@@ -19,3 +19,4 @@ bin
 *.mdb.meta
 Assets/Local.meta
 Assets/Local
+.idea
