@@ -33,13 +33,6 @@ namespace LunraGames.SubLight.Models
 		[JsonProperty] DateTime modified;
 
 		/// <summary>
-		/// Gets the type of the save.
-		/// </summary>
-		/// <value>The type of the save.</value>
-		[JsonProperty]
-		public SaveTypes SaveType { get; protected set; }
-
-		/// <summary>
 		/// How are sibling files consumed? If None is specified, no sibling
 		/// folder is even created.
 		/// </summary>

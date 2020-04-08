@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Messaging;
-using JetBrains.Annotations;
 using UnityEngine;
 
 using LunraGames.SubLight.Models;
@@ -174,34 +172,16 @@ namespace LunraGames.SubLight
 	{
 
 		protected virtual bool SuppressErrorLogging => false;
-		
-		protected SaveTypes[] ToEnum(Type type)
-		{
-			if (type == typeof(GameModel)) return new SaveTypes[] { SaveTypes.Game };
-			if (type == typeof(PreferencesModel)) return new SaveTypes[] { SaveTypes.Preferences };
-			throw new ArgumentOutOfRangeException(nameof(type), type.FullName + " is not handled.");
-		}
 
 		public abstract void Initialize(Action<RequestStatus> done);
 
-		/// <summary>
-		/// Gets the minimum supported saves by SaveTypes, -1 means it only 
-		/// supports saves equal to the current version.
-		/// </summary>
-		/// <value>The minimum supported saves.</value>
-		protected abstract Dictionary<SaveTypes, int> MinimumSupportedSaves { get; }
-		/// <summary>
-		/// Can these models be saved, or are they readonly.
-		/// </summary>
-		/// <value>Can save if true.</value>
-		protected abstract Dictionary<SaveTypes, bool> CanSave { get; }
+		protected abstract string GetUniquePath(Type type, string id);
 
-		protected abstract string GetUniquePath(SaveTypes saveType, string id);
-
-		protected bool IsSupportedVersion(SaveTypes type, int version)
+		protected SaveData GetData(Type type) => (SaveData)Attribute.GetCustomAttribute(type, typeof(SaveData));
+		
+		protected bool IsSupportedVersion(Type type, int version)
 		{
-			if (!MinimumSupportedSaves.ContainsKey(type)) return false;
-			var min = MinimumSupportedSaves[type];
+			var min = GetData(type).MinimumSupportedVersion;
 			// If min is -1, then it means we can only load saves that equal 
 			// this version.
 			if (min < 0) min = VersionProvider.Current;
@@ -213,7 +193,7 @@ namespace LunraGames.SubLight
 			var result = new M();
 			result.SupportedVersion.Value = true;
 			result.Version.Value = VersionProvider.Current;
-			result.Path.Value = GetUniquePath(result.SaveType, id);
+			result.Path.Value = GetUniquePath(typeof(M), id);
 			result.Created.Value = DateTime.MinValue;
 			result.Modified.Value = DateTime.MinValue;
 			return result;
@@ -223,22 +203,13 @@ namespace LunraGames.SubLight
 		{
 			if (model == null) throw new ArgumentNullException(nameof(model));
 			if (done == null) throw new ArgumentNullException(nameof(done));
-			if (!ToEnum(typeof(M)).Contains(model.SaveType))
-			{
-				done(ModelResult<M>.Failure(
-					model,
-					null,
-					"Cannot cast a " + model.SaveType + " model to type " + typeof(M).FullName
-				));
-				return;
-			}
 
 			if (!model.SupportedVersion) 
 			{
 				done(ModelResult<M>.Failure(
 					model,
 					null,
-					"Version " + model.Version + " of " + model.SaveType + " is not supported."
+					"Version " + model.Version + " of " + typeof(M).Name + " is not supported."
 				));
 				return;
 			}
@@ -383,22 +354,14 @@ namespace LunraGames.SubLight
 			if (model == null) throw new ArgumentNullException(nameof(model));
 			done = done ?? OnUnhandledError;
 
-			if (!CanSave.ContainsKey(model.SaveType) || !CanSave[model.SaveType])
+			var data = GetData(typeof(M));
+			
+			if (!data.CanSave)
 			{
 				done(ModelResult<M>.Failure(
 					model,
 					model,
-					"Cannot save a " + model.SaveType + " on this platform."
-				));
-				return;
-			}
-
-			if (!ToEnum(typeof(M)).Contains(model.SaveType))
-			{
-				done(ModelResult<M>.Failure(
-					model,
-					model,
-					"Cannot cast a " + model.SaveType + " model to type " + typeof(M).FullName
+					"Cannot save a " + typeof(M).Name + " on this platform."
 				));
 				return;
 			}
@@ -408,7 +371,7 @@ namespace LunraGames.SubLight
 				done(ModelResult<M>.Failure(
 					model,
 					model,
-					"Version " + model.Version + " of " + model.SaveType + " is not supported."
+					"Version " + model.Version + " of " + typeof(M).Name + " is not supported."
 				));
 				return;
 			}

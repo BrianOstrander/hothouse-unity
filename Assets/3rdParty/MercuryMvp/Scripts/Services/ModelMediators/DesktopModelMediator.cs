@@ -2,12 +2,13 @@
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
-
+using System.Reflection;
 using UnityEngine;
 
 using LunraGames.SubLight.Models;
 
 using Newtonsoft.Json;
+using Assembly = System.Reflection.Assembly;
 
 namespace LunraGames.SubLight
 {
@@ -19,55 +20,6 @@ namespace LunraGames.SubLight
 
 		bool readableSaves;
 
-		protected override Dictionary<SaveTypes, int> MinimumSupportedSaves
-		{
-			get
-			{
-				// -1 means it only supports saves equal to the current version.
-				return new Dictionary<SaveTypes, int>
-				{
-					{ SaveTypes.Game, -1 },
-					{ SaveTypes.Preferences, 8 },
-					{ SaveTypes.EncounterInfo, 9 },
-					{ SaveTypes.InteractedEncounterInfoList, -1 },
-					// -- Meta Key Values
-					{ SaveTypes.GlobalKeyValues, 8 },
-					{ SaveTypes.PreferencesKeyValues, 8 },
-					// -- Galaxies
-					{ SaveTypes.GalaxyPreview, 9 },
-					{ SaveTypes.GalaxyDistant, 9 },
-					{ SaveTypes.GalaxyInfo, 9 },
-					// --
-					{ SaveTypes.GamemodeInfo, 9 },
-					{ SaveTypes.ModuleTrait, 12 }
-				};
-			}
-		}
-
-		protected override Dictionary<SaveTypes, bool> CanSave
-		{
-			get
-			{
-				return new Dictionary<SaveTypes, bool>
-				{
-					{ SaveTypes.Game, true },
-					{ SaveTypes.Preferences, true },
-					{ SaveTypes.EncounterInfo, false },
-					{ SaveTypes.InteractedEncounterInfoList, true },
-					// -- Meta Key Values
-					{ SaveTypes.GlobalKeyValues, true },
-					{ SaveTypes.PreferencesKeyValues, true },
-					// -- Galaxies
-					{ SaveTypes.GalaxyPreview, false },
-					{ SaveTypes.GalaxyDistant, false },
-					{ SaveTypes.GalaxyInfo, false },
-					// --
-					{ SaveTypes.GamemodeInfo, false },
-					{ SaveTypes.ModuleTrait, false }
-				};
-			}
-		}
-
 		public DesktopModelMediator(bool readableSaves = false)
 		{
 			this.readableSaves = readableSaves;
@@ -77,15 +29,22 @@ namespace LunraGames.SubLight
 		{
 			try
 			{
-				var canSave = CanSave;
-				foreach (var curr in Enum.GetValues(typeof(SaveTypes)).Cast<SaveTypes>())
+				foreach(Type type in Assembly.GetExecutingAssembly().GetTypes())
 				{
-					if (curr == SaveTypes.Unknown) continue;
-					if (!CanSave.ContainsKey(curr) || !CanSave[curr]) continue;
+					var current = type.GetCustomAttribute(typeof(SaveData), true);
+					if (current == null) continue;
 
-					var path = GetPath(curr);
-					Directory.CreateDirectory(path);
+					var path = (current as SaveData).Path;
+
+					if (string.IsNullOrEmpty(path))
+					{
+						Debug.LogError("A null or empty path was provided for "+type.Name);
+						continue;
+					}
+					
+					Directory.CreateDirectory(Path.Combine(ParentPath, path));
 				}
+				
 				done(RequestStatus.Success);
 			}
 			catch (Exception exception)
@@ -95,31 +54,9 @@ namespace LunraGames.SubLight
 			}
 		}
 
-		string GetPath(SaveTypes saveType)
-		{
-			switch (saveType)
-			{
-				case SaveTypes.Game: return Path.Combine(ParentPath, "games");
-				case SaveTypes.Preferences: return Path.Combine(ParentPath, "preferences");
-				case SaveTypes.EncounterInfo: return Path.Combine(InternalPath, "encounters");
-				// -- Meta Key Values
-				case SaveTypes.GlobalKeyValues: return Path.Combine(ParentPath, "global-kv");
-				case SaveTypes.PreferencesKeyValues: return Path.Combine(ParentPath, "preferences-kv");
-				// -- Galaxies
-				case SaveTypes.GalaxyPreview:
-				case SaveTypes.GalaxyDistant:
-				case SaveTypes.GalaxyInfo:
-					return Path.Combine(InternalPath, "galaxies");
-				// -- Interacted
-				case SaveTypes.InteractedEncounterInfoList: return Path.Combine(ParentPath, "interacted-encounters");
-				// --
-				case SaveTypes.GamemodeInfo: return Path.Combine(InternalPath, "gamemodes");
-				case SaveTypes.ModuleTrait: return Path.Combine(InternalPath, "module-traits");
-				default: throw new ArgumentOutOfRangeException("saveType", saveType + " is not handled.");
-			}
-		}
+		string GetPath(Type saveType) => Path.Combine(ParentPath, (saveType.GetCustomAttribute(typeof(SaveData), true) as SaveData).Path);
 
-		protected override string GetUniquePath(SaveTypes saveType, string id)
+		protected override string GetUniquePath(Type saveType, string id)
 		{
 			if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 			if (!id.Replace("_", "").Any(Char.IsLetterOrDigit)) throw new ArgumentException("Id \"" + id + "\" contains non alphanumeric characters", nameof(id));
@@ -156,7 +93,7 @@ namespace LunraGames.SubLight
 
 		protected override void OnIndex<M>(Action<ModelIndexResult<SaveModel>> done)
 		{
-			var path = GetPath(ToEnum(typeof(M)).FirstOrDefault());
+			var path = GetPath(typeof(M));
 			var results = new List<SaveModel>();
 			foreach (var file in Directory.GetFiles(path))
 			{
@@ -166,7 +103,7 @@ namespace LunraGames.SubLight
 					var result = Serialization.DeserializeJson<SaveModel>(File.ReadAllText(file));
 					if (result == null) continue;
 
-					result.SupportedVersion.Value = IsSupportedVersion(result.SaveType, result.Version);
+					result.SupportedVersion.Value = IsSupportedVersion(typeof(M), result.Version);
 					result.Path.Value = file;
 					results.Add(result);
 				}
