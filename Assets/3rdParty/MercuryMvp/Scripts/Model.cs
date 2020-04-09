@@ -17,7 +17,7 @@ namespace LunraGames.SubLight
 		/// <summary>
 		/// Id used to identify serialized models.
 		/// </summary>
-		[JsonIgnore] public ListenerProperty<string> Id { get { return idListener; } }
+		[JsonIgnore] public ListenerProperty<string> Id => idListener;
 
 		public Model()
 		{

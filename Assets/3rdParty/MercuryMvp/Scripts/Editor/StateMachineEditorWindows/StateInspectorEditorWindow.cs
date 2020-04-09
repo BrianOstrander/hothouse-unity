@@ -1,6 +1,4 @@
-﻿using System;
-
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 using LunraGamesEditor;
@@ -35,7 +33,7 @@ namespace LunraGames.SubLight
 
 		void OnStateGui()
 		{
-			var isActive = Application.isPlaying && App.HasInstance && App.SM != null;
+			var isActive = Application.isPlaying && App.HasInstance && App.S != null;
 
 			if (!isActive)
 			{
@@ -55,7 +53,7 @@ namespace LunraGames.SubLight
 
 			EditorGUILayout.BeginHorizontal();
 			{
-				if (StateMachine.CapturingTraceData.Value) EditorGUILayout.SelectableLabel("Currently " + App.SM.CurrentState + "." + App.SM.CurrentEvent, EditorStyles.boldLabel);
+				if (StateMachine.CapturingTraceData.Value) EditorGUILayout.SelectableLabel("Currently " + App.S.CurrentState + "." + App.S.CurrentEvent, EditorStyles.boldLabel);
 				else GUILayout.Label("Enable inspection to view StateMachine updates.");
 
 				StateMachine.CapturingTraceData.Value = EditorGUILayout.Toggle("Is Inspecting", StateMachine.CapturingTraceData.Value, GUILayout.ExpandWidth(false));
@@ -64,7 +62,7 @@ namespace LunraGames.SubLight
 
 			if (!StateMachine.CapturingTraceData.Value) return;
 
-			var entries = App.SM.GetEntries();
+			var entries = App.S.GetEntries();
 
 			if (entries.Length == 0)
 			{
@@ -119,7 +117,7 @@ namespace LunraGames.SubLight
 						}
 						EditorGUILayoutExtensions.PopEnabled();
 
-						GUILayout.Label("Syncronized Id: " + (entry.SynchronizedId ?? "< null >"));
+						GUILayout.Label("Synchronized Id: " + (entry.SynchronizedId ?? "< null >"));
 
 						if (isUnrecognizedState) EditorGUILayout.HelpBox("Unrecognized EntryState: " + entry.EntryState, MessageType.Error);
 					}

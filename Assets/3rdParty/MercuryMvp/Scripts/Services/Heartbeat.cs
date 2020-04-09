@@ -20,16 +20,16 @@ namespace LunraGames.SubLight
 
 		public void Wait(Action done, float seconds, bool checkInstantly = false)
 		{
-			if (done == null) throw new ArgumentNullException("done");
-			if (seconds < 0f) throw new ArgumentOutOfRangeException("seconds", "Cannot be less than zero.");
+			if (done == null) throw new ArgumentNullException(nameof(done));
+			if (seconds < 0f) throw new ArgumentOutOfRangeException(nameof(seconds), "Cannot be less than zero.");
 			var endtime = DateTime.Now.AddSeconds(seconds);
 			Wait(done, () => endtime < DateTime.Now, checkInstantly);
 		}
 
 		public void Wait(Action done, Func<bool> condition, bool checkInstantly = false)
 		{
-			if (done == null) throw new ArgumentNullException("done");
-			if (condition == null) throw new ArgumentNullException("condition");
+			if (done == null) throw new ArgumentNullException(nameof(done));
+			if (condition == null) throw new ArgumentNullException(nameof(condition));
 
 			Wait(status => done(), condition, checkInstantly);
 		}
@@ -42,21 +42,22 @@ namespace LunraGames.SubLight
 		/// <param name="checkInstantly">Runs the event this frame, instead of waiting a frame for the first time it's called.</param>
 		public Action Wait(Action<RequestStatus> done, Func<bool> condition, bool checkInstantly = false)
 		{
-			if (done == null) throw new ArgumentNullException("done");
-			if (condition == null) throw new ArgumentNullException("condition");
+			if (done == null) throw new ArgumentNullException(nameof(done));
+			if (condition == null) throw new ArgumentNullException(nameof(condition));
 
 			var status = RequestStatus.Unknown;
-			Action onCancel = () => status = RequestStatus.Cancel;
+			void onCancel() => status = RequestStatus.Cancel;
 
-			Action<float> waiter = null;
-			waiter = delta =>
+			void waiter(float delta)
 			{
 				try
 				{
 					if (status == RequestStatus.Unknown)
 					{
-						if (condition()) status = RequestStatus.Success;
-						else return;
+						if (condition())
+							status = RequestStatus.Success;
+						else
+							return;
 					}
 				}
 				catch (Exception e)
@@ -75,7 +76,7 @@ namespace LunraGames.SubLight
 				{
 					Debug.LogException(e);
 				}
-			};
+			}
 
 			Update += waiter;
 

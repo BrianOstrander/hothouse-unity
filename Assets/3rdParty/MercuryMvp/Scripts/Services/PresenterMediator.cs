@@ -34,9 +34,7 @@ namespace LunraGames.SubLight
 
 		public PresenterMediator(Heartbeat heartbeat)
 		{
-			if (heartbeat == null) throw new ArgumentNullException("heartbeat");
-
-			this.heartbeat = heartbeat;
+			this.heartbeat = heartbeat ?? throw new ArgumentNullException(nameof(heartbeat));
 		}
 
 		public void Initialize(Action<RequestStatus> done) 
@@ -110,9 +108,6 @@ namespace LunraGames.SubLight
 			OnUnRegister(done);
 		}
 
-		void OnUnRegister(Action done)
-		{
-			if (done != null) done();
-		}
+		void OnUnRegister(Action done) => done?.Invoke();
 	}
 }

@@ -28,7 +28,7 @@ namespace LunraGames.SubLight
 			return new TransitionPayload
 			{
 				Requester = requester,
-				Idle = () => App.SM.RequestState(nextPayload)
+				Idle = () => App.S.RequestState(nextPayload)
 			};
 		}
 

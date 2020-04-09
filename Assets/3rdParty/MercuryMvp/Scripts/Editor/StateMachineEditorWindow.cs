@@ -1,7 +1,6 @@
 ﻿using System;
 
 using UnityEditor;
-using UnityEngine;
 
 namespace LunraGames.SubLight
 {
@@ -24,7 +23,7 @@ namespace LunraGames.SubLight
 			GetWindow(typeof(T), false, windowName).Show();
 		}
 
-		public StateMachineEditorWindow(string keyPrefix)
+		protected StateMachineEditorWindow(string keyPrefix)
 		{
 			KeyPrefix = keyPrefix;
 		}
@@ -32,7 +31,7 @@ namespace LunraGames.SubLight
 		#region Events
 		void OnAppInstantiated(App app)
 		{
-			App.SM.StateChange += StateChange;
+			App.S.StateChange += StateChange;
 			AppInstantiated();
 		}
 

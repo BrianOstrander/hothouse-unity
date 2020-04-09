@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using Debug = UnityEngine.Debug;
 
 namespace LunraGames.SubLight
@@ -39,7 +38,7 @@ namespace LunraGames.SubLight
 
 			public TraceData(StackFrame frame)
 			{
-				ClassName = frame.GetMethod().DeclaringType.FullName;
+				ClassName = frame.GetMethod().DeclaringType?.FullName;
 				MethodName = frame.GetMethod().ToString();
 				FilePath = frame.GetFileName();
 				FileLine = frame.GetFileLineNumber();
@@ -116,6 +115,7 @@ namespace LunraGames.SubLight
 					isDone = false;
 					action(OnDone);
 				}
+				// ReSharper disable once PossibleInvalidOperationException
 				return isDone.Value;
 			}
 
@@ -188,13 +188,11 @@ namespace LunraGames.SubLight
 
 		public bool Is(Type isState, Events isEvent) { return isState == CurrentState && isEvent == CurrentEvent; }
 
-		public IState CurrentHandler { get { return currentState; } }
+		public IState CurrentHandler => currentState;
 
 		public StateMachine(Heartbeat heartbeat, params IState[] states)
 		{
-			if (heartbeat == null) throw new ArgumentNullException("heartbeat");
-
-			this.heartbeat = heartbeat;
+			this.heartbeat = heartbeat ?? throw new ArgumentNullException(nameof(heartbeat));
 			stateEntries = states;
 
 			heartbeat.Update += Update;
@@ -332,11 +330,11 @@ namespace LunraGames.SubLight
 			string synchronizedId = null
 		)
 		{
-			Action<Action> waiter = done =>
+			void waiter(Action done)
 			{
 				action();
 				heartbeat.Wait(done, condition);
-			};
+			}
 
 			OnPushBlocking(
 				waiter,
@@ -358,7 +356,7 @@ namespace LunraGames.SubLight
 			string synchronizedId
 		)
 		{
-			if (action == null) throw new ArgumentNullException("action");
+			if (action == null) throw new ArgumentNullException(nameof(action));
 			if (state == null) throw new ArgumentException("Cannot bind to null state");
 			if (stateEvent == Events.Unknown) throw new ArgumentException("Cannot bind to Events.Unknown");
 
@@ -385,7 +383,7 @@ namespace LunraGames.SubLight
 			string synchronizedId
 		)
 		{
-			if (action == null) throw new ArgumentNullException("action");
+			if (action == null) throw new ArgumentNullException(nameof(action));
 			if (state == null) throw new ArgumentException("Cannot bind to null state");
 			if (stateEvent == Events.Unknown) throw new ArgumentException("Cannot bind to Events.Unknown");
 
@@ -420,7 +418,7 @@ namespace LunraGames.SubLight
 			if (currentState != null && nextState != null)
 			{
 				if (currentState.GetType() == state || nextState.GetType() == state) return;
-				if (currentState.GetType() != nextState.GetType()) throw new NotImplementedException("Cannot switch to another state while already transitioning");
+				if (currentState.GetType() != nextState.GetType()) throw new Exception("Cannot switch to another state while already transitioning");
 			}
 
 			nextState = handlingState;

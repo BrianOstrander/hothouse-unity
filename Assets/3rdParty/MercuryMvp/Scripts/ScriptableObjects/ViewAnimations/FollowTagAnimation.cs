@@ -12,7 +12,7 @@ namespace LunraGames.SubLight
 		public override void OnPrepare(IView view)
 		{
 			var tagObject = GameObjectExtensions.FindWithTagOrHandleMissingTag(tag, true);
-			view.Root.position = tagObject == null ? Vector3.zero : tagObject.transform.position;
+			view.RootTransform.position = tagObject == null ? Vector3.zero : tagObject.transform.position;
 		}
 	}
 }

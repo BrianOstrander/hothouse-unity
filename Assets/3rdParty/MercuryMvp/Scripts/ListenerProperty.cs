@@ -12,19 +12,18 @@ namespace LunraGames.SubLight
 
     public class ListenerProperty<T>
     {
-        public string Name { get; private set; }
+        public readonly string Name;
 
         Action<T> set;
         Func<T> get;
-        ListenerPropertySources source = ListenerPropertySources.Unknown;
 
         public Action<T> Changed = ActionExtensions.GetEmpty<T>();
         public Action<T, ListenerPropertySources> ChangedSource = ActionExtensions.GetEmpty<T, ListenerPropertySources>();
 
         public T Value
         {
-            get { return get(); }
-            set { SetValue(value, ListenerPropertySources.Unknown); }
+            get => get();
+            set => SetValue(value);
         }
 
         public bool SetValue(T value, ListenerPropertySources source = ListenerPropertySources.Unknown)

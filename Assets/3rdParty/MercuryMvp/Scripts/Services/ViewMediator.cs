@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-using LunraGames.SubLight.Models;
-
 namespace LunraGames.SubLight
 {
 	public class ViewMediator
@@ -23,8 +21,8 @@ namespace LunraGames.SubLight
 			Heartbeat heartbeat
 		)
 		{
-			if (main == null) throw new ArgumentNullException("main");
-			if (heartbeat == null) throw new ArgumentNullException("heartbeat");
+			if (main == null) throw new ArgumentNullException(nameof(main));
+			if (heartbeat == null) throw new ArgumentNullException(nameof(heartbeat));
 
 			var storageObject = new GameObject("ViewPool");
 			storageObject.transform.SetParent(main);
@@ -86,12 +84,13 @@ namespace LunraGames.SubLight
 		/// Get a new or pooled view
 		/// </summary>
 		/// <param name="type">Type of view.</param>
+		/// <param name="predicate">Predicate for overriding view selection.</param>
 		public IView Get(Type type, Func<IView, bool> predicate = null)
 		{
 			IView existing = null;
 			foreach (var view in pool)
 			{
-				if (!type.IsAssignableFrom(view.GetType())) continue;
+				if (!type.IsInstanceOfType(view)) continue;
 				if (predicate != null)
 				{
 					try
@@ -140,7 +139,7 @@ namespace LunraGames.SubLight
 			}
 			if (prefab == null)
 			{
-				Debug.LogError("No view prefab with a root component implimenting " + type.FullName);
+				Debug.LogError("No view prefab with a root component implementing " + type.FullName);
 				return null;
 			}
 			return Create(prefab);
@@ -149,8 +148,8 @@ namespace LunraGames.SubLight
 		IView Create(GameObject prefab)
 		{
 			var spawned = Object.Instantiate(prefab).GetComponent<IView>();
-			spawned.gameObject.SetActive(false);
-			spawned.transform.SetParent(storage);
+			spawned.RootGameObject.SetActive(false);
+			spawned.RootTransform.SetParent(storage);
 
 			return spawned;
 		}
@@ -171,7 +170,7 @@ namespace LunraGames.SubLight
 			}
 			if (pool.Contains(view))
 			{
-				Debug.LogError("Pool already contains the view " + view.gameObject.name);
+				Debug.LogError("Pool already contains the view " + view.RootGameObject.name);
 				return;
 			}
 			if (view.Visible) Debug.LogError("Pooling a visible view, this shouldn't happen, and may cause unintended side effects");
@@ -191,7 +190,7 @@ namespace LunraGames.SubLight
 			{
 				views.Remove(view);
 
-				view.Parent = null;
+				view.TargetParent = null;
 				DisableAndCacheView(view);
 				view.Closed();
 			}
@@ -215,9 +214,6 @@ namespace LunraGames.SubLight
 		void Update(float delta)
 		{
 			FrameCount++;
-			CameraHasMoved = !lastCameraForward.Approximately(CameraForward) || !lastCameraPosition.Approximately(CameraPosition);
-			lastCameraForward = CameraForward;
-			lastCameraPosition = CameraPosition;
 
 			foreach (var view in views.ToList())
 			{
@@ -234,7 +230,7 @@ namespace LunraGames.SubLight
 				else if (unmodifiedView.TransitionState == TransitionStates.Closing) Closing(unmodifiedView);
 				else
 				{
-					var error = "The view " + (unmodifiedView == null ? "null" : unmodifiedView.gameObject.name) + " with state " + unmodifiedView.TransitionState + " is still on the waldo, this should not be possible";
+					var error = "The view " + unmodifiedView.InstanceName + " with state " + unmodifiedView.TransitionState + " is still on the waldo, this should not be possible";
 					Debug.LogError(error);
 					views.Remove(unmodifiedView);
 				}
@@ -256,11 +252,9 @@ namespace LunraGames.SubLight
 			if (!UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
 				return;
 #endif
-			view.gameObject.SetActive(false);
-			view.transform.SetParent(storage);
+			view.RootGameObject.SetActive(false);
+			view.RootTransform.SetParent(storage);
 		}
-
-		public static bool Initialized { get { throw new NotImplementedException(); } }
 
 		public void Show(IView view, bool instant = false, Transform parent = null)
 		{
@@ -269,27 +263,27 @@ namespace LunraGames.SubLight
 				return;
 			}
 
-			view.Parent = parent;
+			view.TargetParent = parent;
 
 			if (instant) view.SetProgress(view.ShowDuration, 1f);
 			else view.SetProgress(0f, 0f);
 
 			views.Add(view);
 			view.Prepare();
-			// Call showing here since we want instantanious shows to actually be instantanious.
+			// Call showing here since we want instantaneous shows to actually be instantaneous.
 			Showing(view);
 		}
 
 		public void Close(IView view, bool instant = false)
 		{
-			if (view == null) throw new ArgumentNullException("view");
+			if (view == null) throw new ArgumentNullException(nameof(view));
 
 			switch (view.TransitionState)
 			{
 				case TransitionStates.Closed:
 					return;
 				case TransitionStates.Unknown: // This may no longer ever get called.
-					Debug.LogWarning("Can't close a view with an unknown state", view.gameObject);
+					Debug.LogWarning("Can't close a view with an unknown state", view.RootGameObject);
 					return;
 			}
 
@@ -301,28 +295,7 @@ namespace LunraGames.SubLight
 		}
 
 		#region Animation Data
-		// Instead of animations getting their data from weird places, they should get everything through here.
-
-		Vector3 lastCameraPosition;
-		Vector3 lastCameraForward;
-
-		bool IsCameraMainNull { get { return Camera.main == null; } }
-
-		public long FrameCount { get; private set; } // Should be good for 4.8 billion years at 60 FPS!
-		/// <summary>
-		/// Has the camera moved since the last frame?
-		/// </summary>
-		/// <value><c>true</c> if camera has moved; otherwise, <c>false</c>.</value>
-		public bool CameraHasMoved { get; private set; }
-		public Vector3 CameraPosition { get { return IsCameraMainNull ? Vector3.zero : Camera.main.transform.position; } }
-		public Vector3 CameraForward { get { return IsCameraMainNull ? Vector3.forward : Camera.main.transform.forward; } }
-		public Vector3 CameraUp { get { return IsCameraMainNull ? Vector3.up : Camera.main.transform.up; } }
-		public Quaternion CameraRotation { get { return IsCameraMainNull ? Quaternion.identity : Camera.main.transform.rotation; } }
-		public Ray CameraViewportPointToRay(Vector3 pos) { return IsCameraMainNull ? new Ray(Vector3.zero, Vector3.forward) : Camera.main.ViewportPointToRay(pos); }
-		
-		public Camera Camera { get { return IsCameraMainNull ? null : Camera.main; } }
-
-		public int InterfaceScale { get; private set; }
+		public long FrameCount { get; private set; } // Should be good for 4.8 billion years at 60 FPS
 		#endregion
 	}
 }

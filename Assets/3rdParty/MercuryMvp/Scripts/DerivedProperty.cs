@@ -13,7 +13,7 @@ namespace LunraGames.SubLight
 
 		public T Value 
 		{ 
-			get { return get(); } 
+			get => get();
 			private set 
 			{
 				if (EqualityComparer<T>.Default.Equals(get(), value)) return;
@@ -53,7 +53,7 @@ namespace LunraGames.SubLight
 
 		public T Value
 		{
-			get { return get(); }
+			get => get();
 			private set
 			{
 				if (EqualityComparer<T>.Default.Equals(get(), value)) return;
@@ -98,7 +98,7 @@ namespace LunraGames.SubLight
 
 		public T Value
 		{
-			get { return get(); }
+			get => get();
 			private set
 			{
 				if (EqualityComparer<T>.Default.Equals(get(), value)) return;
@@ -147,7 +147,7 @@ namespace LunraGames.SubLight
 
 		public T Value
 		{
-			get { return get(); }
+			get => get();
 			private set
 			{
 				if (EqualityComparer<T>.Default.Equals(get(), value)) return;
@@ -200,7 +200,7 @@ namespace LunraGames.SubLight
 
 		public T Value
 		{
-			get { return get(); }
+			get => get();
 			private set
 			{
 				if (EqualityComparer<T>.Default.Equals(get(), value)) return;

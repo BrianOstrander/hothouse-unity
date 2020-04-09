@@ -15,8 +15,8 @@ namespace LunraGames.SubLight
 	public class DesktopModelMediator : ModelMediator
 	{
 		const string Extension = ".json";
-		static string ParentPath { get { return Path.Combine(Application.persistentDataPath, "saves"); } }
-		static string InternalPath { get { return Path.Combine(Application.streamingAssetsPath, "internal"); } }
+		static string ParentPath => Path.Combine(Application.persistentDataPath, "saves");
+		static string InternalPath => Path.Combine(Application.streamingAssetsPath, "internal");
 
 		bool readableSaves;
 
@@ -34,7 +34,7 @@ namespace LunraGames.SubLight
 					var current = type.GetCustomAttribute(typeof(SaveData), true);
 					if (current == null) continue;
 
-					var path = (current as SaveData).Path;
+					var path = (current as SaveData)?.Path;
 
 					if (string.IsNullOrEmpty(path))
 					{
@@ -54,7 +54,12 @@ namespace LunraGames.SubLight
 			}
 		}
 
-		string GetPath(Type saveType) => Path.Combine(ParentPath, (saveType.GetCustomAttribute(typeof(SaveData), true) as SaveData).Path);
+		string GetPath(Type saveType)
+		{
+			var saveData = saveType.GetCustomAttribute(typeof(SaveData), true) as SaveData;
+			if (saveData == null) throw new ArgumentException(nameof(saveType) + " has meta data attribute");
+			return Path.Combine(ParentPath, saveData.Path);
+		}
 
 		protected override string GetUniquePath(Type saveType, string id)
 		{
@@ -84,9 +89,9 @@ namespace LunraGames.SubLight
 			else done(ModelResult<M>.Success(model, result));
 		}
 
-		protected override void OnSave<M>(M model, Action<ModelResult<M>> done = null)
+		protected override void OnSave<M>(M model, Action<ModelResult<M>> done)
 		{
-			File.WriteAllText(model.Path.Value, Serialization.Serialize(model, formatting: readableSaves ? Formatting.Indented : Formatting.None));
+			File.WriteAllText(model.Path.Value, model.Serialize(formatting: readableSaves ? Formatting.Indented : Formatting.None));
 			if (model.HasSiblingDirectory) Directory.CreateDirectory(model.SiblingDirectory);
 			done(ModelResult<M>.Success(model, model));
 		}
@@ -126,11 +131,7 @@ namespace LunraGames.SubLight
 		{
 			var data = File.ReadAllBytes(path);
 
-			if (data == null)
-			{
-				done(ReadWriteRequest.Failure(path, "Null result"));
-				return;
-			}
+			// Apparently File.ReadAllBytes never returns null so we don't have to check...
 
 			done(ReadWriteRequest.Success(path, data));
 		}
@@ -154,7 +155,7 @@ namespace LunraGames.SubLight
 			var nextFile = remainingFiles.First();
 			remainingFiles.RemoveAt(0);
 
-			Action onDone = () => OnLoadSiblingFiles(remainingFiles, model, result, done);
+			void onDone() => OnLoadSiblingFiles(remainingFiles, model, result, done);
 
 			switch (Path.GetExtension(nextFile))
 			{
@@ -172,12 +173,17 @@ namespace LunraGames.SubLight
 		{
 			var textureName = Path.GetFileNameWithoutExtension(textureResult.Path);
 
-			Action<string> onError = error =>
+			void onError(string error)
 			{
 				Debug.LogError(error);
-				result.Textures.Add(textureName, null);
 				done();
-			};
+			}
+
+			if (string.IsNullOrEmpty(textureName))
+			{
+				onError("Name or path of texture returned null or empty.");
+				return;
+			}
 
 			if (textureResult.Status != RequestStatus.Success)
 			{

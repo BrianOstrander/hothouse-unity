@@ -124,7 +124,7 @@ namespace LunraGames.SubLight
 			Status = status;
 			Models = models;
 			Error = error;
-			Length = models == null ? 0 : models.Length;
+			Length = models?.Length ?? 0;
 		}
 	}
 
@@ -295,7 +295,7 @@ namespace LunraGames.SubLight
 			var remaining = results.Models.ToList();
 			if (predicate != null) remaining = remaining.Where(predicate).ToList();
 
-			OnLoadAllNext<M>(
+			OnLoadAllNext(
 				null,
 				remaining,
 				new List<ModelResult<M>>(), 

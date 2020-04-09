@@ -68,7 +68,7 @@ namespace LunraGames.SubLight
 		#region Exposed Functionality
 		public void Request(SceneRequest request)
 		{
-			if (request.State != SceneRequest.States.Request) throw new ArgumentOutOfRangeException("request.State", "Must be a States.Request");
+			if (request.State != SceneRequest.States.Request) throw new ArgumentOutOfRangeException(nameof(request.State), "Must be a States.Request");
 			switch (current.State)
 			{
 				case SceneRequest.States.Request:
@@ -115,7 +115,7 @@ namespace LunraGames.SubLight
 				current.FoundTags.Add(tag, tagObject);
 			}
 
-			if (0 < current.MissingTags.Count())
+			if (current.MissingTags.Any())
 			{
 				var tagWarning = "Missing Tags:";
 				foreach (var tag in current.MissingTags) tagWarning += "\n\t" + tag;

@@ -20,18 +20,8 @@ namespace LunraGames.SubLight.Models
 			All = 30
 		}
 
-		bool supportedVersion;
-		string path;
+		#region Non Serialized
 		List<string> specifiedSiblings = new List<string>();
-		// TODO: Can I now have this just be a property with a default value set (using new C# 7 features?)
-		Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
-
-		[JsonProperty] bool ignore;
-		[JsonProperty] int version;
-		[JsonProperty] Dictionary<string, string> metaKeyValues = new Dictionary<string, string>();
-		[JsonProperty] DateTime created;
-		[JsonProperty] DateTime modified;
-
 		/// <summary>
 		/// How are sibling files consumed? If None is specified, no sibling
 		/// folder is even created.
@@ -39,35 +29,38 @@ namespace LunraGames.SubLight.Models
 		/// <value>The sibling behaviour.</value>
 		[JsonProperty]
 		public SiblingBehaviours SiblingBehaviour { get; protected set; }
+		
+		bool supportedVersion;
 		/// <summary>
 		/// Is this loadable, or is the version too old.
 		/// </summary>
 		[JsonIgnore]
 		public readonly ListenerProperty<bool> SupportedVersion;
+		
+		string path;
 		/// <summary>
 		/// The path of this save, depends on the SaveLoadService in use.
 		/// </summary>
 		[JsonIgnore]
 		public readonly ListenerProperty<string> Path;
-
+		#endregion
+		
+		#region Serialized
+		[JsonProperty] bool ignore;
 		/// <summary>
 		/// If true, this should be ignored.
 		/// </summary>
 		[JsonIgnore]
 		public readonly ListenerProperty<bool> Ignore;
+		
+		[JsonProperty] int version;
 		/// <summary>
 		/// The version of the app this was saved under.
 		/// </summary>
 		[JsonIgnore]
 		public readonly ListenerProperty<int> Version;
-		/// <summary>
-		/// More identifying data.
-		/// </summary>
-		/// <remarks>
-		/// Editing the dictionary returned won't modify the original one.
-		/// </remarks>
-		[JsonIgnore]
-		public readonly ListenerProperty<Dictionary<string, string>> MetaKeyValues;
+
+		[JsonProperty] DateTime created;
 		/// <summary>
 		/// When this was created and saved.
 		/// </summary>
@@ -76,6 +69,8 @@ namespace LunraGames.SubLight.Models
 		/// </remarks>
 		[JsonIgnore]
 		public readonly ListenerProperty<DateTime> Created;
+		
+		[JsonProperty] DateTime modified;
 		/// <summary>
 		/// When this was last modified and saved.
 		/// </summary>
@@ -84,9 +79,11 @@ namespace LunraGames.SubLight.Models
 		/// </remarks>
 		[JsonIgnore]
 		public readonly ListenerProperty<DateTime> Modified;
-
+		#endregion
+		
 		[JsonIgnore]
-		public bool IsInternal { get { return Path.Value.StartsWith(Application.dataPath); } }
+		public bool IsInternal => Path.Value.StartsWith(Application.dataPath);
+
 		[JsonIgnore]
 		public string InternalPath
 		{
@@ -141,12 +138,11 @@ namespace LunraGames.SubLight.Models
 		}
 
 		[JsonIgnore]
-		public Dictionary<string, Texture2D> Textures { get { return textures; } }
+		public Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>();
 
 		public Texture2D GetTexture(string name)
 		{
-			Texture2D result = null;
-			Textures.TryGetValue(name, out result);
+			Textures.TryGetValue(name, out var result);
 			return result;
 		}
 
@@ -157,46 +153,11 @@ namespace LunraGames.SubLight.Models
 			Path = new ListenerProperty<string>(value => path = value, () => path);
 			Ignore = new ListenerProperty<bool>(value => ignore = value, () => ignore);
 			Version = new ListenerProperty<int>(value => version = value, () => version);
-			MetaKeyValues = new ListenerProperty<Dictionary<string, string>>(OnSetKeyValues, OnGetMetaKeyValues);
 			Created = new ListenerProperty<DateTime>(value => created = value, () => created);
 			Modified = new ListenerProperty<DateTime>(value => modified = value, () => modified);
 		}
 
 		#region Utility
-		/// <summary>
-		/// Sets the meta key. If set to null, the value is removed completely.
-		/// </summary>
-		/// <param name="key">Key.</param>
-		/// <param name="value">Value.</param>
-		public string SetMetaKey(string key, string value)
-		{
-			if (key == null) throw new ArgumentNullException("key");
-
-			string currentValue;
-			if (metaKeyValues.TryGetValue(key, out currentValue))
-			{
-				if (value == null) OnRemoveKeyValue(key);
-				else if (currentValue != value) OnSetKeyValue(key, value);
-			}
-			else if (value != null) OnSetKeyValue(key, value);
-
-			return value;
-		}
-
-		/// <summary>
-		/// Gets the meta key. If it doesn't exist, null is returned.
-		/// </summary>
-		/// <returns>The meta key.</returns>
-		/// <param name="key">Key.</param>
-		public string GetMetaKey(string key)
-		{
-			if (key == null) throw new ArgumentNullException("key");
-
-			string currentValue;
-			if (metaKeyValues.TryGetValue(key, out currentValue)) return currentValue;
-			return null;
-		}
-
 		protected void AddSiblings(params string[] siblingNames)
 		{
 			foreach (var name in siblingNames.Where(s => !specifiedSiblings.Contains(s))) specifiedSiblings.Add(name);
@@ -204,27 +165,7 @@ namespace LunraGames.SubLight.Models
 		#endregion
 
 		#region Events
-		void OnSetKeyValues(Dictionary<string, string> newMetaKeyValues) { metaKeyValues = new Dictionary<string, string>(newMetaKeyValues); }
-		Dictionary<string, string> OnGetMetaKeyValues() { return new Dictionary<string, string>(metaKeyValues); }
-
-		void OnRemoveKeyValue(string key)
-		{
-			var newMetaKeyValues = MetaKeyValues.Value;
-			newMetaKeyValues.Remove(key);
-			MetaKeyValues.Value = newMetaKeyValues;
-		}
-
-		void OnSetKeyValue(string key, string value)
-		{
-			var newMetaKeyValues = MetaKeyValues.Value;
-			newMetaKeyValues[key] = value;
-			MetaKeyValues.Value = newMetaKeyValues;
-		}
-
-		public void PrepareTexture(string name, Texture2D texture)
-		{
-			OnPrepareTexture(name, texture);
-		}
+		public void PrepareTexture(string name, Texture2D texture) => OnPrepareTexture(name, texture);
 
 		protected virtual void OnPrepareTexture(string name, Texture2D texture) {}
 		#endregion

@@ -29,7 +29,7 @@ namespace LunraGames.SubLight
 		public virtual bool AcceptsPayload(object payload, bool throws = false)
 		{
 			Exception exception = null;
-			if (payload == null) exception = new ArgumentNullException("payload");
+			if (payload == null) exception = new ArgumentNullException(nameof(payload));
 			else if (payload.GetType() != PayloadType) exception = new ArgumentException("payload of type " + payload.GetType() + " is not supported by this state");
 
 			var accepts = exception == null;
@@ -59,7 +59,7 @@ namespace LunraGames.SubLight
 					break;
 			}
 			Debug.Log("State is now " + state + "." + stateEvent + " - Payload " + payload.GetType());
-			App.SM.StateChange(new StateChange(state, stateEvent, payload));
+			App.S.StateChange(new StateChange(state, stateEvent, payload));
 		}
 
 		protected virtual void Begin() { }
@@ -70,11 +70,12 @@ namespace LunraGames.SubLight
 	public abstract class State<P> : BaseState, IStateTyped<P>
 		where P : class, IStatePayload
 	{
-		public override Type PayloadType { get { return typeof(P); } }
+		public override Type PayloadType => typeof(P);
+
 		public P Payload
 		{
-			get { return PayloadObject as P; }
-			set { PayloadObject = value; }
+			get => PayloadObject as P;
+			set => PayloadObject = value;
 		}
 	}
 }

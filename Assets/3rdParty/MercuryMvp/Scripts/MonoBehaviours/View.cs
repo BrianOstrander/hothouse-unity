@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.Serialization;
 
-// TODO: Why is this not in the views namespace?
 namespace LunraGames.SubLight
 {
-	
 	public enum TransitionStates
 	{
 		Unknown = 0,
@@ -17,10 +14,12 @@ namespace LunraGames.SubLight
 		Closing = 40
 	}
 
-	public interface IView : IMonoBehaviour
+	public interface IView
 	{
-		Transform Parent { get; set; }
-		Transform Root { get; }
+		Transform TargetParent { get; set; }
+		
+		GameObject RootGameObject { get; }
+		Transform RootTransform { get; }
 
 		float ShowDuration { get; }
 		float CloseDuration { get; }
@@ -113,12 +112,12 @@ namespace LunraGames.SubLight
 			Forced = 30
 		}
 
-		public Transform Parent { get; set; }
+		public Transform TargetParent { get; set; }
+		public GameObject RootGameObject => gameObject;
+		public Transform RootTransform => transform;
 
-		public virtual Transform Root { get { return transform; } }
-
-		public virtual float ShowDuration { get { return ShowCloseDuration.OverrideShow ? ShowCloseDuration.ShowDuration : ShowDurationDefault; } }
-		public virtual float CloseDuration { get { return ShowCloseDuration.OverrideClose ? ShowCloseDuration.CloseDuration : CloseDurationDefault; } }
+		public virtual float ShowDuration => ShowCloseDuration.OverrideShow ? ShowCloseDuration.ShowDuration : ShowDurationDefault;
+		public virtual float CloseDuration => ShowCloseDuration.OverrideClose ? ShowCloseDuration.CloseDuration : CloseDurationDefault;
 		public virtual float Progress { get; private set; }
 		public virtual float ProgressScalar { get; private set; }
 
@@ -131,8 +130,8 @@ namespace LunraGames.SubLight
 		TransitionStates transitionState;
 		public TransitionStates TransitionState
 		{
-			get { return transitionState == TransitionStates.Unknown ? TransitionStates.Closed : transitionState; }
-			protected set { transitionState = value; }
+			get => transitionState == TransitionStates.Unknown ? TransitionStates.Closed : transitionState;
+			protected set => transitionState = value;
 		}
 
 		StackOpacityStates opacityStackStale = StackOpacityStates.NotStale;
@@ -162,9 +161,7 @@ namespace LunraGames.SubLight
 			opacityStackStale = (force || opacityStackStale == StackOpacityStates.Forced) ? StackOpacityStates.Forced : StackOpacityStates.Stale;
 		}
 
-		protected virtual void OnSetInterfaceScale(int index) { }
-
-		public float OpacityStack { get { return lastCalculatedOpacityStack; } }
+		public float OpacityStack => lastCalculatedOpacityStack;
 
 		void CheckOpacityStack()
 		{
@@ -195,21 +192,20 @@ namespace LunraGames.SubLight
 		protected virtual void OnOpacityStack(float opacity) {}
 
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
-		bool interactable = true;
-		public virtual bool Interactable { get { return interactable; } set { interactable = value; } }
+		public virtual bool Interactable { get; set; } = true;
 		[SerializeField, Tooltip("Size of initial pool, entering \"0\" uses ViewMediator defaults.")]
 		int poolSize;
-		public virtual int PoolSize { get { return poolSize; } }
+		public virtual int PoolSize => poolSize;
 		public ShowCloseDurationBlock ShowCloseDuration;
-		[SerializeField, FormerlySerializedAs("_animations")]
+		[SerializeField]
 		ViewAnimation[] animations;
-		public virtual ViewAnimation[] ViewAnimations { get { return animations; } }
+		public virtual ViewAnimation[] ViewAnimations => animations;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 
 		public string InstanceName 
 		{
-			get { return gameObject.name; }
-			set { gameObject.name = value; }
+			get => gameObject.name;
+			set => gameObject.name = value;
 		}
 
 		public Action Prepare { get; set; }
@@ -228,14 +224,12 @@ namespace LunraGames.SubLight
 		{
 			TransitionState = TransitionStates.Showing;
 
-			Root.SetParent(Parent, true);
-			Root.localPosition = Vector3.zero;
-			Root.localScale = Vector3.one;
-			Root.localRotation = Quaternion.identity;
+			RootTransform.SetParent(TargetParent, true);
+			RootTransform.localPosition = Vector3.zero;
+			RootTransform.localScale = Vector3.one;
+			RootTransform.localRotation = Quaternion.identity;
 
-			OnSetInterfaceScale(App.V.InterfaceScale);
-
-			Root.gameObject.SetActive(true);
+			RootTransform.gameObject.SetActive(true);
 
 			foreach (var anim in ViewAnimations) anim.OnPrepare(this);
 			SetOpacityStale(true);
@@ -322,7 +316,7 @@ namespace LunraGames.SubLight
 
 		public void SetLayer(string layer)
 		{
-			Root.gameObject.SetLayerRecursively(LayerMask.NameToLayer(layer));
+			RootTransform.gameObject.SetLayerRecursively(LayerMask.NameToLayer(layer));
 		}
 	}
 }

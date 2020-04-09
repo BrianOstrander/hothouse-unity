@@ -4,6 +4,12 @@ using UnityEngine;
 
 namespace LunraGames.SubLight
 {
+	public interface IPresenter
+	{
+		Type ViewInterface { get; }
+		bool UnBinded { get; }
+	}
+	
 	/// <summary>
 	/// Base Presenter, defining its view and model interface.
 	/// </summary>
@@ -19,7 +25,7 @@ namespace LunraGames.SubLight
 		/// Gets the view interface's type for this presenter.
 		/// </summary>
 		/// <value>The view interface type.</value>
-		public Type ViewInterface { get { return typeof(V); } }
+		public Type ViewInterface => typeof(V);
 
 		public bool UnBinded { private set; get; }
 
@@ -43,12 +49,12 @@ namespace LunraGames.SubLight
 				Debug.LogError("Unable to get an instance of a view for " + GetType());
 				return;
 			}
-			// TODO: Is the cast below necessary?
-			View = view as V;
+			
+			View = view;
 			View.Reset();
 		}
 
-		protected virtual Transform DefaultAnchor { get { return null; } }
+		protected virtual Transform DefaultAnchor => null;
 
 		void UnBind()
 		{
@@ -62,7 +68,7 @@ namespace LunraGames.SubLight
 
 		protected virtual void ShowView(Transform parent = null, bool instant = false)
 		{
-			App.V.Show(View, instant, parent ?? DefaultAnchor);
+			App.V.Show(View, instant, parent ? parent : DefaultAnchor);
 		}
 
 		protected virtual void CloseView(bool instant = false)

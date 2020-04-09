@@ -2,7 +2,7 @@
 
 namespace LunraGames.SubLight.Presenters
 {
-	public class GenericPresenter<V> : Presenter<V>, IPresenterCloseShowOptions
+	public class GenericPresenter<V> : Presenter<V>
 		where V : class, IView
 	{
 		public GenericPresenter(string layer = null)
@@ -25,6 +25,7 @@ namespace LunraGames.SubLight.Presenters
 
 			CloseView(instant);
 		}
+		
 		#region Events
 		#endregion
 	}

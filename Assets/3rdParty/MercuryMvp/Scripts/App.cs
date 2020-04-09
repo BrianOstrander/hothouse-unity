@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 using LunraGames.SubLight.Models;
 
@@ -12,39 +10,39 @@ namespace LunraGames.SubLight
 	{
 		static App instance;
 
-		public static bool HasInstance { get { return instance != null; } }
+		public static bool HasInstance => instance != null;
 
 		/// <summary>
 		/// Called when the App instance is done being constructed.
 		/// </summary>
 		/// <remarks>
-		/// Idealy nothing should use this except editor time scripts.
+		/// Ideally nothing should use this except editor time scripts.
 		/// </remarks>
 		public static Action<App> Instantiated = ActionExtensions.GetEmpty<App>();
 
 		Main main;
-		public static Main Main { get { return instance.main; } }
+		public static Main Main => instance.main;
 
 		Heartbeat heartbeat;
-		public static Heartbeat Heartbeat { get { return instance.heartbeat; } }
+		public static Heartbeat Heartbeat => instance.heartbeat;
 
 		IModelMediator modelMediator;
-		public static IModelMediator M { get { return instance.modelMediator; } }
+		public static IModelMediator M => instance.modelMediator;
 
 		PresenterMediator presenterMediator;
-		public static PresenterMediator P { get { return instance.presenterMediator; } }
+		public static PresenterMediator P => instance.presenterMediator;
 
 		ViewMediator viewMediator;
-		public static ViewMediator V { get { return instance.viewMediator; } }
+		public static ViewMediator V => instance.viewMediator;
 
 		AudioService audioService;
-		public static AudioService Audio { get { return instance.audioService; } }
+		public static AudioService Audio => instance.audioService;
 
 		StateMachine stateMachine;
-		public static StateMachine SM { get { return instance.stateMachine; } }
+		public static StateMachine S => instance.stateMachine;
 
 		SceneService scenes;
-		public static SceneService Scenes { get { return instance.scenes; } }
+		public static SceneService Scenes => instance.scenes;
 
 		PreferencesModel preferences;
 		/// <summary>
@@ -56,7 +54,7 @@ namespace LunraGames.SubLight
 		/// before initialization though, since it will be replaced.
 		/// </remarks>
 		/// <value>The preferences.</value>
-		public static PreferencesModel Preferences { get { return instance.preferences; } }
+		public static PreferencesModel Preferences => instance.preferences;
 
 		public App(
 			Main main,

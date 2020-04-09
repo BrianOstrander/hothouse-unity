@@ -4,12 +4,12 @@ namespace LunraGames.SubLight
 {
     public class ReadonlyProperty<T>
     {
-        public string Name { get; private set; }
+        public readonly string Name;
         ListenerProperty<T> property;
 
         public Action<T> Changed = ActionExtensions.GetEmpty<T>();
 
-        public T Value { get { return property.Value; } }
+        public T Value => property.Value;
 
         public ReadonlyProperty(
             Action<T> set,

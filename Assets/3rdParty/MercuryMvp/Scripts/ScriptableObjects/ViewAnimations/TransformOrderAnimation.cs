@@ -27,10 +27,10 @@
 			switch (Order)
 			{
 				case Orders.First:
-					view.Root.SetAsFirstSibling();
+					view.RootTransform.SetAsFirstSibling();
 					break;
 				case Orders.Last:
-					view.Root.SetAsLastSibling();
+					view.RootTransform.SetAsLastSibling();
 					break;
 			}
 		}

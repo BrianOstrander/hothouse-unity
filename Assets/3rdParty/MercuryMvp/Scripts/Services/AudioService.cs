@@ -51,8 +51,6 @@ namespace LunraGames.SubLight
 			public AudioSource Source { get; set; }
 			public Action<IAudioInstance> Done { get; set; }
 
-			public AudioService AudioServiceInstance;
-
 			//public void Stop(float duration, Action<RequestResult> done)
 			//{
 
@@ -74,8 +72,8 @@ namespace LunraGames.SubLight
 			Heartbeat heartbeat
 		)
 		{
-			if (main == null) throw new ArgumentNullException("main");
-			if (heartbeat == null) throw new ArgumentNullException("heartbeat");
+			if (main == null) throw new ArgumentNullException(nameof(main));
+			if (heartbeat == null) throw new ArgumentNullException(nameof(heartbeat));
 
 			audioRoot = new GameObject("AudioRoot");
 			audioRoot.transform.SetParent(main);
@@ -199,8 +197,8 @@ namespace LunraGames.SubLight
 			Action<IAudioInstance> done = null
 		)
 		{
-			if (clip == null) throw new ArgumentNullException("clip");
-			if (group == Groups.Unknown) throw new ArgumentOutOfRangeException("group", "Unknown is not a valid audio group");
+			if (clip == null) throw new ArgumentNullException(nameof(clip));
+			if (group == Groups.Unknown) throw new ArgumentOutOfRangeException(nameof(group), "Unknown is not a valid audio group");
 
 			var instance = new AudioInstance
 			{
@@ -209,7 +207,6 @@ namespace LunraGames.SubLight
 				Group = group,
 				Looping = looping,
 				State = States.Playing,
-				AudioServiceInstance = this,
 				Source = UnPool(),
 				Done = done
 			};
@@ -268,7 +265,6 @@ namespace LunraGames.SubLight
 				return;
 			}
 
-			// if (DevPrefs.LoggingAudio) Debug.Log("Transitioning to AudioSnapshot: " + snapshot);
 			instance.TransitionTo(transitionTime);
 		}
 

@@ -20,11 +20,11 @@ namespace LunraGames.SubLight
 
 		protected override void Begin()
 		{
-			App.SM.PushBlocking(InitializeModels);
-			App.SM.PushBlocking(InitializeViews);
-			App.SM.PushBlocking(InitializePresenters);
-			App.SM.PushBlocking(InitializePreferences);
-			App.SM.PushBlocking(InitializeAudio);
+			App.S.PushBlocking(InitializeModels);
+			App.S.PushBlocking(InitializeViews);
+			App.S.PushBlocking(InitializePresenters);
+			App.S.PushBlocking(InitializePreferences);
+			App.S.PushBlocking(InitializeAudio);
 
 			// if (DevPrefs.WipeGameSavesOnStart) SM.PushBlocking(WipeGameSaves, "WipeGameSaves");
 		}
