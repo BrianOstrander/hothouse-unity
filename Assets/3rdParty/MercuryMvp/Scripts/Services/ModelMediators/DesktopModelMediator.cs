@@ -70,15 +70,15 @@ namespace LunraGames.SubLight
 
 		protected override void OnLoad<M>(SaveModel model, Action<ModelResult<M>> done)
 		{
-			var result = Serialization.DeserializeJson<M>(File.ReadAllText(model.Path));
+			var result = Serialization.DeserializeJson<M>(File.ReadAllText(model.Path.Value));
 			if (result == null)
 			{
 				done(ModelResult<M>.Failure(model, null, "Null result"));
 				return;
 			}
 
-			result.SupportedVersion.Value = model.SupportedVersion;
-			result.Path.Value = model.Path;
+			result.SupportedVersion.Value = model.SupportedVersion.Value;
+			result.Path.Value = model.Path.Value;
 
 			if (result.HasSiblingDirectory) LoadSiblingFiles(model, result, done);
 			else done(ModelResult<M>.Success(model, result));
@@ -86,7 +86,7 @@ namespace LunraGames.SubLight
 
 		protected override void OnSave<M>(M model, Action<ModelResult<M>> done = null)
 		{
-			File.WriteAllText(model.Path, Serialization.Serialize(model, formatting: readableSaves ? Formatting.Indented : Formatting.None));
+			File.WriteAllText(model.Path.Value, Serialization.Serialize(model, formatting: readableSaves ? Formatting.Indented : Formatting.None));
 			if (model.HasSiblingDirectory) Directory.CreateDirectory(model.SiblingDirectory);
 			done(ModelResult<M>.Success(model, model));
 		}
@@ -103,7 +103,7 @@ namespace LunraGames.SubLight
 					var result = Serialization.DeserializeJson<SaveModel>(File.ReadAllText(file));
 					if (result == null) continue;
 
-					result.SupportedVersion.Value = IsSupportedVersion(typeof(M), result.Version);
+					result.SupportedVersion.Value = IsSupportedVersion(typeof(M), result.Version.Value);
 					result.Path.Value = file;
 					results.Add(result);
 				}
@@ -118,7 +118,7 @@ namespace LunraGames.SubLight
 
 		protected override void OnDelete<M>(M model, Action<ModelResult<M>> done)
 		{
-			File.Delete(model.Path);
+			File.Delete(model.Path.Value);
 			done(ModelResult<M>.Success(model, model));
 		}
 

@@ -39,19 +39,6 @@ namespace LunraGames.SubLight
 		}
 
 		void OnProperty(P property) { Value = derive(property); }
-
-		/// <summary>
-		/// Converts the DerivedProperty to the associated type.
-		/// </summary>
-		/// <remarks>
-		/// Only one way casting is supported so that the callbacks bound to the Changed action aren't lost.
-		/// </remarks>
-		/// <returns>The implicit.</returns>
-		/// <param name="p">P.</param>
-		public static implicit operator T(DerivedProperty<T, P> p)
-		{
-			return p.Value;
-		}
 	}
 
 	public class DerivedProperty<T, P0, P1>
@@ -95,20 +82,7 @@ namespace LunraGames.SubLight
 			foreach (var listener in listeners) Changed += listener;
 		}
 
-		void OnProperty() { Value = derive(property0, property1); }
-
-		/// <summary>
-		/// Converts the DerivedProperty to the associated type.
-		/// </summary>
-		/// <remarks>
-		/// Only one way casting is supported so that the callbacks bound to the Changed action aren't lost.
-		/// </remarks>
-		/// <returns>The implicit.</returns>
-		/// <param name="p">P.</param>
-		public static implicit operator T(DerivedProperty<T, P0, P1> p)
-		{
-			return p.Value;
-		}
+		void OnProperty() { Value = derive(property0.Value, property1.Value); }
 	}
 
 	public class DerivedProperty<T, P0, P1, P2>
@@ -156,20 +130,7 @@ namespace LunraGames.SubLight
 			foreach (var listener in listeners) Changed += listener;
 		}
 
-		void OnProperty() { Value = derive(property0, property1, property2); }
-
-		/// <summary>
-		/// Converts the DerivedProperty to the associated type.
-		/// </summary>
-		/// <remarks>
-		/// Only one way casting is supported so that the callbacks bound to the Changed action aren't lost.
-		/// </remarks>
-		/// <returns>The implicit.</returns>
-		/// <param name="p">P.</param>
-		public static implicit operator T(DerivedProperty<T, P0, P1, P2> p)
-		{
-			return p.Value;
-		}
+		void OnProperty() { Value = derive(property0.Value, property1.Value, property2.Value); }
 	}
 
 	public class DerivedProperty<T, P0, P1, P2, P3>
@@ -221,20 +182,7 @@ namespace LunraGames.SubLight
 			foreach (var listener in listeners) Changed += listener;
 		}
 
-		void OnProperty() { Value = derive(property0, property1, property2, property3); }
-
-		/// <summary>
-		/// Converts the DerivedProperty to the associated type.
-		/// </summary>
-		/// <remarks>
-		/// Only one way casting is supported so that the callbacks bound to the Changed action aren't lost.
-		/// </remarks>
-		/// <returns>The implicit.</returns>
-		/// <param name="p">P.</param>
-		public static implicit operator T(DerivedProperty<T, P0, P1, P2, P3> p)
-		{
-			return p.Value;
-		}
+		void OnProperty() { Value = derive(property0.Value, property1.Value, property2.Value, property3.Value); }
 	}
 
 	public class DerivedProperty<T, P0, P1, P2, P3, P4>
@@ -290,19 +238,6 @@ namespace LunraGames.SubLight
 			foreach (var listener in listeners) Changed += listener;
 		}
 
-		void OnProperty() { Value = derive(property0, property1, property2, property3, property4); }
-
-		/// <summary>
-		/// Converts the DerivedProperty to the associated type.
-		/// </summary>
-		/// <remarks>
-		/// Only one way casting is supported so that the callbacks bound to the Changed action aren't lost.
-		/// </remarks>
-		/// <returns>The implicit.</returns>
-		/// <param name="p">P.</param>
-		public static implicit operator T(DerivedProperty<T, P0, P1, P2, P3, P4> p)
-		{
-			return p.Value;
-		}
+		void OnProperty() { Value = derive(property0.Value, property1.Value, property2.Value, property3.Value, property4.Value); }
 	}
 }

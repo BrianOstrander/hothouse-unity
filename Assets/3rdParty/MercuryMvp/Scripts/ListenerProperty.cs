@@ -3,47 +3,62 @@ using System.Collections.Generic;
 
 namespace LunraGames.SubLight
 {
-	public class ListenerProperty<T>
-	{
-		public string Name { get; private set; }
-		Action<T> set;
-		Func<T> get;
+    public enum ListenerPropertySources
+    {
+        Unknown = 0,
+        Internal = 10,
+        External = 20
+    }
 
-		public Action<T> Changed = ActionExtensions.GetEmpty<T>();
+    public class ListenerProperty<T>
+    {
+        public string Name { get; private set; }
 
-		public T Value
-		{
-			get { return get(); }
-			set
-			{
-				if (EqualityComparer<T>.Default.Equals(get(), value)) return;
-				set(value);
-				Changed(value);
-			}
-		}
+        Action<T> set;
+        Func<T> get;
+        ListenerPropertySources source = ListenerPropertySources.Unknown;
 
-		public ListenerProperty(Action<T> set, Func<T> get, string name, params Action<T>[] listeners)
-		{
-			Name = name;
-			this.set = set;
-			this.get = get;
+        public Action<T> Changed = ActionExtensions.GetEmpty<T>();
+        public Action<T, ListenerPropertySources> ChangedSource = ActionExtensions.GetEmpty<T, ListenerPropertySources>();
 
-			foreach (var listener in listeners) Changed += listener;
-		}
+        public T Value
+        {
+            get { return get(); }
+            set { SetValue(value, ListenerPropertySources.Unknown); }
+        }
 
-		public ListenerProperty(Action<T> set, Func<T> get, params Action<T>[] listeners) : this (set, get, null, listeners) {}
+        public bool SetValue(T value, ListenerPropertySources source = ListenerPropertySources.Unknown)
+        {
+            if (EqualityComparer<T>.Default.Equals(get(), value)) return false;
+            set(value);
+            Changed(value);
+            ChangedSource(value, source);
+            return true;
+        }
 
-		/// <summary>
-		/// Converts the ModelProperty to the associated type.
-		/// </summary>
-		/// <remarks>
-		/// Only one way casting is supported so that the callbacks bound to the Changed action aren't lost.
-		/// </remarks>
-		/// <returns>The implicit.</returns>
-		/// <param name="p">P.</param>
-		public static implicit operator T(ListenerProperty<T> p)
-		{
-			return p.Value;
-		}
-	}
+        public ListenerProperty(
+            Action<T> set,
+            Func<T> get,
+            string name,
+            params Action<T>[] listeners
+        )
+        {
+            Name = name;
+            this.set = set;
+            this.get = get;
+
+            foreach (var listener in listeners) Changed += listener;
+        }
+
+        public ListenerProperty(
+            Action<T> set,
+            Func<T> get,
+            params Action<T>[] listeners
+        ) : this (
+            set,
+            get,
+            null,
+            listeners
+        ) {}
+    }
 }

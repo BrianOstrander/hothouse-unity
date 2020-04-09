@@ -204,7 +204,7 @@ namespace LunraGames.SubLight
 			if (model == null) throw new ArgumentNullException(nameof(model));
 			if (done == null) throw new ArgumentNullException(nameof(done));
 
-			if (!model.SupportedVersion) 
+			if (!model.SupportedVersion.Value) 
 			{
 				done(ModelResult<M>.Failure(
 					model,
@@ -366,7 +366,7 @@ namespace LunraGames.SubLight
 				return;
 			}
 
-			if (!model.SupportedVersion)
+			if (!model.SupportedVersion.Value)
 			{
 				done(ModelResult<M>.Failure(
 					model,
@@ -376,7 +376,7 @@ namespace LunraGames.SubLight
 				return;
 			}
 
-			if (string.IsNullOrEmpty(model.Path))
+			if (string.IsNullOrEmpty(model.Path.Value))
 			{
 				done(ModelResult<M>.Failure(
 					model,
@@ -390,10 +390,10 @@ namespace LunraGames.SubLight
 			var wasModified = model.Modified.Value;
 			var wasVersion = model.Version.Value;
 
-			if (updateModified || model.Created == DateTime.MinValue)
+			if (updateModified || model.Created.Value == DateTime.MinValue)
 			{
 				model.Modified.Value = DateTime.Now;
-				if (model.Created == DateTime.MinValue) model.Created.Value = model.Modified.Value;
+				if (model.Created.Value == DateTime.MinValue) model.Created.Value = model.Modified.Value;
 			}
 
 			model.Version.Value = VersionProvider.Current;
