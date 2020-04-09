@@ -25,9 +25,7 @@ namespace LunraGames.SubLight
 		public abstract Type PayloadType { get; }
 
 		public object PayloadObject { get; set; }
-
-		protected StateMachineWrapper SM;
-
+		
 		public virtual bool AcceptsPayload(object payload, bool throws = false)
 		{
 			Exception exception = null;
@@ -43,7 +41,6 @@ namespace LunraGames.SubLight
 		{
 			AcceptsPayload(payload, true);
 			PayloadObject = payload;
-			SM = SM ?? new StateMachineWrapper(App.SM, GetType());
 		}
 
 		public virtual void UpdateState(Type state, StateMachine.Events stateEvent, object payload)

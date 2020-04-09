@@ -269,42 +269,8 @@ namespace LunraGames.SubLight
 		}
 
 		#region Pushing
-		public void Push<T>(
-			Action action,
-			string description,
-			bool repeating = false
-		)
-		{
-			Push(
-				action,
-				typeof(T),
-				description,
-				repeating
-			);
-		}
-
-		public void PushBlocking<T>(Action<Action> action, string description)
-		{
-			PushBlocking(
-				action,
-				typeof(T),
-				description
-			);
-		}
-
-		public void PushBlocking<T>(Action action, Func<bool> condition, string description)
-		{
-			PushBlocking(
-				action,
-				condition,
-				typeof(T),
-				description
-			);
-		}
-
 		public void Push(
 			Action action,
-			Type type,
 			string description,
 			bool repeating = false,
 			string synchronizedId = null
@@ -314,7 +280,6 @@ namespace LunraGames.SubLight
 				action,
 				currentState.GetType(),
 				currentEvent,
-				type,
 				description,
 				repeating,
 				synchronizedId
@@ -323,7 +288,6 @@ namespace LunraGames.SubLight
 
 		public void PushBlocking(
 			Action<Action> action,
-			Type type,
 			string description,
 			string synchronizedId = null
 		)
@@ -332,7 +296,6 @@ namespace LunraGames.SubLight
 				action,
 				currentState.GetType(),
 				currentEvent,
-				type,
 				description,
 				synchronizedId
 			);
@@ -341,7 +304,6 @@ namespace LunraGames.SubLight
 		public void PushBlocking(
 			Action action,
 			Func<bool> condition,
-			Type type,
 			string description,
 			string synchronizedId = null
 		)
@@ -356,7 +318,6 @@ namespace LunraGames.SubLight
 				waiter,
 				currentState.GetType(),
 				currentEvent,
-				type,
 				description,
 				synchronizedId
 			);
@@ -368,7 +329,6 @@ namespace LunraGames.SubLight
 			Action action,
 			Type state,
 			Events stateEvent,
-			Type type,
 			string description,
 			bool repeating,
 			string synchronizedId
@@ -384,7 +344,7 @@ namespace LunraGames.SubLight
 					action,
 					state,
 					stateEvent,
-					type == null ? "< Unspecified >." + description : type.Name + "." + description,
+					"< Unspecified >." + description,
 					repeating,
 					synchronizedId
 				)
@@ -398,7 +358,6 @@ namespace LunraGames.SubLight
 			Action<Action> action,
 			Type state,
 			Events stateEvent,
-			Type type,
 			string description,
 			string synchronizedId
 		)
@@ -412,7 +371,7 @@ namespace LunraGames.SubLight
 				new BlockingEntry(
 					action, state,
 					stateEvent,
-					type == null ? "< Unspecified >." + description : type.Name + "." + description,
+					"< Unspecified >." + description,
 					synchronizedId
 				)
 				{
@@ -452,7 +411,7 @@ namespace LunraGames.SubLight
 		#region Utility
 		public void PushBreak()
 		{
-			Push<StateMachine>(OnBreak, "PushBreak");
+			Push(OnBreak, "PushBreak");
 		}
 
 		void OnBreak()

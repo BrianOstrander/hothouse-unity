@@ -23,13 +23,10 @@ namespace LunraGames.SubLight
 
 		public bool UnBinded { private set; get; }
 
-		protected StateMachineWrapper SM;
-
 		public Presenter() : this(App.V.Get<V>()) {}
 
 		public Presenter(V view)
 		{
-			SM = new StateMachineWrapper(App.SM, GetType());
 			Register();
 			SetView (view);
 		}
