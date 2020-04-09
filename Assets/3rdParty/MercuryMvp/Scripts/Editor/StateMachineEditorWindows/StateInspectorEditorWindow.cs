@@ -10,7 +10,6 @@ namespace LunraGames.SubLight
 	public class StateInspectorEditorWindow : StateMachineEditorWindow
 	{
 		EditorPrefsFloat entryScroll;
-		EditorPrefsBool isInspecting;
 
 		[MenuItem("Window/SubLight/State Inspector")]
 		static void Initialize() { OnInitialize<StateInspectorEditorWindow>("State Inspector"); }
@@ -18,7 +17,6 @@ namespace LunraGames.SubLight
 		public StateInspectorEditorWindow() : base("LG_SL_StateInspector_")
 		{
 			entryScroll = new EditorPrefsFloat(KeyPrefix + "EntryScroll");
-			isInspecting = new EditorPrefsBool(KeyPrefix + "IsInspecting");
 
 			AppInstantiated += OnAppInstantiated;
 			Gui += OnStateGui;
@@ -32,7 +30,7 @@ namespace LunraGames.SubLight
 
 		void OnHeartbeatUpdate(float delta)
 		{
-			if (isInspecting) Repaint();
+			if (StateMachine.CapturingTraceData.Value) Repaint();
 		}
 
 		void OnStateGui()
@@ -45,7 +43,11 @@ namespace LunraGames.SubLight
 				EditorGUILayout.BeginHorizontal();
 				{
 					GUILayout.FlexibleSpace();
-					isInspecting.Value = EditorGUILayout.Toggle("Is Inspecting", isInspecting.Value, GUILayout.ExpandWidth(false));
+					StateMachine.CapturingTraceData.Value = EditorGUILayout.Toggle(
+						"Is Inspecting",
+						StateMachine.CapturingTraceData.Value,
+						GUILayout.ExpandWidth(false)
+					);
 				}
 				EditorGUILayout.EndHorizontal();
 				return;
@@ -53,14 +55,14 @@ namespace LunraGames.SubLight
 
 			EditorGUILayout.BeginHorizontal();
 			{
-				if (isInspecting) EditorGUILayout.SelectableLabel("Currently " + App.SM.CurrentState + "." + App.SM.CurrentEvent, EditorStyles.boldLabel);
+				if (StateMachine.CapturingTraceData.Value) EditorGUILayout.SelectableLabel("Currently " + App.SM.CurrentState + "." + App.SM.CurrentEvent, EditorStyles.boldLabel);
 				else GUILayout.Label("Enable inspection to view StateMachine updates.");
 
-				isInspecting.Value = EditorGUILayout.Toggle("Is Inspecting", isInspecting.Value, GUILayout.ExpandWidth(false));
+				StateMachine.CapturingTraceData.Value = EditorGUILayout.Toggle("Is Inspecting", StateMachine.CapturingTraceData.Value, GUILayout.ExpandWidth(false));
 			}
 			EditorGUILayout.EndHorizontal();
 
-			if (!isInspecting.Value) return;
+			if (!StateMachine.CapturingTraceData.Value) return;
 
 			var entries = App.SM.GetEntries();
 
@@ -80,7 +82,8 @@ namespace LunraGames.SubLight
 
 						EditorGUILayout.BeginHorizontal();
 						{
-							EditorGUILayout.SelectableLabel(entry.Description);
+							GUILayout.Label(entry.Trace.ToString());
+							
 							var stateColor = Color.black;
 
 							switch (entry.EntryState)
@@ -102,6 +105,19 @@ namespace LunraGames.SubLight
 							EditorGUILayoutExtensions.PopColor();
 						}
 						EditorGUILayout.EndHorizontal();
+						
+						EditorGUILayoutExtensions.PushEnabled(entry.Trace.IsValid);
+						{
+							var buttonLabel = entry.Trace.IsValid ? AssetDatabaseExtensions.GetRelativeAssetPath(entry.Trace.FilePath) + " : " + entry.Trace.FileLine : "No file to open";
+							if (GUILayout.Button(buttonLabel, EditorStyles.linkLabel))
+							{
+								AssetDatabase.OpenAsset(
+									AssetDatabase.LoadAssetAtPath<MonoScript>(AssetDatabaseExtensions.GetRelativeAssetPath(entry.Trace.FilePath)),
+									entry.Trace.FileLine
+								);
+							}
+						}
+						EditorGUILayoutExtensions.PopEnabled();
 
 						GUILayout.Label("Syncronized Id: " + (entry.SynchronizedId ?? "< null >"));
 

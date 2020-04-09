@@ -1,13 +1,16 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-
-using UnityEngine;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Debug = UnityEngine.Debug;
 
 namespace LunraGames.SubLight
 {
 	public class StateMachine
 	{
+		public static DevPrefsBool CapturingTraceData = new DevPrefsBool("MercuryMvp_StateMachine_CapturingTraceData");
+		
 		public enum Events
 		{
 			Unknown = 0,
@@ -26,6 +29,30 @@ namespace LunraGames.SubLight
 			Blocked = 50
 		}
 
+		public struct TraceData
+		{
+			public readonly string ClassName;
+			public readonly string MethodName;
+			public readonly string FilePath;
+			public readonly int FileLine;
+			public readonly bool IsValid;
+
+			public TraceData(StackFrame frame)
+			{
+				ClassName = frame.GetMethod().DeclaringType.FullName;
+				MethodName = frame.GetMethod().ToString();
+				FilePath = frame.GetFileName();
+				FileLine = frame.GetFileLineNumber();
+				IsValid = true;
+			}
+
+			public override string ToString()
+			{
+				if (IsValid) return ClassName + ":" + MethodName.Remove(0, MethodName.IndexOf(' ') + 1);
+				return "(Inspecting was not enabled when this was captured)";
+			}
+		}
+
 		/// <summary>
 		/// Used for external examination and debugging of the StateMachine.
 		/// </summary>
@@ -33,7 +60,7 @@ namespace LunraGames.SubLight
 		{
 			Type State { get; }
 			Events Event { get; }
-			string Description { get; }
+			TraceData Trace { get; }
 			bool IsRepeating { get; }
 			string SynchronizedId { get; }
 			EntryStates EntryState { get; }
@@ -50,7 +77,7 @@ namespace LunraGames.SubLight
 		{
 			public Type State { get; protected set; }
 			public Events Event { get; protected set; }
-			public string Description { get; protected set; }
+			public TraceData Trace { get; protected set; }
 			public bool IsRepeating { get; protected set; }
 			public string SynchronizedId { get; protected set; }
 			public abstract bool Trigger();
@@ -70,14 +97,14 @@ namespace LunraGames.SubLight
 				Action<Action> action,
 				Type state,
 				Events stateEvent,
-				string description,
+				TraceData trace,
 				string synchronizedId
 			)
 			{
 				this.action = action;
 				State = state;
 				Event = stateEvent;
-				Description = description;
+				Trace = trace;
 				IsRepeating = false;
 				SynchronizedId = string.IsNullOrEmpty(synchronizedId) ? null : synchronizedId;
 			}
@@ -106,7 +133,7 @@ namespace LunraGames.SubLight
 				Action action,
 				Type state,
 				Events stateEvent,
-				string description,
+				TraceData trace,
 				bool repeating,
 				string synchronizedId
 			)
@@ -114,7 +141,7 @@ namespace LunraGames.SubLight
 				this.action = action;
 				State = state;
 				Event = stateEvent;
-				Description = description;
+				Trace = trace;
 				IsRepeating = repeating;
 				SynchronizedId = string.IsNullOrEmpty(synchronizedId) ? null : synchronizedId;
 			}
@@ -271,7 +298,6 @@ namespace LunraGames.SubLight
 		#region Pushing
 		public void Push(
 			Action action,
-			string description,
 			bool repeating = false,
 			string synchronizedId = null
 		)
@@ -280,7 +306,7 @@ namespace LunraGames.SubLight
 				action,
 				currentState.GetType(),
 				currentEvent,
-				description,
+				GetStackDescription(),
 				repeating,
 				synchronizedId
 			);
@@ -288,7 +314,6 @@ namespace LunraGames.SubLight
 
 		public void PushBlocking(
 			Action<Action> action,
-			string description,
 			string synchronizedId = null
 		)
 		{
@@ -296,7 +321,7 @@ namespace LunraGames.SubLight
 				action,
 				currentState.GetType(),
 				currentEvent,
-				description,
+				GetStackDescription(),
 				synchronizedId
 			);
 		}
@@ -304,7 +329,6 @@ namespace LunraGames.SubLight
 		public void PushBlocking(
 			Action action,
 			Func<bool> condition,
-			string description,
 			string synchronizedId = null
 		)
 		{
@@ -318,7 +342,7 @@ namespace LunraGames.SubLight
 				waiter,
 				currentState.GetType(),
 				currentEvent,
-				description,
+				GetStackDescription(),
 				synchronizedId
 			);
 		}
@@ -329,7 +353,7 @@ namespace LunraGames.SubLight
 			Action action,
 			Type state,
 			Events stateEvent,
-			string description,
+			TraceData trace,
 			bool repeating,
 			string synchronizedId
 		)
@@ -337,14 +361,13 @@ namespace LunraGames.SubLight
 			if (action == null) throw new ArgumentNullException("action");
 			if (state == null) throw new ArgumentException("Cannot bind to null state");
 			if (stateEvent == Events.Unknown) throw new ArgumentException("Cannot bind to Events.Unknown");
-			if (string.IsNullOrEmpty(description)) throw new ArgumentException("Cannot have empty or null description");
 
 			queued.Add(
 				new NonBlockingEntry(
 					action,
 					state,
 					stateEvent,
-					"< Unspecified >." + description,
+					trace,
 					repeating,
 					synchronizedId
 				)
@@ -358,20 +381,19 @@ namespace LunraGames.SubLight
 			Action<Action> action,
 			Type state,
 			Events stateEvent,
-			string description,
+			TraceData trace,
 			string synchronizedId
 		)
 		{
 			if (action == null) throw new ArgumentNullException("action");
 			if (state == null) throw new ArgumentException("Cannot bind to null state");
 			if (stateEvent == Events.Unknown) throw new ArgumentException("Cannot bind to Events.Unknown");
-			if (string.IsNullOrEmpty(description)) throw new ArgumentException("Cannot have empty or null description");
 
 			queued.Add(
 				new BlockingEntry(
 					action, state,
 					stateEvent,
-					"< Unspecified >." + description,
+					trace,
 					synchronizedId
 				)
 				{
@@ -411,7 +433,7 @@ namespace LunraGames.SubLight
 		#region Utility
 		public void PushBreak()
 		{
-			Push(OnBreak, "PushBreak");
+			Push(OnBreak);
 		}
 
 		void OnBreak()
@@ -421,6 +443,20 @@ namespace LunraGames.SubLight
 		}
 
 		public IEntryImmutable[] GetEntries() { return entries.Cast<IEntryImmutable>().ToArray(); }
+		
+		TraceData GetStackDescription(int offset = 2)
+		{
+			if (CapturingTraceData.Value)
+			{
+				try { return new TraceData(new StackTrace(true).GetFrame(offset)); }
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+					return default;
+				}
+			}
+			return default;
+		}
 		#endregion
 	}
 }

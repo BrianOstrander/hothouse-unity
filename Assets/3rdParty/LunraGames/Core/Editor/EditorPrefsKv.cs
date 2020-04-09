@@ -19,11 +19,6 @@ namespace LunraGamesEditor
 			Key = key;
 			Default = defaultValue;
 		}
-
-		public static implicit operator T(EditorPrefsKv<T> p)
-		{
-			return p.Value;
-		}
 	}
 
 	public class EditorPrefsString : EditorPrefsKv<string>

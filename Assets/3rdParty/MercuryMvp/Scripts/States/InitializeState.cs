@@ -20,11 +20,11 @@ namespace LunraGames.SubLight
 
 		protected override void Begin()
 		{
-			App.SM.PushBlocking(InitializeModels, "InitializeModels");
-			App.SM.PushBlocking(InitializeViews, "InitializeViews");
-			App.SM.PushBlocking(InitializePresenters, "InitializePresenters");
-			App.SM.PushBlocking(InitializePreferences, "InitializePreferences");
-			App.SM.PushBlocking(InitializeAudio, "InitializeAudio");
+			App.SM.PushBlocking(InitializeModels);
+			App.SM.PushBlocking(InitializeViews);
+			App.SM.PushBlocking(InitializePresenters);
+			App.SM.PushBlocking(InitializePreferences);
+			App.SM.PushBlocking(InitializeAudio);
 
 			// if (DevPrefs.WipeGameSavesOnStart) SM.PushBlocking(WipeGameSaves, "WipeGameSaves");
 		}
@@ -40,6 +40,29 @@ namespace LunraGames.SubLight
 			);
 
 			// App.SM.RequestState(Payload.HomeStatePayload);
+			
+			App.SM.PushBlocking(
+				() => Debug.Log("blocking..."),
+				() => false//,
+				// "IdleBlock"
+			);
+			
+			App.SM.PushBlocking(
+				() => Debug.Log("blocking..."),
+				() => false//,
+				// "IdleBlock"
+			);
+			
+			App.SM.PushBlocking(
+				() => Debug.Log("blocking..."),
+				() => false//,
+				// "IdleBlock"
+			);
+			App.SM.PushBlocking(
+				() => Debug.Log("blocking..."),
+				() => false//,
+				// "IdleBlock"
+			);
 		}
 
 		#region Mediators

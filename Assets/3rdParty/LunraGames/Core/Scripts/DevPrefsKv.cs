@@ -21,11 +21,6 @@ namespace LunraGames
 			Key = key;
 			Default = defaultValue;
 		}
-
-		public static implicit operator T(DevPrefsKv<T> p)
-		{
-			return p.Value;
-		}
 	}
 
 	public class DevPrefsString : DevPrefsKv<string>
