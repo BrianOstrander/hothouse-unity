@@ -8,15 +8,6 @@ namespace LunraGames.SubLight
 {
 	public class StateMachine
 	{
-		public enum States
-		{
-			Unknown = 0,
-			Initialize = 10,
-			Transition = 20,
-			Home = 30,
-			Game = 40,
-		}
-
 		public enum Events
 		{
 			Unknown = 0,
@@ -40,7 +31,7 @@ namespace LunraGames.SubLight
 		/// </summary>
 		public interface IEntryImmutable
 		{
-			States State { get; }
+			Type State { get; }
 			Events Event { get; }
 			string Description { get; }
 			bool IsRepeating { get; }
@@ -57,7 +48,7 @@ namespace LunraGames.SubLight
 
 		abstract class Entry : IEntry
 		{
-			public States State { get; protected set; }
+			public Type State { get; protected set; }
 			public Events Event { get; protected set; }
 			public string Description { get; protected set; }
 			public bool IsRepeating { get; protected set; }
@@ -77,7 +68,7 @@ namespace LunraGames.SubLight
 
 			public BlockingEntry(
 				Action<Action> action,
-				States state,
+				Type state,
 				Events stateEvent,
 				string description,
 				string synchronizedId
@@ -113,7 +104,7 @@ namespace LunraGames.SubLight
 
 			public NonBlockingEntry(
 				Action action,
-				States state,
+				Type state,
 				Events stateEvent,
 				string description,
 				bool repeating,
@@ -157,14 +148,7 @@ namespace LunraGames.SubLight
 		List<IEntry> queued = new List<IEntry>();
 		List<IEntry> entries = new List<IEntry>();
 
-		public States CurrentState 
-		{ 
-			get 
-			{
-				if (currentState == null) return States.Unknown;
-				return currentState.HandledState;
-			}
-		}
+		public Type CurrentState => currentState?.GetType();
 
 		public Events CurrentEvent
 		{
@@ -175,7 +159,7 @@ namespace LunraGames.SubLight
 			}
 		}
 
-		public bool Is(States isState, Events isEvent) { return isState == CurrentState && isEvent == CurrentEvent; }
+		public bool Is(Type isState, Events isEvent) { return isState == CurrentState && isEvent == CurrentEvent; }
 
 		public IState CurrentHandler { get { return currentState; } }
 
@@ -207,9 +191,9 @@ namespace LunraGames.SubLight
 					continue;
 				}
 
-				if (entry.State != currentState.HandledState)
+				if (entry.State != currentState.GetType())
 				{
-					if (entry.State == nextState.HandledState)
+					if (entry.State == nextState.GetType())
 					{
 						entry.EntryState = EntryStates.Waiting;
 						persisted.Add(entry);
@@ -242,7 +226,7 @@ namespace LunraGames.SubLight
 			// We can't change states until we're unblocked.
 			if (isBlocked) return;
 
-			if (nextState.HandledState != currentState.HandledState)
+			if (nextState.GetType() != currentState.GetType())
 			{
 				if (currentEvent == Events.Idle)
 				{
@@ -271,7 +255,7 @@ namespace LunraGames.SubLight
 			currentPayload = payload;
 			currentEvent = stateEvent;
 
-			currentState.UpdateState(currentState.HandledState, currentEvent, payload);
+			currentState.UpdateState(currentState.GetType(), currentEvent, payload);
 		}
 
 		IState GetState<P>(P payload)
@@ -328,7 +312,7 @@ namespace LunraGames.SubLight
 		{
 			OnPush(
 				action,
-				currentState.HandledState,
+				currentState.GetType(),
 				currentEvent,
 				type,
 				description,
@@ -346,7 +330,7 @@ namespace LunraGames.SubLight
 		{
 			OnPushBlocking(
 				action,
-				currentState.HandledState,
+				currentState.GetType(),
 				currentEvent,
 				type,
 				description,
@@ -370,7 +354,7 @@ namespace LunraGames.SubLight
 
 			OnPushBlocking(
 				waiter,
-				currentState.HandledState,
+				currentState.GetType(),
 				currentEvent,
 				type,
 				description,
@@ -382,7 +366,7 @@ namespace LunraGames.SubLight
 		#region Push Handlers
 		void OnPush(
 			Action action,
-			States state,
+			Type state,
 			Events stateEvent,
 			Type type,
 			string description,
@@ -391,7 +375,7 @@ namespace LunraGames.SubLight
 		)
 		{
 			if (action == null) throw new ArgumentNullException("action");
-			if (state == States.Unknown) throw new ArgumentException("Cannot bind to States.Unknown");
+			if (state == null) throw new ArgumentException("Cannot bind to null state");
 			if (stateEvent == Events.Unknown) throw new ArgumentException("Cannot bind to Events.Unknown");
 			if (string.IsNullOrEmpty(description)) throw new ArgumentException("Cannot have empty or null description");
 
@@ -412,7 +396,7 @@ namespace LunraGames.SubLight
 
 		void OnPushBlocking(
 			Action<Action> action,
-			States state,
+			Type state,
 			Events stateEvent,
 			Type type,
 			string description,
@@ -420,7 +404,7 @@ namespace LunraGames.SubLight
 		)
 		{
 			if (action == null) throw new ArgumentNullException("action");
-			if (state == States.Unknown) throw new ArgumentException("Cannot bind to States.Unknown");
+			if (state == null) throw new ArgumentException("Cannot bind to null state");
 			if (stateEvent == Events.Unknown) throw new ArgumentException("Cannot bind to Events.Unknown");
 			if (string.IsNullOrEmpty(description)) throw new ArgumentException("Cannot have empty or null description");
 
@@ -449,13 +433,13 @@ namespace LunraGames.SubLight
 			payload = payload ?? new P();
 			var handlingState = GetState(payload);
 			if (handlingState == null) throw new Exception("Cannot find a handler for payload of type " + typeof(P));
-			var state = handlingState.HandledState;
+			var state = handlingState.GetType();
 
-			if (state == States.Unknown) throw new ArgumentException("Cannot switch to an Unknown state");
+			if (state == null) throw new ArgumentException("Cannot switch to a null state");
 			if (currentState != null && nextState != null)
 			{
-				if (currentState.HandledState == state || nextState.HandledState == state) return;
-				if (currentState.HandledState != nextState.HandledState) throw new NotImplementedException("Cannot switch to another state while already transitioning");
+				if (currentState.GetType() == state || nextState.GetType() == state) return;
+				if (currentState.GetType() != nextState.GetType()) throw new NotImplementedException("Cannot switch to another state while already transitioning");
 			}
 
 			nextState = handlingState;

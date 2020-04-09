@@ -1,12 +1,14 @@
+using System;
+
 namespace LunraGames.SubLight
 {
 	public struct StateChange
 	{
-		public readonly StateMachine.States State;
+		public readonly Type State;
 		public readonly StateMachine.Events Event;
 		public readonly object Payload;
 
-		public StateChange(StateMachine.States state, StateMachine.Events stateEvent, object payload)
+		public StateChange(Type state, StateMachine.Events stateEvent, object payload)
 		{
 			State = state;
 			Event = stateEvent;
@@ -18,9 +20,9 @@ namespace LunraGames.SubLight
 			return Payload as P;
 		}
 
-		public bool Is(StateMachine.States state, StateMachine.Events stateEvent)
+		public bool Is<S>(StateMachine.Events stateEvent)
 		{
-			return State == state && Event == stateEvent;
+			return State == typeof(S) && Event == stateEvent;
 		}
 	}
 }

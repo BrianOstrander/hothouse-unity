@@ -8,11 +8,10 @@ namespace LunraGames.SubLight
 
 	public interface IState
 	{
-		StateMachine.States HandledState { get; }
 		Type PayloadType { get; }
 		bool AcceptsPayload(object payload, bool throws = false);
 		void Initialize(object payload);
-		void UpdateState(StateMachine.States state, StateMachine.Events stateEvent, object payload);
+		void UpdateState(Type state, StateMachine.Events stateEvent, object payload);
 	}
 
 	public interface IStateTyped<P> : IState
@@ -23,7 +22,6 @@ namespace LunraGames.SubLight
 
 	public abstract class BaseState : IState
 	{
-		public abstract StateMachine.States HandledState { get; }
 		public abstract Type PayloadType { get; }
 
 		public object PayloadObject { get; set; }
@@ -48,9 +46,9 @@ namespace LunraGames.SubLight
 			SM = SM ?? new StateMachineWrapper(App.SM, GetType());
 		}
 
-		public virtual void UpdateState(StateMachine.States state, StateMachine.Events stateEvent, object payload)
+		public virtual void UpdateState(Type state, StateMachine.Events stateEvent, object payload)
 		{
-			if (state != HandledState) return;
+			if (state != GetType()) return;
 			switch (stateEvent)
 			{
 				case StateMachine.Events.Begin:

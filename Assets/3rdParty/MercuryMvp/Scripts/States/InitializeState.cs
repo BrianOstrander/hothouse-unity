@@ -18,8 +18,6 @@ namespace LunraGames.SubLight
 	{
 		// Reminder: Keep variables in payload for easy reset of states!
 
-		public override StateMachine.States HandledState { get { return StateMachine.States.Initialize; } }
-
 		protected override void Begin()
 		{
 			SM.PushBlocking(InitializeModels, "InitializeModels");

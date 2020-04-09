@@ -43,8 +43,6 @@ namespace LunraGames.SubLight
 	{
 		// Reminder: Keep variables in payload for easy reset of states!
 
-		public override StateMachine.States HandledState { get { return StateMachine.States.Transition; } }
-
 		#region Idle
 		protected override void Idle()
 		{
