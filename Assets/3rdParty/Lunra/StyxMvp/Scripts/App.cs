@@ -48,18 +48,6 @@ namespace Lunra.StyxMvp
 		Scenes scenes;
 		public static Scenes Scenes => instance.scenes;
 
-		PreferencesModel preferences;
-		/// <summary>
-		/// Gets the current preferences.
-		/// </summary>
-		/// <remarks>
-		/// Feel free to hook onto the Changed listeners for this model, they're
-		/// preserved when saving. Don't provide this model to any services
-		/// before initialization though, since it will be replaced.
-		/// </remarks>
-		/// <value>The preferences.</value>
-		public static PreferencesModel Preferences => instance.preferences;
-
 		public App(
 			Main main,
 			AudioConfiguration audioConfiguration
@@ -109,15 +97,6 @@ namespace Lunra.StyxMvp
 		{
 			Debug.LogError("NO RESTART LOGIC DEFINED - TRIGGERED BY:\n" + message);
 		}
-
-		#region Global setters
-		/// <summary>
-		/// Used to set the initial preferences. Should only be set once from
-		/// the initialize state.
-		/// </summary>
-		/// <param name="preferences">Preferences.</param>
-		public static void SetPreferences(PreferencesModel preferences) { instance.preferences = preferences; }
-		#endregion
 
 		#region MonoBehaviour events
 

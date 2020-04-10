@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Lunra.StyxMvp.Models;
 using Lunra.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -62,7 +61,6 @@ namespace Lunra.StyxMvp.Services
 	public class Scenes
 	{
 		SceneRequest current;
-		GameModel model;
 
 		#region Exposed Functionality
 		public void Request(SceneRequest request)

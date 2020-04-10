@@ -1,17 +1,10 @@
 using System;
-using System.Linq;
-using System.Collections.Generic;
-using Lunra.StyxMvp.Models;
-using UnityEngine;
 
-using Lunra.StyxMvp.Presenters;
+using UnityEngine;
 
 namespace Lunra.StyxMvp.Services
 {
-	public class InitializePayload : IStatePayload
-	{
-		public List<GameObject> DefaultViews = new List<GameObject>();
-	}
+	public class InitializePayload : IStatePayload {}
 
 	public class InitializeState : State<InitializePayload>
 	{
@@ -22,7 +15,6 @@ namespace Lunra.StyxMvp.Services
 			App.S.PushBlocking(InitializeModels);
 			App.S.PushBlocking(InitializeViews);
 			App.S.PushBlocking(InitializePresenters);
-			App.S.PushBlocking(InitializePreferences);
 			App.S.PushBlocking(InitializeAudio);
 
 			// if (DevPrefs.WipeGameSavesOnStart) SM.PushBlocking(WipeGameSaves, "WipeGameSaves");
@@ -81,6 +73,7 @@ namespace Lunra.StyxMvp.Services
 		}
 		#endregion
 
+		/*
 		#region Preferences
 		void InitializePreferences(Action done)
 		{
@@ -148,6 +141,7 @@ namespace Lunra.StyxMvp.Services
 			done();
 		}
 		#endregion
+		*/
 
 		void InitializeAudio(Action done)
 		{

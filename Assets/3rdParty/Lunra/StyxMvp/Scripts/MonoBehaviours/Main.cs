@@ -12,7 +12,7 @@ namespace Lunra.StyxMvp
 	/// This class should never be called directly, it simply gets the App singleton going, and passes any unity 
 	/// specific events back to it.
 	/// </remarks>
-	public class Main : MonoBehaviour 
+	public class Main : MonoBehaviour
 	{
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		[SerializeField]
@@ -21,7 +21,7 @@ namespace Lunra.StyxMvp
 
 		App app;
 		
-		void Awake() 
+		void Awake()
 		{
 			app = new App(
 				this,
