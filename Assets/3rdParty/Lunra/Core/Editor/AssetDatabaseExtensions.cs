@@ -10,14 +10,14 @@ namespace LunraGamesEditor
 	{
 		public static string GetAbsoluteAssetPath(Object assetObject)
 		{
-			return Path.Combine(Project.Root.FullName, AssetDatabase.GetAssetPath(assetObject));
+			return Path.Combine(ApplicationExtensions.Root.FullName, AssetDatabase.GetAssetPath(assetObject));
 		}
 
 		public static string GetRelativeAssetPath(string absoluteAssetPath)
 		{
 			if (string.IsNullOrEmpty(absoluteAssetPath)) throw new ArgumentException("Cannot be null or empty");
-			if (!absoluteAssetPath.StartsWith(Project.Root.FullName)) throw new ArgumentException("Path must be inside project");
-			return absoluteAssetPath.Remove(0, Project.Root.FullName.Length + 1);
+			if (!absoluteAssetPath.StartsWith(ApplicationExtensions.Root.FullName)) throw new ArgumentException("Path must be inside project");
+			return absoluteAssetPath.Remove(0, ApplicationExtensions.Root.FullName.Length + 1);
 		}
 
 		/// <summary>
@@ -29,7 +29,7 @@ namespace LunraGamesEditor
 		public static T CreateObject<T>(string name)
 			where T : ScriptableObject
 		{
-			var directory = SelectionExtensions.Directory();
+			var directory = SelectionExtensions.ActiveDirectory;
 			if (directory == null)
 			{
 				EditorUtilityExtensions.DialogInvalid(Strings.Dialogs.Messages.SelectValidDirectory);

@@ -126,14 +126,14 @@ namespace LunraGamesEditor
 			{
 				foreach (var entry in entries)
 				{
-					if (entry.Color.HasValue) EditorGUILayoutExtensions.PushColor(entry.Color.Value);
+					if (entry.Color.HasValue) GUIExtensions.PushColor(entry.Color.Value);
 					if (GUILayout.Button(entry.Content))
 					{
 						closeHandled = true;
 						Close();
 						entry.Done();
 					}
-					if (entry.Color.HasValue) EditorGUILayoutExtensions.PopColor();
+					if (entry.Color.HasValue) GUIExtensions.PopColor();
 				}
 			}
 			GUILayout.EndScrollView();

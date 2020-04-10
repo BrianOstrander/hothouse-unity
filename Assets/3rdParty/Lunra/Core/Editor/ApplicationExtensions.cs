@@ -3,7 +3,7 @@ using System.IO;
 
 namespace LunraGamesEditor
 {
-	public static class Project
+	public static class ApplicationExtensions
 	{
 		public static DirectoryInfo Root => new DirectoryInfo(Application.dataPath).Parent;
 	}

@@ -99,7 +99,7 @@ namespace LunraGames
 		/// Thanks Onur!
 		/// </remarks>
 		public static bool IsPrefab(this Transform transform) {
-			if (Application.isEditor && !Application.isPlaying) throw new InvalidOperationException("IsPrefab only allowed to be used in playmode");
+			if (Application.isEditor && !Application.isPlaying) throw new InvalidOperationException("IsPrefab only allowed to be used during playtime in the editor.");
 
 			return transform.gameObject.scene.buildIndex < 0;
 		}

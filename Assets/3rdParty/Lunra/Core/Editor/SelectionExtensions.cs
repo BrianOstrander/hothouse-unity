@@ -8,12 +8,15 @@ namespace LunraGamesEditor
 		/// <summary>
 		/// Returns the path of the currently selected directory, or the parent directory of a selected asset.
 		/// </summary>
-		public static string Directory()
+		public static string ActiveDirectory
 		{
-			var asset = Selection.activeObject;
-			if (asset == null) return null;
-			var containingDir = Path.GetDirectoryName(AssetDatabase.GetAssetPath(asset));
-			return asset is DefaultAsset ? Path.Combine(containingDir, asset.name) : containingDir;
+			get
+			{
+				var asset = Selection.activeObject;
+				if (asset == null) return null;
+				var containingDir = Path.GetDirectoryName(AssetDatabase.GetAssetPath(asset));
+				return asset is DefaultAsset ? Path.Combine(containingDir, asset.name) : containingDir;
+			}
 		}
 	}
 }

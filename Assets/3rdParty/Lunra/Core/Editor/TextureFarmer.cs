@@ -6,7 +6,7 @@ using System;
 
 namespace LunraGamesEditor
 {
-	public class TextureFarmer 
+	public static class TextureFarmer 
 	{
 		const int PixelBudget = 8000;
 

@@ -98,35 +98,15 @@ namespace LunraGamesEditor
 
 			EditorGUI.BeginChangeCheck();
 		}
-
-		/* Not possible it seems...
-		public static bool IsOnScreen(Rect position)
+		
+		public static void PushIndent()
 		{
-			var screenRect = new Rect(0f, 0f, Screen.currentResolution.width, Screen.currentResolution.height);
-			return screenRect.Contains(position.min) && screenRect.Contains(position.max);
-		}
-		*/
-
-		/// <summary>
-		/// Gets the position on screen either around the cursor, or centered, depending on the size of the window.
-		/// </summary>
-		/// <returns>The position on screen.</returns>
-		/// <param name="size">Size.</param>
-		public static Rect GetPositionOnScreen(Vector2 size)
-		{
-			var result = new Rect(GUIUtility.GUIToScreenPoint(Event.current.mousePosition) - (size * 0.5f), size);
-
-			return result;
-			//if (IsOnScreen(result)) return result;
-			//return new Rect((new Vector2(Screen.width * 0.5f, Screen.height * 0.5f)) - (size * 0.5f), size);
+			EditorGUI.indentLevel++;
 		}
 
-		/// <summary>
-		/// Deselects any buttons, moves the cursor out of text boxes, etc.
-		/// </summary>
-		public static void ResetControls()
+		public static void PopIndent()
 		{
-			GUIUtility.keyboardControl = 0;
+			EditorGUI.indentLevel--;
 		}
 	}
 }

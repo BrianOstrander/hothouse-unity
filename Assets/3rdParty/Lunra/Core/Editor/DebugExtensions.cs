@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace LunraGamesEditor
@@ -11,6 +12,7 @@ namespace LunraGamesEditor
 		public static void OpenFileAtContext()
 		{
 			var trace = new System.Diagnostics.StackTrace(true).GetFrames();
+			if (trace == null) throw new NullReferenceException("Could not get a valid stack trace.");
 			var first = trace.FirstOrDefault();
 			foreach (var frame in trace)
 			{

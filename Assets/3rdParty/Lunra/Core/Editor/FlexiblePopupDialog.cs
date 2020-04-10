@@ -35,7 +35,7 @@ namespace LunraGamesEditor
 			window.onLostFocus = onLostFocus;
 			window.lostFocusCloses = lostFocusCloses;
 
-			window.position = EditorGUIExtensions.GetPositionOnScreen(size);
+			window.position = GUIUtilityExtensions.GetPositionOnScreen(size);
 
 			window.Show();
 		}

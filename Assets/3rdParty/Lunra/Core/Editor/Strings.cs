@@ -26,8 +26,5 @@
 				public const string Other = "Other";
 			}
 		}
-
-		public const string Company = "Lunra Games";
-		public const string Feedback = "Window/"+Company+"/Feedback & Bugs/";
 	}
 }

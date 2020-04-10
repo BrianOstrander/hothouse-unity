@@ -96,15 +96,15 @@ namespace LunraGames.SubLight
 									break;
 							}
 
-							EditorGUILayoutExtensions.PushColor(stateColor);
+							GUIExtensions.PushColor(stateColor);
 							{
 								GUILayout.Label(entry.EntryState.ToString(), EditorStyles.boldLabel, GUILayout.ExpandWidth(false));
 							}
-							EditorGUILayoutExtensions.PopColor();
+							GUIExtensions.PopColor();
 						}
 						EditorGUILayout.EndHorizontal();
 						
-						EditorGUILayoutExtensions.PushEnabled(entry.Trace.IsValid);
+						GUIExtensions.PushEnabled(entry.Trace.IsValid);
 						{
 							var buttonLabel = entry.Trace.IsValid ? AssetDatabaseExtensions.GetRelativeAssetPath(entry.Trace.FilePath) + " : " + entry.Trace.FileLine : "No file to open";
 							if (GUILayout.Button(buttonLabel, EditorStyles.linkLabel))
@@ -115,7 +115,7 @@ namespace LunraGames.SubLight
 								);
 							}
 						}
-						EditorGUILayoutExtensions.PopEnabled();
+						GUIExtensions.PopEnabled();
 
 						GUILayout.Label("Synchronized Id: " + (entry.SynchronizedId ?? "< null >"));
 
