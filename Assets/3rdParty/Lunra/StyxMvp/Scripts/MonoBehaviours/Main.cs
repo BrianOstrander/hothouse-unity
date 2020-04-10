@@ -1,5 +1,7 @@
 using UnityEngine;
 
+using AudioConfiguration = Lunra.StyxMvp.Services.AudioConfiguration;
+
 namespace Lunra.StyxMvp 
 {
 	/// <summary>

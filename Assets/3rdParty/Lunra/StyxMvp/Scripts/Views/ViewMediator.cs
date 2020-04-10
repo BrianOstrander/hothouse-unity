@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
+using Lunra.StyxMvp.Services;
+
 namespace Lunra.StyxMvp
 {
 	public class ViewMediator

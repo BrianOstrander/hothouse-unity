@@ -1,7 +1,12 @@
 ﻿using System;
-using Lunra.StyxMvp.Models;
-using Lunra.Core;
+
 using UnityEngine;
+
+using Lunra.Core;
+using Lunra.StyxMvp.Models;
+using Lunra.StyxMvp.Presenters;
+using Lunra.StyxMvp.Services;
+using AudioConfiguration = Lunra.StyxMvp.Services.AudioConfiguration;
 
 namespace Lunra.StyxMvp
 {
@@ -34,14 +39,14 @@ namespace Lunra.StyxMvp
 		ViewMediator viewMediator;
 		public static ViewMediator V => instance.viewMediator;
 
-		AudioService audioService;
-		public static AudioService Audio => instance.audioService;
+		Audio audio;
+		public static Audio Audio => instance.audio;
 
 		StateMachine stateMachine;
 		public static StateMachine S => instance.stateMachine;
 
-		SceneService scenes;
-		public static SceneService Scenes => instance.scenes;
+		Scenes scenes;
+		public static Scenes Scenes => instance.scenes;
 
 		PreferencesModel preferences;
 		/// <summary>
@@ -89,9 +94,9 @@ namespace Lunra.StyxMvp
 				throw new Exception("Unknown platform");
 			}
 
-			scenes = new SceneService();
+			scenes = new Scenes();
 			
-			audioService = new AudioService(
+			audio = new Audio(
 				Main.transform,
 				audioConfiguration,
 				Heartbeat

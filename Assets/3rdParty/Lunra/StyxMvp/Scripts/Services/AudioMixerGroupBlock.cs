@@ -2,12 +2,12 @@
 
 using UnityEngine.Audio;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Services
 {
 	[Serializable]
 	public struct AudioMixerGroupBlock
 	{
-		public AudioService.Groups Group;
+		public Audio.Groups Group;
 		public AudioMixerGroup Target;
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using Lunra.Core;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Models
 {
     public class ReadonlyProperty<T>
     {

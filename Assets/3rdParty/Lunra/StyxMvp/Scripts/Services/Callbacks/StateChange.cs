@@ -1,6 +1,6 @@
 using System;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Services
 {
 	public struct StateChange
 	{

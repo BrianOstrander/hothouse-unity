@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Lunra.Core;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Models
 {
 	public class DerivedProperty<T, P>
 	{

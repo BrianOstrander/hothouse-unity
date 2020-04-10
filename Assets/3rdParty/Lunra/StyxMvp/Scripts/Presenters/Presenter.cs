@@ -2,7 +2,7 @@ using System;
 
 using UnityEngine;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Presenters
 {
 	public interface IPresenter
 	{

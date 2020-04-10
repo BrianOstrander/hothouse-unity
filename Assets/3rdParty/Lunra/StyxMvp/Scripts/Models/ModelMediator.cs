@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Models
 {
 	public struct ModelResult<M> where M : SaveModel
 	{
@@ -176,11 +176,11 @@ namespace Lunra.StyxMvp
 
 		protected abstract string GetUniquePath(Type type, string id);
 
-		protected SaveData GetData(Type type) => (SaveData)Attribute.GetCustomAttribute(type, typeof(SaveData));
+		protected SaveModelMeta GetSaveModelMeta(Type type) => (SaveModelMeta)Attribute.GetCustomAttribute(type, typeof(SaveModelMeta));
 		
 		protected bool IsSupportedVersion(Type type, int version)
 		{
-			var min = GetData(type).MinimumSupportedVersion;
+			var min = GetSaveModelMeta(type).MinimumSupportedVersion;
 			// If min is -1, then it means we can only load saves that equal 
 			// this version.
 			if (min < 0) min = VersionProvider.Current;
@@ -192,7 +192,7 @@ namespace Lunra.StyxMvp
 			var result = new M();
 			result.SupportedVersion.Value = true;
 			result.Version.Value = VersionProvider.Current;
-			result.Path.Value = GetUniquePath(typeof(M), id);
+			result.AbsolutePath.Value = GetUniquePath(typeof(M), id);
 			result.Created.Value = DateTime.MinValue;
 			result.Modified.Value = DateTime.MinValue;
 			return result;
@@ -353,7 +353,7 @@ namespace Lunra.StyxMvp
 			if (model == null) throw new ArgumentNullException(nameof(model));
 			done = done ?? OnUnhandledError;
 
-			var data = GetData(typeof(M));
+			var data = GetSaveModelMeta(typeof(M));
 			
 			if (!data.CanSave)
 			{
@@ -375,7 +375,7 @@ namespace Lunra.StyxMvp
 				return;
 			}
 
-			if (string.IsNullOrEmpty(model.Path.Value))
+			if (string.IsNullOrEmpty(model.AbsolutePath.Value))
 			{
 				done(ModelResult<M>.Failure(
 					model,

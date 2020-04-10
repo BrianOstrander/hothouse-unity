@@ -1,8 +1,9 @@
-﻿using Lunra.Core;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
+using Lunra.Core;
 using Lunra.Editor.Core;
+using Lunra.StyxMvp.Services;
 
 namespace Lunra.StyxMvp
 {
@@ -29,39 +30,39 @@ namespace Lunra.StyxMvp
 
 		void OnHeartbeatUpdate(float delta)
 		{
-			if (StateMachine.CapturingTraceData.Value) Repaint();
+			if (StateMachine.CaptureTraceData.Value) Repaint();
 		}
 
 		void OnStateGui()
 		{
+			EditorGUILayout.BeginHorizontal();
+			{
+				GUILayout.FlexibleSpace();
+				StateMachine.LogStateChanges.Value = EditorGUILayoutExtensions.ToggleButtonCompact(
+					"Logging States",
+					StateMachine.LogStateChanges.Value,
+					options: GUILayout.MinWidth(128f)
+				);
+				StateMachine.CaptureTraceData.Value = EditorGUILayoutExtensions.ToggleButtonCompact(
+					"Capturing Traces",
+					StateMachine.CaptureTraceData.Value,
+					options: GUILayout.MinWidth(128f)
+				);
+			}
+			EditorGUILayout.EndHorizontal();
+			
 			var isActive = Application.isPlaying && App.HasInstance && App.S != null;
 
 			if (!isActive)
 			{
 				EditorGUILayout.HelpBox("Only available during playmode.", MessageType.Info);
-				EditorGUILayout.BeginHorizontal();
-				{
-					GUILayout.FlexibleSpace();
-					StateMachine.CapturingTraceData.Value = EditorGUILayout.Toggle(
-						"Is Inspecting",
-						StateMachine.CapturingTraceData.Value,
-						GUILayout.ExpandWidth(false)
-					);
-				}
-				EditorGUILayout.EndHorizontal();
 				return;
 			}
 
-			EditorGUILayout.BeginHorizontal();
-			{
-				if (StateMachine.CapturingTraceData.Value) EditorGUILayout.SelectableLabel("Currently " + App.S.CurrentState + "." + App.S.CurrentEvent, EditorStyles.boldLabel);
-				else GUILayout.Label("Enable inspection to view StateMachine updates.");
+			if (StateMachine.CaptureTraceData.Value) EditorGUILayout.SelectableLabel("Currently " + App.S.CurrentState + "." + App.S.CurrentEvent, EditorStyles.boldLabel);
+			else GUILayout.Label("Enable \"Capturing Traces\" to inspect StateMachine stack.");
 
-				StateMachine.CapturingTraceData.Value = EditorGUILayout.Toggle("Is Inspecting", StateMachine.CapturingTraceData.Value, GUILayout.ExpandWidth(false));
-			}
-			EditorGUILayout.EndHorizontal();
-
-			if (!StateMachine.CapturingTraceData.Value) return;
+			if (!StateMachine.CaptureTraceData.Value) return;
 
 			var entries = App.S.GetEntries();
 

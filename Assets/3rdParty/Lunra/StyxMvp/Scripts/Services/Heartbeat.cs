@@ -2,7 +2,7 @@ using System;
 using Lunra.Core;
 using UnityEngine;
 
-namespace Lunra.StyxMvp 
+namespace Lunra.StyxMvp.Services 
 {
 	public class Heartbeat 
 	{

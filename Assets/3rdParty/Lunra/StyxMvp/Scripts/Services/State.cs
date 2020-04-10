@@ -2,7 +2,7 @@ using System;
 
 using UnityEngine;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Services
 {
 	public interface IStatePayload {}
 
@@ -58,7 +58,8 @@ namespace Lunra.StyxMvp
 					End();
 					break;
 			}
-			Debug.Log("State is now " + state + "." + stateEvent + " - Payload " + payload.GetType());
+
+			if (StateMachine.LogStateChanges.Value) Debug.Log("<b>" + state.Name + "." + stateEvent + "</b> ( " + payload.GetType().Name + " )");
 			App.S.StateChange(new StateChange(state, stateEvent, payload));
 		}
 

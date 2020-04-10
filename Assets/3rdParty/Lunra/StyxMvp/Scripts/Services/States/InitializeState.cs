@@ -6,7 +6,7 @@ using UnityEngine;
 
 using Lunra.StyxMvp.Presenters;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Services
 {
 	public class InitializePayload : IStatePayload
 	{

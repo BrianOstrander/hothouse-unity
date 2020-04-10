@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Services
 {
 	public class TransitionPayload : IStatePayload
 	{

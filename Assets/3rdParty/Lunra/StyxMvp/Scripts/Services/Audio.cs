@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Lunra.Core;
 using UnityEngine;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Services
 {
-	public class AudioService
+	public class Audio
 	{
 		public enum Groups
 		{
@@ -65,7 +65,7 @@ namespace Lunra.StyxMvp
 		List<AudioSource> pool = new List<AudioSource>();
 		List<AudioInstance> activeInstances = new List<AudioInstance>();
 
-		public AudioService(
+		public Audio(
 			Transform main,
 			AudioConfiguration audioConfiguration,
 			Heartbeat heartbeat

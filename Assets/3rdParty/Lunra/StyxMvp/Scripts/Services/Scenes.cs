@@ -6,7 +6,7 @@ using Lunra.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Services
 {
 	public struct SceneRequest
 	{
@@ -59,7 +59,7 @@ namespace Lunra.StyxMvp
 		public Dictionary<string, GameObject> FoundTags;
 	}
 
-	public class SceneService
+	public class Scenes
 	{
 		SceneRequest current;
 		GameModel model;

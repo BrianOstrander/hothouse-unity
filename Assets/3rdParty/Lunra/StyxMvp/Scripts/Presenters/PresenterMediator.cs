@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Lunra.StyxMvp 
+using Lunra.StyxMvp.Services; 
+
+namespace Lunra.StyxMvp.Presenters
 {
 	public class PresenterMediator 
 	{

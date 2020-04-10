@@ -14,8 +14,8 @@ namespace Lunra.StyxMvp
 	public class DesktopModelMediator : ModelMediator
 	{
 		const string Extension = ".json";
-		static string ParentPath => Path.Combine(Application.persistentDataPath, "saves");
-		static string InternalPath => Path.Combine(Application.streamingAssetsPath, "internal");
+		static string PersistentPath => Path.Combine(Application.persistentDataPath, "styx_persistent");
+		static string StreamingPath => Path.Combine(Application.streamingAssetsPath, "styx_streaming");
 
 		bool readableSaves;
 
@@ -30,10 +30,10 @@ namespace Lunra.StyxMvp
 			{
 				foreach(Type type in Assembly.GetExecutingAssembly().GetTypes())
 				{
-					var current = type.GetCustomAttribute(typeof(SaveData), true);
+					var current = type.GetCustomAttribute(typeof(SaveModelMeta), true);
 					if (current == null) continue;
 
-					var path = (current as SaveData)?.Path;
+					var path = (current as SaveModelMeta)?.Path;
 
 					if (string.IsNullOrEmpty(path))
 					{
@@ -41,7 +41,7 @@ namespace Lunra.StyxMvp
 						continue;
 					}
 					
-					Directory.CreateDirectory(Path.Combine(ParentPath, path));
+					Directory.CreateDirectory(Path.Combine(PersistentPath, path));
 				}
 				
 				done(RequestStatus.Success);
@@ -55,9 +55,9 @@ namespace Lunra.StyxMvp
 
 		string GetPath(Type saveType)
 		{
-			var saveData = saveType.GetCustomAttribute(typeof(SaveData), true) as SaveData;
+			var saveData = saveType.GetCustomAttribute(typeof(SaveModelMeta), true) as SaveModelMeta;
 			if (saveData == null) throw new ArgumentException(nameof(saveType) + " has meta data attribute");
-			return Path.Combine(ParentPath, saveData.Path);
+			return Path.Combine(PersistentPath, saveData.Path);
 		}
 
 		protected override string GetUniquePath(Type saveType, string id)
@@ -74,7 +74,7 @@ namespace Lunra.StyxMvp
 
 		protected override void OnLoad<M>(SaveModel model, Action<ModelResult<M>> done)
 		{
-			var result = Serialization.DeserializeJson<M>(File.ReadAllText(model.Path.Value));
+			var result = Serialization.DeserializeJson<M>(File.ReadAllText(model.AbsolutePath.Value));
 			if (result == null)
 			{
 				done(ModelResult<M>.Failure(model, null, "Null result"));
@@ -82,7 +82,7 @@ namespace Lunra.StyxMvp
 			}
 
 			result.SupportedVersion.Value = model.SupportedVersion.Value;
-			result.Path.Value = model.Path.Value;
+			result.AbsolutePath.Value = model.AbsolutePath.Value;
 
 			if (result.HasSiblingDirectory) LoadSiblingFiles(model, result, done);
 			else done(ModelResult<M>.Success(model, result));
@@ -90,7 +90,7 @@ namespace Lunra.StyxMvp
 
 		protected override void OnSave<M>(M model, Action<ModelResult<M>> done)
 		{
-			File.WriteAllText(model.Path.Value, model.Serialize(formatting: readableSaves ? Formatting.Indented : Formatting.None));
+			File.WriteAllText(model.AbsolutePath.Value, model.Serialize(formatting: readableSaves ? Formatting.Indented : Formatting.None));
 			if (model.HasSiblingDirectory) Directory.CreateDirectory(model.SiblingDirectory);
 			done(ModelResult<M>.Success(model, model));
 		}
@@ -108,7 +108,7 @@ namespace Lunra.StyxMvp
 					if (result == null) continue;
 
 					result.SupportedVersion.Value = IsSupportedVersion(typeof(M), result.Version.Value);
-					result.Path.Value = file;
+					result.AbsolutePath.Value = file;
 					results.Add(result);
 				}
 				catch (Exception exception)
@@ -122,7 +122,7 @@ namespace Lunra.StyxMvp
 
 		protected override void OnDelete<M>(M model, Action<ModelResult<M>> done)
 		{
-			File.Delete(model.Path.Value);
+			File.Delete(model.AbsolutePath.Value);
 			done(ModelResult<M>.Success(model, model));
 		}
 

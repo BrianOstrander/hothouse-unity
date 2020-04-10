@@ -2,7 +2,7 @@ using System;
 using Lunra.Core;
 using Newtonsoft.Json;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Models
 {
 	public interface IModel 
 	{

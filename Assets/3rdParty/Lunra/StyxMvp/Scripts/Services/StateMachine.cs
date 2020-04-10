@@ -5,11 +5,12 @@ using System.Diagnostics;
 using Lunra.Core;
 using Debug = UnityEngine.Debug;
 
-namespace Lunra.StyxMvp
+namespace Lunra.StyxMvp.Services
 {
 	public class StateMachine
 	{
-		public static PlayerPrefsBool CapturingTraceData = new PlayerPrefsBool("MercuryMvp_StateMachine_CapturingTraceData");
+		public static PlayerPrefsBool CaptureTraceData = new PlayerPrefsBool("LunraStyxMvp_StateMachine_CaptureTraceData");
+		public static PlayerPrefsBool LogStateChanges = new PlayerPrefsBool("LunraStyxMvp_StateMachine_LogStateChanges");
 		
 		public enum Events
 		{
@@ -445,7 +446,7 @@ namespace Lunra.StyxMvp
 		
 		TraceData GetStackDescription(int offset = 2)
 		{
-			if (CapturingTraceData.Value)
+			if (CaptureTraceData.Value)
 			{
 				try { return new TraceData(new StackTrace(true).GetFrame(offset)); }
 				catch (Exception e)

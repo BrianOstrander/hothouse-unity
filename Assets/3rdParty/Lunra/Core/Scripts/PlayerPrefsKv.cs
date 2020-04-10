@@ -3,10 +3,6 @@ using System.Linq;
 
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 namespace Lunra.Core
 {
 	public abstract class PlayerPrefsKv<T>
@@ -27,12 +23,8 @@ namespace Lunra.Core
 	{
 		public override string Value
 		{
-#if UNITY_EDITOR
-			get { return EditorPrefs.GetString(Key, Default); }
-			set { EditorPrefs.SetString(Key, value); }
-#else
-			get; set;
-#endif
+			get => PlayerPrefs.GetString(Key, Default);
+			set => PlayerPrefs.SetString(Key, value);
 		}
 
 		public PlayerPrefsString(string key, string defaultValue = null) : base(key, defaultValue) { }
@@ -42,12 +34,8 @@ namespace Lunra.Core
 	{
 		public override bool Value
 		{
-#if UNITY_EDITOR
-			get { return EditorPrefs.GetBool(Key, Default); }
-			set { EditorPrefs.SetBool(Key, value); }
-#else
-			get; set;
-#endif
+			get => PlayerPrefsExtensions.GetBool(Key, Default);
+			set => PlayerPrefsExtensions.SetBool(Key, value);
 		}
 
 		public PlayerPrefsBool(string key, bool defaultValue = false) : base(key, defaultValue) { }
@@ -57,12 +45,8 @@ namespace Lunra.Core
 	{
 		public override float Value
 		{
-#if UNITY_EDITOR
-			get { return EditorPrefs.GetFloat(Key, Default); }
-			set { EditorPrefs.SetFloat(Key, value); }
-#else
-			get; set;
-#endif
+			get => PlayerPrefs.GetFloat(Key, Default);
+			set => PlayerPrefs.SetFloat(Key, value);
 		}
 
 		public PlayerPrefsFloat(string key, float defaultValue = 0f) : base(key, defaultValue) { }
@@ -72,12 +56,8 @@ namespace Lunra.Core
 	{
 		public override int Value
 		{
-#if UNITY_EDITOR
-			get { return EditorPrefs.GetInt(Key, Default); }
-			set { EditorPrefs.SetInt(Key, value); }
-#else
-			get; set;
-#endif
+			get => PlayerPrefs.GetInt(Key, Default);
+			set => PlayerPrefs.SetInt(Key, value);
 		}
 
 		public PlayerPrefsInt(string key, int defaultValue = 0) : base(key, defaultValue) { }
@@ -87,19 +67,12 @@ namespace Lunra.Core
 	{
 		public override T Value
 		{
-#if UNITY_EDITOR
 			get
 			{
-				var intValue = EditorPrefs.GetInt(Key, Convert.ToInt32(Default));
+				var intValue = PlayerPrefs.GetInt(Key, Convert.ToInt32(Default));
 				return Enum.GetValues(typeof(T)).Cast<T>().FirstOrDefault(e => Convert.ToInt32(e) == intValue);
 			}
-			set
-			{
-				EditorPrefs.SetInt(Key, Convert.ToInt32(value));
-			}
-#else
-			get; set;
-#endif
+			set => PlayerPrefs.SetInt(Key, Convert.ToInt32(value));
 		}
 
 		public PlayerPrefsEnum(string key, T defaultValue = default) : base(key, defaultValue)

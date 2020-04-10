@@ -37,12 +37,12 @@ namespace Lunra.StyxMvp.Models
 		[JsonIgnore]
 		public readonly ListenerProperty<bool> SupportedVersion;
 		
-		string path;
+		string absolutePath;
 		/// <summary>
 		/// The path of this save, depends on the SaveLoadService in use.
 		/// </summary>
 		[JsonIgnore]
-		public readonly ListenerProperty<string> Path;
+		public readonly ListenerProperty<string> AbsolutePath;
 		#endregion
 		
 		#region Serialized
@@ -82,17 +82,10 @@ namespace Lunra.StyxMvp.Models
 		#endregion
 		
 		[JsonIgnore]
-		public bool IsInternal => Path.Value.StartsWith(Application.dataPath);
+		public bool IsStreaming => AbsolutePath.Value.StartsWith(Application.dataPath);
 
 		[JsonIgnore]
-		public string InternalPath
-		{
-			get
-			{
-				if (!IsInternal) return null;
-				return "Assets" + Path.Value.Substring(Application.dataPath.Length);
-			}
-		}
+		public string Path => IsStreaming ? "Assets" + AbsolutePath.Value.Substring(Application.dataPath.Length) : AbsolutePath.Value;
 
 		/// <summary>
 		/// Is there a directory with the same name as this file next to it where it's saved?
@@ -123,17 +116,11 @@ namespace Lunra.StyxMvp.Models
 		{
 			get
 			{
-				if (Path.Value == null || !HasSiblingDirectory) return null;
-				return IoPath.Combine(Directory.GetParent(Path.Value).FullName, IoPath.GetFileNameWithoutExtension(Path.Value)+IoPath.DirectorySeparatorChar);
-			}
-		}
-		[JsonIgnore]
-		public string InternalSiblingDirectory
-		{
-			get
-			{
-				if (!HasSiblingDirectory || !IsInternal) return null;
-				return "Assets" + SiblingDirectory.Substring(Application.dataPath.Length);
+				if (AbsolutePath.Value == null || !HasSiblingDirectory) return null;
+				
+				if (IsStreaming) return "Assets" + SiblingDirectory.Substring(Application.dataPath.Length);
+				
+				return IoPath.Combine(Directory.GetParent(AbsolutePath.Value).FullName, IoPath.GetFileNameWithoutExtension(AbsolutePath.Value)+IoPath.DirectorySeparatorChar);
 			}
 		}
 
@@ -150,7 +137,7 @@ namespace Lunra.StyxMvp.Models
 		{
 			SiblingBehaviour = SiblingBehaviours.None;
 			SupportedVersion = new ListenerProperty<bool>(value => supportedVersion = value, () => supportedVersion);
-			Path = new ListenerProperty<string>(value => path = value, () => path);
+			AbsolutePath = new ListenerProperty<string>(value => absolutePath = value, () => absolutePath);
 			Ignore = new ListenerProperty<bool>(value => ignore = value, () => ignore);
 			Version = new ListenerProperty<int>(value => version = value, () => version);
 			Created = new ListenerProperty<DateTime>(value => created = value, () => created);

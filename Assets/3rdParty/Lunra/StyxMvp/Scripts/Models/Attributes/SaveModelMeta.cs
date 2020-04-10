@@ -3,13 +3,13 @@
 namespace Lunra.StyxMvp.Models
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class SaveData : Attribute
+    public class SaveModelMeta : Attribute
     {
         public readonly string Path;
         public readonly int MinimumSupportedVersion;
         public readonly bool CanSave;
         
-        public SaveData(
+        public SaveModelMeta(
             string path,
             int minimumSupportedVersion = -1,
             bool canSave = true
