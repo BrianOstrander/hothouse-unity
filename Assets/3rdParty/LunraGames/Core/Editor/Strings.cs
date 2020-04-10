@@ -1,23 +1,23 @@
 ﻿namespace LunraGamesEditor
 {
-	public class Strings
+	public static class Strings
 	{
-		public class Dialogs
+		public static class Dialogs
 		{
-			public class Titles
+			public static class Titles
 			{
 				public const string Alert = "Alert";
 				public const string Invalid = "Invalid";
 				public const string Error = "Error";
 			}
 
-			public class Messages
+			public static class Messages
 			{
 				public const string InvalidOperation = "The operation you tried to do was invalid.";
 				public const string SelectValidDirectory = "Select a valid directory.";
 			}
 
-			public class Responses
+			public static class Responses
 			{
 				public const string Okay = "Okay";
 				public const string Cancel = "Cancel";

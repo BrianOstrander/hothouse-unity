@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -7,6 +6,7 @@ using UnityEditor;
 
 namespace LunraGamesEditor
 {
+	// ReSharper disable once InconsistentNaming
 	public static class EditorGUIExtensions
 	{
 		enum ChangeCheckStates
@@ -15,17 +15,17 @@ namespace LunraGamesEditor
 			Paused
 		}
 
-		static int CurrentLevel;
-		static Stack<ChangeCheckStates> ChangeCheckStateStack = new Stack<ChangeCheckStates>();
-		static Stack<bool> ChangeValueStack = new Stack<bool>();
+		static int currentLevel;
+		static Stack<ChangeCheckStates> changeCheckStateStack = new Stack<ChangeCheckStates>();
+		static Stack<bool> changeValueStack = new Stack<bool>();
 
-		static bool IsActive { get { return 0 < CurrentLevel; } }
+		static bool IsActive => 0 < currentLevel;
 
 		public static void BeginChangeCheck()
 		{
 			if (IsActive)
 			{
-				if (ChangeCheckStateStack.Peek() == ChangeCheckStates.Paused)
+				if (changeCheckStateStack.Peek() == ChangeCheckStates.Paused)
 				{
 					Debug.LogError("Cannot begin a change check in the middle of a pause.");
 					return;
@@ -35,14 +35,14 @@ namespace LunraGamesEditor
 				var previous = false;
 				try { previous = EditorGUI.EndChangeCheck(); } catch {}
 
-				previous = ChangeValueStack.Pop() || previous;
-				ChangeValueStack.Push(previous);
+				previous = changeValueStack.Pop() || previous;
+				changeValueStack.Push(previous);
 			}
 
-			ChangeValueStack.Push(false);
+			changeValueStack.Push(false);
 
-			ChangeCheckStateStack.Push(ChangeCheckStates.Listening);
-			CurrentLevel++;
+			changeCheckStateStack.Push(ChangeCheckStates.Listening);
+			currentLevel++;
 
 			EditorGUI.BeginChangeCheck();
 		}
@@ -60,15 +60,15 @@ namespace LunraGamesEditor
 				Debug.LogError("Cannot end a change check that has not been started.");
 				return false;
 			}
-			if (ChangeCheckStateStack.Peek() == ChangeCheckStates.Paused)
+			if (changeCheckStateStack.Peek() == ChangeCheckStates.Paused)
 			{
 				Debug.LogError("Cannot end a change check that has been paused.");
 				return false;
 			}
 
-			ChangeCheckStateStack.Pop();
-			CurrentLevel--;
-			var result = ChangeValueStack.Pop();
+			changeCheckStateStack.Pop();
+			currentLevel--;
+			var result = changeValueStack.Pop();
 			result = EditorGUI.EndChangeCheck() || result;
 			return result;
 		}
@@ -76,25 +76,25 @@ namespace LunraGamesEditor
 		public static void PauseChangeCheck()
 		{
 			if (!IsActive) return;
-			if (ChangeCheckStateStack.Peek() == ChangeCheckStates.Paused) return;
+			if (changeCheckStateStack.Peek() == ChangeCheckStates.Paused) return;
 
-			ChangeCheckStateStack.Push(ChangeCheckStates.Paused);
+			changeCheckStateStack.Push(ChangeCheckStates.Paused);
 
 			var current = EditorGUI.EndChangeCheck();
-			current = ChangeValueStack.Pop() || current;
-			ChangeValueStack.Push(current);
+			current = changeValueStack.Pop() || current;
+			changeValueStack.Push(current);
 		}
 
 		public static void UnPauseChangeCheck()
 		{
 			if (!IsActive) return;
-			if (ChangeCheckStateStack.Peek() != ChangeCheckStates.Paused)
+			if (changeCheckStateStack.Peek() != ChangeCheckStates.Paused)
 			{
 				Debug.LogError("Cannot unpause a change check that has not been paused.");
 				return;
 			}
 
-			ChangeCheckStateStack.Pop();
+			changeCheckStateStack.Pop();
 
 			EditorGUI.BeginChangeCheck();
 		}

@@ -7,14 +7,14 @@ namespace LunraGamesEditor.Singletonnes
 	[CustomEditor(typeof(EditorScriptableSingletonBase), true)]
 	public class EditorScriptableSingletonEditor : Editor 
 	{
-		static float ButtonHeight = 40f;
-		static string WrongInheritence = "Your scriptable object doesn't inherit from "+typeof(EditorScriptableSingleton<>).Name;
-		static string WrongNameMessage = "Your asset's name does not match its type.";
-		static string WrongPathMessage = "Your asset is not in a valid directory.";
-		static string WrongNameAndPathMessage = "Your asset's name does not match its type, and is not in a valid directory.";
+		const float ButtonHeight = 40f;
+		static string wrongInheritence = "Your scriptable object doesn't inherit from "+typeof(EditorScriptableSingleton<>).Name;
+		static string wrongNameMessage = "Your asset's name does not match its type.";
+		static string wrongPathMessage = "Your asset is not in a valid directory.";
+		static string wrongNameAndPathMessage = "Your asset's name does not match its type, and is not in a valid directory.";
 
-		static string AutoFixText = "Auto Fix";
-		static string DefineDirectoryFixText = "Define Specific Editor Folder";
+		static string autoFixText = "Auto Fix";
+		static string defineDirectoryFixText = "Define Specific Editor Folder";
 			
 		public override void OnInspectorGUI() 
 		{
@@ -24,7 +24,7 @@ namespace LunraGamesEditor.Singletonnes
 
 			if (invalidInheritence)
 			{
-				EditorGUILayout.HelpBox(WrongInheritence, MessageType.Error);
+				EditorGUILayout.HelpBox(wrongInheritence, MessageType.Error);
 				DrawDefaultInspector();
 				return;
 			}
@@ -33,17 +33,17 @@ namespace LunraGamesEditor.Singletonnes
 			var assetName = Path.GetFileNameWithoutExtension(path);
 			var requiredName = typedTarget.CurrentType.Name;
 			var invalidName = assetName != requiredName;
-			var invalidPath = !path.Contains("/Editor/");
+			var invalidPath = path != null && !path.Contains("/Editor/");
 
 			if (invalidName || invalidPath) 
 			{
 				EditorGUILayout.BeginHorizontal();
 				{
-					var helpMessage = invalidName && invalidPath ? WrongNameAndPathMessage : (invalidName ? WrongNameMessage : WrongPathMessage);
+					var helpMessage = invalidName && invalidPath ? wrongNameAndPathMessage : (invalidName ? wrongNameMessage : wrongPathMessage);
 					EditorGUILayout.HelpBox(helpMessage, MessageType.Error);
 					if (invalidPath) 
 					{
-						if (GUILayout.Button(DefineDirectoryFixText, EditorStyles.miniButton, GUILayout.Height(ButtonHeight))) 
+						if (GUILayout.Button(defineDirectoryFixText, EditorStyles.miniButton, GUILayout.Height(ButtonHeight))) 
 						{
 							var selectedPath = EditorUtility.SaveFolderPanel("Select a Editor Directory", "Assets", string.Empty);
 							if (!string.IsNullOrEmpty(selectedPath)) 
@@ -57,14 +57,14 @@ namespace LunraGamesEditor.Singletonnes
 								else EditorUtilityExtensions.DialogInvalid("You must select an \"Editor\" directory.");
 							}
 						}
-						if (GUILayout.Button(AutoFixText, EditorStyles.miniButton, GUILayout.Height(ButtonHeight)))
+						if (GUILayout.Button(autoFixText, EditorStyles.miniButton, GUILayout.Height(ButtonHeight)))
 						{
 							MoveAsset(path, Path.Combine(Path.Combine(Path.GetDirectoryName(path), "Editor"), requiredName + ".asset"));
 						}
 					}
-					else if (invalidName)
+					else
 					{
-						if (GUILayout.Button(AutoFixText, EditorStyles.miniButton, GUILayout.Height(ButtonHeight))) 
+						if (GUILayout.Button(autoFixText, EditorStyles.miniButton, GUILayout.Height(ButtonHeight))) 
 						{
 							MoveAsset(path, Path.Combine(Path.GetDirectoryName(path), requiredName+".asset"));
 						}
@@ -80,7 +80,6 @@ namespace LunraGamesEditor.Singletonnes
 
 		void MoveAsset(string originPath, string targetPath) 
 		{
-			var moveResult = string.Empty;
 			var parentDir = Path.GetDirectoryName(targetPath);
 
 			if (!AssetDatabase.IsValidFolder(parentDir)) 
@@ -88,7 +87,7 @@ namespace LunraGamesEditor.Singletonnes
 				AssetDatabase.CreateFolder(Path.GetDirectoryName(parentDir), "Editor");
 			}
 
-			moveResult = AssetDatabase.MoveAsset(originPath, targetPath);
+			var moveResult = AssetDatabase.MoveAsset(originPath, targetPath);
 
 			if (!string.IsNullOrEmpty(moveResult)) EditorUtility.DisplayDialog("Error", moveResult, Strings.Dialogs.Responses.Okay);
 		}

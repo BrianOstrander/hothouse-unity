@@ -16,8 +16,7 @@ namespace LunraGamesEditor
 			if (!File.Exists(head)) return null;
 
 			var lastLine = File.ReadAllLines(head).LastOrDefault();
-			if (lastLine == null) return null;
-			var columns = lastLine.Split(' ');
+			var columns = lastLine?.Split(' ');
 			// The latest commit is on the second column of the last row of the git HEAD file
 			if (columns == null || columns.Length < 2) return null;
 

@@ -11,6 +11,7 @@ using LunraGames.SubLight;
 
 namespace LunraGamesEditor
 {
+	// ReSharper disable once InconsistentNaming
 	public static class EditorGUILayoutExtensions
 	{
 		public static class Constants
@@ -25,13 +26,13 @@ namespace LunraGamesEditor
 			public Color Color;
 		}
 
-		static Stack<Color> ColorStack = new Stack<Color>();
-		static Stack<ColorCombined> ColorCombinedStack = new Stack<ColorCombined>();
-		static Stack<Color> BackgroundColorStack = new Stack<Color>();
-		static Stack<Color> ContentColorStack = new Stack<Color>();
-		static Stack<bool> EnabledStack = new Stack<bool>();
-		static Stack<bool> TextAreaWordWrapStack = new Stack<bool>();
-		static Stack<TextAnchor> ButtonTextAnchorStack = new Stack<TextAnchor>();
+		static Stack<Color> colorStack = new Stack<Color>();
+		static Stack<ColorCombined> colorCombinedStack = new Stack<ColorCombined>();
+		static Stack<Color> backgroundColorStack = new Stack<Color>();
+		static Stack<Color> contentColorStack = new Stack<Color>();
+		static Stack<bool> enabledStack = new Stack<bool>();
+		static Stack<bool> textAreaWordWrapStack = new Stack<bool>();
+		static Stack<TextAnchor> buttonTextAnchorStack = new Stack<TextAnchor>();
 
 		public static T HelpfulEnumPopupValidation<T>(
 			GUIContent content,
@@ -167,7 +168,7 @@ namespace LunraGamesEditor
 			params GUILayoutOption[] guiOptions
 		) where T : struct, Enum
 		{
-			return HelpfulEnumPopupValue<T>(
+			return HelpfulEnumPopupValue(
 				primaryReplacement,
 				value,
 				null,
@@ -197,6 +198,9 @@ namespace LunraGamesEditor
 		/// <returns>The enum popup.</returns>
 		/// <param name="primaryReplacement">Primary replacement.</param>
 		/// <param name="value">Value.</param>
+		/// <param name="options">Enum options</param>
+		/// <param name="style">GUIStyle</param>
+		/// <param name="guiOptions">GUILayout options</param>
 		public static T HelpfulEnumPopupValue<T>(
 			string primaryReplacement, 
 			T value,
@@ -270,14 +274,14 @@ namespace LunraGamesEditor
 
 		public static void PushColor(Color color)
 		{
-			ColorStack.Push(GUI.color);
+			colorStack.Push(GUI.color);
 			GUI.color = color;
 		}
 
 		public static void PopColor()
 		{
-			if (ColorStack.Count == 0) return;
-			GUI.color = ColorStack.Pop();
+			if (colorStack.Count == 0) return;
+			GUI.color = colorStack.Pop();
 		}
 
 		/// <summary>
@@ -298,6 +302,7 @@ namespace LunraGamesEditor
 		/// Works like PushColorCombined, but handles the tinting automatically.
 		/// </summary>
 		/// <param name="color">Color.</param>
+		/// <param name="useColor">Is the color enabled.</param>
 		public static void PushColorValidation(Color color, bool useColor = true)
 		{
 			if (useColor) PushColorCombined(color.NewS(0.25f), color.NewS(0.65f));
@@ -321,7 +326,7 @@ namespace LunraGamesEditor
             	Color = GUI.color,
 			};
 
-			ColorCombinedStack.Push(current);
+			colorCombinedStack.Push(current);
 
 			if (contentColor.HasValue) GUI.contentColor = contentColor.Value;
 			if (backgroundColor.HasValue) GUI.backgroundColor = backgroundColor.Value;
@@ -330,8 +335,8 @@ namespace LunraGamesEditor
 
 		public static void PopColorCombined()
 		{
-			if (ColorCombinedStack.Count == 0) return;
-			var target = ColorCombinedStack.Pop();
+			if (colorCombinedStack.Count == 0) return;
+			var target = colorCombinedStack.Pop();
 			GUI.contentColor = target.ContentColor;
 			GUI.backgroundColor = target.BackgroundColor;
 			GUI.color = target.Color;
@@ -339,65 +344,65 @@ namespace LunraGamesEditor
 
 		public static void PushBackgroundColor(Color backgroundColor)
 		{
-			BackgroundColorStack.Push(GUI.backgroundColor);
+			backgroundColorStack.Push(GUI.backgroundColor);
 			GUI.backgroundColor = backgroundColor;
 		}
 
 		public static void PopBackgroundColor()
 		{
-			if (BackgroundColorStack.Count == 0) return;
-			GUI.backgroundColor = BackgroundColorStack.Pop();
+			if (backgroundColorStack.Count == 0) return;
+			GUI.backgroundColor = backgroundColorStack.Pop();
 		}
 
 		public static void PushContentColor(Color color)
 		{
-			ContentColorStack.Push(GUI.contentColor);
+			contentColorStack.Push(GUI.contentColor);
 			GUI.contentColor = color;
 		}
 
 		public static void PopContentColor()
 		{
-			if (ContentColorStack.Count == 0) return;
-			GUI.contentColor = ContentColorStack.Pop();
+			if (contentColorStack.Count == 0) return;
+			GUI.contentColor = contentColorStack.Pop();
 		}
 
 		public static void PushEnabled(bool enabled)
 		{
-			EnabledStack.Push(GUI.enabled);
+			enabledStack.Push(GUI.enabled);
 			GUI.enabled &= enabled;
 		}
 
 		public static void PopEnabled()
 		{
-			if (EnabledStack.Count == 0) return;
-			GUI.enabled = EnabledStack.Pop();
+			if (enabledStack.Count == 0) return;
+			GUI.enabled = enabledStack.Pop();
 		}
 
 		public static GUIStyle PushTextAreaWordWrap(bool enabled)
 		{
-			TextAreaWordWrapStack.Push(EditorStyles.textArea.wordWrap);
+			textAreaWordWrapStack.Push(EditorStyles.textArea.wordWrap);
 			EditorStyles.textArea.wordWrap = enabled;
 			return EditorStyles.textArea;
 		}
 
 		public static void PopTextAreaWordWrap()
 		{
-			if (TextAreaWordWrapStack.Count == 0) return;
-			var popped = TextAreaWordWrapStack.Pop();
+			if (textAreaWordWrapStack.Count == 0) return;
+			var popped = textAreaWordWrapStack.Pop();
 			EditorStyles.textArea.wordWrap = popped;
 		}
 
 		public static GUIStyle PushButtonTextAnchor(TextAnchor anchor)
 		{
-			ButtonTextAnchorStack.Push(GUI.skin.button.alignment);
+			buttonTextAnchorStack.Push(GUI.skin.button.alignment);
 			GUI.skin.button.alignment = anchor;
 			return GUI.skin.button;
 		}
 
 		public static void PopButtonTextAnchor()
 		{
-			if (ButtonTextAnchorStack.Count == 0) return;
-			var popped = ButtonTextAnchorStack.Pop();
+			if (buttonTextAnchorStack.Count == 0) return;
+			var popped = buttonTextAnchorStack.Pop();
 			GUI.skin.button.alignment = popped;
 		}
 
@@ -414,7 +419,7 @@ namespace LunraGamesEditor
 		public static bool XButton(bool small = false)
 		{
 			PushColorValidation(Color.red);
-			var clicked = false;
+			bool clicked;
 			if (small) clicked = GUILayout.Button("x", EditorStyles.miniButton, GUILayout.Width(20f));
 			else clicked = GUILayout.Button("x", GUILayout.Width(20f));
 			PopColorValidation();
@@ -573,9 +578,7 @@ namespace LunraGamesEditor
 					GUILayout.BeginHorizontal();
 					{
 						if (!nullContent) GUILayout.Label(content);
-						PushEnabled(value != null);
 						if (GUILayout.Button("Set Null", GUILayout.Width(54f), GUILayout.Height(14f))) value = null;
-						PopEnabled();
 					}
 					GUILayout.EndHorizontal();
 					value = EditorGUILayout.TextArea(value, textStyle);
@@ -694,7 +697,7 @@ namespace LunraGamesEditor
 		
 		public static void BeginVertical(GUIStyle style, Color? color, bool useColor = true, params GUILayoutOption[] options)
 		{
-			BeginVertical(style, color.HasValue ? color.Value : GUI.color, useColor, options);
+			BeginVertical(style, color ?? GUI.color, useColor, options);
 		}
 
 		public static void BeginVertical(GUIStyle style, Color color, bool useColor = true, params GUILayoutOption[] options)

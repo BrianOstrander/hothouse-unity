@@ -8,7 +8,7 @@ namespace LunraGames.SubLight
 {
 	public class StateMachine
 	{
-		public static DevPrefsBool CapturingTraceData = new DevPrefsBool("MercuryMvp_StateMachine_CapturingTraceData");
+		public static PlayerPrefsBool CapturingTraceData = new PlayerPrefsBool("MercuryMvp_StateMachine_CapturingTraceData");
 		
 		public enum Events
 		{

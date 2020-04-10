@@ -9,22 +9,22 @@ namespace LunraGames.NumberDemon
 {
 	public class Demon 
 	{
-		static Random SeedGenerator = new Random();
-		Random Generator;
+		static Random seedGenerator = new Random();
+		Random generator;
 
-		public Demon() : this(SeedGenerator.Next()) {}
-		public Demon(int seed) => Generator = new Random(seed);
+		public Demon() : this(seedGenerator.Next()) {}
+		public Demon(int seed) => generator = new Random(seed);
 
 		#region Properties
-		public bool NextBool => Generator.Next(2) == 0;
-		public int NextInteger => Generator.Next();
+		public bool NextBool => generator.Next(2) == 0;
+		public int NextInteger => generator.Next();
 		public long NextLong => BitConverter.ToInt64(GetNextBytes(8), 0);
 
 		/// <summary>
 		/// Gets the next float value between the inclusive minimum 0.0f and the exclusive maximum 1.0f.
 		/// </summary>
 		/// <value>The next float.</value>
-		public float NextFloat => (float)Generator.NextDouble();
+		public float NextFloat => (float)generator.NextDouble();
 
 		public Color NextColor => new Color(NextFloat, NextFloat, NextFloat);
 		#endregion
@@ -33,7 +33,7 @@ namespace LunraGames.NumberDemon
 		public byte[] GetNextBytes(int count)
 		{
 			var bytes = new byte[count];
-			Generator.NextBytes(bytes);
+			generator.NextBytes(bytes);
 			return bytes;
 		}
 
@@ -43,7 +43,7 @@ namespace LunraGames.NumberDemon
 		/// <returns>The next integer.</returns>
 		/// <param name="min">Min, included.</param>
 		/// <param name="max">Max, excluded.</param>
-		public int GetNextInteger(int min = 0, int max = int.MaxValue) { return Generator.Next(min, max); }
+		public int GetNextInteger(int min = 0, int max = int.MaxValue) { return generator.Next(min, max); }
 
 		/// <summary>
 		/// Gets the next float between the inclusive minimum and exclusive maximum.

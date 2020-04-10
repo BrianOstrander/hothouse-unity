@@ -25,33 +25,33 @@ namespace LunraGames
 			return entries.Where(e => regex.IsMatch(keySelector(e)));
 		}
 
-		public static T FirstOrFallback<T>(this IEnumerable<T> entries, Func<T, bool> predicate, T fallback = default(T))
+		public static T FirstOrFallback<T>(this IEnumerable<T> entries, Func<T, bool> predicate, T fallback = default)
 		{
 			return entries.DefaultIfEmpty(fallback).FirstOrDefault(predicate);
 		}
 
-		public static T FirstOrFallback<T>(this IEnumerable<T> entries, T fallback = default(T))
+		public static T FirstOrFallback<T>(this IEnumerable<T> entries, T fallback = default)
 		{
 			return entries.DefaultIfEmpty(fallback).FirstOrDefault();
 		}
 
-		public static T LastOrFallback<T>(this IEnumerable<T> entries, Func<T, bool> predicate, T fallback = default(T))
+		public static T LastOrFallback<T>(this IEnumerable<T> entries, Func<T, bool> predicate, T fallback = default)
 		{
 			return entries.DefaultIfEmpty(fallback).LastOrDefault(predicate);
 		}
 
-		public static T LastOrFallback<T>(this IEnumerable<T> entries, T fallback = default(T))
+		public static T LastOrFallback<T>(this IEnumerable<T> entries, T fallback = default)
 		{
 			return entries.DefaultIfEmpty(fallback).LastOrDefault();
 		}
 
-		public static T Random<T>(this IEnumerable<T> entries, T fallback = default(T))
+		public static T Random<T>(this IEnumerable<T> entries, T fallback = default)
 		{
-			if (entries == null || entries.Count() == 0) return fallback;
+			if (entries == null || entries.None()) return fallback;
 			return entries.ElementAt(UnityEngine.Random.Range(0, entries.Count()));
 		}
 
-		public static T RandomWeighted<T>(this IEnumerable<T> entries, Func<T, float> getWeight, T fallback = default(T))
+		public static T RandomWeighted<T>(this IEnumerable<T> entries, Func<T, float> getWeight, T fallback = default)
 		{
 			var ordered = entries.OrderBy(getWeight);
 			var keyed = new List<KeyValuePair<float, T>>();
@@ -99,7 +99,7 @@ namespace LunraGames
 
 		public static bool ContainsOrIsEmpty<T>(this IEnumerable<T> entries, T element)
 		{
-			if (entries.Count() == 0) return true;
+			if (entries.None()) return true;
 			return entries.Contains(element);
 		}
 
@@ -130,7 +130,7 @@ namespace LunraGames
 
 		public static IEnumerable<T> ExceptOne<T>(this IEnumerable<T> entries, T element)
 		{
-			return entries.Except(new T[] { element });
+			return entries.Except(new[] { element });
 		}
 	}
 }

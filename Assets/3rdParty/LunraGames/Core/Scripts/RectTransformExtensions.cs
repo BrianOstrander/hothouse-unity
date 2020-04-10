@@ -34,9 +34,7 @@ namespace LunraGames
 		/// <param name="transform">Transform.</param>
 		public static Vector3 WorldCornerSize(this RectTransform transform)
 		{
-			Vector3 min;
-			Vector3 max;
-			transform.MinMaxWorldCorner(out min, out max);
+			transform.MinMaxWorldCorner(out var min, out var max);
 			return max - min;
 		}
 	}

@@ -25,7 +25,7 @@ namespace LunraGamesEditor.Singletonnes
 			var requiredName = typedTarget.CurrentType.Name;
 			var requiredPathEnding = Path.Combine("Resources", Path.Combine(ScriptableSingletonBase.ContainingDirectory, requiredName));
 			var invalidName = assetName != requiredName;
-			var invalidPath = !path.EndsWith(Path.Combine(Path.Combine("Resources", ScriptableSingletonBase.ContainingDirectory), Path.GetFileName(path)));
+			var invalidPath = path != null && !path.EndsWith(Path.Combine(Path.Combine("Resources", ScriptableSingletonBase.ContainingDirectory), Path.GetFileName(path)));
 
 			if (invalidName || invalidPath) 
 			{
@@ -58,7 +58,7 @@ namespace LunraGamesEditor.Singletonnes
 							MoveAsset(path, Path.Combine("Assets", requiredPathEnding + ".asset"));
 						}
 					}
-					else if (invalidName)
+					else
 					{
 						if (GUILayout.Button(AutoFixText, EditorStyles.miniButton, GUILayout.Height(ButtonHeight))) 
 						{
@@ -81,7 +81,6 @@ namespace LunraGamesEditor.Singletonnes
 
 		void MoveAsset(string originPath, string targetPath) 
 		{
-			var moveResult = string.Empty;
 			var parentDir = Path.GetDirectoryName(targetPath);
 
 			if (!AssetDatabase.IsValidFolder(parentDir)) 
@@ -91,7 +90,7 @@ namespace LunraGamesEditor.Singletonnes
 				AssetDatabase.CreateFolder(resourceDir, ScriptableSingletonBase.ContainingDirectory);
 			}
 
-			moveResult = AssetDatabase.MoveAsset(originPath, targetPath);
+			var moveResult = AssetDatabase.MoveAsset(originPath, targetPath);
 
 			if (!string.IsNullOrEmpty(moveResult)) EditorUtilityExtensions.DialogError(moveResult);
 		}

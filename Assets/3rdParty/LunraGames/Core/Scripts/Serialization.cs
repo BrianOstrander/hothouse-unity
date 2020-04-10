@@ -16,7 +16,7 @@ namespace LunraGames
 {
 	public static class Serialization 
 	{
-		static JsonConverter[] Converters =
+		static JsonConverter[] converters =
 		{
 			new Vector2Converter(),
 			new Vector3Converter(),
@@ -26,29 +26,29 @@ namespace LunraGames
 			new StringEnumConverter()
 		};
 
-		static JsonSerializerSettings _SerializerSettings;
+		static JsonSerializerSettings serializerSettings;
 
 		static JsonSerializerSettings SerializerSettings 
 		{
 			get
 			{
-				if (_SerializerSettings == null)
+				if (serializerSettings == null)
 				{
-					_SerializerSettings = new JsonSerializerSettings();
-					_SerializerSettings.ObjectCreationHandling = ObjectCreationHandling.Replace;
-					_SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
-					foreach (var converter in Converters) _SerializerSettings.Converters.Add(converter);
-					foreach (var converter in AddedConverters) _SerializerSettings.Converters.Add(converter);
+					serializerSettings = new JsonSerializerSettings();
+					serializerSettings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+					serializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+					foreach (var converter in converters) serializerSettings.Converters.Add(converter);
+					foreach (var converter in addedConverters) serializerSettings.Converters.Add(converter);
 #if PROP_JSON
 					// This overrides the default vector converter, so we can use our own.
 					_SerializerSettings.Converters.Remove(_SerializerSettings.Converters.First(c => c.GetType() == typeof(VectorConverter)));
 #endif
 				}
-				return _SerializerSettings;
+				return serializerSettings;
 			}
 		}
 
-		static JsonSerializerSettings _VerboseSerializerSettings;
+		static JsonSerializerSettings verboseSerializerSettings;
 
 		/// <summary>
 		/// Gets the verbose serializer settings, perfect for use of complex generics.
@@ -56,34 +56,34 @@ namespace LunraGames
 		/// <value>The verbose serializer settings.</value>
 		static JsonSerializerSettings VerboseSerializerSettings {
 			get {
-				if (_VerboseSerializerSettings == null)
+				if (verboseSerializerSettings == null)
 				{
-					_VerboseSerializerSettings = new JsonSerializerSettings();
-					_VerboseSerializerSettings.TypeNameHandling = TypeNameHandling.All;
-					_VerboseSerializerSettings.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
-					_VerboseSerializerSettings.ObjectCreationHandling = ObjectCreationHandling.Replace;
-					_VerboseSerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
-					foreach (var converter in Converters) _VerboseSerializerSettings.Converters.Add(converter);
-					foreach (var converter in AddedConverters) _VerboseSerializerSettings.Converters.Add(converter);
+					verboseSerializerSettings = new JsonSerializerSettings();
+					verboseSerializerSettings.TypeNameHandling = TypeNameHandling.All;
+					verboseSerializerSettings.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
+					verboseSerializerSettings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+					verboseSerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+					foreach (var converter in converters) verboseSerializerSettings.Converters.Add(converter);
+					foreach (var converter in addedConverters) verboseSerializerSettings.Converters.Add(converter);
 #if PROP_JSON
 					// This overrides the default vector converter, so we can use our own.
 					_VerboseSerializerSettings.Converters.Remove(_VerboseSerializerSettings.Converters.First(c => c.GetType() == typeof(VectorConverter)));
 #endif
 				}
-				return _VerboseSerializerSettings;
+				return verboseSerializerSettings;
 			}
 		}
 
-		static List<JsonConverter> AddedConverters = new List<JsonConverter>();
+		static List<JsonConverter> addedConverters = new List<JsonConverter>();
 
 		public static void AddConverters(params JsonConverter[] converters)
 		{
 			foreach (var converter in converters)
 			{
-				if (AddedConverters.Contains(converter)) continue;
-				AddedConverters.Add(converter);
-				if (_SerializerSettings != null) _SerializerSettings.Converters.Add(converter);
-				if (_VerboseSerializerSettings != null) _VerboseSerializerSettings.Converters.Add(converter);
+				if (addedConverters.Contains(converter)) continue;
+				addedConverters.Add(converter);
+				serializerSettings?.Converters.Add(converter);
+				verboseSerializerSettings?.Converters.Add(converter);
 			}
 		}
 
@@ -113,7 +113,7 @@ namespace LunraGames
 			}
 		}
 
-		public static T DeserializeJson<T>(string json, T defaultValue = default(T), bool verbose = false)
+		public static T DeserializeJson<T>(string json, T defaultValue = default, bool verbose = false)
 		{
 			if (StringExtensions.IsNullOrWhiteSpace(json)) return defaultValue;
 
@@ -157,7 +157,7 @@ namespace LunraGames
 			switch (token.Type)
 			{
 				case JTokenType.Object: return token.Children<JProperty>().ToDictionary(p => p.Name, p => DeserializeRaw(p.Value));
-				case JTokenType.Array: return token.Select(t => DeserializeRaw(t)).ToList();
+				case JTokenType.Array: return token.Select(DeserializeRaw).ToList();
 				default: return ((JValue)token).Value;
 			}
 		}
@@ -172,7 +172,7 @@ namespace LunraGames
 			return DeserializeJson(type, json, defaultValue, verbose);
 		}
 
-		public static T Deserialize<T>(this string json, T defaultValue = default(T), bool verbose = false)
+		public static T Deserialize<T>(this string json, T defaultValue = default, bool verbose = false)
 		{
 			return DeserializeJson(json, defaultValue, verbose);
 		}

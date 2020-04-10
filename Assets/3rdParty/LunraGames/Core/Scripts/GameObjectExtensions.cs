@@ -15,9 +15,9 @@ namespace LunraGames
 			bool? setActive = null
 		)
 		{
-			position = position.HasValue? position : Vector3.zero;
-			scale = scale.HasValue? scale : Vector3.one;
-			rotation = rotation.HasValue? rotation : Quaternion.identity;
+			position = position ?? Vector3.zero;
+			scale = scale ?? Vector3.one;
+			rotation = rotation ?? Quaternion.identity;
 
 			var transform = Object.Instantiate(prefab).transform;
 			transform.position = position.Value;
@@ -38,9 +38,9 @@ namespace LunraGames
 			bool? setActive = null
 		)
 		{
-			localPosition = localPosition.HasValue ? localPosition : Vector3.zero;
-			localScale = localScale.HasValue ? localScale : Vector3.one;
-			localRotation = localRotation.HasValue ? localRotation : Quaternion.identity;
+			localPosition = localPosition ?? Vector3.zero;
+			localScale = localScale ?? Vector3.one;
+			localRotation = localRotation ?? Quaternion.identity;
 
 			var child = Object.Instantiate(prefab).transform;
 			child.SetParent(gameObject.transform);
@@ -93,6 +93,7 @@ namespace LunraGames
 		/// </summary>
 		/// <returns>The with tag or handle missing tag.</returns>
 		/// <param name="tag">Tag.</param>
+		/// <param name="quiet">Log an exception if true.</param>
 		public static GameObject FindWithTagOrHandleMissingTag(string tag, bool quiet = false)
 		{
 			try

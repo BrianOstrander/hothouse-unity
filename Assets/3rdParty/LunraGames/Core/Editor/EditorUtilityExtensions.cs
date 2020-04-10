@@ -62,21 +62,21 @@ namespace LunraGamesEditor
 
 			switch (result)
 			{
-				case 0: 
-					if (onOkay != null) onOkay(); 
+				case 0:
+					onOkay?.Invoke();
 					break;
 				case 1:
-					if (onCancel != null) onCancel();
+					onCancel?.Invoke();
 					break;
 				case 2:
-					if (onAlt != null) onAlt();
+					onAlt?.Invoke();
 					break;
 			}
 		}
 
 		public static Color ColorFromString(string value)
 		{
-			return Color.cyan.NewH(int.Parse(CreateMD5(value).Substring(0, 2), System.Globalization.NumberStyles.HexNumber) / 255f);
+			return Color.cyan.NewH(int.Parse(CreateMd5(value).Substring(0, 2), System.Globalization.NumberStyles.HexNumber) / 255f);
 		}
 
 		public static Color ColorFromIndex(int value)
@@ -85,7 +85,7 @@ namespace LunraGamesEditor
 		}
 
 		// TODO: Lol hacks.
-		static string CreateMD5(string input)
+		static string CreateMd5(string input)
 		{
 			input = input ?? string.Empty;
 			// Use input string to calculate MD5 hash
@@ -96,9 +96,9 @@ namespace LunraGamesEditor
 
 				// Convert the byte array to hexadecimal string
 				var sb = new System.Text.StringBuilder();
-				for (int i = 0; i < hashBytes.Length; i++)
+				foreach (var t in hashBytes)
 				{
-					sb.Append(hashBytes[i].ToString("X2"));
+					sb.Append(t.ToString("X2"));
 				}
 				return sb.ToString();
 			}

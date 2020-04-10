@@ -9,7 +9,7 @@ namespace LunraGamesEditor
 {
 	public static class EditorPrefsExtensions 
 	{
-		static JsonConverter[] Converters = 
+		static JsonConverter[] converters = 
 		{
 			new Vector2Converter(),
 			new Vector3Converter(),
@@ -18,23 +18,23 @@ namespace LunraGamesEditor
 			new ColorConverter()
 		};
 
-		static JsonSerializerSettings _SerializerSettings;
+		static JsonSerializerSettings serializerSettings;
 
 		static JsonSerializerSettings SerializerSettings 
 		{
 			get
 			{
-				if (_SerializerSettings == null)
+				if (serializerSettings == null)
 				{
-					_SerializerSettings = new JsonSerializerSettings();
-					_SerializerSettings.TypeNameHandling = TypeNameHandling.All;
-					foreach (var converter in Converters) _SerializerSettings.Converters.Add(converter);
+					serializerSettings = new JsonSerializerSettings();
+					serializerSettings.TypeNameHandling = TypeNameHandling.All;
+					foreach (var converter in converters) serializerSettings.Converters.Add(converter);
 				}
-				return _SerializerSettings;
+				return serializerSettings;
 			}
 		}
 		
-		public static T GetJson<T>(string key, T defaultValue = default(T))
+		public static T GetJson<T>(string key, T defaultValue = default)
 		{
 			var serialized = EditorPrefs.GetString(key, string.Empty);
 			if (StringExtensions.IsNullOrWhiteSpace(serialized)) return defaultValue;

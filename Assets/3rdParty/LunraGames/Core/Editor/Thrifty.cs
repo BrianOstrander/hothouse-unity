@@ -17,12 +17,12 @@ namespace LunraGamesEditor
 		}
 
 
-		static List<Entry> Actions = new List<Entry>();
+		static List<Entry> actions = new List<Entry>();
 
-		static bool Running;
-	    static Thread Thread;
-	    static Entry ThreadedLambda;
-	    static Exception ThreadedException;
+		static bool running;
+	    static Thread thread;
+	    static Entry threadedLambda;
+	    static Exception threadedException;
 
 		[InitializeOnLoadMethod]
 		static void Initialize()
@@ -32,55 +32,58 @@ namespace LunraGamesEditor
 
 		static void Update()
 		{
-			if (EditorApplication.isCompiling || Actions == null || Actions.Count == 0) return;
+			if (EditorApplication.isCompiling || actions == null || actions.Count == 0) return;
 
-			if (!Running)
+			if (!running)
 			{
-				if (ThreadedException != null) Debug.LogException(ThreadedException);
-				if (ThreadedLambda != null) 
+				if (threadedException != null) Debug.LogException(threadedException);
+				if (threadedLambda != null) 
 				{
-					if (ThreadedException != null)
+					if (threadedException != null)
 					{
-						if (ThreadedLambda.Errored != null) ThreadedLambda.Errored(ThreadedException);
+						threadedLambda.Errored?.Invoke(threadedException);
 					}
-					else if (ThreadedLambda.Completed != null) ThreadedLambda.Completed();
+					else
+					{
+						threadedLambda.Completed?.Invoke();
+					}
 
-					Actions.Remove(ThreadedLambda);
+					actions.Remove(threadedLambda);
 				}
 
-				ThreadedLambda = Actions.FirstOrDefault();
-				Thread = new Thread(ThreadedWork);
-				Thread.Start();
+				threadedLambda = actions.FirstOrDefault();
+				thread = new Thread(ThreadedWork);
+				thread.Start();
 			}
 		}
 
 	    public static void Queue(Action threaded, Action completed = null, Action<Exception> errored = null)
 	    {
-	    	if (threaded == null) throw new ArgumentNullException("threaded");
-	    	Actions.Add(new Entry { Threaded = threaded, Completed = completed, Errored = errored});
+	    	if (threaded == null) throw new ArgumentNullException(nameof(threaded));
+	    	actions.Add(new Entry { Threaded = threaded, Completed = completed, Errored = errored});
 	    }
 
 	    static void ThreadedWork()
 	    {
-	        Running = true;
-	        ThreadedException = null;
+	        running = true;
+	        threadedException = null;
 	        var isDone = false;
 
-	        // This pattern lets us interrupt the work at a safe point if neeeded.
-	        while(Running && !isDone)
+	        // This pattern lets us interrupt the work at a safe point if needed.
+	        while(running && !isDone)
 	        {
-				try 
-	            {
-	            	if (ThreadedLambda != null) ThreadedLambda.Threaded();
-            	}
+				try
+				{
+					threadedLambda?.Threaded();
+				}
             	catch (Exception e) 
             	{ 
-            		ThreadedException = e;
+            		threadedException = e;
         		}
 
 	            isDone = true;
 	        }
-	        Running = false;
+	        running = false;
 	    }
 	    /*
 	    void OnDisabled()

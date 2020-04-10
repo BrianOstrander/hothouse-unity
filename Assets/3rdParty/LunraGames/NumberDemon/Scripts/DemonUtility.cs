@@ -7,7 +7,7 @@ namespace LunraGames.NumberDemon
 {
 	public static class DemonUtility
 	{
-		static Demon Generator = new Demon();
+		static Demon generator = new Demon();
 
 		const int IntHalfValue = (int.MaxValue / 2) + 1;
 		const uint UintHalfValue = (uint.MaxValue / 2u) + 1u;
@@ -130,19 +130,19 @@ namespace LunraGames.NumberDemon
 			return (long)(value - UlongHalfValue);
 		}
 
-		public static bool NextBool => Generator.NextBool;
-		public static int NextInteger => Generator.NextInteger;
-		public static long NextLong => Generator.NextLong;
+		public static bool NextBool => generator.NextBool;
+		public static int NextInteger => generator.NextInteger;
+		public static long NextLong => generator.NextLong;
 
 		/// <summary>
 		/// Gets the next float value between the inclusive minimum 0.0f and the exclusive maximum 1.0f.
 		/// </summary>
 		/// <value>The next float.</value>
-		public static float NextFloat => Generator.NextFloat;
+		public static float NextFloat => generator.NextFloat;
 
 		public static Color NextColor => new Color(NextFloat, NextFloat, NextFloat);
 
-		public static byte[] GetNextBytes(int count) { return Generator.GetNextBytes(count); }
+		public static byte[] GetNextBytes(int count) { return generator.GetNextBytes(count); }
 
 		/// <summary>
 		/// Gets the next integer between the inclusive minimum and exclusive maximum.
@@ -150,7 +150,7 @@ namespace LunraGames.NumberDemon
 		/// <returns>The next integer.</returns>
 		/// <param name="min">Min, included.</param>
 		/// <param name="max">Max, excluded.</param>
-		public static int GetNextInteger(int min = 0, int max = int.MaxValue) { return Generator.GetNextInteger(min, max); }
+		public static int GetNextInteger(int min = 0, int max = int.MaxValue) { return generator.GetNextInteger(min, max); }
 
 		/// <summary>
 		/// Gets the next float between the inclusive minimum and exclusive maximum.
@@ -158,6 +158,6 @@ namespace LunraGames.NumberDemon
 		/// <returns>The next float.</returns>
 		/// <param name="min">Min, included.</param>
 		/// <param name="max">Max, excluded.</param>
-		public static float GetNextFloat(float min = 0f, float max = float.MaxValue) { return Generator.GetNextFloat(min, max); }
+		public static float GetNextFloat(float min = 0f, float max = float.MaxValue) { return generator.GetNextFloat(min, max); }
 	}
 }

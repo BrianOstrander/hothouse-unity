@@ -37,7 +37,7 @@ namespace LunraGames
 
 		public static Color NewRgba(this Color color, Color? r = null, Color? g = null, Color? b = null, Color? a = null)
         {	
-			return NewRgba(color, r.HasValue ? r.Value.r : color.r, g.HasValue ? g.Value.g : color.g, b.HasValue ? b.Value.b : color.b, a.HasValue ? a.Value.a : color.a);
+			return NewRgba(color, r?.r ?? color.r, g?.g ?? color.g, b?.b ?? color.b, a?.a ?? color.a);
 		}
 
 		public static Color NewRgba(this Color color, float? r = null, float? g = null, float? b = null, float? a = null)
@@ -49,22 +49,19 @@ namespace LunraGames
 		#region Hsv
 		public static float GetH(this Color color)
 		{
-			float h, s, v;
-			Color.RGBToHSV(color, out h, out s, out v);
+			Color.RGBToHSV(color, out var h, out _, out _);
 			return h;
 		}
 
 		public static float GetS(this Color color)
 		{
-			float h, s, v;
-			Color.RGBToHSV(color, out h, out s, out v);
+			Color.RGBToHSV(color, out _, out var s, out _);
 			return s;
 		}
 
 		public static float GetV(this Color color)
 		{
-			float h, s, v;
-			Color.RGBToHSV(color, out h, out s, out v);
+			Color.RGBToHSV(color, out _, out _, out var v);
 			return v;
 		}
 
@@ -99,25 +96,19 @@ namespace LunraGames
         }
 
 		public static Color NewHsva(this Color color, Color? h = null, Color? s = null, Color? v = null, Color? a = null, bool hdr = false)
-        {	
-			float hH, hS, hV;
-			Color.RGBToHSV(h.HasValue ? h.Value : color, out hH, out hS, out hV);
+        {
+	        Color.RGBToHSV(h ?? color, out var hH, out _, out _);
 
-			float sH, sS, sV;
-			Color.RGBToHSV(s.HasValue ? s.Value : color, out sH, out sS, out sV);
+	        Color.RGBToHSV(s ?? color, out _, out var sS, out _);
 
-			float vH, vS, vV;
-			Color.RGBToHSV(v.HasValue ? v.Value : color, out vH, out vS, out vV);
+	        Color.RGBToHSV(v ?? color, out _, out _, out var vV);
 
-			return Color.HSVToRGB(hH, sS, vV, hdr).NewA(a.HasValue ? a.Value.a : color.a);
+			return Color.HSVToRGB(hH, sS, vV, hdr).NewA(a?.a ?? color.a);
         }
 
 		public static Color NewHsva(this Color color, float? h = null, float? s = null, float? v = null, float? a = null, bool hdr = false)
-        {	
-        	float wasH;
-			float wasS;
-			float wasV;
-			Color.RGBToHSV(color, out wasH, out wasS, out wasV);
+        {
+	        Color.RGBToHSV(color, out var wasH, out var wasS, out var wasV);
 			return Color.HSVToRGB(h ?? wasH, s ?? wasS, v ?? wasV, hdr).NewA(a ?? color.a);
 		}
 		#endregion

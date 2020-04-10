@@ -14,7 +14,7 @@ namespace LunraGamesEditor
 
 		public abstract T Value { get; set; }
 
-		public EditorPrefsKv(string key, T defaultValue = default(T))
+		public EditorPrefsKv(string key, T defaultValue = default)
 		{
 			Key = key;
 			Default = defaultValue;
@@ -25,8 +25,8 @@ namespace LunraGamesEditor
 	{
 		public override string Value
 		{
-			get { return EditorPrefs.GetString(Key, Default); }
-			set { EditorPrefs.SetString(Key, value); }
+			get => EditorPrefs.GetString(Key, Default);
+			set => EditorPrefs.SetString(Key, value);
 		}
 
 		public EditorPrefsString(string key, string defaultValue = null) : base(key, defaultValue) {}
@@ -36,8 +36,8 @@ namespace LunraGamesEditor
 	{
 		public override bool Value
 		{
-			get { return EditorPrefs.GetBool(Key, Default); }
-			set { EditorPrefs.SetBool(Key, value); }
+			get => EditorPrefs.GetBool(Key, Default);
+			set => EditorPrefs.SetBool(Key, value);
 		}
 
 		public EditorPrefsBool(string key, bool defaultValue = false) : base(key, defaultValue) {}
@@ -47,20 +47,20 @@ namespace LunraGamesEditor
 	{
 		public override float Value
 		{
-			get { return EditorPrefs.GetFloat(Key, Default); }
-			set { EditorPrefs.SetFloat(Key, value); }
+			get => EditorPrefs.GetFloat(Key, Default);
+			set => EditorPrefs.SetFloat(Key, value);
 		}
 
 		public Vector2 HorizontalScroll
 		{
-			get { return new Vector2(Value, 0f); }
-			set { Value = value.x; }
+			get => new Vector2(Value, 0f);
+			set => Value = value.x;
 		}
 
 		public Vector2 VerticalScroll
 		{
-			get { return new Vector2(0f, Value); }
-			set { Value = value.y; }
+			get => new Vector2(0f, Value);
+			set => Value = value.y;
 		}
 
 		public EditorPrefsFloat(string key, float defaultValue = 0f) : base(key, defaultValue) {}
@@ -70,8 +70,8 @@ namespace LunraGamesEditor
 	{
 		public override int Value
 		{
-			get { return EditorPrefs.GetInt(Key, Default); }
-			set { EditorPrefs.SetInt(Key, value); }
+			get => EditorPrefs.GetInt(Key, Default);
+			set => EditorPrefs.SetInt(Key, value);
 		}
 
 		public EditorPrefsInt(string key, int defaultValue = 0) : base(key, defaultValue) {}
@@ -86,13 +86,10 @@ namespace LunraGamesEditor
 				var intValue = EditorPrefs.GetInt(Key, Convert.ToInt32(Default));
 				return Enum.GetValues(typeof(T)).Cast<T>().FirstOrDefault(e => Convert.ToInt32(e) == intValue);
 			}
-			set
-			{
-				EditorPrefs.SetInt(Key, Convert.ToInt32(value));
-			}
+			set => EditorPrefs.SetInt(Key, Convert.ToInt32(value));
 		}
 
-		public EditorPrefsEnum(string key, T defaultValue = default(T)) : base(key, defaultValue) 
+		public EditorPrefsEnum(string key, T defaultValue = default) : base(key, defaultValue) 
 		{
 			if (!typeof(T).IsEnum) Debug.LogError(typeof(T).FullName + " is not an enum.");
 		}

@@ -36,6 +36,7 @@ namespace LunraGames
 			return new Vector3(vector3.x, 0f, vector3.z).normalized;
 		}
 
+		// ReSharper disable once InconsistentNaming
 		public static Vector3[] Add(this Vector3[] vector3s, Vector3 addition)
 		{
 			var result = new Vector3[vector3s.Length];

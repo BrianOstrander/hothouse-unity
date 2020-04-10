@@ -19,7 +19,7 @@ namespace LunraGamesEditor
 			public Action Updated;
 		}
 
-		static List<Entry> Entries = new List<Entry>();
+		static List<Entry> entries = new List<Entry>();
 
 		[InitializeOnLoadMethod]
 		static void Initialize()
@@ -29,12 +29,12 @@ namespace LunraGamesEditor
 
 		static void Farm()
 		{
-			if (Entries == null || Entries.Count == 0) return;
+			if (entries == null || entries.Count == 0) return;
 
 			var remainingBudget = PixelBudget;
 			var deletions = new List<Entry>();
 
-			foreach (var entry in Entries)
+			foreach (var entry in entries)
 			{
 				remainingBudget -= entry.Target.width;
 
@@ -51,21 +51,21 @@ namespace LunraGamesEditor
 
 				if (entry.YProgress == entry.Target.height) deletions.Add(entry);
 
-				if (entry.Updated != null) entry.Updated();
+				entry.Updated?.Invoke();
 
 				if (remainingBudget <= 0) break;
 			}
 
 			foreach (var deletion in deletions) 
 			{
-				if (deletion.Completed != null) deletion.Completed();
-				Entries.Remove(deletion);
+				deletion.Completed?.Invoke();
+				entries.Remove(deletion);
 			}
 		}
 
 		public static void Queue(Texture2D target, Color[] replacements, Action completed = null, Action updated = null)
 		{
-			var entry = Entries.FirstOrDefault(e => target == e.Target);
+			var entry = entries.FirstOrDefault(e => target == e.Target);
 
 			if (entry == null)
 			{
@@ -75,7 +75,7 @@ namespace LunraGamesEditor
 					Completed = completed,
 					Updated = updated
 				};
-				Entries.Add(entry);
+				entries.Add(entry);
 			}
 			else
 			{

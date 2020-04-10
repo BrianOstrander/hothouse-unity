@@ -23,12 +23,12 @@ namespace LunraGamesEditor
 			bool lostFocusCloses = true
 		)
 		{
-			if (title == null) throw new ArgumentNullException("title");
-			if (onGui == null) throw new ArgumentNullException("onGui");
+			if (title == null) throw new ArgumentNullException(nameof(title));
+			if (onGui == null) throw new ArgumentNullException(nameof(onGui));
 
 			var window = GetWindow(typeof(FlexiblePopupDialog), true, title, true) as FlexiblePopupDialog;
-
-			//window.size = size;
+			
+			// ReSharper disable once PossibleNullReferenceException
 			window.onGui = onGui;
 
 			window.onClose = onClose;
@@ -47,12 +47,12 @@ namespace LunraGamesEditor
 
 		void OnDestroy()
 		{
-			if (onClose != null) onClose();
+			onClose?.Invoke();
 		}
 
 		void OnLostFocus()
 		{
-			if (onLostFocus != null) onLostFocus();
+			onLostFocus?.Invoke();
 			if (lostFocusCloses) Close();
 		}
 	}

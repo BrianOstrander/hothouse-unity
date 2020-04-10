@@ -13,13 +13,13 @@ namespace LunraGames
 		/// The default equality for curves is not very good, probably suffering from floating point issues, so we use 
 		/// this more robust method instead.
 		/// </remarks>
-		/// <returns><c>true</c>, if equal was curvesed, <c>false</c> otherwise.</returns>
+		/// <returns><c>true</c>, if equal curves, <c>false</c> otherwise.</returns>
 		/// <param name="curve0">Curve0.</param>
 		/// <param name="curve1">Curve1.</param>
 		public static bool CurvesEqual(AnimationCurve curve0, AnimationCurve curve1)
 		{
 			if (curve0 == null && curve1 == null) return true;
-			if ((curve0 == null && curve1 != null) || (curve0 != null && curve1 == null)) return false;
+			if (curve0 == null || curve1 == null) return false;
 
 			if (curve0.keys.Length != curve1.keys.Length) return false;
 
@@ -74,7 +74,7 @@ namespace LunraGames
 
 		public static IEnumerable<float> Samples(this AnimationCurve curve, int count)
 		{
-			var samples = new List<float> {};
+			var samples = new List<float>();
 
 			if (curve.keys == null || curve.length == 0) return samples;
 

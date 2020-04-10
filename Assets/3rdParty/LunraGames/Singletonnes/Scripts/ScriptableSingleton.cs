@@ -1,18 +1,11 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using UnityEngine;
 
 namespace LunraGames.Singletonnes
 {
 	public abstract class ScriptableSingleton<T> : ScriptableSingletonBase where T : UnityEngine.Object 
 	{
-		static T _Instance;
-		public static T Instance 
-		{
-			get 
-			{
-				return _Instance ?? (_Instance = Resources.Load<T>(Path.Combine(ContainingDirectory,typeof(T).Name)));
-			}
-		}
+		static T instance;
+		public static T Instance => instance ? instance : (instance = Resources.Load<T>(Path.Combine(ContainingDirectory,typeof(T).Name)));
 	}
 }

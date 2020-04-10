@@ -6,9 +6,9 @@ namespace LunraGamesEditor.Singletonnes
 	public abstract class EditorScriptableSingleton<T> : EditorScriptableSingletonBase 
 		where T : EditorScriptableSingleton<T>
 	{
-		static T _Instance;
+		static T instance;
 
-		public static T Instance { get { return _Instance ?? ( _Instance = FindInstance()); } }
+		public static T Instance => instance ? instance : (instance = FindInstance());
 
 		static T FindInstance()
 		{

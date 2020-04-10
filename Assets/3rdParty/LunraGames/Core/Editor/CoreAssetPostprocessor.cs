@@ -9,7 +9,7 @@ namespace LunraGamesEditor
 
 		static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
 		{
-			if (OnPostprocessAllAssetsEvents != null) OnPostprocessAllAssetsEvents.Invoke();
+			OnPostprocessAllAssetsEvents?.Invoke();
 		}
 	}
 }

@@ -8,12 +8,11 @@ namespace LunraGames.Singletonnes
 	{
 		public static string ContainingDirectory = "ScriptableSingletons";
 
-		Type _CurrentType;
-		public Type CurrentType { get { return _CurrentType; } }
+		public Type CurrentType { get; }
 
 		protected ScriptableSingletonBase()
 		{
-			_CurrentType = GetType();
+			CurrentType = GetType();
 		}
 	}
 }

@@ -24,67 +24,61 @@ namespace LunraGamesEditor
 			public Color? Color;
 		}
 
-		static Vector2 Size = new Vector2(400f, 100f);
+		static Vector2 size = new Vector2(400f, 100f);
 
-		static Vector2 CenterPosition
-		{
-			get
-			{
-				return (new Vector2(Screen.width * 0.5f, Screen.height * 0.5f)) + (Size * 0.5f);
-			}
-		}
+		static Vector2 CenterPosition => (new Vector2(Screen.width * 0.5f, Screen.height * 0.5f)) + (size * 0.5f);
 
 		static class Styles
 		{
-			static GUIStyle _DescriptionLabel;
+			static GUIStyle descriptionLabel;
 
 			public static GUIStyle DescriptionLabel
 			{
 				get
 				{
-					if (_DescriptionLabel == null)
+					if (descriptionLabel == null)
 					{
-						_DescriptionLabel = new GUIStyle(EditorStyles.label);
-						_DescriptionLabel.alignment = TextAnchor.MiddleLeft;
-						_DescriptionLabel.fontSize = 12;
-						_DescriptionLabel.wordWrap = true;
+						descriptionLabel = new GUIStyle(EditorStyles.label);
+						descriptionLabel.alignment = TextAnchor.MiddleLeft;
+						descriptionLabel.fontSize = 12;
+						descriptionLabel.wordWrap = true;
 					}
-					return _DescriptionLabel;
+					return descriptionLabel;
 				}
 			}
 
-			static GUIStyle _TextField;
+			static GUIStyle textField;
 
 			public static GUIStyle TextField
 			{
 				get
 				{
-					if (_TextField == null)
+					if (textField == null)
 					{
-						_TextField = new GUIStyle(EditorStyles.textField);
-						_TextField.alignment = TextAnchor.MiddleLeft;
-						_TextField.fontSize = 16;
+						textField = new GUIStyle(EditorStyles.textField);
+						textField.alignment = TextAnchor.MiddleLeft;
+						textField.fontSize = 16;
 					}
-					return _TextField;
+					return textField;
 				}
 			}
 
-			static GUIStyle _Button;
+			static GUIStyle button;
 
 			public static GUIStyle Button
 			{
 				get
 				{
-					if (_Button == null)
+					if (button == null)
 					{
-						_Button = new GUIStyle(EditorStyles.miniButton);
-						_Button.alignment = TextAnchor.MiddleCenter;
-						_Button.fixedWidth = 98f;
-						_Button.fixedHeight = 32f;
-						_Button.fontSize = 18;
+						button = new GUIStyle(EditorStyles.miniButton);
+						button.alignment = TextAnchor.MiddleCenter;
+						button.fixedWidth = 98f;
+						button.fixedHeight = 32f;
+						button.fontSize = 18;
 					}
 
-					return _Button;
+					return button;
 				}
 			}
 		}
@@ -107,18 +101,19 @@ namespace LunraGamesEditor
 			bool lostFocusCloses = true
 		)
 		{
-			if (title == null) throw new ArgumentNullException("title");
-			if (entries == null) throw new ArgumentNullException("entries");
-			if (cancelText == null) throw new ArgumentNullException("cancelText");
+			if (title == null) throw new ArgumentNullException(nameof(title));
+			if (entries == null) throw new ArgumentNullException(nameof(entries));
+			if (cancelText == null) throw new ArgumentNullException(nameof(cancelText));
 
 			var window = GetWindow(typeof(OptionPopupDialog), true, title, true) as OptionPopupDialog;
+			// ReSharper disable once PossibleNullReferenceException
 			window.entries = entries;
 			window.cancel = cancel;
 			window.cancelText = cancelText;
 			window.description = description;
 			window.lostFocusCloses = lostFocusCloses;
 
-			window.position = new Rect(CenterPosition, new Vector2(Size.x, Size.y + (18f * entries.Length)));
+			window.position = new Rect(CenterPosition, new Vector2(size.x, size.y + (18f * entries.Length)));
 
 			window.Show();
 		}
@@ -148,7 +143,7 @@ namespace LunraGamesEditor
 				GUILayout.FlexibleSpace();
 				if (GUILayout.Button(cancelText, Styles.Button))
 				{
-					if (cancel != null) cancel();
+					cancel?.Invoke();
 					closeHandled = true;
 					Close();
 				}
@@ -158,14 +153,14 @@ namespace LunraGamesEditor
 
 		void OnDestroy()
 		{
-			if (!closeHandled && cancel != null) cancel();
+			if (!closeHandled) cancel?.Invoke();
 		}
 
 		void OnLostFocus()
 		{
 			if (lostFocusCloses)
 			{
-				if (cancel != null) cancel();
+				cancel?.Invoke();
 				closeHandled = true;
 				Close();
 			}
