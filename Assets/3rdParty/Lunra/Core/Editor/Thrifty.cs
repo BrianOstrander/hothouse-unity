@@ -5,7 +5,7 @@ using System.Linq;
 using System;
 using System.Threading;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public static class Thrifty 
 	{

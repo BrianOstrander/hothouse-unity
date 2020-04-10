@@ -1,12 +1,13 @@
 ﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
-using LunraGames.Singletonnes;
+using Lunra.Singletonnes;
+using Lunra.Editor.Core;
 
-namespace LunraGamesEditor.Singletonnes
+namespace Lunra.Editor.Singletonnes
 {
 	[CustomEditor(typeof(ScriptableSingletonBase), true)]
-	public class ScriptableSingletonEditor : Editor 
+	public class ScriptableSingletonEditor : UnityEditor.Editor 
 	{
 		static float ButtonHeight = 40f;
 		static string WrongNameMessage = "Your asset's name does not match its type.";

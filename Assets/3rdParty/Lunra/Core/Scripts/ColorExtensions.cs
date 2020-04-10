@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class ColorExtensions
 	{

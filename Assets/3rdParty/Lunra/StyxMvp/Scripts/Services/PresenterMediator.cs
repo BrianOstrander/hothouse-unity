@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace LunraGames.SubLight 
+namespace Lunra.StyxMvp 
 {
 	public class PresenterMediator 
 	{

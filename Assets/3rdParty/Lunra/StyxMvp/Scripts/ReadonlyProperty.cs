@@ -1,6 +1,7 @@
 ﻿using System;
+using Lunra.Core;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
     public class ReadonlyProperty<T>
     {

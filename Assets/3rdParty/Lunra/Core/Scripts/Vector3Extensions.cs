@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class Vector3Extensions
 	{

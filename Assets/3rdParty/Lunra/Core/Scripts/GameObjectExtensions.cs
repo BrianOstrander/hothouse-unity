@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace LunraGames 
+namespace Lunra.Core 
 {
 	public static class GameObjectExtensions 
 	{

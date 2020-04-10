@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class Deltas
 	{

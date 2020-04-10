@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using UnityEditor;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public static class SelectionExtensions
 	{

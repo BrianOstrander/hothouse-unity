@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using LunraGames;
+using Lunra.Core;
 using System;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public static class EditorUtilityExtensions
 	{

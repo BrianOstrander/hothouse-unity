@@ -3,7 +3,7 @@ using System.Linq;
 
 using UnityEngine;
 
-namespace LunraGames.NumberDemon
+namespace Lunra.NumberDemon
 {
 	public static class DemonUtility
 	{

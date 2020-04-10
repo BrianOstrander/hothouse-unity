@@ -1,11 +1,12 @@
 ﻿using System.IO;
+using Lunra.Editor.Core;
 using UnityEditor;
 using UnityEngine;
 
-namespace LunraGamesEditor.Singletonnes
+namespace Lunra.Editor.Singletonnes
 {
 	[CustomEditor(typeof(EditorScriptableSingletonBase), true)]
-	public class EditorScriptableSingletonEditor : Editor 
+	public class EditorScriptableSingletonEditor : UnityEditor.Editor 
 	{
 		const float ButtonHeight = 40f;
 		static string wrongInheritence = "Your scriptable object doesn't inherit from "+typeof(EditorScriptableSingleton<>).Name;

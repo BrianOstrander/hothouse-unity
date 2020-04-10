@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
     public static class EditorStylesExtensions
     {

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using UnityEngine;
 
-namespace LunraGames.Singletonnes
+namespace Lunra.Singletonnes
 {
 	public abstract class ScriptableSingleton<T> : ScriptableSingletonBase where T : UnityEngine.Object 
 	{

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class ObjectExtensions 
 	{

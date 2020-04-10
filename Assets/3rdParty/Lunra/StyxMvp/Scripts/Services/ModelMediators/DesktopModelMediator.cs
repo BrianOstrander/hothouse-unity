@@ -3,14 +3,13 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Reflection;
+using Lunra.StyxMvp.Models;
+using Lunra.Core;
 using UnityEngine;
-
-using LunraGames.SubLight.Models;
-
 using Newtonsoft.Json;
 using Assembly = System.Reflection.Assembly;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public class DesktopModelMediator : ModelMediator
 	{

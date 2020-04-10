@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
     public static class VersionProvider
     {

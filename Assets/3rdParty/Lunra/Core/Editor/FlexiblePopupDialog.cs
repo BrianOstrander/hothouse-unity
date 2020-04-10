@@ -3,7 +3,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public class FlexiblePopupDialog : EditorWindow
 	{

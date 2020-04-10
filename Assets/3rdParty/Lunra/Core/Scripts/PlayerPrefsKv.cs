@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public abstract class PlayerPrefsKv<T>
 	{

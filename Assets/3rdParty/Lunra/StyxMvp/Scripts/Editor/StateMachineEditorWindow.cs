@@ -1,8 +1,8 @@
 ﻿using System;
-
+using Lunra.Core;
 using UnityEditor;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public abstract class StateMachineEditorWindow : EditorWindow
 	{

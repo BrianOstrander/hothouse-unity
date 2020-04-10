@@ -4,7 +4,7 @@ using UnityEngine;
 
 using UnityEditor;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	// ReSharper disable once InconsistentNaming
 	public static class EditorGUIExtensions

@@ -2,10 +2,10 @@
 using UnityEditor;
 using System;
 using Newtonsoft.Json;
-using LunraGames;
-using LunraGames.Converters;
+using Lunra.Core;
+using Lunra.Core.Converters;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public static class EditorPrefsExtensions 
 	{

@@ -1,4 +1,4 @@
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	/// <summary>
 	/// This class should have subclasses for each Shader, with the property names of each shader.

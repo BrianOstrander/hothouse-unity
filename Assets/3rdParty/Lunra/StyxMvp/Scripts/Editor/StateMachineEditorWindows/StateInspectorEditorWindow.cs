@@ -1,9 +1,10 @@
-﻿using UnityEditor;
+﻿using Lunra.Core;
+using UnityEditor;
 using UnityEngine;
 
-using LunraGamesEditor;
+using Lunra.Editor.Core;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public class StateInspectorEditorWindow : StateMachineEditorWindow
 	{

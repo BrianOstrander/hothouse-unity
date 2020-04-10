@@ -5,9 +5,9 @@ using System.Text.RegularExpressions;
 
 using UnityEngine;
 
-using LunraGames.NumberDemon;
+using Lunra.NumberDemon;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class LinqExtensions
 	{

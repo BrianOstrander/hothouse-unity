@@ -1,4 +1,4 @@
-﻿namespace LunraGamesEditor
+﻿namespace Lunra.Editor.Core
 {
 	public static class Strings
 	{

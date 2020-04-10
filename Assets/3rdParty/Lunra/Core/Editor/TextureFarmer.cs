@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public static class TextureFarmer 
 	{

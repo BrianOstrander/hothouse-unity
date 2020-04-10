@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LunraGames.SubLight.Models
+namespace Lunra.StyxMvp.Models
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class SaveData : Attribute

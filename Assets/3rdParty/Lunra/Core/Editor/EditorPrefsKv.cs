@@ -5,7 +5,7 @@ using UnityEngine;
 
 using UnityEditor;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public abstract class EditorPrefsKv<T>
 	{

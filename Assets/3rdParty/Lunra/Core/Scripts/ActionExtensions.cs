@@ -1,6 +1,6 @@
 using System;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class ActionExtensions
 	{

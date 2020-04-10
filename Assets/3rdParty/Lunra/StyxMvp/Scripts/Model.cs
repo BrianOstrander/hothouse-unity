@@ -1,8 +1,8 @@
 using System;
-
+using Lunra.Core;
 using Newtonsoft.Json;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public interface IModel 
 	{

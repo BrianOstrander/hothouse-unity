@@ -1,8 +1,9 @@
 ﻿using Newtonsoft.Json;
 using UnityEngine;
 using System;
+using Lunra.Core;
 
-namespace LunraGames.Converters
+namespace Lunra.Core.Converters
 {
 	public class RectConverter : JsonConverter
 	{

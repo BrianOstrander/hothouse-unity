@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using UnityEngine;
 
 using Random = System.Random;
 
-namespace LunraGames.NumberDemon
+namespace Lunra.NumberDemon
 {
 	public class Demon 
 	{

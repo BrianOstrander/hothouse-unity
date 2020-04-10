@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class TransformExtensions
 	{

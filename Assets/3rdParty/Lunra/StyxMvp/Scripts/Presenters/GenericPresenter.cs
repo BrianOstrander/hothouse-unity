@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace LunraGames.SubLight.Presenters
+namespace Lunra.StyxMvp.Presenters
 {
 	public class GenericPresenter<V> : Presenter<V>
 		where V : class, IView

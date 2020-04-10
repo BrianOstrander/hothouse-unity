@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public static class DebugExtensions
 	{

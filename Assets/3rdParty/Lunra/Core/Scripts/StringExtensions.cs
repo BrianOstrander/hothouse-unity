@@ -1,4 +1,4 @@
-﻿namespace LunraGames
+﻿namespace Lunra.Core
 {
 	public static class StringExtensions 
 	{

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-namespace LunraGamesEditor.Singletonnes
+namespace Lunra.Editor.Singletonnes
 {
 	public abstract class EditorScriptableSingleton<T> : EditorScriptableSingletonBase 
 		where T : EditorScriptableSingleton<T>

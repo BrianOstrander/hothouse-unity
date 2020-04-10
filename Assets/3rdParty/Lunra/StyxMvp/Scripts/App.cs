@@ -1,10 +1,9 @@
 ﻿using System;
-
+using Lunra.StyxMvp.Models;
+using Lunra.Core;
 using UnityEngine;
 
-using LunraGames.SubLight.Models;
-
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public class App
 	{

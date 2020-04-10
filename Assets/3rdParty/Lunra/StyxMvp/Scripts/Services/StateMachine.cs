@@ -2,9 +2,10 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Lunra.Core;
 using Debug = UnityEngine.Debug;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public class StateMachine
 	{

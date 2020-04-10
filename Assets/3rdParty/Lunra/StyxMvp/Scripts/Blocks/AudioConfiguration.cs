@@ -3,7 +3,7 @@
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	[Serializable]
 	public struct AudioConfiguration

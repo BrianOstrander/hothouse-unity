@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	// ReSharper disable once InconsistentNaming
 	public static class GUIContentExtensions

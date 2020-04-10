@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using System.IO;
 using IoPath = System.IO.Path;
 
-namespace LunraGames.SubLight.Models
+namespace Lunra.StyxMvp.Models
 {
 	public class SaveModel : Model
 	{

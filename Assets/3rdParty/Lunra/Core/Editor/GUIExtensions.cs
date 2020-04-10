@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using LunraGames;
+using Lunra.Core;
 using UnityEngine;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
     // ReSharper disable once InconsistentNaming
     public static class GUIExtensions

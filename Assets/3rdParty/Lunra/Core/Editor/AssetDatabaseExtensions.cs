@@ -4,7 +4,7 @@ using UnityEditor;
 using System.IO;
 using Object = UnityEngine.Object;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public static class AssetDatabaseExtensions
 	{

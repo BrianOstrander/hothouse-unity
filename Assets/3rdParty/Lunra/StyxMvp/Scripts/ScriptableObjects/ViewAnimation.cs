@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public abstract class ViewAnimation : ScriptableObject
 	{

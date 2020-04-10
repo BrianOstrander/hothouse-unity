@@ -2,7 +2,7 @@
 
 using UnityEngine.Audio;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	[Serializable]
 	public struct AudioMixerGroupBlock

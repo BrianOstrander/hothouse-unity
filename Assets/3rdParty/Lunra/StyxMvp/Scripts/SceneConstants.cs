@@ -1,4 +1,4 @@
-﻿namespace LunraGames.SubLight
+﻿namespace Lunra.StyxMvp
 {
 	/// <summary>
 	/// Name of each scene.

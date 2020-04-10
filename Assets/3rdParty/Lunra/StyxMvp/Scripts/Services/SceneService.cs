@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-
+using Lunra.StyxMvp.Models;
+using Lunra.Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using LunraGames.SubLight.Models;
-
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public struct SceneRequest
 	{

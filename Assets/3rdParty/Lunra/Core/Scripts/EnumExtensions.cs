@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class EnumExtensions
 	{

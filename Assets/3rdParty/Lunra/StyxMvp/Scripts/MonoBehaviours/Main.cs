@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LunraGames.SubLight 
+namespace Lunra.StyxMvp 
 {
 	/// <summary>
 	/// Main kickstarts the App class and provides MonoBehaviour functionality without the annoying life cycle

@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using Lunra.Core;
+using UnityEngine;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public class FollowTagAnimation : ViewAnimation
 	{

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public class ViewMediator
 	{

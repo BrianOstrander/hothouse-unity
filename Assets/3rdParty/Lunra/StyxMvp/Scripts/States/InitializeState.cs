@@ -1,13 +1,12 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-
+using Lunra.StyxMvp.Models;
 using UnityEngine;
 
-using LunraGames.SubLight.Presenters;
-using LunraGames.SubLight.Models;
+using Lunra.StyxMvp.Presenters;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public class InitializePayload : IStatePayload
 	{

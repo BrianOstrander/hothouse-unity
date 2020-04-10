@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.IO;
 
-namespace LunraGamesEditor
+namespace Lunra.Editor.Core
 {
 	public static class ApplicationExtensions
 	{

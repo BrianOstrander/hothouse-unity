@@ -8,11 +8,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 
-using LunraGames.Converters;
-using QuaternionConverter = LunraGames.Converters.QuaternionConverter;
-using ColorConverter = LunraGames.Converters.ColorConverter;
+using Lunra.Core.Converters;
+using QuaternionConverter = Lunra.Core.Converters.QuaternionConverter;
+using ColorConverter = Lunra.Core.Converters.ColorConverter;
 
-namespace LunraGames
+namespace Lunra.Core
 {
 	public static class Serialization 
 	{

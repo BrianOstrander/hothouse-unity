@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	[Serializable]
 	public struct ShowCloseDurationBlock

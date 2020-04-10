@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace LunraGames.SubLight
+namespace Lunra.StyxMvp
 {
 	public struct ResultArray<T>
 	{
