@@ -1,5 +1,7 @@
 ﻿using Lunra.StyxMvp;
+using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
+using Lunra.WildVacuum.Views;
 
 namespace Lunra.WildVacuum.Services
 {
@@ -26,7 +28,14 @@ namespace Lunra.WildVacuum.Services
 		#region Idle
 		protected override void Idle()
 		{
+			var presenter = new GenericPresenter<TestView>();
 			
+			presenter.Show();
+
+			App.Heartbeat.Wait(
+				() => presenter.Close(),
+				5f
+			);
 		}
 		#endregion
         

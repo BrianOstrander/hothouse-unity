@@ -40,7 +40,7 @@ namespace Lunra.StyxMvp
 		{
 			pool = new List<IView>();
 			
-			defaultViews.AddRange(Resources.LoadAll<GameObject>("MercuryMvp/DefaultViews"));
+			defaultViews.AddRange(Resources.LoadAll<GameObject>("StyxDefaultViews"));
 
 			foreach (var prefab in defaultViews)
 			{

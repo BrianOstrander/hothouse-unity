@@ -156,6 +156,7 @@ namespace Lunra.StyxMvp.Services
 		}
 
 		#region Callbacks
+		// TODO: Pass this off to instantiated states so they can call this event without keeping this public...
 		/// <summary>
 		/// Called when a state change happens.
 		/// </summary>

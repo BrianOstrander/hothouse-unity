@@ -28,7 +28,33 @@ namespace Lunra.WildVacuum.Services
         #region Idle
         protected override void Idle()
         {
-			App.S.RequestState<GamePayload>();
+            App.Heartbeat.Wait(
+                () =>
+                {
+                    Debug.Log("Waited 0.1 seconds...");
+                    var counter = 10;
+                    App.Heartbeat.Wait(
+                        () =>
+                        {
+                            Debug.Log("Waited for counter to hit zero");
+                            App.Heartbeat.Wait(
+                                result =>
+                                {
+                                    Debug.Log("Waited for time to be equal with result: " + result);
+                                    App.S.RequestState<GamePayload>();
+                                },
+                                () => (DateTime.Now.Second % 2) == 0
+                            );
+                        },
+                        () =>
+                        {
+                            counter--;
+                            return counter == 0;
+                        }
+                    );
+                },
+                0.1f
+            );
         }
         #endregion
         

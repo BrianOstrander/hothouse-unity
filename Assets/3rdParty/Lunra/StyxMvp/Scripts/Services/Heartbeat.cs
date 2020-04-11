@@ -13,20 +13,18 @@ namespace Lunra.StyxMvp.Services
 	
 	public class Heartbeat 
 	{
-		public Action<float> Update = ActionExtensions.GetEmpty<float>();
-		public Action<float> LateUpdate = ActionExtensions.GetEmpty<float>();
+		public event Action<float> Update = ActionExtensions.GetEmpty<float>();
+		public event Action<float> LateUpdate = ActionExtensions.GetEmpty<float>();
 
-		public void TriggerUpdate(float delta) 
-		{
-			Update(delta);
-		}
+		public void TriggerUpdate(float delta) => Update(delta);
 
-		public void TriggerLateUpdate(float delta)
-		{
-			LateUpdate(delta);
-		}
+		public void TriggerLateUpdate(float delta) => LateUpdate(delta);
 
-		public void Wait(Action done, float seconds, bool checkInstantly = false)
+		public void Wait(
+			Action done,
+			float seconds,
+			bool checkInstantly = false
+		)
 		{
 			if (done == null) throw new ArgumentNullException(nameof(done));
 			if (seconds < 0f) throw new ArgumentOutOfRangeException(nameof(seconds), "Cannot be less than zero.");
@@ -34,7 +32,11 @@ namespace Lunra.StyxMvp.Services
 			Wait(done, () => endtime < DateTime.Now, checkInstantly);
 		}
 
-		public void Wait(Action done, Func<bool> condition, bool checkInstantly = false)
+		public void Wait(
+			Action done,
+			Func<bool> condition,
+			bool checkInstantly = false
+		)
 		{
 			if (done == null) throw new ArgumentNullException(nameof(done));
 			if (condition == null) throw new ArgumentNullException(nameof(condition));
@@ -48,7 +50,11 @@ namespace Lunra.StyxMvp.Services
 		/// <param name="done">Done.</param>
 		/// <param name="condition">Condition.</param>
 		/// <param name="checkInstantly">Runs the event this frame, instead of waiting a frame for the first time it's called.</param>
-		public Action Wait(Action<WaitResults> done, Func<bool> condition, bool checkInstantly = false)
+		public Action Wait(
+			Action<WaitResults> done,
+			Func<bool> condition,
+			bool checkInstantly = false
+		)
 		{
 			if (done == null) throw new ArgumentNullException(nameof(done));
 			if (condition == null) throw new ArgumentNullException(nameof(condition));

@@ -102,9 +102,9 @@ namespace Lunra.StyxMvp
 
 		public void Start() { }
 
-		public void Update(float delta) => heartbeat.Update(delta);
+		public void Update(float delta) => heartbeat.TriggerUpdate(delta);
 
-		public void LateUpdate(float delta) => heartbeat.LateUpdate(delta);
+		public void LateUpdate(float delta) => heartbeat.TriggerLateUpdate(delta);
 
 		public void FixedUpdate() { }
 
