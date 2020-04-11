@@ -169,8 +169,9 @@ namespace Lunra.StyxMvp.Models
 	
 	public abstract class ModelMediator : IModelMediator
 	{
-
 		protected virtual bool SuppressErrorLogging => false;
+		
+		protected virtual int CurrentVersion => Convert.ToInt32(Application.version);
 
 		public abstract void Initialize(Action<Result> done);
 
@@ -183,7 +184,7 @@ namespace Lunra.StyxMvp.Models
 			var min = GetSaveModelMeta(type).MinimumSupportedVersion;
 			// If min is -1, then it means we can only load saves that equal 
 			// this version.
-			if (min < 0) min = VersionProvider.Current;
+			if (min < 0) min = CurrentVersion;
 			return min <= version;
 		}
 
@@ -191,7 +192,7 @@ namespace Lunra.StyxMvp.Models
 		{
 			var result = new M();
 			result.SupportedVersion.Value = true;
-			result.Version.Value = VersionProvider.Current;
+			result.Version.Value = CurrentVersion;
 			result.AbsolutePath.Value = GetUniquePath(typeof(M), id);
 			result.Created.Value = DateTime.MinValue;
 			result.Modified.Value = DateTime.MinValue;
@@ -395,7 +396,7 @@ namespace Lunra.StyxMvp.Models
 				if (model.Created.Value == DateTime.MinValue) model.Created.Value = model.Modified.Value;
 			}
 
-			model.Version.Value = VersionProvider.Current;
+			model.Version.Value = CurrentVersion;
 
 			try { OnSave(model, done); }
 			catch (Exception exception)

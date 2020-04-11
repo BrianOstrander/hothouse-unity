@@ -6,7 +6,7 @@ namespace Lunra.WildVacuum
 {
     public class WildVacuumMain : Main
     {
-        protected override IState[] States => new []
+        protected override IState[] InstantiateStates()  => new []
         {
             new InitializeState()
         };

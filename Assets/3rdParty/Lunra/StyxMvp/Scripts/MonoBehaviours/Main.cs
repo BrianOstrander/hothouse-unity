@@ -1,5 +1,6 @@
+using System;
+using Lunra.StyxMvp.Models;
 using UnityEngine;
-
 using AudioConfiguration = Lunra.StyxMvp.Services.AudioConfiguration;
 using Lunra.StyxMvp.Services;
 
@@ -26,44 +27,30 @@ namespace Lunra.StyxMvp
 			app = new App(
 				this,
 				audioConfiguration,
-				States,
+				InstantiateStates,
+				InstantiateModelMediator,
 				OnStartupDone
 			);
 			DontDestroyOnLoad(gameObject);
 			app.Awake();
 		}
 
-		void Start() 
-		{
-			app.Start ();
-		}
+		void Start() => app.Start();
 
-		void Update() 
-		{
-			app.Update(Time.deltaTime);
-		}
+		void Update() => app.Update(Time.deltaTime);
 
-		void LateUpdate()
-		{
-			app.LateUpdate(Time.deltaTime);
-		}
+		void LateUpdate() => app.LateUpdate(Time.deltaTime); 
 
-		void FixedUpdate() 
-		{
-			app.FixedUpdate();	
-		}
+		void FixedUpdate() => app.FixedUpdate();
 
-		void OnApplicationPause(bool paused) 
-		{
-			app.OnApplicationPause(paused);
-		}
+		void OnApplicationPause(bool paused) => app.OnApplicationPause(paused); 
 
-		void OnApplicationQuit() 
-		{
-			app.OnApplicationQuit();
-		}
+		void OnApplicationQuit() => app.OnApplicationQuit();
 
-		protected abstract IState[] States { get; }
+		protected virtual IModelMediator InstantiateModelMediator() => new DesktopModelMediator();
+
+		protected abstract IState[] InstantiateStates();
+		
 		protected abstract void OnStartupDone();
 	}
 }

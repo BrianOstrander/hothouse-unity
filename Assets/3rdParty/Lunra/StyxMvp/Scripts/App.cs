@@ -57,7 +57,8 @@ namespace Lunra.StyxMvp
 		public App(
 			Main main,
 			AudioConfiguration audioConfiguration,
-			IState[] states,
+			Func<IState[]> instantiateStates,
+			Func<IModelMediator> instantiateModelMediator,
 			Action startupDone
 		)
 		{
@@ -72,23 +73,10 @@ namespace Lunra.StyxMvp
 			);
 			stateMachine = new StateMachine(
 				Heartbeat,
-				states.Append(new StartupState()).Append(new TransitionState()).ToArray() // A bit ugly...
+				instantiateStates().Append(new StartupState()).Append(new TransitionState()).ToArray() // A bit ugly...
 			);
-			
-			if (Application.isEditor)
-			{
-#if UNITY_EDITOR
-				modelMediator = new DesktopModelMediator();
-#endif
-			}
-			else if (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.WindowsPlayer)
-			{
-				modelMediator = new DesktopModelMediator();
-			}
-			else
-			{
-				throw new Exception("Unknown platform");
-			}
+
+			modelMediator = instantiateModelMediator();
 
 			scenes = new Scenes();
 			
