@@ -22,7 +22,7 @@ namespace Lunra.WildVacuum.Services
 
 		protected override void Idle()
 		{
-			Debug.Log("idle on initialize");
+			App.S.RequestState<MainMenuPayload>();
 			
 			/*
 			var mainCamera = (Payload.HomeStatePayload.MainCamera = new HoloRoomFocusCameraPresenter());
