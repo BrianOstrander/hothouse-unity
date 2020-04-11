@@ -2,11 +2,11 @@
 
 using UnityEngine;
 
-namespace Lunra.StyxMvp.Services
+namespace Lunra.Core
 {
 	public struct ResultArray<T>
 	{
-		public readonly RequestStatus Status;
+		public readonly ResultStatus Status;
 		public readonly Result<T>[] Results;
 		public readonly string Error;
 
@@ -15,7 +15,7 @@ namespace Lunra.StyxMvp.Services
 		public static ResultArray<T> Success(Result<T>[] results)
 		{
 			return new ResultArray<T>(
-				RequestStatus.Success,
+				ResultStatus.Success,
 				results
 			);
 		}
@@ -23,14 +23,14 @@ namespace Lunra.StyxMvp.Services
 		public static ResultArray<T> Failure(string error, Result<T>[] results = null)
 		{
 			return new ResultArray<T>(
-				RequestStatus.Failure,
+				ResultStatus.Failure,
 				results,
 				error
 			);
 		}
 
 		ResultArray(
-			RequestStatus status,
+			ResultStatus status,
 			Result<T>[] results,
 			string error = null
 		)
@@ -45,9 +45,9 @@ namespace Lunra.StyxMvp.Services
 			message = string.IsNullOrEmpty(message) ? string.Empty : (message + "\n");
 			switch (Status)
 			{
-				case RequestStatus.Failure: Debug.LogError(message + this); break;
-				case RequestStatus.Cancel: Debug.LogWarning(message + this); break;
-				case RequestStatus.Success: Debug.Log(message + this); break;
+				case ResultStatus.Failure: Debug.LogError(message + this); break;
+				case ResultStatus.Cancel: Debug.LogWarning(message + this); break;
+				case ResultStatus.Success: Debug.Log(message + this); break;
 				default: Debug.LogError(message + "Unrecognized RequestStatus: " + Status + ", result:\n" + this); break;
 			}
 			return this;
@@ -57,7 +57,7 @@ namespace Lunra.StyxMvp.Services
 		{
 			switch (Status)
 			{
-				case RequestStatus.Success: break;
+				case ResultStatus.Success: break;
 				default: Log(message); break;
 			}
 			return this;
@@ -68,7 +68,7 @@ namespace Lunra.StyxMvp.Services
 			var result = "ResultArray<" + typeof(T).Name + ">.Status : " + Status;
 			switch (Status)
 			{
-				case RequestStatus.Success: break;
+				case ResultStatus.Success: break;
 				default:
 					result += " - " + Error;
 					break;

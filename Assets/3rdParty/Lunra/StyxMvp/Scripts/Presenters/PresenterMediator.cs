@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-
+using Lunra.Core;
 using Lunra.StyxMvp.Services; 
 
 namespace Lunra.StyxMvp.Presenters
@@ -39,10 +39,7 @@ namespace Lunra.StyxMvp.Presenters
 			this.heartbeat = heartbeat ?? throw new ArgumentNullException(nameof(heartbeat));
 		}
 
-		public void Initialize(Action<RequestStatus> done) 
-		{
-			done(RequestStatus.Success);
-		}
+		public void Initialize(Action<Result> done) => done(Result.Success());
 
 		public void AddGlobals(params IPresenter[] globals)
 		{

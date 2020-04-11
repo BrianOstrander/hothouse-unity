@@ -81,7 +81,7 @@ namespace Lunra.StyxMvp.Services
 			this.heartbeat = heartbeat;
 		}
 
-		public void Initialize(Action<RequestStatus> done)
+		public void Initialize(Action<Result> done)
 		{
 			for (var i = 0; i < AudioSourcePoolCount; i++)
 			{
@@ -118,7 +118,7 @@ namespace Lunra.StyxMvp.Services
 				);
 			}
 
-			done(RequestStatus.Success);
+			done(Result.Success());
 		}
 
 		#region Events

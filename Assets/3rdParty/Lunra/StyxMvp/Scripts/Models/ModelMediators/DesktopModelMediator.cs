@@ -24,7 +24,7 @@ namespace Lunra.StyxMvp
 			this.readableSaves = readableSaves;
 		}
 
-		public override void Initialize(Action<RequestStatus> done)
+		public override void Initialize(Action<Result> done)
 		{
 			try
 			{
@@ -44,12 +44,11 @@ namespace Lunra.StyxMvp
 					Directory.CreateDirectory(Path.Combine(PersistentPath, path));
 				}
 				
-				done(RequestStatus.Success);
+				done(Result.Success());
 			}
 			catch (Exception exception)
 			{
-				Debug.LogException(exception);
-				done(RequestStatus.Failure);
+				done(Result.Failure(exception).Log());
 			}
 		}
 
@@ -184,7 +183,7 @@ namespace Lunra.StyxMvp
 				return;
 			}
 
-			if (textureResult.Status != RequestStatus.Success)
+			if (textureResult.Status != ResultStatus.Success)
 			{
 				onError("Unable to read bytes at \"" + textureResult.Path + "\", returning null.");
 				return;

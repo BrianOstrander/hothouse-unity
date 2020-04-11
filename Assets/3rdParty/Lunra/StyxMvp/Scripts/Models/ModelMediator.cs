@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Lunra.StyxMvp.Models;
 using UnityEngine;
+using Lunra.Core;
 
 namespace Lunra.StyxMvp.Models
 {
 	public struct ModelResult<M> where M : SaveModel
 	{
-		public readonly RequestStatus Status;
+		public readonly ResultStatus Status;
 		public readonly SaveModel Model;
 		public readonly M TypedModel;
 		public readonly string Error;
@@ -18,7 +18,7 @@ namespace Lunra.StyxMvp.Models
 		public static ModelResult<M> Success(SaveModel model, M typedModel)
 		{
 			return new ModelResult<M>(
-				RequestStatus.Success,
+				ResultStatus.Success,
 				model,
 				typedModel
 			);
@@ -27,7 +27,7 @@ namespace Lunra.StyxMvp.Models
 		public static ModelResult<M> Failure(SaveModel model, M typedModel, string error)
 		{
 			return new ModelResult<M>(
-				RequestStatus.Failure,
+				ResultStatus.Failure,
 				model,
 				typedModel,
 				error
@@ -35,7 +35,7 @@ namespace Lunra.StyxMvp.Models
 		}
 
 		ModelResult(
-			RequestStatus status,
+			ResultStatus status,
 			SaveModel model,
 			M typedModel,
 			string error = null
@@ -50,7 +50,7 @@ namespace Lunra.StyxMvp.Models
 	
 	public struct ModelArrayResult<M> where M : SaveModel
 	{
-		public readonly RequestStatus Status;
+		public readonly ResultStatus Status;
 		public readonly string Error;
 		public readonly ModelResult<M>[] Models;
 
@@ -59,7 +59,7 @@ namespace Lunra.StyxMvp.Models
 		)
 		{
 			return new ModelArrayResult<M>(
-				RequestStatus.Success,
+				ResultStatus.Success,
 				models
 			);
 		}
@@ -70,14 +70,14 @@ namespace Lunra.StyxMvp.Models
 		)
 		{
 			return new ModelArrayResult<M>(
-				RequestStatus.Failure,
+				ResultStatus.Failure,
 				models,
 				error
 			);
 		}
 
 		ModelArrayResult(
-			RequestStatus status,
+			ResultStatus status,
 			ModelResult<M>[] models,
 			string error = null
 		)
@@ -92,7 +92,7 @@ namespace Lunra.StyxMvp.Models
 
 	public struct ModelIndexResult<M> where M : SaveModel
 	{
-		public readonly RequestStatus Status;
+		public readonly ResultStatus Status;
 		public readonly SaveModel[] Models;
 		public readonly string Error;
 		public readonly int Length;
@@ -100,7 +100,7 @@ namespace Lunra.StyxMvp.Models
 		public static ModelIndexResult<M> Success(SaveModel[] models)
 		{
 			return new ModelIndexResult<M>(
-				RequestStatus.Success,
+				ResultStatus.Success,
 				models
 			);
 		}
@@ -108,14 +108,14 @@ namespace Lunra.StyxMvp.Models
 		public static ModelIndexResult<M> Failure(string error)
 		{
 			return new ModelIndexResult<M>(
-				RequestStatus.Failure,
+				ResultStatus.Failure,
 				null,
 				error
 			);
 		}
 
 		ModelIndexResult(
-			RequestStatus status,
+			ResultStatus status,
 			SaveModel[] models,
 			string error = null
 		)
@@ -129,7 +129,7 @@ namespace Lunra.StyxMvp.Models
 
 	public struct ReadWriteRequest
 	{
-		public readonly RequestStatus Status;
+		public readonly ResultStatus Status;
 		public readonly string Path;
 		public readonly byte[] Bytes;
 		public readonly string Error;
@@ -137,7 +137,7 @@ namespace Lunra.StyxMvp.Models
 		public static ReadWriteRequest Success(string path, byte[] bytes)
 		{
 			return new ReadWriteRequest(
-				RequestStatus.Success,
+				ResultStatus.Success,
 				path,
 				bytes
 			);
@@ -146,7 +146,7 @@ namespace Lunra.StyxMvp.Models
 		public static ReadWriteRequest Failure(string path, string error)
 		{
 			return new ReadWriteRequest(
-				RequestStatus.Failure,
+				ResultStatus.Failure,
 				path,
 				null,
 				error
@@ -154,7 +154,7 @@ namespace Lunra.StyxMvp.Models
 		}
 
 		ReadWriteRequest(
-			RequestStatus status,
+			ResultStatus status,
 			string path,
 			byte[] bytes,
 			string error = null
@@ -172,7 +172,7 @@ namespace Lunra.StyxMvp.Models
 
 		protected virtual bool SuppressErrorLogging => false;
 
-		public abstract void Initialize(Action<RequestStatus> done);
+		public abstract void Initialize(Action<Result> done);
 
 		protected abstract string GetUniquePath(Type type, string id);
 
@@ -235,7 +235,7 @@ namespace Lunra.StyxMvp.Models
 
 		void OnLoadIndexed<M>(ModelIndexResult<SaveModel> results, string modelId, Action<ModelResult<M>> done) where M : SaveModel
 		{
-			if (results.Status != RequestStatus.Success)
+			if (results.Status != ResultStatus.Success)
 			{
 				Debug.LogError("Indexing models failed with status: " + results.Status + " and error: " + results.Error);
 				done(ModelResult<M>.Failure(
@@ -282,7 +282,7 @@ namespace Lunra.StyxMvp.Models
 		)
 			where M : SaveModel
 		{
-			if (results.Status != RequestStatus.Success)
+			if (results.Status != ResultStatus.Success)
 			{
 				Debug.LogError("Indexing models failed with status: " + results.Status + " and error: " + results.Error);
 				done(ModelArrayResult<M>.Failure(
@@ -313,12 +313,12 @@ namespace Lunra.StyxMvp.Models
 			if (loadResult.HasValue)
 			{
 				results.Add(loadResult.Value);
-				if (loadResult.Value.Status != RequestStatus.Success) Debug.LogError("Loading model failed with status: " + loadResult.Value.Status + " and error: " + loadResult.Value.Error);
+				if (loadResult.Value.Status != ResultStatus.Success) Debug.LogError("Loading model failed with status: " + loadResult.Value.Status + " and error: " + loadResult.Value.Error);
 			}
 
 			if (remaining.Count == 0)
 			{
-				if (results.Any(r => r.Status != RequestStatus.Success))
+				if (results.Any(r => r.Status != ResultStatus.Success))
 				{
 					var error = "Loading all models encountered at least one error";
 					Debug.LogError(error);
@@ -478,7 +478,7 @@ namespace Lunra.StyxMvp.Models
 
 	public interface IModelMediator
 	{
-		void Initialize(Action<RequestStatus> done);
+		void Initialize(Action<Result> done);
 		M Create<M>(string id) where M : SaveModel, new();
 		void Save<M>(M model, Action<ModelResult<M>> done = null, bool updateModified = true) where M : SaveModel;
 		void Load<M>(SaveModel model, Action<ModelResult<M>> done) where M : SaveModel;

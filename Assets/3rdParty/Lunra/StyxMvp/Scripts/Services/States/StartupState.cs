@@ -1,6 +1,6 @@
 using System;
-
 using UnityEngine;
+using Lunra.Core;
 
 namespace Lunra.StyxMvp.Services
 {
@@ -43,10 +43,10 @@ namespace Lunra.StyxMvp.Services
 		void InitializeModels(Action done)
 		{
 			App.M.Initialize(
-				status =>
+				result =>
 				{
-					if (status == RequestStatus.Success) done();
-					else App.Restart("Initializing ModelMediator failed with status " + status);
+					if (result.Status == ResultStatus.Success) done();
+					else App.Restart("Initializing ModelMediator failed with status " + result.Status);
 				}
 			);
 		}
@@ -54,10 +54,10 @@ namespace Lunra.StyxMvp.Services
 		void InitializeViews(Action done)
 		{
 			App.V.Initialize(
-				status =>
+				result =>
 				{
-					if (status == RequestStatus.Success) done();
-					else App.Restart("Initializing ViewMediator failed with status " + status);
+					if (result.Status == ResultStatus.Success) done();
+					else App.Restart("Initializing ViewMediator failed with status " + result.Status);
 				}
 			);
 		}
@@ -65,10 +65,10 @@ namespace Lunra.StyxMvp.Services
 		void InitializePresenters(Action done)
 		{
 			App.P.Initialize(
-				status =>
+				result =>
 				{
-					if (status == RequestStatus.Success) done();
-					else App.Restart("Initializing PresenterMediator failed with status " + status);
+					if (result.Status == ResultStatus.Success) done();
+					else App.Restart("Initializing PresenterMediator failed with status " + result.Status);
 				}
 			);
 		}
@@ -77,10 +77,10 @@ namespace Lunra.StyxMvp.Services
 		void InitializeAudio(Action done)
 		{
 			App.Audio.Initialize(
-				status =>
+				result =>
 				{
-					if (status == RequestStatus.Success) done(); 
-					else App.Restart("Initializing Audio failed with status " + status);
+					if (result.Status == ResultStatus.Success) done(); 
+					else App.Restart("Initializing Audio failed with status " + result.Status);
 				}
 			);
 		}

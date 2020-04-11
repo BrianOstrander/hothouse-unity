@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
+using UnityEngine;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
 using Lunra.WildVacuum.Models;
-using UnityEngine;
+using Lunra.Core;
 
 namespace Lunra.WildVacuum.Services
 {
@@ -48,7 +49,7 @@ namespace Lunra.WildVacuum.Services
 
 		void OnInitializePreferencesIndex(ModelIndexResult<SaveModel> result, Action done)
 		{
-			if (result.Status != RequestStatus.Success)
+			if (result.Status != ResultStatus.Success)
 			{
 				App.Restart("Listing preferences failed with status" + result.Status);
 				return;
@@ -83,7 +84,7 @@ namespace Lunra.WildVacuum.Services
 
 		void OnInitializePreferencesLoad(ModelResult<PreferencesModel> result, Action done)
 		{
-			if (result.Status != RequestStatus.Success)
+			if (result.Status != ResultStatus.Success)
 			{
 				App.Restart("Loading preferences failed with status" + result.Status);
 				return;
@@ -97,7 +98,7 @@ namespace Lunra.WildVacuum.Services
 
 		void OnInitializePreferencesSaved(ModelResult<PreferencesModel> result, Action done)
 		{
-			if (result.Status != RequestStatus.Success)
+			if (result.Status != ResultStatus.Success)
 			{
 				App.Restart("Saving preferences failed with status " + result.Status);
 				return;

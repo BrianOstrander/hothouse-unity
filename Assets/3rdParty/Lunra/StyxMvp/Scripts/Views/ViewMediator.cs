@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Lunra.Core;
 
 using Lunra.StyxMvp.Services;
 
@@ -36,7 +36,7 @@ namespace Lunra.StyxMvp
 			
 		}
 
-		public void Initialize(Action<RequestStatus> done)
+		public void Initialize(Action<Result> done)
 		{
 			pool = new List<IView>();
 			
@@ -58,7 +58,7 @@ namespace Lunra.StyxMvp
 			heartbeat.Update += Update;
 			heartbeat.LateUpdate += LateUpdate;
 
-			done(RequestStatus.Success);
+			done(Result.Success());
 		}
 
 		/// <summary>

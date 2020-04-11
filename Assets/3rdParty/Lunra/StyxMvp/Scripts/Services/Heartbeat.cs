@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace Lunra.StyxMvp.Services 
 {
+	public enum WaitResults
+	{
+		Unknown = 0,
+		Ready = 10,
+		Cancel = 20
+	}
+	
 	public class Heartbeat 
 	{
 		public Action<float> Update = ActionExtensions.GetEmpty<float>();
@@ -41,24 +48,22 @@ namespace Lunra.StyxMvp.Services
 		/// <param name="done">Done.</param>
 		/// <param name="condition">Condition.</param>
 		/// <param name="checkInstantly">Runs the event this frame, instead of waiting a frame for the first time it's called.</param>
-		public Action Wait(Action<RequestStatus> done, Func<bool> condition, bool checkInstantly = false)
+		public Action Wait(Action<WaitResults> done, Func<bool> condition, bool checkInstantly = false)
 		{
 			if (done == null) throw new ArgumentNullException(nameof(done));
 			if (condition == null) throw new ArgumentNullException(nameof(condition));
 
-			var status = RequestStatus.Unknown;
-			void onCancel() => status = RequestStatus.Cancel;
+			var status = WaitResults.Unknown;
+			void onCancel() => status = WaitResults.Cancel;
 
 			void waiter(float delta)
 			{
 				try
 				{
-					if (status == RequestStatus.Unknown)
+					if (status == WaitResults.Unknown)
 					{
-						if (condition())
-							status = RequestStatus.Success;
-						else
-							return;
+						if (condition()) status = WaitResults.Ready;
+						else return;
 					}
 				}
 				catch (Exception e)
