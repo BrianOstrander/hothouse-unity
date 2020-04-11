@@ -1,10 +1,14 @@
-using System;
-
+﻿using System;
+using System.Linq;
+using Lunra.StyxMvp;
+using Lunra.StyxMvp.Models;
+using Lunra.StyxMvp.Services;
+using Lunra.WildVacuum.Models;
 using UnityEngine;
 
-namespace Lunra.StyxMvp.Services
+namespace Lunra.WildVacuum.Services
 {
-	public class InitializePayload : IStatePayload {}
+	public class InitializePayload : IStatePayload { }
 
 	public class InitializeState : State<InitializePayload>
 	{
@@ -12,68 +16,30 @@ namespace Lunra.StyxMvp.Services
 
 		protected override void Begin()
 		{
-			App.S.PushBlocking(InitializeModels);
-			App.S.PushBlocking(InitializeViews);
-			App.S.PushBlocking(InitializePresenters);
-			App.S.PushBlocking(InitializeAudio);
-
-			// if (DevPrefs.WipeGameSavesOnStart) SM.PushBlocking(WipeGameSaves, "WipeGameSaves");
+			App.S.PushBlocking(InitializePreferences);
 		}
 
 		protected override void Idle()
 		{
-			Debug.Log("we got to the initialize idle...");
-			// var mainCamera = (Payload.HomeStatePayload.MainCamera = new HoloRoomFocusCameraPresenter());
+			Debug.Log("idle on initialize");
+			
+			/*
+			var mainCamera = (Payload.HomeStatePayload.MainCamera = new HoloRoomFocusCameraPresenter());
 
 			App.P.AddGlobals(
-				// mainCamera,
-				// new GenericFocusCameraPresenter<PriorityFocusDetails>(mainCamera.GantryAnchor, mainCamera.FieldOfView)
+				mainCamera,
+				new GenericFocusCameraPresenter<PriorityFocusDetails>(mainCamera.GantryAnchor, mainCamera.FieldOfView)
 			);
 
-			// App.SM.RequestState(Payload.HomeStatePayload);
+			App.SM.RequestState(Payload.HomeStatePayload);
 			
-			// App.SM.PushBlocking(
-			// 	() => Debug.Log("blocking..."),
-			// 	() => false
-			// );
-		}
-
-		#region Mediators
-		void InitializeModels(Action done)
-		{
-			App.M.Initialize(
-				status =>
-				{
-					if (status == RequestStatus.Success) done();
-					else App.Restart("Initializing ModelMediator failed with status " + status);
-				}
+			App.SM.PushBlocking(
+				() => Debug.Log("blocking..."),
+				() => false
 			);
+			*/
 		}
 
-		void InitializeViews(Action done)
-		{
-			App.V.Initialize(
-				status =>
-				{
-					if (status == RequestStatus.Success) done();
-					else App.Restart("Initializing ViewMediator failed with status " + status);
-				}
-			);
-		}
-
-		void InitializePresenters(Action done)
-		{
-			App.P.Initialize(
-				status =>
-				{
-					if (status == RequestStatus.Success) done();
-					else App.Restart("Initializing PresenterMediator failed with status " + status);
-				}
-			);
-		}
-		#endregion
-
-		/*
 		#region Preferences
 		void InitializePreferences(Action done)
 		{
@@ -137,21 +103,10 @@ namespace Lunra.StyxMvp.Services
 				return;
 			}
 
-			App.SetPreferences(result.TypedModel);
+			// App.SetPreferences(result.TypedModel);
+			Debug.LogWarning("Do something with these preferences...");
 			done();
 		}
 		#endregion
-		*/
-
-		void InitializeAudio(Action done)
-		{
-			App.Audio.Initialize(
-				status =>
-				{
-					if (status == RequestStatus.Success) done(); 
-					else App.Restart("Initializing Audio failed with status " + status);
-				}
-			);
-		}
 	}
 }

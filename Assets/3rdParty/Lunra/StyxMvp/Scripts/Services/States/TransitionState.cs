@@ -36,9 +36,16 @@ namespace Lunra.StyxMvp.Services
 		/// Who requested this transition.
 		/// </summary>
 		public string Requester;
+		/// <summary>
+		/// Callback upon transition state reaching its idle.
+		/// </summary>
 		public Action Idle;
 	}
 
+	/// <summary>
+	/// Used as a transitional state, perfect for exiting and returning back to an existing state so I don't have to
+	/// handle same state transitions...
+	/// </summary>
 	public class TransitionState : State<TransitionPayload>
 	{
 		// Reminder: Keep variables in payload for easy reset of states!
@@ -48,15 +55,12 @@ namespace Lunra.StyxMvp.Services
 		{
 			if (Payload.Idle == null)
 			{
-				Debug.Log("Transition requested by " + (string.IsNullOrEmpty(Payload.Requester) ? "< null or empty >" : Payload.Requester)+", but no Idle was provided. Now stuck.");
+				Debug.LogError("Transition requested by " + (string.IsNullOrEmpty(Payload.Requester) ? "< null or empty >" : Payload.Requester)+", but no Idle was provided. Now stuck.");
 				return;
 			}
 
 			Payload.Idle();
 		}
-		#endregion
-
-		#region Events
 		#endregion
 	}
 }

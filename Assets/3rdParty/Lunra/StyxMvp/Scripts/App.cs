@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Linq;
 using UnityEngine;
 
 using Lunra.Core;
@@ -12,6 +12,7 @@ namespace Lunra.StyxMvp
 {
 	public class App
 	{
+		#region Static Properties
 		static App instance;
 
 		public static bool HasInstance => instance != null;
@@ -47,14 +48,22 @@ namespace Lunra.StyxMvp
 
 		Scenes scenes;
 		public static Scenes Scenes => instance.scenes;
+		#endregion
+		
+		#region Local
+		Action startupDone;
+		#endregion
 
 		public App(
 			Main main,
-			AudioConfiguration audioConfiguration
+			AudioConfiguration audioConfiguration,
+			IState[] states,
+			Action startupDone
 		)
 		{
 			instance = this;
 			this.main = main;
+			this.startupDone = startupDone;
 			heartbeat = new Heartbeat();
 			presenterMediator = new PresenterMediator(Heartbeat);
 			viewMediator = new ViewMediator(
@@ -63,8 +72,7 @@ namespace Lunra.StyxMvp
 			);
 			stateMachine = new StateMachine(
 				Heartbeat,
-				new InitializeState(),
-				new TransitionState()
+				states.Append(new StartupState()).Append(new TransitionState()).ToArray() // A bit ugly...
 			);
 			
 			if (Application.isEditor)
@@ -93,33 +101,22 @@ namespace Lunra.StyxMvp
 			Instantiated(this);
 		}
 
-		public static void Restart(string message)
-		{
-			Debug.LogError("NO RESTART LOGIC DEFINED - TRIGGERED BY:\n" + message);
-		}
+		public static void Restart(string message) => Debug.LogError("NO RESTART LOGIC DEFINED - TRIGGERED BY:\n" + message);
 
 		#region MonoBehaviour events
 
-		public void Awake()
-		{
-			var payload = new InitializePayload();
-			stateMachine.RequestState(payload);
-		}
+		public void Awake() => stateMachine.RequestState(
+			new StartupPayload
+			{
+				Idle = startupDone
+			}
+		);
 
-		public void Start()
-		{
+		public void Start() { }
 
-		}
+		public void Update(float delta) => heartbeat.Update(delta);
 
-		public void Update(float delta)
-		{
-			heartbeat.Update(delta);
-		}
-
-		public void LateUpdate(float delta)
-		{
-			heartbeat.LateUpdate(delta);
-		}
+		public void LateUpdate(float delta) => heartbeat.LateUpdate(delta);
 
 		public void FixedUpdate() { }
 
