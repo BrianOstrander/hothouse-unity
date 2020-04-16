@@ -82,7 +82,9 @@ namespace Lunra.StyxMvp
 
 						EditorGUILayout.BeginHorizontal();
 						{
-							GUILayout.Label(entry.Trace.ToString());
+							EditorGUILayoutExtensions.RichTextLabel(entry.Trace.GetReadableName());
+							
+							// entry.Trace.GetReadableCallback()
 							
 							var stateColor = Color.black;
 
@@ -108,18 +110,18 @@ namespace Lunra.StyxMvp
 						
 						GUIExtensions.PushEnabled(entry.Trace.IsValid);
 						{
-							var buttonLabel = entry.Trace.IsValid ? AssetDatabaseExtensions.GetRelativeAssetPath(entry.Trace.FilePath) + " : " + entry.Trace.FileLine : "No file to open";
+							var buttonLabel = entry.Trace.IsValid ? AssetDatabaseExtensions.GetRelativeAssetPath(entry.Trace.InitializerFilePath) + " : " + entry.Trace.InitializerFileLine : "No file to open";
 							if (GUILayout.Button(buttonLabel, EditorStyles.linkLabel))
 							{
 								AssetDatabase.OpenAsset(
-									AssetDatabase.LoadAssetAtPath<MonoScript>(AssetDatabaseExtensions.GetRelativeAssetPath(entry.Trace.FilePath)),
-									entry.Trace.FileLine
+									AssetDatabase.LoadAssetAtPath<MonoScript>(AssetDatabaseExtensions.GetRelativeAssetPath(entry.Trace.InitializerFilePath)),
+									entry.Trace.InitializerFileLine
 								);
 							}
 						}
 						GUIExtensions.PopEnabled();
 
-						GUILayout.Label("Synchronized Id: " + (entry.SynchronizedId ?? "< null >"));
+						if (!string.IsNullOrEmpty(entry.SynchronizedId)) GUILayout.Label("Synchronized Id: " + entry.SynchronizedId);
 
 						if (isUnrecognizedState) EditorGUILayout.HelpBox("Unrecognized EntryState: " + entry.EntryState, MessageType.Error);
 					}

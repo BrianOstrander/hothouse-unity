@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using Lunra.Core;
 using Debug = UnityEngine.Debug;
 
@@ -32,25 +33,57 @@ namespace Lunra.StyxMvp.Services
 
 		public struct TraceData
 		{
-			public readonly string ClassName;
-			public readonly string MethodName;
-			public readonly string FilePath;
-			public readonly int FileLine;
+			static string FormatMethodName(string methodName) => methodName.Remove(0, methodName.IndexOf(' ') + 1);
+			
 			public readonly bool IsValid;
+			public readonly bool IsBlocking;
+			
+			public readonly string InitializerClassName;
+			public readonly string InitializerMethodName;
+			public readonly string InitializerFilePath;
+			public readonly int InitializerFileLine;
 
-			public TraceData(StackFrame frame)
+			public readonly bool IsCallbackAnonymous;
+			
+			public readonly string CallbackClassName;
+			public readonly string CallbackMethodName;
+			
+			public TraceData(
+				StackFrame frame,
+				MethodInfo callbackInfo,
+				bool isBlocking
+			)
 			{
-				ClassName = frame.GetMethod().DeclaringType?.FullName;
-				MethodName = frame.GetMethod().ToString();
-				FilePath = frame.GetFileName();
-				FileLine = frame.GetFileLineNumber();
 				IsValid = true;
+				IsBlocking = isBlocking;
+				
+				InitializerClassName = frame.GetMethod().DeclaringType?.FullName;
+				InitializerMethodName = FormatMethodName(frame.GetMethod().ToString());
+				InitializerFilePath = frame.GetFileName();
+				InitializerFileLine = frame.GetFileLineNumber();
+				
+				CallbackClassName = callbackInfo.DeclaringType?.FullName;
+				CallbackMethodName = FormatMethodName(callbackInfo.ToString());
+
+				IsCallbackAnonymous = callbackInfo.Name.Any((new [] {'<', '>'}).Contains);
 			}
 
-			public override string ToString()
+			public string GetReadableInitializer()
 			{
-				if (IsValid) return ClassName + ":" + MethodName.Remove(0, MethodName.IndexOf(' ') + 1);
-				return "(Inspecting was not enabled when this was captured)";
+				if (IsValid) return InitializerClassName + ":" + InitializerMethodName;
+				return "N / A";
+			}
+
+			public string GetReadableCallback()
+			{
+				if (IsValid) return CallbackClassName + ":" + CallbackMethodName;
+				return "N / A";
+			}
+
+			public string GetReadableName()
+			{
+				if (IsValid) return IsCallbackAnonymous ? "<b>< Anonymous ></b>" : "<b>" + CallbackMethodName + "</b> <i>" + CallbackClassName + "</i>";
+				return "<b>Unknown</b> (Inspecting was not enabled when this was captured)";
 			}
 		}
 
@@ -307,7 +340,7 @@ namespace Lunra.StyxMvp.Services
 				action,
 				currentState.GetType(),
 				currentEvent,
-				GetStackDescription(),
+				GetTraceData(action.Method, false),
 				repeating,
 				synchronizedId
 			);
@@ -322,7 +355,7 @@ namespace Lunra.StyxMvp.Services
 				action,
 				currentState.GetType(),
 				currentEvent,
-				GetStackDescription(),
+				GetTraceData(action.Method, true),
 				synchronizedId
 			);
 		}
@@ -343,7 +376,7 @@ namespace Lunra.StyxMvp.Services
 				waiter,
 				currentState.GetType(),
 				currentEvent,
-				GetStackDescription(),
+				GetTraceData(action.Method, true),
 				synchronizedId
 			);
 		}
@@ -445,11 +478,22 @@ namespace Lunra.StyxMvp.Services
 
 		public IEntryImmutable[] GetEntries() { return entries.Cast<IEntryImmutable>().ToArray(); }
 		
-		TraceData GetStackDescription(int offset = 2)
+		TraceData GetTraceData(
+			MethodInfo callbackInfo,
+			bool isBlocking,
+			int offset = 2
+		)
 		{
 			if (CaptureTraceData.Value)
 			{
-				try { return new TraceData(new StackTrace(true).GetFrame(offset)); }
+				try
+				{
+					return new TraceData(
+						new StackTrace(true).GetFrame(offset),
+						callbackInfo,
+						isBlocking
+					);
+				}
 				catch (Exception e)
 				{
 					Debug.LogException(e);

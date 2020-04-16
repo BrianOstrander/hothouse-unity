@@ -24,10 +24,7 @@ namespace Lunra.Editor.Core
             GUIExtensions.PopColor();
         }
 
-        public static void EndVertical()
-        {
-            GUILayout.EndVertical();
-        }
+        public static void EndVertical() => GUILayout.EndVertical(); 
 
         public static void BeginHorizontal(GUIStyle style, Color color, bool useColor = true, params GUILayoutOption[] options)
         {
@@ -36,9 +33,6 @@ namespace Lunra.Editor.Core
             if (useColor) GUIExtensions.PopColor();
         }
 
-        public static void EndHorizontal()
-        {
-            GUILayout.EndHorizontal();
-        }
+        public static void EndHorizontal() => GUILayout.EndHorizontal();
     }
 }
