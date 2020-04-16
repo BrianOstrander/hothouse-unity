@@ -9,7 +9,10 @@ using Lunra.Core;
 
 namespace Lunra.WildVacuum.Services
 {
-	public class InitializePayload : IStatePayload { }
+	public class InitializePayload : IStatePayload
+	{
+		public PreferencesModel Preferences;
+	}
 
 	public class InitializeState : State<InitializePayload>
 	{
@@ -22,7 +25,12 @@ namespace Lunra.WildVacuum.Services
 
 		protected override void Idle()
 		{
-			App.S.RequestState<MainMenuPayload>();
+			App.S.RequestState(
+				new MainMenuPayload
+				{
+					Preferences = Payload.Preferences
+				}
+			);
 			
 			/*
 			var mainCamera = (Payload.HomeStatePayload.MainCamera = new HoloRoomFocusCameraPresenter());
@@ -58,7 +66,7 @@ namespace Lunra.WildVacuum.Services
 			if (result.Length == 0)
 			{
 				App.M.Save(
-					App.M.Create<PreferencesModel>(App.M.CreateUniqueId()), 
+					GeneratePreferences(), 
 					saveResult => OnInitializePreferencesSaved(saveResult, done)
 				);
 			}
@@ -68,7 +76,7 @@ namespace Lunra.WildVacuum.Services
 				if (toLoad == null)
 				{
 					App.M.Save(
-						App.M.Create<PreferencesModel>(App.M.CreateUniqueId()),
+						GeneratePreferences(),
 						saveResult => OnInitializePreferencesSaved(saveResult, done)
 					);
 				}
@@ -104,9 +112,21 @@ namespace Lunra.WildVacuum.Services
 				return;
 			}
 
-			// App.SetPreferences(result.TypedModel);
-			Debug.LogWarning("Do something with these preferences...");
+			Payload.Preferences = result.TypedModel;
+			
 			done();
+		}
+		#endregion
+		
+		#region Utility
+
+		PreferencesModel GeneratePreferences()
+		{
+			var preferences = App.M.Create<PreferencesModel>(App.M.CreateUniqueId());
+
+			// TODO: Default preferences here...
+			
+			return preferences;
 		}
 		#endregion
 	}

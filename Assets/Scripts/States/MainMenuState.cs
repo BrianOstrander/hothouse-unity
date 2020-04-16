@@ -1,11 +1,15 @@
 ﻿using System;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
+using Lunra.WildVacuum.Models;
 using UnityEngine;
 
 namespace Lunra.WildVacuum.Services
 {
-    public class MainMenuPayload : IStatePayload { }
+    public class MainMenuPayload : IStatePayload
+    {
+        public PreferencesModel Preferences;
+    }
 
     public class MainMenuState : State<MainMenuPayload>
     {
@@ -28,32 +32,11 @@ namespace Lunra.WildVacuum.Services
         #region Idle
         protected override void Idle()
         {
-            App.Heartbeat.Wait(
-                () =>
+            App.S.RequestState(
+                new GamePayload
                 {
-                    Debug.Log("Waited 0.1 seconds...");
-                    var counter = 10;
-                    App.Heartbeat.Wait(
-                        () =>
-                        {
-                            Debug.Log("Waited for counter to hit zero");
-                            App.Heartbeat.Wait(
-                                result =>
-                                {
-                                    Debug.Log("Waited for time to be equal with result: " + result);
-                                    App.S.RequestState<GamePayload>();
-                                },
-                                () => (DateTime.Now.Second % 2) == 0
-                            );
-                        },
-                        () =>
-                        {
-                            counter--;
-                            return counter == 0;
-                        }
-                    );
-                },
-                0.1f
+                    Preferences = Payload.Preferences
+                }
             );
         }
         #endregion

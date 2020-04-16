@@ -1,11 +1,16 @@
 ﻿using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
+using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
+using UnityEngine;
 
 namespace Lunra.WildVacuum.Services
 {
-	public class GamePayload : IStatePayload { }
+	public class GamePayload : IStatePayload
+	{
+		public PreferencesModel Preferences;
+	}
 
 	public class GameState : State<GamePayload>
 	{
@@ -28,14 +33,11 @@ namespace Lunra.WildVacuum.Services
 		#region Idle
 		protected override void Idle()
 		{
-			var presenter = new GenericPresenter<TestView>();
+			// var presenter = new GenericPresenter<RoomView>();
+			//
+			// presenter.Show(instant: true);
 			
-			presenter.Show();
-
-			App.Heartbeat.Wait(
-				() => presenter.Close(),
-				5f
-			);
+			Debug.Log(Payload.Preferences.SiblingDirectory);
 		}
 		#endregion
         

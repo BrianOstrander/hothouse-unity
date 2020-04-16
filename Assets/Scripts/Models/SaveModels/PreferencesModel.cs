@@ -3,5 +3,5 @@
 namespace Lunra.WildVacuum.Models
 {
 	[SaveModelMeta("preferences", 0)]
-	public class PreferencesModel : SaveModel {}
+	public class PreferencesModel : SaveModel { }
 }

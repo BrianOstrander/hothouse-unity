@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using UnityEngine;
 using System;
-using Lunra.Core;
 
 namespace Lunra.Core.Converters
 {

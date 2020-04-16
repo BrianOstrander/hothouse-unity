@@ -39,10 +39,6 @@ namespace Lunra.Core
 					serializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
 					foreach (var converter in converters) serializerSettings.Converters.Add(converter);
 					foreach (var converter in addedConverters) serializerSettings.Converters.Add(converter);
-#if PROP_JSON
-					// This overrides the default vector converter, so we can use our own.
-					_SerializerSettings.Converters.Remove(_SerializerSettings.Converters.First(c => c.GetType() == typeof(VectorConverter)));
-#endif
 				}
 				return serializerSettings;
 			}
@@ -65,10 +61,6 @@ namespace Lunra.Core
 					verboseSerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
 					foreach (var converter in converters) verboseSerializerSettings.Converters.Add(converter);
 					foreach (var converter in addedConverters) verboseSerializerSettings.Converters.Add(converter);
-#if PROP_JSON
-					// This overrides the default vector converter, so we can use our own.
-					_VerboseSerializerSettings.Converters.Remove(_VerboseSerializerSettings.Converters.First(c => c.GetType() == typeof(VectorConverter)));
-#endif
 				}
 				return verboseSerializerSettings;
 			}
