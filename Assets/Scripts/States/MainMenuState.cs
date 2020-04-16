@@ -1,4 +1,5 @@
 ﻿using System;
+using Lunra.Core;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
 using Lunra.WildVacuum.Models;
@@ -32,12 +33,25 @@ namespace Lunra.WildVacuum.Services
         #region Idle
         protected override void Idle()
         {
-            App.S.RequestState(
-                new GamePayload
+            GenerateNewGame(
+                result =>
                 {
-                    Preferences = Payload.Preferences
+                    if (result.Status != ResultStatus.Success)
+                    {
+                        result.Log("Generating new game did not succeed!");
+                        return;
+                    }
+                    
+                    App.S.RequestState(
+                        new GamePayload
+                        {
+                            Preferences = Payload.Preferences,
+                            Game = result.Payload
+                        }
+                    );
                 }
             );
+            
         }
         #endregion
         
@@ -53,5 +67,31 @@ namespace Lunra.WildVacuum.Services
             );
         }
         #endregion
+
+        void GenerateNewGame(Action<Result<GameModel>> done)
+        {
+            var game = new GameModel();
+
+            game.WorldCamera.Enabled.Value = true;
+            
+            var room1 = new RoomPrefabModel();
+
+            room1.PrefabId.Value = "default_spawn";
+            room1.Enabled.Value = true;
+            
+            var room2 = new RoomPrefabModel();
+
+            room2.PrefabId.Value = "rectangle";
+            room2.Enabled.Value = true;
+            room2.Position.Value = new Vector3(0f, 3.01f, -18.74f);
+
+            game.Rooms.Value = new[]
+            {
+                room1,
+                room2
+            };
+            
+            done(Result<GameModel>.Success(game));
+        }
     }
 }

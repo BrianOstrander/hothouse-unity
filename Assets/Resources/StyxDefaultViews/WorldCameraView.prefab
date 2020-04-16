@@ -24,13 +24,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 863547815051313142}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.1607632, y: -0.83909047, z: 0.37593356, w: 0.35882646}
+  m_LocalPosition: {x: 12.87, y: 15.68, z: 12.71}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5557820379749169958}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 48.267002, y: -133.69301, z: 0}
 --- !u!20 &6690077772331988778
 Camera:
   m_ObjectHideFlags: 0
@@ -83,6 +83,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5557820379749169958}
+  - component: {fileID: 8451478976267564119}
   m_Layer: 0
   m_Name: WorldCameraView
   m_TagString: Untagged
@@ -106,6 +107,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8451478976267564119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4245967588106778278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f07d1ac0257ee46ab85d39f04cb7ea6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  poolSize: 0
+  ShowCloseDuration:
+    OverrideShow: 0
+    OverrideClose: 0
+    ShowDuration: 0
+    CloseDuration: 0
+  animations: []
 --- !u!1 &6754313545184291211
 GameObject:
   m_ObjectHideFlags: 0
