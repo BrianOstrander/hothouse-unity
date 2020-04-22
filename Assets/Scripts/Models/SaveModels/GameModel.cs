@@ -14,6 +14,9 @@ namespace Lunra.WildVacuum.Models
 
 		[JsonProperty] RoomPrefabModel[] rooms = new RoomPrefabModel[0];
 		public ListenerProperty<RoomPrefabModel[]> Rooms;
+		
+		[JsonProperty] DoorPrefabModel[] doors = new DoorPrefabModel[0];
+		public ListenerProperty<DoorPrefabModel[]> Doors;
 
 		#endregion
 
@@ -24,6 +27,7 @@ namespace Lunra.WildVacuum.Models
 		public GameModel()
 		{
 			Rooms = new ListenerProperty<RoomPrefabModel[]>(value => rooms = value, () => rooms);
+			Doors = new ListenerProperty<DoorPrefabModel[]>(value => doors = value, () => doors);
 		}
 	}
 }

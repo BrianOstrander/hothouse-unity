@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Views
 {
-    public class TestView : View
-    {
-        protected override void OnShown()
-        {
-            base.OnShown();
-            
-            Debug.Log("Shown this view!");
-        }
-    }
+	public class TestView : View
+	{
+		protected override void OnShown()
+		{
+			base.OnShown();
+			
+			Debug.Log("Shown this view!");
+		}
+	}
 
 }

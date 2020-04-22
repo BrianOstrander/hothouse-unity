@@ -1,8 +1,8 @@
 ﻿namespace Lunra.WildVacuum.Views
 {
-    public class RoomPrefabView : PrefabView
-    {
-        
-    }
+	public class RoomPrefabView : PrefabView
+	{
+		
+	}
 
 }

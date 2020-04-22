@@ -37,9 +37,9 @@ namespace Lunra.WildVacuum.Services
 		{
 			new WorldCameraPresenter(Payload.Game);
 
-			new GenericPresenter<RoomPrefabView>().Show();
-
 			foreach (var room in Payload.Game.Rooms.Value) new RoomPrefabPresenter(Payload.Game, room);
+
+			foreach (var door in Payload.Game.Doors.Value) new DoorPrefabPresenter(Payload.Game, door);
 			
 			done();
 		}

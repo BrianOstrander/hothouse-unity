@@ -6,12 +6,12 @@ namespace Lunra.WildVacuum.Models
 {
     public class WorldCameraModel : Model
     {
-        [JsonProperty] bool enabled;
-        public readonly ListenerProperty<bool> Enabled;
+        [JsonProperty] bool isEnabled;
+        public readonly ListenerProperty<bool> IsEnabled;
 
         public WorldCameraModel()
         {
-            Enabled = new ListenerProperty<bool>(value => enabled = value, () => enabled);
+            IsEnabled = new ListenerProperty<bool>(value => isEnabled = value, () => isEnabled);
         }
     }
 }

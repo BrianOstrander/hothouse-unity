@@ -15,15 +15,15 @@ namespace Lunra.WildVacuum.Models
         [JsonProperty] Quaternion rotation = Quaternion.identity;
         public readonly ListenerProperty<Quaternion> Rotation;
 
-        [JsonProperty] bool enabled;
-        public readonly ListenerProperty<bool> Enabled;
+        [JsonProperty] bool isEnabled;
+        public readonly ListenerProperty<bool> IsEnabled;
 
         public PrefabModel()
         {
             PrefabId = new ListenerProperty<string>(value => prefabId = value, () => prefabId);
             Position = new ListenerProperty<Vector3>(value => position = value, () => position);
             Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);
-            Enabled = new ListenerProperty<bool>(value => enabled = value, () => enabled);
+            IsEnabled = new ListenerProperty<bool>(value => isEnabled = value, () => isEnabled);
         }
     }
 }

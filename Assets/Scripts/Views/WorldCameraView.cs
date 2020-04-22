@@ -2,9 +2,9 @@
 
 namespace Lunra.WildVacuum.Views
 {
-    public class WorldCameraView : View
-    {
-        
-    }
+	public class WorldCameraView : View
+	{
+		
+	}
 
 }
