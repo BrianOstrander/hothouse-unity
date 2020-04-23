@@ -8,8 +8,13 @@ namespace Lunra.WildVacuum.Debugging
 {
 	public class DebugAgent : MonoBehaviour
 	{
+		
+		#region Serialized
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		[SerializeField] string targetName;
 		[SerializeField] NavMeshAgent navMeshAgent;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
+		#endregion
 
 		Transform target;
 		Material material;
