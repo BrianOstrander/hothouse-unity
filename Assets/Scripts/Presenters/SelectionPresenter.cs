@@ -19,15 +19,17 @@ namespace Lunra.WildVacuum.Presenters
 			this.game = game;
 			selection = game.Selection;
 
+			game.SimulationInitialize += OnGameSimulationInitialize;
+			
 			selection.Current.Changed += OnSelectionCurrent;
 
 			App.Heartbeat.Update += OnHeartbeatUpdate;
-			
-			ShowView(instant: true);
 		}
 
 		protected override void OnUnBind()
 		{
+			game.SimulationInitialize -= OnGameSimulationInitialize;
+			
 			selection.Current.Changed -= OnSelectionCurrent;
 			
 			App.Heartbeat.Update -= OnHeartbeatUpdate;
@@ -77,6 +79,13 @@ namespace Lunra.WildVacuum.Presenters
 			if (selection.Current.Value.State != SelectionModel.States.Highlighting) return;
 
 			selection.Current.Value = selection.Current.Value.NewState(SelectionModel.States.Selected);
+		}
+		#endregion
+		
+		#region GameModel Events
+		void OnGameSimulationInitialize()
+		{
+			ShowView(instant: true);
 		}
 		#endregion
 		

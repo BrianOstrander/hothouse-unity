@@ -84,6 +84,9 @@ namespace Lunra.WildVacuum.Models
 
 		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
 		public readonly ListenerProperty<SelectionStates> SelectionState;
+
+		[JsonProperty] NavigationProximity navigationPoint;
+		public readonly ListenerProperty<NavigationProximity> NavigationPoint;
 		#endregion
 		
 		#region Non Serialized
@@ -107,6 +110,7 @@ namespace Lunra.WildVacuum.Models
 			ReproductionFailures = new ListenerProperty<int>(value => reproductionFailures = value, () => reproductionFailures);
 			ReproductionFailureLimit = new ListenerProperty<int>(value => reproductionFailureLimit = value, () => reproductionFailureLimit);
 			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
+			NavigationPoint = new ListenerProperty<NavigationProximity>(value => navigationPoint = value, () => navigationPoint);
 			
 			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
 			IsReproducing = new DerivedProperty<bool, int, int>(

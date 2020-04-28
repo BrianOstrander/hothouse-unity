@@ -2,6 +2,7 @@
 using Lunra.Core;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
+using UnityEngine;
 
 namespace Lunra.WildVacuum.Models
 {
@@ -32,9 +33,9 @@ namespace Lunra.WildVacuum.Models
 		#endregion
 
 		#region NonSerialized
-
+		public bool IsSimulationInitialized { get; private set; }
+		public event Action SimulationInitialize = ActionExtensions.Empty;
 		public Action<float> SimulationUpdate = ActionExtensions.GetEmpty<float>();
-		
 		#endregion
 
 		public GameModel()
@@ -44,6 +45,19 @@ namespace Lunra.WildVacuum.Models
 			Flora = new ListenerProperty<FloraModel[]>(value => flora = value, () => flora);
 			SimulationUpdateMultiplier = new ListenerProperty<float>(value => simulationUpdateMultiplier = value, () => simulationUpdateMultiplier);
 			LastNavigationCalculation = new ListenerProperty<DateTime>(value => lastNavigationCalculation = value, () => lastNavigationCalculation);
+		}
+
+		public void TriggerSimulationInitialize()
+		{
+			if (IsSimulationInitialized)
+			{
+				Debug.LogError("Simulation already initialized...");
+				return;
+			}
+
+			IsSimulationInitialized = true;
+
+			SimulationInitialize();
 		}
 	}
 }

@@ -1,6 +1,7 @@
 using Lunra.StyxMvp.Presenters;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
+using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
@@ -12,15 +13,17 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			this.game = game;
 
-			game.WorldCamera.CameraInstance.Value = View.CameraInstance;
+			game.SimulationInitialize += OnGameSimulationInitialize;
 			
 			game.WorldCamera.IsEnabled.Changed += OnWorldCameraIsEnabled;
 			
-			OnWorldCameraIsEnabled(game.WorldCamera.IsEnabled.Value);
+			game.WorldCamera.CameraInstance.Value = View.CameraInstance;
 		}
 
 		protected override void OnUnBind()
 		{
+			game.SimulationInitialize -= OnGameSimulationInitialize;
+			
 			game.WorldCamera.IsEnabled.Changed -= OnWorldCameraIsEnabled;
 		}
 
@@ -39,6 +42,13 @@ namespace Lunra.WildVacuum.Presenters
 			
 			CloseView(true);
 		}
+		
+		#region GameModel Events
+		void OnGameSimulationInitialize()
+		{
+			OnWorldCameraIsEnabled(game.WorldCamera.IsEnabled.Value);
+		}
+		#endregion
 		
 		#region WorldCameraModel Events
 		void OnWorldCameraIsEnabled(bool enabled)

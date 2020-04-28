@@ -33,6 +33,7 @@ namespace Lunra.WildVacuum.Services
 				done => App.Scenes.Request(SceneRequest.Load(result => done(), Scenes))    
 			);
 			App.S.PushBlocking(OnBeginInitializePresenters);
+			App.S.Push(Payload.Game.TriggerSimulationInitialize);
 		}
 
 		void OnBeginInitializePresenters(Action done)

@@ -22,13 +22,15 @@ namespace Lunra.WildVacuum.Presenters
 			Game = game;
 			Prefab = prefab;
 
-			prefab.IsEnabled.Changed += OnPrefabIsEnabled;
+			Game.SimulationInitialize += OnGameSimulationInitialize;
 			
-			OnPrefabIsEnabled(prefab.IsEnabled.Value);
+			Prefab.IsEnabled.Changed += OnPrefabIsEnabled;
 		}
 
 		protected override void OnUnBind()
 		{
+			Game.SimulationInitialize -= OnGameSimulationInitialize;
+			
 			Prefab.IsEnabled.Changed -= OnPrefabIsEnabled;
 		}
 		
@@ -50,6 +52,13 @@ namespace Lunra.WildVacuum.Presenters
 			
 			CloseView(true);
 		}
+		
+		#region GameModel Events
+		protected virtual void OnGameSimulationInitialize()
+		{
+			OnPrefabIsEnabled(Prefab.IsEnabled.Value);
+		}
+		#endregion
 		
 		#region PrefabModel Events
 		protected virtual void OnPrefabIsEnabled(bool enabled)

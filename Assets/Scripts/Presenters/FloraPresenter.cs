@@ -21,18 +21,20 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			this.game = game;
 			this.flora = flora;
-
+			
 			game.SimulationUpdate += OnGameSimulationUpdate;
 			
 			flora.IsEnabled.Changed += OnFloraIsEnabled;
 			flora.IsReproducing.Changed += OnFloraIsReproducing;
 			flora.SelectionState.Changed += OnFloraSelectionState;
 			
-			OnFloraIsEnabled(flora.IsEnabled.Value);
+			if (game.IsSimulationInitialized) OnInitialized();
+			else game.SimulationInitialize += OnInitialized;
 		}
 
 		protected override void OnUnBind()
 		{
+			game.SimulationInitialize -= OnInitialized;
 			game.SimulationUpdate -= OnGameSimulationUpdate;
 
 			flora.IsEnabled.Changed -= OnFloraIsEnabled;
@@ -98,7 +100,6 @@ namespace Lunra.WildVacuum.Presenters
 
 						if (game.Selection.Current.Value.State == SelectionModel.States.Highlighting && game.Selection.Current.Value.Contains(newFlora.Position.Value))
 						{
-							Debug.Log("we're highlighting...");
 							newFlora.SelectionState.Value = SelectionStates.Highlighted;
 						}
 						
@@ -116,7 +117,15 @@ namespace Lunra.WildVacuum.Presenters
 			flora.ReproductionElapsed.Value = FloraModel.Interval.Create(flora.ReproductionElapsed.Value.Maximum);
 		}
 		
+		#region Events
+		void OnInitialized()
+		{
+			OnFloraIsEnabled(flora.IsEnabled.Value);
+		}
+		#endregion
+		
 		#region GameModel Events
+		
 		void OnGameSimulationUpdate(float delta)
 		{
 			if (!flora.Age.Value.IsDone)
