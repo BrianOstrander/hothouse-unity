@@ -1,4 +1,5 @@
-﻿using Lunra.Core;
+﻿using System;
+using Lunra.Core;
 using Lunra.StyxMvp;
 using UnityEngine;
 
@@ -24,11 +25,14 @@ namespace Lunra.WildVacuum.Views
 		{
 			set
 			{
-				var hue = value ? 0.35f : 0f;
-				foreach (var renderer in gameObject.GetComponentsInChildren<MeshRenderer>()) renderer.material.color = renderer.material.color.NewH(hue);
+				var saturation = value ? 0.47f : 0.37f;
+				SetColor(color => color.NewS(saturation));
 			}
 		}
-		
+
+		public void Highlight() => SetColor(color => color.NewH(0.55f));
+		public void Select() => SetColor(color => color.NewH(0.85f));
+		public void Deselect() => SetColor(color => color.NewH(0.35f));
 		#endregion
 		
 		#region Reverse Bindings
@@ -43,7 +47,15 @@ namespace Lunra.WildVacuum.Views
 
 			Age = 0f;
 			IsReproducing = false;
+			Deselect();
 		}
+		
+		#region Utility
+		void SetColor(Func<Color, Color> apply)
+		{
+			foreach (var renderer in gameObject.GetComponentsInChildren<MeshRenderer>()) renderer.material.color = apply(renderer.material.color);
+		}
+		#endregion
 	}
 
 }

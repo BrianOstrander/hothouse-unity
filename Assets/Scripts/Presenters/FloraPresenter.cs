@@ -23,9 +23,10 @@ namespace Lunra.WildVacuum.Presenters
 			this.flora = flora;
 
 			game.SimulationUpdate += OnGameSimulationUpdate;
-
+			
 			flora.IsEnabled.Changed += OnFloraIsEnabled;
 			flora.IsReproducing.Changed += OnFloraIsReproducing;
+			flora.SelectionState.Changed += OnFloraSelectionState;
 			
 			OnFloraIsEnabled(flora.IsEnabled.Value);
 		}
@@ -36,6 +37,7 @@ namespace Lunra.WildVacuum.Presenters
 
 			flora.IsEnabled.Changed -= OnFloraIsEnabled;
 			flora.IsReproducing.Changed -= OnFloraIsReproducing;
+			flora.SelectionState.Changed -= OnFloraSelectionState;
 		}
 		
 		void Show()
@@ -51,6 +53,8 @@ namespace Lunra.WildVacuum.Presenters
 
 			View.RootTransform.position = flora.Position.Value;
 			View.RootTransform.rotation = flora.Rotation.Value;
+
+			OnFloraSelectionState(flora.SelectionState.Value);
 		}
 
 		void Close()
@@ -91,6 +95,12 @@ namespace Lunra.WildVacuum.Presenters
 						newFlora.ReproductionElapsed.Value = FloraModel.Interval.Create(flora.ReproductionElapsed.Value.Maximum);
 						newFlora.ReproductionRadius.Value = flora.ReproductionRadius.Value;
 						newFlora.ReproductionFailureLimit.Value = flora.ReproductionFailureLimit.Value;
+
+						if (game.Selection.Current.Value.State == SelectionModel.States.Highlighting && game.Selection.Current.Value.Contains(newFlora.Position.Value))
+						{
+							Debug.Log("we're highlighting...");
+							newFlora.SelectionState.Value = SelectionStates.Highlighted;
+						}
 						
 						game.Flora.Value = game.Flora.Value.Append(newFlora).ToArray();
 
@@ -147,6 +157,18 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			if (View.NotVisible) return;
 			View.IsReproducing = isReproducing;
+		}
+		
+		void OnFloraSelectionState(SelectionStates selectionState)
+		{
+			if (View.NotVisible) return;
+			
+			switch (selectionState)
+			{
+				case SelectionStates.Deselected: View.Deselect(); break;
+				case SelectionStates.Highlighted: View.Highlight(); break;
+				case SelectionStates.Selected: View.Select(); break;
+			}
 		}
 		#endregion
 	}

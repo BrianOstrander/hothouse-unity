@@ -81,6 +81,9 @@ namespace Lunra.WildVacuum.Models
 		
 		[JsonProperty] int reproductionFailureLimit;
 		public readonly ListenerProperty<int> ReproductionFailureLimit;
+
+		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
+		public readonly ListenerProperty<SelectionStates> SelectionState;
 		#endregion
 		
 		#region Non Serialized
@@ -103,6 +106,7 @@ namespace Lunra.WildVacuum.Models
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);
 			ReproductionFailures = new ListenerProperty<int>(value => reproductionFailures = value, () => reproductionFailures);
 			ReproductionFailureLimit = new ListenerProperty<int>(value => reproductionFailureLimit = value, () => reproductionFailureLimit);
+			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
 			
 			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
 			IsReproducing = new DerivedProperty<bool, int, int>(

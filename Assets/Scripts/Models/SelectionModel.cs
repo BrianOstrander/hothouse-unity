@@ -9,18 +9,16 @@ namespace Lunra.WildVacuum.Models
 		public enum States
 		{
 			Unknown = 0,
-			None = 10,
-			Highlight = 20,
-			Select = 30,
-			Deselect = 40
+			Deselected = 10,
+			Highlighting = 20,
+			Selected = 30
 		}
 		
 		public struct Selection
 		{
-			public static Selection None() => new Selection(Vector3.zero, Vector3.zero, States.None);
-			public static Selection Highlight(Vector3 begin, Vector3 end) => new Selection(begin, end, States.Highlight);
-			public static Selection Select(Vector3 begin, Vector3 end) => new Selection(begin, end, States.Select);
-			public static Selection Deselect(Vector3 begin, Vector3 end) => new Selection(begin, end, States.Deselect);
+			public static Selection Deselected() => new Selection(Vector3.zero, Vector3.zero, States.Deselected);
+			public static Selection Highlighting(Vector3 begin, Vector3 end) => new Selection(begin, end, States.Highlighting);
+			public static Selection Selected(Vector3 begin, Vector3 end) => new Selection(begin, end, States.Selected);
 			
 			public readonly Vector3 Begin;
 			public readonly Vector3 End;
@@ -42,10 +40,12 @@ namespace Lunra.WildVacuum.Models
 			}
 			
 			public Selection NewState(States state) => new Selection(Begin, End, state);
+
+			public bool Contains(Vector3 position) => Vector3.Distance(Begin, position) < Vector3.Distance(Begin, End);
 		}
 		
 		#region Serialized
-		[JsonProperty] Selection current = Selection.None();
+		[JsonProperty] Selection current = Selection.Deselected();
 		public readonly ListenerProperty<Selection> Current;
 		#endregion
 		

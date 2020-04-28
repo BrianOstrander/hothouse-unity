@@ -56,17 +56,17 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			if (!HasCollision(out var hit)) return;
 			
-			selection.Current.Value = SelectionModel.Selection.Highlight(hit.point, hit.point);
+			selection.Current.Value = SelectionModel.Selection.Highlighting(hit.point, hit.point);
 		}
 		
 		void OnInputMousePrimaryPressed()
 		{
-			if (selection.Current.Value.State != SelectionModel.States.Highlight) return;
+			if (selection.Current.Value.State != SelectionModel.States.Highlighting) return;
 
 			var currentRay = CurrentRay;
 			if (!selection.Current.Value.Surface.Raycast(currentRay, out var surfaceDistance)) return;
 			
-			selection.Current.Value = SelectionModel.Selection.Highlight(
+			selection.Current.Value = SelectionModel.Selection.Highlighting(
 				selection.Current.Value.Begin,
 				currentRay.origin + (currentRay.direction * surfaceDistance)
 			);
@@ -74,9 +74,9 @@ namespace Lunra.WildVacuum.Presenters
 		
 		void OnInputMousePrimaryUp()
 		{
-			if (selection.Current.Value.State != SelectionModel.States.Highlight) return;
+			if (selection.Current.Value.State != SelectionModel.States.Highlighting) return;
 
-			selection.Current.Value = selection.Current.Value.NewState(SelectionModel.States.Select);
+			selection.Current.Value = selection.Current.Value.NewState(SelectionModel.States.Selected);
 		}
 		#endregion
 		
@@ -85,9 +85,23 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			switch (current.State)
 			{
-				case SelectionModel.States.Highlight: View.Highlight(current.Begin, current.End); break;
-				case SelectionModel.States.Select: View.Select(current.Begin, current.End); break;
-				default: View.None(); break;
+				case SelectionModel.States.Highlighting:
+					View.Highlight(current.Begin, current.End);
+					foreach (var flora in game.Flora.Value)
+					{
+						flora.SelectionState.Value = current.Contains(flora.Position.Value) ? SelectionStates.Highlighted : SelectionStates.Deselected;
+					}
+					break;
+				case SelectionModel.States.Selected:
+					View.Select(current.Begin, current.End);
+					foreach (var flora in game.Flora.Value)
+					{
+						flora.SelectionState.Value = current.Contains(flora.Position.Value) ? SelectionStates.Selected : SelectionStates.Deselected;
+					}
+					break;
+				default:
+					View.None();
+					break;
 			}
 		}
 		#endregion
