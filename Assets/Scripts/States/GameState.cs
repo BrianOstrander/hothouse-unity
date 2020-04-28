@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using Lunra.Core;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
@@ -40,6 +42,8 @@ namespace Lunra.WildVacuum.Services
 			foreach (var room in Payload.Game.Rooms.Value) new RoomPrefabPresenter(Payload.Game, room);
 
 			foreach (var door in Payload.Game.Doors.Value) new DoorPrefabPresenter(Payload.Game, door);
+
+			OnGameFlora(Payload.Game.Flora.Value);
 			
 			done();
 		}
@@ -48,13 +52,24 @@ namespace Lunra.WildVacuum.Services
 		#region Idle
 		protected override void Idle()
 		{
-			
+			App.Heartbeat.Update += OnHeartbeatUpdate;
+
+			Payload.Game.Flora.Changed += OnGameFlora;
+		}
+
+		void OnHeartbeatUpdate(float delta)
+		{
+			Payload.Game.SimulationUpdate(delta * Payload.Game.SimulationUpdateMultiplier.Value);
 		}
 		#endregion
         
 		#region End
 		protected override void End()
 		{
+			App.Heartbeat.Update -= OnHeartbeatUpdate;
+			
+			Payload.Game.Flora.Changed -= OnGameFlora;
+			
 			App.S.PushBlocking(
 				done => App.P.UnRegisterAll(done)
 			);
@@ -62,6 +77,18 @@ namespace Lunra.WildVacuum.Services
 			App.S.PushBlocking(
 				done => App.Scenes.Request(SceneRequest.UnLoad(result => done(), Scenes))
 			);
+		}
+		#endregion
+		
+		#region GameModel Events
+		void OnGameFlora(FloraModel[] allFlora)
+		{
+			foreach (var flora in allFlora.Where(f => !f.HasPresenter.Value))
+			{
+				flora.HasPresenter.Value = true;
+				new FloraPresenter(Payload.Game, flora);
+			}
+			Payload.Game.LastNavigationCalculation.Value = DateTime.Now;
 		}
 		#endregion
 	}

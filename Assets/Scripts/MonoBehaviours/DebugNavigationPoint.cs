@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Lunra.StyxMvp;
+using Lunra.StyxMvp.Services;
+using Lunra.WildVacuum.Services;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -26,7 +30,7 @@ namespace Lunra.WildVacuum.Debugging
 			public NavigationPath(Vector3[] corners)
 			{
 				Corners = corners;
-				Position = Corners[0];
+				Position = Corners.FirstOrDefault();
 				State = States.Navigating;
 			}
 			
@@ -65,9 +69,13 @@ namespace Lunra.WildVacuum.Debugging
 		Material material;
 
 		List<MeshRenderer> renderers = new List<MeshRenderer>();
+
+		bool hasInitialized;
 		
 		NavigationPath path;
 		float pathLength;
+
+		DateTime lastNavigationCalculation;
 
 		void Awake()
 		{
@@ -87,6 +95,23 @@ namespace Lunra.WildVacuum.Debugging
 
 		void Update()
 		{
+			if (!App.HasInstance) return;
+
+			if (!hasInitialized)
+			{
+				if (App.S.Is(typeof(GameState), StateMachine.Events.Idle))
+				{
+					lastNavigationCalculation = DateTime.Now;
+
+					var game = (App.S.CurrentHandler as GameState).Payload.Game;
+
+					game.LastNavigationCalculation.Changed += OnGameLastNavigationCalculation;
+
+					hasInitialized = true;
+				}
+				else return;
+			}
+			
 			if (target == null)
 			{
 				target = GameObject.Find(targetName)?.transform;
@@ -113,15 +138,24 @@ namespace Lunra.WildVacuum.Debugging
 				path = null;
 			}
 		}
+		
+		#region Events
+		void OnGameLastNavigationCalculation(DateTime dateTime)
+		{
+			if (dateTime < lastNavigationCalculation) return;
+			lastNavigationCalculation = dateTime;
+			
+			RecalculatePath();
+		}
+		#endregion
 
 		[ContextMenu("Recalculate Path")]
 		void RecalculatePath()
 		{
 			path = null;
 		}
-		
 
-		void OnDrawGizmosSelected()
+		void OnDrawGizmos()
 		{
 			// Gizmos.DrawLine(transform.position, transform.position + (transform.forward * 3f));
 			if (path == null) return;

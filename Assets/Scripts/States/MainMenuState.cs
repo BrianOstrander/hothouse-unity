@@ -74,34 +74,63 @@ namespace Lunra.WildVacuum.Services
 
 			game.WorldCamera.IsEnabled.Value = true;
 			
+			var room0 = new RoomPrefabModel();
+
+			room0.PrefabId.Value = "default_spawn";
+			room0.IsEnabled.Value = true;
+			room0.Id.Value = "room_0";
+			
 			var room1 = new RoomPrefabModel();
 
-			room1.PrefabId.Value = "default_spawn";
+			room1.PrefabId.Value = "rectangle";
 			room1.IsEnabled.Value = true;
-			
-			var room2 = new RoomPrefabModel();
-
-			room2.PrefabId.Value = "rectangle";
-			room2.IsEnabled.Value = true;
-			room2.Position.Value = new Vector3(0f, 3.01f, -18.74f);
+			room1.Id.Value = "room_1";
+			room1.Position.Value = new Vector3(0f, 3.01f, -18.74f);
 
 			game.Rooms.Value = new[]
 			{
-				room1,
-				room2
+				room0,
+				room1
 			};
 			
-			var door1 = new DoorPrefabModel();
+			var door0 = new DoorPrefabModel();
 
-			door1.PrefabId.Value = "default";
-			door1.IsEnabled.Value = true;
-			door1.Position.Value = new Vector3(0f, -0.02f, -15.74f);
+			door0.PrefabId.Value = "default";
+			door0.IsEnabled.Value = true;
+			door0.RoomConnection.Value = new DoorPrefabModel.Connection(room0.Id.Value, room1.Id.Value);
+			door0.Position.Value = new Vector3(0f, -0.02f, -15.74f);
 
 			game.Doors.Value = new[]
 			{
-				door1
+				door0
 			};
 			
+			var flora0 = new FloraModel();
+			flora0.RoomId.Value = room0.Id.Value;
+			flora0.IsEnabled.Value = true;
+			flora0.Position.Value = new Vector3(7f, 0f, -5f);
+			flora0.Rotation.Value = Quaternion.identity;
+			flora0.Age.Value = FloraModel.Interval.Create(0.1f);
+			flora0.ReproductionElapsed.Value = FloraModel.Interval.Create(1f);
+			flora0.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
+			flora0.ReproductionFailureLimit.Value = 30;
+
+			var flora1 = new FloraModel();
+			flora1.RoomId.Value = room0.Id.Value;
+			flora1.IsEnabled.Value = true;
+			flora1.Position.Value = new Vector3(-12f, -0.8386866f, 6f);
+			flora1.Rotation.Value = Quaternion.identity;
+			flora1.Age.Value = flora0.Age.Value;
+			flora1.ReproductionElapsed.Value = flora0.ReproductionElapsed.Value;
+			flora1.ReproductionRadius.Value = flora0.ReproductionRadius.Value;
+			flora1.ReproductionFailureLimit.Value = flora0.ReproductionFailureLimit.Value;
+			
+			game.Flora.Value = new[]
+			{
+				flora0,
+				flora1
+			};
+
 			done(Result<GameModel>.Success(game));
 		}
 	}
