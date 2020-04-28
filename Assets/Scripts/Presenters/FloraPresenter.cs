@@ -86,7 +86,7 @@ namespace Lunra.WildVacuum.Presenters
 						newFlora.RoomId.Value = flora.RoomId.Value;
 						newFlora.IsEnabled.Value = true;
 						newFlora.Position.Value = hit.position;
-						newFlora.Rotation.Value = Quaternion.identity;
+						newFlora.Rotation.Value = Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
 						newFlora.Age.Value = FloraModel.Interval.Create(flora.Age.Value.Maximum);
 						newFlora.ReproductionElapsed.Value = FloraModel.Interval.Create(flora.ReproductionElapsed.Value.Maximum);
 						newFlora.ReproductionRadius.Value = flora.ReproductionRadius.Value;
