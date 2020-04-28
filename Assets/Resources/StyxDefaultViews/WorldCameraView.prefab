@@ -126,6 +126,7 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
+  cameraInstance: {fileID: 6690077772331988778}
 --- !u!1 &6754313545184291211
 GameObject:
   m_ObjectHideFlags: 0

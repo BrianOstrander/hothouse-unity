@@ -11,8 +11,9 @@ namespace Lunra.WildVacuum.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
-		[JsonProperty] 
-		public readonly WorldCameraModel WorldCamera = new WorldCameraModel();
+		[JsonProperty] public readonly WorldCameraModel WorldCamera = new WorldCameraModel();
+		
+		[JsonProperty] public readonly SelectionModel Selection = new SelectionModel();
 
 		[JsonProperty] RoomPrefabModel[] rooms = new RoomPrefabModel[0];
 		public readonly ListenerProperty<RoomPrefabModel[]> Rooms;
@@ -22,7 +23,7 @@ namespace Lunra.WildVacuum.Models
 
 		[JsonProperty] FloraModel[] flora = new FloraModel[0];
 		public readonly ListenerProperty<FloraModel[]> Flora;
-
+		
 		[JsonProperty] float simulationUpdateMultiplier = 1f;
 		public readonly ListenerProperty<float> SimulationUpdateMultiplier;
 

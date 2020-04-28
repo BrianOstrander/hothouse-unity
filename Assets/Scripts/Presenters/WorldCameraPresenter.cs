@@ -12,6 +12,8 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			this.game = game;
 
+			game.WorldCamera.CameraInstance.Value = View.CameraInstance;
+			
 			game.WorldCamera.IsEnabled.Changed += OnWorldCameraIsEnabled;
 			
 			OnWorldCameraIsEnabled(game.WorldCamera.IsEnabled.Value);

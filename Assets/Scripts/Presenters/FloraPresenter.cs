@@ -126,11 +126,11 @@ namespace Lunra.WildVacuum.Presenters
 				return;
 			}
 
-			// if (250 < game.Flora.Value.Length)
-			// {
-			// 	flora.ReproductionFailures.Value = flora.ReproductionFailureLimit.Value;
-			// 	return;
-			// }
+			if (250 < game.Flora.Value.Length)
+			{
+				flora.ReproductionFailures.Value = flora.ReproductionFailureLimit.Value;
+				return;
+			}
 			
 			OnReproduce();
 		}
