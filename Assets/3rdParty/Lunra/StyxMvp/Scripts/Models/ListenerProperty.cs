@@ -4,22 +4,15 @@ using Lunra.Core;
 
 namespace Lunra.StyxMvp.Models
 {
-    public enum ListenerPropertySources
-    {
-        Unknown = 0,
-        Internal = 10,
-        External = 20
-    }
-
     public class ListenerProperty<T>
     {
         public readonly string Name;
 
-        Action<T> set;
-        Func<T> get;
+        readonly Action<T> set;
+        readonly Func<T> get;
 
-        public Action<T> Changed = ActionExtensions.GetEmpty<T>();
-        public Action<T, ListenerPropertySources> ChangedSource = ActionExtensions.GetEmpty<T, ListenerPropertySources>();
+        public event Action<T> Changed = ActionExtensions.GetEmpty<T>();
+        public event Action<T, PropertySources> ChangedSource = ActionExtensions.GetEmpty<T, PropertySources>();
 
         public T Value
         {
@@ -27,7 +20,7 @@ namespace Lunra.StyxMvp.Models
             set => SetValue(value);
         }
 
-        public bool SetValue(T value, ListenerPropertySources source = ListenerPropertySources.Unknown)
+        public bool SetValue(T value, PropertySources source = PropertySources.Unknown)
         {
             if (EqualityComparer<T>.Default.Equals(get(), value)) return false;
             set(value);

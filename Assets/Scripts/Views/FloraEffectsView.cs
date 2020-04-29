@@ -13,8 +13,17 @@ namespace Lunra.WildVacuum.Views
 		#endregion
 
 		#region Bindings
-		public void Spawn() => spawnParticles.Play();
-		public void Chop() => chopParticles.Play();
+		public void PlaySpawn(Vector3 position)
+		{
+			spawnParticles.transform.position = position;
+			spawnParticles.Play();	
+		}
+
+		public void PlayChop(Vector3 position)
+		{
+			chopParticles.transform.position = position;
+			chopParticles.Play();
+		}
 		#endregion
 		
 		#region Reverse Bindings

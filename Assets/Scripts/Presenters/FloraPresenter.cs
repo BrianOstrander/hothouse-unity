@@ -68,7 +68,7 @@ namespace Lunra.WildVacuum.Presenters
 
 			OnFloraSelectionState(flora.SelectionState.Value);
 			
-			if (Mathf.Approximately(0f, flora.Age.Value.Current)) game.FloraEffects.Spawn(new FloraEffectsModel.Request(flora.Position.Value));
+			if (Mathf.Approximately(0f, flora.Age.Value.Current)) game.FloraEffects.SpawnQueue.Enqueue(new FloraEffectsModel.Request(flora.Position.Value));
 		}
 
 		void Close()
@@ -241,7 +241,7 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			if (!Mathf.Approximately(0f, health)) return;
 			
-			if (View.Visible) game.FloraEffects.Chop(new FloraEffectsModel.Request(flora.Position.Value));
+			if (View.Visible) game.FloraEffects.ChopQueue.Enqueue(new FloraEffectsModel.Request(flora.Position.Value));
 			
 			flora.State.Value = FloraModel.States.Pooled;
 			

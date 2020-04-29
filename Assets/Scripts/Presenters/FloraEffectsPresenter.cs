@@ -1,3 +1,5 @@
+using System;
+using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Presenters;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
@@ -9,7 +11,7 @@ namespace Lunra.WildVacuum.Presenters
 	{
 		GameModel game;
 		FloraEffectsModel floraEffects;
-
+		
 		public FloraEffectsPresenter(
 			GameModel game
 		)
@@ -17,18 +19,14 @@ namespace Lunra.WildVacuum.Presenters
 			this.game = game;
 			floraEffects = game.FloraEffects;
 			
-			game.SimulationInitialize += OnGameSimulationInitialized;
-
-			floraEffects.Spawn += OnFloraEffectsSpawn;
-			floraEffects.Chop += OnFloraEffectsChop;
+			game.SimulationInitialize += OnGameSimulationInitialize;
+			game.SimulationUpdate += OnGameSimulationUpdate;
 		}
 
 		protected override void OnUnBind()
 		{
-			game.SimulationInitialize -= OnGameSimulationInitialized;
-			
-			floraEffects.Spawn -= OnFloraEffectsSpawn;
-			floraEffects.Chop -= OnFloraEffectsChop;
+			game.SimulationInitialize -= OnGameSimulationInitialize;
+			game.SimulationUpdate -= OnGameSimulationUpdate;
 		}
 		
 		void Show()
@@ -48,9 +46,17 @@ namespace Lunra.WildVacuum.Presenters
 		}
 		
 		#region GameModel Events
-		void OnGameSimulationInitialized()
+		void OnGameSimulationInitialize()
 		{
 			OnFloraEffectsIsEnabled(floraEffects.IsEnabled.Value);
+		}
+		
+		void OnGameSimulationUpdate(float delta)
+		{
+			if (View.NotVisible) return;
+
+			DequeueEffect(floraEffects.SpawnQueue, View.PlaySpawn);
+			DequeueEffect(floraEffects.ChopQueue, View.PlayChop);
 		}
 		#endregion
 		
@@ -60,21 +66,12 @@ namespace Lunra.WildVacuum.Presenters
 			if (isEnabled) Show();
 			else Close();
 		}
+		#endregion
 		
-		void OnFloraEffectsSpawn(FloraEffectsModel.Request request)
+		#region Utility
+		void DequeueEffect(QueueProperty<FloraEffectsModel.Request> queue, Action<Vector3> play)
 		{
-			if (View.NotVisible) return;
-
-			View.RootTransform.position = request.Position;
-			View.Spawn();
-		}
-
-		void OnFloraEffectsChop(FloraEffectsModel.Request request)
-		{
-			if (View.NotVisible) return;
-
-			View.RootTransform.position = request.Position;
-			View.Chop();
+			if (queue.TryDequeue(out var request)) play(request.Position);
 		}
 		#endregion
 	}

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
@@ -23,16 +24,20 @@ namespace Lunra.WildVacuum.Models
 		#region Serialized
 		[JsonProperty] bool isEnabled;
 		[JsonIgnore] public readonly ListenerProperty<bool> IsEnabled;
-		#endregion
+
+		[JsonProperty] Queue<Request> spawnQueue = new Queue<Request>();
+		[JsonIgnore] public readonly QueueProperty<Request> SpawnQueue;
 		
-		#region Non Serialized
-		public Action<Request> Spawn = ActionExtensions.GetEmpty<Request>();
-		public Action<Request> Chop = ActionExtensions.GetEmpty<Request>();
+		[JsonProperty] Queue<Request> chopQueue = new Queue<Request>();
+		[JsonIgnore] public readonly QueueProperty<Request> ChopQueue;
 		#endregion
 
 		public FloraEffectsModel()
 		{
 			IsEnabled = new ListenerProperty<bool>(value => isEnabled = value, () => isEnabled);
+			
+			SpawnQueue = new QueueProperty<Request>(spawnQueue);
+			ChopQueue = new QueueProperty<Request>(chopQueue);
 		}
 	}
 }
