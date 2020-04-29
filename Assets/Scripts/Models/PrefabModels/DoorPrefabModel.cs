@@ -21,10 +21,10 @@ namespace Lunra.WildVacuum.Models
         }
         
         [JsonProperty] bool isOpen;
-        public readonly ListenerProperty<bool> IsOpen;
+        [JsonIgnore] public readonly ListenerProperty<bool> IsOpen;
 
         [JsonProperty] Connection roomConnection;
-        public readonly ListenerProperty<Connection> RoomConnection; 
+        [JsonIgnore] public readonly ListenerProperty<Connection> RoomConnection; 
         
 
         public DoorPrefabModel()

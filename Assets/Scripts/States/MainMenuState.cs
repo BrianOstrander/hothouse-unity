@@ -104,36 +104,31 @@ namespace Lunra.WildVacuum.Services
 			{
 				door0
 			};
-			
-			var flora0 = new FloraModel();
-			flora0.RoomId.Value = room0.Id.Value;
-			flora0.IsEnabled.Value = true;
-			flora0.Position.Value = new Vector3(7f, 0f, -5f);
-			flora0.Rotation.Value = Quaternion.identity;
-			flora0.Age.Value = FloraModel.Interval.Create(0.1f);
-			flora0.ReproductionElapsed.Value = FloraModel.Interval.Create(1f);
-			flora0.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
-			flora0.ReproductionFailureLimit.Value = 30;
-			flora0.HealthMaximum.Value = 100f;
-			flora0.Health.Value = flora0.HealthMaximum.Value;
 
-			var flora1 = new FloraModel();
-			flora1.RoomId.Value = room0.Id.Value;
-			flora1.IsEnabled.Value = true;
-			flora1.Position.Value = new Vector3(-12f, -0.8386866f, 6f);
-			flora1.Rotation.Value = Quaternion.identity;
-			flora1.Age.Value = flora0.Age.Value;
-			flora1.ReproductionElapsed.Value = flora0.ReproductionElapsed.Value;
-			flora1.ReproductionRadius.Value = flora0.ReproductionRadius.Value;
-			flora1.ReproductionFailureLimit.Value = flora0.ReproductionFailureLimit.Value;
-			flora1.HealthMaximum.Value = flora0.HealthMaximum.Value;
-			flora1.Health.Value = flora0.Health.Value;
-			
-			game.Flora.Value = new[]
+			void initializeFlora(
+				FloraModel flora,
+				Vector3 position
+			)
 			{
-				flora0,
-				flora1
-			};
+				flora.RoomId.Value = room0.Id.Value;
+				flora.State.Value = FloraModel.States.Visible;
+				flora.Position.Value = position;
+				flora.Rotation.Value = Quaternion.identity;
+				flora.Age.Value = FloraModel.Interval.Create(0.1f);
+				flora.ReproductionElapsed.Value = FloraModel.Interval.Create(1f);
+				flora.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
+				flora.ReproductionFailureLimit.Value = 30;
+				flora.HealthMaximum.Value = 100f;
+				flora.Health.Value = flora.HealthMaximum.Value;	
+			}
+			
+			game.Flora.Activate(
+				flora => initializeFlora(flora, new Vector3(7f, 0f, -5f))
+			);
+			
+			game.Flora.Activate(
+				flora => initializeFlora(flora, new Vector3(-12f, -0.8386866f, 6f))
+			);
 
 			done(Result<GameModel>.Success(game));
 		}

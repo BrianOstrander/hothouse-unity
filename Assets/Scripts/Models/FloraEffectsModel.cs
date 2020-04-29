@@ -22,7 +22,7 @@ namespace Lunra.WildVacuum.Models
 
 		#region Serialized
 		[JsonProperty] bool isEnabled;
-		public readonly ListenerProperty<bool> IsEnabled;
+		[JsonIgnore] public readonly ListenerProperty<bool> IsEnabled;
 		#endregion
 		
 		#region Non Serialized

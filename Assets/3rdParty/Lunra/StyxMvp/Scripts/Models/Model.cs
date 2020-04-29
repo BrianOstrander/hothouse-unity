@@ -9,7 +9,6 @@ namespace Lunra.StyxMvp.Models
 		ListenerProperty<string> Id { get; }
 	}
 
-	[JsonObject(MemberSerialization.OptIn)]
 	public abstract class Model : IModel
 	{
 		[JsonProperty] string id;
@@ -17,7 +16,7 @@ namespace Lunra.StyxMvp.Models
 		/// <summary>
 		/// Id used to identify serialized models.
 		/// </summary>
-		public ListenerProperty<string> Id => idListener;
+		[JsonIgnore] public ListenerProperty<string> Id => idListener;
 
 		public Model()
 		{

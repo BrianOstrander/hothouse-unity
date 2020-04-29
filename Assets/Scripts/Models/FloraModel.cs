@@ -51,56 +51,64 @@ namespace Lunra.WildVacuum.Models
 			}
 		}
 
+		public enum States
+		{
+			Unknown = 0,
+			Pooled = 10,
+			Visible = 20,
+			NotVisible = 30
+		}
+		
 		#region Serialized
 		// [JsonProperty] string themeId;
 		// public readonly ListenerProperty<string> ThemeId;
 
 		[JsonProperty] string roomId;
-		public readonly ListenerProperty<string> RoomId;
+		[JsonIgnore] public readonly ListenerProperty<string> RoomId;
 
 		[JsonProperty] Vector3 position = Vector3.zero;
-		public readonly ListenerProperty<Vector3> Position;
+		[JsonIgnore] public readonly ListenerProperty<Vector3> Position;
         
 		[JsonProperty] Quaternion rotation = Quaternion.identity;
-		public readonly ListenerProperty<Quaternion> Rotation;
-		
-		[JsonProperty] bool isEnabled;
-		public readonly ListenerProperty<bool> IsEnabled;
+		[JsonIgnore] public readonly ListenerProperty<Quaternion> Rotation;
+
+		[JsonProperty] States state;
+		[JsonIgnore] public readonly ListenerProperty<States> State;
 		
 		[JsonProperty] Interval age;
-		public readonly ListenerProperty<Interval> Age;
+		[JsonIgnore] public readonly ListenerProperty<Interval> Age;
 
 		[JsonProperty] Interval reproductionElapsed;
-		public readonly ListenerProperty<Interval> ReproductionElapsed;
+		[JsonIgnore] public readonly ListenerProperty<Interval> ReproductionElapsed;
 		
 		[JsonProperty] FloatRange reproductionRadius;
-		public readonly ListenerProperty<FloatRange> ReproductionRadius;
+		[JsonIgnore] public readonly ListenerProperty<FloatRange> ReproductionRadius;
 		
 		[JsonProperty] int reproductionFailures;
-		public readonly ListenerProperty<int> ReproductionFailures;
+		[JsonIgnore] public readonly ListenerProperty<int> ReproductionFailures;
 		
 		[JsonProperty] int reproductionFailureLimit;
-		public readonly ListenerProperty<int> ReproductionFailureLimit;
+		[JsonIgnore] public readonly ListenerProperty<int> ReproductionFailureLimit;
 
 		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
-		public readonly ListenerProperty<SelectionStates> SelectionState;
+		[JsonIgnore] public readonly ListenerProperty<SelectionStates> SelectionState;
 
 		[JsonProperty] NavigationProximity navigationPoint;
-		public readonly ListenerProperty<NavigationProximity> NavigationPoint;
+		[JsonIgnore] public readonly ListenerProperty<NavigationProximity> NavigationPoint;
 		
 		[JsonProperty] float health;
-		public readonly ListenerProperty<float> Health;
+		[JsonIgnore] public readonly ListenerProperty<float> Health;
 		
 		[JsonProperty] float healthMaximum;
-		public readonly ListenerProperty<float> HealthMaximum;
+		[JsonIgnore] public readonly ListenerProperty<float> HealthMaximum;
 		#endregion
 		
 		#region Non Serialized
 		bool hasPresenter;
-		public readonly ListenerProperty<bool> HasPresenter;
+		[JsonIgnore] public readonly ListenerProperty<bool> HasPresenter;
 
 		bool isReproducing;
-		public readonly DerivedProperty<bool, int, int> IsReproducing;
+		[JsonIgnore] public readonly DerivedProperty<bool, int, int> IsReproducing;
 		#endregion
 		
 		public FloraModel()
@@ -109,7 +117,7 @@ namespace Lunra.WildVacuum.Models
 			RoomId = new ListenerProperty<string>(value => roomId = value, () => roomId);
 			Position = new ListenerProperty<Vector3>(value => position = value, () => position);
 			Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);
-			IsEnabled = new ListenerProperty<bool>(value => isEnabled = value, () => isEnabled);
+			State = new ListenerProperty<States>(value => state = value, () => state);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);

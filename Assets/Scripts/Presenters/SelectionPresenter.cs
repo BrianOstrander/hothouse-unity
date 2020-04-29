@@ -96,14 +96,14 @@ namespace Lunra.WildVacuum.Presenters
 			{
 				case SelectionModel.States.Highlighting:
 					View.Highlight(current.Begin, current.End);
-					foreach (var flora in game.Flora.Value)
+					foreach (var flora in game.Flora.GetActive())
 					{
 						flora.SelectionState.Value = current.Contains(flora.Position.Value) ? SelectionStates.Highlighted : SelectionStates.Deselected;
 					}
 					break;
 				case SelectionModel.States.Selected:
 					View.Select(current.Begin, current.End);
-					foreach (var flora in game.Flora.Value)
+					foreach (var flora in game.Flora.GetActive())
 					{
 						flora.SelectionState.Value = current.Contains(flora.Position.Value) ? SelectionStates.Selected : SelectionStates.Deselected;
 					}

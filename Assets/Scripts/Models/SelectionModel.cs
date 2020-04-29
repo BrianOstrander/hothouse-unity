@@ -46,7 +46,7 @@ namespace Lunra.WildVacuum.Models
 		
 		#region Serialized
 		[JsonProperty] Selection current = Selection.Deselected();
-		public readonly ListenerProperty<Selection> Current;
+		[JsonIgnore] public readonly ListenerProperty<Selection> Current;
 		#endregion
 		
 		#region Non Serialized
