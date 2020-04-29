@@ -13,8 +13,8 @@ namespace Lunra.WildVacuum.Models
 	{
 		#region Serialized
 		[JsonProperty] public readonly WorldCameraModel WorldCamera = new WorldCameraModel();
-		
 		[JsonProperty] public readonly SelectionModel Selection = new SelectionModel();
+		[JsonProperty] public readonly FloraEffectsModel FloraEffects = new FloraEffectsModel();
 
 		[JsonProperty] RoomPrefabModel[] rooms = new RoomPrefabModel[0];
 		public readonly ListenerProperty<RoomPrefabModel[]> Rooms;

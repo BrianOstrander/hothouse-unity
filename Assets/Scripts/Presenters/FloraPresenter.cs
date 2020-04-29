@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lunra.Core;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp.Presenters;
@@ -6,6 +7,7 @@ using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace Lunra.WildVacuum.Presenters
 {
@@ -23,10 +25,12 @@ namespace Lunra.WildVacuum.Presenters
 			this.flora = flora;
 			
 			game.SimulationUpdate += OnGameSimulationUpdate;
+			game.LastNavigationCalculation.Changed += OnGameLastNavigationCalculation;
 			
 			flora.IsEnabled.Changed += OnFloraIsEnabled;
 			flora.IsReproducing.Changed += OnFloraIsReproducing;
 			flora.SelectionState.Changed += OnFloraSelectionState;
+			flora.Health.Changed += OnFloraHealth;
 			
 			if (game.IsSimulationInitialized) OnInitialized();
 			else game.SimulationInitialize += OnInitialized;
@@ -36,10 +40,12 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			game.SimulationInitialize -= OnInitialized;
 			game.SimulationUpdate -= OnGameSimulationUpdate;
+			game.LastNavigationCalculation.Changed -= OnGameLastNavigationCalculation;
 
 			flora.IsEnabled.Changed -= OnFloraIsEnabled;
 			flora.IsReproducing.Changed -= OnFloraIsReproducing;
 			flora.SelectionState.Changed -= OnFloraSelectionState;
+			flora.Health.Changed -= OnFloraHealth;
 		}
 		
 		void Show()
@@ -97,6 +103,8 @@ namespace Lunra.WildVacuum.Presenters
 						newFlora.ReproductionElapsed.Value = FloraModel.Interval.Create(flora.ReproductionElapsed.Value.Maximum);
 						newFlora.ReproductionRadius.Value = flora.ReproductionRadius.Value;
 						newFlora.ReproductionFailureLimit.Value = flora.ReproductionFailureLimit.Value;
+						newFlora.HealthMaximum.Value = flora.HealthMaximum.Value;
+						newFlora.Health.Value = flora.HealthMaximum.Value;
 
 						if (game.Selection.Current.Value.State == SelectionModel.States.Highlighting && game.Selection.Current.Value.Contains(newFlora.Position.Value))
 						{
@@ -121,11 +129,12 @@ namespace Lunra.WildVacuum.Presenters
 		void OnInitialized()
 		{
 			OnFloraIsEnabled(flora.IsEnabled.Value);
+			
+			if (View.Visible && Mathf.Approximately(0f, flora.Age.Value.Current)) game.FloraEffects.Spawn(new FloraEffectsModel.Request(flora.Position.Value));
 		}
 		#endregion
 		
 		#region GameModel Events
-		
 		void OnGameSimulationUpdate(float delta)
 		{
 			if (!flora.Age.Value.IsDone)
@@ -153,6 +162,16 @@ namespace Lunra.WildVacuum.Presenters
 			
 			OnReproduce();
 		}
+
+		void OnGameLastNavigationCalculation(DateTime dateTime)
+		{
+			var found = NavMesh.SamplePosition(flora.Position.Value, out var hit, flora.ReproductionRadius.Value.Maximum, NavMesh.AllAreas);
+
+			if (found) flora.NavigationPoint.Value = new NavigationProximity(hit.position, Vector3.Distance(hit.position, flora.Position.Value), NavigationProximity.AccessStates.Accessible);
+			else flora.NavigationPoint.Value = new NavigationProximity(flora.Position.Value, float.MaxValue, NavigationProximity.AccessStates.NotAccessible);
+			
+			if (found) Debug.DrawLine(flora.NavigationPoint.Value.Position, flora.NavigationPoint.Value.Position + (Vector3.up * 1f), Color.green, 1f);
+		}
 		#endregion
 
 		#region FloraModel Events
@@ -176,8 +195,25 @@ namespace Lunra.WildVacuum.Presenters
 			{
 				case SelectionStates.Deselected: View.Deselect(); break;
 				case SelectionStates.Highlighted: View.Highlight(); break;
-				case SelectionStates.Selected: View.Select(); break;
+				case SelectionStates.Selected:
+					View.Select();
+					if (flora.NavigationPoint.Value.Access == NavigationProximity.AccessStates.Accessible)
+					{
+						Debug.DrawLine(flora.Position.Value, flora.NavigationPoint.Value.Position, Color.green, 15f);
+						Debug.DrawLine(flora.NavigationPoint.Value.Position, flora.NavigationPoint.Value.Position + (Vector3.up * 1f), Color.green, 15f);
+					}
+					break;
 			}
+		}
+
+		void OnFloraHealth(float health)
+		{
+			if (View.NotVisible) return;
+
+			if (!Mathf.Approximately(0f, health)) return;
+			
+			game.FloraEffects.Chop(new FloraEffectsModel.Request(flora.Position.Value));
+			
 		}
 		#endregion
 	}

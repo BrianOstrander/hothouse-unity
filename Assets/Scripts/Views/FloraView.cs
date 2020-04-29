@@ -13,6 +13,7 @@ namespace Lunra.WildVacuum.Views
 		[SerializeField] float maximumHeight;
 		[SerializeField] Transform heightRoot;
 		[SerializeField] AnimationCurve reproductionDirectionMutationFalloff;
+		[SerializeField] ParticleSystem killParticles;
 		
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
@@ -40,7 +41,7 @@ namespace Lunra.WildVacuum.Views
 		public AnimationCurve ReproductionDirectionMutationFalloff => reproductionDirectionMutationFalloff;
 		
 		#endregion
-		
+
 		public override void Reset()
 		{
 			base.Reset();
@@ -49,7 +50,7 @@ namespace Lunra.WildVacuum.Views
 			IsReproducing = false;
 			Deselect();
 		}
-		
+
 		#region Utility
 		void SetColor(Func<Color, Color> apply)
 		{

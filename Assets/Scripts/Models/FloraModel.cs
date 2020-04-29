@@ -87,6 +87,12 @@ namespace Lunra.WildVacuum.Models
 
 		[JsonProperty] NavigationProximity navigationPoint;
 		public readonly ListenerProperty<NavigationProximity> NavigationPoint;
+		
+		[JsonProperty] float health;
+		public readonly ListenerProperty<float> Health;
+		
+		[JsonProperty] float healthMaximum;
+		public readonly ListenerProperty<float> HealthMaximum;
 		#endregion
 		
 		#region Non Serialized
@@ -111,6 +117,8 @@ namespace Lunra.WildVacuum.Models
 			ReproductionFailureLimit = new ListenerProperty<int>(value => reproductionFailureLimit = value, () => reproductionFailureLimit);
 			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
 			NavigationPoint = new ListenerProperty<NavigationProximity>(value => navigationPoint = value, () => navigationPoint);
+			Health = new ListenerProperty<float>(value => health = value, () => health);
+			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
 			
 			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
 			IsReproducing = new DerivedProperty<bool, int, int>(

@@ -114,6 +114,8 @@ namespace Lunra.WildVacuum.Services
 			flora0.ReproductionElapsed.Value = FloraModel.Interval.Create(1f);
 			flora0.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
 			flora0.ReproductionFailureLimit.Value = 30;
+			flora0.HealthMaximum.Value = 100f;
+			flora0.Health.Value = flora0.HealthMaximum.Value;
 
 			var flora1 = new FloraModel();
 			flora1.RoomId.Value = room0.Id.Value;
@@ -124,6 +126,8 @@ namespace Lunra.WildVacuum.Services
 			flora1.ReproductionElapsed.Value = flora0.ReproductionElapsed.Value;
 			flora1.ReproductionRadius.Value = flora0.ReproductionRadius.Value;
 			flora1.ReproductionFailureLimit.Value = flora0.ReproductionFailureLimit.Value;
+			flora1.HealthMaximum.Value = flora0.HealthMaximum.Value;
+			flora1.Health.Value = flora0.Health.Value;
 			
 			game.Flora.Value = new[]
 			{

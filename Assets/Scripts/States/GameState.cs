@@ -38,9 +38,11 @@ namespace Lunra.WildVacuum.Services
 
 		void OnBeginInitializePresenters(Action done)
 		{
+			Payload.Game.FloraEffects.IsEnabled.Value = true;
+			
 			new WorldCameraPresenter(Payload.Game);
-
 			new SelectionPresenter(Payload.Game);
+			new FloraEffectsPresenter(Payload.Game);
 
 			foreach (var room in Payload.Game.Rooms.Value) new RoomPrefabPresenter(Payload.Game, room);
 

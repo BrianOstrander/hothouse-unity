@@ -1,7 +1,6 @@
 using Lunra.StyxMvp.Presenters;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
-using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
