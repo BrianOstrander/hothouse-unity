@@ -2,6 +2,7 @@
 using Lunra.Core;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
+using Lunra.WildVacuum.Models.AgentModels;
 using UnityEngine;
 
 namespace Lunra.WildVacuum.Models
@@ -17,6 +18,7 @@ namespace Lunra.WildVacuum.Models
 		public readonly SelectionModel Selection = new SelectionModel();
 		public readonly FloraEffectsModel FloraEffects = new FloraEffectsModel();
 		public readonly ModelPool<FloraModel> Flora = new ModelPool<FloraModel>();
+		public readonly ModelPool<DwellerModel> Dwellers = new ModelPool<DwellerModel>();
 
 		[JsonProperty] RoomPrefabModel[] rooms = new RoomPrefabModel[0];
 		[JsonIgnore] public readonly ListenerProperty<RoomPrefabModel[]> Rooms;

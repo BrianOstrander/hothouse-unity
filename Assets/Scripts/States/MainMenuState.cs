@@ -3,6 +3,7 @@ using Lunra.Core;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
 using Lunra.WildVacuum.Models;
+using Lunra.WildVacuum.Models.AgentModels;
 using UnityEngine;
 
 namespace Lunra.WildVacuum.Services
@@ -114,21 +115,54 @@ namespace Lunra.WildVacuum.Services
 				flora.State.Value = FloraModel.States.Visible;
 				flora.Position.Value = position;
 				flora.Rotation.Value = Quaternion.identity;
-				flora.Age.Value = FloraModel.Interval.Create(0.1f);
+				flora.Age.Value = FloraModel.Interval.Create(1f);
 				flora.ReproductionElapsed.Value = FloraModel.Interval.Create(1f);
 				flora.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
-				flora.ReproductionFailureLimit.Value = 30;
+				flora.ReproductionFailureLimit.Value = 40;
 				flora.HealthMaximum.Value = 100f;
-				flora.Health.Value = flora.HealthMaximum.Value;	
+				flora.Health.Value = flora.HealthMaximum.Value;
 			}
 			
 			game.Flora.Activate(
 				flora => initializeFlora(flora, new Vector3(7f, 0f, -5f))
 			);
 			
-			game.Flora.Activate(
-				flora => initializeFlora(flora, new Vector3(-12f, -0.8386866f, 6f))
+			// game.Flora.Activate(
+			// 	flora => initializeFlora(flora, new Vector3(-12f, -0.8386866f, 6f))
+			// );
+
+			var dwellerCount = 0;
+			
+			void initializeDweller(
+				DwellerModel dweller,
+				Vector3 position
+			)
+			{
+				dweller.Id.Value = dwellerCount.ToString();
+				dweller.State.Value = AgentModel.States.Visible;
+				dweller.Position.Value = position;
+				dweller.Rotation.Value = Quaternion.identity;
+				dweller.NavigationPlan.Value = NavigationPlan.Calculating(
+					dweller.Position.Value,
+					new Vector3(0f, -0.8386865f, 0f)	
+				);
+				dweller.NavigationVelocity.Value = 1f;
+				dweller.Job.Value = DwellerModel.Jobs.FloraClearance;
+
+				dwellerCount++;
+			}
+			
+			game.Dwellers.Activate(
+				dweller => initializeDweller(dweller, new Vector3(-12f, -0.8386866f, 6f))
 			);
+			
+			game.Dwellers.Activate(
+				dweller => initializeDweller(dweller, new Vector3(-12f, -0.8386866f, 6f))
+			);
+			
+			// game.Dwellers.Activate(
+			// 	dweller => initializeDweller(dweller, new Vector3(-10f, -0.8386866f, 6f))
+			// );
 
 			done(Result<GameModel>.Success(game));
 		}

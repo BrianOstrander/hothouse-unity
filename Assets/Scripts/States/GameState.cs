@@ -85,6 +85,8 @@ namespace Lunra.WildVacuum.Services
 
 			foreach (var flora in Payload.Game.Flora.GetActive()) new FloraPresenter(Payload.Game, flora);
 
+			foreach (var dweller in Payload.Game.Dwellers.GetActive()) new DwellerPresenter(Payload.Game, dweller);
+			
 			done();
 		}
 		#endregion
