@@ -1,4 +1,6 @@
-﻿using Lunra.StyxMvp.Presenters;
+﻿using System;
+using Lunra.StyxMvp;
+using Lunra.StyxMvp.Presenters;
 using Lunra.WildVacuum.Ai;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
@@ -30,6 +32,8 @@ namespace Lunra.WildVacuum.Presenters
 		protected virtual void OnBind()
 		{
 			View.InstanceName = typeof(V).Name + "_" + (string.IsNullOrEmpty(Agent.Id.Value) ? "null_or_empty_id" : Agent.Id.Value);
+
+			App.Heartbeat.DrawGizmos += OnHeartbeatDrawGizmos;
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 			
@@ -45,6 +49,8 @@ namespace Lunra.WildVacuum.Presenters
 
 		protected override void OnUnBind()
 		{
+			App.Heartbeat.DrawGizmos -= OnHeartbeatDrawGizmos;
+			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
 			Agent.State.Changed -= OnAgentState;
@@ -60,8 +66,6 @@ namespace Lunra.WildVacuum.Presenters
 			
 			View.Reset();
 
-			View.DrawGizmosSelected += OnViewDrawGizmosSelected;
-			
 			ShowView(instant: true);
 
 			View.RootTransform.position = Agent.Position.Value;
@@ -74,11 +78,12 @@ namespace Lunra.WildVacuum.Presenters
 			
 			CloseView(true);
 		}
-		
-		#region View Events
-		protected virtual void OnViewDrawGizmosSelected()
-		{
 
+		#region Heartbeat Events
+		protected virtual void OnHeartbeatDrawGizmos(Action cleanup)
+		{
+			if (!Agent.IsDebugging) return;
+			
 			switch (Agent.NavigationPlan.Value.State)
 			{
 				case NavigationPlan.States.Navigating:
@@ -101,6 +106,8 @@ namespace Lunra.WildVacuum.Presenters
 					);
 					break;
 			}
+
+			cleanup();
 		}
 		#endregion
 		

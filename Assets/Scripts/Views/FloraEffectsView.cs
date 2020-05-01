@@ -1,5 +1,6 @@
 ﻿using Lunra.StyxMvp;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Lunra.WildVacuum.Views
 {
@@ -8,7 +9,8 @@ namespace Lunra.WildVacuum.Views
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		[SerializeField] ParticleSystem spawnParticles;
-		[SerializeField] ParticleSystem chopParticles;
+		[SerializeField] ParticleSystem hurtParticles;
+		[SerializeField] ParticleSystem deathParticles;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 
@@ -18,11 +20,17 @@ namespace Lunra.WildVacuum.Views
 			spawnParticles.transform.position = position;
 			spawnParticles.Play();	
 		}
-
-		public void PlayChop(Vector3 position)
+		
+		public void PlayHurt(Vector3 position)
 		{
-			chopParticles.transform.position = position;
-			chopParticles.Play();
+			hurtParticles.transform.position = position;
+			hurtParticles.Play();
+		}
+
+		public void PlayDeath(Vector3 position)
+		{
+			deathParticles.transform.position = position;
+			deathParticles.Play();
 		}
 		#endregion
 		

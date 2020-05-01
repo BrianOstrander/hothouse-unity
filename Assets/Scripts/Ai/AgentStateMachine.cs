@@ -28,7 +28,7 @@ namespace Lunra.WildVacuum.Ai
 			
 			foreach (var state in States) state.Initialize(World, Agent);
 
-			Debug.Log(Name + ": entering default state " + CurrentState.Name);
+			if (agent.IsDebugging) Debug.Log(Name + ": entering default state " + CurrentState.Name);
 		}
 		
 		protected virtual void OnInitialize() { }
@@ -45,7 +45,7 @@ namespace Lunra.WildVacuum.Ai
 				transition.Transition();
 				targetState.Begin();
 
-				Debug.Log(Name + ": " + CurrentState.Name + "." + transition.Name + " -> " + targetState.Name);
+				if (Agent.IsDebugging) Debug.Log(Name + ": " + CurrentState.Name + "." + transition.Name + " -> " + targetState.Name);
 				
 				CurrentState = targetState;
 				return;

@@ -56,7 +56,8 @@ namespace Lunra.WildVacuum.Presenters
 			if (View.NotVisible) return;
 
 			DequeueEffect(floraEffects.SpawnQueue, View.PlaySpawn);
-			DequeueEffect(floraEffects.ChopQueue, View.PlayChop);
+			DequeueEffect(floraEffects.HurtQueue, View.PlayHurt);
+			DequeueEffect(floraEffects.DeathQueue, View.PlayDeath);
 		}
 		#endregion
 		

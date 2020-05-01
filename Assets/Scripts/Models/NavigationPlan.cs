@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -50,6 +51,19 @@ namespace Lunra.WildVacuum.Models
 				States.Navigating
 			);
 		}
+		
+		public static NavigationPlan NavigatingForced(
+			Vector3 beginPosition,
+			Vector3 endPosition
+		)
+		{
+			return new NavigationPlan(
+				new [] { beginPosition, endPosition },
+				beginPosition,
+				1,
+				States.Navigating
+			);
+		}
 
 		public static NavigationPlan Invalid(NavigationPlan navigationPlan) => Invalid(navigationPlan.Position, navigationPlan.EndPosition);
 
@@ -85,10 +99,10 @@ namespace Lunra.WildVacuum.Models
 		public readonly States State;
 		public readonly DateTime Created;
 		
-		readonly int nextNode;
+		[JsonProperty] readonly int nextNode;
 
-		public Vector3 BeginPosition => Nodes?.FirstOrDefault() ?? Vector3.zero;
-		public Vector3 EndPosition => Nodes?.LastOrDefault() ?? Vector3.zero;
+		[JsonIgnore] public Vector3 BeginPosition => Nodes?.FirstOrDefault() ?? Vector3.zero;
+		[JsonIgnore] public Vector3 EndPosition => Nodes?.LastOrDefault() ?? Vector3.zero;
 		
 		NavigationPlan(
 			Vector3[] nodes,

@@ -28,8 +28,11 @@ namespace Lunra.WildVacuum.Models
 		[JsonProperty] Queue<Request> spawnQueue = new Queue<Request>();
 		[JsonIgnore] public readonly QueueProperty<Request> SpawnQueue;
 		
-		[JsonProperty] Queue<Request> chopQueue = new Queue<Request>();
-		[JsonIgnore] public readonly QueueProperty<Request> ChopQueue;
+		[JsonProperty] Queue<Request> hurtQueue = new Queue<Request>();
+		[JsonIgnore] public readonly QueueProperty<Request> HurtQueue;
+		
+		[JsonProperty] Queue<Request> deathQueue = new Queue<Request>();
+		[JsonIgnore] public readonly QueueProperty<Request> DeathQueue;
 		#endregion
 
 		public FloraEffectsModel()
@@ -37,7 +40,8 @@ namespace Lunra.WildVacuum.Models
 			IsEnabled = new ListenerProperty<bool>(value => isEnabled = value, () => isEnabled);
 			
 			SpawnQueue = new QueueProperty<Request>(spawnQueue);
-			ChopQueue = new QueueProperty<Request>(chopQueue);
+			HurtQueue = new QueueProperty<Request>(hurtQueue);
+			DeathQueue = new QueueProperty<Request>(deathQueue);
 		}
 	}
 }

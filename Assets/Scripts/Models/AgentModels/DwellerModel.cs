@@ -14,6 +14,9 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		#region Serialized
 		[JsonProperty] Jobs job;
 		[JsonIgnore] public readonly ListenerProperty<Jobs> Job;
+		
+		[JsonProperty] float meleeRange;
+		[JsonIgnore] public readonly ListenerProperty<float> MeleeRange;
 		#endregion
 		
 		#region Non Serialized
@@ -21,7 +24,8 @@ namespace Lunra.WildVacuum.Models.AgentModels
 
 		public DwellerModel()
 		{
-			Job = new ListenerProperty<Jobs>(value => job = value, () => job);	
+			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
+			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 		}
 	}
 }

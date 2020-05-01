@@ -16,9 +16,22 @@ namespace Lunra.StyxMvp.Services
 		public event Action<float> Update = ActionExtensions.GetEmpty<float>();
 		public event Action<float> LateUpdate = ActionExtensions.GetEmpty<float>();
 
+		public event Action<Action> DrawGizmos = ActionExtensions.GetEmpty<Action>();
+
 		public void TriggerUpdate(float delta) => Update(delta);
 
 		public void TriggerLateUpdate(float delta) => LateUpdate(delta);
+
+		public void TriggerDrawGizmos()
+		{
+			DrawGizmos(
+				() =>
+				{
+					Gizmos.color = Color.white;
+					Gizmos.matrix = Matrix4x4.identity;
+				}
+			);	
+		}
 
 		public void Wait(
 			Action done,

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
-using UnityEngine.AI;
 
 namespace Lunra.WildVacuum.Models
 {
@@ -27,11 +26,17 @@ namespace Lunra.WildVacuum.Models
 
 		[JsonProperty] float navigationVelocity;
 		[JsonIgnore] public readonly ListenerProperty<float> NavigationVelocity;
+		
+		[JsonProperty] float navigationForceDistanceMaximum;
+		[JsonIgnore] public readonly ListenerProperty<float> NavigationForceDistanceMaximum;
+		
+		[JsonProperty] NavigationPlan navigationPlan = Models.NavigationPlan.Done();
+		[JsonIgnore] public readonly ListenerProperty<NavigationPlan> NavigationPlan;
+		
+		public bool IsDebugging { get; set; }
 		#endregion
 		
 		#region Non Serialized
-		NavigationPlan navigationPlan = Models.NavigationPlan.Done();
-		[JsonIgnore] public readonly ListenerProperty<NavigationPlan> NavigationPlan;
 		#endregion
 		
 		public AgentModel()
@@ -40,7 +45,7 @@ namespace Lunra.WildVacuum.Models
 			Position = new ListenerProperty<Vector3>(value => position = value, () => position);
 			Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);
 			NavigationVelocity = new ListenerProperty<float>(value => navigationVelocity = value, () => navigationVelocity);
-			
+			NavigationForceDistanceMaximum = new ListenerProperty<float>(value => navigationForceDistanceMaximum = value, () => navigationForceDistanceMaximum);
 			NavigationPlan = new ListenerProperty<NavigationPlan>(value => navigationPlan = value, () => navigationPlan);
 		}
 	}

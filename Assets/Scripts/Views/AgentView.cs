@@ -12,7 +12,6 @@ namespace Lunra.WildVacuum.Views
 		#endregion
 
 		#region Bindings
-		public event Action DrawGizmosSelected = ActionExtensions.Empty;
 		#endregion
 		
 		#region Reverse Bindings
@@ -21,11 +20,7 @@ namespace Lunra.WildVacuum.Views
 		public override void Reset()
 		{
 			base.Reset();
-
-			DrawGizmosSelected = ActionExtensions.Empty;
 		}
-
-		void OnDrawGizmosSelected() => DrawGizmosSelected();
 	}
 
 }

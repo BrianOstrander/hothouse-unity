@@ -2,6 +2,7 @@
 using System.Linq;
 using Lunra.Core;
 using Lunra.NumberDemon;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
@@ -24,6 +25,8 @@ namespace Lunra.WildVacuum.Presenters
 			this.game = game;
 			this.flora = flora;
 
+			App.Heartbeat.DrawGizmos += OnHeartbeatDrawGizmos;
+			
 			flora.HasPresenter.Value = true;
 
 			if (string.IsNullOrEmpty(flora.Id.Value)) flora.Id.Value = Guid.NewGuid().ToString();
@@ -42,6 +45,8 @@ namespace Lunra.WildVacuum.Presenters
 
 		protected override void OnUnBind()
 		{
+			App.Heartbeat.DrawGizmos -= OnHeartbeatDrawGizmos;
+			
 			game.SimulationInitialize -= OnInitialized;
 			game.SimulationUpdate -= OnGameSimulationUpdate;
 			game.LastNavigationCalculation.Changed -= OnGameLastNavigationCalculation;
@@ -145,6 +150,23 @@ namespace Lunra.WildVacuum.Presenters
 			OnFloraState(flora.State.Value);
 		}
 		#endregion
+
+		#region Heartbeat Events
+		void OnHeartbeatDrawGizmos(Action cleanup)
+		{
+			switch (flora.State.Value)
+			{
+				case FloraModel.States.Pooled:
+					return;
+			}
+			
+			Gizmos.color = flora.NavigationPoint.Value.Access == NavigationProximity.AccessStates.Accessible ? Color.green : Color.red;
+
+			Gizmos.DrawWireCube(flora.Position.Value, Vector3.one);
+			
+			cleanup();
+		}
+		#endregion
 		
 		#region GameModel Events
 		void OnGameSimulationUpdate(float delta)
@@ -244,9 +266,13 @@ namespace Lunra.WildVacuum.Presenters
 
 		void OnFloraHealth(float health)
 		{
-			if (!Mathf.Approximately(0f, health)) return;
+			if (!Mathf.Approximately(0f, health))
+			{
+				if (View.Visible) game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(flora.Position.Value));
+				return;
+			}
 			
-			if (View.Visible) game.FloraEffects.ChopQueue.Enqueue(new FloraEffectsModel.Request(flora.Position.Value));
+			if (View.Visible) game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(flora.Position.Value));
 			
 			flora.State.Value = FloraModel.States.Pooled;
 			

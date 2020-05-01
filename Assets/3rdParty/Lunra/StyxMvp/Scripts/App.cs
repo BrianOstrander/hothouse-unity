@@ -112,6 +112,8 @@ namespace Lunra.StyxMvp
 
 		public void OnApplicationQuit() { }
 
+		public void OnDrawGizmos() => heartbeat.TriggerDrawGizmos();
+		
 		#endregion
 	}
 }

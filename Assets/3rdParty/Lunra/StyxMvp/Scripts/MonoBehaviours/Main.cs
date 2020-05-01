@@ -47,6 +47,8 @@ namespace Lunra.StyxMvp
 
 		void OnApplicationQuit() => app.OnApplicationQuit();
 
+		void OnDrawGizmos() => app?.OnDrawGizmos();
+
 		protected virtual IModelMediator InstantiateModelMediator() => new DesktopModelMediator();
 
 		protected abstract IState[] InstantiateStates();

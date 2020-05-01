@@ -18,9 +18,13 @@ namespace Lunra.WildVacuum.Ai
 
 		public override void Begin()
 		{
-			target = World.Flora.GetActive().FirstOrDefault(
-				f => Mathf.Approximately(0f, Vector3.Distance(f.NavigationPoint.Value.Position, Agent.Position.Value)) 
-			);
+			target = World.Flora.GetActive().OrderBy(
+				f => Vector3.Distance(f.Position.Value, Agent.Position.Value)
+			).FirstOrDefault();
+			
+			// target = World.Flora.GetActive().FirstOrDefault(
+			// 	f => Mathf.Approximately(0f, Vector3.Distance(f.NavigationPoint.Value.Position, Agent.Position.Value)) 
+			// );
 		}
 
 		public override void Idle(float delta)
