@@ -104,37 +104,38 @@ namespace Lunra.WildVacuum.Presenters
 				{
 					if (nearbyFlora.None(f => Vector3.Distance(f.Position.Value, hit.position) < f.ReproductionRadius.Value.Minimum))
 					{
-						reproductionFailed = false;
-						
-						game.Flora.Activate(
-							newFlora =>
-							{
-								newFlora.RoomId.Value = flora.RoomId.Value;
-								newFlora.Position.Value = hit.position;
-								newFlora.Rotation.Value = Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
-								newFlora.Age.Value = FloraModel.Interval.Create(flora.Age.Value.Maximum);
-								newFlora.ReproductionElapsed.Value = FloraModel.Interval.Create(flora.ReproductionElapsed.Value.Maximum);
-								newFlora.ReproductionRadius.Value = flora.ReproductionRadius.Value;
-								newFlora.ReproductionFailures.Value = 0;
-								newFlora.ReproductionFailureLimit.Value = flora.ReproductionFailureLimit.Value;
-								newFlora.HealthMaximum.Value = flora.HealthMaximum.Value;
-								newFlora.Health.Value = flora.HealthMaximum.Value;
+						if (game.Dwellers.GetActive().None(d => Vector3.Distance(d.Position.Value, hit.position) < flora.ReproductionRadius.Value.Minimum))
+						{
+							reproductionFailed = false;
 
-								if (game.Selection.Current.Value.State == SelectionModel.States.Highlighting && game.Selection.Current.Value.Contains(newFlora.Position.Value))
+							game.Flora.Activate(
+								newFlora =>
 								{
-									newFlora.SelectionState.Value = SelectionStates.Highlighted;
+									newFlora.RoomId.Value = flora.RoomId.Value;
+									newFlora.Position.Value = hit.position;
+									newFlora.Rotation.Value = Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
+									newFlora.Age.Value = FloraModel.Interval.Create(flora.Age.Value.Maximum);
+									newFlora.ReproductionElapsed.Value = FloraModel.Interval.Create(flora.ReproductionElapsed.Value.Maximum);
+									newFlora.ReproductionRadius.Value = flora.ReproductionRadius.Value;
+									newFlora.ReproductionFailures.Value = 0;
+									newFlora.ReproductionFailureLimit.Value = flora.ReproductionFailureLimit.Value;
+									newFlora.HealthMaximum.Value = flora.HealthMaximum.Value;
+									newFlora.Health.Value = flora.HealthMaximum.Value;
+
+									if (game.Selection.Current.Value.State == SelectionModel.States.Highlighting && game.Selection.Current.Value.Contains(newFlora.Position.Value))
+									{
+										newFlora.SelectionState.Value = SelectionStates.Highlighted;
+									}
+									else newFlora.SelectionState.Value = SelectionStates.Deselected;
+
+									newFlora.State.Value = FloraModel.States.Visible;
+
+									if (!newFlora.HasPresenter.Value) new FloraPresenter(game, newFlora);
+
+									game.LastNavigationCalculation.Value = DateTime.Now;
 								}
-								else newFlora.SelectionState.Value = SelectionStates.Deselected;
-
-								newFlora.State.Value = FloraModel.States.Visible;
-
-								if (!newFlora.HasPresenter.Value) new FloraPresenter(game, newFlora);
-								
-								game.LastNavigationCalculation.Value = DateTime.Now;
-							}
-						);
-
-						// Debug.DrawLine(hit.position, hit.position + (Vector3.up * 2f), Color.green, 0.5f);
+							);
+						}
 					}
 				}
 			}
