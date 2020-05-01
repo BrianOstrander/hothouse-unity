@@ -50,14 +50,33 @@ namespace Lunra.WildVacuum.Models
 				States.Navigating
 			);
 		}
+
+		public static NavigationPlan Invalid(NavigationPlan navigationPlan) => Invalid(navigationPlan.Position, navigationPlan.EndPosition);
+
+		public static NavigationPlan Invalid(Vector3 beginPosition) => Invalid(beginPosition, beginPosition);
 		
-		public static NavigationPlan Invalid()
+		public static NavigationPlan Invalid(
+			Vector3 beginPosition,
+			Vector3 endPosition
+		)
+		{
+			return new NavigationPlan(
+				new [] { beginPosition, endPosition },
+				beginPosition, 
+				1,
+				States.Invalid
+			);
+		}
+
+		public static NavigationPlan Done() => Done(Vector3.zero); 
+		
+		public static NavigationPlan Done(Vector3 position)
 		{
 			return new NavigationPlan(
 				null,
-				Vector3.zero, 
+				position,
 				-1,
-				States.Invalid
+				States.Done
 			);
 		}
 		

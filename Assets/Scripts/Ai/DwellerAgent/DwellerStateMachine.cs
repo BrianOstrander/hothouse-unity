@@ -11,7 +11,8 @@ namespace Lunra.WildVacuum.Ai
 				new []
 				{
 					CurrentState = new DwellerIdleState(),
-					new DwellerNavigateState()
+					new DwellerNavigateState(),
+					new DwellerClearFloraState()
 				}
 			);
 		}

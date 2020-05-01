@@ -8,7 +8,7 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		public enum Jobs
 		{
 			Unknown = 0,
-			FloraClearance = 10
+			ClearFlora = 10
 		}
 		
 		#region Serialized

@@ -1,4 +1,6 @@
-﻿using Lunra.StyxMvp;
+﻿using System;
+using Lunra.Core;
+using Lunra.StyxMvp;
 
 namespace Lunra.WildVacuum.Views
 {
@@ -10,6 +12,7 @@ namespace Lunra.WildVacuum.Views
 		#endregion
 
 		#region Bindings
+		public event Action DrawGizmosSelected = ActionExtensions.Empty;
 		#endregion
 		
 		#region Reverse Bindings
@@ -19,7 +22,10 @@ namespace Lunra.WildVacuum.Views
 		{
 			base.Reset();
 
+			DrawGizmosSelected = ActionExtensions.Empty;
 		}
+
+		void OnDrawGizmosSelected() => DrawGizmosSelected();
 	}
 
 }

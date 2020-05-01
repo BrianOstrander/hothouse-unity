@@ -30,7 +30,7 @@ namespace Lunra.WildVacuum.Models
 		#endregion
 		
 		#region Non Serialized
-		NavigationPlan navigationPlan;
+		NavigationPlan navigationPlan = Models.NavigationPlan.Done();
 		[JsonIgnore] public readonly ListenerProperty<NavigationPlan> NavigationPlan;
 		#endregion
 		

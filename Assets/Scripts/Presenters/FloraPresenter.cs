@@ -154,6 +154,11 @@ namespace Lunra.WildVacuum.Presenters
 				case FloraModel.States.Pooled:
 					return;
 			}
+
+			if (flora.NavigationPoint.Value.Access == NavigationProximity.AccessStates.Unknown)
+			{
+				OnGameLastNavigationCalculation(game.LastNavigationCalculation.Value);
+			}
 			
 			if (!flora.Age.Value.IsDone)
 			{

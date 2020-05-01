@@ -33,6 +33,8 @@ namespace Lunra.WildVacuum.Presenters
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 			
+			Agent.NavigationPlan.Value = NavigationPlan.Done(Agent.Position.Value); 
+			
 			Agent.State.Changed += OnAgentState;
 			Agent.Position.Changed += OnAgentPosition;
 			Agent.NavigationPlan.Changed += OnAgentNavigationPlan;
@@ -58,6 +60,8 @@ namespace Lunra.WildVacuum.Presenters
 			
 			View.Reset();
 
+			View.DrawGizmosSelected += OnViewDrawGizmosSelected;
+			
 			ShowView(instant: true);
 
 			View.RootTransform.position = Agent.Position.Value;
@@ -70,6 +74,35 @@ namespace Lunra.WildVacuum.Presenters
 			
 			CloseView(true);
 		}
+		
+		#region View Events
+		protected virtual void OnViewDrawGizmosSelected()
+		{
+
+			switch (Agent.NavigationPlan.Value.State)
+			{
+				case NavigationPlan.States.Navigating:
+					Gizmos.color = Color.green;
+			
+					for (var i = 1; i < Agent.NavigationPlan.Value.Nodes.Length; i++)
+					{
+						Gizmos.DrawLine(
+							Agent.NavigationPlan.Value.Nodes[i - 1],
+							Agent.NavigationPlan.Value.Nodes[i]
+						);
+					}
+					break;
+				case NavigationPlan.States.Invalid:
+					Gizmos.color = Color.red;
+					
+					Gizmos.DrawLine(
+						Agent.NavigationPlan.Value.Position,
+						Agent.NavigationPlan.Value.EndPosition
+					);
+					break;
+			}
+		}
+		#endregion
 		
 		#region GameModel Events
 		protected virtual void OnInitialize()

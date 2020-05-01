@@ -1,5 +1,7 @@
+using System.Linq;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
+using UnityEngine;
 using UnityEngine.AI;
 
 namespace Lunra.WildVacuum.Ai
@@ -9,7 +11,8 @@ namespace Lunra.WildVacuum.Ai
 		public override void OnInitialize()
 		{
 			AddTransitions(
-				new ToIdleOnDoneOrInvalid()
+				new ToIdleOnDone(),
+				new ToIdleOnInvalid()
 			);
 		}
 
@@ -36,18 +39,30 @@ namespace Lunra.WildVacuum.Ai
 			);
 
 			if (hasPath) Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
-			else Agent.NavigationPlan.Value = NavigationPlan.Invalid();
+			else Agent.NavigationPlan.Value = NavigationPlan.Invalid(Agent.NavigationPlan.Value);
 
 			return hasPath;
 		}
 
-		class ToIdleOnDoneOrInvalid : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		class ToIdleOnDone : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered()
 			{
 				switch (Agent.NavigationPlan.Value.State)
 				{
 					case NavigationPlan.States.Done:
+						return true;
+				}
+				return false;
+			}
+		}
+		
+		class ToIdleOnInvalid : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		{
+			public override bool IsTriggered()
+			{
+				switch (Agent.NavigationPlan.Value.State)
+				{
 					case NavigationPlan.States.Invalid:
 						return true;
 				}
