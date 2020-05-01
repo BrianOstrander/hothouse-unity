@@ -1,7 +1,5 @@
-using System.Linq;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
-using UnityEngine;
 using UnityEngine.AI;
 
 namespace Lunra.WildVacuum.Ai
@@ -16,11 +14,15 @@ namespace Lunra.WildVacuum.Ai
 			);
 		}
 
-		public override void Begin() => CalculatePath();
+		public override void Begin()
+		{
+			if (Agent.NavigationPlan.Value.State == NavigationPlan.States.NavigatingForced) return;
+			CalculatePath();
+		}
 
 		public override void Idle(float delta)
 		{
-			if (Agent.NavigationPlan.Value.Created < World.LastNavigationCalculation.Value)
+			if (Agent.NavigationPlan.Value.Created < World.LastNavigationCalculation.Value && Agent.NavigationPlan.Value.State != NavigationPlan.States.NavigatingForced)
 			{
 				if (!CalculatePath()) return;
 			}

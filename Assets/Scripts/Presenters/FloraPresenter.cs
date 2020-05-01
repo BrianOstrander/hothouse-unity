@@ -163,6 +163,13 @@ namespace Lunra.WildVacuum.Presenters
 			Gizmos.color = flora.NavigationPoint.Value.Access == NavigationProximity.AccessStates.Accessible ? Color.green : Color.red;
 
 			Gizmos.DrawWireCube(flora.Position.Value, Vector3.one);
+
+			switch (flora.NavigationPoint.Value.Access)
+			{
+				case NavigationProximity.AccessStates.Accessible:
+					Gizmos.DrawLine(flora.NavigationPoint.Value.Position, flora.NavigationPoint.Value.Position + (Vector3.up));
+					break;
+			}
 			
 			cleanup();
 		}
@@ -179,7 +186,16 @@ namespace Lunra.WildVacuum.Presenters
 
 			if (flora.NavigationPoint.Value.Access == NavigationProximity.AccessStates.Unknown)
 			{
-				OnGameLastNavigationCalculation(game.LastNavigationCalculation.Value);
+				switch (flora.State.Value)
+				{
+					case FloraModel.States.Pooled:
+						return;
+				}
+			
+				var found = NavMesh.SamplePosition(flora.Position.Value, out var hit, flora.ReproductionRadius.Value.Maximum, NavMesh.AllAreas);
+
+				if (found) flora.NavigationPoint.Value = new NavigationProximity(hit.position, Vector3.Distance(hit.position, flora.Position.Value), NavigationProximity.AccessStates.Accessible);
+				else flora.NavigationPoint.Value = new NavigationProximity(flora.Position.Value, float.MaxValue, NavigationProximity.AccessStates.NotAccessible);
 			}
 			
 			if (!flora.Age.Value.IsDone)
@@ -206,16 +222,7 @@ namespace Lunra.WildVacuum.Presenters
 
 		void OnGameLastNavigationCalculation(DateTime dateTime)
 		{
-			switch (flora.State.Value)
-			{
-				case FloraModel.States.Pooled:
-					return;
-			}
-			
-			var found = NavMesh.SamplePosition(flora.Position.Value, out var hit, flora.ReproductionRadius.Value.Maximum, NavMesh.AllAreas);
-
-			if (found) flora.NavigationPoint.Value = new NavigationProximity(hit.position, Vector3.Distance(hit.position, flora.Position.Value), NavigationProximity.AccessStates.Accessible);
-			else flora.NavigationPoint.Value = new NavigationProximity(flora.Position.Value, float.MaxValue, NavigationProximity.AccessStates.NotAccessible);
+			flora.NavigationPoint.Value = new NavigationProximity(flora.Position.Value, 0f, NavigationProximity.AccessStates.Unknown);
 		}
 		#endregion
 
@@ -275,7 +282,6 @@ namespace Lunra.WildVacuum.Presenters
 			if (View.Visible) game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(flora.Position.Value));
 			
 			flora.State.Value = FloraModel.States.Pooled;
-			
 			game.Flora.InActivate(flora);
 		}
 		#endregion

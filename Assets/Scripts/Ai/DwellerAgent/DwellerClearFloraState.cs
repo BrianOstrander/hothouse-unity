@@ -7,7 +7,9 @@ namespace Lunra.WildVacuum.Ai
 {
 	public class DwellerClearFloraState : AgentState<GameModel, DwellerModel>
 	{
+		string targetId;
 		FloraModel target;
+		float cooldownElapsed;
 		
 		public override void OnInitialize()
 		{
@@ -21,15 +23,18 @@ namespace Lunra.WildVacuum.Ai
 			target = World.Flora.GetActive().OrderBy(
 				f => Vector3.Distance(f.Position.Value, Agent.Position.Value)
 			).FirstOrDefault();
-			
-			// target = World.Flora.GetActive().FirstOrDefault(
-			// 	f => Mathf.Approximately(0f, Vector3.Distance(f.NavigationPoint.Value.Position, Agent.Position.Value)) 
-			// );
+			targetId = target?.Id.Value;
 		}
 
 		public override void Idle(float delta)
 		{
-			target.Health.Value = Mathf.Max(0f, target.Health.Value - (30f * delta));
+			cooldownElapsed += delta;
+
+			if (cooldownElapsed < Agent.MeleeCooldown.Value) return;
+
+			cooldownElapsed = cooldownElapsed % Agent.MeleeCooldown.Value;
+			
+			target.Health.Value = Mathf.Max(0f, target.Health.Value - Agent.MeleeDamage.Value);
 		}
 
 		class ToIdleOnFloraNullOrCleared : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
@@ -40,7 +45,9 @@ namespace Lunra.WildVacuum.Ai
 			
 			public override bool IsTriggered()
 			{
-				return sourceState.target == null || Mathf.Approximately(0f, sourceState.target.Health.Value);
+				if (sourceState.target == null) return true;
+				if (Mathf.Approximately(0f, sourceState.target.Health.Value)) return true;
+				return sourceState.targetId != sourceState.target.Id.Value;
 			}
 		}
 	}

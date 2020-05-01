@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Lunra.WildVacuum.Models
 {
 	public class ModelPool<M> : Model
-		where M : new()
+		where M : Model, new()
 	{
 		public class Reservoir
 		{
@@ -50,7 +50,8 @@ namespace Lunra.WildVacuum.Models
 		public void InActivate(params M[] models)
 		{
 			if (models == null || models.None()) return;
-			if (All.Value.Active.ContainsAll(models)) return;
+
+			foreach (var model in models) model.Id.Value = null;
 			
 			All.Value = new Reservoir(
 				All.Value.Active.Except(models).ToArray(),
@@ -69,6 +70,7 @@ namespace Lunra.WildVacuum.Models
 			{
 				result = new M();
 				initialize?.Invoke(result);
+				
 				All.Value = new Reservoir(
 					All.Value.Active.Append(result).ToArray(),
 					All.Value.InActive
@@ -82,6 +84,8 @@ namespace Lunra.WildVacuum.Models
 					All.Value.InActive.ExceptOne(result).ToArray()
 				);
 			}
+			
+			if (string.IsNullOrEmpty(result.Id.Value)) result.Id.Value = Guid.NewGuid().ToString();
 		}
 	}
 }

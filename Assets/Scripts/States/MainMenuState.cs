@@ -116,7 +116,7 @@ namespace Lunra.WildVacuum.Services
 				flora.Position.Value = position;
 				flora.Rotation.Value = Quaternion.identity;
 				flora.Age.Value = FloraModel.Interval.Create(1f);
-				flora.ReproductionElapsed.Value = FloraModel.Interval.Create(10f);
+				flora.ReproductionElapsed.Value = FloraModel.Interval.Create(2f);
 				flora.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
 				flora.ReproductionFailureLimit.Value = 40;
 				// flora.ReproductionFailureLimit.Value = 0;
@@ -160,9 +160,11 @@ namespace Lunra.WildVacuum.Services
 				*/
 				dweller.NavigationVelocity.Value = 3f;
 				dweller.Job.Value = job;
-				dweller.MeleeRange.Value = 0.75f;
 				dweller.IsDebugging = debugAgentStates;
-				dweller.NavigationForceDistanceMaximum.Value = 1f;
+				dweller.NavigationForceDistanceMaximum.Value = 4f;
+				dweller.MeleeRange.Value = 0.75f;
+				dweller.MeleeCooldown.Value = 0.5f;
+				dweller.MeleeDamage.Value = 30f;
 			}
 			
 			game.Dwellers.Activate(
@@ -174,7 +176,7 @@ namespace Lunra.WildVacuum.Services
 					true
 				)
 			);
-			/*
+			
 			game.Dwellers.Activate(
 				dweller => initializeDweller(
 					dweller,
@@ -183,7 +185,6 @@ namespace Lunra.WildVacuum.Services
 					DwellerModel.Jobs.ClearFlora
 				)
 			);
-			*/
 
 			done(Result<GameModel>.Success(game));
 		}

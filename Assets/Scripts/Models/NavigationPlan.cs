@@ -14,7 +14,8 @@ namespace Lunra.WildVacuum.Models
 			Invalid = 10,
 			Calculating = 30,
 			Navigating = 40,
-			Done = 50
+			NavigatingForced = 50,
+			Done = 60
 		}
 		
 		public static NavigationPlan Calculating(
@@ -61,7 +62,7 @@ namespace Lunra.WildVacuum.Models
 				new [] { beginPosition, endPosition },
 				beginPosition,
 				1,
-				States.Navigating
+				States.NavigatingForced
 			);
 		}
 

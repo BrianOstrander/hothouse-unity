@@ -51,7 +51,6 @@ namespace Lunra.WildVacuum.Ai
 						Color.magenta,
 						30f
 					);
-					Debug.Break();
 				}
 			}
 		}
@@ -78,7 +77,7 @@ namespace Lunra.WildVacuum.Ai
 			public override bool IsTriggered()
 			{
 				if (Agent.Job.Value != DwellerModel.Jobs.ClearFlora) return false;
-				
+
 				targetFlora = World.Flora.GetActive()
 					.Where(
 						f =>
@@ -87,6 +86,7 @@ namespace Lunra.WildVacuum.Ai
 							return World.Dwellers.GetActive().None(
 								d =>
 								{
+									if (d == Agent) return false;
 									var distanceBetweenCurrent = Vector3.Distance(f.NavigationPoint.Value.Position, d.Position.Value);
 									var distanceBetweenTarget = Vector3.Distance(f.NavigationPoint.Value.Position, d.NavigationPlan.Value.EndPosition);
 									return Mathf.Min(distanceBetweenCurrent, distanceBetweenTarget) < Agent.MeleeRange.Value;
@@ -119,6 +119,7 @@ namespace Lunra.WildVacuum.Ai
 				var validFlora = World.Flora.GetActive().FirstOrDefault(
 					flora =>
 					{
+						if (flora.State.Value == FloraModel.States.Pooled) return false;
 						if (flora.NavigationPoint.Value.Access != NavigationProximity.AccessStates.Accessible) return false;
 						return Vector3.Distance(Agent.Position.Value, flora.NavigationPoint.Value.Position) < Agent.MeleeRange.Value;
 					}
