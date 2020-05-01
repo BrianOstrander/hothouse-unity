@@ -37,7 +37,6 @@ namespace Lunra.WildVacuum.Ai
 
 			cooldownElapsed = cooldownElapsed % Agent.MeleeCooldown.Value;
 			
-			Debug.Log(target.MarkedForClearing.Value);
 			target.Health.Value = Mathf.Max(0f, target.Health.Value - Agent.MeleeDamage.Value);
 		}
 

@@ -271,8 +271,6 @@ namespace Lunra.WildVacuum.Presenters
 
 		void OnFloraHealth(float health)
 		{
-			Debug.Log("Attacked, is marked for clearance? "+flora.MarkedForClearing.Value);
-			
 			if (!Mathf.Approximately(0f, health))
 			{
 				if (View.Visible) game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(flora.Position.Value));
