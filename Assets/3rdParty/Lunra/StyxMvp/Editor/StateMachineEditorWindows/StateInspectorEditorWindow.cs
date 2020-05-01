@@ -11,10 +11,10 @@ namespace Lunra.StyxMvp
 	{
 		EditorPrefsFloat entryScroll;
 
-		[MenuItem("Window/SubLight/State Inspector")]
+		[MenuItem("Window/Styx/State Inspector")]
 		static void Initialize() { OnInitialize<StateInspectorEditorWindow>("State Inspector"); }
 
-		public StateInspectorEditorWindow() : base("LG_SL_StateInspector_")
+		public StateInspectorEditorWindow() : base("Lunra.Styx.StateInspector.")
 		{
 			entryScroll = new EditorPrefsFloat(KeyPrefix + "EntryScroll");
 

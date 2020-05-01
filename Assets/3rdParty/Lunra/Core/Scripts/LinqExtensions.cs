@@ -71,7 +71,8 @@ namespace Lunra.Core
 					return entry.Value;
 				}
 			}
-			return keyed.Last().Value;
+
+			return keyed.Any() ? keyed.Last().Value : fallback;
 		}
 
 #if !CSHARP_7_3_OR_NEWER
