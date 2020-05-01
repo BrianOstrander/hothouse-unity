@@ -177,14 +177,14 @@ namespace Lunra.WildVacuum.Services
 				)
 			);
 			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"1",
-					new Vector3(-10f, -0.8386866f, 6f),
-					DwellerModel.Jobs.ClearFlora
-				)
-			);
+			// game.Dwellers.Activate(
+			// 	dweller => initializeDweller(
+			// 		dweller,
+			// 		"1",
+			// 		new Vector3(-10f, -0.8386866f, 6f),
+			// 		DwellerModel.Jobs.ClearFlora
+			// 	)
+			// );
 
 			done(Result<GameModel>.Success(game));
 		}

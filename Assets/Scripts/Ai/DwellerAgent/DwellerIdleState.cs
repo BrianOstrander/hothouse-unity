@@ -80,21 +80,24 @@ namespace Lunra.WildVacuum.Ai
 
 				targetFlora = World.Flora.GetActive()
 					.Where(
-						f =>
+						flora =>
 						{
-							if (f.NavigationPoint.Value.Access != NavigationProximity.AccessStates.Accessible) return false;
+							if (!flora.MarkedForClearing.Value) return false;
+							if (flora.NavigationPoint.Value.Access != NavigationProximity.AccessStates.Accessible) return false;
 							return World.Dwellers.GetActive().None(
 								d =>
 								{
 									if (d == Agent) return false;
-									var distanceBetweenCurrent = Vector3.Distance(f.NavigationPoint.Value.Position, d.Position.Value);
-									var distanceBetweenTarget = Vector3.Distance(f.NavigationPoint.Value.Position, d.NavigationPlan.Value.EndPosition);
+									var distanceBetweenCurrent = Vector3.Distance(flora.NavigationPoint.Value.Position, d.Position.Value);
+									var distanceBetweenTarget = Vector3.Distance(flora.NavigationPoint.Value.Position, d.NavigationPlan.Value.EndPosition);
 									return Mathf.Min(distanceBetweenCurrent, distanceBetweenTarget) < Agent.MeleeRange.Value;
 								}
 							);
 						}
 					)
-					.RandomWeighted(f => Vector3.Distance(Agent.Position.Value, f.NavigationPoint.Value.Position));
+					.OrderBy(f => Vector3.Distance(Agent.Position.Value, f.NavigationPoint.Value.Position))
+					.FirstOrDefault();
+					// .RandomWeighted(f => Vector3.Distance(Agent.Position.Value, f.NavigationPoint.Value.Position));
 
 				return targetFlora != null;
 			}
@@ -120,8 +123,9 @@ namespace Lunra.WildVacuum.Ai
 					flora =>
 					{
 						if (flora.State.Value == FloraModel.States.Pooled) return false;
+						if (!flora.MarkedForClearing.Value) return false;
 						if (flora.NavigationPoint.Value.Access != NavigationProximity.AccessStates.Accessible) return false;
-						return Vector3.Distance(Agent.Position.Value, flora.NavigationPoint.Value.Position) < Agent.MeleeRange.Value;
+						return Vector3.Distance(Agent.Position.Value, flora.Position.Value) < Agent.MeleeRange.Value;
 					}
 				);
 

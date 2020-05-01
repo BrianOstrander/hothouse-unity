@@ -102,6 +102,9 @@ namespace Lunra.WildVacuum.Models
 		
 		[JsonProperty] float healthMaximum;
 		[JsonIgnore] public readonly ListenerProperty<float> HealthMaximum;
+		
+		[JsonProperty] bool markedForClearing;
+		[JsonIgnore] public readonly ListenerProperty<bool> MarkedForClearing;
 		#endregion
 		
 		#region Non Serialized
@@ -128,6 +131,7 @@ namespace Lunra.WildVacuum.Models
 			NavigationPoint = new ListenerProperty<NavigationProximity>(value => navigationPoint = value, () => navigationPoint);
 			Health = new ListenerProperty<float>(value => health = value, () => health);
 			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
+			MarkedForClearing = new ListenerProperty<bool>(value => markedForClearing = value, () => markedForClearing);
 			
 			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
 			IsReproducing = new DerivedProperty<bool, int, int>(

@@ -20,9 +20,12 @@ namespace Lunra.WildVacuum.Ai
 
 		public override void Begin()
 		{
-			target = World.Flora.GetActive().OrderBy(
-				f => Vector3.Distance(f.Position.Value, Agent.Position.Value)
-			).FirstOrDefault();
+			target = World.Flora.GetActive()
+				.Where(f => f.MarkedForClearing.Value)
+				.OrderBy(
+					f => Vector3.Distance(f.Position.Value, Agent.Position.Value)
+				)
+				.FirstOrDefault();
 			targetId = target?.Id.Value;
 		}
 
@@ -34,6 +37,7 @@ namespace Lunra.WildVacuum.Ai
 
 			cooldownElapsed = cooldownElapsed % Agent.MeleeCooldown.Value;
 			
+			Debug.Log(target.MarkedForClearing.Value);
 			target.Health.Value = Mathf.Max(0f, target.Health.Value - Agent.MeleeDamage.Value);
 		}
 

@@ -121,7 +121,8 @@ namespace Lunra.WildVacuum.Presenters
 									newFlora.ReproductionFailureLimit.Value = flora.ReproductionFailureLimit.Value;
 									newFlora.HealthMaximum.Value = flora.HealthMaximum.Value;
 									newFlora.Health.Value = flora.HealthMaximum.Value;
-
+									newFlora.MarkedForClearing.Value = false;
+									
 									if (game.Selection.Current.Value.State == SelectionModel.States.Highlighting && game.Selection.Current.Value.Contains(newFlora.Position.Value))
 									{
 										newFlora.SelectionState.Value = SelectionStates.Highlighted;
@@ -257,23 +258,21 @@ namespace Lunra.WildVacuum.Presenters
 			
 			switch (selectionState)
 			{
-				case SelectionStates.Deselected: View.Deselect(); break;
+				case SelectionStates.Deselected:
+					if (!flora.MarkedForClearing.Value) View.Deselect();
+					break;
 				case SelectionStates.Highlighted: View.Highlight(); break;
 				case SelectionStates.Selected:
 					View.Select();
-					if (flora.NavigationPoint.Value.Access == NavigationProximity.AccessStates.Accessible)
-					{
-						// Debug.DrawLine(flora.Position.Value, flora.NavigationPoint.Value.Position, Color.green, 15f);
-						// Debug.DrawLine(flora.NavigationPoint.Value.Position, flora.NavigationPoint.Value.Position + (Vector3.up * 1f), Color.green, 15f);
-					}
-
-					flora.Health.Value = 0f;
+					flora.MarkedForClearing.Value = true;
 					break;
 			}
 		}
 
 		void OnFloraHealth(float health)
 		{
+			Debug.Log("Attacked, is marked for clearance? "+flora.MarkedForClearing.Value);
+			
 			if (!Mathf.Approximately(0f, health))
 			{
 				if (View.Visible) game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(flora.Position.Value));
