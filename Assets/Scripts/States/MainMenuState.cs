@@ -145,6 +145,7 @@ namespace Lunra.WildVacuum.Services
 				string id,
 				Vector3 position,
 				DwellerModel.Jobs job = DwellerModel.Jobs.Unknown,
+				int jobPriority = 0,
 				bool debugAgentStates = false
 			)
 			{
@@ -160,6 +161,7 @@ namespace Lunra.WildVacuum.Services
 				*/
 				dweller.NavigationVelocity.Value = 3f;
 				dweller.Job.Value = job;
+				dweller.JobPriority.Value = jobPriority;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
 				dweller.MeleeRange.Value = 0.75f;
@@ -173,18 +175,20 @@ namespace Lunra.WildVacuum.Services
 					"0",
 					new Vector3(-12f, -0.8386866f, 6f),
 					DwellerModel.Jobs.ClearFlora,
+					0,
 					true
 				)
 			);
 			
-			// game.Dwellers.Activate(
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"1",
-			// 		new Vector3(-10f, -0.8386866f, 6f),
-			// 		DwellerModel.Jobs.ClearFlora
-			// 	)
-			// );
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"1",
+					new Vector3(-10f, -0.8386866f, 6f),
+					DwellerModel.Jobs.ClearFlora,
+					1
+				)
+			);
 
 			done(Result<GameModel>.Success(game));
 		}

@@ -79,32 +79,16 @@ namespace Lunra.WildVacuum.Ai
 				if (Agent.Job.Value != DwellerModel.Jobs.ClearFlora) return false;
 
 				targetFlora = World.Flora.GetActive()
-					.Where(
-						flora =>
-						{
-							if (!flora.MarkedForClearing.Value) return false;
-							if (flora.NavigationPoint.Value.Access != NavigationProximity.AccessStates.Accessible) return false;
-							return World.Dwellers.GetActive().None(
-								d =>
-								{
-									if (d == Agent) return false;
-									var distanceBetweenCurrent = Vector3.Distance(flora.NavigationPoint.Value.Position, d.Position.Value);
-									var distanceBetweenTarget = Vector3.Distance(flora.NavigationPoint.Value.Position, d.NavigationPlan.Value.EndPosition);
-									return Mathf.Min(distanceBetweenCurrent, distanceBetweenTarget) < Agent.MeleeRange.Value;
-								}
-							);
-						}
-					)
-					.OrderBy(f => Vector3.Distance(Agent.Position.Value, f.NavigationPoint.Value.Position))
-					.FirstOrDefault();
-					// .RandomWeighted(f => Vector3.Distance(Agent.Position.Value, f.NavigationPoint.Value.Position));
+					.Where(f => f.MarkedForClearing.Value)
+					.OrderBy(f => Vector3.Distance(Agent.Position.Value, f.Position.Value))
+					.ElementAtOrDefault(Agent.JobPriority.Value);
 
 				return targetFlora != null;
 			}
 
 			public override void Transition()
 			{
-				if (targetFlora != null) Agent.NavigationPlan.Value = NavigationPlan.Calculating(Agent.Position.Value, targetFlora.NavigationPoint.Value.Position);
+				if (targetFlora != null) Agent.NavigationPlan.Value = NavigationPlan.Calculating(Agent.Position.Value, targetFlora.Position.Value, Agent.MeleeRange.Value);
 				else
 				{
 					Debug.LogError(nameof(targetFlora) + " is null, this should not occur");
@@ -124,7 +108,6 @@ namespace Lunra.WildVacuum.Ai
 					{
 						if (flora.State.Value == FloraModel.States.Pooled) return false;
 						if (!flora.MarkedForClearing.Value) return false;
-						if (flora.NavigationPoint.Value.Access != NavigationProximity.AccessStates.Accessible) return false;
 						return Vector3.Distance(Agent.Position.Value, flora.Position.Value) < Agent.MeleeRange.Value;
 					}
 				);

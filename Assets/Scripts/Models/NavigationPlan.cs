@@ -20,14 +20,16 @@ namespace Lunra.WildVacuum.Models
 		
 		public static NavigationPlan Calculating(
 			Vector3 beginPosition,
-			Vector3 endPosition
+			Vector3 endPosition,
+			float threshold = 0f
 		)
 		{
 			return new NavigationPlan(
 				new [] { beginPosition, endPosition },
 				beginPosition, 
 				1,
-				States.Calculating
+				States.Calculating,
+				threshold
 			);
 		}
 		
@@ -39,17 +41,22 @@ namespace Lunra.WildVacuum.Models
 				new [] { navigationPlan.Position, navigationPlan.EndPosition },
 				navigationPlan.Position,
 				1,
-				States.Calculating
+				States.Calculating,
+				navigationPlan.Threshold
 			);
 		}
 		
-		public static NavigationPlan Navigating(NavMeshPath path)
+		public static NavigationPlan Navigating(
+			NavMeshPath path,
+			float threshold = 0f
+		)
 		{
 			return new NavigationPlan(
 				path.corners,
 				path.corners?[0] ?? Vector3.zero,
 				1,
-				States.Navigating
+				States.Navigating,
+				threshold
 			);
 		}
 		
@@ -62,7 +69,8 @@ namespace Lunra.WildVacuum.Models
 				new [] { beginPosition, endPosition },
 				beginPosition,
 				1,
-				States.NavigatingForced
+				States.NavigatingForced,
+				0f
 			);
 		}
 
@@ -79,7 +87,8 @@ namespace Lunra.WildVacuum.Models
 				new [] { beginPosition, endPosition },
 				beginPosition, 
 				1,
-				States.Invalid
+				States.Invalid,
+				0f
 			);
 		}
 
@@ -91,7 +100,8 @@ namespace Lunra.WildVacuum.Models
 				null,
 				position,
 				-1,
-				States.Done
+				States.Done,
+				0f
 			);
 		}
 		
@@ -99,7 +109,8 @@ namespace Lunra.WildVacuum.Models
 		public readonly Vector3 Position;
 		public readonly States State;
 		public readonly DateTime Created;
-		
+		public readonly float Threshold;
+
 		[JsonProperty] readonly int nextNode;
 
 		[JsonIgnore] public Vector3 BeginPosition => Nodes?.FirstOrDefault() ?? Vector3.zero;
@@ -109,7 +120,8 @@ namespace Lunra.WildVacuum.Models
 			Vector3[] nodes,
 			Vector3 position,
 			int nextNode,
-			States state
+			States state,
+			float threshold
 		)
 		{
 			Nodes = nodes;
@@ -118,6 +130,8 @@ namespace Lunra.WildVacuum.Models
 			State = state;
 			
 			Created = DateTime.Now;
+
+			Threshold = threshold;
 		}
 
 		public NavigationPlan Next(float velocity)
@@ -133,7 +147,7 @@ namespace Lunra.WildVacuum.Models
 			var newPosition = Position;
 			var newNextNode = nextNode;
 			var newState = State;
-				
+			
 			while (newNextNode < Nodes.Length && 0f < velocity)
 			{		
 				var distanceToNextNode = Vector3.Distance(newPosition, Nodes[newNextNode]);
@@ -150,13 +164,14 @@ namespace Lunra.WildVacuum.Models
 				break;
 			}
 
-			if (newNextNode == Nodes.Length) newState = States.Done;
+			if (newNextNode == Nodes.Length || Vector3.Distance(newPosition, EndPosition) < Threshold) newState = States.Done;
 
 			return new NavigationPlan(
 				Nodes,
 				newPosition,
 				newNextNode,
-				newState
+				newState,
+				Threshold
 			);
 		}
 	}

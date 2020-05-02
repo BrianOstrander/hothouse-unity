@@ -94,9 +94,6 @@ namespace Lunra.WildVacuum.Models
 		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
 		[JsonIgnore] public readonly ListenerProperty<SelectionStates> SelectionState;
 
-		[JsonProperty] NavigationProximity navigationPoint;
-		[JsonIgnore] public readonly ListenerProperty<NavigationProximity> NavigationPoint;
-		
 		[JsonProperty] float health;
 		[JsonIgnore] public readonly ListenerProperty<float> Health;
 		
@@ -128,7 +125,6 @@ namespace Lunra.WildVacuum.Models
 			ReproductionFailures = new ListenerProperty<int>(value => reproductionFailures = value, () => reproductionFailures);
 			ReproductionFailureLimit = new ListenerProperty<int>(value => reproductionFailureLimit = value, () => reproductionFailureLimit);
 			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
-			NavigationPoint = new ListenerProperty<NavigationProximity>(value => navigationPoint = value, () => navigationPoint);
 			Health = new ListenerProperty<float>(value => health = value, () => health);
 			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
 			MarkedForClearing = new ListenerProperty<bool>(value => markedForClearing = value, () => markedForClearing);

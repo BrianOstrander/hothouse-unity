@@ -25,15 +25,12 @@ namespace Lunra.WildVacuum.Presenters
 			this.game = game;
 			this.flora = flora;
 
-			App.Heartbeat.DrawGizmos += OnHeartbeatDrawGizmos;
-			
 			flora.HasPresenter.Value = true;
 
 			if (string.IsNullOrEmpty(flora.Id.Value)) flora.Id.Value = Guid.NewGuid().ToString();
 			
 			game.SimulationUpdate += OnGameSimulationUpdate;
-			game.LastNavigationCalculation.Changed += OnGameLastNavigationCalculation;
-			
+
 			flora.State.Changed += OnFloraState;
 			flora.IsReproducing.Changed += OnFloraIsReproducing;
 			flora.SelectionState.Changed += OnFloraSelectionState;
@@ -45,11 +42,8 @@ namespace Lunra.WildVacuum.Presenters
 
 		protected override void OnUnBind()
 		{
-			App.Heartbeat.DrawGizmos -= OnHeartbeatDrawGizmos;
-			
 			game.SimulationInitialize -= OnInitialized;
 			game.SimulationUpdate -= OnGameSimulationUpdate;
-			game.LastNavigationCalculation.Changed -= OnGameLastNavigationCalculation;
 
 			flora.State.Changed -= OnFloraState;
 			flora.IsReproducing.Changed -= OnFloraIsReproducing;
@@ -154,27 +148,7 @@ namespace Lunra.WildVacuum.Presenters
 		#endregion
 
 		#region Heartbeat Events
-		void OnHeartbeatDrawGizmos(Action cleanup)
-		{
-			switch (flora.State.Value)
-			{
-				case FloraModel.States.Pooled:
-					return;
-			}
-			
-			Gizmos.color = flora.NavigationPoint.Value.Access == NavigationProximity.AccessStates.Accessible ? Color.green : Color.red;
-
-			Gizmos.DrawWireCube(flora.Position.Value, Vector3.one);
-
-			switch (flora.NavigationPoint.Value.Access)
-			{
-				case NavigationProximity.AccessStates.Accessible:
-					Gizmos.DrawLine(flora.NavigationPoint.Value.Position, flora.NavigationPoint.Value.Position + (Vector3.up));
-					break;
-			}
-			
-			cleanup();
-		}
+		
 		#endregion
 		
 		#region GameModel Events
@@ -186,20 +160,6 @@ namespace Lunra.WildVacuum.Presenters
 					return;
 			}
 
-			if (flora.NavigationPoint.Value.Access == NavigationProximity.AccessStates.Unknown)
-			{
-				switch (flora.State.Value)
-				{
-					case FloraModel.States.Pooled:
-						return;
-				}
-			
-				var found = NavMesh.SamplePosition(flora.Position.Value, out var hit, flora.ReproductionRadius.Value.Maximum, NavMesh.AllAreas);
-
-				if (found) flora.NavigationPoint.Value = new NavigationProximity(hit.position, Vector3.Distance(hit.position, flora.Position.Value), NavigationProximity.AccessStates.Accessible);
-				else flora.NavigationPoint.Value = new NavigationProximity(flora.Position.Value, float.MaxValue, NavigationProximity.AccessStates.NotAccessible);
-			}
-			
 			if (!flora.Age.Value.IsDone)
 			{
 				flora.Age.Value = flora.Age.Value.Update(delta);
@@ -220,11 +180,6 @@ namespace Lunra.WildVacuum.Presenters
 			if (250 < game.Flora.GetActive().Length) return;
 			
 			OnReproduce();
-		}
-
-		void OnGameLastNavigationCalculation(DateTime dateTime)
-		{
-			flora.NavigationPoint.Value = new NavigationProximity(flora.Position.Value, 0f, NavigationProximity.AccessStates.Unknown);
 		}
 		#endregion
 
