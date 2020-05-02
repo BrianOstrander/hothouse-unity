@@ -5,6 +5,7 @@ using Lunra.StyxMvp.Services;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
 using UnityEngine;
+using Resources = Lunra.WildVacuum.Models.Resources;
 
 namespace Lunra.WildVacuum.Services
 {
@@ -167,6 +168,11 @@ namespace Lunra.WildVacuum.Services
 				dweller.MeleeRange.Value = 0.75f;
 				dweller.MeleeCooldown.Value = 0.5f;
 				dweller.MeleeDamage.Value = 30f;
+
+				// switch (job)
+				// {
+				// 	case DwellerModel.Jobs.ClearFlora:
+				// }
 			}
 			
 			game.Dwellers.Activate(
@@ -189,6 +195,72 @@ namespace Lunra.WildVacuum.Services
 					1
 				)
 			);
+			
+			var inventory = new Inventory(
+				new Inventory.Capacity[]
+				{
+					new Inventory.Capacity(Resources.Stalks, 10),
+					new Inventory.Capacity(Resources.Scrap, 10)
+				},
+				Resources.Unknown,
+				0
+			);
+			
+			/*
+			Debug.Log(inventory);
+
+			var remaining = inventory.Fill(5, Resources.Stalks, out inventory);
+			
+			Debug.Log("Fill with 5 Stalks\n"+inventory+"\nRemaining: "+remaining);
+			
+			remaining = inventory.Fill(5, Resources.Scrap, out inventory);
+			
+			Debug.Log("Fill with 5 Scrap\n"+inventory+"\nRemaining: "+remaining);
+			
+			remaining = inventory.Fill(10, Resources.Stalks, out inventory);
+			
+			Debug.Log("Fill with 10 Stalks\n"+inventory+"\nRemaining: "+remaining);
+			
+			Debug.Log("-1-");
+
+			remaining = inventory.ModifyStorage(5, Resources.Stalks, out inventory);
+			
+			Debug.Log("Modify storage to 5 Stalks\n"+inventory+"\nRemaining: "+remaining);
+			
+			remaining = inventory.ModifyStorage(10, Resources.Stalks, out inventory);
+			
+			Debug.Log("Modify storage to 10 Stalks\n"+inventory+"\nRemaining: "+remaining);
+			
+			remaining = inventory.ModifyStorage(5, Resources.Scrap, out inventory);
+			
+			Debug.Log("Modify storage to 5 Scrap\n"+inventory+"\nRemaining: "+remaining);
+			
+			Debug.Log("-2-");
+			
+			remaining = inventory.ModifyCount(5, out inventory);
+			
+			Debug.Log("Modify count to 5 Stalks\n"+inventory+"\nRemaining: "+remaining);
+			
+			remaining = inventory.ModifyCount(0, out inventory);
+			
+			Debug.Log("Modify count to 0 Stalks\n"+inventory+"\nRemaining: "+remaining);
+			
+			Debug.Log("-3-");
+			
+			var remainingCap = inventory.ModifyResourceCount(5, Resources.Stalks, out inventory);
+			
+			Debug.Log("Modify resource count to 5 Stalks\n"+inventory+"\nRemaining: "+remainingCap);
+			
+			remainingCap = inventory.ModifyResourceCount(5, Resources.Scrap, out inventory);
+			
+			Debug.Log("Modify resource count to 5 Scrap\n"+inventory+"\nRemaining: "+remainingCap);
+			
+			remainingCap = inventory.ModifyResourceCount(15, Resources.Scrap, out inventory);
+			
+			Debug.Log("Modify resource count to 15 Scrap\n"+inventory+"\nRemaining: "+remainingCap);
+			
+			Debug.Break();
+			*/
 
 			done(Result<GameModel>.Success(game));
 		}

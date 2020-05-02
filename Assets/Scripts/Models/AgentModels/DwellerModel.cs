@@ -18,6 +18,9 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		[JsonProperty] int jobPriority;
 		[JsonIgnore] public readonly ListenerProperty<int> JobPriority;
 		
+		[JsonProperty] Inventory inventory;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
+		
 		[JsonProperty] float meleeRange;
 		[JsonIgnore] public readonly ListenerProperty<float> MeleeRange;
 		
@@ -35,6 +38,7 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		{
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobPriority = new ListenerProperty<int>(value => jobPriority = value, () => jobPriority);
+			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
 			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);
