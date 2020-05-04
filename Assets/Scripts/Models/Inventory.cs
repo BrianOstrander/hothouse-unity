@@ -1,203 +1,121 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
-using Lunra.Core;
 using UnityEngine;
 
 namespace Lunra.WildVacuum.Models
 {
 	public struct Inventory
 	{
-		public static Inventory Default => new Inventory(new Capacity[0], Resources.Unknown, 0);
-		
-		public struct Capacity
-		{
-			public readonly Resources Resource;
-			public readonly int Count;
+		public static Inventory Empty { get; } = new Inventory(Item.Empty, Item.Empty);
 
-			public Capacity(
-				Resources resource,
-				int count
-			)
-			{
-				Resource = resource;
-				Count = count;
-			}
-
-			public override string ToString() => Resource + " : " + Count;
-		}
-
-		public readonly Capacity[] Storage;
-		public readonly Resources Resource;
-		public readonly int Count;
-		public readonly int Maximum;
-		public readonly bool IsFull;
-
-		public Inventory(
-			Capacity[] storage,
-			Resources resource,
-			int count
+		public static Inventory Populate(
+			Func<Item.Types, int> capacityPredicate,
+			Func<Item.Types, int> currentPredicate
 		)
-		{
-			Storage = storage;
-			Resource = resource;
-			Count = count;
-			Maximum = storage.FirstOrDefault(s => s.Resource == resource).Count;
-
-			IsFull = resource != Resources.Unknown && storage.FirstOrDefault(s => s.Resource == resource).Count <= count;
-		}
-
-		public int ModifyStorage(
-			int count,
-			Resources resource,
-			out Inventory inventory
-		)
-		{
-			if (resource == Resources.Unknown)
-			{
-				Debug.LogError("Cannot modify storage of " + resource);
-				inventory = this;
-				return 0;
-			}
-			
-			var newStorage = Storage.Where(s => s.Resource != resource).Append(new Capacity(resource, count));
-
-			var remaining = 0;
-			var newCount = Count;
-			var newResource = Resource;
-			
-			if (resource == Resource && count < Count)
-			{
-				remaining = Count - count;
-				newCount = count;
-			}
-			
-			inventory = new Inventory(
-				newStorage.ToArray(),
-				newCount == 0 ? Resources.Unknown : newResource,
-				newCount
-			);
-
-			return remaining;
-		}
-		
-		public int ModifyCount(
-			int count,
-			out Inventory inventory
-		)
-		{
-			var remaining = 0;
-			var newCount = count;
-
-			if (Maximum < count)
-			{
-				remaining = count - Maximum;
-				newCount = Maximum;
-			}
-			
-			inventory = new Inventory(
-				Storage,
-				newCount == 0 ? Resources.Unknown : Resource,
-				newCount
-			);
-
-			return remaining;
-		}
-		
-		public Capacity ModifyResourceCount(
-			int count, 
-			Resources resource,
-			out Inventory inventory
-		)
-		{
-			if (resource == Resources.Unknown)
-			{
-				if (count != 0)
-				{
-					Debug.LogError("Unable to modify resource count for "+resource);
-					inventory = this;
-					return default;
-				}
-				
-				inventory = new Inventory(
-					Storage,
-					resource,
-					count
-				);
-				
-				return new Capacity(Resource, Count);
-			}
-
-			if (resource == Resource)
-			{
-				return new Capacity(resource, ModifyCount(count, out inventory));
-			}
-
-			var maximum = Storage.FirstOrDefault(s => s.Resource == resource).Count;
-
-			var remaining = 0;
-			var newConut = count;
-			
-			if (maximum < count)
-			{
-				remaining = count - maximum;
-				newConut = maximum;
-			}
-			
-			inventory = new Inventory(
-				Storage,
-				resource,
-				newConut
-			);
-
-			return new Capacity(Resource, remaining);
-		}
-
-		public Inventory Empty()
 		{
 			return new Inventory(
-				Storage,
-				Resources.Unknown,
-				0
+				Item.Populate(capacityPredicate),
+				Item.Populate(currentPredicate)
 			);
 		}
 
-		public int Fill(
-			int count,
-			Resources resource,
-			out Inventory inventory
+		public readonly Item[] Maximum;
+		public readonly Item[] Current;
+		
+		Inventory(
+			Item[] maximum,
+			Item[] current
 		)
 		{
-			if (resource == Resources.Unknown)
-			{
-				inventory = this;
-				Debug.LogError("Cannot fill with "+resource);
-				return count;
-			}
-
-			if (Resource != Resources.Unknown && resource != Resource)
-			{
-				inventory = this;
-				return count;
-			}
-
-			var capacity = Storage.FirstOrDefault(s => s.Resource == resource);
-
-			var remaining = count - Mathf.Min(capacity.Count - Count, count);
+			if (maximum.Length != current.Length) throw new Exception("Capacity and entries must have the same length");
 			
-			inventory = new Inventory(
-				Storage,
-				resource,
-				Count + (count - remaining)
-			);
-
-			return remaining;
+			Maximum = maximum;
+			Current = current;
 		}
+
+		public Inventory SetMaximum(int count, Item.Types type) => SetMaximum(current => current.Type == type ? count : current.Count);
+		
+		public Inventory SetMaximum(Item item) => SetMaximum(current => current.Type == item.Type ? item.Count : current.Count);
+		
+		public Inventory SetMaximum(Func<Item, int> predicate)
+		{
+			return new Inventory(
+				Maximum.Select(i => Item.New(Mathf.Max(0, predicate(i)), i.Type)).ToArray(),
+				Current.Select(i => Item.New(Mathf.Min(i.Count, predicate(i)), i.Type)).ToArray()
+			);
+		}
+		
+		public Inventory SetCurrent(int count, Item.Types type) => SetCurrent(current => current.Type == type ? count : current.Count);
+		
+		public Inventory SetCurrent(Item item) => SetCurrent(current => current.Type == item.Type ? item.Count : current.Count);
+		
+		public Inventory SetCurrent(Func<Item, int> predicate)
+		{
+			Func<Item.Types, int> getMaximum = GetMaximum;
+			return new Inventory(
+				Maximum,
+				Current.Select(
+					i => Item.New(
+						Mathf.Clamp(predicate(i), 0, getMaximum(i.Type)),
+						i.Type
+					)
+				).ToArray()
+			);
+		}
+		
+		public Inventory Add(int count, Item.Types type) => Add(current => current.Type == type ? count : current.Count);
+		
+		public Inventory Add(Item item) => Add(current => current.Type == item.Type ? item.Count : current.Count);
+		
+		public Inventory Add(Func<Item, int> predicate)
+		{
+			Func<Item.Types, int> getMaximum = GetMaximum;
+			return new Inventory(
+				Maximum,
+				Current.Select(
+					i => Item.New(
+						Mathf.Clamp(i.Count + predicate(i), 0, getMaximum(i.Type)),
+						i.Type
+					)
+				).ToArray()
+			);
+		}
+		
+		public Inventory Subtract(int count, Item.Types type) => Subtract(current => current.Type == type ? count : current.Count);
+		
+		public Inventory Subtract(Item item) => Subtract(current => current.Type == item.Type ? item.Count : current.Count);
+		
+		public Inventory Subtract(Func<Item, int> predicate)
+		{
+			Func<Item.Types, int> getMaximum = GetMaximum;
+			return new Inventory(
+				Maximum,
+				Current.Select(
+					i => Item.New(
+						Mathf.Clamp(i.Count - predicate(i), 0, getMaximum(i.Type)),
+						i.Type
+					)
+				).ToArray()
+			);
+		}
+
+		public int GetMaximum(Item.Types type) => Maximum.FirstOrDefault(i => i.Type == type).Count;
+		
+		public int GetCurrent(Item.Types type) => Current.FirstOrDefault(i => i.Type == type).Count;
+
+		public int GetCapacity(Item.Types type) => GetMaximum(type) - GetCurrent(type);
+
+		public int this[Item.Types type] => GetCurrent(type);
 
 		public override string ToString()
 		{
-			var result = Resource + " : " + Count + "\n______";
-			foreach (var capacity in (Storage ?? new Capacity[0])) result += "\n" + capacity.Resource + " : " + capacity.Count;
-			return result + "\n______";
+			var result = "[";
+
+			result += "\n\tType\t{ Curr\t:\tMax }";
+			
+			foreach (var entry in Current) result += "\n\t" + entry.Type + "\t{ " + entry.Count + "\t:\t" + GetMaximum(entry.Type) + " }";
+			
+			return result + "\n]";
 		}
 	}
 }

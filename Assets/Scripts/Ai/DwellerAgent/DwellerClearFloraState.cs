@@ -14,7 +14,8 @@ namespace Lunra.WildVacuum.Ai
 		public override void OnInitialize()
 		{
 			AddTransitions(
-				new ToIdleOnFloraNullOrCleared(this)	
+				new ToIdleOnFloraNull(this),
+				new ToIdleOnFloraCleared(this)
 			);
 		}
 
@@ -36,21 +37,33 @@ namespace Lunra.WildVacuum.Ai
 			if (cooldownElapsed < Agent.MeleeCooldown.Value) return;
 
 			cooldownElapsed = cooldownElapsed % Agent.MeleeCooldown.Value;
-			
+ 
 			target.Health.Value = Mathf.Max(0f, target.Health.Value - Agent.MeleeDamage.Value);
 		}
 
-		class ToIdleOnFloraNullOrCleared : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		class ToIdleOnFloraNull : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
 		{
 			DwellerClearFloraState sourceState;
 
-			public ToIdleOnFloraNullOrCleared(DwellerClearFloraState sourceState) => this.sourceState = sourceState;
+			public ToIdleOnFloraNull(DwellerClearFloraState sourceState) => this.sourceState = sourceState;
+
+			public override bool IsTriggered() => sourceState.target == null;
+		}
+		
+		class ToIdleOnFloraCleared : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		{
+			DwellerClearFloraState sourceState;
+
+			public ToIdleOnFloraCleared(DwellerClearFloraState sourceState) => this.sourceState = sourceState;
 			
 			public override bool IsTriggered()
 			{
-				if (sourceState.target == null) return true;
-				if (Mathf.Approximately(0f, sourceState.target.Health.Value)) return true;
-				return sourceState.targetId != sourceState.target.Id.Value;
+				return Mathf.Approximately(0f, sourceState.target.Health.Value) || sourceState.targetId != sourceState.target.Id.Value;
+			}
+
+			public override void Transition()
+			{
+				// var remainder = Agent.Inventory.Value.Fill() 
 			}
 		}
 	}
