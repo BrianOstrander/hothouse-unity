@@ -18,7 +18,7 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		[JsonProperty] int jobPriority;
 		[JsonIgnore] public readonly ListenerProperty<int> JobPriority;
 		
-		[JsonProperty] Inventory inventory;
+		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
 		
 		[JsonProperty] float meleeRange;

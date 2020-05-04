@@ -116,6 +116,7 @@ namespace Lunra.WildVacuum.Presenters
 									newFlora.HealthMaximum.Value = flora.HealthMaximum.Value;
 									newFlora.Health.Value = flora.HealthMaximum.Value;
 									newFlora.MarkedForClearing.Value = false;
+									newFlora.ItemDrops.Value = flora.ItemDrops.Value;
 									
 									if (game.Selection.Current.Value.State == SelectionModel.States.Highlighting && game.Selection.Current.Value.Contains(newFlora.Position.Value))
 									{

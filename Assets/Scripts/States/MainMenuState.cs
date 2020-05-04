@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
@@ -122,6 +123,12 @@ namespace Lunra.WildVacuum.Services
 				// flora.ReproductionFailureLimit.Value = 0;
 				flora.HealthMaximum.Value = 100f;
 				flora.Health.Value = flora.HealthMaximum.Value;
+				flora.ItemDrops.Value = Inventory.Populate(
+					new Dictionary<Item.Types, int>
+					{
+						{ Item.Types.Stalks, 1 }
+					}
+				);
 			}
 			
 			game.Flora.Activate(
@@ -139,7 +146,7 @@ namespace Lunra.WildVacuum.Services
 			// game.Flora.Activate(
 			// 	flora => initializeFlora(flora, new Vector3(-12f, -0.8386866f, 6f))
 			// );
-
+			
 			void initializeDweller(
 				DwellerModel dweller,
 				string id,
@@ -153,12 +160,6 @@ namespace Lunra.WildVacuum.Services
 				dweller.State.Value = AgentModel.States.Visible;
 				dweller.Position.Value = position;
 				dweller.Rotation.Value = Quaternion.identity;
-				/*
-				dweller.NavigationPlan.Value = NavigationPlan.Calculating(
-					dweller.Position.Value,
-					new Vector3(0f, -0.8386865f, 0f)	
-				);
-				*/
 				dweller.NavigationVelocity.Value = 3f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
@@ -167,11 +168,12 @@ namespace Lunra.WildVacuum.Services
 				dweller.MeleeRange.Value = 0.75f;
 				dweller.MeleeCooldown.Value = 0.5f;
 				dweller.MeleeDamage.Value = 30f;
-
-				// switch (job)
-				// {
-				// 	case DwellerModel.Jobs.ClearFlora:
-				// }
+				dweller.Inventory.Value = Inventory.PopulateMaximum(
+					new Dictionary<Item.Types, int>
+					{
+						{ Item.Types.Stalks, 5 }
+					}
+				);
 			}
 			
 			game.Dwellers.Activate(
@@ -185,15 +187,15 @@ namespace Lunra.WildVacuum.Services
 				)
 			);
 			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"1",
-					new Vector3(-10f, -0.8386866f, 6f),
-					DwellerModel.Jobs.ClearFlora,
-					1
-				)
-			);
+			// game.Dwellers.Activate(
+			// 	dweller => initializeDweller(
+			// 		dweller,
+			// 		"1",
+			// 		new Vector3(-10f, -0.8386866f, 6f),
+			// 		DwellerModel.Jobs.ClearFlora,
+			// 		1
+			// 	)
+			// );
 
 			/*
 			var inventory = Inventory.Populate(

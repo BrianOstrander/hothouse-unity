@@ -12,7 +12,8 @@ namespace Lunra.WildVacuum.Presenters
 
 		protected override void OnBind()
 		{
-			
+
+			Agent.Inventory.Changed += inventory => Debug.Log("Inventory:\n" + inventory);
 			
 			base.OnBind();
 		}

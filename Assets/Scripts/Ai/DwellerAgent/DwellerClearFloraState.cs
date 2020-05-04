@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
@@ -63,7 +64,25 @@ namespace Lunra.WildVacuum.Ai
 
 			public override void Transition()
 			{
-				// var remainder = Agent.Inventory.Value.Fill() 
+				Agent.Inventory.Value = Agent.Inventory.Value.Add(
+					sourceState.target.ItemDrops.Value,
+					out var overflow
+				);
+
+				if (overflow.IsEmpty) return;
+				
+				Debug.LogWarning("TODO: figure out what to do with overflow");
+				// var newInventory = Agent.Inventory.Value;
+				// var droppedInventory = 
+
+				// foreach (var item in )
+				//
+				// var capacity = Agent.Inventory.Value.GetCapacity(Item.Types.Stalks);
+				//
+				// if (1 <= capacity)
+				// {
+				// 	Agent.Inventory.Value = Agent.Inventory.Value.Add(1, Item.Types.Stalks);
+				// }
 			}
 		}
 	}

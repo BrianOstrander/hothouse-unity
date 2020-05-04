@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using UnityEngine;
 
 namespace Lunra.WildVacuum.Models
@@ -18,9 +20,39 @@ namespace Lunra.WildVacuum.Models
 				Item.Populate(currentPredicate)
 			);
 		}
+		
+		public static Inventory Populate(
+			Dictionary<Item.Types, int> all
+		)
+		{
+			var result = Item.Populate(
+				t =>
+				{
+					all.TryGetValue(t, out var count);
+					return count;
+				}
+			);
+			return new Inventory(result, result); 
+		}
+		
+		public static Inventory PopulateMaximum(
+			Dictionary<Item.Types, int> all
+		)
+		{
+			var resultCurrent = Item.Populate(
+				t =>
+				{
+					all.TryGetValue(t, out var count);
+					return count;
+				}
+			);
+			
+			return new Inventory(resultCurrent, Item.Populate(t => 0)); 
+		}
 
 		public readonly Item[] Maximum;
 		public readonly Item[] Current;
+		public readonly bool IsEmpty;
 		
 		Inventory(
 			Item[] maximum,
@@ -31,6 +63,8 @@ namespace Lunra.WildVacuum.Models
 			
 			Maximum = maximum;
 			Current = current;
+
+			IsEmpty = !Current.Any(i => 0 < i.Count);
 		}
 
 		public Inventory SetMaximum(int count, Item.Types type) => SetMaximum(current => current.Type == type ? count : current.Count);
@@ -79,6 +113,26 @@ namespace Lunra.WildVacuum.Models
 					)
 				).ToArray()
 			);
+		}
+		
+		public Inventory Add(
+			Inventory target,
+			out Inventory overflow
+		)
+		{
+			var result = Add(i => target[i.Type]);
+
+			var rawOverflow = new Dictionary<Item.Types, int>();
+			
+			foreach (var item in target.Current)
+			{
+				var capacity = GetCapacity(item.Type);
+				if (capacity < item.Count) rawOverflow.Add(item.Type, item.Count - capacity);
+			}
+			
+			overflow = Populate(rawOverflow);
+
+			return result;
 		}
 		
 		public Inventory Subtract(int count, Item.Types type) => Subtract(current => current.Type == type ? count : current.Count);

@@ -102,6 +102,9 @@ namespace Lunra.WildVacuum.Models
 		
 		[JsonProperty] bool markedForClearing;
 		[JsonIgnore] public readonly ListenerProperty<bool> MarkedForClearing;
+		
+		[JsonProperty] Inventory itemDrops = Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> ItemDrops;
 		#endregion
 		
 		#region Non Serialized
@@ -128,6 +131,7 @@ namespace Lunra.WildVacuum.Models
 			Health = new ListenerProperty<float>(value => health = value, () => health);
 			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
 			MarkedForClearing = new ListenerProperty<bool>(value => markedForClearing = value, () => markedForClearing);
+			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
 			
 			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
 			IsReproducing = new DerivedProperty<bool, int, int>(
