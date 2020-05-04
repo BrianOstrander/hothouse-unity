@@ -25,6 +25,9 @@ namespace Lunra.WildVacuum.Models
 		
 		[JsonProperty] DoorPrefabModel[] doors = new DoorPrefabModel[0];
 		[JsonIgnore] public readonly ListenerProperty<DoorPrefabModel[]> Doors;
+		
+		[JsonProperty] ItemCacheBuildingModel[] itemCaches = new ItemCacheBuildingModel[0];
+		[JsonIgnore] public readonly ListenerProperty<ItemCacheBuildingModel[]> ItemCaches;
 
 		[JsonProperty] float simulationUpdateMultiplier = 1f;
 		[JsonIgnore] public readonly ListenerProperty<float> SimulationUpdateMultiplier;
@@ -43,6 +46,7 @@ namespace Lunra.WildVacuum.Models
 		{
 			Rooms = new ListenerProperty<RoomPrefabModel[]>(value => rooms = value, () => rooms);
 			Doors = new ListenerProperty<DoorPrefabModel[]>(value => doors = value, () => doors);
+			ItemCaches = new ListenerProperty<ItemCacheBuildingModel[]>(value => itemCaches = value, () => itemCaches);
 			SimulationUpdateMultiplier = new ListenerProperty<float>(value => simulationUpdateMultiplier = value, () => simulationUpdateMultiplier);
 			LastNavigationCalculation = new ListenerProperty<DateTime>(value => lastNavigationCalculation = value, () => lastNavigationCalculation);
 		}

@@ -4,7 +4,7 @@ using Lunra.StyxMvp.Models;
 
 namespace Lunra.WildVacuum.Models
 {
-	public class AgentModel : Model
+	public abstract class AgentModel : Model
 	{
 		public enum States
 		{

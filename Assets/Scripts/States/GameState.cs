@@ -83,6 +83,8 @@ namespace Lunra.WildVacuum.Services
 
 			foreach (var door in Payload.Game.Doors.Value) new DoorPrefabPresenter(Payload.Game, door);
 
+			foreach (var itemCache in Payload.Game.ItemCaches.Value) new ItemCacheBuildingPresenter(Payload.Game, itemCache);
+
 			foreach (var flora in Payload.Game.Flora.GetActive()) new FloraPresenter(Payload.Game, flora);
 
 			foreach (var dweller in Payload.Game.Dwellers.GetActive()) new DwellerPresenter(Payload.Game, dweller);

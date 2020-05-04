@@ -6,8 +6,8 @@ using Lunra.WildVacuum.Views;
 namespace Lunra.WildVacuum.Presenters
 {
 	public class PrefabPresenter<V, M> : Presenter<V>
-		where M : PrefabModel
 		where V : PrefabView
+		where M : PrefabModel
 	{
 		protected GameModel Game;
 		protected M Prefab;

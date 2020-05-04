@@ -14,6 +14,7 @@ namespace Lunra.WildVacuum.Ai
 			AddTransitions(
 				new ToNavigateForced(),
 				new ToNavigate(),
+				new ToNavigateToNearestItemCache(),
 				new ToClearNearestFlora(),
 				new ToNavigateToNearestFlora()
 			);
@@ -70,6 +71,46 @@ namespace Lunra.WildVacuum.Ai
 			}
 		}
 		
+		// class ToEmptyInventoryInNearestItemCache : AgentTransition<>
+
+		class ToNavigateToNearestItemCache : AgentTransition<DwellerNavigateState, GameModel, DwellerModel>
+		{
+			ItemCacheBuildingModel targetItemCache;
+			
+			public override bool IsTriggered()
+			{
+				if (Agent.Inventory.Value.IsEmpty || Agent.Inventory.Value.IsNoneFull()) return false;
+
+				var fullItems = Agent.Inventory.Value.GetFull();
+
+				targetItemCache = World.ItemCaches.Value
+					.OrderBy(b => Vector3.Distance(Agent.Position.Value, b.Position.Value))
+					.FirstOrDefault(
+						b =>
+						{
+							if (b.Entrances.Value.None(e => e.State == BuildingModel.Entrance.States.Available)) return false;
+							
+							foreach (var item in fullItems)
+							{
+								if (!b.Inventory.Value.IsFull(item.Type)) return true;
+							}
+
+							return false;
+						}
+					);
+
+				return targetItemCache != null;
+			}
+
+			public override void Transition()
+			{
+				Agent.NavigationPlan.Value = NavigationPlan.Calculating(
+					Agent.Position.Value,
+					targetItemCache.Entrances.Value.FirstOrDefault(e => e.State == BuildingModel.Entrance.States.Available).Position
+				);
+			}
+		}
+		
 		class ToNavigateToNearestFlora : AgentTransition<DwellerNavigateState, GameModel, DwellerModel>
 		{
 			FloraModel targetFlora;
@@ -88,12 +129,11 @@ namespace Lunra.WildVacuum.Ai
 
 			public override void Transition()
 			{
-				if (targetFlora != null) Agent.NavigationPlan.Value = NavigationPlan.Calculating(Agent.Position.Value, targetFlora.Position.Value, Agent.MeleeRange.Value);
-				else
-				{
-					Debug.LogError(nameof(targetFlora) + " is null, this should not occur");
-					Agent.NavigationPlan.Value = NavigationPlan.Invalid(Agent.Position.Value);
-				}
+				Agent.NavigationPlan.Value = NavigationPlan.Calculating(
+					Agent.Position.Value,
+					targetFlora.Position.Value,
+					Agent.MeleeRange.Value
+				);
 			}
 		}
 		

@@ -159,6 +159,26 @@ namespace Lunra.WildVacuum.Models
 
 		public int GetCapacity(Item.Types type) => GetMaximum(type) - GetCurrent(type);
 
+		public Item[] GetFull()
+		{
+			Func<Item.Types, int> getCurrent = GetCurrent;
+			return Maximum.Where(m => m.Count != 0 && m.Count == getCurrent(m.Type)).ToArray();
+		}
+		
+		public bool IsFull(Item.Types type) => GetCapacity(type) == 0;
+
+		public bool IsNoneFull() => !IsAnyFull();
+		
+		public bool IsAnyFull()
+		{
+			foreach (var type in EnumExtensions.GetValues(Item.Types.Unknown))
+			{
+				if (IsFull(type)) return true;
+			}
+
+			return false;
+		}
+
 		public int this[Item.Types type] => GetCurrent(type);
 
 		public override string ToString()

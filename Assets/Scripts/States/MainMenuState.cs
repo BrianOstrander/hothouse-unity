@@ -106,7 +106,24 @@ namespace Lunra.WildVacuum.Services
 			{
 				door0
 			};
+			
+			var itemCache0 = new ItemCacheBuildingModel();
 
+			itemCache0.PrefabId.Value = "item_cache";
+			itemCache0.IsEnabled.Value = true;
+			itemCache0.Position.Value = new Vector3(12f, -0.8386866f, 6f);
+			itemCache0.Inventory.Value = Inventory.PopulateMaximum(
+				new Dictionary<Item.Types, int>
+				{
+					{ Item.Types.Stalks, 10 }
+				}
+			);
+
+			game.ItemCaches.Value = new[]
+			{
+				itemCache0
+			};
+			
 			void initializeFlora(
 				FloraModel flora,
 				Vector3 position
@@ -168,12 +185,22 @@ namespace Lunra.WildVacuum.Services
 				dweller.MeleeRange.Value = 0.75f;
 				dweller.MeleeCooldown.Value = 0.5f;
 				dweller.MeleeDamage.Value = 30f;
+				
+				dweller.Inventory.Value = Inventory.Populate(
+					new Dictionary<Item.Types, int>
+					{
+						{ Item.Types.Stalks, 5 }
+					}
+				);
+				
+				/*
 				dweller.Inventory.Value = Inventory.PopulateMaximum(
 					new Dictionary<Item.Types, int>
 					{
 						{ Item.Types.Stalks, 5 }
 					}
 				);
+				*/
 			}
 			
 			game.Dwellers.Activate(

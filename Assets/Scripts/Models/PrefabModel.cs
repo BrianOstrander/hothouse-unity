@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Models
 {
-	public class PrefabModel : Model
+	public abstract class PrefabModel : Model
 	{
 		[JsonProperty] string prefabId;
 		[JsonIgnore] public readonly ListenerProperty<string> PrefabId;
