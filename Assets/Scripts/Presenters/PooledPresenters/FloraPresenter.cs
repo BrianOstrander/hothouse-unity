@@ -58,7 +58,7 @@ namespace Lunra.WildVacuum.Presenters
 
 			if (!Model.Age.Value.IsDone)
 			{
-				Model.Age.Value = Model.Age.Value.Update(Time.deltaTime);
+				Model.Age.Value = Model.Age.Value.Update(Game.SimulationDelta);
 
 				if (View.Visible) View.Age = Model.Age.Value.Normalized;
 				
@@ -69,7 +69,7 @@ namespace Lunra.WildVacuum.Presenters
 
 			if (!Model.ReproductionElapsed.Value.IsDone)
 			{
-				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Time.deltaTime);
+				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Game.SimulationDelta);
 				return;
 			}
 

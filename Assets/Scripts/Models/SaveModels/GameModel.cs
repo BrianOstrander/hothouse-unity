@@ -32,9 +32,23 @@ namespace Lunra.WildVacuum.Models
 
 		[JsonProperty] DateTime lastNavigationCalculation;
 		[JsonIgnore] public readonly ListenerProperty<DateTime> LastNavigationCalculation;
+
+		/// <summary>
+		/// The speed modifier for simulated actions, such as movement, build times, etc
+		/// </summary>
+		[JsonProperty] float simulationMultiplier = 1f;
+		[JsonIgnore] public readonly ListenerProperty<float> SimulationMultiplier;
+		
+		[JsonProperty] float simulationTimeConversion = 1f;
+		[JsonIgnore] public readonly ListenerProperty<float> SimulationTimeConversion;
+		
+		[JsonProperty] DayTime simulationTime = DayTime.Zero;
+		[JsonIgnore] public readonly ListenerProperty<DayTime> SimulationTime;
 		#endregion
 
 		#region NonSerialized
+		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
+		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
 		public event Action SimulationInitialize = ActionExtensions.Empty;
 		public Action SimulationUpdate = ActionExtensions.Empty;
@@ -46,6 +60,9 @@ namespace Lunra.WildVacuum.Models
 			Doors = new ListenerProperty<DoorPrefabModel[]>(value => doors = value, () => doors);
 			ItemCaches = new ListenerProperty<ItemCacheBuildingModel[]>(value => itemCaches = value, () => itemCaches);
 			LastNavigationCalculation = new ListenerProperty<DateTime>(value => lastNavigationCalculation = value, () => lastNavigationCalculation);
+			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
+			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
+			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
 		}
 
 		public void TriggerSimulationInitialize()

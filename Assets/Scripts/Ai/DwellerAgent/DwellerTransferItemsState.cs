@@ -68,7 +68,7 @@ namespace Lunra.WildVacuum.Ai
 
 		public override void Idle()
 		{
-			cooldownElapsed += Time.deltaTime;
+			cooldownElapsed += World.SimulationDelta;
 
 			if (cooldownElapsed < target.TransferCooldown) return;
 

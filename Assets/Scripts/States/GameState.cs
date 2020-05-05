@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lunra.Core;
 using Lunra.StyxMvp;
-using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
 using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
 using Lunra.WildVacuum.Presenters;
-using Lunra.WildVacuum.Views;
 using UnityEngine;
 
 namespace Lunra.WildVacuum.Services
@@ -96,6 +92,8 @@ namespace Lunra.WildVacuum.Services
 		#region Idle
 		protected override void Idle()
 		{
+			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
+			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 
 			App.Heartbeat.Wait(
@@ -114,6 +112,7 @@ namespace Lunra.WildVacuum.Services
 
 		void OnHeartbeatUpdate()
 		{
+			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
 			Payload.Game.SimulationUpdate();
 		}
 		#endregion
@@ -121,6 +120,8 @@ namespace Lunra.WildVacuum.Services
 		#region End
 		protected override void End()
 		{
+			Payload.Game.SimulationMultiplier.Changed -= OnGameSimulationMultiplier;
+			
 			App.Heartbeat.Update -= OnHeartbeatUpdate;
 			
 			App.S.PushBlocking(
@@ -134,6 +135,10 @@ namespace Lunra.WildVacuum.Services
 		#endregion
 		
 		#region GameModel Events
+		void OnGameSimulationMultiplier(float multiplier)
+		{
+			Time.timeScale = multiplier;
+		}
 		#endregion
 	}
 }

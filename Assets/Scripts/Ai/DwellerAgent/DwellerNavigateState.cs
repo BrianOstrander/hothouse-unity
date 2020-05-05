@@ -38,7 +38,7 @@ namespace Lunra.WildVacuum.Ai
 				if (!CalculatePath()) return;
 			}
 			
-			Agent.NavigationPlan.Value = Agent.NavigationPlan.Value.Next(Agent.NavigationVelocity.Value * Time.deltaTime);
+			Agent.NavigationPlan.Value = Agent.NavigationPlan.Value.Next(Agent.NavigationVelocity.Value * World.SimulationDelta);
 		}
 
 		bool CalculatePath()
