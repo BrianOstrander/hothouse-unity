@@ -7,9 +7,8 @@ namespace Lunra.WildVacuum.Models
 	public enum PooledStates
 	{
 		Unknown = 0,
-		Pooled = 10,
-		Visible = 20,
-		NotVisible = 30
+		InActive = 10,
+		Active = 20
 	}
 	
 	public class PooledModel : Model
@@ -24,8 +23,8 @@ namespace Lunra.WildVacuum.Models
 		
 		[JsonProperty] Quaternion rotation = Quaternion.identity;
 		[JsonIgnore] public readonly ListenerProperty<Quaternion> Rotation;
-		
-		[JsonProperty] PooledStates pooledState;
+
+		[JsonProperty] PooledStates pooledState = PooledStates.InActive;
 		[JsonIgnore] public readonly ListenerProperty<PooledStates> PooledState;
 		#endregion
 		

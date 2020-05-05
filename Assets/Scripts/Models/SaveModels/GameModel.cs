@@ -17,8 +17,8 @@ namespace Lunra.WildVacuum.Models
 		public readonly WorldCameraModel WorldCamera = new WorldCameraModel();
 		public readonly SelectionModel Selection = new SelectionModel();
 		public readonly FloraEffectsModel FloraEffects = new FloraEffectsModel();
-		public readonly ModelPool<FloraModel> Flora = new ModelPool<FloraModel>();
-		public readonly ModelPool<DwellerModel> Dwellers = new ModelPool<DwellerModel>();
+		public readonly PoolModel<FloraModel> Flora = new PoolModel<FloraModel>();
+		public readonly PoolModel<DwellerModel> Dwellers = new PoolModel<DwellerModel>();
 
 		[JsonProperty] RoomPrefabModel[] rooms = new RoomPrefabModel[0];
 		[JsonIgnore] public readonly ListenerProperty<RoomPrefabModel[]> Rooms;

@@ -52,7 +52,7 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			switch (Model.PooledState.Value)
 			{
-				case PooledStates.Pooled:
+				case PooledStates.InActive:
 					return;
 			}
 
@@ -113,7 +113,6 @@ namespace Lunra.WildVacuum.Presenters
 			
 			if (View.Visible) Game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(Model.Position.Value));
 			
-			Model.PooledState.Value = PooledStates.Pooled;
 			Game.Flora.InActivate(Model);
 		}
 		#endregion
@@ -165,9 +164,7 @@ namespace Lunra.WildVacuum.Presenters
 										newFlora.SelectionState.Value = SelectionStates.Highlighted;
 									}
 									else newFlora.SelectionState.Value = SelectionStates.Deselected;
-
-									newFlora.PooledState.Value = PooledStates.Visible;
-
+									
 									if (!newFlora.HasPresenter.Value) new FloraPresenter(Game, newFlora);
 								}
 							);

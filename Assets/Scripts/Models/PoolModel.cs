@@ -6,8 +6,8 @@ using Newtonsoft.Json;
 
 namespace Lunra.WildVacuum.Models
 {
-	public class ModelPool<M> : Model
-		where M : Model, new()
+	public class PoolModel<M> : Model
+		where M : PooledModel, new()
 	{
 		public class Reservoir
 		{
@@ -42,7 +42,7 @@ namespace Lunra.WildVacuum.Models
 		public M[] GetInActive() => All.Value.InActive;
 		#endregion
 
-		public ModelPool()
+		public PoolModel()
 		{
 			All = new ListenerProperty<Reservoir>(value => all = value, () => all);
 		}
@@ -57,6 +57,8 @@ namespace Lunra.WildVacuum.Models
 				All.Value.Active.Except(models).ToArray(),
 				All.Value.InActive.Union(models).ToArray()
 			);
+
+			foreach (var model in models) model.PooledState.Value = PooledStates.InActive;
 		}
 
 		public void Activate(
@@ -86,6 +88,8 @@ namespace Lunra.WildVacuum.Models
 			}
 			
 			if (string.IsNullOrEmpty(result.Id.Value)) result.Id.Value = Guid.NewGuid().ToString();
+
+			result.PooledState.Value = PooledStates.Active;
 		}
 	}
 }

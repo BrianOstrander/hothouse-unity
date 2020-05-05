@@ -82,11 +82,10 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			switch (pooledState)
 			{
-				case PooledStates.Pooled:
-				case PooledStates.NotVisible:
+				case PooledStates.InActive:
 					Close();
 					break;
-				case PooledStates.Visible:
+				case PooledStates.Active:
 					Show();
 					break;
 				default:

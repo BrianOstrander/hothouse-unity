@@ -90,7 +90,7 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			switch (Model.PooledState.Value)
 			{
-				case PooledStates.Pooled:
+				case PooledStates.InActive:
 					return;
 			}
 			
@@ -103,8 +103,7 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			switch (Model.PooledState.Value)
 			{
-				case PooledStates.Pooled:
-				case PooledStates.NotVisible:
+				case PooledStates.InActive:
 					return;
 			}
 
