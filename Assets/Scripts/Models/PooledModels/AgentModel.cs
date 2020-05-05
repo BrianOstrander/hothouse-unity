@@ -4,26 +4,9 @@ using Lunra.StyxMvp.Models;
 
 namespace Lunra.WildVacuum.Models
 {
-	public abstract class AgentModel : Model
+	public abstract class AgentModel : PooledModel
 	{
-		public enum States
-		{
-			Unknown = 0,
-			Pooled = 10,
-			Visible = 20,
-			NotVisible = 30
-		}
-		
 		#region Serialized
-		[JsonProperty] States state;
-		[JsonIgnore] public readonly ListenerProperty<States> State;
-		
-		[JsonProperty] Vector3 position = Vector3.zero;
-		[JsonIgnore] public readonly ListenerProperty<Vector3> Position;
-
-		[JsonProperty] Quaternion rotation = Quaternion.identity;
-		[JsonIgnore] public readonly ListenerProperty<Quaternion> Rotation;
-
 		[JsonProperty] float navigationVelocity;
 		[JsonIgnore] public readonly ListenerProperty<float> NavigationVelocity;
 		
@@ -41,9 +24,6 @@ namespace Lunra.WildVacuum.Models
 		
 		public AgentModel()
 		{
-			State = new ListenerProperty<States>(value => state = value, () => state);	
-			Position = new ListenerProperty<Vector3>(value => position = value, () => position);
-			Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);
 			NavigationVelocity = new ListenerProperty<float>(value => navigationVelocity = value, () => navigationVelocity);
 			NavigationForceDistanceMaximum = new ListenerProperty<float>(value => navigationForceDistanceMaximum = value, () => navigationForceDistanceMaximum);
 			NavigationPlan = new ListenerProperty<NavigationPlan>(value => navigationPlan = value, () => navigationPlan);

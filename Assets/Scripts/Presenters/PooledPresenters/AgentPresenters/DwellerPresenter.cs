@@ -8,12 +8,12 @@ namespace Lunra.WildVacuum.Presenters
 {
 	public class DwellerPresenter : AgentPresenter<DwellerView, DwellerModel, DwellerStateMachine>
 	{
-		public DwellerPresenter(GameModel game, DwellerModel agent) : base(game, agent) { }
+		public DwellerPresenter(GameModel game, DwellerModel model) : base(game, model) { }
 
 		protected override void OnBind()
 		{
 
-			Agent.Inventory.Changed += inventory => Debug.Log("Inventory:\n" + inventory);
+			Model.Inventory.Changed += inventory => Debug.Log("Inventory:\n" + inventory);
 			
 			base.OnBind();
 		}

@@ -1,5 +1,4 @@
-﻿using System;
-using Lunra.Core;
+﻿using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Lunra.NumberDemon;
 using Newtonsoft.Json;
@@ -7,75 +6,12 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Models
 {
-	public class FloraModel : Model
+	public class FloraModel : PooledModel
 	{
-		public struct Interval
-		{
-			public static Interval Create(float maximum)
-			{
-				return new Interval(
-					0f,
-					maximum
-				);
-			}
-
-			public static Interval Random(float maximum)
-			{
-				return new Interval(
-					DemonUtility.GetNextFloat(0f, maximum),
-					maximum
-				);
-			}
-			
-			public readonly float Current;
-			public readonly float Maximum;
-			public readonly float Normalized;
-			public readonly bool IsDone;
-
-			Interval(
-				float current,
-				float maximum
-			)
-			{
-				Current = current;
-				Maximum = maximum;
-				Normalized = Mathf.Approximately(maximum, 0f) ? 1f : current / maximum;
-				IsDone = Mathf.Approximately(current, maximum);
-			}
-
-			public Interval Update(float time)
-			{
-				return new Interval(
-					Mathf.Min(time + Current, Maximum),
-					Maximum
-				);
-			}
-		}
-
-		public enum States
-		{
-			Unknown = 0,
-			Pooled = 10,
-			Visible = 20,
-			NotVisible = 30
-		}
-		
 		#region Serialized
 		// [JsonProperty] string themeId;
 		// public readonly ListenerProperty<string> ThemeId;
 
-		[JsonProperty] string roomId;
-		[JsonIgnore] public readonly ListenerProperty<string> RoomId;
-
-		[JsonProperty] Vector3 position = Vector3.zero;
-		[JsonIgnore] public readonly ListenerProperty<Vector3> Position;
-        
-		[JsonProperty] Quaternion rotation = Quaternion.identity;
-		[JsonIgnore] public readonly ListenerProperty<Quaternion> Rotation;
-
-		[JsonProperty] States state;
-		[JsonIgnore] public readonly ListenerProperty<States> State;
-		
 		[JsonProperty] Interval age;
 		[JsonIgnore] public readonly ListenerProperty<Interval> Age;
 
@@ -108,9 +44,6 @@ namespace Lunra.WildVacuum.Models
 		#endregion
 		
 		#region Non Serialized
-		bool hasPresenter;
-		[JsonIgnore] public readonly ListenerProperty<bool> HasPresenter;
-
 		bool isReproducing;
 		[JsonIgnore] public readonly DerivedProperty<bool, int, int> IsReproducing;
 		#endregion
@@ -118,10 +51,6 @@ namespace Lunra.WildVacuum.Models
 		public FloraModel()
 		{
 			// ThemeId = new ListenerProperty<string>(value => themeId = value, () => themeId);
-			RoomId = new ListenerProperty<string>(value => roomId = value, () => roomId);
-			Position = new ListenerProperty<Vector3>(value => position = value, () => position);
-			Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);
-			State = new ListenerProperty<States>(value => state = value, () => state);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);
@@ -133,7 +62,6 @@ namespace Lunra.WildVacuum.Models
 			MarkedForClearing = new ListenerProperty<bool>(value => markedForClearing = value, () => markedForClearing);
 			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
 			
-			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
 			IsReproducing = new DerivedProperty<bool, int, int>(
 				value => isReproducing = value,
 				() => isReproducing,

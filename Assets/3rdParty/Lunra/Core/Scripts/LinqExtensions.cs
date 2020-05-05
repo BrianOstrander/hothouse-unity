@@ -27,22 +27,24 @@ namespace Lunra.Core
 
 		public static T FirstOrFallback<T>(this IEnumerable<T> entries, Func<T, bool> predicate, T fallback = default)
 		{
-			return entries.DefaultIfEmpty(fallback).FirstOrDefault(predicate);
+			try { return entries.First(predicate); }
+			catch (InvalidOperationException) { return fallback; }
 		}
 
 		public static T FirstOrFallback<T>(this IEnumerable<T> entries, T fallback = default)
 		{
-			return entries.DefaultIfEmpty(fallback).FirstOrDefault();
+			return entries.DefaultIfEmpty(fallback).First();
 		}
 
 		public static T LastOrFallback<T>(this IEnumerable<T> entries, Func<T, bool> predicate, T fallback = default)
 		{
-			return entries.DefaultIfEmpty(fallback).LastOrDefault(predicate);
+			try { return entries.Last(predicate); }
+			catch (InvalidOperationException) { return fallback; }
 		}
 
 		public static T LastOrFallback<T>(this IEnumerable<T> entries, T fallback = default)
 		{
-			return entries.DefaultIfEmpty(fallback).LastOrDefault();
+			return entries.DefaultIfEmpty(fallback).Last();
 		}
 
 		public static T Random<T>(this IEnumerable<T> entries, T fallback = default)

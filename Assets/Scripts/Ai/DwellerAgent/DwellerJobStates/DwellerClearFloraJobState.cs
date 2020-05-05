@@ -86,7 +86,8 @@ namespace Lunra.WildVacuum.Ai
 			
 			public override bool IsTriggered()
 			{
-				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks)) return false;
+				if (Agent.Inventory.Value[Item.Types.Stalks] == 0) return false;
+				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.GetActive().Any(f => f.MarkedForClearing.Value)) return false;
 
 				target = GetNearestItemCache(World, Agent, out _, out var entrancePosition);
 
@@ -118,7 +119,8 @@ namespace Lunra.WildVacuum.Ai
 			
 			public override bool IsTriggered()
 			{
-				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks)) return false;
+				if (Agent.Inventory.Value[Item.Types.Stalks] == 0) return false;
+				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.GetActive().Any(f => f.MarkedForClearing.Value)) return false;
 
 				target = GetNearestItemCache(World, Agent, out targetPath, out _);
 
@@ -143,7 +145,7 @@ namespace Lunra.WildVacuum.Ai
 				targetFlora = World.Flora.GetActive().FirstOrDefault(
 					flora =>
 					{
-						if (flora.State.Value == FloraModel.States.Pooled) return false;
+						if (flora.PooledState.Value == PooledStates.Pooled) return false;
 						if (!flora.MarkedForClearing.Value) return false;
 						return Vector3.Distance(Agent.Position.Value, flora.Position.Value) < Agent.MeleeRange.Value;
 					}

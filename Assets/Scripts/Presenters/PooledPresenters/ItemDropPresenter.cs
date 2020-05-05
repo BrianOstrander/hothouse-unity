@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.NumberDemon;
@@ -12,18 +13,18 @@ using Random = UnityEngine.Random;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class FloraPresenter : Presenter<FloraView>
+	public class ItemDropPresenter : Presenter<FloraView>
 	{
 		GameModel game;
-		FloraModel flora;
+		ItemDropModel itemDrop;
 
-		public FloraPresenter(
+		public ItemDropPresenter(
 			GameModel game,
-			FloraModel flora
+			ItemDropModel itemDrop
 		)
 		{
 			this.game = game;
-			this.flora = flora;
+			this.itemDrop = itemDrop;
 
 			flora.HasPresenter.Value = true;
 
@@ -239,3 +240,4 @@ namespace Lunra.WildVacuum.Presenters
 		#endregion
 	}
 }
+*/

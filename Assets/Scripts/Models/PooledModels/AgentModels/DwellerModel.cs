@@ -10,7 +10,7 @@ namespace Lunra.WildVacuum.Models.AgentModels
 			Unknown = 0,
 			ClearFlora = 10
 		}
-		
+
 		#region Serialized
 		[JsonProperty] Jobs job;
 		[JsonIgnore] public readonly ListenerProperty<Jobs> Job;

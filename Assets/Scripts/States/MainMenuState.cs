@@ -115,7 +115,7 @@ namespace Lunra.WildVacuum.Services
 			itemCache0.Inventory.Value = Inventory.PopulateMaximum(
 				new Dictionary<Item.Types, int>
 				{
-					{ Item.Types.Stalks, 1000 }
+					{ Item.Types.Stalks, 0 }
 				}
 			);
 
@@ -130,11 +130,11 @@ namespace Lunra.WildVacuum.Services
 			)
 			{
 				flora.RoomId.Value = room0.Id.Value;
-				flora.State.Value = FloraModel.States.Visible;
+				flora.PooledState.Value = PooledStates.Visible;
 				flora.Position.Value = position;
 				flora.Rotation.Value = Quaternion.identity;
-				flora.Age.Value = FloraModel.Interval.Create(1f);
-				flora.ReproductionElapsed.Value = FloraModel.Interval.Create(2f);
+				flora.Age.Value = Interval.WithMaximum(1f);
+				flora.ReproductionElapsed.Value = Interval.WithMaximum(2f);
 				flora.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
 				flora.ReproductionFailureLimit.Value = 40;
 				// flora.ReproductionFailureLimit.Value = 0;
@@ -174,7 +174,7 @@ namespace Lunra.WildVacuum.Services
 			)
 			{
 				dweller.Id.Value = id;
-				dweller.State.Value = AgentModel.States.Visible;
+				dweller.PooledState.Value = PooledStates.Visible;
 				dweller.Position.Value = position;
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
