@@ -111,11 +111,11 @@ namespace Lunra.WildVacuum.Services
 
 			itemCache0.PrefabId.Value = "item_cache";
 			itemCache0.IsEnabled.Value = true;
-			itemCache0.Position.Value = new Vector3(12f, -0.8386866f, 6f);
+			itemCache0.Position.Value = new Vector3(6f, -0.8386866f, 6f);
 			itemCache0.Inventory.Value = Inventory.PopulateMaximum(
 				new Dictionary<Item.Types, int>
 				{
-					{ Item.Types.Stalks, 10 }
+					{ Item.Types.Stalks, 1000 }
 				}
 			);
 
@@ -177,30 +177,28 @@ namespace Lunra.WildVacuum.Services
 				dweller.State.Value = AgentModel.States.Visible;
 				dweller.Position.Value = position;
 				dweller.Rotation.Value = Quaternion.identity;
-				dweller.NavigationVelocity.Value = 3f;
+				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
 				dweller.MeleeRange.Value = 0.75f;
 				dweller.MeleeCooldown.Value = 0.5f;
-				dweller.MeleeDamage.Value = 30f;
+				dweller.MeleeDamage.Value = 60f;
 				
-				dweller.Inventory.Value = Inventory.Populate(
-					new Dictionary<Item.Types, int>
-					{
-						{ Item.Types.Stalks, 5 }
-					}
-				);
+				// dweller.Inventory.Value = Inventory.Populate(
+				// 	new Dictionary<Item.Types, int>
+				// 	{
+				// 		{ Item.Types.Stalks, 5 }
+				// 	}
+				// );
 				
-				/*
 				dweller.Inventory.Value = Inventory.PopulateMaximum(
 					new Dictionary<Item.Types, int>
 					{
 						{ Item.Types.Stalks, 5 }
 					}
 				);
-				*/
 			}
 			
 			game.Dwellers.Activate(

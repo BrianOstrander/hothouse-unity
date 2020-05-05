@@ -5,6 +5,7 @@ using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
 using Lunra.WildVacuum.Models;
+using Lunra.WildVacuum.Models.AgentModels;
 using Lunra.WildVacuum.Presenters;
 using Lunra.WildVacuum.Views;
 using UnityEngine;
@@ -97,6 +98,11 @@ namespace Lunra.WildVacuum.Services
 		protected override void Idle()
 		{
 			App.Heartbeat.Update += OnHeartbeatUpdate;
+
+			// App.Heartbeat.Wait(
+			// 	() => { Payload.Game.Dwellers.GetActive().First().Job.Value = DwellerModel.Jobs.Unknown; },
+			// 	1f
+			// );
 		}
 
 		void OnHeartbeatUpdate(float delta)

@@ -22,7 +22,7 @@ namespace Lunra.WildVacuum.Ai
 		where S : AgentState<W, A>
 		where A : AgentModel
 	{
-		public string Name => GetType().Name;
+		public virtual string Name => GetType().Name;
 		
 		public W World { get; private set; }
 		public A Agent { get; private set; }

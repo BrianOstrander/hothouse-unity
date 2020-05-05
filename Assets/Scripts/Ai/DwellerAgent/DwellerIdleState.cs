@@ -9,71 +9,38 @@ namespace Lunra.WildVacuum.Ai
 {
 	public class DwellerIdleState : AgentState<GameModel, DwellerModel>
 	{
+		public override string Name => "Idle";
+
 		public override void OnInitialize()
 		{
+			InstantiateJob<DwellerClearFloraJobState>();
+		}
+
+		void InstantiateJob<S>()
+			where S : DwellerJobState<S>, new()
+		{
+			var job = new S();
+			AddChildStates(job);
+			AddTransitions(job.GetToJobTransition);
+		}
+
+		/*
+		public override void OnInitialize()
+		{
+			AddChildStates(
+				new DwellerNavigateState<DwellerIdleState>()	
+			);
+			
 			AddTransitions(
-				new ToNavigateForced(),
-				new ToNavigate(),
+				new DwellerNavigationForcedTransition<DwellerIdleState>(),
+				new DwellerNavigationTransition<DwellerIdleState>(),
 				new ToNavigateToNearestItemCache(),
 				new ToClearNearestFlora(),
 				new ToNavigateToNearestFlora()
 			);
 		}
 
-		class ToNavigateForced : AgentTransition<DwellerNavigateState, GameModel, DwellerModel>
-		{
-			Vector3 nearestValidPosition;
-			
-			public override bool IsTriggered()
-			{
-				if (Agent.NavigationPlan.Value.State != NavigationPlan.States.Invalid) return false;
-
-				if (NavMesh.SamplePosition(Agent.Position.Value, out var hit, Agent.NavigationForceDistanceMaximum.Value, NavMesh.AllAreas))
-				{
-					nearestValidPosition = hit.position;
-					return !Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value, hit.position));
-				}
-
-				return false;
-			}
-
-			public override void Transition()
-			{
-				Agent.NavigationPlan.Value = NavigationPlan.NavigatingForced(
-					Agent.Position.Value,
-					nearestValidPosition
-				);
-
-				if (Agent.IsDebugging)
-				{
-					Debug.DrawLine(
-						Agent.NavigationPlan.Value.BeginPosition,
-						Agent.NavigationPlan.Value.EndPosition,
-						Color.magenta,
-						30f
-					);
-				}
-			}
-		}
-		
-		class ToNavigate : AgentTransition<DwellerNavigateState, GameModel, DwellerModel>
-		{
-			public override bool IsTriggered()
-			{
-				switch (Agent.NavigationPlan.Value.State)
-				{
-					case NavigationPlan.States.Calculating:
-					case NavigationPlan.States.Navigating:
-						return true;
-				}
-
-				return false;
-			}
-		}
-		
-		// class ToEmptyInventoryInNearestItemCache : AgentTransition<>
-
-		class ToNavigateToNearestItemCache : AgentTransition<DwellerNavigateState, GameModel, DwellerModel>
+		class ToNavigateToNearestItemCache : AgentTransition<DwellerNavigateState<DwellerIdleState>, GameModel, DwellerModel>
 		{
 			ItemCacheBuildingModel targetItemCache;
 			
@@ -111,7 +78,7 @@ namespace Lunra.WildVacuum.Ai
 			}
 		}
 		
-		class ToNavigateToNearestFlora : AgentTransition<DwellerNavigateState, GameModel, DwellerModel>
+		class ToNavigateToNearestFlora : AgentTransition<DwellerNavigateState<DwellerIdleState>, GameModel, DwellerModel>
 		{
 			FloraModel targetFlora;
 			
@@ -155,5 +122,6 @@ namespace Lunra.WildVacuum.Ai
 				return validFlora != null;
 			}
 		}
+		*/
 	}
 }

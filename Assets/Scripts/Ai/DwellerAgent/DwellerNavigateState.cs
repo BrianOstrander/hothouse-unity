@@ -4,20 +4,30 @@ using UnityEngine.AI;
 
 namespace Lunra.WildVacuum.Ai
 {
-	public class DwellerNavigateState : AgentState<GameModel, DwellerModel>
+	public class DwellerNavigateState<S> : AgentState<GameModel, DwellerModel>
+		where S : AgentState<GameModel, DwellerModel>
 	{
+		public override string Name => "Navigate";
+
 		public override void OnInitialize()
 		{
 			AddTransitions(
-				new ToIdleOnDone(),
-				new ToIdleOnInvalid()
+				new ToReturnOnDone(),
+				new ToReturnOnInvalid()
 			);
 		}
 
 		public override void Begin()
 		{
-			if (Agent.NavigationPlan.Value.State == NavigationPlan.States.NavigatingForced) return;
-			CalculatePath();
+			switch (Agent.NavigationPlan.Value.State)
+			{
+				case NavigationPlan.States.Navigating:
+				case NavigationPlan.States.NavigatingForced:
+					break;
+				default:
+					CalculatePath();
+					break;
+			}
 		}
 
 		public override void Idle(float delta)
@@ -46,7 +56,7 @@ namespace Lunra.WildVacuum.Ai
 			return hasPath;
 		}
 
-		class ToIdleOnDone : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		class ToReturnOnDone : AgentTransition<S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered()
 			{
@@ -59,7 +69,7 @@ namespace Lunra.WildVacuum.Ai
 			}
 		}
 		
-		class ToIdleOnInvalid : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		class ToReturnOnInvalid : AgentTransition<S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered()
 			{

@@ -6,7 +6,11 @@ namespace Lunra.WildVacuum.Ai
     public abstract class AgentState<W, A>
         where A : AgentModel
     {
-        public string Name => GetType().Name;
+        public virtual string Name => GetType().Name;
+        
+        public List<AgentState<W, A>> ChildStates { get; } = new List<AgentState<W, A>>();
+        
+        public List<IAgentTransition<W, A>> Transitions { get; } = new List<IAgentTransition<W, A>>();
         
         public W World { get; private set; }
         public A Agent { get; private set; }
@@ -29,9 +33,9 @@ namespace Lunra.WildVacuum.Ai
         public virtual void Begin() { }
         public virtual void Idle(float delta) { }
         public virtual void End() { }
-     
-        public List<IAgentTransition<W, A>> Transitions { get; } = new List<IAgentTransition<W, A>>();
-
+        
+        public void AddChildStates(params AgentState<W, A>[] childStates) => ChildStates.AddRange(childStates);
+        
         public void AddTransitions(params IAgentTransition<W, A>[] transitions) => Transitions.AddRange(transitions);
     }
 }

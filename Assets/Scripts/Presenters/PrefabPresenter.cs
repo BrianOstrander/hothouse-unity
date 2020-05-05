@@ -40,6 +40,8 @@ namespace Lunra.WildVacuum.Presenters
 			
 			View.Reset();
 
+			OnShow();
+			
 			ShowView(instant: true);
 
 			View.RootTransform.position = Prefab.Position.Value;
@@ -50,8 +52,21 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			if (View.NotVisible) return;
 			
+			OnClose();
 			CloseView(true);
 		}
+		
+		#region Events
+		protected virtual void OnShow()
+		{
+			
+		}
+		
+		protected virtual void OnClose()
+		{
+			
+		}
+		#endregion
 		
 		#region GameModel Events
 		protected virtual void OnGameSimulationInitialize()

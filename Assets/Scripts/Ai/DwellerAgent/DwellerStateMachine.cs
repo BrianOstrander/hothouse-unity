@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
 
@@ -5,16 +6,13 @@ namespace Lunra.WildVacuum.Ai
 {
 	public class DwellerStateMachine : AgentStateMachine<GameModel, DwellerModel>
 	{
-		protected override void OnInitialize()
+		protected override List<AgentState<GameModel, DwellerModel>> GetStates()
 		{
-			States.AddRange(
-				new []
-				{
-					CurrentState = new DwellerIdleState(),
-					new DwellerNavigateState(),
-					new DwellerClearFloraState()
-				}
-			);
+			return new List<AgentState<GameModel, DwellerModel>>
+			{
+				(CurrentState = new DwellerIdleState()),
+				new DwellerClearFloraJobState()
+			};
 		}
 	}
 }

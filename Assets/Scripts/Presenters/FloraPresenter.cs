@@ -127,8 +127,6 @@ namespace Lunra.WildVacuum.Presenters
 									newFlora.State.Value = FloraModel.States.Visible;
 
 									if (!newFlora.HasPresenter.Value) new FloraPresenter(game, newFlora);
-
-									game.LastNavigationCalculation.Value = DateTime.Now;
 								}
 							);
 						}
