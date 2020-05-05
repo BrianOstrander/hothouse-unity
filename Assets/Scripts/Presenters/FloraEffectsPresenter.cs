@@ -51,7 +51,7 @@ namespace Lunra.WildVacuum.Presenters
 			OnFloraEffectsIsEnabled(floraEffects.IsEnabled.Value);
 		}
 		
-		void OnGameSimulationUpdate(float delta)
+		void OnGameSimulationUpdate()
 		{
 			if (View.NotVisible) return;
 

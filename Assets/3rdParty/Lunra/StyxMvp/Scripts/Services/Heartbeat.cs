@@ -11,16 +11,16 @@ namespace Lunra.StyxMvp.Services
 		Cancel = 20
 	}
 	
-	public class Heartbeat 
+	public class Heartbeat
 	{
-		public event Action<float> Update = ActionExtensions.GetEmpty<float>();
-		public event Action<float> LateUpdate = ActionExtensions.GetEmpty<float>();
+		public event Action Update = ActionExtensions.Empty;
+		public event Action LateUpdate = ActionExtensions.Empty;
 
 		public event Action<Action> DrawGizmos = ActionExtensions.GetEmpty<Action>();
 
-		public void TriggerUpdate(float delta) => Update(delta);
+		public void TriggerUpdate() => Update();
 
-		public void TriggerLateUpdate(float delta) => LateUpdate(delta);
+		public void TriggerLateUpdate() => LateUpdate();
 
 		public void TriggerDrawGizmos()
 		{
@@ -75,7 +75,7 @@ namespace Lunra.StyxMvp.Services
 			var status = WaitResults.Unknown;
 			void onCancel() => status = WaitResults.Cancel;
 
-			void waiter(float delta)
+			void waiter()
 			{
 				try
 				{
@@ -105,7 +105,7 @@ namespace Lunra.StyxMvp.Services
 
 			Update += waiter;
 
-			if (checkInstantly) waiter(0f);
+			if (checkInstantly) waiter();
 
 			return onCancel;
 		}

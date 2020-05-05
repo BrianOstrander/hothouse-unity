@@ -45,7 +45,7 @@ namespace Lunra.WildVacuum.Ai
 
 		protected abstract List<AgentState<W, A>> GetStates();
 		
-		public void Update(float delta)
+		public void Update()
 		{
 			if (IsOutOfState) return;
 			
@@ -72,7 +72,7 @@ namespace Lunra.WildVacuum.Ai
 				return;
 			}
 			
-			CurrentState.Idle(delta);
+			CurrentState.Idle();
 		}
 	}
 }

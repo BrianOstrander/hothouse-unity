@@ -17,7 +17,7 @@
 			ProcessOrder(view);
 		}
 
-		public override void OnIdle(IView view, float delta)
+		public override void OnIdle(IView view)
 		{
 			if (OrderOnIdle) ProcessOrder(view);
 		}

@@ -62,12 +62,12 @@ namespace Lunra.StyxMvp
 		/// Called when view is idle, with a delta in seconds since the last call. Add events using += for predictable behaviour.
 		/// </summary>
 		/// <value>The idle.</value>
-		Action<float> Idle { get; set; }
+		Action Idle { get; set; }
 		/// <summary>
 		/// Called on view late idle, with a delta in seconds since the lats call. Add events using += for predictable behaviour.
 		/// </summary>
 		/// <value>The late idle.</value>
-		Action<float> LateIdle { get; set; }
+		Action LateIdle { get; set; }
 		/// <summary>
 		/// Called when a view starts to close, only once at the beginning.
 		/// </summary>
@@ -86,11 +86,11 @@ namespace Lunra.StyxMvp
 		/// <summary>
 		/// Always called on update if the view is not Closed.
 		/// </summary>
-		Action<float> Constant { get; set; }
+		Action Constant { get; set; }
 		/// <summary>
 		/// Always called on late update if the view is not Closed.
 		/// </summary>
-		Action<float> LateConstant { get; set; }
+		Action LateConstant { get; set; }
 
 		void Reset();
 
@@ -211,14 +211,14 @@ namespace Lunra.StyxMvp
 		public Action Prepare { get; set; }
 		public Action<float> Showing { get; set; }
 		public Action Shown { get; set; }
-		public Action<float> Idle { get; set; }
-		public Action<float> LateIdle { get; set; }
+		public Action Idle { get; set; }
+		public Action LateIdle { get; set; }
 		public Action PrepareClose { get; set; }
 		public Action<float> Closing { get; set; }
 		public Action Closed { get; set; }
 
-		public Action<float> Constant { get; set; }
-		public Action<float> LateConstant { get; set; }
+		public Action Constant { get; set; }
+		public Action LateConstant { get; set; }
 
 		protected virtual void OnPrepare()
 		{
@@ -246,14 +246,14 @@ namespace Lunra.StyxMvp
 			foreach (var anim in ViewAnimations) anim.OnShown(this);
 		}
 
-		protected virtual void OnIdle(float delta) 
+		protected virtual void OnIdle() 
 		{
-			foreach (var anim in ViewAnimations) anim.OnIdle(this, delta);
+			foreach (var anim in ViewAnimations) anim.OnIdle(this);
 		}
 
-		protected virtual void OnLateIdle(float delta)
+		protected virtual void OnLateIdle()
 		{
-			foreach (var anim in ViewAnimations) anim.OnLateIdle(this, delta);
+			foreach (var anim in ViewAnimations) anim.OnLateIdle(this);
 		}
 
 		protected virtual void OnPrepareClose()
@@ -273,22 +273,22 @@ namespace Lunra.StyxMvp
 			foreach (var anim in ViewAnimations) anim.OnClosed(this);
 		}
 
-		protected virtual void OnConstant(float delta)
+		protected virtual void OnConstant()
 		{
 			foreach (var anim in ViewAnimations)
 			{
-				anim.ConstantOnce(this, delta);
-				anim.OnConstant(this, delta);
+				anim.ConstantOnce(this);
+				anim.OnConstant(this);
 			}
 			CheckOpacityStack();
 		}
 
-		protected virtual void OnLateConstant(float delta)
+		protected virtual void OnLateConstant()
 		{
 			foreach (var anim in ViewAnimations)
 			{
-				anim.LateConstantOnce(this, delta);
-				anim.OnLateConstant(this, delta);
+				anim.LateConstantOnce(this);
+				anim.OnLateConstant(this);
 			}
 			CheckOpacityStack();
 		}

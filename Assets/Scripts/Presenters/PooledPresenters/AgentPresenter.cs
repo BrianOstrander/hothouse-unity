@@ -86,7 +86,7 @@ namespace Lunra.WildVacuum.Presenters
 			StateMachine.Initialize(Game, Model);
 		}
 
-		void OnGameSimulationUpdate(float delta)
+		void OnGameSimulationUpdate()
 		{
 			switch (Model.PooledState.Value)
 			{
@@ -94,7 +94,7 @@ namespace Lunra.WildVacuum.Presenters
 					return;
 			}
 			
-			StateMachine.Update(delta);
+			StateMachine.Update();
 		}
 		#endregion
 		

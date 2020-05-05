@@ -213,17 +213,17 @@ namespace Lunra.StyxMvp
 			}
 		}
 
-		void Update(float delta)
+		void Update()
 		{
 			FrameCount++;
 
 			foreach (var view in views.ToList())
 			{
-				if (view.TransitionState != TransitionStates.Closed) view.Constant(delta);
+				if (view.TransitionState != TransitionStates.Closed) view.Constant();
 
 				if (view.TransitionState == TransitionStates.Shown)
 				{
-					view.Idle(delta);
+					view.Idle();
 					continue;
 				}
 
@@ -239,12 +239,12 @@ namespace Lunra.StyxMvp
 			}
 		}
 
-		void LateUpdate(float delta)
+		void LateUpdate()
 		{
 			foreach (var view in views.ToList())
 			{
-				if (view.TransitionState != TransitionStates.Closed) view.LateConstant(delta);
-				if (view.TransitionState == TransitionStates.Shown) view.LateIdle(delta);
+				if (view.TransitionState != TransitionStates.Closed) view.LateConstant();
+				if (view.TransitionState == TransitionStates.Shown) view.LateIdle();
 			}
 		}
 

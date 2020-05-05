@@ -37,9 +37,9 @@ namespace Lunra.StyxMvp
 
 		void Start() => app.Start();
 
-		void Update() => app.Update(Time.deltaTime);
+		void Update() => app.Update();
 
-		void LateUpdate() => app.LateUpdate(Time.deltaTime); 
+		void LateUpdate() => app.LateUpdate(); 
 
 		void FixedUpdate() => app.FixedUpdate();
 

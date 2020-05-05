@@ -36,7 +36,7 @@ namespace Lunra.WildVacuum.Presenters
 		}
 		
 		#region Heartbeat Events
-		void OnHeartbeatUpdate(float delta)
+		void OnHeartbeatUpdate()
 		{
 			if (Input.GetMouseButtonDown(0)) OnInputMousePrimaryDown();
 			else if (Input.GetMouseButton(0)) OnInputMousePrimaryPressed();

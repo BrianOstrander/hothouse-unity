@@ -48,7 +48,7 @@ namespace Lunra.WildVacuum.Presenters
 		}
 
 		#region GameModel Events
-		void OnGameSimulationUpdate(float delta)
+		void OnGameSimulationUpdate()
 		{
 			switch (Model.PooledState.Value)
 			{
@@ -58,7 +58,7 @@ namespace Lunra.WildVacuum.Presenters
 
 			if (!Model.Age.Value.IsDone)
 			{
-				Model.Age.Value = Model.Age.Value.Update(delta);
+				Model.Age.Value = Model.Age.Value.Update(Time.deltaTime);
 
 				if (View.Visible) View.Age = Model.Age.Value.Normalized;
 				
@@ -69,7 +69,7 @@ namespace Lunra.WildVacuum.Presenters
 
 			if (!Model.ReproductionElapsed.Value.IsDone)
 			{
-				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(delta);
+				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Time.deltaTime);
 				return;
 			}
 

@@ -28,7 +28,7 @@ namespace Lunra.StyxMvp
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 		}
 
-		void OnHeartbeatUpdate(float delta)
+		void OnHeartbeatUpdate()
 		{
 			if (StateMachine.CaptureTraceData.Value) Repaint();
 		}

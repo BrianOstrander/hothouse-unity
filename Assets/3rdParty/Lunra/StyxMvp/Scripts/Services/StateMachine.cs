@@ -234,7 +234,7 @@ namespace Lunra.StyxMvp.Services
 			heartbeat.Update += Update;
 		}
 
-		void Update(float delta)
+		void Update()
 		{
 			entries.AddRange(queued);
 			queued.Clear();

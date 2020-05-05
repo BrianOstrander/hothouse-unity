@@ -112,9 +112,9 @@ namespace Lunra.WildVacuum.Services
 			);
 		}
 
-		void OnHeartbeatUpdate(float delta)
+		void OnHeartbeatUpdate()
 		{
-			Payload.Game.SimulationUpdate(delta * Payload.Game.SimulationUpdateMultiplier.Value);
+			Payload.Game.SimulationUpdate();
 		}
 		#endregion
         

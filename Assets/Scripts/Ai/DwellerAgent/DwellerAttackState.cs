@@ -50,9 +50,9 @@ namespace Lunra.WildVacuum.Ai
 			this.target = target;
 		}
 
-		public override void Idle(float delta)
+		public override void Idle()
 		{
-			cooldownElapsed += delta;
+			cooldownElapsed += Time.deltaTime;
 
 			if (cooldownElapsed < Agent.MeleeCooldown.Value) return;
 

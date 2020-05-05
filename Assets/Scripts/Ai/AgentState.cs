@@ -31,7 +31,7 @@ namespace Lunra.WildVacuum.Ai
         public virtual void OnInitialize() { }
 
         public virtual void Begin() { }
-        public virtual void Idle(float delta) { }
+        public virtual void Idle() { }
         public virtual void End() { }
         
         public void AddChildStates(params AgentState<W, A>[] childStates) => ChildStates.AddRange(childStates);

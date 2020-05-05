@@ -30,9 +30,6 @@ namespace Lunra.WildVacuum.Models
 		[JsonProperty] ItemCacheBuildingModel[] itemCaches = new ItemCacheBuildingModel[0];
 		[JsonIgnore] public readonly ListenerProperty<ItemCacheBuildingModel[]> ItemCaches;
 
-		[JsonProperty] float simulationUpdateMultiplier = 1f;
-		[JsonIgnore] public readonly ListenerProperty<float> SimulationUpdateMultiplier;
-
 		[JsonProperty] DateTime lastNavigationCalculation;
 		[JsonIgnore] public readonly ListenerProperty<DateTime> LastNavigationCalculation;
 		#endregion
@@ -40,7 +37,7 @@ namespace Lunra.WildVacuum.Models
 		#region NonSerialized
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
 		public event Action SimulationInitialize = ActionExtensions.Empty;
-		public Action<float> SimulationUpdate = ActionExtensions.GetEmpty<float>();
+		public Action SimulationUpdate = ActionExtensions.Empty;
 		#endregion
 
 		public GameModel()
@@ -48,7 +45,6 @@ namespace Lunra.WildVacuum.Models
 			Rooms = new ListenerProperty<RoomPrefabModel[]>(value => rooms = value, () => rooms);
 			Doors = new ListenerProperty<DoorPrefabModel[]>(value => doors = value, () => doors);
 			ItemCaches = new ListenerProperty<ItemCacheBuildingModel[]>(value => itemCaches = value, () => itemCaches);
-			SimulationUpdateMultiplier = new ListenerProperty<float>(value => simulationUpdateMultiplier = value, () => simulationUpdateMultiplier);
 			LastNavigationCalculation = new ListenerProperty<DateTime>(value => lastNavigationCalculation = value, () => lastNavigationCalculation);
 		}
 

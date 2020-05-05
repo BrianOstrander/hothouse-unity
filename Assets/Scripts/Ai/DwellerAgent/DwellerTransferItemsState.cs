@@ -3,6 +3,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
+using UnityEngine;
 
 namespace Lunra.WildVacuum.Ai
 {
@@ -65,9 +66,9 @@ namespace Lunra.WildVacuum.Ai
 		
 		public void SetTarget(Target target) => this.target = target;
 
-		public override void Idle(float delta)
+		public override void Idle()
 		{
-			cooldownElapsed += delta;
+			cooldownElapsed += Time.deltaTime;
 
 			if (cooldownElapsed < target.TransferCooldown) return;
 

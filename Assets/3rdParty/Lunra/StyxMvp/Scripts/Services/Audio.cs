@@ -122,7 +122,7 @@ namespace Lunra.StyxMvp.Services
 		}
 
 		#region Events
-		void OnUpdate(float delta)
+		void OnUpdate()
 		{
 			var newActiveInstances = new List<AudioInstance>(activeInstances.Count);
 			var dones = new List<Action>();
