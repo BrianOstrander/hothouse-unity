@@ -5,6 +5,6 @@ namespace Lunra.WildVacuum.Presenters
 {
 	public class RoomPrefabPresenter : PrefabPresenter<RoomPrefabView, RoomPrefabModel>
 	{
-		public RoomPrefabPresenter(GameModel game, RoomPrefabModel prefab) : base(game, prefab) { }
+		public RoomPrefabPresenter(GameModel game, RoomPrefabModel model) : base(game, model) { }
 	}
 }

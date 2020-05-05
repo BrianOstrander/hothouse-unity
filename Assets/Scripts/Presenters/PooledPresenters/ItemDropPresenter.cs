@@ -12,11 +12,15 @@ namespace Lunra.WildVacuum.Presenters
 		protected override void OnBind()
 		{
 			base.OnBind();
+
+			Model.Inventory.Changed += OnItemDropInventory;
 		}
 
 		protected override void OnUnBind()
 		{
 			base.OnUnBind();
+			
+			Model.Inventory.Changed -= OnItemDropInventory;
 		}
 
 		protected override void OnShow()
@@ -24,5 +28,12 @@ namespace Lunra.WildVacuum.Presenters
 			var item = Model.Inventory.Value.Current.OrderByDescending(i => i.Count).FirstOrDefault();
 			View.SetEntry(item.Count, item.Type);
 		}
+		
+		#region ItemDropModel Events
+		void OnItemDropInventory(Inventory inventory)
+		{
+			if (inventory.IsEmpty) Game.ItemDrops.InActivate(Model);
+		}
+		#endregion
 	}
 }

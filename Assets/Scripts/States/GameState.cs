@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.StyxMvp;
@@ -97,10 +98,18 @@ namespace Lunra.WildVacuum.Services
 		{
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 
-			// App.Heartbeat.Wait(
-			// 	() => { Payload.Game.Dwellers.GetActive().First().Job.Value = DwellerModel.Jobs.Unknown; },
-			// 	1f
-			// );
+			App.Heartbeat.Wait(
+				() =>
+				{
+					Payload.Game.ItemCaches.Value.First().Inventory.Value = Inventory.PopulateMaximum(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 999 }
+						}
+					);
+				},
+				20f
+			);
 		}
 
 		void OnHeartbeatUpdate(float delta)

@@ -179,6 +179,9 @@ namespace Lunra.WildVacuum.Models
 			return false;
 		}
 
+		public bool Any(Item.Types type) => 0 < GetCurrent(type);
+		public bool None(Item.Types type) => !Any(type);
+
 		public int this[Item.Types type] => GetCurrent(type);
 
 		public override string ToString()

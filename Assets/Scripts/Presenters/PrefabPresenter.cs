@@ -10,28 +10,28 @@ namespace Lunra.WildVacuum.Presenters
 		where M : PrefabModel
 	{
 		protected GameModel Game;
-		protected M Prefab;
+		protected M Model;
 
 		public PrefabPresenter(
 			GameModel game,
-			M prefab
+			M model
 		) : base(
-			App.V.Get<V>(v => v.PrefabId == prefab.PrefabId.Value)
+			App.V.Get<V>(v => v.PrefabId == model.PrefabId.Value)
 		)
 		{
 			Game = game;
-			Prefab = prefab;
+			Model = model;
 
 			Game.SimulationInitialize += OnGameSimulationInitialize;
 			
-			Prefab.IsEnabled.Changed += OnPrefabIsEnabled;
+			Model.IsEnabled.Changed += OnPrefabIsEnabled;
 		}
 
 		protected override void OnUnBind()
 		{
 			Game.SimulationInitialize -= OnGameSimulationInitialize;
 			
-			Prefab.IsEnabled.Changed -= OnPrefabIsEnabled;
+			Model.IsEnabled.Changed -= OnPrefabIsEnabled;
 		}
 		
 		protected virtual void Show()
@@ -44,8 +44,8 @@ namespace Lunra.WildVacuum.Presenters
 			
 			ShowView(instant: true);
 
-			View.RootTransform.position = Prefab.Position.Value;
-			View.RootTransform.rotation = Prefab.Rotation.Value;
+			View.RootTransform.position = Model.Position.Value;
+			View.RootTransform.rotation = Model.Rotation.Value;
 		}
 
 		protected virtual void Close()
@@ -71,7 +71,7 @@ namespace Lunra.WildVacuum.Presenters
 		#region GameModel Events
 		protected virtual void OnGameSimulationInitialize()
 		{
-			OnPrefabIsEnabled(Prefab.IsEnabled.Value);
+			OnPrefabIsEnabled(Model.IsEnabled.Value);
 		}
 		#endregion
 		

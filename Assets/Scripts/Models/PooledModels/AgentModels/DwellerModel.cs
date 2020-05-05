@@ -29,6 +29,12 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		
 		[JsonProperty] float meleeDamage;
 		[JsonIgnore] public readonly ListenerProperty<float> MeleeDamage;
+		
+		[JsonProperty] float loadCooldown;
+		[JsonIgnore] public readonly ListenerProperty<float> LoadCooldown;
+		
+		[JsonProperty] float unloadCooldown;
+		[JsonIgnore] public readonly ListenerProperty<float> UnloadCooldown;
 		#endregion
 		
 		#region Non Serialized
@@ -42,6 +48,8 @@ namespace Lunra.WildVacuum.Models.AgentModels
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
 			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);
+			LoadCooldown = new ListenerProperty<float>(value => loadCooldown = value, () => loadCooldown); 
+			UnloadCooldown = new ListenerProperty<float>(value => unloadCooldown = value, () => unloadCooldown);
 		}
 	}
 }

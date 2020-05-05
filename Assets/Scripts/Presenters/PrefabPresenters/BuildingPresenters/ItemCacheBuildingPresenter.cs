@@ -7,23 +7,23 @@ namespace System
 {
 	public class ItemCacheBuildingPresenter : BuildingPresenter<ItemCacheBuildingView, ItemCacheBuildingModel>
 	{
-		public ItemCacheBuildingPresenter(GameModel game, ItemCacheBuildingModel prefab) : base(game, prefab)
+		public ItemCacheBuildingPresenter(GameModel game, ItemCacheBuildingModel model) : base(game, model)
 		{
-			prefab.Inventory.Changed += value => Debug.Log("ItemCache:\n" + value);
+			model.Inventory.Changed += value => Debug.Log("ItemCache:\n" + value);
 
-			prefab.Inventory.Changed += OnItemCacheBuildingInventory;
+			model.Inventory.Changed += OnItemCacheBuildingInventory;
 		}
 
 		protected override void OnUnBind()
 		{
 			base.OnUnBind();
 
-			Prefab.Inventory.Changed -= OnItemCacheBuildingInventory;
+			Model.Inventory.Changed -= OnItemCacheBuildingInventory;
 		}
 
 		protected override void OnShow()
 		{
-			View.Text = Prefab.Inventory.Value[Item.Types.Stalks].ToString();
+			View.Shown += () => OnItemCacheBuildingInventory(Model.Inventory.Value);
 		}
 		
 		#region ItemCacheBuildingModel Events
@@ -31,7 +31,7 @@ namespace System
 		{
 			if (View.NotVisible) return;
 
-			View.Text = inventory[Item.Types.Stalks].ToString();
+			View.Text = inventory[Item.Types.Stalks] + " / " + inventory.GetMaximum(Item.Types.Stalks);
 		}
 		#endregion
 	}

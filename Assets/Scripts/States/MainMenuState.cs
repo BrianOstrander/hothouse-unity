@@ -183,6 +183,9 @@ namespace Lunra.WildVacuum.Services
 				dweller.MeleeRange.Value = 0.75f;
 				dweller.MeleeCooldown.Value = 0.5f;
 				dweller.MeleeDamage.Value = 60f;
+
+				dweller.LoadCooldown.Value = 0.5f;
+				dweller.UnloadCooldown.Value = dweller.LoadCooldown.Value;
 				
 				// dweller.Inventory.Value = Inventory.Populate(
 				// 	new Dictionary<Item.Types, int>
@@ -194,7 +197,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.Inventory.Value = Inventory.PopulateMaximum(
 					new Dictionary<Item.Types, int>
 					{
-						{ Item.Types.Stalks, 5 }
+						{ Item.Types.Stalks, 1 }
 					}
 				);
 			}

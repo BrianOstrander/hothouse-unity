@@ -61,28 +61,30 @@ namespace Lunra.WildVacuum.Ai
 			base.OnInitialize();
 
 			var attackState = new DwellerAttackState<DwellerClearFloraJobState>();
-			var unloadItemsState = new DwellerUnloadItemsState<DwellerClearFloraJobState>();
+			var transferItemsState = new DwellerTransferItemsState<DwellerClearFloraJobState>();
 			
 			AddChildStates(
 				attackState,
-				unloadItemsState,
+				transferItemsState,
 				new DwellerNavigateState<DwellerClearFloraJobState>()
 			);
 			
 			AddTransitions(
-				new ToUnloadItemsToNearestItemCache(unloadItemsState),
+				new ToUnloadItemsToNearestItemCache(transferItemsState),
 				new ToNavigateToNearestItemCache(),
 				new ToAttackNearestFlora(attackState),
-				new ToNavigateToNearestFlora()
+				new ToNavigateToNearestFlora(),
+				new ToLoadItemsFromNearestItemDrop(transferItemsState),
+				new ToNavigateToNearestItemDrop()
 			);
 		}
 
-		class ToUnloadItemsToNearestItemCache : AgentTransition<DwellerUnloadItemsState<DwellerClearFloraJobState>, GameModel, DwellerModel>
+		class ToUnloadItemsToNearestItemCache : AgentTransition<DwellerTransferItemsState<DwellerClearFloraJobState>, GameModel, DwellerModel>
 		{
-			DwellerUnloadItemsState<DwellerClearFloraJobState> unloadState;
+			DwellerTransferItemsState<DwellerClearFloraJobState> transferState;
 			ItemCacheBuildingModel target;
 
-			public ToUnloadItemsToNearestItemCache(DwellerUnloadItemsState<DwellerClearFloraJobState> unloadState) => this.unloadState = unloadState;
+			public ToUnloadItemsToNearestItemCache(DwellerTransferItemsState<DwellerClearFloraJobState> transferState) => this.transferState = transferState;
 			
 			public override bool IsTriggered()
 			{
@@ -98,15 +100,19 @@ namespace Lunra.WildVacuum.Ai
 
 			public override void Transition()
 			{
-				unloadState.SetTarget(
-					new DwellerUnloadItemsState<DwellerClearFloraJobState>.Target(
-						target,
+				transferState.SetTarget(
+					new DwellerTransferItemsState<DwellerClearFloraJobState>.Target(
+						i => target.Inventory.Value = i,
+						() => target.Inventory.Value,
+						i => Agent.Inventory.Value = i,
+						() => Agent.Inventory.Value,
 						Inventory.Populate(
 							new Dictionary<Item.Types, int>()
 							{
 								{ Item.Types.Stalks, Agent.Inventory.Value[Item.Types.Stalks] }
 							}
-						)
+						),
+						Agent.UnloadCooldown.Value
 					)
 				);
 			}
@@ -132,7 +138,7 @@ namespace Lunra.WildVacuum.Ai
 				Agent.NavigationPlan.Value = NavigationPlan.Navigating(targetPath);
 			}
 		}
-		
+
 		class ToAttackNearestFlora : AgentTransition<DwellerAttackState<DwellerClearFloraJobState>, GameModel, DwellerModel>
 		{
 			DwellerAttackState<DwellerClearFloraJobState> attackState;
@@ -174,14 +180,13 @@ namespace Lunra.WildVacuum.Ai
 							World.ItemDrops.Activate(
 								itemDrop =>
 								{
-									itemDrop.RoomId.Value = Agent.RoomId.Value;
-									itemDrop.Position.Value = Agent.Position.Value;
+									itemDrop.RoomId.Value = targetFlora.RoomId.Value;
+									itemDrop.Position.Value = targetFlora.Position.Value;
 									itemDrop.Rotation.Value = Quaternion.identity;
 									itemDrop.Inventory.Value = overflow;
+									itemDrop.Job.Value = DwellerModel.Jobs.ClearFlora;
 								}
 							);
-			
-							// Debug.LogWarning("TODO: figure out what to do with overflow");
 						}
 					)
 				);
@@ -209,6 +214,77 @@ namespace Lunra.WildVacuum.Ai
 					target.Position.Value,
 					Agent.MeleeRange.Value
 				);
+			}
+		}
+		
+		class ToLoadItemsFromNearestItemDrop : AgentTransition<DwellerTransferItemsState<DwellerClearFloraJobState>, GameModel, DwellerModel>
+		{
+			DwellerTransferItemsState<DwellerClearFloraJobState> transferState;
+			ItemDropModel target;
+
+			public ToLoadItemsFromNearestItemDrop(DwellerTransferItemsState<DwellerClearFloraJobState> transferState) => this.transferState = transferState;
+			
+			public override bool IsTriggered()
+			{
+				if (Agent.Inventory.Value.IsFull(Item.Types.Stalks)) return false;
+
+				target = World.ItemDrops.GetActive()
+					.Where(t => t.Job.Value == DwellerModel.Jobs.ClearFlora && t.Inventory.Value.Any(Item.Types.Stalks))
+					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
+					.FirstOrDefault();
+				
+				if (target == null) return false;
+
+				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), target.Position.Value.NewY(0f)));
+			}
+
+			public override void Transition()
+			{
+				transferState.SetTarget(
+					new DwellerTransferItemsState<DwellerClearFloraJobState>.Target(
+						i => Agent.Inventory.Value = i,
+						() => Agent.Inventory.Value,
+						i => target.Inventory.Value = i,
+						() => target.Inventory.Value,
+						Inventory.Populate(
+							new Dictionary<Item.Types, int>()
+							{
+								{ Item.Types.Stalks, target.Inventory.Value[Item.Types.Stalks] }
+							}
+						),
+						Agent.UnloadCooldown.Value
+					)
+				);
+			}
+		}
+		
+		class ToNavigateToNearestItemDrop : AgentTransition<DwellerNavigateState<DwellerClearFloraJobState>, GameModel, DwellerModel>
+		{
+			ItemDropModel target;
+			NavMeshPath targetPath = new NavMeshPath();
+			
+			public override bool IsTriggered()
+			{
+				if (Agent.Inventory.Value.IsFull(Item.Types.Stalks)) return false;
+
+				target = World.ItemDrops.GetActive()
+					.Where(t => t.Job.Value == DwellerModel.Jobs.ClearFlora && t.Inventory.Value.Any(Item.Types.Stalks))
+					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
+					.FirstOrDefault(
+						t =>  NavMesh.CalculatePath(
+							Agent.Position.Value,
+							t.Position.Value,
+							NavMesh.AllAreas,
+							targetPath
+						)
+					);
+
+				return target != null;
+			}
+
+			public override void Transition()
+			{
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(targetPath);
 			}
 		}
 	}
