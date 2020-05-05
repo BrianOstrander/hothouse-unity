@@ -1,5 +1,7 @@
-﻿using Lunra.WildVacuum.Models;
+﻿using System.Linq;
+using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
+using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
@@ -19,10 +21,8 @@ namespace Lunra.WildVacuum.Presenters
 
 		protected override void OnShow()
 		{
-			
+			var item = Model.Inventory.Value.Current.OrderByDescending(i => i.Count).FirstOrDefault();
+			View.SetEntry(item.Count, item.Type);
 		}
-
-		#region GameModel Events
-		#endregion
 	}
 }

@@ -15,6 +15,8 @@ namespace Lunra.WildVacuum.Models
 		
 		public static Item New(int count, Types type) => new Item(count, type);
 		
+		public static Item None() => new Item(0, Types.Unknown);
+		
 		public enum Types
 		{
 			Unknown = 0,

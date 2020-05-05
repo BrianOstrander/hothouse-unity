@@ -171,9 +171,17 @@ namespace Lunra.WildVacuum.Ai
 
 							if (overflow.IsEmpty) return;
 							
-							
+							World.ItemDrops.Activate(
+								itemDrop =>
+								{
+									itemDrop.RoomId.Value = Agent.RoomId.Value;
+									itemDrop.Position.Value = Agent.Position.Value;
+									itemDrop.Rotation.Value = Quaternion.identity;
+									itemDrop.Inventory.Value = overflow;
+								}
+							);
 			
-							Debug.LogWarning("TODO: figure out what to do with overflow");
+							// Debug.LogWarning("TODO: figure out what to do with overflow");
 						}
 					)
 				);

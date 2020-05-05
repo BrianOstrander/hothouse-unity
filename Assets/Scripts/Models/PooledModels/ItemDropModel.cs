@@ -6,13 +6,13 @@ namespace Lunra.WildVacuum.Models
 	public class ItemDropModel : PooledModel
 	{
 		#region Serialized
-		[JsonProperty] Inventory itemDrops = Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ItemDrops;
+		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
 		#endregion
 
 		public ItemDropModel()
 		{
-			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
+			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 		}
 	}
 }
