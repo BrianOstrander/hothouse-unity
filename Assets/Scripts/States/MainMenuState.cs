@@ -130,7 +130,6 @@ namespace Lunra.WildVacuum.Services
 			)
 			{
 				flora.RoomId.Value = room0.Id.Value;
-				flora.PooledState.Value = PooledStates.Active;
 				flora.Position.Value = position;
 				flora.Rotation.Value = Quaternion.identity;
 				flora.Age.Value = Interval.WithMaximum(1f);
@@ -174,7 +173,6 @@ namespace Lunra.WildVacuum.Services
 			)
 			{
 				dweller.Id.Value = id;
-				dweller.PooledState.Value = PooledStates.Active;
 				dweller.Position.Value = position;
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;

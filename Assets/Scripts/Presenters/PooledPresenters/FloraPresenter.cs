@@ -164,8 +164,6 @@ namespace Lunra.WildVacuum.Presenters
 										newFlora.SelectionState.Value = SelectionStates.Highlighted;
 									}
 									else newFlora.SelectionState.Value = SelectionStates.Deselected;
-									
-									if (!newFlora.HasPresenter.Value) new FloraPresenter(Game, newFlora);
 								}
 							);
 						}

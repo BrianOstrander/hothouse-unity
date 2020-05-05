@@ -1,8 +1,11 @@
 using System;
 using System.Linq;
 using Lunra.Core;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
+using Lunra.WildVacuum.Presenters;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Lunra.WildVacuum.Models
 {
@@ -40,11 +43,30 @@ namespace Lunra.WildVacuum.Models
 		#region Non Serialized
 		public M[] GetActive() => All.Value.Active;
 		public M[] GetInActive() => All.Value.InActive;
+		public bool IsInitialized { get; private set; }
+		public event Action<M> InstantiatePresenter;
 		#endregion
 
 		public PoolModel()
 		{
 			All = new ListenerProperty<Reservoir>(value => all = value, () => all);
+		}
+
+		public void Initialize(Action<M> instantiatePresenter)
+		{
+			if (IsInitialized) throw new Exception("Already initialized");
+
+			InstantiatePresenter = instantiatePresenter;
+			
+			if (InstantiatePresenter == null) throw new NullReferenceException(nameof(InstantiatePresenter));
+
+			foreach (var model in GetActive())
+			{
+				if (model.HasPresenter.Value) Debug.LogWarning("Initializing "+nameof(PooledModel)+", but a model already has a presenter, this is an invalid state");
+				InstantiatePresenter(model);
+			}
+			
+			IsInitialized = true;
 		}
 
 		public void InActivate(params M[] models)
@@ -90,6 +112,8 @@ namespace Lunra.WildVacuum.Models
 			if (string.IsNullOrEmpty(result.Id.Value)) result.Id.Value = Guid.NewGuid().ToString();
 
 			result.PooledState.Value = PooledStates.Active;
+			
+			if (IsInitialized && !result.HasPresenter.Value) InstantiatePresenter.Invoke(result);
 		}
 	}
 }
