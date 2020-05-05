@@ -10,32 +10,32 @@ namespace Lunra.WildVacuum.Ai
 
 		public abstract DwellerModel.Jobs Job { get; }
 
-		ToJobTransition toJobTransition;
-		public ToJobTransition GetToJobTransition => toJobTransition ?? (toJobTransition = new ToJobTransition(this as S));
+		ToJobOnAssigned toJobOnAssigned;
+		public ToJobOnAssigned GetToJobOnAssigned => toJobOnAssigned ?? (toJobOnAssigned = new ToJobOnAssigned(this as S));
 		
 		public override void OnInitialize()
 		{
-			AddTransitions(new ToIdleTransition(this as S));
+			AddTransitions(new ToIdleOnJobUnassigned(this as S));
 		}
 		
-		public class ToJobTransition : AgentTransition<S, GameModel, DwellerModel>
+		public class ToJobOnAssigned : AgentTransition<S, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + jobState.Name + ">";
 
 			S jobState;
 
-			public ToJobTransition(S jobState) => this.jobState = jobState; 
+			public ToJobOnAssigned(S jobState) => this.jobState = jobState; 
 			
 			public override bool IsTriggered() => jobState.Job == Agent.Job.Value;
 		}
 		
-		class ToIdleTransition : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		class ToIdleOnJobUnassigned : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + jobState.Name + ">";
 			
 			S jobState;
 
-			public ToIdleTransition(S jobState) => this.jobState = jobState; 
+			public ToIdleOnJobUnassigned(S jobState) => this.jobState = jobState; 
 			
 			public override bool IsTriggered() => jobState.Job != Agent.Job.Value;
 		}

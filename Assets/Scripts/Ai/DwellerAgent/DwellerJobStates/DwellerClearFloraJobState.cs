@@ -10,48 +10,20 @@ namespace Lunra.WildVacuum.Ai
 {
 	public class DwellerClearFloraJobState : DwellerJobState<DwellerClearFloraJobState>
 	{
-		static ItemCacheBuildingModel GetNearestItemCache(
+		static ItemCacheBuildingModel GetNearestItemCacheWithStalkCapacity(
 			GameModel world,
 			DwellerModel agent,
 			out NavMeshPath path,
 			out Vector3 entrancePosition
 		)
 		{
-			var pathResult = new NavMeshPath();
-			var entranceResult = Vector3.zero;
-
-			var result = world.ItemCaches.Value
-				.Where(t => 0 < t.Inventory.Value.GetCapacity(Item.Types.Stalks))
-				.OrderBy(t => Vector3.Distance(agent.Position.Value, t.Position.Value))
-				.FirstOrDefault(
-					t =>
-					{
-						foreach (var entrance in t.Entrances.Value)
-						{
-							if (entrance.State != BuildingModel.Entrance.States.Available) continue;
-
-							var hasPath = NavMesh.CalculatePath(
-								agent.Position.Value,
-								entrance.Position,
-								NavMesh.AllAreas,
-								pathResult
-							);
-
-							if (hasPath)
-							{
-								entranceResult = entrance.Position;
-								return true;
-							}
-						}
-
-						return false;
-					}
-				);
-
-			path = pathResult;
-			entrancePosition = entranceResult;
-			
-			return result;
+			return DwellerUtility.CalculateNearestEntrance(
+				agent.Position.Value,
+				world.ItemCaches.Value,
+				b => 0 < b.Inventory.Value.GetCapacity(Item.Types.Stalks),
+				out path,
+				out entrancePosition
+			);
 		}
 
 		public override DwellerModel.Jobs Job => DwellerModel.Jobs.ClearFlora;
@@ -91,7 +63,7 @@ namespace Lunra.WildVacuum.Ai
 				if (Agent.Inventory.Value[Item.Types.Stalks] == 0) return false;
 				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.GetActive().Any(f => f.MarkedForClearing.Value)) return false;
 
-				target = GetNearestItemCache(World, Agent, out _, out var entrancePosition);
+				target = GetNearestItemCacheWithStalkCapacity(World, Agent, out _, out var entrancePosition);
 
 				if (target == null) return false;
 
@@ -128,7 +100,7 @@ namespace Lunra.WildVacuum.Ai
 				if (Agent.Inventory.Value[Item.Types.Stalks] == 0) return false;
 				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.GetActive().Any(f => f.MarkedForClearing.Value)) return false;
 
-				target = GetNearestItemCache(World, Agent, out targetPath, out _);
+				target = GetNearestItemCacheWithStalkCapacity(World, Agent, out targetPath, out _);
 
 				return target != null;
 			}
