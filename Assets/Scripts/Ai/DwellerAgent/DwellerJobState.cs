@@ -1,6 +1,6 @@
+using Lunra.Core;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
-using UnityEngine;
 
 namespace Lunra.WildVacuum.Ai
 {
@@ -53,6 +53,17 @@ namespace Lunra.WildVacuum.Ai
 			public ToIdleOnShiftEnd(S jobState) => this.jobState = jobState; 
 			
 			public override bool IsTriggered() => !Agent.JobShift.Value.Contains(World.SimulationTime.Value);
+
+			public override void Transition()
+			{
+				switch (Agent.Desire.Value)
+				{
+					case Desires.Unknown:
+					case Desires.None:
+						Agent.Desire.Value = EnumExtensions.GetValues(Desires.Unknown, Desires.None).Random();
+						break;
+				}
+			}
 		}
 	}
 }

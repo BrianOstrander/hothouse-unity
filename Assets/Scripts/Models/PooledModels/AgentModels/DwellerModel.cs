@@ -22,6 +22,9 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
 		[JsonIgnore] public readonly ListenerProperty<DayTimeFrame> JobShift;
 		
+		[JsonProperty] Desires desire;
+		[JsonIgnore] public readonly ListenerProperty<Desires> Desire;
+		
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
 		
@@ -49,6 +52,7 @@ namespace Lunra.WildVacuum.Models.AgentModels
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobPriority = new ListenerProperty<int>(value => jobPriority = value, () => jobPriority);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
+			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);

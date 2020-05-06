@@ -96,18 +96,18 @@ namespace Lunra.WildVacuum.Services
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 
-			App.Heartbeat.Wait(
-				() =>
-				{
-					Payload.Game.ItemCaches.Value.First().Inventory.Value = Inventory.PopulateMaximum(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Stalks, 999 }
-						}
-					);
-				},
-				20f
-			);
+			// App.Heartbeat.Wait(
+			// 	() =>
+			// 	{
+			// 		Payload.Game.ItemCaches.Value.First().Inventory.Value = Inventory.PopulateMaximum(
+			// 			new Dictionary<Item.Types, int>
+			// 			{
+			// 				{ Item.Types.Stalks, 999 }
+			// 			}
+			// 		);
+			// 	},
+			// 	20f
+			// );
 		}
 
 		void OnHeartbeatUpdate()

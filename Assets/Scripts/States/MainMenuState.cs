@@ -117,7 +117,7 @@ namespace Lunra.WildVacuum.Services
 			itemCache0.Inventory.Value = Inventory.PopulateMaximum(
 				new Dictionary<Item.Types, int>
 				{
-					{ Item.Types.Stalks, 0 }
+					{ Item.Types.Stalks, 999 }
 				}
 			);
 
@@ -181,6 +181,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
 				dweller.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
+				dweller.Desire.Value = Desires.None;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
 				dweller.MeleeRange.Value = 0.75f;
