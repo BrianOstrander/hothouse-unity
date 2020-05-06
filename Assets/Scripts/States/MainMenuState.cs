@@ -77,55 +77,90 @@ namespace Lunra.WildVacuum.Services
 			game.SimulationTimeConversion.Value = 1f / 10f;
 			
 			game.WorldCamera.IsEnabled.Value = true;
-			
-			var room0 = new RoomPrefabModel();
 
-			room0.PrefabId.Value = "default_spawn";
-			room0.IsEnabled.Value = true;
-			room0.Id.Value = "room_0";
-			
-			var room1 = new RoomPrefabModel();
-
-			room1.PrefabId.Value = "rectangle";
-			room1.IsEnabled.Value = true;
-			room1.Id.Value = "room_1";
-			room1.Position.Value = new Vector3(0f, 3.01f, -18.74f);
-
-			game.Rooms.Value = new[]
+			void initializeRoom(
+				RoomPrefabModel room,
+				string id,
+				string prefabId,
+				Vector3 position
+			)
 			{
-				room0,
-				room1
-			};
+				room.Id.Value = id;
+				room.RoomId.Value = id;
+				room.PrefabId.Value = prefabId;
+				room.Position.Value = position;
+				room.Rotation.Value = Quaternion.identity;
+			}
 			
-			var door0 = new DoorPrefabModel();
-
-			door0.PrefabId.Value = "default";
-			door0.IsEnabled.Value = true;
-			door0.RoomConnection.Value = new DoorPrefabModel.Connection(room0.Id.Value, room1.Id.Value);
-			door0.Position.Value = new Vector3(0f, -0.02f, -15.74f);
-
-			game.Doors.Value = new[]
-			{
-				door0
-			};
+			var room0 = game.Rooms.Activate(
+				room => initializeRoom(
+					room,
+					"room_0",
+					"default_spawn",
+					Vector3.zero
+				),
+				room => room.PrefabId.Value == "default_spawn"
+			);
 			
-			var itemCache0 = new ItemCacheBuildingModel();
-
-			itemCache0.PrefabId.Value = "item_cache";
-			itemCache0.IsEnabled.Value = true;
-			itemCache0.Position.Value = new Vector3(6f, -0.8386866f, 6f);
-			itemCache0.Inventory.Value = Inventory.PopulateMaximum(
-				new Dictionary<Item.Types, int>
-				{
-					{ Item.Types.Stalks, 999 }
-				}
+			var room1 = game.Rooms.Activate(
+				room => initializeRoom(
+					room,
+					"room_1",
+					"rectangle",
+					new Vector3(0f, 3.01f, -18.74f)
+				),
+				room => room.PrefabId.Value == "rectangle"
 			);
 
-			game.ItemCaches.Value = new[]
+			void initializeDoor(
+				DoorPrefabModel door,
+				string prefabId,
+				DoorPrefabModel.Connection connection,
+				Vector3 position
+			)
 			{
-				itemCache0
-			};
-			
+				door.PrefabId.Value = prefabId;
+				door.RoomConnection.Value = connection;
+				door.Position.Value = position;
+			}
+
+			game.Doors.Activate(
+				door => initializeDoor(
+					door,
+					"default",
+					new DoorPrefabModel.Connection(room0.Id.Value, room1.Id.Value),
+					new Vector3(0f, -0.02f, -15.74f)
+				),
+				door => door.PrefabId.Value == "default"
+			);
+
+			void initializeItemCache(
+				ItemCacheBuildingModel itemCache,
+				string prefabId,
+				Vector3 position,
+				Inventory inventory
+			)
+			{
+				itemCache.PrefabId.Value = prefabId;
+				itemCache.Position.Value = position;
+				itemCache.Inventory.Value = inventory;
+			}
+
+			game.ItemCaches.Activate(
+				itemCache => initializeItemCache(
+					itemCache,
+					"item_cache",
+					new Vector3(6f, -0.8386866f, 6f),
+					Inventory.PopulateMaximum(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 999 }
+						}
+					)		
+				),
+				itemCache => itemCache.PrefabId.Value == "item_cache"
+			);
+
 			void initializeFlora(
 				FloraModel flora,
 				Vector3 position

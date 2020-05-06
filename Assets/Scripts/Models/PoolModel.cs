@@ -83,7 +83,7 @@ namespace Lunra.WildVacuum.Models
 			foreach (var model in models) model.PooledState.Value = PooledStates.InActive;
 		}
 
-		public void Activate(
+		public M Activate(
 			Action<M> initialize = null,
 			Func<M, bool> predicate = null
 		)
@@ -114,6 +114,8 @@ namespace Lunra.WildVacuum.Models
 			result.PooledState.Value = PooledStates.Active;
 			
 			if (IsInitialized && !result.HasPresenter.Value) InstantiatePresenter.Invoke(result);
+
+			return result;
 		}
 	}
 }

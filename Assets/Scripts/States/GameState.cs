@@ -77,9 +77,10 @@ namespace Lunra.WildVacuum.Services
 			new SelectionPresenter(Payload.Game);
 			new FloraEffectsPresenter(Payload.Game);
 
-			foreach (var model in Payload.Game.Rooms.Value) new RoomPrefabPresenter(Payload.Game, model);
-			foreach (var model in Payload.Game.Doors.Value) new DoorPrefabPresenter(Payload.Game, model);
-			foreach (var model in Payload.Game.ItemCaches.Value) new ItemCacheBuildingPresenter(Payload.Game, model);
+			Payload.Game.Rooms.Initialize(m => new RoomPrefabPresenter(Payload.Game, m));
+			Payload.Game.Doors.Initialize(m => new DoorPrefabPresenter(Payload.Game, m));
+			Payload.Game.ItemCaches.Initialize(m => new ItemCacheBuildingPresenter(Payload.Game, m));
+			Payload.Game.DesireBuildings.Initialize(m => new DesireBuildingPresenter(Payload.Game, m));
 			
 			Payload.Game.Flora.Initialize(m => new FloraPresenter(Payload.Game, m));
 			Payload.Game.ItemDrops.Initialize(m => new ItemDropPresenter(Payload.Game, m));

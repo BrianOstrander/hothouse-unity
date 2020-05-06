@@ -6,27 +6,25 @@ namespace Lunra.WildVacuum.Presenters
 {
 	public class DoorPrefabPresenter : PrefabPresenter<DoorPrefabView, DoorPrefabModel>
 	{
-		public DoorPrefabPresenter(GameModel game, DoorPrefabModel model) : base(game, model)
+		public DoorPrefabPresenter(GameModel game, DoorPrefabModel model) : base(game, model) { }
+
+		protected override void OnBind()
 		{
+			base.OnBind();
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
 		}
 
 		protected override void OnUnBind()
 		{
 			base.OnUnBind();
-			
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
 		}
 
-		protected override void Show()
+		protected override void OnShow()
 		{
-			if (View.Visible) return;
-			
-			base.Show();
-			
 			if (Model.IsOpen.Value) View.Open();
 		}
-
+		
 		#region DoorPrefabModel Events
 		void OnDoorPrefabIsOpen(bool isOpen)
 		{

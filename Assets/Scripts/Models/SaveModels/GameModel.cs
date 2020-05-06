@@ -17,22 +17,15 @@ namespace Lunra.WildVacuum.Models
 		public readonly WorldCameraModel WorldCamera = new WorldCameraModel();
 		public readonly SelectionModel Selection = new SelectionModel();
 		public readonly FloraEffectsModel FloraEffects = new FloraEffectsModel();
+		
 		public readonly PoolModel<FloraModel> Flora = new PoolModel<FloraModel>();
 		public readonly PoolModel<ItemDropModel> ItemDrops = new PoolModel<ItemDropModel>();
 		public readonly PoolModel<DwellerModel> Dwellers = new PoolModel<DwellerModel>();
-
-		[JsonProperty] RoomPrefabModel[] rooms = new RoomPrefabModel[0];
-		[JsonIgnore] public readonly ListenerProperty<RoomPrefabModel[]> Rooms;
+		public readonly PoolModel<RoomPrefabModel> Rooms = new PoolModel<RoomPrefabModel>();
+		public readonly PoolModel<DoorPrefabModel> Doors = new PoolModel<DoorPrefabModel>();
+		public readonly PoolModel<ItemCacheBuildingModel> ItemCaches = new PoolModel<ItemCacheBuildingModel>();
+		public readonly PoolModel<DesireBuildingModel> DesireBuildings = new PoolModel<DesireBuildingModel>();
 		
-		[JsonProperty] DoorPrefabModel[] doors = new DoorPrefabModel[0];
-		[JsonIgnore] public readonly ListenerProperty<DoorPrefabModel[]> Doors;
-		
-		[JsonProperty] ItemCacheBuildingModel[] itemCaches = new ItemCacheBuildingModel[0];
-		[JsonIgnore] public readonly ListenerProperty<ItemCacheBuildingModel[]> ItemCaches;
-		
-		[JsonProperty] DesireBuildingModel[] desireBuildings = new DesireBuildingModel[0];
-		[JsonIgnore] public readonly ListenerProperty<DesireBuildingModel[]> DesireBuildings;
-
 		[JsonProperty] DateTime lastNavigationCalculation;
 		[JsonIgnore] public readonly ListenerProperty<DateTime> LastNavigationCalculation;
 
@@ -59,10 +52,6 @@ namespace Lunra.WildVacuum.Models
 
 		public GameModel()
 		{
-			Rooms = new ListenerProperty<RoomPrefabModel[]>(value => rooms = value, () => rooms);
-			Doors = new ListenerProperty<DoorPrefabModel[]>(value => doors = value, () => doors);
-			ItemCaches = new ListenerProperty<ItemCacheBuildingModel[]>(value => itemCaches = value, () => itemCaches);
-			DesireBuildings = new ListenerProperty<DesireBuildingModel[]>(value => desireBuildings = value, () => desireBuildings);
 			LastNavigationCalculation = new ListenerProperty<DateTime>(value => lastNavigationCalculation = value, () => lastNavigationCalculation);
 			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);

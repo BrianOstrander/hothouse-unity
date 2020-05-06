@@ -19,7 +19,7 @@ namespace Lunra.WildVacuum.Ai
 		{
 			return DwellerUtility.CalculateNearestEntrance(
 				agent.Position.Value,
-				world.ItemCaches.Value,
+				world.ItemCaches.GetActive(),
 				b => 0 < b.Inventory.Value.GetCapacity(Item.Types.Stalks),
 				out path,
 				out entrancePosition

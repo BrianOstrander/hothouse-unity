@@ -16,6 +16,19 @@ namespace Lunra.WildVacuum.Presenters
 		public PooledPresenter(
 			GameModel game,
 			M model
+		) : this(
+			game,
+			model,
+			App.V.Get<V>()
+		)
+		{ }
+
+		public PooledPresenter(
+			GameModel game,
+			M model,
+			V view
+		) : base(
+			view
 		)
 		{
 			Game = game;
@@ -49,6 +62,7 @@ namespace Lunra.WildVacuum.Presenters
 			
 			View.Reset();
 			
+			
 			OnShow();
 			
 			ShowView(instant: true);
@@ -71,7 +85,9 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			OnPooledState(Model.PooledState.Value);
 		}
+		#endregion
 		
+		#region View Events
 		protected virtual void OnShow() { }
 		
 		protected virtual void OnClose() { }

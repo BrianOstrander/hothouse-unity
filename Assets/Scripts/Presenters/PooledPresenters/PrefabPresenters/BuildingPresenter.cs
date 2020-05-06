@@ -8,18 +8,11 @@ namespace Lunra.WildVacuum.Presenters
 		where V : BuildingView
 		where M : BuildingModel
 	{
-		protected BuildingPresenter(GameModel game, M model) : base(game, model)
+		protected BuildingPresenter(GameModel game, M model) : base(game, model) { }
+
+		#region View Events
+		protected override void OnShow()
 		{
-			
-		}
-
-		#region PrefabModel Events
-		protected override void OnPrefabIsEnabled(bool enabled)
-		{
-			base.OnPrefabIsEnabled(enabled);
-
-			if (!enabled || Model.Entrances.Value.Any()) return;
-
 			Model.Entrances.Value = View.Entrances.Select(e => new BuildingModel.Entrance(e, BuildingModel.Entrance.States.Available)).ToArray();
 		}
 		#endregion
