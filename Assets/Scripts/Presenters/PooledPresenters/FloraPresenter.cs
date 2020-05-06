@@ -15,9 +15,9 @@ namespace Lunra.WildVacuum.Presenters
 	{
 		public FloraPresenter(GameModel game, FloraModel model) : base(game, model) { }
 
-		protected override void OnBind()
+		protected override void Bind()
 		{
-			base.OnBind();
+			base.Bind();
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
@@ -26,9 +26,9 @@ namespace Lunra.WildVacuum.Presenters
 			Model.Health.Changed += OnFloraHealth;
 		}
 
-		protected override void OnUnBind()
+		protected override void UnBind()
 		{
-			base.OnUnBind();
+			base.UnBind();
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 
@@ -37,7 +37,7 @@ namespace Lunra.WildVacuum.Presenters
 			Model.Health.Changed -= OnFloraHealth;
 		}
 
-		protected override void OnShow()
+		protected override void OnViewPrepare()
 		{
 			View.Age = Model.Age.Value.Normalized;
 			View.IsReproducing = Model.IsReproducing.Value;

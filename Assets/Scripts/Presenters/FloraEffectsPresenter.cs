@@ -23,7 +23,7 @@ namespace Lunra.WildVacuum.Presenters
 			game.SimulationUpdate += OnGameSimulationUpdate;
 		}
 
-		protected override void OnUnBind()
+		protected override void UnBind()
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			game.SimulationUpdate -= OnGameSimulationUpdate;

@@ -26,7 +26,7 @@ namespace Lunra.WildVacuum.Presenters
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 		}
 
-		protected override void OnUnBind()
+		protected override void UnBind()
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			

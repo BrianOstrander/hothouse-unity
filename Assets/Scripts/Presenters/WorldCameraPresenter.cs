@@ -19,7 +19,7 @@ namespace Lunra.WildVacuum.Presenters
 			game.WorldCamera.CameraInstance.Value = View.CameraInstance;
 		}
 
-		protected override void OnUnBind()
+		protected override void UnBind()
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			

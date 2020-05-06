@@ -1,6 +1,7 @@
 using System.Linq;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
+using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
@@ -11,7 +12,7 @@ namespace Lunra.WildVacuum.Presenters
 		protected BuildingPresenter(GameModel game, M model) : base(game, model) { }
 
 		#region View Events
-		protected override void OnShow()
+		protected override void OnViewShown()
 		{
 			Model.Entrances.Value = View.Entrances.Select(e => new BuildingModel.Entrance(e, BuildingModel.Entrance.States.Available)).ToArray();
 		}

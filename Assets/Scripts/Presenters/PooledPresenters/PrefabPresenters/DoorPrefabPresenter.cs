@@ -8,19 +8,21 @@ namespace Lunra.WildVacuum.Presenters
 	{
 		public DoorPrefabPresenter(GameModel game, DoorPrefabModel model) : base(game, model) { }
 
-		protected override void OnBind()
+		protected override void Bind()
 		{
-			base.OnBind();
+			base.Bind();
+			
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
 		}
-
-		protected override void OnUnBind()
+		
+		protected override void UnBind()
 		{
-			base.OnUnBind();
+			base.UnBind();
+			
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
 		}
 
-		protected override void OnShow()
+		protected override void OnViewPrepare()
 		{
 			if (Model.IsOpen.Value) View.Open();
 		}

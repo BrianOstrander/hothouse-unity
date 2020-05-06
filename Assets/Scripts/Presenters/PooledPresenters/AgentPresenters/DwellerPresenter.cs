@@ -10,17 +10,11 @@ namespace Lunra.WildVacuum.Presenters
 	{
 		public DwellerPresenter(GameModel game, DwellerModel model) : base(game, model) { }
 
-		protected override void OnBind()
+		protected override void Bind()
 		{
-
-			Model.Inventory.Changed += inventory => Debug.Log("Inventory:\n" + inventory);
+			base.Bind();
 			
-			base.OnBind();
-		}
-
-		protected override void OnUnBind()
-		{
-			base.OnUnBind();
+			Model.Inventory.Changed += inventory => Debug.Log("Inventory:\n" + inventory);
 		}
 	}
 }

@@ -4,7 +4,7 @@ using Lunra.WildVacuum.Views;
 
 namespace Lunra.WildVacuum.Presenters
 { 
-	public class PrefabPresenter<M, V> : PooledPresenter<M, V>
+	public abstract class PrefabPresenter<M, V> : PooledPresenter<M, V>
 		where M : PrefabModel
 		where V : PrefabView
 	{

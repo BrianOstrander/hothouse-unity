@@ -37,23 +37,28 @@ namespace Lunra.WildVacuum.Presenters
 			Model.HasPresenter.Value = true;
 
 			if (string.IsNullOrEmpty(Model.Id.Value)) Model.Id.Value = Guid.NewGuid().ToString();
-
-			OnBind();
 			
-			if (Game.IsSimulationInitialized) OnInitialized();
-			else Game.SimulationInitialize += OnInitialized;
+			Bind();
 		}
 
-		protected virtual void OnBind()
+		protected virtual void Bind()
 		{
 			Model.PooledState.Changed += OnPooledState;
+			if (Game.IsSimulationInitialized) Initialize();
+			else Game.SimulationInitialize += Initialize;
 		}
 
-		protected override void OnUnBind()
+		protected override void UnBind()
 		{
 			Model.PooledState.Changed -= OnPooledState;
 			
-			Game.SimulationInitialize -= OnInitialized;
+			Game.SimulationInitialize -= Initialize;
+		}
+		
+		void Initialize()
+		{
+			OnPooledState(Model.PooledState.Value);
+			OnInitialized();
 		}
 		
 		void Show()
@@ -61,36 +66,40 @@ namespace Lunra.WildVacuum.Presenters
 			if (View.Visible) return;
 			
 			View.Reset();
+
+			View.Prepare += OnViewPrepare;
+
+			View.Shown += ViewSetTransform;
+			View.Shown += OnViewShown;
 			
-			
-			OnShow();
+			View.PrepareClose += OnViewPrepareClose;
+			View.Closed += OnViewClosed;
 			
 			ShowView(instant: true);
-
-			View.RootTransform.position = Model.Position.Value;
-			View.RootTransform.rotation = Model.Rotation.Value;
 		}
 
 		void Close()
 		{
 			if (View.NotVisible) return;
 			
-			OnClose();
-			
 			CloseView(true);
+		}
+
+		void ViewSetTransform()
+		{
+			View.RootTransform.position = Model.Position.Value;
+			View.RootTransform.rotation = Model.Rotation.Value;
 		}
 		
 		#region Events
-		protected virtual void OnInitialized()
-		{
-			OnPooledState(Model.PooledState.Value);
-		}
+		protected virtual void OnInitialized() { }
 		#endregion
 		
-		#region View Events
-		protected virtual void OnShow() { }
-		
-		protected virtual void OnClose() { }
+		#region View Event
+		protected virtual void OnViewPrepare() { }
+		protected virtual void OnViewShown() { }
+		protected virtual void OnViewPrepareClose() { }
+		protected virtual void OnViewClosed() { }
 		#endregion
 
 		#region PooledModel Events

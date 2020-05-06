@@ -7,23 +7,28 @@ namespace System
 {
 	public class ItemCacheBuildingPresenter : BuildingPresenter<ItemCacheBuildingModel, ItemCacheBuildingView>
 	{
-		public ItemCacheBuildingPresenter(GameModel game, ItemCacheBuildingModel model) : base(game, model)
-		{
-			model.Inventory.Changed += value => Debug.Log("ItemCache:\n" + value);
+		public ItemCacheBuildingPresenter(GameModel game, ItemCacheBuildingModel model) : base(game, model) { }
 
-			model.Inventory.Changed += OnItemCacheBuildingInventory;
+		protected override void Bind()
+		{
+			base.Bind();
+			
+			Model.Inventory.Changed += value => Debug.Log("ItemCache:\n" + value);
+
+			Model.Inventory.Changed += OnItemCacheBuildingInventory;
 		}
 
-		protected override void OnUnBind()
+		protected override void UnBind()
 		{
-			base.OnUnBind();
-
+			base.UnBind();
+			
 			Model.Inventory.Changed -= OnItemCacheBuildingInventory;
 		}
 
-		protected override void OnShow()
+		protected override void OnViewShown()
 		{
-			View.Shown += () => OnItemCacheBuildingInventory(Model.Inventory.Value);
+			base.OnViewShown();
+			OnItemCacheBuildingInventory(Model.Inventory.Value);
 		}
 		
 		#region ItemCacheBuildingModel Events

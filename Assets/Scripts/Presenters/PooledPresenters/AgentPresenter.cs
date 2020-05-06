@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class AgentPresenter<M, V, S> : PooledPresenter<M, V>
+	public abstract class AgentPresenter<M, V, S> : PooledPresenter<M, V>
 		where M : AgentModel
 		where V : AgentView
 		where S : AgentStateMachine<GameModel, M>, new()
@@ -16,9 +16,9 @@ namespace Lunra.WildVacuum.Presenters
 
 		public AgentPresenter(GameModel game, M model) : base(game, model) { }
 
-		protected override void OnBind()
+		protected override void Bind()
 		{
-			base.OnBind();
+			base.Bind();
 			
 			StateMachine = new S();
 			
@@ -34,9 +34,9 @@ namespace Lunra.WildVacuum.Presenters
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 		}
 
-		protected override void OnUnBind()
+		protected override void UnBind()
 		{
-			base.OnUnBind();
+			base.UnBind();
 			
 			App.Heartbeat.DrawGizmos -= OnHeartbeatDrawGizmos;
 			
@@ -81,8 +81,6 @@ namespace Lunra.WildVacuum.Presenters
 		#region GameModel Events
 		protected override void OnInitialized()
 		{
-			base.OnInitialized();
-			
 			StateMachine.Initialize(Game, Model);
 		}
 

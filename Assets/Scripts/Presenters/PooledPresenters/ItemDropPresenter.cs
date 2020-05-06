@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
-using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
@@ -9,21 +8,21 @@ namespace Lunra.WildVacuum.Presenters
 	{
 		public ItemDropPresenter(GameModel game, ItemDropModel model) : base(game, model) { }
 
-		protected override void OnBind()
+		protected override void Bind()
 		{
-			base.OnBind();
-
+			base.Bind();
+			
 			Model.Inventory.Changed += OnItemDropInventory;
 		}
 
-		protected override void OnUnBind()
+		protected override void UnBind()
 		{
-			base.OnUnBind();
+			base.UnBind();
 			
 			Model.Inventory.Changed -= OnItemDropInventory;
 		}
 
-		protected override void OnShow()
+		protected override void OnViewPrepare()
 		{
 			var item = Model.Inventory.Value.Current.OrderByDescending(i => i.Count).FirstOrDefault();
 			View.SetEntry(item.Count, item.Type);

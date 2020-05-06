@@ -39,7 +39,7 @@ namespace Lunra.StyxMvp.Presenters
 
 		protected void Register()
 		{
-			App.P.Register(this, () => View.TransitionState, CloseView, UnBind);
+			App.P.Register(this, () => View.TransitionState, CloseView, BaseUnBind);
 		}
 
 		protected void SetView(V view)
@@ -56,15 +56,15 @@ namespace Lunra.StyxMvp.Presenters
 
 		protected virtual Transform DefaultAnchor => null;
 
-		void UnBind()
+		void BaseUnBind()
 		{
 			if (UnBinded) return;
 			UnBinded = true;
 			App.V.Pool(View);
-			OnUnBind();
+			UnBind();
 		}
 
-		protected virtual void OnUnBind() {}
+		protected virtual void UnBind() {}
 
 		protected virtual void ShowView(Transform parent = null, bool instant = false)
 		{
