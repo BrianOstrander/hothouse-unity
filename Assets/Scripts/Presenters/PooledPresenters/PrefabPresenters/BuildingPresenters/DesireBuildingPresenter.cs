@@ -7,5 +7,6 @@ namespace System
 	public class DesireBuildingPresenter : BuildingPresenter<DesireBuildingModel, BuildingView>
 	{
 		public DesireBuildingPresenter(GameModel game, DesireBuildingModel model) : base(game, model) { }
+		
 	}
 }

@@ -234,57 +234,37 @@ namespace Lunra.WildVacuum.Services
 				dweller => initializeDweller(
 					dweller,
 					"0",
-					new Vector3(-12f, -0.8386866f, 6f),
+					new Vector3(-12f, -0.8386866f, 3f),
 					DwellerModel.Jobs.ClearFlora,
 					0,
 					true
 				)
 			);
-			
-			// game.Dwellers.Activate(
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"1",
-			// 		new Vector3(-10f, -0.8386866f, 6f),
-			// 		DwellerModel.Jobs.ClearFlora,
-			// 		1
-			// 	)
-			// );
 
-			/*
-			var inventory = Inventory.Populate(
-				capacityType => 10,
-				entryType => 0
+			void initializeDesireBuilding(
+				DesireBuildingModel model,
+				string id,
+				Vector3 position,
+				Dictionary<Desires, float> quality
+			)
+			{
+				model.Id.Value = id;
+				model.Position.Value = position;
+				model.DesireQuality.Value = quality;
+			}
+
+			game.DesireBuildings.Activate(
+				"sleep",
+				m => initializeDesireBuilding(
+					m,
+					"sleep_0",
+					new Vector3(-12f, -0.8386866f, 6f),
+					new Dictionary<Desires, float>
+					{
+						{ Desires.Sleep, 1f }	
+					}
+				)
 			);
-			
-			Debug.Log(inventory);
-
-			inventory = inventory.SetCurrent(20, Item.Types.Stalks);
-
-			Debug.Log("SetCurrent 20 Stalks\n" + inventory);
-			
-			inventory = inventory.SetCurrent(-20, Item.Types.Stalks);
-
-			Debug.Log("SetCurrent -20 Stalks\n" + inventory);
-			
-			inventory = inventory.Add(15, Item.Types.Stalks);
-
-			Debug.Log("Add 15 Stalks\n" + inventory);
-			
-			inventory = inventory.Subtract(5, Item.Types.Stalks);
-
-			Debug.Log("Subtract 5 Stalks\n" + inventory);
-			
-			inventory = inventory.SetMaximum(0, Item.Types.Stalks);
-
-			Debug.Log("SetMaximum 0 Stalks\n" + inventory);
-			
-			inventory = inventory.Add(item => 5);
-
-			Debug.Log("Add 5 to all\n" + inventory);
-			
-			Debug.Break();
-			*/
 
 			done(Result<GameModel>.Success(game));
 		}

@@ -33,7 +33,7 @@ namespace Lunra.WildVacuum.Ai
 			public override bool IsTriggered() => jobState.Job == Agent.Job.Value && Agent.JobShift.Value.Contains(World.SimulationTime.Value);
 		}
 		
-		class ToIdleOnJobUnassigned : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnJobUnassigned : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + jobState.Name + ">";
 			
@@ -44,7 +44,7 @@ namespace Lunra.WildVacuum.Ai
 			public override bool IsTriggered() => jobState.Job != Agent.Job.Value;
 		}
 		
-		class ToIdleOnShiftEnd : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnShiftEnd : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + jobState.Name + ">";
 			

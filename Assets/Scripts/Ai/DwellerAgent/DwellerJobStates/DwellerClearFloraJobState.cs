@@ -30,8 +30,6 @@ namespace Lunra.WildVacuum.Ai
 
 		public override void OnInitialize()
 		{
-			base.OnInitialize();
-
 			var attackState = new DwellerAttackState<DwellerClearFloraJobState>();
 			var transferItemsState = new DwellerTransferItemsState<DwellerClearFloraJobState>();
 			
@@ -42,11 +40,16 @@ namespace Lunra.WildVacuum.Ai
 			);
 			
 			AddTransitions(
+				new ToIdleOnJobUnassigned(this),
+				
 				new ToUnloadItemsToNearestItemCache(transferItemsState),
-				new ToNavigateToNearestItemCache(),
 				new ToAttackNearestFlora(attackState),
-				new ToNavigateToNearestFlora(),
 				new ToLoadItemsFromNearestItemDrop(transferItemsState),
+				new ToNavigateToNearestItemCache(),
+				
+				new ToIdleOnShiftEnd(this),
+				
+				new ToNavigateToNearestFlora(),
 				new ToNavigateToNearestItemDrop()
 			);
 		}

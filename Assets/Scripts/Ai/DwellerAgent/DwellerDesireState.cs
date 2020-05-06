@@ -43,7 +43,7 @@ namespace Lunra.WildVacuum.Ai
 			}
 		}
 		
-		class ToIdleOnDesireChanged : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnDesireChanged : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + desireState.Name + ">";
 			
@@ -54,7 +54,7 @@ namespace Lunra.WildVacuum.Ai
 			public override bool IsTriggered() => desireState.Desire != Agent.Desire.Value;
 		}
 		
-		class ToIdleOnShiftBegin : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnShiftBegin : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + desireState.Name + ">";
 			
