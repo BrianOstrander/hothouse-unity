@@ -3,10 +3,10 @@ using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Views;
 
 namespace Lunra.WildVacuum.Presenters
-{
-	public class PrefabPresenter<V, M> : PooledPresenter<V, M>
-		where V : PrefabView
+{ 
+	public class PrefabPresenter<M, V> : PooledPresenter<M, V>
 		where M : PrefabModel
+		where V : PrefabView
 	{
 		public PrefabPresenter(
 			GameModel game,

@@ -81,75 +81,66 @@ namespace Lunra.WildVacuum.Services
 			void initializeRoom(
 				RoomPrefabModel room,
 				string id,
-				string prefabId,
 				Vector3 position
 			)
 			{
 				room.Id.Value = id;
 				room.RoomId.Value = id;
-				room.PrefabId.Value = prefabId;
 				room.Position.Value = position;
 				room.Rotation.Value = Quaternion.identity;
 			}
 			
 			var room0 = game.Rooms.Activate(
+				"default_spawn",
 				room => initializeRoom(
 					room,
 					"room_0",
-					"default_spawn",
 					Vector3.zero
-				),
-				room => room.PrefabId.Value == "default_spawn"
+				)
 			);
 			
 			var room1 = game.Rooms.Activate(
+				"rectangle",
 				room => initializeRoom(
 					room,
 					"room_1",
-					"rectangle",
 					new Vector3(0f, 3.01f, -18.74f)
-				),
-				room => room.PrefabId.Value == "rectangle"
+				)
 			);
 
 			void initializeDoor(
 				DoorPrefabModel door,
-				string prefabId,
 				DoorPrefabModel.Connection connection,
 				Vector3 position
 			)
 			{
-				door.PrefabId.Value = prefabId;
 				door.RoomConnection.Value = connection;
 				door.Position.Value = position;
 			}
 
 			game.Doors.Activate(
+				"default",
 				door => initializeDoor(
 					door,
-					"default",
 					new DoorPrefabModel.Connection(room0.Id.Value, room1.Id.Value),
 					new Vector3(0f, -0.02f, -15.74f)
-				),
-				door => door.PrefabId.Value == "default"
+				)
 			);
 
 			void initializeItemCache(
 				ItemCacheBuildingModel itemCache,
-				string prefabId,
 				Vector3 position,
 				Inventory inventory
 			)
 			{
-				itemCache.PrefabId.Value = prefabId;
 				itemCache.Position.Value = position;
 				itemCache.Inventory.Value = inventory;
 			}
 
 			game.ItemCaches.Activate(
+				"item_cache",
 				itemCache => initializeItemCache(
 					itemCache,
-					"item_cache",
 					new Vector3(6f, -0.8386866f, 6f),
 					Inventory.PopulateMaximum(
 						new Dictionary<Item.Types, int>
@@ -157,8 +148,7 @@ namespace Lunra.WildVacuum.Services
 							{ Item.Types.Stalks, 999 }
 						}
 					)		
-				),
-				itemCache => itemCache.PrefabId.Value == "item_cache"
+				)
 			);
 
 			void initializeFlora(

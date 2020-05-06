@@ -21,10 +21,11 @@ namespace Lunra.WildVacuum.Models
 		public readonly PoolModel<FloraModel> Flora = new PoolModel<FloraModel>();
 		public readonly PoolModel<ItemDropModel> ItemDrops = new PoolModel<ItemDropModel>();
 		public readonly PoolModel<DwellerModel> Dwellers = new PoolModel<DwellerModel>();
-		public readonly PoolModel<RoomPrefabModel> Rooms = new PoolModel<RoomPrefabModel>();
-		public readonly PoolModel<DoorPrefabModel> Doors = new PoolModel<DoorPrefabModel>();
-		public readonly PoolModel<ItemCacheBuildingModel> ItemCaches = new PoolModel<ItemCacheBuildingModel>();
-		public readonly PoolModel<DesireBuildingModel> DesireBuildings = new PoolModel<DesireBuildingModel>();
+		
+		public readonly PrefabPoolModel<RoomPrefabModel> Rooms = new PrefabPoolModel<RoomPrefabModel>();
+		public readonly PrefabPoolModel<DoorPrefabModel> Doors = new PrefabPoolModel<DoorPrefabModel>();
+		public readonly PrefabPoolModel<ItemCacheBuildingModel> ItemCaches = new PrefabPoolModel<ItemCacheBuildingModel>();
+		public readonly PrefabPoolModel<DesireBuildingModel> DesireBuildings = new PrefabPoolModel<DesireBuildingModel>();
 		
 		[JsonProperty] DateTime lastNavigationCalculation;
 		[JsonIgnore] public readonly ListenerProperty<DateTime> LastNavigationCalculation;

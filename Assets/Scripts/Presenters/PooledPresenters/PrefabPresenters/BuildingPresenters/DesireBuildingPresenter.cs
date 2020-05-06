@@ -4,7 +4,7 @@ using Lunra.WildVacuum.Views;
 
 namespace System
 {
-	public class DesireBuildingPresenter : BuildingPresenter<BuildingView, DesireBuildingModel>
+	public class DesireBuildingPresenter : BuildingPresenter<DesireBuildingModel, BuildingView>
 	{
 		public DesireBuildingPresenter(GameModel game, DesireBuildingModel model) : base(game, model) { }
 	}

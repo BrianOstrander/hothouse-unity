@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class FloraPresenter : PooledPresenter<FloraView, FloraModel>
+	public class FloraPresenter : PooledPresenter<FloraModel, FloraView>
 	{
 		public FloraPresenter(GameModel game, FloraModel model) : base(game, model) { }
 

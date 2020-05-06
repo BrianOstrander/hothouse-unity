@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class DoorPrefabPresenter : PrefabPresenter<DoorPrefabView, DoorPrefabModel>
+	public class DoorPrefabPresenter : PrefabPresenter<DoorPrefabModel, DoorPrefabView>
 	{
 		public DoorPrefabPresenter(GameModel game, DoorPrefabModel model) : base(game, model) { }
 

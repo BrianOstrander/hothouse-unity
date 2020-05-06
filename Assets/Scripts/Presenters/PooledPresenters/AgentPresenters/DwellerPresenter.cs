@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class DwellerPresenter : AgentPresenter<DwellerView, DwellerModel, DwellerStateMachine>
+	public class DwellerPresenter : AgentPresenter<DwellerModel, DwellerView, DwellerStateMachine>
 	{
 		public DwellerPresenter(GameModel game, DwellerModel model) : base(game, model) { }
 

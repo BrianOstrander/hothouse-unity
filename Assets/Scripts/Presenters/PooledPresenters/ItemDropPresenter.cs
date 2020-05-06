@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class ItemDropPresenter : PooledPresenter<ItemDropView, ItemDropModel>
+	public class ItemDropPresenter : PooledPresenter<ItemDropModel, ItemDropView>
 	{
 		public ItemDropPresenter(GameModel game, ItemDropModel model) : base(game, model) { }
 

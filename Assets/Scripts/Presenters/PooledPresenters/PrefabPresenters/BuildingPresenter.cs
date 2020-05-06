@@ -4,9 +4,9 @@ using Lunra.WildVacuum.Views;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public abstract class BuildingPresenter<V, M> : PrefabPresenter<V, M>
-		where V : BuildingView
+	public abstract class BuildingPresenter<M, V> : PrefabPresenter<M, V>
 		where M : BuildingModel
+		where V : BuildingView
 	{
 		protected BuildingPresenter(GameModel game, M model) : base(game, model) { }
 

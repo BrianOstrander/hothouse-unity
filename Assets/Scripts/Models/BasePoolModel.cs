@@ -1,8 +1,9 @@
-/*
 using System;
 using System.Linq;
 using Lunra.Core;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
+using Lunra.WildVacuum.Presenters;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -40,8 +41,8 @@ namespace Lunra.WildVacuum.Models
 		#endregion
 		
 		#region Non Serialized
-		public M[] GetActive() => All.Value.Active;
-		public M[] GetInActive() => All.Value.InActive;
+		public M[] AllActive => All.Value.Active;
+		public M[] AllInActive => All.Value.InActive;
 		public bool IsInitialized { get; private set; }
 		public event Action<M> InstantiatePresenter;
 		#endregion
@@ -51,7 +52,7 @@ namespace Lunra.WildVacuum.Models
 			All = new ListenerProperty<Reservoir>(value => all = value, () => all);
 		}
 
-		public void Initialize(Action<M> instantiatePresenter)
+		protected void Initialize(Action<M> instantiatePresenter)
 		{
 			if (IsInitialized) throw new Exception("Already initialized");
 
@@ -59,7 +60,7 @@ namespace Lunra.WildVacuum.Models
 			
 			if (InstantiatePresenter == null) throw new NullReferenceException(nameof(InstantiatePresenter));
 
-			foreach (var model in GetActive())
+			foreach (var model in AllActive)
 			{
 				if (model.HasPresenter.Value) Debug.LogWarning("Initializing "+nameof(PooledModel)+", but a model already has a presenter, this is an invalid state");
 				InstantiatePresenter(model);
@@ -68,7 +69,7 @@ namespace Lunra.WildVacuum.Models
 			IsInitialized = true;
 		}
 
-		public void InActivate(params M[] models)
+		protected void InActivate(params M[] models)
 		{
 			if (models == null || models.None()) return;
 
@@ -82,7 +83,7 @@ namespace Lunra.WildVacuum.Models
 			foreach (var model in models) model.PooledState.Value = PooledStates.InActive;
 		}
 
-		public M Activate(
+		protected M Activate(
 			Action<M> initialize = null,
 			Func<M, bool> predicate = null
 		)
@@ -118,4 +119,3 @@ namespace Lunra.WildVacuum.Models
 		}
 	}
 }
-*/

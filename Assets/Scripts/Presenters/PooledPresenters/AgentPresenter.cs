@@ -7,9 +7,9 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class AgentPresenter<V, M, S> : PooledPresenter<V, M>
-		where V : AgentView
+	public class AgentPresenter<M, V, S> : PooledPresenter<M, V>
 		where M : AgentModel
+		where V : AgentView
 		where S : AgentStateMachine<GameModel, M>, new()
 	{
 		protected S StateMachine;

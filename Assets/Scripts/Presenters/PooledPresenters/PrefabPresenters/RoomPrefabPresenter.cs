@@ -3,7 +3,7 @@ using Lunra.WildVacuum.Views;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class RoomPrefabPresenter : PrefabPresenter<RoomPrefabView, RoomPrefabModel>
+	public class RoomPrefabPresenter : PrefabPresenter<RoomPrefabModel, RoomPrefabView>
 	{
 		public RoomPrefabPresenter(GameModel game, RoomPrefabModel model) : base(game, model) { }
 	}

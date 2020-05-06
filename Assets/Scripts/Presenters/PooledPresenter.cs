@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class PooledPresenter<V, M> : Presenter<V>
-		where V : View
+	public class PooledPresenter<M, V> : Presenter<V>
 		where M : PooledModel
+		where V : View
 	{
 		protected readonly GameModel Game;
 		protected M Model;

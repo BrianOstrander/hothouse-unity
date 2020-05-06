@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace System
 {
-	public class ItemCacheBuildingPresenter : BuildingPresenter<ItemCacheBuildingView, ItemCacheBuildingModel>
+	public class ItemCacheBuildingPresenter : BuildingPresenter<ItemCacheBuildingModel, ItemCacheBuildingView>
 	{
 		public ItemCacheBuildingPresenter(GameModel game, ItemCacheBuildingModel model) : base(game, model)
 		{
