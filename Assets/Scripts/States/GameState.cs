@@ -114,6 +114,8 @@ namespace Lunra.WildVacuum.Services
 		{
 			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
 			Payload.Game.SimulationUpdate();
+			
+			// Debug.Log(Payload.Game.SimulationTime.Value.ToDayTimeString());
 		}
 		#endregion
         

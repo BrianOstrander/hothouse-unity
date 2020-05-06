@@ -74,6 +74,8 @@ namespace Lunra.WildVacuum.Services
 		{
 			var game = new GameModel();
 
+			game.SimulationTimeConversion.Value = 1f / 10f;
+			
 			game.WorldCamera.IsEnabled.Value = true;
 			
 			var room0 = new RoomPrefabModel();
@@ -178,6 +180,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
+				dweller.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
 				dweller.MeleeRange.Value = 0.75f;
@@ -186,7 +189,6 @@ namespace Lunra.WildVacuum.Services
 
 				dweller.LoadCooldown.Value = 0.5f;
 				dweller.UnloadCooldown.Value = dweller.LoadCooldown.Value;
-				
 				// dweller.Inventory.Value = Inventory.Populate(
 				// 	new Dictionary<Item.Types, int>
 				// 	{

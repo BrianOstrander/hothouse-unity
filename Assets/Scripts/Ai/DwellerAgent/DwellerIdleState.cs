@@ -21,7 +21,7 @@ namespace Lunra.WildVacuum.Ai
 		{
 			var job = new S();
 			AddChildStates(job);
-			AddTransitions(job.GetToJobOnAssigned);
+			AddTransitions(job.GetToJobOnShiftBegin);
 		}
 
 		/*

@@ -1,3 +1,4 @@
+using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -17,6 +18,9 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		
 		[JsonProperty] int jobPriority;
 		[JsonIgnore] public readonly ListenerProperty<int> JobPriority;
+
+		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
+		[JsonIgnore] public readonly ListenerProperty<DayTimeFrame> JobShift;
 		
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
@@ -44,6 +48,7 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		{
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobPriority = new ListenerProperty<int>(value => jobPriority = value, () => jobPriority);
+			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
