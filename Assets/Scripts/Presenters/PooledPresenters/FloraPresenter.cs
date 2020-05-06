@@ -73,7 +73,7 @@ namespace Lunra.WildVacuum.Presenters
 				return;
 			}
 
-			if (250 < Game.Flora.GetActive().Length) return;
+			if (250 < Game.Flora.AllActive.Length) return;
 			
 			TryReproducing();
 		}
@@ -120,7 +120,7 @@ namespace Lunra.WildVacuum.Presenters
 		#region Utility
 		void TryReproducing()
 		{
-			var nearbyFlora = Game.Flora.GetActive().Where(
+			var nearbyFlora = Game.Flora.AllActive.Where(
 				f =>
 				{
 					if (f.RoomId.Value != Model.RoomId.Value) return false;
@@ -139,7 +139,7 @@ namespace Lunra.WildVacuum.Presenters
 				{
 					if (nearbyFlora.None(f => Vector3.Distance(f.Position.Value, hit.position) < f.ReproductionRadius.Value.Minimum))
 					{
-						if (Game.Dwellers.GetActive().None(d => Vector3.Distance(d.Position.Value, hit.position) < Model.ReproductionRadius.Value.Minimum))
+						if (Game.Dwellers.AllActive.None(d => Vector3.Distance(d.Position.Value, hit.position) < Model.ReproductionRadius.Value.Minimum))
 						{
 							reproductionFailed = false;
 

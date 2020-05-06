@@ -19,7 +19,7 @@ namespace Lunra.WildVacuum.Ai
 		{
 			return DwellerUtility.CalculateNearestEntrance(
 				agent.Position.Value,
-				world.ItemCaches.GetActive(),
+				world.ItemCaches.AllActive,
 				b => 0 < b.Inventory.Value.GetCapacity(Item.Types.Stalks),
 				out path,
 				out entrancePosition
@@ -61,7 +61,7 @@ namespace Lunra.WildVacuum.Ai
 			public override bool IsTriggered()
 			{
 				if (Agent.Inventory.Value[Item.Types.Stalks] == 0) return false;
-				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.GetActive().Any(f => f.MarkedForClearing.Value)) return false;
+				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.AllActive.Any(f => f.MarkedForClearing.Value)) return false;
 
 				target = GetNearestItemCacheWithStalkCapacity(World, Agent, out _, out var entrancePosition);
 
@@ -98,7 +98,7 @@ namespace Lunra.WildVacuum.Ai
 			public override bool IsTriggered()
 			{
 				if (Agent.Inventory.Value[Item.Types.Stalks] == 0) return false;
-				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.GetActive().Any(f => f.MarkedForClearing.Value)) return false;
+				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.AllActive.Any(f => f.MarkedForClearing.Value)) return false;
 
 				target = GetNearestItemCacheWithStalkCapacity(World, Agent, out targetPath, out _);
 
@@ -120,7 +120,7 @@ namespace Lunra.WildVacuum.Ai
 			
 			public override bool IsTriggered()
 			{
-				targetFlora = World.Flora.GetActive().FirstOrDefault(
+				targetFlora = World.Flora.AllActive.FirstOrDefault(
 					flora =>
 					{
 						if (flora.PooledState.Value == PooledStates.InActive) return false;
@@ -171,7 +171,7 @@ namespace Lunra.WildVacuum.Ai
 			
 			public override bool IsTriggered()
 			{
-				target = World.Flora.GetActive()
+				target = World.Flora.AllActive
 					.Where(t => t.MarkedForClearing.Value)
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.ElementAtOrDefault(Agent.JobPriority.Value);
@@ -200,7 +200,7 @@ namespace Lunra.WildVacuum.Ai
 			{
 				if (Agent.Inventory.Value.IsFull(Item.Types.Stalks)) return false;
 
-				target = World.ItemDrops.GetActive()
+				target = World.ItemDrops.AllActive
 					.Where(t => t.Job.Value == DwellerModel.Jobs.ClearFlora && t.Inventory.Value.Any(Item.Types.Stalks))
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault();
@@ -239,7 +239,7 @@ namespace Lunra.WildVacuum.Ai
 			{
 				if (Agent.Inventory.Value.IsFull(Item.Types.Stalks)) return false;
 
-				target = World.ItemDrops.GetActive()
+				target = World.ItemDrops.AllActive
 					.Where(t => t.Job.Value == DwellerModel.Jobs.ClearFlora && t.Inventory.Value.Any(Item.Types.Stalks))
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault(

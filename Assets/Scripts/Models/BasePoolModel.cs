@@ -1,15 +1,14 @@
+/*
 using System;
 using System.Linq;
 using Lunra.Core;
-using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
-using Lunra.WildVacuum.Presenters;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.WildVacuum.Models
 {
-	public class PoolModel<M> : Model
+	public class BasePoolModel<M> : Model
 		where M : PooledModel, new()
 	{
 		public class Reservoir
@@ -41,13 +40,13 @@ namespace Lunra.WildVacuum.Models
 		#endregion
 		
 		#region Non Serialized
-		public M[] AllActive => All.Value.Active;
-		public M[] AllInActive => All.Value.InActive;
+		public M[] GetActive() => All.Value.Active;
+		public M[] GetInActive() => All.Value.InActive;
 		public bool IsInitialized { get; private set; }
 		public event Action<M> InstantiatePresenter;
 		#endregion
 
-		public PoolModel()
+		public BasePoolModel()
 		{
 			All = new ListenerProperty<Reservoir>(value => all = value, () => all);
 		}
@@ -60,7 +59,7 @@ namespace Lunra.WildVacuum.Models
 			
 			if (InstantiatePresenter == null) throw new NullReferenceException(nameof(InstantiatePresenter));
 
-			foreach (var model in AllActive)
+			foreach (var model in GetActive())
 			{
 				if (model.HasPresenter.Value) Debug.LogWarning("Initializing "+nameof(PooledModel)+", but a model already has a presenter, this is an invalid state");
 				InstantiatePresenter(model);
@@ -119,3 +118,4 @@ namespace Lunra.WildVacuum.Models
 		}
 	}
 }
+*/
