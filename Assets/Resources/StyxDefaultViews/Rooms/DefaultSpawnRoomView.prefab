@@ -55,6 +55,50 @@ MonoBehaviour:
     CloseDuration: 0
   animations: []
   prefabId: default_spawn
+  lights:
+  - {fileID: 3801586380162699998}
+  lightIntensityByTimeOfDay:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.19954129
+      value: 1
+      inSlope: 0.03196678
+      outSlope: 0.03196678
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.2352941
+    - serializedVersion: 3
+      time: 0.40022942
+      value: 3.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.5929556
+      value: 3.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.79472476
+      value: 1
+      inSlope: 0.057327792
+      outSlope: 0.057327792
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.13488376
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &3215566907273418047
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -43,9 +43,9 @@ namespace Lunra.WildVacuum.Ai
 				new ToIdleOnJobUnassigned(this),
 				
 				new ToUnloadItemsToNearestItemCache(transferItemsState),
-				new ToAttackNearestFlora(attackState),
-				new ToLoadItemsFromNearestItemDrop(transferItemsState),
 				new ToNavigateToNearestItemCache(),
+				new ToLoadItemsFromNearestItemDrop(transferItemsState),
+				new ToAttackNearestFlora(attackState),
 				
 				new ToIdleOnShiftEnd(this),
 				

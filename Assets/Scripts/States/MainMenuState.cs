@@ -74,7 +74,7 @@ namespace Lunra.WildVacuum.Services
 		{
 			var game = new GameModel();
 
-			game.SimulationTimeConversion.Value = 1f / 10f;
+			game.SimulationTimeConversion.Value = 1f / 30f;
 			
 			game.WorldCamera.IsEnabled.Value = true;
 
