@@ -29,6 +29,9 @@ namespace Lunra.WildVacuum.Models
 		
 		[JsonProperty] ItemCacheBuildingModel[] itemCaches = new ItemCacheBuildingModel[0];
 		[JsonIgnore] public readonly ListenerProperty<ItemCacheBuildingModel[]> ItemCaches;
+		
+		[JsonProperty] DesireBuildingModel[] desireBuildings = new DesireBuildingModel[0];
+		[JsonIgnore] public readonly ListenerProperty<DesireBuildingModel[]> DesireBuildings;
 
 		[JsonProperty] DateTime lastNavigationCalculation;
 		[JsonIgnore] public readonly ListenerProperty<DateTime> LastNavigationCalculation;
@@ -59,6 +62,7 @@ namespace Lunra.WildVacuum.Models
 			Rooms = new ListenerProperty<RoomPrefabModel[]>(value => rooms = value, () => rooms);
 			Doors = new ListenerProperty<DoorPrefabModel[]>(value => doors = value, () => doors);
 			ItemCaches = new ListenerProperty<ItemCacheBuildingModel[]>(value => itemCaches = value, () => itemCaches);
+			DesireBuildings = new ListenerProperty<DesireBuildingModel[]>(value => desireBuildings = value, () => desireBuildings);
 			LastNavigationCalculation = new ListenerProperty<DateTime>(value => lastNavigationCalculation = value, () => lastNavigationCalculation);
 			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
