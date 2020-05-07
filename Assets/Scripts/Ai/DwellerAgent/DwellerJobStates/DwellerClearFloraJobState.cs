@@ -10,22 +10,6 @@ namespace Lunra.WildVacuum.Ai
 {
 	public class DwellerClearFloraJobState : DwellerJobState<DwellerClearFloraJobState>
 	{
-		static BuildingModel GetNearestItemCacheWithStalkCapacity(
-			GameModel world,
-			DwellerModel agent,
-			out NavMeshPath path,
-			out Vector3 entrancePosition
-		)
-		{
-			return DwellerUtility.CalculateNearestEntrance(
-				agent.Position.Value,
-				world.Buildings.AllActive,
-				b => 0 < b.Inventory.Value.GetCapacity(Item.Types.Stalks),
-				out path,
-				out entrancePosition
-			);
-		}
-
 		public override DwellerModel.Jobs Job => DwellerModel.Jobs.ClearFlora;
 
 		public override void OnInitialize()
@@ -34,41 +18,45 @@ namespace Lunra.WildVacuum.Ai
 			var validItems = new[] { Item.Types.Stalks };
 			
 			var attackState = new DwellerAttackState<DwellerClearFloraJobState>();
-			var transferItemsState = new DwellerTransferItemsState<DwellerClearFloraJobState>();
+			var cleanupState = new DwellerItemCleanupState<DwellerClearFloraJobState>(
+				validJobs,
+				validItems
+			);
 			
 			AddChildStates(
 				attackState,
-				transferItemsState,
+				cleanupState,	
 				new DwellerNavigateState<DwellerClearFloraJobState>()
 			);
 			
 			AddTransitions(
 				new ToIdleOnJobUnassigned(this),
+			
+				new ToItemCleanupOnValidInventory(
+					cleanupState,
+					ToItemCleanupOnValidInventory.InventoryTrigger.NonZeroMaximumFull,
+					validJobs,
+					validItems
+				),
 				
-				new ToUnloadItemsToNearestItemCache(
-					validItems,	
-					transferItemsState
-				),
-				new ToNavigateToNearestItemCache(
-					validItems,
-					itemType =>
-					{
-						switch (itemType)
-						{
-							case Item.Types.Stalks:
-								return World.Flora.AllActive.None(f => f.MarkedForClearing.Value);
-						}
-
-						return false;
-					}
-				),
-				new ToLoadItemsFromNearestItemDrop(validJobs, validItems, transferItemsState),
 				new ToAttackNearestFlora(attackState),
 				
 				new ToIdleOnShiftEnd(this),
 				
 				new ToNavigateToNearestFlora(),
-				new ToNavigateToNearestItemDrop(validJobs, validItems)
+				
+				new ToItemCleanupOnValidInventory(
+					cleanupState,
+					ToItemCleanupOnValidInventory.InventoryTrigger.SomeOrNonZeroMaximumFull,
+					validJobs,
+					validItems
+				),
+				new ToItemCleanupOnValidInventory(
+					cleanupState,
+					ToItemCleanupOnValidInventory.InventoryTrigger.None,
+					validJobs,
+					validItems
+				)
 			);
 		}
 
@@ -84,7 +72,6 @@ namespace Lunra.WildVacuum.Ai
 				targetFlora = World.Flora.AllActive.FirstOrDefault(
 					flora =>
 					{
-						if (flora.PooledState.Value == PooledStates.InActive) return false;
 						if (!flora.MarkedForClearing.Value) return false;
 						return Vector3.Distance(Agent.Position.Value, flora.Position.Value) < Agent.MeleeRange.Value;
 					}

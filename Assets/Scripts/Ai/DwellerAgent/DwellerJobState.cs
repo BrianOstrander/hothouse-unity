@@ -21,6 +21,7 @@ namespace Lunra.WildVacuum.Ai
 		
 		public override void OnInitialize()
 		{
+			// TODO: Should I be casting to S? I think I should just be using DwellerJobState<S> in transitions...
 			AddTransitions(
 				new ToIdleOnJobUnassigned(this as S),
 				new ToIdleOnShiftEnd(this as S)
@@ -70,182 +71,70 @@ namespace Lunra.WildVacuum.Ai
 				}
 			}
 		}
-		
-		protected class ToUnloadItemsToNearestItemCache : AgentTransition<DwellerTransferItemsState<S>, GameModel, DwellerModel>
+
+		protected class ToItemCleanupOnValidInventory : AgentTransition<DwellerItemCleanupState<S>, GameModel, DwellerModel>
 		{
+			public enum InventoryTrigger
+			{
+				Unknown = 0,
+				Any = 10,
+				None = 20,
+				NonZeroMaximumFull = 40,
+				SomeOrNonZeroMaximumFull = 50
+			}
+
+			public override string Name => base.Name + "." + inventoryTrigger;
+
+			DwellerItemCleanupState<S> cleanupState;
+			InventoryTrigger inventoryTrigger;
+			DwellerModel.Jobs[] validJobs;
 			Item.Types[] validItems;
-			DwellerTransferItemsState<S> transferState;
-			BuildingModel target;
-
-			public ToUnloadItemsToNearestItemCache(
-				Item.Types[] validItems,
-				DwellerTransferItemsState<S> transferState
-			)
-			{
-				this.validItems = validItems;
-				this.transferState = transferState;
-			}
-
-			public override bool IsTriggered()
-			{
-				var currentlyValidItems = validItems.Where(i => 0 < Agent.Inventory.Value.GetCurrent(i));
-
-				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
-				
-				target = DwellerUtility.CalculateNearestEntrance(
-					Agent.Position.Value,
-					World.Buildings.AllActive,
-					b => currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i)),
-					out _,
-					out var entrancePosition
-				);
-
-				if (target == null) return false;
-
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
-			}
-
-			public override void Transition()
-			{
-				var itemsToUnload = new Dictionary<Item.Types, int>();
-				
-				foreach (var validItem in validItems) itemsToUnload.Add(validItem, Agent.Inventory.Value[validItem]);
-				
-				transferState.SetTarget(
-					new DwellerTransferItemsState<S>.Target(
-						i => target.Inventory.Value = i,
-						() => target.Inventory.Value,
-						i => Agent.Inventory.Value = i,
-						() => Agent.Inventory.Value,
-						Inventory.Populate(itemsToUnload),
-						Agent.UnloadCooldown.Value
-					)
-				);
-			}
-		}
-		
-		protected class ToNavigateToNearestItemCache : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
-		{
-			Item.Types[] validItems;
-			Func<Item.Types, bool> isValidToDumpNonFullItem;
-			BuildingModel target;
-			NavMeshPath targetPath = new NavMeshPath();
 			
-			public ToNavigateToNearestItemCache(
-				Item.Types[] validItems,
-				Func<Item.Types, bool> isValidToDumpNonFullItem = null
-			)
-			{
-				this.validItems = validItems;
-				this.isValidToDumpNonFullItem = isValidToDumpNonFullItem ?? (itemType => true);
-			}
-
-			public override bool IsTriggered()
-			{
-				var currentlyValidItems = validItems.Where(i => 0 < Agent.Inventory.Value.GetCurrent(i));
-
-				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
-				
-				if (currentlyValidItems.Where(i => 0 < Agent.Inventory.Value.GetCapacity(i)).Any(i => !isValidToDumpNonFullItem(i)))
-				{
-					// There are valid non-full items that were blocked from being dumped...
-					return false;
-				}
-				
-				// If we get here, that means either all valid items are full, or there are some but we're not being
-				// blocked from dumping them...
-				
-				target = DwellerUtility.CalculateNearestEntrance(
-					Agent.Position.Value,
-					World.Buildings.AllActive,
-					b => currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i)),
-					out targetPath,
-					out _
-				);
-
-				return target != null;
-			}
-
-			public override void Transition()
-			{
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(targetPath);
-			}
-		}
-		
-		protected class ToLoadItemsFromNearestItemDrop : AgentTransition<DwellerTransferItemsState<S>, GameModel, DwellerModel>
-		{
-			DwellerModel.Jobs[] validJobs;
-			Item.Types[] validItems;
-			ItemDropModel target;
-			DwellerTransferItemsState<S> transferState;
-
-			public ToLoadItemsFromNearestItemDrop(
-				DwellerModel.Jobs[] validJobs,
-				Item.Types[] validItems,
-				DwellerTransferItemsState<S> transferState
-			)
-			{
-				this.validJobs = validJobs;
-				this.validItems = validItems;
-				this.transferState = transferState;
-			}
-
-			public override bool IsTriggered()
-			{
-				var itemsWithCapacity = validItems.Where(i => 0 < Agent.Inventory.Value.GetCapacity(i));
-				if (itemsWithCapacity.None()) return false;
-				
-				target = World.ItemDrops.AllActive
-					.Where(t => validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => t.Inventory.Value.Any(i)))
-					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
-					.FirstOrDefault();
-				
-				if (target == null) return false;
-
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), target.Position.Value.NewY(0f)));
-			}
-
-			public override void Transition()
-			{
-				var itemsToLoad = new Dictionary<Item.Types, int>();
-				
-				foreach (var validItem in validItems) itemsToLoad.Add(validItem, target.Inventory.Value[validItem]);
-				
-				transferState.SetTarget(
-					new DwellerTransferItemsState<S>.Target(
-						i => Agent.Inventory.Value = i,
-						() => Agent.Inventory.Value,
-						i => target.Inventory.Value = i,
-						() => target.Inventory.Value,
-						Inventory.Populate(itemsToLoad),
-						Agent.LoadCooldown.Value
-					)
-				);
-			}
-		}
-		
-		protected class ToNavigateToNearestItemDrop : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
-		{
-			DwellerModel.Jobs[] validJobs;
-			Item.Types[] validItems;
-			ItemDropModel target;
 			NavMeshPath targetPath = new NavMeshPath();
 
-			public ToNavigateToNearestItemDrop(
+			public ToItemCleanupOnValidInventory(
+				DwellerItemCleanupState<S> cleanupState,
+				InventoryTrigger inventoryTrigger,
 				DwellerModel.Jobs[] validJobs,
 				Item.Types[] validItems
 			)
 			{
+				this.cleanupState = cleanupState;
+				this.inventoryTrigger = inventoryTrigger;
 				this.validJobs = validJobs;
 				this.validItems = validItems;
 			}
 
 			public override bool IsTriggered()
 			{
+				if (inventoryTrigger == InventoryTrigger.Any) return true;
+
+				switch (inventoryTrigger)
+				{
+					case InventoryTrigger.Any:
+						return true;
+					case InventoryTrigger.None:
+						if (validItems.Any(i => Agent.Inventory.Value.Any(i))) return false;
+						return IsAnyValidItemReachable();
+					case InventoryTrigger.NonZeroMaximumFull:
+						if (validItems.Any(i => !Agent.Inventory.Value.IsNonZeroMaximumFull(i))) return false;
+						return IsAnyBuildingWithInventoryReachable();
+					case InventoryTrigger.SomeOrNonZeroMaximumFull:
+						var someValidItems = validItems.Where(i => Agent.Inventory.Value.Any(i));
+						if (someValidItems.None()) return false;
+						return IsAnyValidItemReachable() || IsAnyBuildingWithInventoryReachable();
+				}
+				
+				Debug.LogError("Unrecognized "+nameof(inventoryTrigger)+": "+inventoryTrigger);
+				return false;
+			}
+
+			bool IsAnyValidItemReachable()
+			{
 				var itemsWithCapacity = validItems.Where(i => 0 < Agent.Inventory.Value.GetCapacity(i));
 				if (itemsWithCapacity.None()) return false;
 
-				target = World.ItemDrops.AllActive
+				var target = World.ItemDrops.AllActive
 					.Where(t => validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => t.Inventory.Value.Any(i)))
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault(
@@ -260,9 +149,29 @@ namespace Lunra.WildVacuum.Ai
 				return target != null;
 			}
 
+			bool IsAnyBuildingWithInventoryReachable()
+			{
+				var currentlyValidItems = validItems.Where(i => Agent.Inventory.Value.Any(i));
+
+				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
+				
+				// If we get here, that means either all valid items are full, or there are some but we're not being
+				// blocked from dumping them... OUT OF DATE DESC
+				
+				var target = DwellerUtility.CalculateNearestEntrance(
+					Agent.Position.Value,
+					World.Buildings.AllActive,
+					b => currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i)),
+					out targetPath,
+					out _
+				);
+
+				return target != null;
+			}
+
 			public override void Transition()
 			{
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(targetPath);
+				cleanupState.ResetUnloadCount();
 			}
 		}
 	}

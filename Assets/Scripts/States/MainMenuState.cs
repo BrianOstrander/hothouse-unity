@@ -181,7 +181,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
+				dweller.JobShift.Value = DayTimeFrame.Maximum; // new DayTimeFrame(0.0f, 0.75f);
 				dweller.Desire.Value = Desires.None;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
