@@ -181,7 +181,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
-				dweller.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
 				dweller.Desire.Value = Desires.None;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -201,7 +201,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.Inventory.Value = Inventory.PopulateMaximum(
 					new Dictionary<Item.Types, int>
 					{
-						{ Item.Types.Stalks, 1 }
+						{ Item.Types.Stalks, 2 }
 					}
 				);
 			}
@@ -258,6 +258,48 @@ namespace Lunra.WildVacuum.Services
 						}
 					) 
 				)
+			);
+
+			game.ItemDrops.Activate(
+				m =>
+				{
+					m.Position.Value = new Vector3(2f, 0f, -5f);
+					m.Job.Value = DwellerModel.Jobs.ClearFlora;
+					m.Inventory.Value = Inventory.Populate(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 1 }
+						}
+					);
+				}
+			);
+			
+			game.ItemDrops.Activate(
+				m =>
+				{
+					m.Position.Value = new Vector3(1f, 0f, -5f);
+					m.Job.Value = DwellerModel.Jobs.ClearFlora;
+					m.Inventory.Value = Inventory.Populate(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 1 }
+						}
+					);
+				}
+			);
+			
+			game.ItemDrops.Activate(
+				m =>
+				{
+					m.Position.Value = new Vector3(0f, 0f, -5f);
+					m.Job.Value = DwellerModel.Jobs.ClearFlora;
+					m.Inventory.Value = Inventory.Populate(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 1 }
+						}
+					);
+				}
 			);
 
 			done(Result<GameModel>.Success(game));

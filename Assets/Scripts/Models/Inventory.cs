@@ -161,13 +161,15 @@ namespace Lunra.WildVacuum.Models
 
 		public int GetCapacity(Item.Types type) => GetMaximum(type) - GetCurrent(type);
 
-		public Item[] GetFull()
+		public Item[] GetNonZeroMaximumFull()
 		{
 			Func<Item.Types, int> getCurrent = GetCurrent;
 			return Maximum.Where(m => m.Count != 0 && m.Count == getCurrent(m.Type)).ToArray();
 		}
 		
 		public bool IsFull(Item.Types type) => GetCapacity(type) == 0;
+
+		public bool IsNonZeroMaximumFull(Item.Types type) => 0 < GetMaximum(type) && IsFull(type);
 
 		public bool IsNoneFull() => !IsAnyFull();
 		

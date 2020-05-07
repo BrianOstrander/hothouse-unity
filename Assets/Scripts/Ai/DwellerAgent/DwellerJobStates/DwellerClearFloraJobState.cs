@@ -30,6 +30,9 @@ namespace Lunra.WildVacuum.Ai
 
 		public override void OnInitialize()
 		{
+			var validJobs = new[] { DwellerModel.Jobs.ClearFlora };
+			var validItems = new[] { Item.Types.Stalks };
+			
 			var attackState = new DwellerAttackState<DwellerClearFloraJobState>();
 			var transferItemsState = new DwellerTransferItemsState<DwellerClearFloraJobState>();
 			
@@ -42,76 +45,31 @@ namespace Lunra.WildVacuum.Ai
 			AddTransitions(
 				new ToIdleOnJobUnassigned(this),
 				
-				new ToUnloadItemsToNearestItemCache(transferItemsState),
-				new ToNavigateToNearestItemCache(),
-				new ToLoadItemsFromNearestItemDrop(transferItemsState),
+				new ToUnloadItemsToNearestItemCache(
+					validItems,	
+					transferItemsState
+				),
+				new ToNavigateToNearestItemCache(
+					validItems,
+					itemType =>
+					{
+						switch (itemType)
+						{
+							case Item.Types.Stalks:
+								return World.Flora.AllActive.None(f => f.MarkedForClearing.Value);
+						}
+
+						return false;
+					}
+				),
+				new ToLoadItemsFromNearestItemDrop(validJobs, validItems, transferItemsState),
 				new ToAttackNearestFlora(attackState),
 				
 				new ToIdleOnShiftEnd(this),
 				
 				new ToNavigateToNearestFlora(),
-				new ToNavigateToNearestItemDrop()
+				new ToNavigateToNearestItemDrop(validJobs, validItems)
 			);
-		}
-
-		class ToUnloadItemsToNearestItemCache : AgentTransition<DwellerTransferItemsState<DwellerClearFloraJobState>, GameModel, DwellerModel>
-		{
-			DwellerTransferItemsState<DwellerClearFloraJobState> transferState;
-			BuildingModel target;
-
-			public ToUnloadItemsToNearestItemCache(DwellerTransferItemsState<DwellerClearFloraJobState> transferState) => this.transferState = transferState;
-			
-			public override bool IsTriggered()
-			{
-				if (Agent.Inventory.Value[Item.Types.Stalks] == 0) return false;
-				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.AllActive.Any(f => f.MarkedForClearing.Value)) return false;
-
-				target = GetNearestItemCacheWithStalkCapacity(World, Agent, out _, out var entrancePosition);
-
-				if (target == null) return false;
-
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
-			}
-
-			public override void Transition()
-			{
-				transferState.SetTarget(
-					new DwellerTransferItemsState<DwellerClearFloraJobState>.Target(
-						i => target.Inventory.Value = i,
-						() => target.Inventory.Value,
-						i => Agent.Inventory.Value = i,
-						() => Agent.Inventory.Value,
-						Inventory.Populate(
-							new Dictionary<Item.Types, int>()
-							{
-								{ Item.Types.Stalks, Agent.Inventory.Value[Item.Types.Stalks] }
-							}
-						),
-						Agent.UnloadCooldown.Value
-					)
-				);
-			}
-		}
-		
-		class ToNavigateToNearestItemCache : AgentTransition<DwellerNavigateState<DwellerClearFloraJobState>, GameModel, DwellerModel>
-		{
-			BuildingModel target;
-			NavMeshPath targetPath = new NavMeshPath();
-			
-			public override bool IsTriggered()
-			{
-				if (Agent.Inventory.Value[Item.Types.Stalks] == 0) return false;
-				if (!Agent.Inventory.Value.IsFull(Item.Types.Stalks) && World.Flora.AllActive.Any(f => f.MarkedForClearing.Value)) return false;
-
-				target = GetNearestItemCacheWithStalkCapacity(World, Agent, out targetPath, out _);
-
-				return target != null;
-			}
-
-			public override void Transition()
-			{
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(targetPath);
-			}
 		}
 
 		class ToAttackNearestFlora : AgentTransition<DwellerAttackState<DwellerClearFloraJobState>, GameModel, DwellerModel>
@@ -189,77 +147,6 @@ namespace Lunra.WildVacuum.Ai
 					target.Position.Value,
 					Agent.MeleeRange.Value
 				);
-			}
-		}
-		
-		class ToLoadItemsFromNearestItemDrop : AgentTransition<DwellerTransferItemsState<DwellerClearFloraJobState>, GameModel, DwellerModel>
-		{
-			DwellerTransferItemsState<DwellerClearFloraJobState> transferState;
-			ItemDropModel target;
-
-			public ToLoadItemsFromNearestItemDrop(DwellerTransferItemsState<DwellerClearFloraJobState> transferState) => this.transferState = transferState;
-			
-			public override bool IsTriggered()
-			{
-				if (Agent.Inventory.Value.IsFull(Item.Types.Stalks)) return false;
-
-				target = World.ItemDrops.AllActive
-					.Where(t => t.Job.Value == DwellerModel.Jobs.ClearFlora && t.Inventory.Value.Any(Item.Types.Stalks))
-					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
-					.FirstOrDefault();
-				
-				if (target == null) return false;
-
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), target.Position.Value.NewY(0f)));
-			}
-
-			public override void Transition()
-			{
-				transferState.SetTarget(
-					new DwellerTransferItemsState<DwellerClearFloraJobState>.Target(
-						i => Agent.Inventory.Value = i,
-						() => Agent.Inventory.Value,
-						i => target.Inventory.Value = i,
-						() => target.Inventory.Value,
-						Inventory.Populate(
-							new Dictionary<Item.Types, int>()
-							{
-								{ Item.Types.Stalks, target.Inventory.Value[Item.Types.Stalks] }
-							}
-						),
-						Agent.UnloadCooldown.Value
-					)
-				);
-			}
-		}
-		
-		class ToNavigateToNearestItemDrop : AgentTransition<DwellerNavigateState<DwellerClearFloraJobState>, GameModel, DwellerModel>
-		{
-			ItemDropModel target;
-			NavMeshPath targetPath = new NavMeshPath();
-			
-			public override bool IsTriggered()
-			{
-				if (Agent.Inventory.Value.IsFull(Item.Types.Stalks)) return false;
-
-				target = World.ItemDrops.AllActive
-					.Where(t => t.Job.Value == DwellerModel.Jobs.ClearFlora && t.Inventory.Value.Any(Item.Types.Stalks))
-					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
-					.FirstOrDefault(
-						t =>  NavMesh.CalculatePath(
-							Agent.Position.Value,
-							t.Position.Value,
-							NavMesh.AllAreas,
-							targetPath
-						)
-					);
-
-				return target != null;
-			}
-
-			public override void Transition()
-			{
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(targetPath);
 			}
 		}
 	}
