@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Views
 {
-	public class ItemCacheBuildingView : BuildingView
+	public class DebugBuildingView : BuildingView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null

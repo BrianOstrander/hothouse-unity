@@ -9,7 +9,7 @@ namespace Lunra.WildVacuum.Ai
 	public abstract class DwellerDesireState<S> : AgentState<GameModel, DwellerModel>
 		where S : DwellerDesireState<S>
 	{
-		protected DesireBuildingModel GetNearestDesireBuilding(
+		protected BuildingModel GetNearestDesireBuilding(
 			GameModel world,
 			DwellerModel agent,
 			out NavMeshPath path,
@@ -18,7 +18,7 @@ namespace Lunra.WildVacuum.Ai
 		{
 			return DwellerUtility.CalculateNearestEntrance(
 				agent.Position.Value,
-				world.DesireBuildings.AllActive,
+				world.Buildings.AllActive,
 				b =>
 				{
 					if (b.DesireQuality.Value.TryGetValue(Desire, out var quality)) return 0f < quality;
@@ -130,7 +130,7 @@ namespace Lunra.WildVacuum.Ai
 		protected class ToNavigateToNearestDesireBuilding : AgentTransition<DwellerNavigateState<DwellerSleepDesireState>, GameModel, DwellerModel>
 		{
 			S desireState;
-			DesireBuildingModel target;
+			BuildingModel target;
 			NavMeshPath targetPath = new NavMeshPath();
 
 			public ToNavigateToNearestDesireBuilding(S desireState) => this.desireState = desireState;

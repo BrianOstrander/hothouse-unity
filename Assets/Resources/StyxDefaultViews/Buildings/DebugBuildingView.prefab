@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5510244648543165857}
   - component: {fileID: 2029496293870269055}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: TextLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -36,8 +36,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 90.00001, y: 0, z: 180}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0.41}
-  m_SizeDelta: {x: 2.6, y: 3.2}
+  m_AnchoredPosition: {x: 0, y: 0.31}
+  m_SizeDelta: {x: 2, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &874115111548010176
 MeshRenderer:
@@ -140,21 +140,21 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 13.68
-  m_fontSizeBase: 13.68
+  m_fontSize: 11.9
+  m_fontSizeBase: 4
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 1
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_textAlignment: 514
+  m_textAlignment: 513
   m_characterSpacing: 0
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_firstOverflowCharacterIndex: -1
@@ -262,7 +262,7 @@ Transform:
   m_GameObject: {fileID: 4098501061844459422}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.12, z: 0}
-  m_LocalScale: {x: 3, y: 0.30073074, z: 3}
+  m_LocalScale: {x: 2, y: 0.30073074, z: 2}
   m_Children: []
   m_Father: {fileID: 624211895944601708}
   m_RootOrder: 0
@@ -354,7 +354,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5840307319868858384}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.12, z: 1.529}
+  m_LocalPosition: {x: 0, y: 0.12, z: 0.99}
   m_LocalScale: {x: 0.90000004, y: 0.14041118, z: 0.1875}
   m_Children: []
   m_Father: {fileID: 624211895944601708}
@@ -432,7 +432,7 @@ GameObject:
   - component: {fileID: 2070434652407403227}
   - component: {fileID: 7353317441349290497}
   m_Layer: 0
-  m_Name: ItemCacheBuildingView
+  m_Name: DebugBuildingView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -465,7 +465,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7891588836702804578}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64ac97688087480d8dc7ae0ed81f6b3a, type: 3}
+  m_Script: {fileID: 11500000, guid: 33f331bd969c43888f39db114a83cd1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   poolSize: 0
@@ -475,7 +475,7 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: item_cache
+  prefabId: debug
   entrances:
   - {fileID: 2217704237645697402}
   label: {fileID: 2029496293870269055}
@@ -489,7 +489,7 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 1.5, y: 1.5, z: 1.5}
+  m_Extents: {x: 1, y: 1, z: 1}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1

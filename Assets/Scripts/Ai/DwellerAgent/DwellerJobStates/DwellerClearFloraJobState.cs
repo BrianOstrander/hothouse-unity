@@ -10,7 +10,7 @@ namespace Lunra.WildVacuum.Ai
 {
 	public class DwellerClearFloraJobState : DwellerJobState<DwellerClearFloraJobState>
 	{
-		static ItemCacheBuildingModel GetNearestItemCacheWithStalkCapacity(
+		static BuildingModel GetNearestItemCacheWithStalkCapacity(
 			GameModel world,
 			DwellerModel agent,
 			out NavMeshPath path,
@@ -19,7 +19,7 @@ namespace Lunra.WildVacuum.Ai
 		{
 			return DwellerUtility.CalculateNearestEntrance(
 				agent.Position.Value,
-				world.ItemCaches.AllActive,
+				world.Buildings.AllActive,
 				b => 0 < b.Inventory.Value.GetCapacity(Item.Types.Stalks),
 				out path,
 				out entrancePosition
@@ -57,7 +57,7 @@ namespace Lunra.WildVacuum.Ai
 		class ToUnloadItemsToNearestItemCache : AgentTransition<DwellerTransferItemsState<DwellerClearFloraJobState>, GameModel, DwellerModel>
 		{
 			DwellerTransferItemsState<DwellerClearFloraJobState> transferState;
-			ItemCacheBuildingModel target;
+			BuildingModel target;
 
 			public ToUnloadItemsToNearestItemCache(DwellerTransferItemsState<DwellerClearFloraJobState> transferState) => this.transferState = transferState;
 			
@@ -95,7 +95,7 @@ namespace Lunra.WildVacuum.Ai
 		
 		class ToNavigateToNearestItemCache : AgentTransition<DwellerNavigateState<DwellerClearFloraJobState>, GameModel, DwellerModel>
 		{
-			ItemCacheBuildingModel target;
+			BuildingModel target;
 			NavMeshPath targetPath = new NavMeshPath();
 			
 			public override bool IsTriggered()

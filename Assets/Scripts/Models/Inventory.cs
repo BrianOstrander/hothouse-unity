@@ -53,6 +53,7 @@ namespace Lunra.WildVacuum.Models
 		public readonly Item[] Maximum;
 		public readonly Item[] Current;
 		public readonly bool IsEmpty;
+		public readonly bool IsCapacityZero;
 		
 		Inventory(
 			Item[] maximum,
@@ -64,7 +65,8 @@ namespace Lunra.WildVacuum.Models
 			Maximum = maximum;
 			Current = current;
 
-			IsEmpty = !Current.Any(i => 0 < i.Count);
+			IsEmpty = Current.None(i => 0 < i.Count);
+			IsCapacityZero = Maximum.None(i => 0 < i.Count);
 		}
 
 		public Inventory SetMaximum(int count, Item.Types type) => SetMaximum(current => current.Type == type ? count : current.Count);

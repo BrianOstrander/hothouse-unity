@@ -127,30 +127,6 @@ namespace Lunra.WildVacuum.Services
 				)
 			);
 
-			void initializeItemCache(
-				ItemCacheBuildingModel itemCache,
-				Vector3 position,
-				Inventory inventory
-			)
-			{
-				itemCache.Position.Value = position;
-				itemCache.Inventory.Value = inventory;
-			}
-
-			game.ItemCaches.Activate(
-				"item_cache",
-				itemCache => initializeItemCache(
-					itemCache,
-					new Vector3(6f, -0.8386866f, 6f),
-					Inventory.PopulateMaximum(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Stalks, 999 }
-						}
-					)		
-				)
-			);
-
 			void initializeFlora(
 				FloraModel flora,
 				Vector3 position
@@ -241,28 +217,46 @@ namespace Lunra.WildVacuum.Services
 				)
 			);
 
-			void initializeDesireBuilding(
-				DesireBuildingModel model,
+			void initializeBuilding(
+				BuildingModel model,
 				string id,
 				Vector3 position,
-				Dictionary<Desires, float> quality
+				Inventory inventory,
+				Dictionary<Desires, float> quality = null
 			)
 			{
 				model.Id.Value = id;
 				model.Position.Value = position;
-				model.DesireQuality.Value = quality;
+				model.Inventory.Value = inventory;
+				model.DesireQuality.Value = quality ?? new Dictionary<Desires, float>();
 			}
 
-			game.DesireBuildings.Activate(
-				"sleep",
-				m => initializeDesireBuilding(
+			game.Buildings.Activate(
+				"debug",
+				m => initializeBuilding(
 					m,
 					"sleep_0",
 					new Vector3(-12f, -0.8386866f, 6f),
+					Inventory.Empty,
 					new Dictionary<Desires, float>
 					{
 						{ Desires.Sleep, 1f }	
 					}
+				)
+			);
+
+			game.Buildings.Activate(
+				"debug",
+				m => initializeBuilding(
+					m,
+					"item_cache_0",
+					new Vector3(6f, -0.8386866f, 6f),
+					Inventory.PopulateMaximum(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 999 }
+						}
+					) 
 				)
 			);
 
