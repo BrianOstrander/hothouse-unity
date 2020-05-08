@@ -30,23 +30,20 @@ namespace Lunra.WildVacuum.Ai
 
 		public abstract Desires Desire { get; }
 
-		ToDesireOnShiftEnd toDesireOnShiftEnd;
-		public ToDesireOnShiftEnd GetToDesireOnShiftEnd => toDesireOnShiftEnd ?? (toDesireOnShiftEnd = new ToDesireOnShiftEnd(this as S));
-		
 		public override void OnInitialize()
 		{
 			var timeoutState = new DwellerTimeoutState<S>();
 			
 			AddChildStates(
 				timeoutState,
-				new DwellerNavigateState<DwellerSleepDesireState>()
+				new DwellerNavigateState<S>()
 			);
 			
 			AddTransitions(
-				new ToIdleOnDesireChanged(this as S),
-				new ToTimeoutForDesire(this as S, timeoutState),
-				new ToNavigateToNearestDesireBuilding(this as S),
-				new ToIdleOnShiftBegin(this as S)
+				new ToIdleOnDesireChanged(this),
+				new ToTimeoutForDesire(this, timeoutState),
+				new ToNavigateToNearestDesireBuilding(this),
+				new ToIdleOnShiftBegin(this)
 			);
 		}
 
@@ -54,9 +51,9 @@ namespace Lunra.WildVacuum.Ai
 		{
 			public override string Name => base.Name + "<" + desireState.Name + ">";
 
-			S desireState;
+			DwellerDesireState<S> desireState;
 
-			public ToDesireOnShiftEnd(S desireState) => this.desireState = desireState; 
+			public ToDesireOnShiftEnd(DwellerDesireState<S> desireState) => this.desireState = desireState; 
 			
 			public override bool IsTriggered()
 			{
@@ -75,9 +72,9 @@ namespace Lunra.WildVacuum.Ai
 		{
 			public override string Name => base.Name + "<" + desireState.Name + ">";
 			
-			S desireState;
+			DwellerDesireState<S> desireState;
 
-			public ToIdleOnDesireChanged(S desireState) => this.desireState = desireState; 
+			public ToIdleOnDesireChanged(DwellerDesireState<S> desireState) => this.desireState = desireState; 
 			
 			public override bool IsTriggered() => desireState.Desire != Agent.Desire.Value;
 		}
@@ -86,21 +83,21 @@ namespace Lunra.WildVacuum.Ai
 		{
 			public override string Name => base.Name + "<" + desireState.Name + ">";
 			
-			S desireState;
+			DwellerDesireState<S> desireState;
 
-			public ToIdleOnShiftBegin(S desireState) => this.desireState = desireState; 
+			public ToIdleOnShiftBegin(DwellerDesireState<S> desireState) => this.desireState = desireState; 
 			
 			public override bool IsTriggered() => Agent.JobShift.Value.Contains(World.SimulationTime.Value);
 		}
 		
 		protected class ToTimeoutForDesire : AgentTransition<DwellerTimeoutState<S>, GameModel, DwellerModel>
 		{
-			S desireState;
+			DwellerDesireState<S> desireState;
 			DwellerTimeoutState<S> timeoutState;
 			BuildingModel target;
 
 			public ToTimeoutForDesire(
-				S desireState,
+				DwellerDesireState<S> desireState,
 				DwellerTimeoutState<S> timeoutState
 			)
 			{
@@ -120,17 +117,18 @@ namespace Lunra.WildVacuum.Ai
 			public override void Transition()
 			{
 				timeoutState.ConfigureForNextTimeOfDay(Agent.JobShift.Value.Begin);
+				target.Operate(Agent, desireState.Desire);
 				Agent.Desire.Value = Desires.None;
 			}
 		}
 		
-		protected class ToNavigateToNearestDesireBuilding : AgentTransition<DwellerNavigateState<DwellerSleepDesireState>, GameModel, DwellerModel>
+		protected class ToNavigateToNearestDesireBuilding : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
 		{
-			S desireState;
+			DwellerDesireState<S> desireState;
 			BuildingModel target;
 			NavMeshPath targetPath = new NavMeshPath();
 
-			public ToNavigateToNearestDesireBuilding(S desireState) => this.desireState = desireState;
+			public ToNavigateToNearestDesireBuilding(DwellerDesireState<S> desireState) => this.desireState = desireState;
 			
 			public override bool IsTriggered()
 			{

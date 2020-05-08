@@ -10,11 +10,11 @@ namespace Lunra.WildVacuum.Ai
 {
 	public class DwellerClearFloraJobState : DwellerJobState<DwellerClearFloraJobState>
 	{
-		public override DwellerModel.Jobs Job => DwellerModel.Jobs.ClearFlora;
+		public override Jobs Job => Jobs.ClearFlora;
 
 		public override void OnInitialize()
 		{
-			var validJobs = new[] { DwellerModel.Jobs.ClearFlora };
+			var validJobs = new[] { Jobs.ClearFlora };
 			var validItems = new[] { Item.Types.Stalks };
 			
 			var attackState = new DwellerAttackState<DwellerClearFloraJobState>();
@@ -104,7 +104,7 @@ namespace Lunra.WildVacuum.Ai
 									itemDrop.Position.Value = targetFlora.Position.Value;
 									itemDrop.Rotation.Value = Quaternion.identity;
 									itemDrop.Inventory.Value = overflow;
-									itemDrop.Job.Value = DwellerModel.Jobs.ClearFlora;
+									itemDrop.Job.Value = Jobs.ClearFlora;
 								}
 							);
 						}

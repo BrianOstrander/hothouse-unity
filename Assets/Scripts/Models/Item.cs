@@ -21,7 +21,8 @@ namespace Lunra.WildVacuum.Models
 		{
 			Unknown = 0,
 			Stalks = 10,
-			Scrap = 20
+			Rations = 20,
+			Scrap = 30,
 		}
 
 		public readonly int Count;

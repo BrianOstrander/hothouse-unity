@@ -6,12 +6,6 @@ namespace Lunra.WildVacuum.Models.AgentModels
 {
 	public class DwellerModel : AgentModel
 	{
-		public enum Jobs
-		{
-			Unknown = 0,
-			ClearFlora = 10
-		}
-
 		#region Serialized
 		[JsonProperty] Jobs job;
 		[JsonIgnore] public readonly ListenerProperty<Jobs> Job;

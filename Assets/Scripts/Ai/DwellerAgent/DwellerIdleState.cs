@@ -15,6 +15,7 @@ namespace Lunra.WildVacuum.Ai
 		{
 			InstantiateJob<DwellerClearFloraJobState>();
 			InstantiateDesire<DwellerSleepDesireState>();
+			InstantiateDesire<DwellerEatDesireState>();
 		}
 
 		void InstantiateJob<S>()
@@ -30,7 +31,8 @@ namespace Lunra.WildVacuum.Ai
 		{
 			var state = new S();
 			AddChildStates(state);
-			AddTransitions(state.GetToDesireOnShiftEnd);
+			// AddTransitions(state.GetToDesireOnShiftEnd);
+			AddTransitions(new DwellerDesireState<S>.ToDesireOnShiftEnd(state));
 		}
 	}
 }

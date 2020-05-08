@@ -4,6 +4,7 @@ namespace Lunra.WildVacuum.Models
 	{
 		Unknown = 0,
 		None = 10,
-		Sleep = 20
+		Sleep = 20,
+		Eat = 30
 	}
 }

@@ -55,7 +55,31 @@ namespace Lunra.WildVacuum.Presenters
 			else
 			{
 				result += "DesireQualities:\n";
-				foreach (var kv in Model.DesireQuality.Value) result += " > " + kv.Desire + " : " + kv.Quality + "\n";
+				foreach (var desire in Model.DesireQuality.Value)
+				{
+					switch (desire.State)
+					{
+						case DesireQuality.States.NotAvailable:
+							result += "<color=red>";
+							break;
+						case DesireQuality.States.Unknown:
+							result += "<color=yellow>";
+							break;
+							
+					}
+					
+					result += " > " + desire.Desire + " : " + desire.Quality + "\n";
+					
+					switch (desire.State)
+					{
+						case DesireQuality.States.NotAvailable:
+							result += "</color>";
+							break;
+						case DesireQuality.States.Unknown:
+							result += "</color>";
+							break;
+					}
+				}
 			}
 
 			View.Text = result;

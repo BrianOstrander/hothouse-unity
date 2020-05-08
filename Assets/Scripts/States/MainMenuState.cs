@@ -74,7 +74,7 @@ namespace Lunra.WildVacuum.Services
 		{
 			var game = new GameModel();
 
-			game.SimulationTimeConversion.Value = 1f / 30f;
+			game.SimulationTimeConversion.Value = 1f / 10f;
 			
 			game.WorldCamera.IsEnabled.Value = true;
 
@@ -170,7 +170,7 @@ namespace Lunra.WildVacuum.Services
 				DwellerModel dweller,
 				string id,
 				Vector3 position,
-				DwellerModel.Jobs job = DwellerModel.Jobs.Unknown,
+				Jobs job = Jobs.Unknown,
 				int jobPriority = 0,
 				bool debugAgentStates = false
 			)
@@ -181,7 +181,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.1f);
 				dweller.Desire.Value = Desires.None;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -211,7 +211,7 @@ namespace Lunra.WildVacuum.Services
 					dweller,
 					"0",
 					new Vector3(-12f, -0.8386866f, 3f),
-					DwellerModel.Jobs.ClearFlora,
+					Jobs.ClearFlora,
 					0,
 					true
 				)
@@ -256,12 +256,37 @@ namespace Lunra.WildVacuum.Services
 					) 
 				)
 			);
+			
+			game.Buildings.Activate(
+				"debug",
+				m => initializeBuilding(
+					m,
+					"eat_0",
+					new Vector3(8f, -0.8386866f, 2f),
+					Inventory.Populate(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Rations, 1 }
+						}
+					),
+					new DesireQuality(
+						Desires.Eat, 
+						Inventory.Populate(
+							new Dictionary<Item.Types, int>
+							{
+								{ Item.Types.Rations, 1 }
+							}
+						),
+						1f
+					)
+				)
+			);
 
 			game.ItemDrops.Activate(
 				m =>
 				{
 					m.Position.Value = new Vector3(2f, 0f, -5f);
-					m.Job.Value = DwellerModel.Jobs.ClearFlora;
+					m.Job.Value = Jobs.ClearFlora;
 					m.Inventory.Value = Inventory.Populate(
 						new Dictionary<Item.Types, int>
 						{
@@ -275,7 +300,7 @@ namespace Lunra.WildVacuum.Services
 				m =>
 				{
 					m.Position.Value = new Vector3(1f, 0f, -5f);
-					m.Job.Value = DwellerModel.Jobs.ClearFlora;
+					m.Job.Value = Jobs.ClearFlora;
 					m.Inventory.Value = Inventory.Populate(
 						new Dictionary<Item.Types, int>
 						{
@@ -289,7 +314,7 @@ namespace Lunra.WildVacuum.Services
 				m =>
 				{
 					m.Position.Value = new Vector3(0f, 0f, -5f);
-					m.Job.Value = DwellerModel.Jobs.ClearFlora;
+					m.Job.Value = Jobs.ClearFlora;
 					m.Inventory.Value = Inventory.Populate(
 						new Dictionary<Item.Types, int>
 						{

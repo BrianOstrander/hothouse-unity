@@ -1,5 +1,8 @@
+using System;
+using Lunra.Core;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
+using Lunra.WildVacuum.Models.AgentModels;
 
 namespace Lunra.WildVacuum.Models
 {
@@ -18,6 +21,8 @@ namespace Lunra.WildVacuum.Models
 		[JsonProperty] DesireQuality[] desireQuality = new DesireQuality[0];
 		[JsonIgnore] public readonly ListenerProperty<DesireQuality[]> DesireQuality;
 		#endregion
+
+		public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
 		
 		public BuildingModel()
 		{

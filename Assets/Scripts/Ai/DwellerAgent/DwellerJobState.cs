@@ -14,7 +14,7 @@ namespace Lunra.WildVacuum.Ai
 	{
 		public override string Name => Job + "Job";
 
-		public abstract DwellerModel.Jobs Job { get; }
+		public abstract Jobs Job { get; }
 
 		ToJobOnShiftBegin toJobOnShiftBegin;
 		public ToJobOnShiftBegin GetToJobOnShiftBegin => toJobOnShiftBegin ?? (toJobOnShiftBegin = new ToJobOnShiftBegin(this as S));
@@ -87,7 +87,7 @@ namespace Lunra.WildVacuum.Ai
 
 			DwellerItemCleanupState<S> cleanupState;
 			InventoryTrigger inventoryTrigger;
-			DwellerModel.Jobs[] validJobs;
+			Jobs[] validJobs;
 			Item.Types[] validItems;
 			
 			NavMeshPath targetPath = new NavMeshPath();
@@ -95,7 +95,7 @@ namespace Lunra.WildVacuum.Ai
 			public ToItemCleanupOnValidInventory(
 				DwellerItemCleanupState<S> cleanupState,
 				InventoryTrigger inventoryTrigger,
-				DwellerModel.Jobs[] validJobs,
+				Jobs[] validJobs,
 				Item.Types[] validItems
 			)
 			{

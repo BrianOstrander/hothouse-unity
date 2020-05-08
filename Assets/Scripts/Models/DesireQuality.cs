@@ -44,16 +44,13 @@ namespace Lunra.WildVacuum.Models
 			State = state;
 		}
 
-		public DesireQuality CalculateState(
-			Inventory availableItems,
-			States? state = null
-		)
+		public DesireQuality CalculateState(Inventory availableItems)
 		{
 			return new DesireQuality(
 				Desire,
 				Cost,
 				Quality,
-				state ?? (availableItems.Contains(Cost) ? States.Available : States.NotAvailable)
+				availableItems.Contains(Cost) ? States.Available : States.NotAvailable
 			);
 		}
 	}

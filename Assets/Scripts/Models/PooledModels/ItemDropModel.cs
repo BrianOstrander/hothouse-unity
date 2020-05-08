@@ -10,14 +10,14 @@ namespace Lunra.WildVacuum.Models
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
 
-		[JsonProperty] DwellerModel.Jobs job;
-		[JsonIgnore] public readonly ListenerProperty<DwellerModel.Jobs> Job;
+		[JsonProperty] Jobs job;
+		[JsonIgnore] public readonly ListenerProperty<Jobs> Job;
 		#endregion
 
 		public ItemDropModel()
 		{
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
-			Job = new ListenerProperty<DwellerModel.Jobs>(value => job = value, () => job);
+			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 		}
 	}
 }

@@ -16,7 +16,7 @@ namespace Lunra.WildVacuum.Ai
 		
 		public override string Name => "ItemCleanup";
 
-		DwellerModel.Jobs[] validJobs;
+		Jobs[] validJobs;
 		Item.Types[] validItems;
 
 		int unloadCount;
@@ -24,7 +24,7 @@ namespace Lunra.WildVacuum.Ai
 		public void ResetUnloadCount() => unloadCount = UnloadCountTimeout;
 		
 		public DwellerItemCleanupState(
-			DwellerModel.Jobs[] validJobs,
+			Jobs[] validJobs,
 			Item.Types[] validItems
 		)
 		{

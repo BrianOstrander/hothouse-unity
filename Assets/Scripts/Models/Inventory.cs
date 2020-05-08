@@ -136,6 +136,8 @@ namespace Lunra.WildVacuum.Models
 
 			return result;
 		}
+
+		public Inventory Subtract(Inventory inventory) => Subtract(i => inventory[i.Type]);
 		
 		public Inventory Subtract(int count, Item.Types type) => Subtract(current => current.Type == type ? count : current.Count);
 		
@@ -191,6 +193,7 @@ namespace Lunra.WildVacuum.Models
 			if (inventory.IsEmpty) return true;
 			foreach (var currentItem in Current)
 			{
+				Debug.Log(currentItem.Type + " " + currentItem.Count + " : " + Current.Length);
 				if (currentItem.Count < inventory[currentItem.Type]) return false;
 			}
 			return true;

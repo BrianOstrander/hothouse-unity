@@ -58,7 +58,7 @@ namespace Lunra.WildVacuum.Ai
 				if (targetState == null)
 				{
 					IsOutOfState = true;
-					Debug.LogError("Unable to find transition to: "+transition.TargetState);
+					Debug.LogError("Transition " + transition.Name + " requested a state that could not be found: " + transition.TargetState);
 					return;
 				}
 				
