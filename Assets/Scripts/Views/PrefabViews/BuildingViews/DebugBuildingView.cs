@@ -13,9 +13,13 @@ namespace Lunra.WildVacuum.Views
 
 		public string Text
 		{
-			set => label.text = value;
+			set
+			{
+				label.text = value;
+				label.gameObject.SetActive(!string.IsNullOrEmpty(value));
+			}
 		}
-		
+
 		public override void Reset()
 		{
 			base.Reset();

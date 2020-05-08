@@ -9,6 +9,7 @@ namespace Lunra.Editor.Core
 {
 	public abstract class EditorPrefsKv<T>
 	{
+		public readonly string Name;
 		public readonly string Key;
 		public readonly T Default;
 
@@ -16,9 +17,18 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsKv(string key, T defaultValue = default)
 		{
+			if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
+			
+			Name = key.Contains('.') ? key.Split('.').Last() : key;
 			Key = key;
 			Default = defaultValue;
 		}
+
+		public string LabelName => ObjectNames.NicifyVariableName(Name);
+		
+		public GUIContent Label => new GUIContent(LabelName);
+
+		public abstract void Draw();
 	}
 
 	public class EditorPrefsString : EditorPrefsKv<string>
@@ -30,6 +40,8 @@ namespace Lunra.Editor.Core
 		}
 
 		public EditorPrefsString(string key, string defaultValue = null) : base(key, defaultValue) {}
+
+		public override void Draw() => Value = EditorGUILayout.TextField(Label, Value);
 	}
 
 	public class EditorPrefsBool : EditorPrefsKv<bool>
@@ -41,6 +53,8 @@ namespace Lunra.Editor.Core
 		}
 
 		public EditorPrefsBool(string key, bool defaultValue = false) : base(key, defaultValue) {}
+
+		public override void Draw() => Value = EditorGUILayout.Toggle(Label, Value);
 	}
 
 	public class EditorPrefsFloat : EditorPrefsKv<float>
@@ -64,6 +78,8 @@ namespace Lunra.Editor.Core
 		}
 
 		public EditorPrefsFloat(string key, float defaultValue = 0f) : base(key, defaultValue) {}
+
+		public override void Draw() => Value = EditorGUILayout.FloatField(Label, Value);
 	}
 
 	public class EditorPrefsInt : EditorPrefsKv<int>
@@ -75,9 +91,11 @@ namespace Lunra.Editor.Core
 		}
 
 		public EditorPrefsInt(string key, int defaultValue = 0) : base(key, defaultValue) {}
+
+		public override void Draw() => Value = EditorGUILayout.IntField(Label, Value);
 	}
 
-	public class EditorPrefsEnum<T> : EditorPrefsKv<T> where T : struct, IConvertible
+	public class EditorPrefsEnum<T> : EditorPrefsKv<T> where T : Enum
 	{
 		public override T Value
 		{
@@ -93,5 +111,7 @@ namespace Lunra.Editor.Core
 		{
 			if (!typeof(T).IsEnum) Debug.LogError(typeof(T).FullName + " is not an enum.");
 		}
+
+		public override void Draw() => Value = (T)EditorGUILayout.EnumPopup(Label, Value);
 	}
 }

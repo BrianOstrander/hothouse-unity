@@ -9,12 +9,5 @@ namespace Lunra.WildVacuum.Presenters
 	public class DwellerPresenter : AgentPresenter<DwellerModel, DwellerView, DwellerStateMachine>
 	{
 		public DwellerPresenter(GameModel game, DwellerModel model) : base(game, model) { }
-
-		protected override void Bind()
-		{
-			base.Bind();
-			
-			Model.Inventory.Changed += inventory => Debug.Log("Inventory:\n" + inventory);
-		}
 	}
 }

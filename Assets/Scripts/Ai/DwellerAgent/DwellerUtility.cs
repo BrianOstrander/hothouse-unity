@@ -21,6 +21,8 @@ namespace Lunra.WildVacuum.Ai
 			var pathResult = new NavMeshPath();
 			var entranceResult = Vector3.zero;
 
+			// Debug.Log("nearest entrance buildings: "+buildings.Count());
+			
 			var result = buildings
 				.Where(buildingPredicate)
 				.OrderBy(t => Vector3.Distance(beginPosition, t.Position.Value))

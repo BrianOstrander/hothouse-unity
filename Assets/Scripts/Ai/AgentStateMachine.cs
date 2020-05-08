@@ -66,8 +66,15 @@ namespace Lunra.WildVacuum.Ai
 				transition.Transition();
 				targetState.Begin();
 
-				if (Agent.IsDebugging) Debug.Log(Name + ": " + CurrentState.Name + "." + transition.Name + " -> " + targetState.Name);
+				Agent.Context = new AgentContext(
+					Name,
+					CurrentState.Name,
+					targetState.Name,
+					transition.Name
+				);
 				
+				if (Agent.IsDebugging) Debug.Log(Agent.Context);
+
 				CurrentState = targetState;
 				return;
 			}

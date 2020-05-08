@@ -170,8 +170,9 @@ namespace Lunra.WildVacuum.Services
 				DwellerModel dweller,
 				string id,
 				Vector3 position,
-				Jobs job = Jobs.Unknown,
+				Jobs job = Jobs.None,
 				int jobPriority = 0,
+				Desires desire = Desires.None,
 				bool debugAgentStates = false
 			)
 			{
@@ -182,7 +183,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
 				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.1f);
-				dweller.Desire.Value = Desires.None;
+				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
 				dweller.MeleeRange.Value = 0.75f;
@@ -212,8 +213,7 @@ namespace Lunra.WildVacuum.Services
 					"0",
 					new Vector3(-12f, -0.8386866f, 3f),
 					Jobs.ClearFlora,
-					0,
-					true
+					0
 				)
 			);
 
@@ -262,11 +262,37 @@ namespace Lunra.WildVacuum.Services
 				m => initializeBuilding(
 					m,
 					"eat_0",
-					new Vector3(8f, -0.8386866f, 2f),
+					new Vector3(12f, -0.8386866f, 2f),
 					Inventory.Populate(
 						new Dictionary<Item.Types, int>
 						{
-							{ Item.Types.Rations, 1 }
+							{ Item.Types.Rations, 99 }
+						}
+					),
+					new DesireQuality(
+						Desires.Eat, 
+						Inventory.Populate(
+							new Dictionary<Item.Types, int>
+							{
+								{ Item.Types.Rations, 1 }
+							}
+						),
+						1f
+					)
+				)
+			);
+			
+			game.Buildings.Activate(
+				"default_wagon",
+				m => initializeBuilding(
+					m,
+					"wagon_0",
+					new Vector3(0f, -0.8386866f, 4f),
+					Inventory.Populate(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 10 },
+							{ Item.Types.Rations, 10 }
 						}
 					),
 					new DesireQuality(

@@ -79,7 +79,7 @@ namespace Lunra.WildVacuum.Services
 
 			Payload.Game.Rooms.Initialize(m => new RoomPrefabPresenter(Payload.Game, m));
 			Payload.Game.Doors.Initialize(m => new DoorPrefabPresenter(Payload.Game, m));
-			Payload.Game.Buildings.Initialize(m => new DebugBuildingPresenter(Payload.Game, m));
+			Payload.Game.Buildings.Initialize(m => new BuildingPresenter(Payload.Game, m));
 			
 			Payload.Game.Flora.Initialize(m => new FloraPresenter(Payload.Game, m));
 			Payload.Game.ItemDrops.Initialize(m => new ItemDropPresenter(Payload.Game, m));

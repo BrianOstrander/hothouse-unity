@@ -13,6 +13,8 @@
 			return truncation + value.Substring(value.Length - length);
 		}
 
-		public static string GetNonNullOrEmpty(string value, string defaultValue) { return string.IsNullOrEmpty(value) ? defaultValue : value; }
+		public static string GetNonNullOrEmpty(string value, string defaultValue) => string.IsNullOrEmpty(value) ? defaultValue : value;
+
+		public static string Wrap(string value, string begin, string end) => begin + value + end;
 	}
 }

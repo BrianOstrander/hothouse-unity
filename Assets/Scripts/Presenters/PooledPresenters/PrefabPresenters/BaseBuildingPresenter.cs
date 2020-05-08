@@ -1,4 +1,5 @@
 using System.Linq;
+using Lunra.Core;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
 using Lunra.WildVacuum.Views;
@@ -6,15 +7,22 @@ using UnityEngine;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public abstract class BuildingPresenter<M, V> : PrefabPresenter<M, V>
+	public abstract class BaseBuildingPresenter<M, V> : PrefabPresenter<M, V>
 		where M : BuildingModel
 		where V : BuildingView
 	{
-		protected BuildingPresenter(GameModel game, M model) : base(game, model) { }
+		protected BaseBuildingPresenter(GameModel game, M model) : base(game, model) { }
 
 		protected override void Bind()
 		{
 			base.Bind();
+
+			if (View.Entrances.None())
+			{
+				Debug.LogError(
+					"No entrances found for "+View.name+"."+StringExtensions.GetNonNullOrEmpty(View.PrefabId, "< null or empty PrefabId >")
+				);
+			}
 
 			Model.Inventory.Changed += OnBuildingInventory;
 			Model.Operate += OnBuildingOperate;

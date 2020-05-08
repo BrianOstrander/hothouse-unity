@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 
@@ -16,7 +17,8 @@ namespace Lunra.WildVacuum.Models
 		[JsonProperty] NavigationPlan navigationPlan = Models.NavigationPlan.Done();
 		[JsonIgnore] public readonly ListenerProperty<NavigationPlan> NavigationPlan;
 		
-		public bool IsDebugging { get; set; }
+		[JsonIgnore] public bool IsDebugging { get; set; }
+		[JsonIgnore] public AgentContext Context { get; set; } 
 		#endregion
 		
 		#region Non Serialized

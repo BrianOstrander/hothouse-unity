@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.WildVacuum.Models;
@@ -6,7 +5,7 @@ using Lunra.WildVacuum.Views;
 
 namespace Lunra.WildVacuum.Presenters
 {
-	public class DebugBuildingPresenter : BuildingPresenter<BuildingModel, DebugBuildingView>
+	public class DebugBuildingPresenter : BaseBuildingPresenter<BuildingModel, DebugBuildingView>
 	{
 		public DebugBuildingPresenter(GameModel game, BuildingModel model) : base(game, model) { }
 

@@ -193,7 +193,6 @@ namespace Lunra.WildVacuum.Models
 			if (inventory.IsEmpty) return true;
 			foreach (var currentItem in Current)
 			{
-				Debug.Log(currentItem.Type + " " + currentItem.Count + " : " + Current.Length);
 				if (currentItem.Count < inventory[currentItem.Type]) return false;
 			}
 			return true;

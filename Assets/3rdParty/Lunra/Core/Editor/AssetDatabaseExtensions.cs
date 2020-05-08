@@ -41,5 +41,24 @@ namespace Lunra.Editor.Core
 			Selection.activeObject = config;
 			return config;
 		}
+		
+		/*
+		public static T GetOrCreate<T>(string defaultPath)
+			where T : ScriptableObject
+		{
+			if (string.IsNullOrEmpty(defaultPath)) throw new ArgumentException("Cannot be null or empty", nameof(defaultPath));
+			
+			var result = AssetDatabase.LoadAssetAtPath<T>(defaultPath);
+			
+			if (result == null)
+			{
+				result = ScriptableObject.CreateInstance<T>();
+				AssetDatabase.CreateAsset(result, defaultPath);
+				AssetDatabase.SaveAssets();
+			}
+			
+			return result;
+		}
+		*/
 	}
 }
