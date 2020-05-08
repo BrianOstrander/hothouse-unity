@@ -11,7 +11,9 @@ namespace Lunra.WildVacuum.Ai
 		public string Name => (string.IsNullOrEmpty(Agent.Id.Value) ? "null_or_empty_id" : Agent.Id.Value) + "<" + GetType().Name + ">";
 		
 		public List<AgentState<W, A>> States { get; } = new List<AgentState<W, A>>();
-		public AgentState<W, A> CurrentState { get; protected set; }
+		
+		public AgentState<W, A> DefaultState { get; protected set; }
+		public AgentState<W, A> CurrentState { get; private set; }
 		
 		public W World { get; private set; }
 		public A Agent { get; private set; }
@@ -39,6 +41,14 @@ namespace Lunra.WildVacuum.Ai
 				
 				statesRemainingToInitialize.AddRange(state.ChildStates);
 			}
+
+			if (DefaultState == null)
+			{
+				Debug.LogError("No "+nameof(DefaultState)+" specified");
+				return;
+			}
+
+			CurrentState = DefaultState;
 			
 			if (agent.IsDebugging) Debug.Log(Name + ": entering default state " + CurrentState.Name);
 		}
@@ -80,6 +90,25 @@ namespace Lunra.WildVacuum.Ai
 			}
 			
 			CurrentState.Idle();
+		}
+
+		public void Reset()
+		{
+			if (CurrentState == DefaultState) return;
+			
+			CurrentState.End();
+			DefaultState.Begin();
+
+			Agent.Context = new AgentContext(
+				Name,
+				CurrentState.Name,
+				DefaultState.Name,
+				"< Reset >"
+			);
+				
+			if (Agent.IsDebugging) Debug.Log(Agent.Context);
+
+			CurrentState = DefaultState;
 		}
 	}
 }

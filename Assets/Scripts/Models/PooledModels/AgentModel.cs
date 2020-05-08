@@ -1,6 +1,4 @@
-﻿using System;
-using UnityEngine;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 
 namespace Lunra.WildVacuum.Models
@@ -16,12 +14,17 @@ namespace Lunra.WildVacuum.Models
 		
 		[JsonProperty] NavigationPlan navigationPlan = Models.NavigationPlan.Done();
 		[JsonIgnore] public readonly ListenerProperty<NavigationPlan> NavigationPlan;
+
+		[JsonProperty] float health;
+		[JsonIgnore] public readonly ListenerProperty<float> Health;
 		
-		[JsonIgnore] public bool IsDebugging { get; set; }
-		[JsonIgnore] public AgentContext Context { get; set; } 
+		[JsonProperty] float healthMaximum;
+		[JsonIgnore] public readonly ListenerProperty<float> HealthMaximum;
 		#endregion
 		
 		#region Non Serialized
+		[JsonIgnore] public bool IsDebugging { get; set; }
+		[JsonIgnore] public AgentContext Context { get; set; } 
 		#endregion
 		
 		public AgentModel()
@@ -29,6 +32,8 @@ namespace Lunra.WildVacuum.Models
 			NavigationVelocity = new ListenerProperty<float>(value => navigationVelocity = value, () => navigationVelocity);
 			NavigationForceDistanceMaximum = new ListenerProperty<float>(value => navigationForceDistanceMaximum = value, () => navigationForceDistanceMaximum);
 			NavigationPlan = new ListenerProperty<NavigationPlan>(value => navigationPlan = value, () => navigationPlan);
+			Health = new ListenerProperty<float>(value => health = value, () => health);
+			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
 		}
 	}
 }

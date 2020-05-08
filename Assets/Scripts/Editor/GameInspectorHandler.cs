@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.StyxMvp;
@@ -14,6 +15,7 @@ namespace Lunra.Editor.Core
 	public static class GameInspectorHandler
 	{
 		static GameState current;
+		static GUIStyle labelStyle;
 		
 		static GameInspectorHandler()
 		{
@@ -23,6 +25,9 @@ namespace Lunra.Editor.Core
 
 		static void OnPlayModeStateChanged(PlayModeStateChange playModeState)
 		{
+			labelStyle = new GUIStyle(EditorStyles.label);
+			labelStyle.richText = true;
+			
 			switch (playModeState)
 			{
 				case PlayModeStateChange.ExitingEditMode:
@@ -47,7 +52,7 @@ namespace Lunra.Editor.Core
 					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
 
 					label += GetInventory(model.Inventory.Value);
-
+					
 					if (model.DesireQuality.Value.Any())
 					{
 						label += "\nDesires:";
@@ -59,7 +64,8 @@ namespace Lunra.Editor.Core
 
 					Handles.Label(
 						model.Position.Value,
-						StringExtensions.Wrap(label, "<color=cyan>", "</color>")
+						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
+						labelStyle
 					);
 				}
 			}
@@ -70,6 +76,8 @@ namespace Lunra.Editor.Core
 				{
 					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
 
+					if (!Mathf.Approximately(model.Health.Value, model.HealthMaximum.Value)) label += "\nHealth: " + model.Health.Value.ToString("N1") + " / " + model.HealthMaximum.Value.ToString("N1");
+					
 					label += "\nState: " + model.Context.CurrentState;
 					
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value + "_" + model.JobPriority.Value;
@@ -79,9 +87,22 @@ namespace Lunra.Editor.Core
 
 					Handles.Label(
 						model.Position.Value + (Vector3.up * 3f),
-						StringExtensions.Wrap(label, "<color=cyan>", "</color>")
+						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
+						labelStyle
 					);
+					
+					switch (model.NavigationPlan.Value.State)
+					{
+						case NavigationPlan.States.Navigating:
+							var nodes = model.NavigationPlan.Value.Nodes;
+							for (var i = 1; i < nodes.Length; i++) Debug.DrawLine(nodes[i - 1], nodes[i], Color.green);
+							break;
+						case NavigationPlan.States.Invalid:
+							Debug.DrawLine(model.NavigationPlan.Value.Position, model.NavigationPlan.Value.EndPosition, Color.red);
+							break;
+					}
 				}
+				
 			}
 		}
 

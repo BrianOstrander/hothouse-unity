@@ -10,7 +10,7 @@ namespace Lunra.WildVacuum.Ai
 		{
 			return new List<AgentState<GameModel, DwellerModel>>
 			{
-				(CurrentState = new DwellerIdleState())
+				(DefaultState = new DwellerIdleState())
 			};
 		}
 	}

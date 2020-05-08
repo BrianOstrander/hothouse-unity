@@ -189,6 +189,8 @@ namespace Lunra.WildVacuum.Services
 				dweller.MeleeRange.Value = 0.75f;
 				dweller.MeleeCooldown.Value = 0.5f;
 				dweller.MeleeDamage.Value = 60f;
+				dweller.HealthMaximum.Value = 100f;
+				dweller.Health.Value = dweller.HealthMaximum.Value;
 
 				dweller.LoadCooldown.Value = 0.5f;
 				dweller.UnloadCooldown.Value = dweller.LoadCooldown.Value;

@@ -24,8 +24,6 @@ namespace Lunra.WildVacuum.Presenters
 			
 			View.InstanceName = typeof(V).Name + "_" + (string.IsNullOrEmpty(Model.Id.Value) ? "null_or_empty_id" : Model.Id.Value);
 
-			App.Heartbeat.DrawGizmos += OnHeartbeatDrawGizmos;
-			
 			Model.NavigationPlan.Value = NavigationPlan.Done(Model.Position.Value);
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
@@ -38,45 +36,11 @@ namespace Lunra.WildVacuum.Presenters
 		{
 			base.UnBind();
 			
-			App.Heartbeat.DrawGizmos -= OnHeartbeatDrawGizmos;
-			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
 			Model.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 		}
-
-		#region Heartbeat Events
-		protected virtual void OnHeartbeatDrawGizmos(Action cleanup)
-		{
-			if (!Model.IsDebugging) return;
-			
-			switch (Model.NavigationPlan.Value.State)
-			{
-				case NavigationPlan.States.Navigating:
-					Gizmos.color = Color.green;
-			
-					for (var i = 1; i < Model.NavigationPlan.Value.Nodes.Length; i++)
-					{
-						Gizmos.DrawLine(
-							Model.NavigationPlan.Value.Nodes[i - 1],
-							Model.NavigationPlan.Value.Nodes[i]
-						);
-					}
-					break;
-				case NavigationPlan.States.Invalid:
-					Gizmos.color = Color.red;
-					
-					Gizmos.DrawLine(
-						Model.NavigationPlan.Value.Position,
-						Model.NavigationPlan.Value.EndPosition
-					);
-					break;
-			}
-
-			cleanup();
-		}
-		#endregion
 		
 		#region GameModel Events
 		protected override void OnInitialized()
@@ -111,6 +75,18 @@ namespace Lunra.WildVacuum.Presenters
 		protected virtual void OnAgentNavigationPlan(NavigationPlan navigationPlan)
 		{
 			Model.Position.Value = navigationPlan.Position;
+		}
+
+		protected override void OnPooledState(PooledStates pooledState)
+		{
+			switch (pooledState)
+			{
+				case PooledStates.InActive:
+					StateMachine.Reset();		
+					break;
+			}
+			
+			base.OnPooledState(pooledState);
 		}
 		#endregion
 	}
