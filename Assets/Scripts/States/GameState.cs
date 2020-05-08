@@ -4,6 +4,7 @@ using System.Linq;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
 using Lunra.WildVacuum.Models;
+using Lunra.WildVacuum.Models.AgentModels;
 using Lunra.WildVacuum.Presenters;
 using UnityEngine;
 
@@ -99,14 +100,10 @@ namespace Lunra.WildVacuum.Services
 			// App.Heartbeat.Wait(
 			// 	() =>
 			// 	{
-			// 		Payload.Game.ItemCaches.Value.First().Inventory.Value = Inventory.PopulateMaximum(
-			// 			new Dictionary<Item.Types, int>
-			// 			{
-			// 				{ Item.Types.Stalks, 999 }
-			// 			}
-			// 		);
+			// 		Debug.Log("Killing dweller!");
+			// 		Payload.Game.Dwellers.AllActive.First().Health.Value = 0f;
 			// 	},
-			// 	20f
+			// 	10f
 			// );
 		}
 
@@ -114,8 +111,6 @@ namespace Lunra.WildVacuum.Services
 		{
 			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
 			Payload.Game.SimulationUpdate();
-			
-			// Debug.Log(Payload.Game.SimulationTime.Value.ToDayTimeString());
 		}
 		#endregion
         

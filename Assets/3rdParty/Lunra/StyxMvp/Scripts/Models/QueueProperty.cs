@@ -17,12 +17,12 @@ namespace Lunra.StyxMvp.Models
 		public struct Delta
 		{
 			public readonly Events Event;
-			public readonly PropertySources Source;
+			public readonly object Source;
 			public readonly T Element;
 
 			public Delta(
 				Events events,
-				PropertySources source = PropertySources.Unknown,
+				object source = default,
 				T element = default
 			)
 			{
@@ -40,7 +40,7 @@ namespace Lunra.StyxMvp.Models
 		readonly Queue<T> queue;
 
 		public void Clear(
-			PropertySources source = PropertySources.Unknown
+			object source = default
 		)
 		{
 			if (queue.None()) return;
@@ -56,7 +56,7 @@ namespace Lunra.StyxMvp.Models
 
 		public void Enqueue(
 			T element,
-			PropertySources source = PropertySources.Unknown
+			object source = default
 		)
 		{
 			queue.Enqueue(element);
@@ -72,7 +72,7 @@ namespace Lunra.StyxMvp.Models
 
 		public bool TryDequeue(
 			out T element,
-			PropertySources source = PropertySources.Unknown
+			object source = default
 		)
 		{
 			element = default;
@@ -83,7 +83,7 @@ namespace Lunra.StyxMvp.Models
 		}
 		
 		public T Dequeue(
-			PropertySources source = PropertySources.Unknown
+			object source = default
 		)
 		{
 			var result = queue.Dequeue();

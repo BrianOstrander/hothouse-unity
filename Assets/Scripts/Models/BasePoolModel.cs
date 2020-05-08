@@ -63,6 +63,7 @@ namespace Lunra.WildVacuum.Models
 			foreach (var model in AllActive)
 			{
 				if (model.HasPresenter.Value) Debug.LogWarning("Initializing "+nameof(PooledModel)+", but a model already has a presenter, this is an invalid state");
+				model.PooledState.ChangedSource += (value, source) => OnPooledState(model, value, source);
 				InstantiatePresenter(model);
 			}
 			
@@ -80,7 +81,7 @@ namespace Lunra.WildVacuum.Models
 				All.Value.InActive.Union(models).ToArray()
 			);
 
-			foreach (var model in models) model.PooledState.Value = PooledStates.InActive;
+			foreach (var model in models) model.PooledState.SetValue(PooledStates.InActive, this);
 		}
 
 		protected M Activate(
@@ -111,11 +112,32 @@ namespace Lunra.WildVacuum.Models
 			
 			if (string.IsNullOrEmpty(result.Id.Value)) result.Id.Value = Guid.NewGuid().ToString();
 
-			result.PooledState.Value = PooledStates.Active;
+			result.PooledState.SetValue(PooledStates.Active, this);
 			
 			if (IsInitialized && !result.HasPresenter.Value) InstantiatePresenter.Invoke(result);
 
 			return result;
 		}
+		
+		#region Events
+		void OnPooledState(
+			M model,
+			PooledStates pooledState,
+			object source
+		)
+		{
+			if (source == this) return;
+
+			switch (pooledState)
+			{
+				case PooledStates.Active:
+					Activate(predicate: m => m == model);
+					break;
+				case PooledStates.InActive:
+					InActivate(model);
+					break;
+			}
+		}
+		#endregion
 	}
 }

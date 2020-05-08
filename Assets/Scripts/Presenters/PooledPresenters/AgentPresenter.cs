@@ -30,6 +30,7 @@ namespace Lunra.WildVacuum.Presenters
 			
 			Model.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
+			Model.Health.Changed += OnAgentHealth;
 		}
 
 		protected override void UnBind()
@@ -40,6 +41,7 @@ namespace Lunra.WildVacuum.Presenters
 			
 			Model.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
+			Model.Health.Changed -= OnAgentHealth;
 		}
 		
 		#region GameModel Events
@@ -87,6 +89,13 @@ namespace Lunra.WildVacuum.Presenters
 			}
 			
 			base.OnPooledState(pooledState);
+		}
+
+		protected virtual void OnAgentHealth(float health)
+		{
+			if (!Mathf.Approximately(0f, health)) return;
+
+			Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion
 	}

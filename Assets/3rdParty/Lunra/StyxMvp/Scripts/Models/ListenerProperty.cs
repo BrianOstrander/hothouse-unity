@@ -12,7 +12,7 @@ namespace Lunra.StyxMvp.Models
         readonly Func<T> get;
 
         public event Action<T> Changed = ActionExtensions.GetEmpty<T>();
-        public event Action<T, PropertySources> ChangedSource = ActionExtensions.GetEmpty<T, PropertySources>();
+        public event Action<T, object> ChangedSource = ActionExtensions.GetEmpty<T, object>();
 
         public T Value
         {
@@ -20,7 +20,7 @@ namespace Lunra.StyxMvp.Models
             set => SetValue(value);
         }
 
-        public bool SetValue(T value, PropertySources source = PropertySources.Unknown)
+        public bool SetValue(T value, object source = default)
         {
             if (EqualityComparer<T>.Default.Equals(get(), value)) return false;
             set(value);
