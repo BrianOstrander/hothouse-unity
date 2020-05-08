@@ -1,3 +1,4 @@
+using System.Linq;
 using Lunra.Core;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
@@ -19,11 +20,7 @@ namespace Lunra.WildVacuum.Ai
 			return DwellerUtility.CalculateNearestEntrance(
 				agent.Position.Value,
 				world.Buildings.AllActive,
-				b =>
-				{
-					if (b.DesireQuality.Value.TryGetValue(Desire, out var quality)) return 0f < quality;
-					return false;
-				},
+				b => 0f < b.DesireQuality.Value.FirstAvailableQualityOrDefault(Desire),
 				out path,
 				out entrancePosition
 			);

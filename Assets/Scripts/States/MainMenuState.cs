@@ -181,7 +181,7 @@ namespace Lunra.WildVacuum.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
-				dweller.JobShift.Value = DayTimeFrame.Maximum; // new DayTimeFrame(0.0f, 0.75f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
 				dweller.Desire.Value = Desires.None;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -222,13 +222,13 @@ namespace Lunra.WildVacuum.Services
 				string id,
 				Vector3 position,
 				Inventory inventory,
-				Dictionary<Desires, float> quality = null
+				params DesireQuality[] desireQualities
 			)
 			{
 				model.Id.Value = id;
 				model.Position.Value = position;
 				model.Inventory.Value = inventory;
-				model.DesireQuality.Value = quality ?? new Dictionary<Desires, float>();
+				model.DesireQuality.Value = desireQualities;
 			}
 
 			game.Buildings.Activate(
@@ -238,10 +238,7 @@ namespace Lunra.WildVacuum.Services
 					"sleep_0",
 					new Vector3(-12f, -0.8386866f, 6f),
 					Inventory.Empty,
-					new Dictionary<Desires, float>
-					{
-						{ Desires.Sleep, 1f }	
-					}
+					DesireQuality.New(Desires.Sleep, 1f)
 				)
 			);
 

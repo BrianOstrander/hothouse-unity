@@ -186,6 +186,16 @@ namespace Lunra.WildVacuum.Models
 		public bool Any(Item.Types type) => 0 < GetCurrent(type);
 		public bool None(Item.Types type) => !Any(type);
 
+		public bool Contains(Inventory inventory)
+		{
+			if (inventory.IsEmpty) return true;
+			foreach (var currentItem in Current)
+			{
+				if (currentItem.Count < inventory[currentItem.Type]) return false;
+			}
+			return true;
+		}
+		
 		public int this[Item.Types type] => GetCurrent(type);
 
 		public override string ToString()

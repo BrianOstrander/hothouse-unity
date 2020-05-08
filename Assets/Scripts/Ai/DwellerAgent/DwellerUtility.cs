@@ -29,7 +29,7 @@ namespace Lunra.WildVacuum.Ai
 					{
 						foreach (var entrance in t.Entrances.Value)
 						{
-							if (entrance.State != BuildingModel.Entrance.States.Available) continue;
+							if (entrance.State != Entrance.States.Available) continue;
 
 							var hasPath = NavMesh.CalculatePath(
 								beginPosition,

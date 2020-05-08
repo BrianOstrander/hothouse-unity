@@ -55,7 +55,7 @@ namespace Lunra.WildVacuum.Presenters
 			else
 			{
 				result += "DesireQualities:\n";
-				foreach (var kv in Model.DesireQuality.Value) result += " > " + kv.Key + " : " + kv.Value + "\n";
+				foreach (var kv in Model.DesireQuality.Value) result += " > " + kv.Desire + " : " + kv.Quality + "\n";
 			}
 
 			View.Text = result;
@@ -65,7 +65,7 @@ namespace Lunra.WildVacuum.Presenters
 		#region Building Events
 		void OnBuildingInventory(Inventory inventory) => OnRefreshDebugLabel();
 
-		void OnBuildingDesireQuality(Dictionary<Desires, float> desireQuality) => OnRefreshDebugLabel();
+		void OnBuildingDesireQuality(DesireQuality[] desireQuality) => OnRefreshDebugLabel();
 		#endregion
 	}
 }
