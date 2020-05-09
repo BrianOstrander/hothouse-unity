@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using UnityEngine;
 
@@ -49,8 +50,12 @@ namespace Lunra.Hothouse.Ai
 			}
 
 			CurrentState = DefaultState;
-			
-			if (agent.IsDebugging) Debug.Log(Name + ": entering default state " + CurrentState.Name);
+
+			if (agent.IsDebugging)
+			{
+				Debug.Log(Name + ": entering default state " + CurrentState.Name);
+				Debug.Log(ToString());
+			}
 		}
 
 		protected abstract List<AgentState<W, A>> GetStates();
@@ -109,6 +114,71 @@ namespace Lunra.Hothouse.Ai
 			if (Agent.IsDebugging) Debug.Log(Agent.Context);
 
 			CurrentState = DefaultState;
+		}
+
+		public override string ToString()
+		{
+			var states = new List<string>();
+			var transitions = new List<string>();
+
+			var rootStates = States.Where(
+				possibleChild => States.None(s => s.ChildStates.Contains(possibleChild))
+			).ToList();
+			
+			var stateNameMap = new Dictionary<AgentState<W, A>, string>();
+			
+			foreach (var state in rootStates)
+			{
+				states.Add(state.Name);
+				stateNameMap.Add(state, state.Name);
+
+				List<string> getChildStateNames(string path, List<AgentState<W, A>> childStates)
+				{
+					var childResults = new List<string>();
+
+					foreach (var currChild in childStates)
+					{
+						var currChildPath = path + "." + currChild.Name;
+						childResults.Add(currChildPath);
+						stateNameMap.Add(currChild, currChildPath);
+						childResults.AddRange(getChildStateNames(currChildPath, currChild.ChildStates));
+					}
+
+					return childResults;
+				}
+				
+				states.AddRange(
+					getChildStateNames(
+						state.Name,
+						state.ChildStates
+					)	
+				);
+			}
+
+			foreach (var state in States)
+			{
+				var sourceStateName = stateNameMap[state];
+				foreach (var transition in state.Transitions)
+				{
+					var destinationStateName = stateNameMap[States.FirstOrDefault(s => s.GetType() == transition.TargetState)];
+					transitions.Add(
+						"\"" + sourceStateName + "\" -> \"" + destinationStateName + "\" [ label = \"" + transition.Name + "\" ]"
+					);
+				}
+			}
+			
+			var result = "digraph " + GetType().Name + " {";
+
+			foreach (var state in states)
+			{
+				result += "\n\t \"" + state + "\" [ shape = circle, label = \"" + state.Split('.').LastOrFallback(state) + "\"]";
+			}
+
+			foreach (var transition in transitions) result += "\n\t" + transition;
+
+			result += "\n}";
+			
+			return result;
 		}
 	}
 }

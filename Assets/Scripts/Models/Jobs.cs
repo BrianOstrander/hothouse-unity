@@ -4,6 +4,7 @@ namespace Lunra.Hothouse.Models
 	{
 		Unknown = 0,
 		None = 10,
-		ClearFlora = 20
+		ClearFlora = 20,
+		Construction = 30
 	}
 }

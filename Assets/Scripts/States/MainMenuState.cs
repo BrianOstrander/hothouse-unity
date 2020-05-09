@@ -250,7 +250,7 @@ namespace Lunra.Hothouse.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = game.Dwellers.AllActive.Length;
-				dweller.JobShift.Value = DayTimeFrame.Maximum;// new DayTimeFrame(0.0f, 0.1f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -292,15 +292,16 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"1",
-					new Vector3(-11f, -0.8386866f, 3f),
-					Jobs.ClearFlora
-				)
-			);
+			// game.Dwellers.Activate(
+			// 	dweller => initializeDweller(
+			// 		dweller,
+			// 		"1",
+			// 		new Vector3(-11f, -0.8386866f, 3f),
+			// 		Jobs.Construction
+			// 	)
+			// );
 			
+			/*
 			game.Dwellers.Activate(
 				dweller => initializeDweller(
 					dweller,
@@ -328,6 +329,7 @@ namespace Lunra.Hothouse.Services
 					0
 				)
 			);
+			*/
 
 			void initializeBuilding(
 				BuildingModel model,
@@ -337,14 +339,16 @@ namespace Lunra.Hothouse.Services
 				params DesireQuality[] desireQualities
 			)
 			{
+				model.BuildingState.Value = BuildingStates.Operating;
+				model.ConstructionRecipe.Value = Inventory.Empty;
+				model.ConstructionRecipePromised.Value = Inventory.Empty;
 				model.Id.Value = id;
 				model.Position.Value = position;
 				model.Inventory.Value = inventory;
 				model.DesireQuality.Value = desireQualities;
 			}
 
-			/*
-			game.Buildings.Activate(
+			var sleepBuilding = game.Buildings.Activate(
 				"debug",
 				m => initializeBuilding(
 					m,
@@ -354,7 +358,15 @@ namespace Lunra.Hothouse.Services
 					DesireQuality.New(Desires.Sleep, 1f)
 				)
 			);
-			*/
+
+			sleepBuilding.BuildingState.Value = BuildingStates.Constructing;
+			sleepBuilding.ConstructionRecipe.Value = Inventory.PopulateMaximum(
+				new Dictionary<Item.Types, int>
+				{
+					{ Item.Types.Stalks, 5 }
+				}
+			);
+			
 
 			/*
 			game.Buildings.Activate(
