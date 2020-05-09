@@ -1,11 +1,11 @@
 ﻿using System.Linq;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Views;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class SelectionPresenter : Presenter<SelectionView>
 	{

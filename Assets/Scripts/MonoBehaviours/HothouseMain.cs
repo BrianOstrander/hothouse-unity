@@ -1,10 +1,10 @@
-﻿using Lunra.StyxMvp;
+﻿using Lunra.Hothouse.Services;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
-using Lunra.WildVacuum.Services;
 
-namespace Lunra.WildVacuum
+namespace Lunra.Hothouse
 {
-	public class WildVacuumMain : Main
+	public class HothouseMain : Main
 	{
 		protected override IState[] InstantiateStates()  => new IState[]
 		{

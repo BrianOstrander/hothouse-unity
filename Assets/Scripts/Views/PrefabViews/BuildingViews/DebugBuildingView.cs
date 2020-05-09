@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Views
+namespace Lunra.Hothouse.Views
 {
 	public class DebugBuildingView : BuildingView
 	{

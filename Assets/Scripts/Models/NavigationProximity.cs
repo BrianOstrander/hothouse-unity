@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public struct NavigationProximity
 	{

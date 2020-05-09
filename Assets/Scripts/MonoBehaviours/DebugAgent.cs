@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Lunra.WildVacuum.Debugging
+namespace Lunra.Hothouse.Debugging
 {
 	public class DebugAgent : MonoBehaviour
 	{

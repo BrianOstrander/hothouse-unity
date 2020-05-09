@@ -1,6 +1,6 @@
 using System;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public class PoolModel<M> : BasePoolModel<M>
 		where M : PooledModel, new()

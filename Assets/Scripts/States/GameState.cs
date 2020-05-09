@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Presenters;
+using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
-using Lunra.WildVacuum.Presenters;
-using Lunra.WildVacuum.Views;
+using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Services
+namespace Lunra.Hothouse.Services
 {
 	public class GamePayload : IStatePayload
 	{

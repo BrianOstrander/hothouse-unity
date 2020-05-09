@@ -2,7 +2,7 @@
 using Lunra.Core;
 using Lunra.StyxMvp;
 
-namespace Lunra.WildVacuum.Views
+namespace Lunra.Hothouse.Views
 {
 	public class AgentView : View
 	{

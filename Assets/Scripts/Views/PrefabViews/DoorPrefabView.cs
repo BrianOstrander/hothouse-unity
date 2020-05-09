@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 
-namespace Lunra.WildVacuum.Views
+namespace Lunra.Hothouse.Views
 {
 	public class DoorPrefabView : PrefabView
 	{

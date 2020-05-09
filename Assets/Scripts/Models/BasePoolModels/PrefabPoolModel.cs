@@ -1,6 +1,6 @@
 using System;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public class PrefabPoolModel<M> : BasePoolModel<M>
 		where M : PrefabModel, new()

@@ -1,10 +1,10 @@
-using Lunra.WildVacuum.Ai;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
-using Lunra.WildVacuum.Views;
+using Lunra.Hothouse.Ai;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
+using Lunra.Hothouse.Views;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class DwellerPresenter : AgentPresenter<DwellerModel, DwellerView, DwellerStateMachine>
 	{

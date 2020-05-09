@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Hothouse.Models;
 using Lunra.StyxMvp;
-using Lunra.WildVacuum.Models;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Views
+namespace Lunra.Hothouse.Views
 {
 	public class ItemDropView : View
 	{

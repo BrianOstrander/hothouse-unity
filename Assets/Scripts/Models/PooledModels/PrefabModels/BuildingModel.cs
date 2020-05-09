@@ -1,10 +1,10 @@
 using System;
 using Lunra.Core;
+using Lunra.Hothouse.Models.AgentModels;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
-using Lunra.WildVacuum.Models.AgentModels;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public class BuildingModel : PrefabModel
 	{

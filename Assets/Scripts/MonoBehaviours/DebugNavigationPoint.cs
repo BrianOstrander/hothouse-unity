@@ -2,13 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Hothouse.Services;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
-using Lunra.WildVacuum.Services;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Lunra.WildVacuum.Debugging
+namespace Lunra.Hothouse.Debugging
 {
 	public class DebugNavigationPoint : MonoBehaviour
 	{

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Lunra.Core;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public struct Item
 	{

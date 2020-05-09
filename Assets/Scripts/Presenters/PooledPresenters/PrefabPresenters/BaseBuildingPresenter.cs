@@ -1,11 +1,11 @@
 using System.Linq;
 using Lunra.Core;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
-using Lunra.WildVacuum.Views;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
+using Lunra.Hothouse.Views;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public abstract class BaseBuildingPresenter<M, V> : PrefabPresenter<M, V>
 		where M : BuildingModel

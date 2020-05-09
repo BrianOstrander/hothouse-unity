@@ -1,7 +1,7 @@
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
     public class DoorPrefabModel : PrefabModel
     {

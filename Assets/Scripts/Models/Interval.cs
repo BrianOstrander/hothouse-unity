@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Lunra.NumberDemon;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public struct Interval
 	{

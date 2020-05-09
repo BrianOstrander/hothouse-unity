@@ -1,9 +1,9 @@
 using System;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Ai
+namespace Lunra.Hothouse.Ai
 {
 	public class DwellerAttackState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>

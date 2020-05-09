@@ -4,10 +4,10 @@ using UnityEngine;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
-using Lunra.WildVacuum.Models;
 using Lunra.Core;
+using Lunra.Hothouse.Models;
 
-namespace Lunra.WildVacuum.Services
+namespace Lunra.Hothouse.Services
 {
 	public class InitializePayload : IStatePayload
 	{

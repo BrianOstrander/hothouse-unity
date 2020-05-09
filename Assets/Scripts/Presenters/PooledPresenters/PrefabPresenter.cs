@@ -1,8 +1,8 @@
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Views;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 { 
 	public abstract class PrefabPresenter<M, V> : PooledPresenter<M, V>
 		where M : PrefabModel

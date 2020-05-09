@@ -1,8 +1,8 @@
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Views;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class WorldCameraPresenter : Presenter<WorldCameraView>
 	{

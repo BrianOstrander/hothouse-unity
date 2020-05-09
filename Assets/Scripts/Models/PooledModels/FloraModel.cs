@@ -4,7 +4,7 @@ using Lunra.NumberDemon;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public class FloraModel : PooledModel
 	{

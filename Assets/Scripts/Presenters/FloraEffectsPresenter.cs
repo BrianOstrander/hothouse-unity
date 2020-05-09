@@ -1,11 +1,11 @@
 using System;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Presenters;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Views;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class FloraEffectsPresenter : Presenter<FloraEffectsView>
 	{

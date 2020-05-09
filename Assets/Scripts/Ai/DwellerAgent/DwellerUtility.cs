@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Lunra.Hothouse.Models;
 using UnityEngine;
 using UnityEngine.AI;
-using Lunra.WildVacuum.Models;
 
-namespace Lunra.WildVacuum.Ai
+namespace Lunra.Hothouse.Ai
 {
 	public static class DwellerUtility
 	{

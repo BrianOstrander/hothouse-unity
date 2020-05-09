@@ -1,11 +1,11 @@
 ﻿using System;
+using Lunra.Hothouse.Ai;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
-using Lunra.WildVacuum.Ai;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Views;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public abstract class AgentPresenter<M, V, S> : PooledPresenter<M, V>
 		where M : AgentModel

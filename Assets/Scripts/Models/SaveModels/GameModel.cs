@@ -1,11 +1,11 @@
 ﻿using System;
 using Lunra.Core;
+using Lunra.Hothouse.Models.AgentModels;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
-using Lunra.WildVacuum.Models.AgentModels;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	/// <summary>
 	/// All data that is serialized about the game.

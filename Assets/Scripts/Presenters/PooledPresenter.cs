@@ -1,10 +1,10 @@
 using System;
+using Lunra.Hothouse.Models;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
-using Lunra.WildVacuum.Models;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class PooledPresenter<M, V> : Presenter<V>
 		where M : PooledModel

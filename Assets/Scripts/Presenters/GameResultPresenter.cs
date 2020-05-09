@@ -1,13 +1,13 @@
 using System.Linq;
 using Lunra.Core;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
+using Lunra.Hothouse.Services;
+using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
-using Lunra.WildVacuum.Services;
-using Lunra.WildVacuum.Views;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class GameResultPresenter : Presenter<GameResultView>
 	{

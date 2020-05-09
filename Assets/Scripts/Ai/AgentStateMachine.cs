@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Lunra.WildVacuum.Models;
+using Lunra.Hothouse.Models;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Ai
+namespace Lunra.Hothouse.Ai
 {
 	public abstract class AgentStateMachine<W, A>
 		where A : AgentModel

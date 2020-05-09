@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public abstract class AgentModel : PooledModel
 	{

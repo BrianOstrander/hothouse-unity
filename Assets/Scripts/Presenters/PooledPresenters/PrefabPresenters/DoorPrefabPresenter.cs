@@ -1,8 +1,8 @@
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Views;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class DoorPrefabPresenter : PrefabPresenter<DoorPrefabModel, DoorPrefabView>
 	{

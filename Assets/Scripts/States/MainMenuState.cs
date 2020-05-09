@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Lunra.Core;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Services
+namespace Lunra.Hothouse.Services
 {
 	public class MainMenuPayload : IStatePayload
 	{

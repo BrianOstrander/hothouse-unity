@@ -1,4 +1,4 @@
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public enum Desires
 	{

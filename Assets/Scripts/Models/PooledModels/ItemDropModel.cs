@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
-using Lunra.WildVacuum.Models.AgentModels;
+using Lunra.Hothouse.Models.AgentModels;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public class ItemDropModel : PooledModel
 	{

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp.Presenters;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Views;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class FloraPresenter : PooledPresenter<FloraModel, FloraView>
 	{

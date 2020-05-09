@@ -1,7 +1,7 @@
 ﻿using Lunra.StyxMvp;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Views
+namespace Lunra.Hothouse.Views
 {
 	public class WorldCameraView : View
 	{

@@ -1,9 +1,9 @@
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 using UnityEngine.AI;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
 
-namespace Lunra.WildVacuum.Ai
+namespace Lunra.Hothouse.Ai
 {
 	public class DwellerNavigationForcedTransition<S> : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>

@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Views
+namespace Lunra.Hothouse.Views
 {
 	public class BuildingView : PrefabView
 	{

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
 
-namespace Lunra.WildVacuum.Ai
+namespace Lunra.Hothouse.Ai
 {
 	public class DwellerStateMachine : AgentStateMachine<GameModel, DwellerModel>
 	{

@@ -3,11 +3,11 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
-using Lunra.WildVacuum.Presenters;
+using Lunra.Hothouse.Presenters;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Lunra.WildVacuum.Models
+namespace Lunra.Hothouse.Models
 {
 	public class BasePoolModel<M> : Model
 		where M : PooledModel, new()

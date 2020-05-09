@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Lunra.WildVacuum.Views
+namespace Lunra.Hothouse.Views
 {
 	public class RoomPrefabView : PrefabView
 	{

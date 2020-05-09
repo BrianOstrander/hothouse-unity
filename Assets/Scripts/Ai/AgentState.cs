@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Lunra.WildVacuum.Models;
+using Lunra.Hothouse.Models;
 
-namespace Lunra.WildVacuum.Ai
+namespace Lunra.Hothouse.Ai
 {
     public abstract class AgentState<W, A>
         where A : AgentModel

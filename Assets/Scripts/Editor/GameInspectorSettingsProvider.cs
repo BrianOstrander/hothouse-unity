@@ -4,11 +4,11 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Lunra.WildVacuum.Editor
+namespace Lunra.Hothouse.Editor
 {
 	public static class GameInspectionSettings
 	{
-		const string KeyPrefix = "Lunra.WildVacuum.GameInspectionSettings.";
+		const string KeyPrefix = "Lunra.Hothouse.GameInspectionSettings.";
 
 		public static EditorPrefsBool IsInspecting = new EditorPrefsBool(KeyPrefix + "IsInspecting");
 		public static EditorPrefsBool IsInspectingBuildings = new EditorPrefsBool(KeyPrefix + "IsInspectingBuildings");

@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Models.AgentModels;
 using UnityEngine.AI;
 
-namespace Lunra.WildVacuum.Ai
+namespace Lunra.Hothouse.Ai
 {
 	public class DwellerClearFloraJobState : DwellerJobState<DwellerClearFloraJobState>
 	{

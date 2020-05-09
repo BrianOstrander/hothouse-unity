@@ -1,7 +1,7 @@
-using Lunra.WildVacuum.Models;
-using Lunra.WildVacuum.Views;
+using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 
-namespace Lunra.WildVacuum.Presenters
+namespace Lunra.Hothouse.Presenters
 {
 	public class RoomPrefabPresenter : PrefabPresenter<RoomPrefabModel, RoomPrefabView>
 	{
