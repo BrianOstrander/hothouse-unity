@@ -200,6 +200,19 @@ namespace Lunra.Hothouse.Models
 		
 		public int this[Item.Types type] => GetCurrent(type);
 
+		public int GetSharedMinimumCapacity(params Item.Types[] types)
+		{
+			var minimumMaximum = int.MaxValue;
+			var total = 0;
+			foreach (var type in types)
+			{
+				minimumMaximum = Mathf.Min(GetMaximum(type), minimumMaximum);
+				total += this[type];
+			}
+
+			return minimumMaximum - total;
+		}
+		
 		public override string ToString()
 		{
 			var result = "[";

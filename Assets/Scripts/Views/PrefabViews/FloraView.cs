@@ -28,9 +28,9 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
-		public void Highlight() => SetColor(color => color.NewH(0.55f));
-		public void Select() => SetColor(color => color.NewH(0.85f));
-		public void Deselect() => SetColor(color => color.NewH(0.35f));
+		public void Highlight() => SetColor(color => color.NewV(0.5f));
+		public void Select() => SetColor(color => color.NewV(0.75f));
+		public void Deselect() => SetColor(color => color.NewV(1f));
 		#endregion
 		
 		#region Reverse Bindings

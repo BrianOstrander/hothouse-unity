@@ -21,7 +21,7 @@ namespace Lunra.Hothouse.Ai
 
 		int cleanupCount;
 
-		public void ResetCleanupCount() => cleanupCount = CleanupCountTimeout;
+		public void ResetCleanupCount() => cleanupCount = validItems?.Length ?? CleanupCountTimeout;
 		
 		public DwellerItemCleanupState(
 			Jobs[] validJobs,

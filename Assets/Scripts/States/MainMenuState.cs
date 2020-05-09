@@ -225,7 +225,7 @@ namespace Lunra.Hothouse.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = jobPriority;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.1f);
+				dweller.JobShift.Value = DayTimeFrame.Maximum;// new DayTimeFrame(0.0f, 0.1f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -349,8 +349,8 @@ namespace Lunra.Hothouse.Services
 					"wagon_0",
 					new Vector3(0f, -0.8386866f, 4f),
 					Inventory.Populate(
-						type => 10,
-						type => type == Item.Types.Rations ? 5 : 0
+						type => 100,
+						type => type == Item.Types.Rations ? 0 : 0
 					),
 					new DesireQuality(
 						Desires.Eat, 
@@ -365,6 +365,7 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 
+			/*
 			game.ItemDrops.Activate(
 				m =>
 				{
@@ -379,6 +380,7 @@ namespace Lunra.Hothouse.Services
 				}
 			);
 			
+			*/
 			game.ItemDrops.Activate(
 				m =>
 				{
@@ -387,7 +389,7 @@ namespace Lunra.Hothouse.Services
 					m.Inventory.Value = Inventory.Populate(
 						new Dictionary<Item.Types, int>
 						{
-							{ Item.Types.Stalks, 1 }
+							{ Item.Types.Rations, 1 }
 						}
 					);
 				}
@@ -401,7 +403,7 @@ namespace Lunra.Hothouse.Services
 					m.Inventory.Value = Inventory.Populate(
 						new Dictionary<Item.Types, int>
 						{
-							{ Item.Types.Stalks, 1 }
+							{ Item.Types.Rations, 1 }
 						}
 					);
 				}

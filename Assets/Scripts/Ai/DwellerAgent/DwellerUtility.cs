@@ -55,6 +55,6 @@ namespace Lunra.Hothouse.Ai
 			entrancePosition = entranceResult;
 			
 			return result;
-		}
+		} 
 	}
 }
