@@ -114,7 +114,7 @@ namespace Lunra.Hothouse.Ai
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
 						Inventory.Populate(itemsToTransfer),
-						Agent.UnloadCooldown.Value
+						Agent.DepositCooldown.Value
 					)
 				);
 
@@ -204,7 +204,7 @@ namespace Lunra.Hothouse.Ai
 						i => target.Inventory.Value = i,
 						() => target.Inventory.Value,
 						Inventory.Populate(itemsToTransfer),
-						Agent.LoadCooldown.Value
+						Agent.WithdrawalCooldown.Value
 					)
 				);
 			}

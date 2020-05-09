@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
@@ -127,11 +128,24 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 
+			var fastFloraPrefabIds = new string[]
+			{
+				"fast0",
+				"fast1"
+			};
+			
+			var edibleFloraPrefabIds = new string[]
+			{
+				"edible0"
+			};
+			
 			void initializeFlora(
 				FloraModel flora,
-				Vector3 position
+				Vector3 position,
+				FloraSpecies species
 			)
 			{
+				flora.Species.Value = species;
 				flora.RoomId.Value = room0.Id.Value;
 				flora.Position.Value = position;
 				flora.Rotation.Value = Quaternion.identity;
@@ -142,66 +156,78 @@ namespace Lunra.Hothouse.Services
 				flora.HealthMaximum.Value = 100f;
 				flora.Health.Value = flora.HealthMaximum.Value;
 
-				if (flora.PrefabId.Value == "food")
+				switch (species)
 				{
-					flora.ReproductionElapsed.Value = Interval.WithMaximum(10f);
-					flora.ItemDrops.Value = Inventory.Populate(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Rations, 1 }
-						}
-					);
+					case FloraSpecies.Fast:
+						flora.SpreadDamage.Value = 50f;
+						flora.ValidPrefabIds.Value = fastFloraPrefabIds;
+						flora.ReproductionElapsed.Value = Interval.WithMaximum(2f);
+						flora.ItemDrops.Value = Inventory.Populate(
+							new Dictionary<Item.Types, int>
+							{
+								{ Item.Types.Stalks, 1 }
+							}
+						);
+						break;
+					case FloraSpecies.Edible:
+						flora.SpreadDamage.Value = 0f;
+						flora.ValidPrefabIds.Value = edibleFloraPrefabIds;
+						flora.ReproductionElapsed.Value = Interval.WithMaximum(10f);
+						flora.ItemDrops.Value = Inventory.Populate(
+							new Dictionary<Item.Types, int>
+							{
+								{ Item.Types.Rations, 1 }
+							}
+						);
+						break;
+					default:
+						Debug.LogError("Unrecognized species: "+species);
+						break;
 				}
-				else
-				{
-					flora.ReproductionElapsed.Value = Interval.WithMaximum(2f);
-					flora.ItemDrops.Value = Inventory.Populate(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Stalks, 1 }
-						}
-					);
-				}
-				
 			}
 			
 			game.Flora.Activate(
-				"fast",
+				fastFloraPrefabIds.First(),
 				flora => initializeFlora(
 					flora,
-					new Vector3(7f, 0f, -5f)
+					new Vector3(7f, 0f, -5f),
+					FloraSpecies.Fast
 				)
 			);
 			
 			game.Flora.Activate(
-				"fast",
+				fastFloraPrefabIds.First(),
 				flora => initializeFlora(
 					flora,
-					new Vector3(10f, 0f, -5f)
+					new Vector3(10f, 0f, -5f),
+					FloraSpecies.Fast
 				)
 			);
 			
 			game.Flora.Activate(
-				"fast",
+				fastFloraPrefabIds.First(),
 				flora => initializeFlora(
 					flora,
-					new Vector3(4f, 0f, -5f)
+					new Vector3(4f, 0f, -5f),
+					FloraSpecies.Fast
 				)
 			);
 			
 			game.Flora.Activate(
-				"food",
+				edibleFloraPrefabIds.First(),
 				flora => initializeFlora(
 					flora,
-					new Vector3(-4f, 0f, -5f)
+					new Vector3(-4f, 0f, -5f),
+					FloraSpecies.Edible
 				)
 			);
 			
 			game.Flora.Activate(
-				"food",
+				edibleFloraPrefabIds.First(),
 				flora => initializeFlora(
 					flora,
-					new Vector3(-6f, 0f, -5f)
+					new Vector3(-6f, 0f, -5f),
+					FloraSpecies.Edible
 				)
 			);
 			
@@ -214,7 +240,6 @@ namespace Lunra.Hothouse.Services
 				string id,
 				Vector3 position,
 				Jobs job = Jobs.None,
-				int jobPriority = 0,
 				Desires desire = Desires.None,
 				bool debugAgentStates = false
 			)
@@ -224,7 +249,7 @@ namespace Lunra.Hothouse.Services
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
-				dweller.JobPriority.Value = jobPriority;
+				dweller.JobPriority.Value = game.Dwellers.AllActive.Length;
 				dweller.JobShift.Value = DayTimeFrame.Maximum;// new DayTimeFrame(0.0f, 0.1f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
@@ -235,21 +260,21 @@ namespace Lunra.Hothouse.Services
 				dweller.HealthMaximum.Value = 100f;
 				dweller.Health.Value = dweller.HealthMaximum.Value;
 
-				dweller.LoadCooldown.Value = 0.5f;
-				dweller.UnloadCooldown.Value = dweller.LoadCooldown.Value;
-				dweller.Inventory.Value = Inventory.Populate(
-					type => 2,
-					type => type == Item.Types.Stalks ? 1 : 0
-				);
-				
-				// dweller.Inventory.Value = Inventory.PopulateMaximum(
-				// 	new Dictionary<Item.Types, int>
-				// 	{
-				// 		{ Item.Types.Stalks, 2 },
-				// 		{ Item.Types.Rations, 2 },
-				// 		{ Item.Types.Scrap, 2 }
-				// 	}
+				dweller.WithdrawalCooldown.Value = 0.5f;
+				dweller.DepositCooldown.Value = dweller.WithdrawalCooldown.Value;
+				// dweller.Inventory.Value = Inventory.Populate(
+				// 	type => 2,
+				// 	type => type == Item.Types.Stalks ? 1 : 0
 				// );
+				
+				dweller.Inventory.Value = Inventory.PopulateMaximum(
+					new Dictionary<Item.Types, int>
+					{
+						{ Item.Types.Stalks, 2 },
+						{ Item.Types.Rations, 2 },
+						{ Item.Types.Scrap, 2 }
+					}
+				);
 				
 				dweller.DesireDamage.Value = new Dictionary<Desires, float>
 				{
@@ -263,19 +288,16 @@ namespace Lunra.Hothouse.Services
 					dweller,
 					"0",
 					new Vector3(-12f, -0.8386866f, 3f),
-					Jobs.ClearFlora,
-					0
+					Jobs.ClearFlora
 				)
 			);
 			
-			/*
 			game.Dwellers.Activate(
 				dweller => initializeDweller(
 					dweller,
 					"1",
 					new Vector3(-11f, -0.8386866f, 3f),
-					Jobs.ClearFlora,
-					0
+					Jobs.ClearFlora
 				)
 			);
 			
@@ -284,8 +306,7 @@ namespace Lunra.Hothouse.Services
 					dweller,
 					"2",
 					new Vector3(-10f, -0.8386866f, 3f),
-					Jobs.ClearFlora,
-					0
+					Jobs.ClearFlora
 				)
 			);
 			
@@ -294,8 +315,7 @@ namespace Lunra.Hothouse.Services
 					dweller,
 					"3",
 					new Vector3(-9f, -0.8386866f, 3f),
-					Jobs.ClearFlora,
-					0
+					Jobs.ClearFlora
 				)
 			);
 			
@@ -308,7 +328,6 @@ namespace Lunra.Hothouse.Services
 					0
 				)
 			);
-			*/
 
 			void initializeBuilding(
 				BuildingModel model,

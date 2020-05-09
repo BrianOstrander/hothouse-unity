@@ -74,9 +74,15 @@ namespace Lunra.Hothouse.Ai
 
 			cooldownElapsed = cooldownElapsed % target.TransferCooldown;
 
-			var nextToUnload = target.ItemsToTransfer.Current.First(
-				i => 0 < i.Count && 0 < target.GetDestination().GetCapacity(i.Type)
+			var nextToUnload = target.ItemsToTransfer.Current.FirstOrDefault(
+				i => 0 < i.Count && target.GetSource().Any(i.Type) && 0 < target.GetDestination().GetCapacity(i.Type)
 			).Type;
+
+			if (nextToUnload == Item.Types.Unknown)
+			{
+				target = target.NewItemsToUnload(Inventory.Empty);
+				return;
+			}
 
 			target.SetDestination(target.GetDestination().Add(1, nextToUnload));
 			target.SetSource(target.GetSource().Subtract(1, nextToUnload));

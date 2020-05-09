@@ -72,8 +72,6 @@ namespace Lunra.Hothouse.Presenters
 				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Game.SimulationDelta);
 				return;
 			}
-
-			if (250 < Game.Flora.AllActive.Length) return;
 			
 			TryReproducing();
 		}
@@ -130,7 +128,7 @@ namespace Lunra.Hothouse.Presenters
 
 			var randomPosition = Model.Position.Value + (Random.insideUnitSphere.NewY(0f).normalized * Model.ReproductionRadius.Value.Evaluate(DemonUtility.NextFloat));
 
-			var reproductionFailed = true;
+			var increaseReproductionFailures = true;
 			
 			if (NavMesh.SamplePosition(randomPosition, out var hit, Model.ReproductionRadius.Value.Delta, NavMesh.AllAreas))
 			{
@@ -141,12 +139,14 @@ namespace Lunra.Hothouse.Presenters
 					{
 						if (Game.Dwellers.AllActive.None(d => Vector3.Distance(d.Position.Value, hit.position) < Model.ReproductionRadius.Value.Minimum))
 						{
-							reproductionFailed = false;
+							increaseReproductionFailures = false;
 
 							Game.Flora.Activate(
-								Model.PrefabId.Value,
+								Model.ValidPrefabIds.Value.Random(),
 								newFlora =>
 								{
+									newFlora.ValidPrefabIds.Value = Model.ValidPrefabIds.Value;
+									newFlora.Species.Value = Model.Species.Value;
 									newFlora.RoomId.Value = Model.RoomId.Value;
 									newFlora.Position.Value = hit.position;
 									newFlora.Rotation.Value = Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
@@ -155,6 +155,7 @@ namespace Lunra.Hothouse.Presenters
 									newFlora.ReproductionRadius.Value = Model.ReproductionRadius.Value;
 									newFlora.ReproductionFailures.Value = 0;
 									newFlora.ReproductionFailureLimit.Value = Model.ReproductionFailureLimit.Value;
+									newFlora.SpreadDamage.Value = Model.SpreadDamage.Value;
 									newFlora.HealthMaximum.Value = Model.HealthMaximum.Value;
 									newFlora.Health.Value = Model.HealthMaximum.Value;
 									newFlora.MarkedForClearing.Value = false;
@@ -172,7 +173,27 @@ namespace Lunra.Hothouse.Presenters
 				}
 			}
 
-			if (reproductionFailed) Model.ReproductionFailures.Value++;
+			if (increaseReproductionFailures && 0f < Model.SpreadDamage.Value)
+			{
+				var nearestFloraOfDifferentSpecies = Game.Flora.AllActive
+					.Where(
+						f =>
+						{
+							if (f.Species.Value == Model.Species.Value) return false;
+							return Vector3.Distance(f.Position.Value, Model.Position.Value) < Model.ReproductionRadius.Value.Maximum;
+						}
+					)
+					.OrderBy(f => Vector3.Distance(f.Position.Value, Model.Position.Value))
+					.FirstOrDefault();
+				
+				if (nearestFloraOfDifferentSpecies != null)
+				{
+					nearestFloraOfDifferentSpecies.Health.Value = Mathf.Max(0f, nearestFloraOfDifferentSpecies.Health.Value - Model.SpreadDamage.Value);
+					increaseReproductionFailures = false;
+				}
+			}
+			
+			if (increaseReproductionFailures) Model.ReproductionFailures.Value++;
 			
 			Model.ReproductionElapsed.Value = Interval.WithMaximum(Model.ReproductionElapsed.Value.Maximum);
 		}

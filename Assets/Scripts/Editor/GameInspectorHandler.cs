@@ -102,7 +102,16 @@ namespace Lunra.Editor.Core
 							break;
 					}
 				}
-				
+			}
+
+			if (GameInspectionSettings.IsInspectingFlora.Value)
+			{
+				foreach (var model in current.Payload.Game.Flora.AllActive)
+				{
+					if (model.IsReproducing.Value) continue;
+					Handles.color = Color.red;
+					Handles.DrawWireCube(model.Position.Value, Vector3.one);
+				}
 			}
 		}
 

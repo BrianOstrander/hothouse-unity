@@ -13,6 +13,7 @@ namespace Lunra.Hothouse.Editor
 		public static EditorPrefsBool IsInspecting = new EditorPrefsBool(KeyPrefix + "IsInspecting");
 		public static EditorPrefsBool IsInspectingBuildings = new EditorPrefsBool(KeyPrefix + "IsInspectingBuildings");
 		public static EditorPrefsBool IsInspectingDwellers = new EditorPrefsBool(KeyPrefix + "IsInspectingDwellers");
+		public static EditorPrefsBool IsInspectingFlora = new EditorPrefsBool(KeyPrefix + "IsInspectingFlora");
 	}
 	
 	public class GameInspectorSettingsProvider : SettingsProvider
@@ -24,6 +25,7 @@ namespace Lunra.Hothouse.Editor
 			GameInspectionSettings.IsInspecting.Draw();
 			GameInspectionSettings.IsInspectingBuildings.Draw();
 			GameInspectionSettings.IsInspectingDwellers.Draw();
+			GameInspectionSettings.IsInspectingFlora.Draw();
 		}
 
 		[SettingsProvider]
@@ -35,7 +37,8 @@ namespace Lunra.Hothouse.Editor
 			{
 				GameInspectionSettings.IsInspecting.LabelName,
 				GameInspectionSettings.IsInspectingBuildings.LabelName,
-				GameInspectionSettings.IsInspectingDwellers.LabelName
+				GameInspectionSettings.IsInspectingDwellers.LabelName,
+				GameInspectionSettings.IsInspectingFlora.LabelName
 			};
 			
 			return provider;

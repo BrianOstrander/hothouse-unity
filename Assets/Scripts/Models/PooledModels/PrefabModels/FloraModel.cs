@@ -9,6 +9,12 @@ namespace Lunra.Hothouse.Models
 	public class FloraModel : PrefabModel
 	{
 		#region Serialized
+		[JsonProperty] string[] validPrefabIds = new string[0];
+		[JsonIgnore] public readonly ListenerProperty<string[]> ValidPrefabIds;
+		
+		[JsonProperty] FloraSpecies species;
+		[JsonIgnore] public readonly ListenerProperty<FloraSpecies> Species;
+
 		[JsonProperty] Interval age;
 		[JsonIgnore] public readonly ListenerProperty<Interval> Age;
 
@@ -27,6 +33,9 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
 		[JsonIgnore] public readonly ListenerProperty<SelectionStates> SelectionState;
 
+		[JsonProperty] float spreadDamage;
+		[JsonIgnore] public readonly ListenerProperty<float> SpreadDamage;
+		
 		[JsonProperty] float health;
 		[JsonIgnore] public readonly ListenerProperty<float> Health;
 		
@@ -47,12 +56,15 @@ namespace Lunra.Hothouse.Models
 		
 		public FloraModel()
 		{
+			ValidPrefabIds = new ListenerProperty<string[]>(value => validPrefabIds = value, () => validPrefabIds);
+			Species = new ListenerProperty<FloraSpecies>(value => species = value, () => species);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);
 			ReproductionFailures = new ListenerProperty<int>(value => reproductionFailures = value, () => reproductionFailures);
 			ReproductionFailureLimit = new ListenerProperty<int>(value => reproductionFailureLimit = value, () => reproductionFailureLimit);
 			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
+			SpreadDamage = new ListenerProperty<float>(value => spreadDamage = value, () => spreadDamage);
 			Health = new ListenerProperty<float>(value => health = value, () => health);
 			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
 			MarkedForClearing = new ListenerProperty<bool>(value => markedForClearing = value, () => markedForClearing);
