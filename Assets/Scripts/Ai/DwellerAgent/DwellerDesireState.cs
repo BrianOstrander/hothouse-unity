@@ -88,6 +88,16 @@ namespace Lunra.WildVacuum.Ai
 			public ToIdleOnShiftBegin(DwellerDesireState<S> desireState) => this.desireState = desireState; 
 			
 			public override bool IsTriggered() => Agent.JobShift.Value.Contains(World.SimulationTime.Value);
+
+			public override void Transition()
+			{
+				if (Agent.GetDesireDamage(desireState.Desire, out var damage))
+				{
+					Agent.Health.Value = Mathf.Max(0f, Agent.Health.Value - damage);
+				}
+
+				Agent.Desire.Value = Desires.None;
+			}
 		}
 		
 		protected class ToTimeoutForDesire : AgentTransition<DwellerTimeoutState<S>, GameModel, DwellerModel>

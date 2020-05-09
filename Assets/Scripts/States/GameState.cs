@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.StyxMvp;
+using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
 using Lunra.WildVacuum.Models;
 using Lunra.WildVacuum.Models.AgentModels;
 using Lunra.WildVacuum.Presenters;
+using Lunra.WildVacuum.Views;
 using UnityEngine;
 
 namespace Lunra.WildVacuum.Services
@@ -73,6 +75,9 @@ namespace Lunra.WildVacuum.Services
 		void OnBeginInitializePresenters(Action done)
 		{
 			Payload.Game.FloraEffects.IsEnabled.Value = true;
+
+			new GameResultPresenter(Payload.Game, Payload.Preferences);
+			new GenericPresenter<EventSystemView>().Show();
 			
 			new WorldCameraPresenter(Payload.Game);
 			new SelectionPresenter(Payload.Game);

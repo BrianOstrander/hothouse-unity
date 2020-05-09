@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Lunra.WildVacuum.Models.AgentModels
 {
@@ -18,6 +20,9 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		
 		[JsonProperty] Desires desire;
 		[JsonIgnore] public readonly ListenerProperty<Desires> Desire;
+		
+		[JsonProperty] Dictionary<Desires, float> desireDamage = new Dictionary<Desires, float>();
+		[JsonIgnore] public readonly ListenerProperty<Dictionary<Desires, float>> DesireDamage;
 		
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
@@ -41,12 +46,21 @@ namespace Lunra.WildVacuum.Models.AgentModels
 		#region Non Serialized
 		#endregion
 
+		public bool GetDesireDamage(Desires desire, out float damage)
+		{
+			if (!DesireDamage.Value.TryGetValue(desire, out damage)) damage = 0f;
+			else damage *= HealthMaximum.Value;
+
+			return !Mathf.Approximately(0f, damage);
+		}
+		
 		public DwellerModel()
 		{
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobPriority = new ListenerProperty<int>(value => jobPriority = value, () => jobPriority);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
 			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);
+			DesireDamage = new ListenerProperty<Dictionary<Desires, float>>(value => desireDamage = value, () => desireDamage);
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);

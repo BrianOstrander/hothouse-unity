@@ -207,6 +207,12 @@ namespace Lunra.WildVacuum.Services
 						{ Item.Types.Stalks, 2 }
 					}
 				);
+				
+				dweller.DesireDamage.Value = new Dictionary<Desires, float>
+				{
+					{ Desires.Eat , 0.3f },
+					{ Desires.Sleep , 0.1f }
+				};
 			}
 			
 			game.Dwellers.Activate(
@@ -233,6 +239,7 @@ namespace Lunra.WildVacuum.Services
 				model.DesireQuality.Value = desireQualities;
 			}
 
+			/*
 			game.Buildings.Activate(
 				"debug",
 				m => initializeBuilding(
@@ -243,6 +250,7 @@ namespace Lunra.WildVacuum.Services
 					DesireQuality.New(Desires.Sleep, 1f)
 				)
 			);
+			*/
 
 			game.Buildings.Activate(
 				"debug",
@@ -259,6 +267,7 @@ namespace Lunra.WildVacuum.Services
 				)
 			);
 			
+			/*
 			game.Buildings.Activate(
 				"debug",
 				m => initializeBuilding(
@@ -283,6 +292,7 @@ namespace Lunra.WildVacuum.Services
 					)
 				)
 			);
+			*/
 			
 			game.Buildings.Activate(
 				"default_wagon",
