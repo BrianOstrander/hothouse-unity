@@ -14,6 +14,7 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			InstantiateJob<DwellerClearFloraJobState>();
+			InstantiateJob<DwellerConstructionJobState>();
 			InstantiateDesire<DwellerSleepDesireState>();
 			InstantiateDesire<DwellerEatDesireState>();
 		}
@@ -31,7 +32,6 @@ namespace Lunra.Hothouse.Ai
 		{
 			var state = new S();
 			AddChildStates(state);
-			// AddTransitions(state.GetToDesireOnShiftEnd);
 			AddTransitions(new DwellerDesireState<S>.ToDesireOnShiftEnd(state));
 		}
 	}

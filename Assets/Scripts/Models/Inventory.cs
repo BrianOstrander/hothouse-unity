@@ -173,6 +173,17 @@ namespace Lunra.Hothouse.Models
 
 		public bool IsNonZeroMaximumFull(Item.Types type) => 0 < GetMaximum(type) && IsFull(type);
 
+		public bool IsAllNonZeroMaximumFull()
+		{
+			foreach (var maximum in Maximum)
+			{
+				if (maximum.Count == 0) continue;
+				if (this[maximum.Type] != maximum.Count) return false;
+			}
+
+			return true;
+		}
+
 		public bool IsNoneFull() => !IsAnyFull();
 		
 		public bool IsAnyFull()

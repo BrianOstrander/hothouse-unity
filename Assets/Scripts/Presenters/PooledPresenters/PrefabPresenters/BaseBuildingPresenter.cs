@@ -25,6 +25,7 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			Model.Inventory.Changed += OnBuildingInventory;
+			Model.ConstructionRecipe.Changed += OnBuildingConstructionRecipe;
 			Model.Operate += OnBuildingOperate;
 		}
 
@@ -33,6 +34,7 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 
 			Model.Inventory.Changed -= OnBuildingInventory;
+			Model.ConstructionRecipe.Changed -= OnBuildingConstructionRecipe;
 			Model.Operate -= OnBuildingOperate;
 		}
 
@@ -55,6 +57,21 @@ namespace Lunra.Hothouse.Presenters
 			).ToArray(); // Has to call ToArray otherwise anyChanged will never get called...
 			
 			if (anyChanged) Model.DesireQuality.Value = newDesireQuality;
+		}
+
+		void OnBuildingConstructionRecipe(Inventory constructionRecipe)
+		{
+			if (!constructionRecipe.IsAllNonZeroMaximumFull()) return;
+
+			switch (Model.BuildingState.Value)
+			{
+				case BuildingStates.Constructing:
+					Model.BuildingState.Value = BuildingStates.Operating;
+					break;
+				default:
+					Debug.LogError("Tried to fill construction recipe while building is in invalid state: "+Model.BuildingState.Value);
+					break;
+			}
 		}
 		
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)

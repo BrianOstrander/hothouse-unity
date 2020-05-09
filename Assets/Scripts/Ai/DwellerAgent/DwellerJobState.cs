@@ -156,7 +156,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				var target = DwellerUtility.CalculateNearestEntrance(
+				var target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
 					World.Buildings.AllActive,
 					b =>

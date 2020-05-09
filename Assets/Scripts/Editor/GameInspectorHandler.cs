@@ -51,6 +51,11 @@ namespace Lunra.Editor.Core
 				{
 					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
 
+					if (model.BuildingState.Value != BuildingStates.Operating)
+					{
+						label += "\nState: " + model.BuildingState.Value;
+					}
+					
 					label += GetInventory(model.Inventory.Value);
 					
 					if (model.DesireQuality.Value.Any())
@@ -67,6 +72,12 @@ namespace Lunra.Editor.Core
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
+
+					if (model.BuildingState.Value == BuildingStates.Constructing)
+					{
+						Handles.color = Color.yellow.NewA(0.2f);
+						Handles.DrawWireCube(model.Position.Value, Vector3.one);
+					}
 				}
 			}
 

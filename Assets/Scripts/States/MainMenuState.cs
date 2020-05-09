@@ -250,7 +250,7 @@ namespace Lunra.Hothouse.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = game.Dwellers.AllActive.Length;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.5f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -262,44 +262,56 @@ namespace Lunra.Hothouse.Services
 
 				dweller.WithdrawalCooldown.Value = 0.5f;
 				dweller.DepositCooldown.Value = dweller.WithdrawalCooldown.Value;
-				// dweller.Inventory.Value = Inventory.Populate(
-				// 	type => 2,
-				// 	type => type == Item.Types.Stalks ? 1 : 0
-				// );
-				
-				dweller.Inventory.Value = Inventory.PopulateMaximum(
-					new Dictionary<Item.Types, int>
-					{
-						{ Item.Types.Stalks, 2 },
-						{ Item.Types.Rations, 2 },
-						{ Item.Types.Scrap, 2 }
-					}
+				dweller.Inventory.Value = Inventory.Populate(
+					type => 2,
+					type => type == Item.Types.Stalks ? 2 : 0
 				);
+				
+				// dweller.Inventory.Value = Inventory.PopulateMaximum(
+				// 	new Dictionary<Item.Types, int>
+				// 	{
+				// 		{ Item.Types.Stalks, 2 },
+				// 		{ Item.Types.Rations, 2 },
+				// 		{ Item.Types.Scrap, 2 }
+				// 	}
+				// );
 				
 				dweller.DesireDamage.Value = new Dictionary<Desires, float>
 				{
 					{ Desires.Eat , 0.3f },
 					{ Desires.Sleep , 0.1f }
 				};
+				
+				dweller.InventoryPromise.Value = new InventoryPromise(
+					"sleep_0",
+					InventoryPromise.Operations.Construction,
+					Inventory.Populate(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 2 }	
+						}
+					)
+				);
 			}
-			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"0",
-					new Vector3(-12f, -0.8386866f, 3f),
-					Jobs.ClearFlora
-				)
-			);
 			
 			// game.Dwellers.Activate(
 			// 	dweller => initializeDweller(
 			// 		dweller,
-			// 		"1",
-			// 		new Vector3(-11f, -0.8386866f, 3f),
-			// 		Jobs.Construction
+			// 		"0",
+			// 		new Vector3(-12f, -0.8386866f, 3f),
+			// 		Jobs.ClearFlora
 			// 	)
 			// );
+			
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"1",
+					new Vector3(-11f, -0.8386866f, 3f),
+					Jobs.Construction,
+					debugAgentStates: true
+				)
+			);
 			
 			/*
 			game.Dwellers.Activate(
@@ -363,7 +375,7 @@ namespace Lunra.Hothouse.Services
 			sleepBuilding.ConstructionRecipe.Value = Inventory.PopulateMaximum(
 				new Dictionary<Item.Types, int>
 				{
-					{ Item.Types.Stalks, 5 }
+					{ Item.Types.Stalks, 2 }
 				}
 			);
 			

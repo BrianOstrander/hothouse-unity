@@ -9,6 +9,24 @@ namespace Lunra.Hothouse.Ai
 {
 	public static class DwellerUtility
 	{
+		public static M CalculateNearestOperatingEntrance<M>(
+			Vector3 beginPosition,
+			IEnumerable<M> buildings,
+			Func<M, bool> buildingPredicate,
+			out NavMeshPath path,
+			out Vector3 entrancePosition
+		)
+			where M : BuildingModel
+		{
+			return CalculateNearestEntrance(
+				beginPosition,
+				buildings,
+				b => b.BuildingState.Value == BuildingStates.Operating && buildingPredicate(b),
+				out path,
+				out entrancePosition
+			);
+		}
+
 		public static M CalculateNearestEntrance<M>(
 			Vector3 beginPosition,
 			IEnumerable<M> buildings,
@@ -20,9 +38,7 @@ namespace Lunra.Hothouse.Ai
 		{
 			var pathResult = new NavMeshPath();
 			var entranceResult = Vector3.zero;
-
-			// Debug.Log("nearest entrance buildings: "+buildings.Count());
-			
+	
 			var result = buildings
 				.Where(buildingPredicate)
 				.OrderBy(t => Vector3.Distance(beginPosition, t.Position.Value))

@@ -84,7 +84,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				target = DwellerUtility.CalculateNearestEntrance(
+				target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
 					World.Buildings.AllActive,
 					b =>
@@ -139,7 +139,7 @@ namespace Lunra.Hothouse.Ai
 				// If we get here, that means either all valid items are full, or there are some but we're not being
 				// blocked from dumping them... OUT OF DATE DESC
 				
-				target = DwellerUtility.CalculateNearestEntrance(
+				target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
 					World.Buildings.AllActive,
 					b =>
@@ -163,8 +163,8 @@ namespace Lunra.Hothouse.Ai
 		class ToWithdrawalItemsFromNearestItemDrop : AgentTransition<DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
 			DwellerItemCleanupState<S> sourceState;
-			ItemDropModel target;
 			DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState;
+			ItemDropModel target;
 
 			public ToWithdrawalItemsFromNearestItemDrop(
 				DwellerItemCleanupState<S> sourceState,
