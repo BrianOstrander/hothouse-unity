@@ -12,16 +12,16 @@ namespace Lunra.Hothouse.Ai
 	public class DwellerItemCleanupState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
-		const int UnloadCountTimeout = 1;
+		const int CleanupCountTimeout = 1;
 		
 		public override string Name => "ItemCleanup";
 
 		Jobs[] validJobs;
 		Item.Types[] validItems;
 
-		int unloadCount;
+		int cleanupCount;
 
-		public void ResetUnloadCount() => unloadCount = UnloadCountTimeout;
+		public void ResetCleanupCount() => cleanupCount = CleanupCountTimeout;
 		
 		public DwellerItemCleanupState(
 			Jobs[] validJobs,
@@ -31,7 +31,7 @@ namespace Lunra.Hothouse.Ai
 			this.validJobs = validJobs;
 			this.validItems = validItems;
 
-			ResetUnloadCount();
+			ResetCleanupCount();
 		}
 
 		public override void OnInitialize()
@@ -45,31 +45,31 @@ namespace Lunra.Hothouse.Ai
 			
 			AddTransitions(
 				new AgentTransitionFallthrough<S,GameModel,DwellerModel>(
-					"UnloadTimeout",
-					() => unloadCount <= 0
+					"CleanupTimeout",
+					() => cleanupCount <= 0
 				),
-				new ToUnloadItemsToNearestItemCache(
+				new ToDepositItemsInNearestBuilding(
 					this,	
 					transferItemsState
 				),
-				new ToLoadItemsFromNearestItemDrop(
+				new ToWithdrawalItemsFromNearestItemDrop(
 					this,
 					transferItemsState
 				),
 				new ToNavigateToNearestItemDrop(this),
-				new ToNavigateToNearestItemCache(this)
+				new ToNavigateToNearestBuilding(this)
 			);
 		}
 
-		public override void Idle() => unloadCount--;
+		public override void Idle() => cleanupCount--;
 
-		class ToUnloadItemsToNearestItemCache : AgentTransition<DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
+		class ToDepositItemsInNearestBuilding : AgentTransition<DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
 			DwellerItemCleanupState<S> sourceState;
 			DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState;
 			BuildingModel target;
 
-			public ToUnloadItemsToNearestItemCache(
+			public ToDepositItemsInNearestBuilding(
 				DwellerItemCleanupState<S> sourceState,
 				DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState
 			)
@@ -87,7 +87,11 @@ namespace Lunra.Hothouse.Ai
 				target = DwellerUtility.CalculateNearestEntrance(
 					Agent.Position.Value,
 					World.Buildings.AllActive,
-					b => currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i)),
+					b =>
+					{
+						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
+						return currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i));
+					},
 					out _,
 					out var entrancePosition
 				);
@@ -99,9 +103,9 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				var itemsToUnload = new Dictionary<Item.Types, int>();
+				var itemsToTransfer = new Dictionary<Item.Types, int>();
 				
-				foreach (var validItem in sourceState.validItems) itemsToUnload.Add(validItem, Agent.Inventory.Value[validItem]);
+				foreach (var validItem in sourceState.validItems) itemsToTransfer.Add(validItem, Agent.Inventory.Value[validItem]);
 				
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerItemCleanupState<S>>.Target(
@@ -109,22 +113,22 @@ namespace Lunra.Hothouse.Ai
 						() => target.Inventory.Value,
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
-						Inventory.Populate(itemsToUnload),
+						Inventory.Populate(itemsToTransfer),
 						Agent.UnloadCooldown.Value
 					)
 				);
 
-				sourceState.unloadCount--;
+				sourceState.cleanupCount--;
 			}
 		}
 		
-		class ToNavigateToNearestItemCache : AgentTransition<DwellerNavigateState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
+		class ToNavigateToNearestBuilding : AgentTransition<DwellerNavigateState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
 			DwellerItemCleanupState<S> sourceState;
 			BuildingModel target;
 			NavMeshPath targetPath = new NavMeshPath();
 			
-			public ToNavigateToNearestItemCache(DwellerItemCleanupState<S> sourceState) => this.sourceState = sourceState;
+			public ToNavigateToNearestBuilding(DwellerItemCleanupState<S> sourceState) => this.sourceState = sourceState;
 
 			public override bool IsTriggered()
 			{
@@ -138,7 +142,11 @@ namespace Lunra.Hothouse.Ai
 				target = DwellerUtility.CalculateNearestEntrance(
 					Agent.Position.Value,
 					World.Buildings.AllActive,
-					b => currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i)),
+					b =>
+					{
+						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
+						return currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i));
+					},
 					out targetPath,
 					out _
 				);
@@ -152,13 +160,13 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 		
-		class ToLoadItemsFromNearestItemDrop : AgentTransition<DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
+		class ToWithdrawalItemsFromNearestItemDrop : AgentTransition<DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
 			DwellerItemCleanupState<S> sourceState;
 			ItemDropModel target;
 			DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState;
 
-			public ToLoadItemsFromNearestItemDrop(
+			public ToWithdrawalItemsFromNearestItemDrop(
 				DwellerItemCleanupState<S> sourceState,
 				DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState
 			)
@@ -184,9 +192,9 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				var itemsToLoad = new Dictionary<Item.Types, int>();
+				var itemsToTransfer = new Dictionary<Item.Types, int>();
 				
-				foreach (var validItem in sourceState.validItems) itemsToLoad.Add(validItem, target.Inventory.Value[validItem]);
+				foreach (var validItem in sourceState.validItems) itemsToTransfer.Add(validItem, target.Inventory.Value[validItem]);
 				
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerItemCleanupState<S>>.Target(
@@ -194,7 +202,7 @@ namespace Lunra.Hothouse.Ai
 						() => Agent.Inventory.Value,
 						i => target.Inventory.Value = i,
 						() => target.Inventory.Value,
-						Inventory.Populate(itemsToLoad),
+						Inventory.Populate(itemsToTransfer),
 						Agent.LoadCooldown.Value
 					)
 				);

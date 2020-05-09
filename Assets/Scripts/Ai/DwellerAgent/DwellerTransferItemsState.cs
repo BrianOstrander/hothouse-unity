@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Ai
 			public readonly Action<Inventory> SetSource;
 			public readonly Func<Inventory> GetSource;
 			
-			public readonly Inventory ItemsToUnload;
+			public readonly Inventory ItemsToTransfer;
 			public readonly float TransferCooldown;
 
 			public Target(
@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Ai
 				Func<Inventory> getDestination,
 				Action<Inventory> setSource,
 				Func<Inventory> getSource,
-				Inventory itemsToUnload,
+				Inventory itemsToTransfer,
 				float transferCooldown
 			)
 			{
@@ -36,7 +36,7 @@ namespace Lunra.Hothouse.Ai
 				GetDestination = getDestination;
 				SetSource = setSource;
 				GetSource = getSource;
-				ItemsToUnload = itemsToUnload;
+				ItemsToTransfer = itemsToTransfer;
 				TransferCooldown = transferCooldown;
 			}
 
@@ -74,14 +74,14 @@ namespace Lunra.Hothouse.Ai
 
 			cooldownElapsed = cooldownElapsed % target.TransferCooldown;
 
-			var nextToUnload = target.ItemsToUnload.Current.First(
+			var nextToUnload = target.ItemsToTransfer.Current.First(
 				i => 0 < i.Count && 0 < target.GetDestination().GetCapacity(i.Type)
 			).Type;
 
 			target.SetDestination(target.GetDestination().Add(1, nextToUnload));
 			target.SetSource(target.GetSource().Subtract(1, nextToUnload));
 			
-			target = target.NewItemsToUnload(target.ItemsToUnload.Subtract(1, nextToUnload));
+			target = target.NewItemsToUnload(target.ItemsToTransfer.Subtract(1, nextToUnload));
 		}
 
 		public override void End()
@@ -96,7 +96,7 @@ namespace Lunra.Hothouse.Ai
 
 			public ToReturnOnAllItemsTransfered(DwellerTransferItemsState<S> sourceState) => this.sourceState = sourceState;
 			
-			public override bool IsTriggered() => sourceState.target.ItemsToUnload.IsEmpty;
+			public override bool IsTriggered() => sourceState.target.ItemsToTransfer.IsEmpty;
 		}
 		
 		class ToReturnOnDestinationAtCapacity : AgentTransition<S, GameModel, DwellerModel>
@@ -107,7 +107,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
-				return sourceState.target.ItemsToUnload.Current
+				return sourceState.target.ItemsToTransfer.Current
 					.Where(i => 0 < i.Count)
 					.None(i => 0 < sourceState.target.GetDestination().GetCapacity(i.Type));
 			}

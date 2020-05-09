@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class FloraPresenter : PooledPresenter<FloraModel, FloraView>
+	public class FloraPresenter : PrefabPresenter<FloraModel, FloraView>
 	{
 		public FloraPresenter(GameModel game, FloraModel model) : base(game, model) { }
 
@@ -144,6 +144,7 @@ namespace Lunra.Hothouse.Presenters
 							reproductionFailed = false;
 
 							Game.Flora.Activate(
+								Model.PrefabId.Value,
 								newFlora =>
 								{
 									newFlora.RoomId.Value = Model.RoomId.Value;

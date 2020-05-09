@@ -155,13 +155,14 @@ namespace Lunra.Hothouse.Ai
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				// If we get here, that means either all valid items are full, or there are some but we're not being
-				// blocked from dumping them... OUT OF DATE DESC
-				
 				var target = DwellerUtility.CalculateNearestEntrance(
 					Agent.Position.Value,
 					World.Buildings.AllActive,
-					b => currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i)),
+					b =>
+					{
+						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
+						return currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i));
+					},
 					out targetPath,
 					out _
 				);
@@ -171,7 +172,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				cleanupState.ResetUnloadCount();
+				cleanupState.ResetCleanupCount();
 			}
 		}
 	}

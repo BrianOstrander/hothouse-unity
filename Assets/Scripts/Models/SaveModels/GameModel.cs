@@ -18,10 +18,10 @@ namespace Lunra.Hothouse.Models
 		public readonly SelectionModel Selection = new SelectionModel();
 		public readonly FloraEffectsModel FloraEffects = new FloraEffectsModel();
 		
-		public readonly PoolModel<FloraModel> Flora = new PoolModel<FloraModel>();
 		public readonly PoolModel<ItemDropModel> ItemDrops = new PoolModel<ItemDropModel>();
 		public readonly PoolModel<DwellerModel> Dwellers = new PoolModel<DwellerModel>();
 		
+		public readonly PrefabPoolModel<FloraModel> Flora = new PrefabPoolModel<FloraModel>();
 		public readonly PrefabPoolModel<RoomPrefabModel> Rooms = new PrefabPoolModel<RoomPrefabModel>();
 		public readonly PrefabPoolModel<DoorPrefabModel> Doors = new PrefabPoolModel<DoorPrefabModel>();
 		public readonly PrefabPoolModel<BuildingModel> Buildings = new PrefabPoolModel<BuildingModel>();

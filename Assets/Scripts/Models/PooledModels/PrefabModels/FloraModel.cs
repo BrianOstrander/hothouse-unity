@@ -6,12 +6,9 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class FloraModel : PooledModel
+	public class FloraModel : PrefabModel
 	{
 		#region Serialized
-		// [JsonProperty] string themeId;
-		// public readonly ListenerProperty<string> ThemeId;
-
 		[JsonProperty] Interval age;
 		[JsonIgnore] public readonly ListenerProperty<Interval> Age;
 
@@ -50,7 +47,6 @@ namespace Lunra.Hothouse.Models
 		
 		public FloraModel()
 		{
-			// ThemeId = new ListenerProperty<string>(value => themeId = value, () => themeId);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);

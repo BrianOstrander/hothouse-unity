@@ -142,5 +142,9 @@ namespace Lunra.Hothouse.Services
 			Time.timeScale = multiplier;
 		}
 		#endregion
+		
+		#region Utility
+		
+		#endregion
 	}
 }

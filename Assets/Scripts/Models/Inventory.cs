@@ -99,9 +99,9 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		public Inventory Add(int count, Item.Types type) => Add(current => current.Type == type ? count : current.Count);
+		public Inventory Add(int count, Item.Types type) => Add(current => current.Type == type ? count : 0);
 		
-		public Inventory Add(Item item) => Add(current => current.Type == item.Type ? item.Count : current.Count);
+		public Inventory Add(Item item) => Add(current => current.Type == item.Type ? item.Count : 0);
 		
 		public Inventory Add(Func<Item, int> predicate)
 		{
@@ -139,9 +139,9 @@ namespace Lunra.Hothouse.Models
 
 		public Inventory Subtract(Inventory inventory) => Subtract(i => inventory[i.Type]);
 		
-		public Inventory Subtract(int count, Item.Types type) => Subtract(current => current.Type == type ? count : current.Count);
+		public Inventory Subtract(int count, Item.Types type) => Subtract(current => current.Type == type ? count : 0);
 		
-		public Inventory Subtract(Item item) => Subtract(current => current.Type == item.Type ? item.Count : current.Count);
+		public Inventory Subtract(Item item) => Subtract(current => current.Type == item.Type ? item.Count : 0);
 		
 		public Inventory Subtract(Func<Item, int> predicate)
 		{

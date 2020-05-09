@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Models.AgentModels;
 using Newtonsoft.Json;
@@ -11,6 +12,9 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
+		
+		[JsonProperty] InventoryPermission inventoryPermission = Models.InventoryPermission.AllForAnyJob();
+		[JsonIgnore] public readonly ListenerProperty<InventoryPermission> InventoryPermission;
 
 		[JsonProperty] DesireQuality[] desireQuality = new DesireQuality[0];
 		[JsonIgnore] public readonly ListenerProperty<DesireQuality[]> DesireQuality;
@@ -27,6 +31,7 @@ namespace Lunra.Hothouse.Models
 		{
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
+			InventoryPermission = new ListenerProperty<InventoryPermission>(value => inventoryPermission = value, () => inventoryPermission);
 			DesireQuality = new ListenerProperty<DesireQuality[]>(value => desireQuality = value, () => desireQuality);
 		}
 	}

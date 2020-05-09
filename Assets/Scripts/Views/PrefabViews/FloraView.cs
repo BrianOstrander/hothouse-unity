@@ -5,21 +5,18 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class FloraView : View
+	public class FloraView : PrefabView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		
 		[SerializeField] float maximumHeight;
 		[SerializeField] Transform heightRoot;
-		[SerializeField] AnimationCurve reproductionDirectionMutationFalloff;
-		[SerializeField] ParticleSystem killParticles;
 		
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 
 		#region Bindings
-
 		public float Age { set => heightRoot.localPosition = new Vector3(0f, maximumHeight * Mathf.Clamp01(value), 0f); }
 
 		public bool IsReproducing
@@ -37,9 +34,6 @@ namespace Lunra.Hothouse.Views
 		#endregion
 		
 		#region Reverse Bindings
-
-		public AnimationCurve ReproductionDirectionMutationFalloff => reproductionDirectionMutationFalloff;
-		
 		#endregion
 
 		public override void Reset()
