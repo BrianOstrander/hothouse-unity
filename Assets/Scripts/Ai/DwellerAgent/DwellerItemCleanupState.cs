@@ -177,6 +177,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
+				if (Agent.Inventory.Value.GetSharedMinimumCapacity(sourceState.validItems) <= 0) return false;
 				var itemsWithCapacity = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value.GetCapacity(i));
 				if (itemsWithCapacity.None()) return false;
 				
@@ -219,6 +220,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
+				if (Agent.Inventory.Value.GetSharedMinimumCapacity(sourceState.validItems) <= 0) return false;
 				var itemsWithCapacity = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value.GetCapacity(i));
 				if (itemsWithCapacity.None()) return false;
 

@@ -237,21 +237,19 @@ namespace Lunra.Hothouse.Services
 
 				dweller.LoadCooldown.Value = 0.5f;
 				dweller.UnloadCooldown.Value = dweller.LoadCooldown.Value;
-				// dweller.Inventory.Value = Inventory.Populate(
+				dweller.Inventory.Value = Inventory.Populate(
+					type => 2,
+					type => type == Item.Types.Stalks ? 1 : 0
+				);
+				
+				// dweller.Inventory.Value = Inventory.PopulateMaximum(
 				// 	new Dictionary<Item.Types, int>
 				// 	{
-				// 		{ Item.Types.Stalks, 5 }
+				// 		{ Item.Types.Stalks, 2 },
+				// 		{ Item.Types.Rations, 2 },
+				// 		{ Item.Types.Scrap, 2 }
 				// 	}
 				// );
-				
-				dweller.Inventory.Value = Inventory.PopulateMaximum(
-					new Dictionary<Item.Types, int>
-					{
-						{ Item.Types.Stalks, 2 },
-						{ Item.Types.Rations, 2 },
-						{ Item.Types.Scrap, 2 }
-					}
-				);
 				
 				dweller.DesireDamage.Value = new Dictionary<Desires, float>
 				{
@@ -267,9 +265,50 @@ namespace Lunra.Hothouse.Services
 					new Vector3(-12f, -0.8386866f, 3f),
 					Jobs.ClearFlora,
 					0
-					// debugAgentStates: true
 				)
 			);
+			
+			/*
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"1",
+					new Vector3(-11f, -0.8386866f, 3f),
+					Jobs.ClearFlora,
+					0
+				)
+			);
+			
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"2",
+					new Vector3(-10f, -0.8386866f, 3f),
+					Jobs.ClearFlora,
+					0
+				)
+			);
+			
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"3",
+					new Vector3(-9f, -0.8386866f, 3f),
+					Jobs.ClearFlora,
+					0
+				)
+			);
+			
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"4",
+					new Vector3(-8f, -0.8386866f, 3f),
+					Jobs.ClearFlora,
+					0
+				)
+			);
+			*/
 
 			void initializeBuilding(
 				BuildingModel model,
@@ -349,8 +388,8 @@ namespace Lunra.Hothouse.Services
 					"wagon_0",
 					new Vector3(0f, -0.8386866f, 4f),
 					Inventory.Populate(
-						type => 100,
-						type => type == Item.Types.Rations ? 0 : 0
+						type => 50,
+						type => type == Item.Types.Rations ? 5 : 0
 					),
 					new DesireQuality(
 						Desires.Eat, 
