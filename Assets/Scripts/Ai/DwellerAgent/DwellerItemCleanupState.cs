@@ -86,14 +86,14 @@ namespace Lunra.Hothouse.Ai
 				
 				target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
-					World.Buildings.AllActive,
+					out _,
+					out var entrancePosition,
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
 						return currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i));
 					},
-					out _,
-					out var entrancePosition
+					World.Buildings.AllActive
 				);
 
 				if (target == null) return false;
@@ -141,14 +141,14 @@ namespace Lunra.Hothouse.Ai
 				
 				target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
-					World.Buildings.AllActive,
+					out targetPath,
+					out _,
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
 						return currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i));
 					},
-					out targetPath,
-					out _
+					World.Buildings.AllActive
 				);
 
 				return target != null;

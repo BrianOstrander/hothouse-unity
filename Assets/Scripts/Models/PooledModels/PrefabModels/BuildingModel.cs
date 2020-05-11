@@ -19,11 +19,11 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] InventoryPermission inventoryPermission = Models.InventoryPermission.AllForAnyJob();
 		[JsonIgnore] public readonly ListenerProperty<InventoryPermission> InventoryPermission;
 		
-		[JsonProperty] Inventory constructionRecipe = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionRecipe;
+		[JsonProperty] Inventory constructionRecipeInventory = Models.Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionRecipeInventory;
 		
-		[JsonProperty] Inventory constructionRecipePromised = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionRecipePromised;
+		[JsonProperty] Inventory constructionRecipeInventoryPromised = Models.Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionRecipeInventoryPromised;
 
 		[JsonProperty] DesireQuality[] desireQuality = new DesireQuality[0];
 		[JsonIgnore] public readonly ListenerProperty<DesireQuality[]> DesireQuality;
@@ -41,8 +41,8 @@ namespace Lunra.Hothouse.Models
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			InventoryPermission = new ListenerProperty<InventoryPermission>(value => inventoryPermission = value, () => inventoryPermission);
-			ConstructionRecipe = new ListenerProperty<Inventory>(value => constructionRecipe = value, () => constructionRecipe);
-			ConstructionRecipePromised = new ListenerProperty<Inventory>(value => constructionRecipePromised = value, () => constructionRecipePromised);
+			ConstructionRecipeInventory = new ListenerProperty<Inventory>(value => constructionRecipeInventory = value, () => constructionRecipeInventory);
+			ConstructionRecipeInventoryPromised = new ListenerProperty<Inventory>(value => constructionRecipeInventoryPromised = value, () => constructionRecipeInventoryPromised);
 			DesireQuality = new ListenerProperty<DesireQuality[]>(value => desireQuality = value, () => desireQuality);
 			
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);

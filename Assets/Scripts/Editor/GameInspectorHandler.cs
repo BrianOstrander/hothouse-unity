@@ -14,6 +14,14 @@ namespace Lunra.Editor.Core
 	[InitializeOnLoad]
 	public static class GameInspectorHandler
 	{
+		enum InventoryVisibilities
+		{
+			Unknown = 0,
+			Always = 10,
+			IfNotNonZeroEmpty = 20,
+			IfMaximumIsGreaterThanZero = 30
+		}
+		
 		static GameState current;
 		static GUIStyle labelStyle;
 		
@@ -25,11 +33,12 @@ namespace Lunra.Editor.Core
 
 		static void OnPlayModeStateChanged(PlayModeStateChange playModeState)
 		{
-			labelStyle = new GUIStyle(EditorStyles.label);
-			labelStyle.richText = true;
-			
 			switch (playModeState)
 			{
+				case PlayModeStateChange.EnteredPlayMode:
+					labelStyle = new GUIStyle(EditorStyles.label);
+					labelStyle.richText = true;
+					break;
 				case PlayModeStateChange.ExitingEditMode:
 				case PlayModeStateChange.ExitingPlayMode:
 					current = null;
@@ -57,7 +66,24 @@ namespace Lunra.Editor.Core
 					}
 					
 					label += GetInventory(model.Inventory.Value);
-					
+
+					switch (model.BuildingState.Value)
+					{
+						case BuildingStates.Constructing:
+							label += GetInventory(
+								model.ConstructionRecipeInventory.Value,
+								InventoryVisibilities.IfMaximumIsGreaterThanZero,
+								"Recipe"
+							);
+							
+							label += GetInventory(
+								model.ConstructionRecipeInventoryPromised.Value,
+								InventoryVisibilities.IfMaximumIsGreaterThanZero,
+								"Promised"
+							);
+							break;
+					}
+
 					if (model.DesireQuality.Value.Any())
 					{
 						label += "\nDesires:";
@@ -94,7 +120,19 @@ namespace Lunra.Editor.Core
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value + "_" + model.JobPriority.Value;
 					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;
 
-					label += GetInventory(model.Inventory.Value);
+					label += GetInventory(
+						model.Inventory.Value,
+						InventoryVisibilities.IfMaximumIsGreaterThanZero
+					);
+
+					if (model.InventoryPromise.Value.Operation != InventoryPromise.Operations.None)
+					{
+						label += GetInventory(
+							model.InventoryPromise.Value.Inventory,
+							InventoryVisibilities.IfMaximumIsGreaterThanZero,
+							model.InventoryPromise.Value.Operation+"Promise"
+						);
+					}
 
 					Handles.Label(
 						model.Position.Value + (Vector3.up * 3f),
@@ -126,20 +164,38 @@ namespace Lunra.Editor.Core
 			}
 		}
 
-		public static string GetInventory(Inventory inventory)
+		static string GetInventory(
+			Inventory inventory,
+			InventoryVisibilities inventoryVisibilities = InventoryVisibilities.IfNotNonZeroEmpty,
+			string label = "Inventory"
+		)
 		{
-			var result = string.Empty;
-			
-			if (!inventory.IsCapacityZero)
+			switch (inventoryVisibilities)
 			{
-				result += "\nInventory:";
-				foreach (var maximum in inventory.Maximum.Where(i => 0 < i.Count))
-				{
-					result += "\n  " + maximum.Type + " : " + inventory[maximum.Type] + " / " + maximum.Count;
-				}
+				case InventoryVisibilities.IfNotNonZeroEmpty:
+					if (inventory.IsEmpty) return string.Empty;
+					break;
+				case InventoryVisibilities.IfMaximumIsGreaterThanZero:
+					if (inventory.AllMaximumsZero) return string.Empty;
+					break;
 			}
-
+			
+			var result = "\n" + label + ":";
+			
+			foreach (var maximum in inventory.Maximum.Where(i => 0 < i.Count))
+			{
+				result += "\n  " + maximum.Type + " : " + inventory[maximum.Type] + " / " + maximum.Count;
+			}
+			
 			return result;
+		}
+
+		public static void OpenHandlerAsset()
+		{
+			AssetDatabase.OpenAsset(
+				AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/Scripts/Editor/" + nameof(GameInspectorHandler) + ".cs"),
+				40
+			);
 		}
 	}
 }

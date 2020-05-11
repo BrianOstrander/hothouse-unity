@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			Model.Inventory.Changed += OnBuildingInventory;
-			Model.ConstructionRecipe.Changed += OnBuildingConstructionRecipe;
+			Model.ConstructionRecipeInventory.Changed += OnBuildingConstructionRecipeInventory;
 			Model.Operate += OnBuildingOperate;
 		}
 
@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 
 			Model.Inventory.Changed -= OnBuildingInventory;
-			Model.ConstructionRecipe.Changed -= OnBuildingConstructionRecipe;
+			Model.ConstructionRecipeInventory.Changed -= OnBuildingConstructionRecipeInventory;
 			Model.Operate -= OnBuildingOperate;
 		}
 
@@ -59,7 +59,7 @@ namespace Lunra.Hothouse.Presenters
 			if (anyChanged) Model.DesireQuality.Value = newDesireQuality;
 		}
 
-		void OnBuildingConstructionRecipe(Inventory constructionRecipe)
+		void OnBuildingConstructionRecipeInventory(Inventory constructionRecipe)
 		{
 			if (!constructionRecipe.IsAllNonZeroMaximumFull()) return;
 

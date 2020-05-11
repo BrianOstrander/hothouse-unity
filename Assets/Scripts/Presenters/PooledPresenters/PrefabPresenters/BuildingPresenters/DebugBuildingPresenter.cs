@@ -39,7 +39,7 @@ namespace Lunra.Hothouse.Presenters
 
 			var result = string.Empty;
 
-			if (Model.Inventory.Value.IsEmpty && Model.Inventory.Value.IsCapacityZero) result += "Inventory: Empty\n";
+			if (Model.Inventory.Value.IsEmpty && Model.Inventory.Value.AllMaximumsZero) result += "Inventory: Empty\n";
 			else
 			{
 				result += "Inventory:\n";

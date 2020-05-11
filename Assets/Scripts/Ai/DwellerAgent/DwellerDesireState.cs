@@ -19,10 +19,10 @@ namespace Lunra.Hothouse.Ai
 		{
 			return DwellerUtility.CalculateNearestOperatingEntrance(
 				agent.Position.Value,
-				world.Buildings.AllActive,
-				b => 0f < b.DesireQuality.Value.FirstAvailableQualityOrDefault(Desire),
 				out path,
-				out entrancePosition
+				out entrancePosition,
+				b => 0f < b.DesireQuality.Value.FirstAvailableQualityOrDefault(Desire),
+				world.Buildings.AllActive
 			);
 		}
 		

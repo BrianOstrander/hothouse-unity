@@ -11,28 +11,28 @@ namespace Lunra.Hothouse.Ai
 	{
 		public static M CalculateNearestOperatingEntrance<M>(
 			Vector3 beginPosition,
-			IEnumerable<M> buildings,
-			Func<M, bool> buildingPredicate,
 			out NavMeshPath path,
-			out Vector3 entrancePosition
+			out Vector3 entrancePosition,
+			Func<M, bool> buildingPredicate,
+			params M[] buildings
 		)
 			where M : BuildingModel
 		{
 			return CalculateNearestEntrance(
 				beginPosition,
-				buildings,
-				b => b.BuildingState.Value == BuildingStates.Operating && buildingPredicate(b),
 				out path,
-				out entrancePosition
+				out entrancePosition,
+				b => b.BuildingState.Value == BuildingStates.Operating && buildingPredicate(b),
+				buildings
 			);
 		}
 
 		public static M CalculateNearestEntrance<M>(
 			Vector3 beginPosition,
-			IEnumerable<M> buildings,
-			Func<M, bool> buildingPredicate,
 			out NavMeshPath path,
-			out Vector3 entrancePosition
+			out Vector3 entrancePosition,
+			Func<M, bool> buildingPredicate,
+			params M[] buildings
 		)
 			where M : BuildingModel
 		{
@@ -43,34 +43,50 @@ namespace Lunra.Hothouse.Ai
 				.Where(buildingPredicate)
 				.OrderBy(t => Vector3.Distance(beginPosition, t.Position.Value))
 				.FirstOrDefault(
-					t =>
-					{
-						foreach (var entrance in t.Entrances.Value)
-						{
-							if (entrance.State != Entrance.States.Available) continue;
-
-							var hasPath = NavMesh.CalculatePath(
-								beginPosition,
-								entrance.Position,
-								NavMesh.AllAreas,
-								pathResult
-							);
-
-							if (hasPath)
-							{
-								entranceResult = entrance.Position;
-								return true;
-							}
-						}
-
-						return false;
-					}
+					t => CalculateNearestEntrance(
+						beginPosition,
+						out pathResult,
+						out entranceResult,
+						t
+					)
 				);
 
 			path = pathResult;
 			entrancePosition = entranceResult;
 			
 			return result;
-		} 
+		}
+
+		public static bool CalculateNearestEntrance<M>(
+			Vector3 beginPosition,
+			out NavMeshPath path,
+			out Vector3 entrancePosition,
+			M building
+		)
+			where M : BuildingModel
+		{
+			path = new NavMeshPath();
+			entrancePosition = Vector3.zero;
+
+			foreach (var entrance in building.Entrances.Value)
+			{
+				if (entrance.State != Entrance.States.Available) continue;
+
+				var hasPath = NavMesh.CalculatePath(
+					beginPosition,
+					entrance.Position,
+					NavMesh.AllAreas,
+					path
+				);
+
+				if (hasPath)
+				{
+					entrancePosition = entrance.Position;
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 }

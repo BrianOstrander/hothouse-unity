@@ -11,12 +11,12 @@ namespace Lunra.Hothouse.Models
 		public static Inventory Empty { get; } = new Inventory(Item.Empty, Item.Empty);
 
 		public static Inventory Populate(
-			Func<Item.Types, int> capacityPredicate,
+			Func<Item.Types, int> maximumPredicate,
 			Func<Item.Types, int> currentPredicate
 		)
 		{
 			return new Inventory(
-				Item.Populate(capacityPredicate),
+				Item.Populate(maximumPredicate),
 				Item.Populate(currentPredicate)
 			);
 		}
@@ -53,7 +53,7 @@ namespace Lunra.Hothouse.Models
 		public readonly Item[] Maximum;
 		public readonly Item[] Current;
 		public readonly bool IsEmpty;
-		public readonly bool IsCapacityZero;
+		public readonly bool AllMaximumsZero;
 		
 		Inventory(
 			Item[] maximum,
@@ -66,7 +66,7 @@ namespace Lunra.Hothouse.Models
 			Current = current;
 
 			IsEmpty = Current.None(i => 0 < i.Count);
-			IsCapacityZero = Maximum.None(i => 0 < i.Count);
+			AllMaximumsZero = Maximum.None(i => 0 < i.Count);
 		}
 
 		public Inventory SetMaximum(int count, Item.Types type) => SetMaximum(current => current.Type == type ? count : current.Count);
@@ -116,6 +116,8 @@ namespace Lunra.Hothouse.Models
 				).ToArray()
 			);
 		}
+
+		public Inventory Add(Inventory target) => Add(target, out _);
 		
 		public Inventory Add(
 			Inventory target,
@@ -154,6 +156,42 @@ namespace Lunra.Hothouse.Models
 						i.Type
 					)
 				).ToArray()
+			);
+		}
+
+		public Inventory Intersect(Inventory inventory)
+		{
+			var source = this;
+			return Populate(
+				type => Mathf.Min(source[type], inventory[type]),
+				type => Mathf.Min(source[type], inventory[type])
+			);
+		}
+		
+		public Inventory Inverted()
+		{
+			var source = this;
+			return Populate(
+				type => source.GetMaximum(type),
+				type => source.GetMaximum(type) - source[type]
+			);
+		}
+
+		public Inventory Filled()
+		{
+			var source = this;
+			return Populate(
+				type => source.GetMaximum(type),
+				type => source.GetMaximum(type)
+			);
+		}
+
+		public Inventory Clamped(Inventory inventory)
+		{
+			var source = this;
+			return Populate(
+				type => inventory.GetMaximum(type),
+				type => Mathf.Min(source[type], inventory.GetMaximum(type))
 			);
 		}
 

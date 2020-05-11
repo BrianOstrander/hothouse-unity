@@ -10,6 +10,87 @@ namespace Lunra.Hothouse.Ai
 {
 	public class DwellerConstructionJobState : DwellerJobState<DwellerConstructionJobState>
 	{
+		static BuildingModel GetNearestItemSource(
+			GameModel world,
+			DwellerModel agent,
+			out NavMeshPath path,
+			out Vector3 entrancePosition,
+			out InventoryPromise promise 
+		)
+		{
+			var promiseResult = InventoryPromise.Default();
+			
+			var validConstructionSites = world.Buildings.AllActive
+				.Where(
+					possibleConstructionSite =>
+					{
+						if (possibleConstructionSite.BuildingState.Value != BuildingStates.Constructing) return false;
+
+						return !possibleConstructionSite.ConstructionRecipeInventory.Value
+							.Inverted()
+							.Subtract(possibleConstructionSite.ConstructionRecipeInventoryPromised.Value)
+							.IsEmpty;
+					}
+				)
+				.ToDictionary(b => b, b => false);
+
+			var itemSourceResult = DwellerUtility.CalculateNearestOperatingEntrance(
+				agent.Position.Value,
+				out path,
+				out entrancePosition,
+				possibleItemSource =>
+				{
+					if (possibleItemSource.Inventory.Value.IsEmpty) return false;
+					if (!possibleItemSource.InventoryPermission.Value.CanWithdrawal(agent.Job.Value)) return false;
+
+					var index = 0;
+					while (index < validConstructionSites.Count)
+					{
+						var kv = validConstructionSites.ElementAt(index);
+						if (!kv.Value)
+						{
+							var navigationValid = DwellerUtility.CalculateNearestEntrance(
+								agent.Position.Value,
+								out _,
+								out _,
+								kv.Key
+							);
+
+							if (navigationValid) validConstructionSites[kv.Key] = true;
+							else
+							{
+								validConstructionSites.Remove(kv.Key);
+								continue;
+							}
+						}
+
+						var nonPromisedInventory = kv.Key.ConstructionRecipeInventory.Value
+							.Inverted()
+							.Subtract(kv.Key.ConstructionRecipeInventoryPromised.Value);
+
+						if (!nonPromisedInventory.Intersect(possibleItemSource.Inventory.Value).IsEmpty)
+						{
+							promiseResult = new InventoryPromise(
+								kv.Key.Id.Value,
+								InventoryPromise.Operations.Construction,
+								nonPromisedInventory.Clamped(agent.Inventory.Value)
+							); 
+							return true;
+						}
+
+						index++;
+					}
+
+					return false;	
+				},
+				world.Buildings.AllActive
+			);
+
+			promise = promiseResult;
+			
+			return itemSourceResult;
+		}
+		
 		public override Jobs Job => Jobs.Construction;
 
 		public override void OnInitialize()
@@ -33,11 +114,13 @@ namespace Lunra.Hothouse.Ai
 			AddTransitions(
 				new ToIdleOnJobUnassigned(this),
 			
+				new ToWithdrawalItems(transferItemsState),
 				new ToDepositToNearestConstructionSite(transferItemsState),
+				new ToNavigateToConstructionSite(),
 
 				new ToIdleOnShiftEnd(this),
 				
-				new ToNavigateToConstructionSite(),
+				new ToNavigateToWithdrawalItems(),
 				
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
@@ -53,27 +136,78 @@ namespace Lunra.Hothouse.Ai
 				)
 			);
 		}
-
-		/*
-		class ToNavigateToWithdrawalItems : AgentTransition<DwellerNavigateState<DwellerConstructionJobState>, GameModel, DwellerModel>
+		
+		class ToWithdrawalItems : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
+			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
+			BuildingModel target;
+			InventoryPromise promise;
+
+			public ToWithdrawalItems(
+				DwellerTransferItemsState<DwellerConstructionJobState> transferState
+			)
+			{
+				this.transferState = transferState;
+			}
+			
 			public override bool IsTriggered()
 			{
-				// var constructionResourcesInNeed
-				
-				// var target = DwellerUtility.CalculateNearestEntrance(
-				// 	Agent.Position.Value,
-				// 	World.Buildings.AllActive,
-				// 	b => b.BuildingState.Value == BuildingStates.Constructing,
-				// 	out _,
-				// 	out _
-				// );
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 
-				// if (target == null) return false;
-				return false;
+				target = GetNearestItemSource(
+					World,
+					Agent,
+					out _,
+					out var entrancePosition,
+					out promise
+				);
+
+				if (target == null) return false;
+				
+				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
+			}
+
+			public override void Transition()
+			{
+				var constructionSite = World.Buildings.AllActive.First(b => b.Id.Value == promise.BuildingId);
+				
+				Agent.InventoryPromise.Value = promise;
+				constructionSite.ConstructionRecipeInventoryPromised.Value = constructionSite.ConstructionRecipeInventoryPromised.Value.Add(promise.Inventory);
+				
+				transferState.SetTarget(
+					new DwellerTransferItemsState<DwellerConstructionJobState>.Target(
+						i => Agent.Inventory.Value = i,
+						() => Agent.Inventory.Value,
+						i => target.Inventory.Value = i,
+						() => target.Inventory.Value,
+						promise.Inventory,
+						Agent.WithdrawalCooldown.Value
+					)
+				);
 			}
 		}
-		*/
+
+		class ToNavigateToWithdrawalItems : AgentTransition<DwellerNavigateState<DwellerConstructionJobState>, GameModel, DwellerModel>
+		{
+			NavMeshPath path;
+			
+			public override bool IsTriggered()
+			{
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
+
+				var target = GetNearestItemSource(
+					World,
+					Agent,
+					out path,
+					out _,
+					out _
+				);
+
+				return target != null;
+			}
+
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
+		}
 
 		class ToDepositToNearestConstructionSite : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
@@ -108,8 +242,8 @@ namespace Lunra.Hothouse.Ai
 			{
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerConstructionJobState>.Target(
-						i => target.ConstructionRecipe.Value = i,
-						() => target.ConstructionRecipe.Value,
+						i => target.ConstructionRecipeInventory.Value = i,
+						() => target.ConstructionRecipeInventory.Value,
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
 						Agent.InventoryPromise.Value.Inventory,
@@ -133,14 +267,14 @@ namespace Lunra.Hothouse.Ai
 				
 				var target = DwellerUtility.CalculateNearestEntrance(
 					Agent.Position.Value,
-					World.Buildings.AllActive,
+					out path,
+					out _,
 					b =>
 					{
 						if (b.BuildingState.Value != BuildingStates.Constructing) return false;
 						return b.Id.Value == Agent.InventoryPromise.Value.BuildingId;
 					},
-					out path,
-					out _
+					World.Buildings.AllActive
 				);
 
 				return target != null;

@@ -1,13 +1,16 @@
+using Newtonsoft.Json;
+
 namespace Lunra.Hothouse.Models
 {
 	public struct InventoryPromise
 	{
-		public static InventoryPromise Default() => new InventoryPromise(null, Operations.Unknown, Inventory.Empty);
+		public static InventoryPromise Default() => new InventoryPromise(null, Operations.None, Inventory.Empty);
 		
 		public enum Operations
 		{
 			Unknown = 0,
-			Construction = 10
+			None = 10,
+			Construction = 20
 		}
 		
 		public readonly string BuildingId;

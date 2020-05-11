@@ -18,10 +18,16 @@ namespace Lunra.Hothouse.Editor
 	
 	public class GameInspectorSettingsProvider : SettingsProvider
 	{
+		static class Content
+		{
+			public static GUIContent OpenInspectorHandler = new GUIContent("Open Inspector Handler");
+		}
+		
 		public GameInspectorSettingsProvider(string path, SettingsScope scope = SettingsScope.User) : base(path, scope) { }
 
 		public override void OnGUI(string searchContext)
 		{
+			if (GUILayout.Button(Content.OpenInspectorHandler)) GameInspectorHandler.OpenHandlerAsset();
 			GameInspectionSettings.IsInspecting.Draw();
 			GameInspectionSettings.IsInspectingBuildings.Draw();
 			GameInspectionSettings.IsInspectingDwellers.Draw();
@@ -35,6 +41,7 @@ namespace Lunra.Hothouse.Editor
 
 			provider.keywords = new[]
 			{
+				Content.OpenInspectorHandler.text,
 				GameInspectionSettings.IsInspecting.LabelName,
 				GameInspectionSettings.IsInspectingBuildings.LabelName,
 				GameInspectionSettings.IsInspectingDwellers.LabelName,

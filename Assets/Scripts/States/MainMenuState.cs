@@ -250,7 +250,7 @@ namespace Lunra.Hothouse.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = game.Dwellers.AllActive.Length;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.5f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1.0f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -264,7 +264,7 @@ namespace Lunra.Hothouse.Services
 				dweller.DepositCooldown.Value = dweller.WithdrawalCooldown.Value;
 				dweller.Inventory.Value = Inventory.Populate(
 					type => 2,
-					type => type == Item.Types.Stalks ? 2 : 0
+					type => 0//type == Item.Types.Stalks ? 2 : 0
 				);
 				
 				// dweller.Inventory.Value = Inventory.PopulateMaximum(
@@ -282,6 +282,7 @@ namespace Lunra.Hothouse.Services
 					{ Desires.Sleep , 0.1f }
 				};
 				
+				/*
 				dweller.InventoryPromise.Value = new InventoryPromise(
 					"sleep_0",
 					InventoryPromise.Operations.Construction,
@@ -292,22 +293,23 @@ namespace Lunra.Hothouse.Services
 						}
 					)
 				);
+				*/
 			}
 			
-			// game.Dwellers.Activate(
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"0",
-			// 		new Vector3(-12f, -0.8386866f, 3f),
-			// 		Jobs.ClearFlora
-			// 	)
-			// );
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"0",
+					new Vector3(-12f, -0.8386866f, 3f),
+					Jobs.Construction
+				)
+			);
 			
 			game.Dwellers.Activate(
 				dweller => initializeDweller(
 					dweller,
 					"1",
-					new Vector3(-11f, -0.8386866f, 3f),
+					new Vector3(-5f, -0.8386866f, 3f),
 					Jobs.Construction,
 					debugAgentStates: true
 				)
@@ -352,8 +354,8 @@ namespace Lunra.Hothouse.Services
 			)
 			{
 				model.BuildingState.Value = BuildingStates.Operating;
-				model.ConstructionRecipe.Value = Inventory.Empty;
-				model.ConstructionRecipePromised.Value = Inventory.Empty;
+				model.ConstructionRecipeInventory.Value = Inventory.Empty;
+				model.ConstructionRecipeInventoryPromised.Value = Inventory.Empty;
 				model.Id.Value = id;
 				model.Position.Value = position;
 				model.Inventory.Value = inventory;
@@ -372,14 +374,14 @@ namespace Lunra.Hothouse.Services
 			);
 
 			sleepBuilding.BuildingState.Value = BuildingStates.Constructing;
-			sleepBuilding.ConstructionRecipe.Value = Inventory.PopulateMaximum(
+			sleepBuilding.ConstructionRecipeInventory.Value = Inventory.PopulateMaximum(
 				new Dictionary<Item.Types, int>
 				{
-					{ Item.Types.Stalks, 2 }
+					{ Item.Types.Stalks, 4 }
 				}
 			);
+			sleepBuilding.ConstructionRecipeInventoryPromised.Value = sleepBuilding.ConstructionRecipeInventory.Value;
 			
-
 			/*
 			game.Buildings.Activate(
 				"debug",
@@ -432,7 +434,7 @@ namespace Lunra.Hothouse.Services
 					new Vector3(0f, -0.8386866f, 4f),
 					Inventory.Populate(
 						type => 50,
-						type => type == Item.Types.Rations ? 5 : 0
+						type => 4 // type == Item.Types.Rations ? 5 : 0
 					),
 					new DesireQuality(
 						Desires.Eat, 
