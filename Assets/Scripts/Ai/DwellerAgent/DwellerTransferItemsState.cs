@@ -63,7 +63,7 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			AddTransitions(
-				new ToReturnOnAllItemsTransfered(this),
+				new ToReturnOnAllItemsTransferred(this),
 				new ToReturnOnDestinationAtCapacity(this)
 			);
 		}
@@ -110,11 +110,11 @@ namespace Lunra.Hothouse.Ai
 			cooldownElapsed = 0f;
 		}
 
-		class ToReturnOnAllItemsTransfered : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnAllItemsTransferred : AgentTransition<S, GameModel, DwellerModel>
 		{
 			DwellerTransferItemsState<S> sourceState;
 
-			public ToReturnOnAllItemsTransfered(DwellerTransferItemsState<S> sourceState) => this.sourceState = sourceState;
+			public ToReturnOnAllItemsTransferred(DwellerTransferItemsState<S> sourceState) => this.sourceState = sourceState;
 			
 			public override bool IsTriggered() => sourceState.target.ItemsToTransfer.IsEmpty;
 		}
