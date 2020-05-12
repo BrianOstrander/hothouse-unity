@@ -244,8 +244,7 @@ namespace Lunra.Hothouse.Services
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
-				dweller.JobPriority.Value = game.Dwellers.AllActive.Length;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.5f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -279,8 +278,17 @@ namespace Lunra.Hothouse.Services
 				dweller => initializeDweller(
 					dweller,
 					"1",
-					new Vector3(-10f, -0.8386866f, 3f),
+					new Vector3(-2f, -0.8386866f, 10f),
 					Jobs.Construction
+				)
+			);
+			
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"2",
+					new Vector3(-8f, -0.8386866f, 3f),
+					Jobs.ClearFlora
 				)
 			);
 			
@@ -333,7 +341,7 @@ namespace Lunra.Hothouse.Services
 					new Inventory(
 						new Dictionary<Item.Types, int>
 						{
-							{ Item.Types.Stalks, 4 },
+							// { Item.Types.Stalks, 4 },
 							{ Item.Types.Scrap, 4 },
 							{ Item.Types.Rations, 4 }
 						}
@@ -361,6 +369,7 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 
+			/*
 			game.ItemDrops.Activate(
 				m =>
 				{
@@ -388,6 +397,7 @@ namespace Lunra.Hothouse.Services
 					);
 				}
 			);
+			*/
 
 			done(Result<GameModel>.Success(game));
 		}

@@ -121,8 +121,8 @@ namespace Lunra.Editor.Core
 					if (!Mathf.Approximately(model.Health.Value, model.HealthMaximum.Value)) label += "\nHealth: " + model.Health.Value.ToString("N1") + " / " + model.HealthMaximum.Value.ToString("N1");
 					
 					label += "\nState: " + model.Context.CurrentState;
-					
-					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value + "_" + model.JobPriority.Value;
+
+					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
 					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;
 
 					label += GetInventory(

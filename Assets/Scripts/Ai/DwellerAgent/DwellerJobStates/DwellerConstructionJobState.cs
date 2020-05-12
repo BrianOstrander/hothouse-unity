@@ -64,11 +64,11 @@ namespace Lunra.Hothouse.Ai
 						var nonPromisedInventory = kv.Key.ConstructionInventoryCapacity.Value.GetCapacityFor(
 							kv.Key.ConstructionInventory.Value + kv.Key.ConstructionInventoryPromised.Value
 						);
-						
-						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Value))
+
+						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Value, out var intersection))
 						{
 							agent.InventoryCapacity.Value.GetClamped(
-								nonPromisedInventory,
+								intersection,
 								out var promisedInventory
 							);
 							

@@ -126,7 +126,7 @@ namespace Lunra.Hothouse.Ai
 				target = World.Flora.AllActive
 					.Where(t => t.MarkedForClearing.Value)
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
-					.ElementAtOrDefault(Agent.JobPriority.Value);
+					.FirstOrDefault();
 
 				return target != null;
 			}

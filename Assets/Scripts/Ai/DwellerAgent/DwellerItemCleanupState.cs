@@ -133,7 +133,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
-				var currentlyValidItems = sourceState.validItems.Where(i => 0 < Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i));
+				var currentlyValidItems = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value[i]);
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				

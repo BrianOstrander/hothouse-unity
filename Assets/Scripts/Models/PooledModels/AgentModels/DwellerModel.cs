@@ -11,9 +11,6 @@ namespace Lunra.Hothouse.Models.AgentModels
 		#region Serialized
 		[JsonProperty] Jobs job;
 		[JsonIgnore] public readonly ListenerProperty<Jobs> Job;
-		
-		[JsonProperty] int jobPriority;
-		[JsonIgnore] public readonly ListenerProperty<int> JobPriority;
 
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
 		[JsonIgnore] public readonly ListenerProperty<DayTimeFrame> JobShift;
@@ -63,7 +60,6 @@ namespace Lunra.Hothouse.Models.AgentModels
 		public DwellerModel()
 		{
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
-			JobPriority = new ListenerProperty<int>(value => jobPriority = value, () => jobPriority);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
 			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);
 			DesireDamage = new ListenerProperty<Dictionary<Desires, float>>(value => desireDamage = value, () => desireDamage);
