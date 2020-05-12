@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
@@ -95,6 +96,28 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (!Mathf.Approximately(0f, health)) return;
 
+			if (!Model.Inventory.Value.IsEmpty)
+			{
+				Game.ItemDrops.Activate(
+					m =>
+					{
+						m.Inventory.Value = Model.Inventory.Value;
+						m.Job.Value = Jobs.None;
+						m.RoomId.Value = Model.RoomId.Value;
+						m.Position.Value = Model.Position.Value;
+						m.Rotation.Value = Quaternion.identity;
+					}
+				);
+			}
+
+			if (Model.InventoryPromise.Value.Operation != InventoryPromise.Operations.Unknown)
+			{
+				var building = Game.Buildings.AllActive.FirstOrDefault(b => b.Id.Value == Model.InventoryPromise.Value.BuildingId);
+				
+				if (building == null) Debug.LogError("Cannot find an active building with id \"" + Model.InventoryPromise.Value.BuildingId + "\" to cancel out promise operation: " + Model.InventoryPromise.Value.Operation);
+				else building.ConstructionInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory;
+			}
+			
 			Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion

@@ -102,14 +102,14 @@ namespace Lunra.Hothouse.Services
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 
-			// App.Heartbeat.Wait(
-			// 	() =>
-			// 	{
-			// 		Debug.Log("Killing dweller!");
-			// 		Payload.Game.Dwellers.AllActive.First().Health.Value = 0f;
-			// 	},
-			// 	10f
-			// );
+			App.Heartbeat.Wait(
+				() =>
+				{
+					Debug.Log("Killing dweller id : 0");
+					Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
+				},
+				5f
+			);
 		}
 
 		void OnHeartbeatUpdate()

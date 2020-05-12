@@ -20,6 +20,15 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] float healthMaximum;
 		[JsonIgnore] public readonly ListenerProperty<float> HealthMaximum;
+		
+		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
+
+		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.ByNone();
+		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> InventoryCapacity;
+
+		[JsonProperty] InventoryPromise inventoryPromise = Models.InventoryPromise.Default();
+		[JsonIgnore] public readonly ListenerProperty<InventoryPromise> InventoryPromise;
 		#endregion
 		
 		#region Non Serialized
@@ -34,6 +43,9 @@ namespace Lunra.Hothouse.Models
 			NavigationPlan = new ListenerProperty<NavigationPlan>(value => navigationPlan = value, () => navigationPlan);
 			Health = new ListenerProperty<float>(value => health = value, () => health);
 			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
+			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
+			InventoryCapacity = new ListenerProperty<InventoryCapacity>(value => inventoryCapacity = value, () => inventoryCapacity);
+			InventoryPromise = new ListenerProperty<InventoryPromise>(value => inventoryPromise = value, () => inventoryPromise);
 		}
 	}
 }

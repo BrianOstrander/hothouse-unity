@@ -159,6 +159,28 @@ namespace Lunra.Editor.Core
 					}
 				}
 			}
+			
+			if (GameInspectionSettings.IsInspectingItemDrops.Value)
+			{
+				foreach (var model in current.Payload.Game.ItemDrops.AllActive)
+				{
+					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
+					
+					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
+					
+					label += GetInventory(
+						"Inventory",
+						model.Inventory.Value
+						
+					);
+
+					Handles.Label(
+						model.Position.Value + (Vector3.up * 1f),
+						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
+						labelStyle
+					);
+				}
+			}
 
 			if (GameInspectionSettings.IsInspectingFlora.Value)
 			{
