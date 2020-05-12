@@ -190,8 +190,26 @@ namespace Lunra.Hothouse.Models
 		{
 			var source = this;
 			return Populate(
-				type => inventory.GetMaximum(type),
+				type => Mathf.Min(source.GetMaximum(type), inventory.GetMaximum(type)),
 				type => Mathf.Min(source[type], inventory.GetMaximum(type))
+			);
+		}
+		
+		public Inventory SumClamped(int maximum)
+		{
+			List<Item> results = new List<Item>();
+			var count = 0;
+			foreach (var item in Current)
+			{
+				if (count == maximum) break;
+				var addition = Mathf.Min(item.Count, maximum - count);
+				results.Add(Item.New(addition, item.Type));
+				count += addition;
+			}
+
+			return Populate(
+				type => results.FirstOrDefault(i => i.Type == type).Count,
+				type => results.FirstOrDefault(i => i.Type == type).Count
 			);
 		}
 
@@ -249,6 +267,13 @@ namespace Lunra.Hothouse.Models
 		
 		public int this[Item.Types type] => GetCurrent(type);
 
+		public int GetCurrentSum(params Item.Types[] types)
+		{
+			var result = 0;
+			foreach (var type in types) result += GetCurrent(type);
+			return result;
+		}
+		
 		public int GetSharedMinimumCapacity(params Item.Types[] types)
 		{
 			var minimumMaximum = int.MaxValue;

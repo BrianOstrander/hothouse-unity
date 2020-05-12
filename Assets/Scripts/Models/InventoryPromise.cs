@@ -4,7 +4,11 @@ namespace Lunra.Hothouse.Models
 {
 	public struct InventoryPromise
 	{
-		public static InventoryPromise Default() => new InventoryPromise(null, Operations.None, Inventory.Empty);
+		public static InventoryPromise Default() => new InventoryPromise(
+			null,
+			Operations.None,
+			Inventory.Empty
+		);
 		
 		public enum Operations
 		{
@@ -26,6 +30,15 @@ namespace Lunra.Hothouse.Models
 			BuildingId = buildingId;
 			Operation = operation;
 			Inventory = inventory;
+		}
+
+		public InventoryPromise NewInventory(Inventory inventory)
+		{
+			return new InventoryPromise(
+				BuildingId,
+				Operation,
+				inventory
+			);
 		}
 	}
 }

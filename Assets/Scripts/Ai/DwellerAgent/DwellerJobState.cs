@@ -118,7 +118,6 @@ namespace Lunra.Hothouse.Ai
 						return IsAnyValidItemReachable();
 					case InventoryTrigger.NonZeroMaximumFull:
 						if (0 < Agent.Inventory.Value.GetSharedMinimumCapacity(validItems)) return false;
-						// if (validItems.None(i => Agent.Inventory.Value.IsNonZeroMaximumFull(i))) return false;
 						return IsAnyBuildingWithInventoryReachable();
 					case InventoryTrigger.SomeOrNonZeroMaximumFull:
 						var someValidItems = validItems.Where(i => Agent.Inventory.Value.Any(i));

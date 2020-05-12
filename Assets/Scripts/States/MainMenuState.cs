@@ -250,7 +250,7 @@ namespace Lunra.Hothouse.Services
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobPriority.Value = game.Dwellers.AllActive.Length;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1.0f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -262,6 +262,7 @@ namespace Lunra.Hothouse.Services
 
 				dweller.WithdrawalCooldown.Value = 0.5f;
 				dweller.DepositCooldown.Value = dweller.WithdrawalCooldown.Value;
+				dweller.SharedInventoryMaximum.Value = 2;
 				dweller.Inventory.Value = Inventory.Populate(
 					type => 2,
 					type => 0//type == Item.Types.Stalks ? 2 : 0
@@ -305,25 +306,25 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"1",
-					new Vector3(-5f, -0.8386866f, 3f),
-					Jobs.Construction,
-					debugAgentStates: true
-				)
-			);
+			// game.Dwellers.Activate(
+			// 	dweller => initializeDweller(
+			// 		dweller,
+			// 		"1",
+			// 		new Vector3(-11f, -0.8386866f, 3f),
+			// 		Jobs.Construction
+			// 		// debugAgentStates: true
+			// 	)
+			// );
 			
+			// game.Dwellers.Activate(
+			// 	dweller => initializeDweller(
+			// 		dweller,
+			// 		"2",
+			// 		new Vector3(-10f, -0.8386866f, 3f),
+			// 		Jobs.ClearFlora
+			// 	)
+			// );
 			/*
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"2",
-					new Vector3(-10f, -0.8386866f, 3f),
-					Jobs.ClearFlora
-				)
-			);
 			
 			game.Dwellers.Activate(
 				dweller => initializeDweller(
@@ -377,7 +378,8 @@ namespace Lunra.Hothouse.Services
 			sleepBuilding.ConstructionRecipeInventory.Value = Inventory.PopulateMaximum(
 				new Dictionary<Item.Types, int>
 				{
-					{ Item.Types.Stalks, 4 }
+					{ Item.Types.Stalks, 2 },
+					{ Item.Types.Scrap, 2 }
 				}
 			);
 			sleepBuilding.ConstructionRecipeInventoryPromised.Value = sleepBuilding.ConstructionRecipeInventory.Value;
@@ -434,7 +436,7 @@ namespace Lunra.Hothouse.Services
 					new Vector3(0f, -0.8386866f, 4f),
 					Inventory.Populate(
 						type => 50,
-						type => 4 // type == Item.Types.Rations ? 5 : 0
+						type => 4//type == Item.Types.Rations ? 5 : 0
 					),
 					new DesireQuality(
 						Desires.Eat, 

@@ -73,7 +73,7 @@ namespace Lunra.Hothouse.Ai
 							promiseResult = new InventoryPromise(
 								kv.Key.Id.Value,
 								InventoryPromise.Operations.Construction,
-								nonPromisedInventory.Clamped(agent.Inventory.Value)
+								nonPromisedInventory.Clamped(agent.Inventory.Value).SumClamped(agent.SharedInventoryMaximum.Value)
 							); 
 							return true;
 						}
@@ -90,9 +90,18 @@ namespace Lunra.Hothouse.Ai
 			
 			return itemSourceResult;
 		}
+
+		enum Steps
+		{
+			Unknown = 0,
+			Withdrawing = 10,
+			Depositing = 20
+		}
 		
 		public override Jobs Job => Jobs.Construction;
 
+		Steps step;
+		
 		public override void OnInitialize()
 		{
 			var validJobs = new[] { Jobs.Construction };
@@ -114,8 +123,8 @@ namespace Lunra.Hothouse.Ai
 			AddTransitions(
 				new ToIdleOnJobUnassigned(this),
 			
-				new ToWithdrawalItems(transferItemsState),
-				new ToDepositToNearestConstructionSite(transferItemsState),
+				new ToWithdrawalItems(this, transferItemsState),
+				new ToDepositToNearestConstructionSite(this, transferItemsState),
 				new ToNavigateToConstructionSite(),
 
 				new ToIdleOnShiftEnd(this),
@@ -136,17 +145,62 @@ namespace Lunra.Hothouse.Ai
 				)
 			);
 		}
-		
+
+		public override void Begin()
+		{
+			switch (step)
+			{
+				case Steps.Unknown:
+					return;
+			}
+			
+			var constructionSite = World.Buildings.AllActive.FirstOrDefault(b => b.Id.Value == Agent.InventoryPromise.Value.BuildingId);
+			
+			if (constructionSite == null)
+			{
+				// Building must have been destroyed...
+				Agent.InventoryPromise.Value = InventoryPromise.Default();
+				step = Steps.Unknown;
+				return;
+			}
+			
+			switch (step)
+			{
+				case Steps.Withdrawing:
+					if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory))
+					{
+						// The dweller was unable to pull all the resources it wanted to, so we're going to correct the
+						// amount we promised
+						var newPromise = Agent.InventoryPromise.Value.Inventory.Intersect(Agent.Inventory.Value);
+						constructionSite.ConstructionRecipeInventoryPromised.Value = constructionSite.ConstructionRecipeInventoryPromised.Value
+							.Subtract(Agent.InventoryPromise.Value.Inventory.Subtract(newPromise));
+
+						Agent.InventoryPromise.Value = Agent.InventoryPromise.Value.NewInventory(newPromise);
+					}
+					break;
+				case Steps.Depositing:
+					constructionSite.ConstructionRecipeInventoryPromised.Value = constructionSite.ConstructionRecipeInventoryPromised.Value
+						.Subtract(Agent.InventoryPromise.Value.Inventory);
+					Agent.InventoryPromise.Value = InventoryPromise.Default();
+					break;
+			}
+			
+			step = Steps.Unknown;
+		}
+
 		class ToWithdrawalItems : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
+			DwellerConstructionJobState sourceState;
 			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
 			BuildingModel target;
 			InventoryPromise promise;
 
 			public ToWithdrawalItems(
+				DwellerConstructionJobState sourceState,
 				DwellerTransferItemsState<DwellerConstructionJobState> transferState
 			)
 			{
+				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 			
@@ -173,7 +227,7 @@ namespace Lunra.Hothouse.Ai
 				
 				Agent.InventoryPromise.Value = promise;
 				constructionSite.ConstructionRecipeInventoryPromised.Value = constructionSite.ConstructionRecipeInventoryPromised.Value.Add(promise.Inventory);
-				
+
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerConstructionJobState>.Target(
 						i => Agent.Inventory.Value = i,
@@ -184,6 +238,8 @@ namespace Lunra.Hothouse.Ai
 						Agent.WithdrawalCooldown.Value
 					)
 				);
+
+				sourceState.step = Steps.Withdrawing;
 			}
 		}
 
@@ -211,20 +267,27 @@ namespace Lunra.Hothouse.Ai
 
 		class ToDepositToNearestConstructionSite : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
+			DwellerConstructionJobState sourceState;
 			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
 			BuildingModel target;
 
 			public ToDepositToNearestConstructionSite(
+				DwellerConstructionJobState sourceState,
 				DwellerTransferItemsState<DwellerConstructionJobState> transferState
 			)
 			{
+				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 			
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.Construction) return false;
-				if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
+				if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory))
+				{
+					Debug.LogError("This should not be able to happen!");
+					return false;
+				}
 				
 				target = World.Buildings.AllActive.FirstOrDefault(
 					m =>
@@ -250,9 +313,8 @@ namespace Lunra.Hothouse.Ai
 						Agent.DepositCooldown.Value
 					)
 				);
-				
-				Agent.InventoryPromise.Value = InventoryPromise.Default();
-				// TODO: UNPROMISE STUFF HERE FROM BUILDING (WHEN THAT IS READY... or don't???)
+
+				sourceState.step = Steps.Depositing;
 			}
 		}
 
@@ -263,8 +325,7 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.Construction) return false;
-				if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
-				
+
 				var target = DwellerUtility.CalculateNearestEntrance(
 					Agent.Position.Value,
 					out path,
