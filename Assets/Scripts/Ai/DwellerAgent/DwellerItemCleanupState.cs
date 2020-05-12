@@ -80,7 +80,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
-				var currentlyValidItems = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value.GetCurrent(i));
+				var currentlyValidItems = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value[i]);
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
@@ -91,7 +91,7 @@ namespace Lunra.Hothouse.Ai
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
-						return currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i));
+						return currentlyValidItems.Any(i => b.InventoryCapacity.Value.HasCapacityFor(b.Inventory.Value, i));
 					},
 					World.Buildings.AllActive
 				);
@@ -111,9 +111,10 @@ namespace Lunra.Hothouse.Ai
 					new DwellerTransferItemsState<DwellerItemCleanupState<S>>.Target(
 						i => target.Inventory.Value = i,
 						() => target.Inventory.Value,
+						i => target.InventoryCapacity.Value.GetCapacityFor(target.Inventory.Value, i),
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
-						Inventory.Populate(itemsToTransfer),
+						new Inventory(itemsToTransfer),
 						Agent.DepositCooldown.Value
 					)
 				);
@@ -132,12 +133,9 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
-				var currentlyValidItems = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value.GetCurrent(i));
+				var currentlyValidItems = sourceState.validItems.Where(i => 0 < Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i));
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
-				
-				// If we get here, that means either all valid items are full, or there are some but we're not being
-				// blocked from dumping them... OUT OF DATE DESC
 				
 				target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
@@ -146,7 +144,7 @@ namespace Lunra.Hothouse.Ai
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
-						return currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i));
+						return currentlyValidItems.Any(i => b.InventoryCapacity.Value.HasCapacityFor(b.Inventory.Value, i));
 					},
 					World.Buildings.AllActive
 				);
@@ -177,12 +175,13 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
-				if (Agent.Inventory.Value.GetSharedMinimumCapacity(sourceState.validItems) <= 0) return false;
-				var itemsWithCapacity = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value.GetCapacity(i));
+				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
+				
+				var itemsWithCapacity = sourceState.validItems.Where(i => Agent.InventoryCapacity.Value.HasCapacityFor(Agent.Inventory.Value, i));
 				if (itemsWithCapacity.None()) return false;
 				
 				target = World.ItemDrops.AllActive
-					.Where(t => sourceState.validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => t.Inventory.Value.Any(i)))
+					.Where(t => sourceState.validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => 0 < t.Inventory.Value[i]))
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault();
 				
@@ -201,9 +200,10 @@ namespace Lunra.Hothouse.Ai
 					new DwellerTransferItemsState<DwellerItemCleanupState<S>>.Target(
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
+						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
 						i => target.Inventory.Value = i,
 						() => target.Inventory.Value,
-						Inventory.Populate(itemsToTransfer),
+						new Inventory(itemsToTransfer),
 						Agent.WithdrawalCooldown.Value
 					)
 				);
@@ -220,12 +220,13 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
-				if (Agent.Inventory.Value.GetSharedMinimumCapacity(sourceState.validItems) <= 0) return false;
-				var itemsWithCapacity = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value.GetCapacity(i));
+				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
+				
+				var itemsWithCapacity = sourceState.validItems.Where(i => Agent.InventoryCapacity.Value.HasCapacityFor(Agent.Inventory.Value, i));
 				if (itemsWithCapacity.None()) return false;
 
 				target = World.ItemDrops.AllActive
-					.Where(t => sourceState.validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => t.Inventory.Value.Any(i)))
+					.Where(t => sourceState.validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => 0 < t.Inventory.Value[i]))
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault(
 						t =>  NavMesh.CalculatePath(

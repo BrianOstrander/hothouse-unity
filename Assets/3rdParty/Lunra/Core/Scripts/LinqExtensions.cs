@@ -132,5 +132,10 @@ namespace Lunra.Core
 		{
 			return entries.Except(new[] { element });
 		}
+		
+		public static IEnumerable<T> Union<T>(this IEnumerable<T> source, T element)
+		{
+			return source.Union(Enumerable.Repeat(element, 1));
+		}
 	}
 }

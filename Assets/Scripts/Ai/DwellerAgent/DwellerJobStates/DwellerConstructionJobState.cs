@@ -26,10 +26,7 @@ namespace Lunra.Hothouse.Ai
 					{
 						if (possibleConstructionSite.BuildingState.Value != BuildingStates.Constructing) return false;
 
-						return !possibleConstructionSite.ConstructionRecipeInventory.Value
-							.Inverted()
-							.Subtract(possibleConstructionSite.ConstructionRecipeInventoryPromised.Value)
-							.IsEmpty;
+						return !(possibleConstructionSite.ConstructionInventoryRemaining.Value - possibleConstructionSite.ConstructionInventoryPromised.Value).IsEmpty;
 					}
 				)
 				.ToDictionary(b => b, b => false);
@@ -64,17 +61,21 @@ namespace Lunra.Hothouse.Ai
 							}
 						}
 
-						var nonPromisedInventory = kv.Key.ConstructionRecipeInventory.Value
-							.Inverted()
-							.Subtract(kv.Key.ConstructionRecipeInventoryPromised.Value);
+						var nonPromisedInventory = kv.Key.ConstructionInventoryRemaining.Value - kv.Key.ConstructionInventoryPromised.Value;
 
-						if (!nonPromisedInventory.Intersect(possibleItemSource.Inventory.Value).IsEmpty)
+						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Value))
 						{
+							agent.InventoryCapacity.Value.GetClamped(
+								nonPromisedInventory,
+								out var promisedInventory
+							);
+							
 							promiseResult = new InventoryPromise(
 								kv.Key.Id.Value,
 								InventoryPromise.Operations.Construction,
-								nonPromisedInventory.Clamped(agent.Inventory.Value).SumClamped(agent.SharedInventoryMaximum.Value)
-							); 
+								promisedInventory
+							);
+							
 							return true;
 						}
 
@@ -133,13 +134,13 @@ namespace Lunra.Hothouse.Ai
 				
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
-					ToItemCleanupOnValidInventory.InventoryTrigger.SomeOrNonZeroMaximumFull,
+					ToItemCleanupOnValidInventory.InventoryTrigger.OnGreaterThanZero,
 					validJobs,
 					validItems
 				),
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
-					ToItemCleanupOnValidInventory.InventoryTrigger.None,
+					ToItemCleanupOnValidInventory.InventoryTrigger.OnEmpty,
 					validJobs,
 					validItems
 				)
@@ -171,16 +172,17 @@ namespace Lunra.Hothouse.Ai
 					{
 						// The dweller was unable to pull all the resources it wanted to, so we're going to correct the
 						// amount we promised
-						var newPromise = Agent.InventoryPromise.Value.Inventory.Intersect(Agent.Inventory.Value);
-						constructionSite.ConstructionRecipeInventoryPromised.Value = constructionSite.ConstructionRecipeInventoryPromised.Value
-							.Subtract(Agent.InventoryPromise.Value.Inventory.Subtract(newPromise));
+						Agent.InventoryPromise.Value.Inventory.Intersects(
+							Agent.Inventory.Value,
+							out var newPromise
+						);
+						constructionSite.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory - newPromise;
 
 						Agent.InventoryPromise.Value = Agent.InventoryPromise.Value.NewInventory(newPromise);
 					}
 					break;
 				case Steps.Depositing:
-					constructionSite.ConstructionRecipeInventoryPromised.Value = constructionSite.ConstructionRecipeInventoryPromised.Value
-						.Subtract(Agent.InventoryPromise.Value.Inventory);
+					constructionSite.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory;
 					Agent.InventoryPromise.Value = InventoryPromise.Default();
 					break;
 			}
@@ -226,12 +228,13 @@ namespace Lunra.Hothouse.Ai
 				var constructionSite = World.Buildings.AllActive.First(b => b.Id.Value == promise.BuildingId);
 				
 				Agent.InventoryPromise.Value = promise;
-				constructionSite.ConstructionRecipeInventoryPromised.Value = constructionSite.ConstructionRecipeInventoryPromised.Value.Add(promise.Inventory);
+				constructionSite.ConstructionInventoryPromised.Value += promise.Inventory;
 
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerConstructionJobState>.Target(
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
+						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
 						i => target.Inventory.Value = i,
 						() => target.Inventory.Value,
 						promise.Inventory,
@@ -305,8 +308,9 @@ namespace Lunra.Hothouse.Ai
 			{
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerConstructionJobState>.Target(
-						i => target.ConstructionRecipeInventory.Value = i,
-						() => target.ConstructionRecipeInventory.Value,
+						i => target.ConstructionInventoryRemaining.Value = i,
+						() => target.ConstructionInventoryRemaining.Value,
+						i => Mathf.Min(i.Weight, target.ConstructionInventoryRemaining.Value[i.Type] - i.Weight),
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
 						Agent.InventoryPromise.Value.Inventory,

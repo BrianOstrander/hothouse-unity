@@ -35,6 +35,7 @@ namespace Lunra.Hothouse.Presenters
 		#region Events
 		void OnRefreshDebugLabel()
 		{
+			/*
 			if (View.NotVisible) return;
 
 			var result = string.Empty;
@@ -82,6 +83,8 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			View.Text = result;
+			*/
+			View.Text = "TODO";
 		}
 		#endregion
 		

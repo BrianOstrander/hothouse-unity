@@ -71,13 +71,13 @@ namespace Lunra.Editor.Core
 					{
 						case BuildingStates.Constructing:
 							label += GetInventory(
-								model.ConstructionRecipeInventory.Value,
+								model.ConstructionInventoryRemaining.Value,
 								InventoryVisibilities.IfMaximumIsGreaterThanZero,
 								"Recipe"
 							);
 							
 							label += GetInventory(
-								model.ConstructionRecipeInventoryPromised.Value,
+								model.ConstructionInventoryPromised.Value,
 								InventoryVisibilities.IfMaximumIsGreaterThanZero,
 								"Promised"
 							);
@@ -170,6 +170,7 @@ namespace Lunra.Editor.Core
 			string label = "Inventory"
 		)
 		{
+			/*
 			switch (inventoryVisibilities)
 			{
 				case InventoryVisibilities.IfNotNonZeroEmpty:
@@ -188,6 +189,8 @@ namespace Lunra.Editor.Core
 			}
 			
 			return result;
+			*/
+			return "TODO";
 		}
 
 		public static void OpenHandlerAsset()

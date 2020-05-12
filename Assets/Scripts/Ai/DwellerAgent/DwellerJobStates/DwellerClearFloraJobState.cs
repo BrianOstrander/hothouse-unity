@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Ai
 			
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
-					ToItemCleanupOnValidInventory.InventoryTrigger.NonZeroMaximumFull,
+					ToItemCleanupOnValidInventory.InventoryTrigger.OnFull,
 					validJobs,
 					validItems
 				),
@@ -47,13 +47,13 @@ namespace Lunra.Hothouse.Ai
 				
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
-					ToItemCleanupOnValidInventory.InventoryTrigger.SomeOrNonZeroMaximumFull,
+					ToItemCleanupOnValidInventory.InventoryTrigger.OnGreaterThanZero,
 					validJobs,
 					validItems
 				),
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
-					ToItemCleanupOnValidInventory.InventoryTrigger.None,
+					ToItemCleanupOnValidInventory.InventoryTrigger.OnEmpty,
 					validJobs,
 					validItems
 				)
@@ -90,13 +90,17 @@ namespace Lunra.Hothouse.Ai
 						health => targetFlora.Health.Value = health,
 						() =>
 						{
-							Agent.Inventory.Value = Agent.Inventory.Value.Add(
+							var hasOverflow = Agent.InventoryCapacity.Value.AddClamped(
+								Agent.Inventory.Value,
 								itemDrops,
+								out var clamped,
 								out var overflow
 							);
 
-							if (overflow.IsEmpty) return;
-							
+							Agent.Inventory.Value = clamped;
+
+							if (!hasOverflow) return;
+
 							World.ItemDrops.Activate(
 								itemDrop =>
 								{

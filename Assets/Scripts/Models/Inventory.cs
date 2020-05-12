@@ -1,301 +1,215 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
+#pragma warning disable CS0661 // Defines == or != operator but does not override Object.GetHashCode()
+#pragma warning disable CS0659 // Overrides Object.Equals(object) but does not override Object.GetHashCode()
 	public struct Inventory
+#pragma warning restore CS0659 // Overrides Object.Equals(object) but does not override Object.GetHashCode()
+#pragma warning restore CS0661 // Defines == or != operator but does not override Object.GetHashCode()
 	{
-		public static Inventory Empty { get; } = new Inventory(Item.Empty, Item.Empty);
+		public struct Entry
+		{
+			public readonly Item.Types Type;
+			public readonly int Weight;
 
-		public static Inventory Populate(
-			Func<Item.Types, int> maximumPredicate,
-			Func<Item.Types, int> currentPredicate
-		)
-		{
-			return new Inventory(
-				Item.Populate(maximumPredicate),
-				Item.Populate(currentPredicate)
-			);
-		}
-		
-		public static Inventory Populate(
-			Dictionary<Item.Types, int> all
-		)
-		{
-			var result = Item.Populate(
-				t =>
-				{
-					all.TryGetValue(t, out var count);
-					return count;
-				}
-			);
-			return new Inventory(result, result); 
-		}
-		
-		public static Inventory PopulateMaximum(
-			Dictionary<Item.Types, int> all
-		)
-		{
-			var resultCurrent = Item.Populate(
-				t =>
-				{
-					all.TryGetValue(t, out var count);
-					return count;
-				}
-			);
-			
-			return new Inventory(resultCurrent, Item.Populate(t => 0)); 
-		}
-
-		public readonly Item[] Maximum;
-		public readonly Item[] Current;
-		public readonly bool IsEmpty;
-		public readonly bool AllMaximumsZero;
-		
-		Inventory(
-			Item[] maximum,
-			Item[] current
-		)
-		{
-			if (maximum.Length != current.Length) throw new Exception("Capacity and entries must have the same length");
-			
-			Maximum = maximum;
-			Current = current;
-
-			IsEmpty = Current.None(i => 0 < i.Count);
-			AllMaximumsZero = Maximum.None(i => 0 < i.Count);
-		}
-
-		public Inventory SetMaximum(int count, Item.Types type) => SetMaximum(current => current.Type == type ? count : current.Count);
-		
-		public Inventory SetMaximum(Item item) => SetMaximum(current => current.Type == item.Type ? item.Count : current.Count);
-		
-		public Inventory SetMaximum(Func<Item, int> predicate)
-		{
-			return new Inventory(
-				Maximum.Select(i => Item.New(Mathf.Max(0, predicate(i)), i.Type)).ToArray(),
-				Current.Select(i => Item.New(Mathf.Min(i.Count, predicate(i)), i.Type)).ToArray()
-			);
-		}
-		
-		public Inventory SetCurrent(int count, Item.Types type) => SetCurrent(current => current.Type == type ? count : current.Count);
-		
-		public Inventory SetCurrent(Item item) => SetCurrent(current => current.Type == item.Type ? item.Count : current.Count);
-		
-		public Inventory SetCurrent(Func<Item, int> predicate)
-		{
-			Func<Item.Types, int> getMaximum = GetMaximum;
-			return new Inventory(
-				Maximum,
-				Current.Select(
-					i => Item.New(
-						Mathf.Clamp(predicate(i), 0, getMaximum(i.Type)),
-						i.Type
-					)
-				).ToArray()
-			);
-		}
-		
-		public Inventory Add(int count, Item.Types type) => Add(current => current.Type == type ? count : 0);
-		
-		public Inventory Add(Item item) => Add(current => current.Type == item.Type ? item.Count : 0);
-		
-		public Inventory Add(Func<Item, int> predicate)
-		{
-			Func<Item.Types, int> getMaximum = GetMaximum;
-			return new Inventory(
-				Maximum,
-				Current.Select(
-					i => Item.New(
-						Mathf.Clamp(i.Count + predicate(i), 0, getMaximum(i.Type)),
-						i.Type
-					)
-				).ToArray()
-			);
-		}
-
-		public Inventory Add(Inventory target) => Add(target, out _);
-		
-		public Inventory Add(
-			Inventory target,
-			out Inventory overflow
-		)
-		{
-			var result = Add(i => target[i.Type]);
-
-			var rawOverflow = new Dictionary<Item.Types, int>();
-			
-			foreach (var item in target.Current)
+			public Entry(
+				Item.Types type,
+				int weight
+			)
 			{
-				var capacity = GetCapacity(item.Type);
-				if (capacity < item.Count) rawOverflow.Add(item.Type, item.Count - capacity);
+				Type = type;
+				Weight = weight;
 			}
-			
-			overflow = Populate(rawOverflow);
-
-			return result;
-		}
-
-		public Inventory Subtract(Inventory inventory) => Subtract(i => inventory[i.Type]);
-		
-		public Inventory Subtract(int count, Item.Types type) => Subtract(current => current.Type == type ? count : 0);
-		
-		public Inventory Subtract(Item item) => Subtract(current => current.Type == item.Type ? item.Count : 0);
-		
-		public Inventory Subtract(Func<Item, int> predicate)
-		{
-			Func<Item.Types, int> getMaximum = GetMaximum;
-			return new Inventory(
-				Maximum,
-				Current.Select(
-					i => Item.New(
-						Mathf.Clamp(i.Count - predicate(i), 0, getMaximum(i.Type)),
-						i.Type
-					)
-				).ToArray()
-			);
-		}
-
-		public Inventory Intersect(Inventory inventory)
-		{
-			var source = this;
-			return Populate(
-				type => Mathf.Min(source[type], inventory[type]),
-				type => Mathf.Min(source[type], inventory[type])
-			);
 		}
 		
-		public Inventory Inverted()
-		{
-			var source = this;
-			return Populate(
-				type => source.GetMaximum(type),
-				type => source.GetMaximum(type) - source[type]
-			);
-		}
-
-		public Inventory Filled()
-		{
-			var source = this;
-			return Populate(
-				type => source.GetMaximum(type),
-				type => source.GetMaximum(type)
-			);
-		}
-
-		public Inventory Clamped(Inventory inventory)
-		{
-			var source = this;
-			return Populate(
-				type => Mathf.Min(source.GetMaximum(type), inventory.GetMaximum(type)),
-				type => Mathf.Min(source[type], inventory.GetMaximum(type))
-			);
-		}
+		public static Inventory Empty => new Inventory(new Dictionary<Item.Types, int>());
 		
-		public Inventory SumClamped(int maximum)
+		// TODO: Hide this and replace with something that returns (Item.Types Type, int Weight)
+		// Really shouldn't show this since it may not contain all values!
+		public readonly ReadOnlyDictionary<Item.Types, int> Entries;
+		public readonly int Weight;
+
+		public bool IsEmpty => 0 == Weight;
+
+		public Inventory(Dictionary<Item.Types, int> entries)
 		{
-			List<Item> results = new List<Item>();
-			var count = 0;
-			foreach (var item in Current)
+			// TODO: Filter out zero kv's
+			Entries = new ReadOnlyDictionary<Item.Types, int>(entries);
+			Weight = entries.Select(kv => kv.Value).Sum();
+		}
+
+		public int this[Item.Types type]
+		{
+			get
 			{
-				if (count == maximum) break;
-				var addition = Mathf.Min(item.Count, maximum - count);
-				results.Add(Item.New(addition, item.Type));
-				count += addition;
+				if (Entries.TryGetValue(type, out var value)) return value;
+				return 0;
 			}
-
-			return Populate(
-				type => results.FirstOrDefault(i => i.Type == type).Count,
-				type => results.FirstOrDefault(i => i.Type == type).Count
-			);
 		}
 
-		public int GetMaximum(Item.Types type) => Maximum.FirstOrDefault(i => i.Type == type).Count;
-		
-		public int GetCurrent(Item.Types type) => Current.FirstOrDefault(i => i.Type == type).Count;
-
-		public int GetCapacity(Item.Types type) => GetMaximum(type) - GetCurrent(type);
-
-		public Item[] GetNonZeroMaximumFull()
-		{
-			Func<Item.Types, int> getCurrent = GetCurrent;
-			return Maximum.Where(m => m.Count != 0 && m.Count == getCurrent(m.Type)).ToArray();
-		}
-		
-		public bool IsFull(Item.Types type) => GetCapacity(type) == 0;
-
-		public bool IsNonZeroMaximumFull(Item.Types type) => 0 < GetMaximum(type) && IsFull(type);
-
-		public bool IsAllNonZeroMaximumFull()
-		{
-			foreach (var maximum in Maximum)
-			{
-				if (maximum.Count == 0) continue;
-				if (this[maximum.Type] != maximum.Count) return false;
-			}
-
-			return true;
-		}
-
-		public bool IsNoneFull() => !IsAnyFull();
-		
-		public bool IsAnyFull()
-		{
-			foreach (var type in EnumExtensions.GetValues(Item.Types.Unknown))
-			{
-				if (IsFull(type)) return true;
-			}
-
-			return false;
-		}
-
-		public bool Any(Item.Types type) => 0 < GetCurrent(type);
-		public bool None(Item.Types type) => !Any(type);
+		public IEnumerable<Item.Types> Types => Entries.Keys;
 
 		public bool Contains(Inventory inventory)
 		{
-			if (inventory.IsEmpty) return true;
-			foreach (var currentItem in Current)
-			{
-				if (currentItem.Count < inventory[currentItem.Type]) return false;
-			}
-			return true;
+			var current = this;
+			return inventory.Types.All(t => inventory[t] <= current[t]);
+		}
+
+		public bool Intersects(Inventory inventory) => Intersects(inventory, out _);
+
+		public bool Intersects(
+			Inventory inventory,
+			out Inventory intersection
+		)
+		{
+			var current = this;
+			intersection = new Inventory(
+				inventory.Types.Intersect(current.Types).ToDictionary(
+					type => type,
+					type => Mathf.Min(current[type], inventory[type])
+				)
+			);
+
+			return !intersection.IsEmpty;
 		}
 		
-		public int this[Item.Types type] => GetCurrent(type);
-
-		public int GetCurrentSum(params Item.Types[] types)
+		public static Inventory Maximum(Inventory inventory0, Inventory inventory1)
 		{
-			var result = 0;
-			foreach (var type in types) result += GetCurrent(type);
-			return result;
+			if (inventory0 <= inventory1) return inventory1;
+			return inventory0;
+		}
+
+		public static Inventory Minimum(Inventory inventory0, Inventory inventory1)
+		{
+			if (inventory0 <= inventory1) return inventory0;
+			return inventory1;
+		}
+
+		#region Operator Overrides
+		public static Inventory operator +(Inventory inventory0, Inventory inventory1)
+		{
+			return new Inventory(
+				inventory0.Types.Union(inventory1.Types).ToDictionary(
+					type => type,
+					type => inventory0[type] + inventory1[type]
+				)
+			);
 		}
 		
-		public int GetSharedMinimumCapacity(params Item.Types[] types)
+		public static Inventory operator +(Inventory inventory0, (Item.Types Type, int Weight) entry)
 		{
-			var minimumMaximum = int.MaxValue;
-			var total = 0;
-			foreach (var type in types)
-			{
-				minimumMaximum = Mathf.Min(GetMaximum(type), minimumMaximum);
-				total += this[type];
-			}
+			return new Inventory(
+				inventory0.Types.Union(entry.Type).ToDictionary(
+					type => type,
+					type => type == entry.Type ? inventory0[type] + entry.Weight : inventory0[type]
+				)
+			);
+		}
 
-			return minimumMaximum - total;
+		public static Inventory operator -(Inventory inventory0, Inventory inventory1)
+		{
+			return new Inventory(
+				inventory0.Types.Union(inventory1.Types).ToDictionary(
+					type => type,
+					type => inventory0[type] - inventory1[type]
+				)
+			);
 		}
 		
-		public override string ToString()
+		public static Inventory operator -(Inventory inventory, (Item.Types Type, int Weight) entry)
 		{
-			var result = "[";
-
-			result += "\n\tType\t{ Curr\t:\tMax }";
-			
-			foreach (var entry in Current) result += "\n\t" + entry.Type + "\t{ " + entry.Count + "\t:\t" + GetMaximum(entry.Type) + " }";
-			
-			return result + "\n]";
+			return new Inventory(
+				inventory.Types.Union(entry.Type).ToDictionary(
+					type => type,
+					type => type == entry.Type ? inventory[type] - entry.Weight : inventory[type]
+				)
+			);
 		}
+		
+		public static Inventory operator *(Inventory inventory0, Inventory inventory1)
+		{
+			return new Inventory(
+				inventory0.Types.Union(inventory1.Types).ToDictionary(
+					type => type,
+					type => inventory0[type] * inventory1[type]
+				)
+			);
+		}
+		
+		public static Inventory operator *(Inventory inventory, int value)
+		{
+			return new Inventory(
+					inventory.Types.ToDictionary(
+					type => type,
+					type => inventory[type] * value
+				)
+			);
+		}
+		
+		public static Inventory operator *(Inventory inventory, (Item.Types Type, int Weight) entry)
+		{
+			return new Inventory(
+				inventory.Types.ToDictionary(
+					type => type,
+					type => type == entry.Type ? inventory[type] * entry.Weight : inventory[type] 
+				)
+			);
+		}
+
+		public static bool operator <(Inventory inventory0, Inventory inventory1)
+		{
+			return inventory0.Weight < inventory1.Weight;
+		}
+
+		public static bool operator >(Inventory inventory0, Inventory inventory1)
+		{
+			return inventory0.Weight > inventory1.Weight;
+		}
+
+		public static bool operator <=(Inventory inventory0, Inventory inventory1)
+		{
+			if (inventory0 < inventory1) return true;
+			if (inventory0 == inventory1) return true;
+			return false;
+		}
+
+		public static bool operator >=(Inventory inventory0, Inventory inventory1)
+		{
+			if (inventory0 > inventory1) return true;
+			if (inventory0 == inventory1) return true;
+			return false;
+		}
+
+		public bool Equals(Inventory inventory)
+		{
+			if (Weight != inventory.Weight) return false;
+			var current = this;
+			return Types.Union(inventory.Types).All(t => current[t] == inventory[t]);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+
+			return obj.GetType() == GetType() && Equals((Inventory)obj);
+		}
+
+		public static bool operator ==(Inventory inventory0, Inventory inventory1)
+		{
+			if (Equals(inventory0, inventory1)) return true;
+			if (Equals(inventory0, null)) return false;
+			if (Equals(inventory1, null)) return false;
+			return inventory0.Equals(inventory1);
+		}
+
+		public static bool operator !=(Inventory inventory0, Inventory inventory1) { return !(inventory0 == inventory1); }
+		#endregion
 	}
 }

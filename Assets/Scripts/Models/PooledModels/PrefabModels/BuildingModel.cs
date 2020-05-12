@@ -16,14 +16,17 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
 		
+		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.ByNone();
+		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> InventoryCapacity;
+		
 		[JsonProperty] InventoryPermission inventoryPermission = Models.InventoryPermission.AllForAnyJob();
 		[JsonIgnore] public readonly ListenerProperty<InventoryPermission> InventoryPermission;
 		
-		[JsonProperty] Inventory constructionRecipeInventory = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionRecipeInventory;
+		[JsonProperty] Inventory constructionInventoryRemaining = Models.Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventoryRemaining;
 		
-		[JsonProperty] Inventory constructionRecipeInventoryPromised = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionRecipeInventoryPromised;
+		[JsonProperty] Inventory constructionInventoryPromised = Models.Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventoryPromised;
 
 		[JsonProperty] DesireQuality[] desireQuality = new DesireQuality[0];
 		[JsonIgnore] public readonly ListenerProperty<DesireQuality[]> DesireQuality;
@@ -40,9 +43,10 @@ namespace Lunra.Hothouse.Models
 		{
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
+			InventoryCapacity = new ListenerProperty<InventoryCapacity>(value => inventoryCapacity = value, () => inventoryCapacity);
 			InventoryPermission = new ListenerProperty<InventoryPermission>(value => inventoryPermission = value, () => inventoryPermission);
-			ConstructionRecipeInventory = new ListenerProperty<Inventory>(value => constructionRecipeInventory = value, () => constructionRecipeInventory);
-			ConstructionRecipeInventoryPromised = new ListenerProperty<Inventory>(value => constructionRecipeInventoryPromised = value, () => constructionRecipeInventoryPromised);
+			ConstructionInventoryRemaining = new ListenerProperty<Inventory>(value => constructionInventoryRemaining = value, () => constructionInventoryRemaining);
+			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);
 			DesireQuality = new ListenerProperty<DesireQuality[]>(value => desireQuality = value, () => desireQuality);
 			
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);

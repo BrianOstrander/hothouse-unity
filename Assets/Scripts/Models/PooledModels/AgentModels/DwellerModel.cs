@@ -27,12 +27,12 @@ namespace Lunra.Hothouse.Models.AgentModels
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
 
+		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.ByNone();
+		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> InventoryCapacity;
+
 		[JsonProperty] InventoryPromise inventoryPromise = Models.InventoryPromise.Default();
 		[JsonIgnore] public readonly ListenerProperty<InventoryPromise> InventoryPromise;
 
-		[JsonProperty] int sharedInventoryMaximum;
-		[JsonIgnore] public readonly ListenerProperty<int> SharedInventoryMaximum;
-		
 		[JsonProperty] float meleeRange;
 		[JsonIgnore] public readonly ListenerProperty<float> MeleeRange;
 		
@@ -68,8 +68,8 @@ namespace Lunra.Hothouse.Models.AgentModels
 			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);
 			DesireDamage = new ListenerProperty<Dictionary<Desires, float>>(value => desireDamage = value, () => desireDamage);
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
+			InventoryCapacity = new ListenerProperty<InventoryCapacity>(value => inventoryCapacity = value, () => inventoryCapacity);
 			InventoryPromise = new ListenerProperty<InventoryPromise>(value => inventoryPromise = value, () => inventoryPromise);
-			SharedInventoryMaximum = new ListenerProperty<int>(value => sharedInventoryMaximum = value, () => sharedInventoryMaximum);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
 			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);

@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			Model.Inventory.Changed += OnBuildingInventory;
-			Model.ConstructionRecipeInventory.Changed += OnBuildingConstructionRecipeInventory;
+			Model.ConstructionInventoryRemaining.Changed += OnBuildingConstructionInventoryRemaining;
 			Model.Operate += OnBuildingOperate;
 		}
 
@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 
 			Model.Inventory.Changed -= OnBuildingInventory;
-			Model.ConstructionRecipeInventory.Changed -= OnBuildingConstructionRecipeInventory;
+			Model.ConstructionInventoryRemaining.Changed -= OnBuildingConstructionInventoryRemaining;
 			Model.Operate -= OnBuildingOperate;
 		}
 
@@ -59,9 +59,9 @@ namespace Lunra.Hothouse.Presenters
 			if (anyChanged) Model.DesireQuality.Value = newDesireQuality;
 		}
 
-		void OnBuildingConstructionRecipeInventory(Inventory constructionRecipe)
+		void OnBuildingConstructionInventoryRemaining(Inventory constructionInventoryRemaining)
 		{
-			if (!constructionRecipe.IsAllNonZeroMaximumFull()) return;
+			if (!constructionInventoryRemaining.IsEmpty) return;
 
 			switch (Model.BuildingState.Value)
 			{
@@ -91,7 +91,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (quality.Cost.IsEmpty) return;
 
-			Model.Inventory.Value = Model.Inventory.Value.Subtract(quality.Cost);
+			Model.Inventory.Value -= quality.Cost;
 		}
 		#endregion
 		

@@ -162,7 +162,7 @@ namespace Lunra.Hothouse.Services
 						flora.SpreadDamage.Value = 50f;
 						flora.ValidPrefabIds.Value = fastFloraPrefabIds;
 						flora.ReproductionElapsed.Value = Interval.WithMaximum(2f);
-						flora.ItemDrops.Value = Inventory.Populate(
+						flora.ItemDrops.Value = new Inventory(
 							new Dictionary<Item.Types, int>
 							{
 								{ Item.Types.Stalks, 1 }
@@ -173,7 +173,7 @@ namespace Lunra.Hothouse.Services
 						flora.SpreadDamage.Value = 0f;
 						flora.ValidPrefabIds.Value = edibleFloraPrefabIds;
 						flora.ReproductionElapsed.Value = Interval.WithMaximum(10f);
-						flora.ItemDrops.Value = Inventory.Populate(
+						flora.ItemDrops.Value = new Inventory(
 							new Dictionary<Item.Types, int>
 							{
 								{ Item.Types.Rations, 1 }
@@ -231,10 +231,6 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 			
-			// game.Flora.Activate(
-			// 	flora => initializeFlora(flora, new Vector3(-12f, -0.8386866f, 6f))
-			// );
-			
 			void initializeDweller(
 				DwellerModel dweller,
 				string id,
@@ -262,39 +258,13 @@ namespace Lunra.Hothouse.Services
 
 				dweller.WithdrawalCooldown.Value = 0.5f;
 				dweller.DepositCooldown.Value = dweller.WithdrawalCooldown.Value;
-				dweller.SharedInventoryMaximum.Value = 2;
-				dweller.Inventory.Value = Inventory.Populate(
-					type => 2,
-					type => 0//type == Item.Types.Stalks ? 2 : 0
-				);
-				
-				// dweller.Inventory.Value = Inventory.PopulateMaximum(
-				// 	new Dictionary<Item.Types, int>
-				// 	{
-				// 		{ Item.Types.Stalks, 2 },
-				// 		{ Item.Types.Rations, 2 },
-				// 		{ Item.Types.Scrap, 2 }
-				// 	}
-				// );
+				dweller.InventoryCapacity.Value = InventoryCapacity.ByTotalWeight(2);
 				
 				dweller.DesireDamage.Value = new Dictionary<Desires, float>
 				{
 					{ Desires.Eat , 0.3f },
 					{ Desires.Sleep , 0.1f }
 				};
-				
-				/*
-				dweller.InventoryPromise.Value = new InventoryPromise(
-					"sleep_0",
-					InventoryPromise.Operations.Construction,
-					Inventory.Populate(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Stalks, 2 }	
-						}
-					)
-				);
-				*/
 			}
 			
 			game.Dwellers.Activate(
@@ -306,60 +276,22 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 			
-			// game.Dwellers.Activate(
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"1",
-			// 		new Vector3(-11f, -0.8386866f, 3f),
-			// 		Jobs.Construction
-			// 		// debugAgentStates: true
-			// 	)
-			// );
-			
-			// game.Dwellers.Activate(
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"2",
-			// 		new Vector3(-10f, -0.8386866f, 3f),
-			// 		Jobs.ClearFlora
-			// 	)
-			// );
-			/*
-			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"3",
-					new Vector3(-9f, -0.8386866f, 3f),
-					Jobs.ClearFlora
-				)
-			);
-			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"4",
-					new Vector3(-8f, -0.8386866f, 3f),
-					Jobs.ClearFlora,
-					0
-				)
-			);
-			*/
-
 			void initializeBuilding(
 				BuildingModel model,
 				string id,
 				Vector3 position,
 				Inventory inventory,
+				InventoryCapacity inventoryCapacity,
 				params DesireQuality[] desireQualities
 			)
 			{
 				model.BuildingState.Value = BuildingStates.Operating;
-				model.ConstructionRecipeInventory.Value = Inventory.Empty;
-				model.ConstructionRecipeInventoryPromised.Value = Inventory.Empty;
+				model.ConstructionInventoryRemaining.Value = Inventory.Empty;
+				model.ConstructionInventoryPromised.Value = Inventory.Empty;
 				model.Id.Value = id;
 				model.Position.Value = position;
 				model.Inventory.Value = inventory;
+				model.InventoryCapacity.Value = inventoryCapacity;
 				model.DesireQuality.Value = desireQualities;
 			}
 
@@ -370,63 +302,20 @@ namespace Lunra.Hothouse.Services
 					"sleep_0",
 					new Vector3(-12f, -0.8386866f, 6f),
 					Inventory.Empty,
+					InventoryCapacity.ByNone(),
 					DesireQuality.New(Desires.Sleep, 1f)
 				)
 			);
 
 			sleepBuilding.BuildingState.Value = BuildingStates.Constructing;
-			sleepBuilding.ConstructionRecipeInventory.Value = Inventory.PopulateMaximum(
+			sleepBuilding.ConstructionInventoryRemaining.Value = new Inventory(
 				new Dictionary<Item.Types, int>
 				{
 					{ Item.Types.Stalks, 2 },
 					{ Item.Types.Scrap, 2 }
 				}
 			);
-			sleepBuilding.ConstructionRecipeInventoryPromised.Value = sleepBuilding.ConstructionRecipeInventory.Value;
-			
-			/*
-			game.Buildings.Activate(
-				"debug",
-				m => initializeBuilding(
-					m,
-					"item_cache_0",
-					new Vector3(6f, -0.8386866f, 6f),
-					Inventory.PopulateMaximum(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Stalks, 999 }
-						}
-					) 
-				)
-			);
-			*/
-			
-			/*
-			game.Buildings.Activate(
-				"debug",
-				m => initializeBuilding(
-					m,
-					"eat_0",
-					new Vector3(12f, -0.8386866f, 2f),
-					Inventory.Populate(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Rations, 99 }
-						}
-					),
-					new DesireQuality(
-						Desires.Eat, 
-						Inventory.Populate(
-							new Dictionary<Item.Types, int>
-							{
-								{ Item.Types.Rations, 1 }
-							}
-						),
-						1f
-					)
-				)
-			);
-			*/
+			sleepBuilding.ConstructionInventoryPromised.Value = sleepBuilding.ConstructionInventoryRemaining.Value;
 			
 			game.Buildings.Activate(
 				"default_wagon",
@@ -434,13 +323,27 @@ namespace Lunra.Hothouse.Services
 					m,
 					"wagon_0",
 					new Vector3(0f, -0.8386866f, 4f),
-					Inventory.Populate(
-						type => 50,
-						type => 4//type == Item.Types.Rations ? 5 : 0
+					new Inventory(
+						new Dictionary<Item.Types, int>
+						{
+							{ Item.Types.Stalks, 4 },
+							{ Item.Types.Scrap, 4 },
+							{ Item.Types.Rations, 4 }
+						}
+					),
+					InventoryCapacity.ByIndividualWeight(
+						new Inventory(
+							new Dictionary<Item.Types, int>
+							{
+								{ Item.Types.Stalks, 50 },
+								{ Item.Types.Scrap, 50 },
+								{ Item.Types.Rations, 50 }
+							}
+						)	
 					),
 					new DesireQuality(
 						Desires.Eat, 
-						Inventory.Populate(
+						new Inventory(
 							new Dictionary<Item.Types, int>
 							{
 								{ Item.Types.Rations, 1 }
@@ -451,28 +354,12 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 
-			/*
-			game.ItemDrops.Activate(
-				m =>
-				{
-					m.Position.Value = new Vector3(2f, 0f, -5f);
-					m.Job.Value = Jobs.ClearFlora;
-					m.Inventory.Value = Inventory.Populate(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Stalks, 1 }
-						}
-					);
-				}
-			);
-			
-			*/
 			game.ItemDrops.Activate(
 				m =>
 				{
 					m.Position.Value = new Vector3(1f, 0f, -5f);
 					m.Job.Value = Jobs.ClearFlora;
-					m.Inventory.Value = Inventory.Populate(
+					m.Inventory.Value = new Inventory(
 						new Dictionary<Item.Types, int>
 						{
 							{ Item.Types.Rations, 1 }
@@ -486,7 +373,7 @@ namespace Lunra.Hothouse.Services
 				{
 					m.Position.Value = new Vector3(0f, 0f, -5f);
 					m.Job.Value = Jobs.ClearFlora;
-					m.Inventory.Value = Inventory.Populate(
+					m.Inventory.Value = new Inventory(
 						new Dictionary<Item.Types, int>
 						{
 							{ Item.Types.Rations, 1 }

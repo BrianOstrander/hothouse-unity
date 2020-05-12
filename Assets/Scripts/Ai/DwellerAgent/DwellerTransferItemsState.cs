@@ -16,6 +16,7 @@ namespace Lunra.Hothouse.Ai
 		{
 			public readonly Action<Inventory> SetDestination;
 			public readonly Func<Inventory> GetDestination;
+			public readonly Func<(Item.Types Type, int Weight), int> GetDestinationCapacity;
 			
 			public readonly Action<Inventory> SetSource;
 			public readonly Func<Inventory> GetSource;
@@ -26,6 +27,7 @@ namespace Lunra.Hothouse.Ai
 			public Target(
 				Action<Inventory> setDestination,
 				Func<Inventory> getDestination,
+				Func<(Item.Types Type, int Weight), int> getDestinationCapacity,
 				Action<Inventory> setSource,
 				Func<Inventory> getSource,
 				Inventory itemsToTransfer,
@@ -34,6 +36,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				SetDestination = setDestination;
 				GetDestination = getDestination;
+				GetDestinationCapacity = getDestinationCapacity;
 				SetSource = setSource;
 				GetSource = getSource;
 				ItemsToTransfer = itemsToTransfer;
@@ -45,6 +48,7 @@ namespace Lunra.Hothouse.Ai
 				return new Target(
 					SetDestination,
 					GetDestination,
+					GetDestinationCapacity,
 					SetSource,
 					GetSource,
 					itemsToUnload,
@@ -74,20 +78,30 @@ namespace Lunra.Hothouse.Ai
 
 			cooldownElapsed = cooldownElapsed % target.TransferCooldown;
 
-			var nextToUnload = target.ItemsToTransfer.Current.FirstOrDefault(
-				i => 0 < i.Count && target.GetSource().Any(i.Type) && 0 < target.GetDestination().GetCapacity(i.Type)
-			).Type;
+			(Item.Types Type, int Weight) itemToUnload = (Item.Types.Unknown, 0);
 
-			if (nextToUnload == Item.Types.Unknown)
+			foreach (var item in target.ItemsToTransfer.Entries)
+			{
+				if (item.Value == 0) continue;
+				if (target.GetSource()[item.Key] == 0) continue;
+				if (target.GetDestinationCapacity((item.Key, item.Value)) <= 0) continue;
+				itemToUnload = (item.Key, item.Value);
+				break;
+			}
+			
+			if (itemToUnload.Type == Item.Types.Unknown)
 			{
 				target = target.NewItemsToUnload(Inventory.Empty);
 				return;
 			}
 
-			target.SetDestination(target.GetDestination().Add(1, nextToUnload));
-			target.SetSource(target.GetSource().Subtract(1, nextToUnload));
+			// TODO: The amount transfered at a time should probably be defined somewhere and not hardcoded...
+			itemToUnload.Weight = 1;
+
+			target.SetDestination(target.GetDestination() + itemToUnload);
+			target.SetSource(target.GetSource() - itemToUnload);
 			
-			target = target.NewItemsToUnload(target.ItemsToTransfer.Subtract(1, nextToUnload));
+			target = target.NewItemsToUnload(target.ItemsToTransfer - itemToUnload);
 		}
 
 		public override void End()
@@ -113,9 +127,9 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
-				return sourceState.target.ItemsToTransfer.Current
-					.Where(i => 0 < i.Count)
-					.None(i => 0 < sourceState.target.GetDestination().GetCapacity(i.Type));
+				return sourceState.target.ItemsToTransfer.Entries
+					.Where(i => 0 < i.Value)
+					.None(i => 0 <= sourceState.target.GetDestinationCapacity((i.Key, i.Value)));
 			}
 		}
 	}

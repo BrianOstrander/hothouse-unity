@@ -77,10 +77,10 @@ namespace Lunra.Hothouse.Ai
 			public enum InventoryTrigger
 			{
 				Unknown = 0,
-				Any = 10,
-				None = 20,
-				NonZeroMaximumFull = 40,
-				SomeOrNonZeroMaximumFull = 50
+				Always = 10,
+				OnEmpty = 20,
+				OnFull = 40,
+				OnGreaterThanZero = 50
 			}
 
 			public override string Name => base.Name + "." + inventoryTrigger;
@@ -107,21 +107,20 @@ namespace Lunra.Hothouse.Ai
 
 			public override bool IsTriggered()
 			{
-				if (inventoryTrigger == InventoryTrigger.Any) return true;
+				if (inventoryTrigger == InventoryTrigger.Always) return true;
 
 				switch (inventoryTrigger)
 				{
-					case InventoryTrigger.Any:
+					case InventoryTrigger.Always:
 						return true;
-					case InventoryTrigger.None:
-						if (validItems.Any(i => Agent.Inventory.Value.Any(i))) return false;
+					case InventoryTrigger.OnEmpty:
+						if (!Agent.Inventory.Value.IsEmpty) return false;
 						return IsAnyValidItemReachable();
-					case InventoryTrigger.NonZeroMaximumFull:
-						if (0 < Agent.Inventory.Value.GetSharedMinimumCapacity(validItems)) return false;
+					case InventoryTrigger.OnFull:
+						if (Agent.InventoryCapacity.Value.IsNotFull(Agent.Inventory.Value)) return false;
 						return IsAnyBuildingWithInventoryReachable();
-					case InventoryTrigger.SomeOrNonZeroMaximumFull:
-						var someValidItems = validItems.Where(i => Agent.Inventory.Value.Any(i));
-						if (someValidItems.None()) return false;
+					case InventoryTrigger.OnGreaterThanZero:
+						if (Agent.Inventory.Value.IsEmpty) return false;
 						return IsAnyValidItemReachable() || IsAnyBuildingWithInventoryReachable();
 				}
 				
@@ -131,11 +130,8 @@ namespace Lunra.Hothouse.Ai
 
 			bool IsAnyValidItemReachable()
 			{
-				var itemsWithCapacity = validItems.Where(i => 0 < Agent.Inventory.Value.GetCapacity(i));
-				if (itemsWithCapacity.None()) return false;
-
 				var target = World.ItemDrops.AllActive
-					.Where(t => validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => t.Inventory.Value.Any(i)))
+					.Where(t => validJobs.Contains(t.Job.Value) && validItems.Any(i => 0 < t.Inventory.Value[i]))
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault(
 						t =>  NavMesh.CalculatePath(
@@ -151,10 +147,6 @@ namespace Lunra.Hothouse.Ai
 
 			bool IsAnyBuildingWithInventoryReachable()
 			{
-				var currentlyValidItems = validItems.Where(i => Agent.Inventory.Value.Any(i));
-
-				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
-				
 				var target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
 					out targetPath,
@@ -162,7 +154,7 @@ namespace Lunra.Hothouse.Ai
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
-						return currentlyValidItems.Any(i => 0 < b.Inventory.Value.GetCapacity(i));
+						return validItems.Any(i => b.InventoryCapacity.Value.IsNotFull(b.Inventory.Value + (i, 1)));
 					},
 					World.Buildings.AllActive
 				);

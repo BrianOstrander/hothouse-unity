@@ -24,8 +24,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnViewPrepare()
 		{
-			var item = Model.Inventory.Value.Current.OrderByDescending(i => i.Count).FirstOrDefault();
-			View.SetEntry(item.Count, item.Type);
+			var item = Model.Inventory.Value.Entries.OrderByDescending(i => i.Value).FirstOrDefault();
+			View.SetEntry(item.Value, item.Key);
 		}
 		
 		#region ItemDropModel Events
