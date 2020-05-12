@@ -60,8 +60,7 @@ namespace Lunra.Hothouse.Models
 				case Clamps.TotalWeight:
 					return inventory.Weight < weightMaximum;
 				case Clamps.IndividualWeight:
-					var current = this;
-					return inventory.Entries.All(e => e.Value < current.inventoryMaximum[e.Key]);
+					return !inventoryMaximum.Entries.All(e => e.Value <= inventory[e.Key]);
 				default:
 					Debug.LogError("Unrecognized clamp: "+Clamping);
 					return true;
@@ -103,6 +102,46 @@ namespace Lunra.Hothouse.Models
 		{
 			return entry.Weight <= (weight = Mathf.Min(entry.Weight, GetCapacityFor(inventory, entry.Type)));
 		}
+
+		public int GetMaximumFor(
+			Inventory inventory,
+			Item.Types type
+		)
+		{
+			return inventory[type] + GetCapacityFor(inventory, type);
+		}
+		
+		public Inventory GetCapacityFor(Inventory inventory)
+		{
+			switch (Clamping)
+			{
+				case Clamps.None:
+					return inventory;
+				case Clamps.TotalWeight:
+					var weightRemaining = weightMaximum - inventory.Weight;
+					if (weightRemaining <= 0) return Inventory.Empty;
+					var totalWeightResult = new Dictionary<Item.Types, int>();
+					foreach (var type in inventoryMaximum.Types)
+					{
+						if (weightRemaining <= 0) break;
+						var weightAdded = Mathf.Min(weightRemaining, inventory[type]);
+						totalWeightResult.Add(type, weightAdded);
+						weightRemaining -= weightAdded;
+					}
+					return new Inventory(totalWeightResult);
+				case Clamps.IndividualWeight:
+					var individualWeightResult = new Dictionary<Item.Types, int>();
+					foreach (var type in inventoryMaximum.Types)
+					{
+						// Debug.Log(inventoryMaximum[type] + " _ " + inventory[type]);
+						individualWeightResult.Add(type, Mathf.Max(0, inventoryMaximum[type] - inventory[type]));
+					}
+					return new Inventory(individualWeightResult); 
+				default:
+					Debug.LogError("Unrecognized clamp: "+Clamping);
+					return inventory;
+			}
+		}
 		
 		public int GetCapacityFor(
 			Inventory inventory,
@@ -141,7 +180,7 @@ namespace Lunra.Hothouse.Models
 					return entry.Weight;
 			}
 		}
-
+		
 		public bool GetClamped(
 			Inventory inventory,
 			out Inventory clamped 
@@ -296,6 +335,22 @@ namespace Lunra.Hothouse.Models
 			overflow = new Inventory(overflowResult);
 
 			return !overflow.IsEmpty;
+		}
+
+		public override string ToString()
+		{
+			var result = "Clamping : " + Clamping;
+			switch (Clamping)
+			{
+				case Clamps.TotalWeight:
+					result += "\nWeightMaximum : " + weightMaximum;
+					break;
+				case Clamps.IndividualWeight:
+					result += "\nInventoryMaximum : " + inventoryMaximum;
+					break;
+			}
+
+			return result;
 		}
 	}
 }

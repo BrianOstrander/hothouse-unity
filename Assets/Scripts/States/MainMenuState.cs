@@ -152,7 +152,6 @@ namespace Lunra.Hothouse.Services
 				flora.Age.Value = Interval.WithMaximum(1f);
 				flora.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
 				flora.ReproductionFailureLimit.Value = 40;
-				// flora.ReproductionFailureLimit.Value = 0;
 				flora.HealthMaximum.Value = 100f;
 				flora.Health.Value = flora.HealthMaximum.Value;
 
@@ -276,6 +275,15 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 			
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"1",
+					new Vector3(-10f, -0.8386866f, 3f),
+					Jobs.Construction
+				)
+			);
+			
 			void initializeBuilding(
 				BuildingModel model,
 				string id,
@@ -286,8 +294,6 @@ namespace Lunra.Hothouse.Services
 			)
 			{
 				model.BuildingState.Value = BuildingStates.Operating;
-				model.ConstructionInventoryRemaining.Value = Inventory.Empty;
-				model.ConstructionInventoryPromised.Value = Inventory.Empty;
 				model.Id.Value = id;
 				model.Position.Value = position;
 				model.Inventory.Value = inventory;
@@ -308,14 +314,15 @@ namespace Lunra.Hothouse.Services
 			);
 
 			sleepBuilding.BuildingState.Value = BuildingStates.Constructing;
-			sleepBuilding.ConstructionInventoryRemaining.Value = new Inventory(
-				new Dictionary<Item.Types, int>
-				{
-					{ Item.Types.Stalks, 2 },
-					{ Item.Types.Scrap, 2 }
-				}
+			sleepBuilding.ConstructionInventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
+				new Inventory(
+					new Dictionary<Item.Types, int>
+					{
+						{Item.Types.Stalks, 2},
+						{Item.Types.Scrap, 2}
+					}
+				)
 			);
-			sleepBuilding.ConstructionInventoryPromised.Value = sleepBuilding.ConstructionInventoryRemaining.Value;
 			
 			game.Buildings.Activate(
 				"default_wagon",

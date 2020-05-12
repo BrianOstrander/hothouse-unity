@@ -31,20 +31,19 @@ namespace Lunra.Hothouse.Models
 		
 		public static Inventory Empty => new Inventory(new Dictionary<Item.Types, int>());
 		
-		// TODO: Hide this and replace with something that returns (Item.Types Type, int Weight)
-		// Really shouldn't show this since it may not contain all values!
 		public readonly ReadOnlyDictionary<Item.Types, int> Entries;
 		public readonly int Weight;
 
+		[JsonIgnore]
 		public bool IsEmpty => 0 == Weight;
 
 		public Inventory(Dictionary<Item.Types, int> entries)
 		{
-			// TODO: Filter out zero kv's
 			Entries = new ReadOnlyDictionary<Item.Types, int>(entries);
 			Weight = entries.Select(kv => kv.Value).Sum();
 		}
 
+		[JsonIgnore]
 		public int this[Item.Types type]
 		{
 			get
@@ -54,6 +53,7 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 
+		[JsonIgnore]
 		public IEnumerable<Item.Types> Types => Entries.Keys;
 
 		public bool Contains(Inventory inventory)
@@ -211,5 +211,19 @@ namespace Lunra.Hothouse.Models
 
 		public static bool operator !=(Inventory inventory0, Inventory inventory1) { return !(inventory0 == inventory1); }
 		#endregion
+
+		public override string ToString()
+		{
+			if (Weight == 0) return "Empty";
+			
+			var result = "[";
+			foreach (var kv in Entries.Where(kv => kv.Value != 0))
+			{
+				result += "\n\t" + kv.Key + " : " + kv.Value;
+			}
+			
+			result += "\n]";
+			return result + "\nWeight : " + Weight;
+		}
 	}
 }

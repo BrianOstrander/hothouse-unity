@@ -26,7 +26,7 @@ namespace Lunra.Hothouse.Ai
 					{
 						if (possibleConstructionSite.BuildingState.Value != BuildingStates.Constructing) return false;
 
-						return !(possibleConstructionSite.ConstructionInventoryRemaining.Value - possibleConstructionSite.ConstructionInventoryPromised.Value).IsEmpty;
+						return possibleConstructionSite.ConstructionInventoryCapacity.Value.IsNotFull(possibleConstructionSite.ConstructionInventory.Value + possibleConstructionSite.ConstructionInventoryPromised.Value);
 					}
 				)
 				.ToDictionary(b => b, b => false);
@@ -61,8 +61,10 @@ namespace Lunra.Hothouse.Ai
 							}
 						}
 
-						var nonPromisedInventory = kv.Key.ConstructionInventoryRemaining.Value - kv.Key.ConstructionInventoryPromised.Value;
-
+						var nonPromisedInventory = kv.Key.ConstructionInventoryCapacity.Value.GetCapacityFor(
+							kv.Key.ConstructionInventory.Value + kv.Key.ConstructionInventoryPromised.Value
+						);
+						
 						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Value))
 						{
 							agent.InventoryCapacity.Value.GetClamped(
@@ -308,9 +310,9 @@ namespace Lunra.Hothouse.Ai
 			{
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerConstructionJobState>.Target(
-						i => target.ConstructionInventoryRemaining.Value = i,
-						() => target.ConstructionInventoryRemaining.Value,
-						i => Mathf.Min(i.Weight, target.ConstructionInventoryRemaining.Value[i.Type] - i.Weight),
+						i => target.ConstructionInventory.Value = i,
+						() => target.ConstructionInventory.Value,
+						i => target.ConstructionInventoryCapacity.Value.GetCapacityFor(target.ConstructionInventory.Value, i),
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
 						Agent.InventoryPromise.Value.Inventory,

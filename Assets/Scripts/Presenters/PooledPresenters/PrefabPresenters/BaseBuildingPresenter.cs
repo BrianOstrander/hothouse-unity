@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			Model.Inventory.Changed += OnBuildingInventory;
-			Model.ConstructionInventoryRemaining.Changed += OnBuildingConstructionInventoryRemaining;
+			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
 			Model.Operate += OnBuildingOperate;
 		}
 
@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 
 			Model.Inventory.Changed -= OnBuildingInventory;
-			Model.ConstructionInventoryRemaining.Changed -= OnBuildingConstructionInventoryRemaining;
+			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
 			Model.Operate -= OnBuildingOperate;
 		}
 
@@ -59,9 +59,9 @@ namespace Lunra.Hothouse.Presenters
 			if (anyChanged) Model.DesireQuality.Value = newDesireQuality;
 		}
 
-		void OnBuildingConstructionInventoryRemaining(Inventory constructionInventoryRemaining)
+		void OnBuildingConstructionInventory(Inventory constructionInventory)
 		{
-			if (!constructionInventoryRemaining.IsEmpty) return;
+			if (constructionInventory.IsEmpty || Model.ConstructionInventoryCapacity.Value.IsNotFull(constructionInventory)) return;
 
 			switch (Model.BuildingState.Value)
 			{

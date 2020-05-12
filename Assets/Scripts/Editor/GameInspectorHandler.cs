@@ -18,8 +18,9 @@ namespace Lunra.Editor.Core
 		{
 			Unknown = 0,
 			Always = 10,
-			IfNotNonZeroEmpty = 20,
-			IfMaximumIsGreaterThanZero = 30
+			IfNotEmpty = 20,
+			IfMaximumGreaterThanZero = 30,
+			IfNotFull = 40
 		}
 		
 		static GameState current;
@@ -65,21 +66,25 @@ namespace Lunra.Editor.Core
 						label += "\nState: " + model.BuildingState.Value;
 					}
 					
-					label += GetInventory(model.Inventory.Value);
+					label += GetInventory(
+						"Inventory",
+						model.Inventory.Value,
+						model.InventoryCapacity.Value
+					);
 
 					switch (model.BuildingState.Value)
 					{
 						case BuildingStates.Constructing:
 							label += GetInventory(
-								model.ConstructionInventoryRemaining.Value,
-								InventoryVisibilities.IfMaximumIsGreaterThanZero,
-								"Recipe"
+								"Construction",
+								model.ConstructionInventory.Value,
+								model.ConstructionInventoryCapacity.Value,
+								InventoryVisibilities.IfNotFull
 							);
 							
 							label += GetInventory(
-								model.ConstructionInventoryPromised.Value,
-								InventoryVisibilities.IfMaximumIsGreaterThanZero,
-								"Promised"
+								"Construction Promised",
+								model.ConstructionInventoryPromised.Value
 							);
 							break;
 					}
@@ -121,16 +126,18 @@ namespace Lunra.Editor.Core
 					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;
 
 					label += GetInventory(
+						"Inventory",
 						model.Inventory.Value,
-						InventoryVisibilities.IfMaximumIsGreaterThanZero
+						model.InventoryCapacity.Value,
+						InventoryVisibilities.IfMaximumGreaterThanZero
+						
 					);
 
 					if (model.InventoryPromise.Value.Operation != InventoryPromise.Operations.None)
 					{
 						label += GetInventory(
-							model.InventoryPromise.Value.Inventory,
-							InventoryVisibilities.IfMaximumIsGreaterThanZero,
-							model.InventoryPromise.Value.Operation+"Promise"
+							model.InventoryPromise.Value.Operation+"Promise",
+							model.InventoryPromise.Value.Inventory
 						);
 					}
 
@@ -165,32 +172,38 @@ namespace Lunra.Editor.Core
 		}
 
 		static string GetInventory(
+			string label,
 			Inventory inventory,
-			InventoryVisibilities inventoryVisibilities = InventoryVisibilities.IfNotNonZeroEmpty,
-			string label = "Inventory"
+			InventoryCapacity? capacity = null,
+			InventoryVisibilities inventoryVisibilities = InventoryVisibilities.IfNotEmpty
 		)
 		{
-			/*
-			switch (inventoryVisibilities)
+			var result = string.Empty;
+
+			foreach (var type in EnumExtensions.GetValues(Item.Types.Unknown))
 			{
-				case InventoryVisibilities.IfNotNonZeroEmpty:
-					if (inventory.IsEmpty) return string.Empty;
-					break;
-				case InventoryVisibilities.IfMaximumIsGreaterThanZero:
-					if (inventory.AllMaximumsZero) return string.Empty;
-					break;
+				var value = inventory[type];
+				var valueMaximum = capacity?.GetMaximumFor(inventory, type);
+				
+				switch (inventoryVisibilities)
+				{
+					case InventoryVisibilities.Always:
+						break;
+					case InventoryVisibilities.IfNotEmpty:
+						if (value == 0) continue;
+						break;
+					case InventoryVisibilities.IfMaximumGreaterThanZero:
+						if ((!valueMaximum.HasValue || valueMaximum.Value == 0) && value == 0) continue;
+						break;
+					case InventoryVisibilities.IfNotFull:
+						if (valueMaximum.HasValue && valueMaximum.Value == value) continue;
+						break;
+				}
+				
+				result += "\n  " + type + " : " + value + (valueMaximum.HasValue ? (" / " + valueMaximum.Value) : string.Empty);
 			}
-			
-			var result = "\n" + label + ":";
-			
-			foreach (var maximum in inventory.Maximum.Where(i => 0 < i.Count))
-			{
-				result += "\n  " + maximum.Type + " : " + inventory[maximum.Type] + " / " + maximum.Count;
-			}
-			
-			return result;
-			*/
-			return "TODO";
+
+			return string.IsNullOrEmpty(result) ? result : ("\n" + label + ":" + result);
 		}
 
 		public static void OpenHandlerAsset()

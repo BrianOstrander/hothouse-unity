@@ -22,9 +22,12 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] InventoryPermission inventoryPermission = Models.InventoryPermission.AllForAnyJob();
 		[JsonIgnore] public readonly ListenerProperty<InventoryPermission> InventoryPermission;
 		
-		[JsonProperty] Inventory constructionInventoryRemaining = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventoryRemaining;
+		[JsonProperty] Inventory constructionInventory = Models.Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventory;
 		
+		[JsonProperty] InventoryCapacity constructionInventoryCapacity = Models.InventoryCapacity.ByNone();
+		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> ConstructionInventoryCapacity;
+
 		[JsonProperty] Inventory constructionInventoryPromised = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventoryPromised;
 
@@ -45,7 +48,8 @@ namespace Lunra.Hothouse.Models
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			InventoryCapacity = new ListenerProperty<InventoryCapacity>(value => inventoryCapacity = value, () => inventoryCapacity);
 			InventoryPermission = new ListenerProperty<InventoryPermission>(value => inventoryPermission = value, () => inventoryPermission);
-			ConstructionInventoryRemaining = new ListenerProperty<Inventory>(value => constructionInventoryRemaining = value, () => constructionInventoryRemaining);
+			ConstructionInventory = new ListenerProperty<Inventory>(value => constructionInventory = value, () => constructionInventory);
+			ConstructionInventoryCapacity = new ListenerProperty<InventoryCapacity>(value => constructionInventoryCapacity = value, () => constructionInventoryCapacity);
 			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);
 			DesireQuality = new ListenerProperty<DesireQuality[]>(value => desireQuality = value, () => desireQuality);
 			
