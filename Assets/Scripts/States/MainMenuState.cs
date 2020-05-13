@@ -283,14 +283,15 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 			
-			// game.Dwellers.Activate(
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"2",
-			// 		new Vector3(-8f, -0.8386866f, 3f),
-			// 		Jobs.ClearFlora
-			// 	)
-			// );
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"2",
+					new Vector3(-4f, -0.8386866f, 3f),
+					Jobs.ClearFlora,
+					debugAgentStates: true
+				)
+			);
 			
 			void initializeBuilding(
 				BuildingModel model,
@@ -371,18 +372,18 @@ namespace Lunra.Hothouse.Services
 					new Inventory(
 						new Dictionary<Item.Types, int>
 						{
-							{ Item.Types.Stalks, 4 },
-							{ Item.Types.Scrap, 4 },
-							{ Item.Types.Rations, 4 }
+							// { Item.Types.Stalks, 4 },
+							// { Item.Types.Scrap, 4 },
+							// { Item.Types.Rations, 4 }
 						}
 					),
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Item.Types, int>
 							{
-								{ Item.Types.Stalks, 50 },
-								{ Item.Types.Scrap, 50 },
-								{ Item.Types.Rations, 50 }
+								// { Item.Types.Stalks, 50 },
+								// { Item.Types.Scrap, 50 },
+								// { Item.Types.Rations, 50 }
 							}
 						)	
 					),

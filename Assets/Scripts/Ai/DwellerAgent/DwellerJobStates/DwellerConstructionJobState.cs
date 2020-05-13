@@ -111,6 +111,7 @@ namespace Lunra.Hothouse.Ai
 			var validItems = new[] { Item.Types.Stalks, Item.Types.Scrap };
 			
 			var transferItemsState = new DwellerTransferItemsState<DwellerConstructionJobState>();
+			var timeoutState = new DwellerTimeoutState<DwellerConstructionJobState>();
 			
 			var cleanupState = new DwellerItemCleanupState<DwellerConstructionJobState>(
 				validJobs,
@@ -119,7 +120,8 @@ namespace Lunra.Hothouse.Ai
 			
 			AddChildStates(
 				transferItemsState,
-				cleanupState,	
+				timeoutState,
+				cleanupState,
 				new DwellerNavigateState<DwellerConstructionJobState>()
 			);
 			
@@ -147,7 +149,8 @@ namespace Lunra.Hothouse.Ai
 					ToItemCleanupOnValidInventory.InventoryTrigger.OnEmpty,
 					validJobs,
 					validItems
-				)
+				),
+				new ToDropItems(timeoutState)
 			);
 		}
 

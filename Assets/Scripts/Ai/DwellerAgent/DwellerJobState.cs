@@ -108,20 +108,20 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				if (inventoryTrigger == InventoryTrigger.Always) return true;
-
+				if (!IsAnyBuildingWithInventoryReachable()) return false;
+				
 				switch (inventoryTrigger)
 				{
-					case InventoryTrigger.Always:
-						return true;
 					case InventoryTrigger.OnEmpty:
 						if (!Agent.Inventory.Value.IsEmpty) return false;
 						return IsAnyValidItemReachable();
 					case InventoryTrigger.OnFull:
 						if (Agent.InventoryCapacity.Value.IsNotFull(Agent.Inventory.Value)) return false;
-						return IsAnyBuildingWithInventoryReachable();
+						return true;
 					case InventoryTrigger.OnGreaterThanZero:
 						if (Agent.Inventory.Value.IsEmpty) return false;
-						return IsAnyValidItemReachable() || IsAnyBuildingWithInventoryReachable();
+						if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return true;
+						return IsAnyValidItemReachable();
 				}
 				
 				Debug.LogError("Unrecognized "+nameof(inventoryTrigger)+": "+inventoryTrigger);
@@ -165,6 +165,38 @@ namespace Lunra.Hothouse.Ai
 			public override void Transition()
 			{
 				cleanupState.ResetCleanupCount();
+			}
+		}
+		
+		protected class ToDropItems : AgentTransition<DwellerTimeoutState<S>, GameModel, DwellerModel>
+		{
+			DwellerTimeoutState<S> timeoutState;
+
+			public ToDropItems(
+				DwellerTimeoutState<S> timeoutState
+			)
+			{
+				this.timeoutState = timeoutState;
+			}
+
+			public override bool IsTriggered() => !Agent.Inventory.Value.IsEmpty;
+
+			public override void Transition()
+			{
+				World.ItemDrops.Activate(
+					itemDrop =>
+					{
+						itemDrop.RoomId.Value = Agent.RoomId.Value;
+						itemDrop.Position.Value = Agent.Position.Value;
+						itemDrop.Rotation.Value = Quaternion.identity;
+						itemDrop.Inventory.Value = Agent.Inventory.Value;
+						itemDrop.Job.Value = Agent.Job.Value;
+					}
+				);
+				
+				Agent.Inventory.Value = Inventory.Empty;
+				
+				timeoutState.ConfigureForInterval(Interval.WithMaximum(Agent.DepositCooldown.Value));
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Presenters;
 using Lunra.Hothouse.Views;
@@ -102,14 +103,23 @@ namespace Lunra.Hothouse.Services
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 
-			// App.Heartbeat.Wait(
-			// 	() =>
-			// 	{
-			// 		Debug.Log("Killing dweller id : 0");
-			// 		Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
-			// 	},
-			// 	5f
-			// );
+			App.Heartbeat.Wait(
+				() =>
+				{
+					var wagon = Payload.Game.Buildings.AllActive.First(b => b.Id.Value.StartsWith("wagon"));
+					wagon.InventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
+						new Inventory(
+							EnumExtensions.GetValues(Item.Types.Unknown).ToDictionary(
+								type => type,
+								type => 50
+							)
+						)	
+					);
+					// Debug.Log("Killing dweller id : 0");
+					// Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
+				},
+				10f
+			);
 		}
 
 		void OnHeartbeatUpdate()

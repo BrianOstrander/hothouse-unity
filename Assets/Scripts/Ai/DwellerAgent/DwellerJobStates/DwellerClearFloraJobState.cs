@@ -22,10 +22,12 @@ namespace Lunra.Hothouse.Ai
 				validJobs,
 				validItems
 			);
+			var timeoutState = new DwellerTimeoutState<DwellerClearFloraJobState>();
 			
 			AddChildStates(
 				attackState,
 				cleanupState,	
+				timeoutState,
 				new DwellerNavigateState<DwellerClearFloraJobState>()
 			);
 			
@@ -56,7 +58,8 @@ namespace Lunra.Hothouse.Ai
 					ToItemCleanupOnValidInventory.InventoryTrigger.OnEmpty,
 					validJobs,
 					validItems
-				)
+				),
+				new ToDropItems(timeoutState)
 			);
 		}
 
