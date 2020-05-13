@@ -118,6 +118,8 @@ namespace Lunra.Hothouse.Models
 				case Clamps.None:
 					return inventory;
 				case Clamps.TotalWeight:
+					// TODO: I think there's something wrong with this... it returns empty inventories, but maybe that's
+					// okay...
 					var weightRemaining = weightMaximum - inventory.Weight;
 					if (weightRemaining <= 0) return Inventory.Empty;
 					var totalWeightResult = new Dictionary<Item.Types, int>();
@@ -133,7 +135,6 @@ namespace Lunra.Hothouse.Models
 					var individualWeightResult = new Dictionary<Item.Types, int>();
 					foreach (var type in inventoryMaximum.Types)
 					{
-						// Debug.Log(inventoryMaximum[type] + " _ " + inventory[type]);
 						individualWeightResult.Add(type, Mathf.Max(0, inventoryMaximum[type] - inventory[type]));
 					}
 					return new Inventory(individualWeightResult); 

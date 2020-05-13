@@ -5,7 +5,7 @@ namespace Lunra.Hothouse.Models
 		Unknown = 0,
 		Constructing = 10,
 		Operating = 20,
-		Deconstructing = 30,
+		Salvaging = 30,
 		Decaying = 40
 	}
 }

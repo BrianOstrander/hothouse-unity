@@ -229,7 +229,7 @@ namespace Lunra.Hothouse.Services
 					FloraSpecies.Edible
 				)
 			);
-			
+
 			void initializeDweller(
 				DwellerModel dweller,
 				string id,
@@ -244,7 +244,7 @@ namespace Lunra.Hothouse.Services
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.5f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -269,7 +269,7 @@ namespace Lunra.Hothouse.Services
 				dweller => initializeDweller(
 					dweller,
 					"0",
-					new Vector3(-12f, -0.8386866f, 3f),
+					new Vector3(-6f, -0.8386866f, 3f),
 					Jobs.Construction
 				)
 			);
@@ -309,7 +309,7 @@ namespace Lunra.Hothouse.Services
 				model.DesireQuality.Value = desireQualities;
 			}
 
-			var sleepBuilding = game.Buildings.Activate(
+			var sleepBuilding0 = game.Buildings.Activate(
 				"debug",
 				m => initializeBuilding(
 					m,
@@ -321,7 +321,36 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 
-			sleepBuilding.BuildingState.Value = BuildingStates.Constructing;
+			sleepBuilding0.BuildingState.Value = BuildingStates.Salvaging;
+			sleepBuilding0.SalvageInventory.Value = new Inventory(
+				new Dictionary<Item.Types, int>
+				{
+					{Item.Types.Stalks, 1},
+					{Item.Types.Scrap, 1}
+				}
+			);
+			
+			var sleepBuilding1 = game.Buildings.Activate(
+				"debug",
+				m => initializeBuilding(
+					m,
+					"sleep_1",
+					new Vector3(-12f, -0.8386866f, 0f),
+					Inventory.Empty,
+					InventoryCapacity.ByNone(),
+					DesireQuality.New(Desires.Sleep, 1f)
+				)
+			);
+
+			sleepBuilding1.BuildingState.Value = BuildingStates.Salvaging;
+			sleepBuilding1.SalvageInventory.Value = new Inventory(
+				new Dictionary<Item.Types, int>
+				{
+					{Item.Types.Stalks, 1},
+					{Item.Types.Scrap, 2}
+				}
+			);
+			/*
 			sleepBuilding.ConstructionInventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
 				new Inventory(
 					new Dictionary<Item.Types, int>
@@ -331,6 +360,7 @@ namespace Lunra.Hothouse.Services
 					}
 				)
 			);
+			*/
 			
 			game.Buildings.Activate(
 				"default_wagon",

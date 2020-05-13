@@ -30,6 +30,9 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] Inventory constructionInventoryPromised = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventoryPromised;
+		
+		[JsonProperty] Inventory salvageInventory = Models.Inventory.Empty;
+		[JsonIgnore] public readonly ListenerProperty<Inventory> SalvageInventory;
 
 		[JsonProperty] DesireQuality[] desireQuality = new DesireQuality[0];
 		[JsonIgnore] public readonly ListenerProperty<DesireQuality[]> DesireQuality;
@@ -51,6 +54,7 @@ namespace Lunra.Hothouse.Models
 			ConstructionInventory = new ListenerProperty<Inventory>(value => constructionInventory = value, () => constructionInventory);
 			ConstructionInventoryCapacity = new ListenerProperty<InventoryCapacity>(value => constructionInventoryCapacity = value, () => constructionInventoryCapacity);
 			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);
+			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
 			DesireQuality = new ListenerProperty<DesireQuality[]>(value => desireQuality = value, () => desireQuality);
 			
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);

@@ -87,6 +87,12 @@ namespace Lunra.Editor.Core
 								model.ConstructionInventoryPromised.Value
 							);
 							break;
+						case BuildingStates.Salvaging:
+							label += GetInventory(
+								"Salvage",
+								model.SalvageInventory.Value
+							);
+							break;
 					}
 
 					if (model.DesireQuality.Value.Any())

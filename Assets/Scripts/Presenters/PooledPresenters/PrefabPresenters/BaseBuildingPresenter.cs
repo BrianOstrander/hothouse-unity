@@ -26,6 +26,7 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.Inventory.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
+			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
 			Model.Operate += OnBuildingOperate;
 		}
 
@@ -35,6 +36,7 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.Inventory.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
+			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
 			Model.Operate -= OnBuildingOperate;
 		}
 
@@ -72,6 +74,13 @@ namespace Lunra.Hothouse.Presenters
 					Debug.LogError("Tried to fill construction recipe while building is in invalid state: "+Model.BuildingState.Value);
 					break;
 			}
+		}
+
+		void OnBuildingSalvageInventory(Inventory salvageInventory)
+		{
+			if (Model.BuildingState.Value != BuildingStates.Salvaging || !salvageInventory.IsEmpty) return;
+
+			Model.PooledState.Value = PooledStates.InActive;
 		}
 		
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
