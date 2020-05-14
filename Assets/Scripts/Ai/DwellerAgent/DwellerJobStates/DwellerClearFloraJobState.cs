@@ -14,13 +14,13 @@ namespace Lunra.Hothouse.Ai
 
 		public override void OnInitialize()
 		{
-			var validJobs = new[] { Jobs.ClearFlora };
-			var validItems = new[] { Item.Types.Stalks, Item.Types.Rations };
+			var validJobs = new[] { Jobs.ClearFlora, Jobs.None };
+			var validCleanupItems = Item.Valid;
 			
 			var attackState = new DwellerAttackState<DwellerClearFloraJobState>();
 			var cleanupState = new DwellerItemCleanupState<DwellerClearFloraJobState>(
 				validJobs,
-				validItems
+				validCleanupItems
 			);
 			var timeoutState = new DwellerTimeoutState<DwellerClearFloraJobState>();
 			
@@ -38,7 +38,7 @@ namespace Lunra.Hothouse.Ai
 					cleanupState,
 					ToItemCleanupOnValidInventory.InventoryTrigger.OnFull,
 					validJobs,
-					validItems
+					validCleanupItems
 				),
 				
 				new ToAttackNearestFlora(attackState),
@@ -51,13 +51,13 @@ namespace Lunra.Hothouse.Ai
 					cleanupState,
 					ToItemCleanupOnValidInventory.InventoryTrigger.OnGreaterThanZero,
 					validJobs,
-					validItems
+					validCleanupItems
 				),
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
 					ToItemCleanupOnValidInventory.InventoryTrigger.OnEmpty,
 					validJobs,
-					validItems
+					validCleanupItems
 				),
 				new ToDropItems(timeoutState)
 			);

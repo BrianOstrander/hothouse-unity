@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
 
-		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.ByNone();
+		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.None();
 		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> InventoryCapacity;
 
 		[JsonProperty] InventoryPromise inventoryPromise = Models.InventoryPromise.Default();

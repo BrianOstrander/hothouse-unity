@@ -107,15 +107,15 @@ namespace Lunra.Hothouse.Ai
 		
 		public override void OnInitialize()
 		{
-			var validJobs = new[] { Jobs.Construction };
-			var validItems = new[] { Item.Types.Stalks, Item.Types.Scrap };
+			var validJobs = new[] { Jobs.Construction, Jobs.None };
+			var validCleanupItems = Item.Valid;
 			
 			var transferItemsState = new DwellerTransferItemsState<DwellerConstructionJobState>();
 			var timeoutState = new DwellerTimeoutState<DwellerConstructionJobState>();
 			
 			var cleanupState = new DwellerItemCleanupState<DwellerConstructionJobState>(
 				validJobs,
-				validItems
+				validCleanupItems
 			);
 			
 			AddChildStates(
@@ -142,13 +142,13 @@ namespace Lunra.Hothouse.Ai
 					cleanupState,
 					ToItemCleanupOnValidInventory.InventoryTrigger.OnGreaterThanZero,
 					validJobs,
-					validItems
+					validCleanupItems
 				),
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
 					ToItemCleanupOnValidInventory.InventoryTrigger.OnEmpty,
 					validJobs,
-					validItems
+					validCleanupItems
 				),
 				new ToDropItems(timeoutState)
 			);

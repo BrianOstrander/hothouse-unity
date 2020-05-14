@@ -69,7 +69,8 @@ namespace Lunra.Editor.Core
 					label += GetInventory(
 						"Inventory",
 						model.Inventory.Value,
-						model.InventoryCapacity.Value
+						model.InventoryCapacity.Value,
+						InventoryVisibilities.IfMaximumGreaterThanZero
 					);
 
 					switch (model.BuildingState.Value)

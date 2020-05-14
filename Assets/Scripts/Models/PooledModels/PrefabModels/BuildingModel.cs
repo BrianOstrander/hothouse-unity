@@ -16,7 +16,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
 		
-		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.ByNone();
+		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.None();
 		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> InventoryCapacity;
 		
 		[JsonProperty] InventoryPermission inventoryPermission = Models.InventoryPermission.AllForAnyJob();
@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] Inventory constructionInventory = Models.Inventory.Empty;
 		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventory;
 		
-		[JsonProperty] InventoryCapacity constructionInventoryCapacity = Models.InventoryCapacity.ByNone();
+		[JsonProperty] InventoryCapacity constructionInventoryCapacity = Models.InventoryCapacity.None();
 		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> ConstructionInventoryCapacity;
 
 		[JsonProperty] Inventory constructionInventoryPromised = Models.Inventory.Empty;

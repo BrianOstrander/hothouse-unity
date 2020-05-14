@@ -121,7 +121,7 @@ namespace Lunra.Hothouse.Ai
 					case InventoryTrigger.OnGreaterThanZero:
 						if (Agent.Inventory.Value.IsEmpty) return false;
 						if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return true;
-						return IsAnyValidItemReachable();
+						return true;
 				}
 				
 				Debug.LogError("Unrecognized "+nameof(inventoryTrigger)+": "+inventoryTrigger);

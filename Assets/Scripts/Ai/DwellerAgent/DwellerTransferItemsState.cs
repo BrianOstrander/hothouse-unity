@@ -16,7 +16,7 @@ namespace Lunra.Hothouse.Ai
 		{
 			public readonly Action<Inventory> SetDestination;
 			public readonly Func<Inventory> GetDestination;
-			public readonly Func<(Item.Types Type, int Weight), int> GetDestinationCapacity;
+			public readonly Func<Item.Types, int> GetDestinationCapacity;
 			
 			public readonly Action<Inventory> SetSource;
 			public readonly Func<Inventory> GetSource;
@@ -27,7 +27,7 @@ namespace Lunra.Hothouse.Ai
 			public Target(
 				Action<Inventory> setDestination,
 				Func<Inventory> getDestination,
-				Func<(Item.Types Type, int Weight), int> getDestinationCapacity,
+				Func<Item.Types, int> getDestinationCapacity,
 				Action<Inventory> setSource,
 				Func<Inventory> getSource,
 				Inventory itemsToTransfer,
@@ -82,10 +82,10 @@ namespace Lunra.Hothouse.Ai
 
 			foreach (var item in target.ItemsToTransfer.Entries)
 			{
-				if (item.Value == 0) continue;
-				if (target.GetSource()[item.Key] == 0) continue;
-				if (target.GetDestinationCapacity((item.Key, item.Value)) <= 0) continue;
-				itemToUnload = (item.Key, item.Value);
+				if (item.Weight == 0) continue;
+				if (target.GetSource()[item.Type] == 0) continue;
+				if (target.GetDestinationCapacity(item.Type) <= 0) continue;
+				itemToUnload = (item.Type, item.Weight);
 				break;
 			}
 			
@@ -128,8 +128,8 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				return sourceState.target.ItemsToTransfer.Entries
-					.Where(i => 0 < i.Value)
-					.None(i => 0 <= sourceState.target.GetDestinationCapacity((i.Key, i.Value)));
+					.Where(i => 0 < i.Weight)
+					.None(i => 0 <= sourceState.target.GetDestinationCapacity(i.Type));
 			}
 		}
 	}

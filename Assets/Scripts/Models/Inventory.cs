@@ -30,17 +30,33 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		public static Inventory Empty => new Inventory(new Dictionary<Item.Types, int>());
+		public static Inventory MaximumValue => new Inventory(
+			EnumExtensions.GetValues(Item.Types.Unknown).ToDictionary(
+				type => type,
+				type => int.MaxValue
+			)	
+		);
 		
-		public readonly ReadOnlyDictionary<Item.Types, int> Entries;
-		public readonly int Weight;
+		readonly ReadOnlyDictionary<Item.Types, int> entries;
+		public readonly int TotalWeight;
 
 		[JsonIgnore]
-		public bool IsEmpty => 0 == Weight;
+		public bool IsEmpty => 0 == TotalWeight;
+		[JsonIgnore]
+		public IEnumerable<(Item.Types Type, int Weight)> Entries
+		{
+			get
+			{
+				var current = this;
+				return EnumExtensions.GetValues(Item.Types.Unknown)
+					.Select(t => (t, current[t]));
+			}
+		}
 
 		public Inventory(Dictionary<Item.Types, int> entries)
 		{
-			Entries = new ReadOnlyDictionary<Item.Types, int>(entries);
-			Weight = entries.Select(kv => kv.Value).Sum();
+			this.entries = new ReadOnlyDictionary<Item.Types, int>(entries);
+			TotalWeight = entries.Select(kv => kv.Value).Sum();
 		}
 
 		[JsonIgnore]
@@ -48,19 +64,12 @@ namespace Lunra.Hothouse.Models
 		{
 			get
 			{
-				if (Entries.TryGetValue(type, out var value)) return value;
+				if (entries.TryGetValue(type, out var value)) return value;
 				return 0;
 			}
 		}
 
-		[JsonIgnore]
-		public IEnumerable<Item.Types> Types => Entries.Keys;
-
-		public bool Contains(Inventory inventory)
-		{
-			var current = this;
-			return inventory.Types.All(t => inventory[t] <= current[t]);
-		}
+		public bool Contains(Inventory inventory) => Entries.All(i => inventory[i.Type] <= i.Weight);
 
 		public bool Intersects(Inventory inventory) => Intersects(inventory, out _);
 
@@ -69,14 +78,13 @@ namespace Lunra.Hothouse.Models
 			out Inventory intersection
 		)
 		{
-			var current = this;
 			intersection = new Inventory(
-				inventory.Types.Intersect(current.Types).ToDictionary(
-					type => type,
-					type => Mathf.Min(current[type], inventory[type])
+				Entries.ToDictionary(
+					i => i.Type,
+					i => Mathf.Min(i.Weight, inventory[i.Type])
 				)
 			);
-
+			
 			return !intersection.IsEmpty;
 		}
 		
@@ -96,81 +104,81 @@ namespace Lunra.Hothouse.Models
 		public static Inventory operator +(Inventory inventory0, Inventory inventory1)
 		{
 			return new Inventory(
-				inventory0.Types.Union(inventory1.Types).ToDictionary(
-					type => type,
-					type => inventory0[type] + inventory1[type]
-				)
+				inventory0.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Weight + inventory1[i.Type]
+				)	
 			);
 		}
 		
-		public static Inventory operator +(Inventory inventory0, (Item.Types Type, int Weight) entry)
+		public static Inventory operator +(Inventory inventory, (Item.Types Type, int Weight) entry)
 		{
 			return new Inventory(
-				inventory0.Types.Union(entry.Type).ToDictionary(
-					type => type,
-					type => type == entry.Type ? inventory0[type] + entry.Weight : inventory0[type]
-				)
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Type == entry.Type ? i.Weight + entry.Weight : i.Weight
+				)	
 			);
 		}
 
 		public static Inventory operator -(Inventory inventory0, Inventory inventory1)
 		{
 			return new Inventory(
-				inventory0.Types.Union(inventory1.Types).ToDictionary(
-					type => type,
-					type => inventory0[type] - inventory1[type]
-				)
+				inventory0.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Weight - inventory1[i.Type]
+				)	
 			);
 		}
 		
 		public static Inventory operator -(Inventory inventory, (Item.Types Type, int Weight) entry)
 		{
 			return new Inventory(
-				inventory.Types.Union(entry.Type).ToDictionary(
-					type => type,
-					type => type == entry.Type ? inventory[type] - entry.Weight : inventory[type]
-				)
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Type == entry.Type ? i.Weight - entry.Weight : i.Weight
+				)	
 			);
 		}
 		
 		public static Inventory operator *(Inventory inventory0, Inventory inventory1)
 		{
 			return new Inventory(
-				inventory0.Types.Union(inventory1.Types).ToDictionary(
-					type => type,
-					type => inventory0[type] * inventory1[type]
+				inventory0.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Weight * inventory1[i.Type]
 				)
 			);
 		}
 		
-		public static Inventory operator *(Inventory inventory, int value)
+		public static Inventory operator *(Inventory inventory, int weight)
 		{
 			return new Inventory(
-					inventory.Types.ToDictionary(
-					type => type,
-					type => inventory[type] * value
-				)
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Weight * weight
+				)	
 			);
 		}
 		
 		public static Inventory operator *(Inventory inventory, (Item.Types Type, int Weight) entry)
 		{
 			return new Inventory(
-				inventory.Types.ToDictionary(
-					type => type,
-					type => type == entry.Type ? inventory[type] * entry.Weight : inventory[type] 
-				)
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Type == entry.Type ? i.Weight * entry.Weight : i.Weight
+				)	
 			);
 		}
 
 		public static bool operator <(Inventory inventory0, Inventory inventory1)
 		{
-			return inventory0.Weight < inventory1.Weight;
+			return inventory0.TotalWeight < inventory1.TotalWeight;
 		}
 
 		public static bool operator >(Inventory inventory0, Inventory inventory1)
 		{
-			return inventory0.Weight > inventory1.Weight;
+			return inventory0.TotalWeight > inventory1.TotalWeight;
 		}
 
 		public static bool operator <=(Inventory inventory0, Inventory inventory1)
@@ -189,9 +197,8 @@ namespace Lunra.Hothouse.Models
 
 		public bool Equals(Inventory inventory)
 		{
-			if (Weight != inventory.Weight) return false;
-			var current = this;
-			return Types.Union(inventory.Types).All(t => current[t] == inventory[t]);
+			if (TotalWeight != inventory.TotalWeight) return false;
+			return Entries.All(i => i.Weight == inventory[i.Type]);
 		}
 
 		public override bool Equals(object obj)
@@ -214,16 +221,16 @@ namespace Lunra.Hothouse.Models
 
 		public override string ToString()
 		{
-			if (Weight == 0) return "Empty";
+			if (TotalWeight == 0) return "Empty";
 			
 			var result = "[";
-			foreach (var kv in Entries.Where(kv => kv.Value != 0))
+			foreach (var kv in entries.Where(kv => kv.Value != 0))
 			{
 				result += "\n\t" + kv.Key + " : " + kv.Value;
 			}
 			
 			result += "\n]";
-			return result + "\nWeight : " + Weight;
+			return result + "\nWeight : " + TotalWeight;
 		}
 	}
 }

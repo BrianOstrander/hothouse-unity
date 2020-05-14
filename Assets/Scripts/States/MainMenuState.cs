@@ -317,12 +317,12 @@ namespace Lunra.Hothouse.Services
 					"sleep_0",
 					new Vector3(-12f, -0.8386866f, 6f),
 					Inventory.Empty,
-					InventoryCapacity.ByNone(),
+					InventoryCapacity.None(),
 					DesireQuality.New(Desires.Sleep, 1f)
 				)
 			);
 
-			sleepBuilding0.BuildingState.Value = BuildingStates.Salvaging;
+			// sleepBuilding0.BuildingState.Value = BuildingStates.Salvaging;
 			sleepBuilding0.SalvageInventory.Value = new Inventory(
 				new Dictionary<Item.Types, int>
 				{
@@ -338,12 +338,12 @@ namespace Lunra.Hothouse.Services
 					"sleep_1",
 					new Vector3(-12f, -0.8386866f, 0f),
 					Inventory.Empty,
-					InventoryCapacity.ByNone(),
+					InventoryCapacity.None(),
 					DesireQuality.New(Desires.Sleep, 1f)
 				)
 			);
 
-			sleepBuilding1.BuildingState.Value = BuildingStates.Salvaging;
+			// sleepBuilding1.BuildingState.Value = BuildingStates.Salvaging;
 			sleepBuilding1.SalvageInventory.Value = new Inventory(
 				new Dictionary<Item.Types, int>
 				{
@@ -381,9 +381,9 @@ namespace Lunra.Hothouse.Services
 						new Inventory(
 							new Dictionary<Item.Types, int>
 							{
-								// { Item.Types.Stalks, 50 },
-								// { Item.Types.Scrap, 50 },
-								// { Item.Types.Rations, 50 }
+								{ Item.Types.Stalks, 50 },
+								{ Item.Types.Scrap, 50 },
+								{ Item.Types.Rations, 50 }
 							}
 						)	
 					),
@@ -400,35 +400,33 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 
-			/*
 			game.ItemDrops.Activate(
 				m =>
 				{
 					m.Position.Value = new Vector3(1f, 0f, -5f);
-					m.Job.Value = Jobs.ClearFlora;
+					m.Job.Value = Jobs.None;
 					m.Inventory.Value = new Inventory(
 						new Dictionary<Item.Types, int>
 						{
-							{ Item.Types.Rations, 1 }
+							{ Item.Types.Scrap, 1 }
 						}
 					);
 				}
 			);
 			
-			game.ItemDrops.Activate(
-				m =>
-				{
-					m.Position.Value = new Vector3(0f, 0f, -5f);
-					m.Job.Value = Jobs.ClearFlora;
-					m.Inventory.Value = new Inventory(
-						new Dictionary<Item.Types, int>
-						{
-							{ Item.Types.Rations, 1 }
-						}
-					);
-				}
-			);
-			*/
+			// game.ItemDrops.Activate(
+			// 	m =>
+			// 	{
+			// 		m.Position.Value = new Vector3(0f, 0f, -5f);
+			// 		m.Job.Value = Jobs.ClearFlora;
+			// 		m.Inventory.Value = new Inventory(
+			// 			new Dictionary<Item.Types, int>
+			// 			{
+			// 				{ Item.Types.Rations, 1 }
+			// 			}
+			// 		);
+			// 	}
+			// );
 
 			done(Result<GameModel>.Success(game));
 		}

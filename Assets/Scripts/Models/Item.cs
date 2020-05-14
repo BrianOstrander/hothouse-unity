@@ -6,6 +6,8 @@ namespace Lunra.Hothouse.Models
 {
 	public struct Item
 	{
+		public static Types[] Valid = EnumExtensions.GetValues(Types.Unknown);
+		
 		public static Item[] Empty { get; } = Populate(t => 0);
 		
 		public static Item[] Populate(Func<Types, int> predicate)
