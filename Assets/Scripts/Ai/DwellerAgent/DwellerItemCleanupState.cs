@@ -16,7 +16,7 @@ namespace Lunra.Hothouse.Ai
 		public override string Name => "ItemCleanup";
 
 		Jobs[] validJobs;
-		Item.Types[] validItems;
+		Inventory.Types[] validItems;
 
 		int cleanupCount;
 
@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Ai
 		
 		public DwellerItemCleanupState(
 			Jobs[] validJobs,
-			Item.Types[] validItems
+			Inventory.Types[] validItems
 		)
 		{
 			this.validJobs = validJobs;
@@ -102,7 +102,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				var itemsToTransfer = new Dictionary<Item.Types, int>();
+				var itemsToTransfer = new Dictionary<Inventory.Types, int>();
 				
 				foreach (var validItem in sourceState.validItems) itemsToTransfer.Add(validItem, Agent.Inventory.Value[validItem]);
 				
@@ -190,7 +190,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				var itemsToTransfer = new Dictionary<Item.Types, int>();
+				var itemsToTransfer = new Dictionary<Inventory.Types, int>();
 				
 				foreach (var validItem in sourceState.validItems) itemsToTransfer.Add(validItem, target.Inventory.Value[validItem]);
 				

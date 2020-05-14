@@ -162,9 +162,9 @@ namespace Lunra.Hothouse.Services
 						flora.ValidPrefabIds.Value = fastFloraPrefabIds;
 						flora.ReproductionElapsed.Value = Interval.WithMaximum(2f);
 						flora.ItemDrops.Value = new Inventory(
-							new Dictionary<Item.Types, int>
+							new Dictionary<Inventory.Types, int>
 							{
-								{ Item.Types.Stalks, 1 }
+								{ Inventory.Types.Stalks, 1 }
 							}
 						);
 						break;
@@ -173,9 +173,9 @@ namespace Lunra.Hothouse.Services
 						flora.ValidPrefabIds.Value = edibleFloraPrefabIds;
 						flora.ReproductionElapsed.Value = Interval.WithMaximum(10f);
 						flora.ItemDrops.Value = new Inventory(
-							new Dictionary<Item.Types, int>
+							new Dictionary<Inventory.Types, int>
 							{
-								{ Item.Types.Rations, 1 }
+								{ Inventory.Types.Rations, 1 }
 							}
 						);
 						break;
@@ -324,10 +324,10 @@ namespace Lunra.Hothouse.Services
 
 			// sleepBuilding0.BuildingState.Value = BuildingStates.Salvaging;
 			sleepBuilding0.SalvageInventory.Value = new Inventory(
-				new Dictionary<Item.Types, int>
+				new Dictionary<Inventory.Types, int>
 				{
-					{Item.Types.Stalks, 1},
-					{Item.Types.Scrap, 1}
+					{Inventory.Types.Stalks, 1},
+					{Inventory.Types.Scrap, 1}
 				}
 			);
 			
@@ -345,10 +345,10 @@ namespace Lunra.Hothouse.Services
 
 			// sleepBuilding1.BuildingState.Value = BuildingStates.Salvaging;
 			sleepBuilding1.SalvageInventory.Value = new Inventory(
-				new Dictionary<Item.Types, int>
+				new Dictionary<Inventory.Types, int>
 				{
-					{Item.Types.Stalks, 1},
-					{Item.Types.Scrap, 2}
+					{Inventory.Types.Stalks, 1},
+					{Inventory.Types.Scrap, 2}
 				}
 			);
 			/*
@@ -370,7 +370,7 @@ namespace Lunra.Hothouse.Services
 					"wagon_0",
 					new Vector3(0f, -0.8386866f, 4f),
 					new Inventory(
-						new Dictionary<Item.Types, int>
+						new Dictionary<Inventory.Types, int>
 						{
 							// { Item.Types.Stalks, 4 },
 							// { Item.Types.Scrap, 4 },
@@ -379,20 +379,20 @@ namespace Lunra.Hothouse.Services
 					),
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
-							new Dictionary<Item.Types, int>
+							new Dictionary<Inventory.Types, int>
 							{
-								{ Item.Types.Stalks, 50 },
-								{ Item.Types.Scrap, 50 },
-								{ Item.Types.Rations, 50 }
+								{ Inventory.Types.Stalks, 50 },
+								{ Inventory.Types.Scrap, 50 },
+								{ Inventory.Types.Rations, 50 }
 							}
 						)	
 					),
 					new DesireQuality(
 						Desires.Eat, 
 						new Inventory(
-							new Dictionary<Item.Types, int>
+							new Dictionary<Inventory.Types, int>
 							{
-								{ Item.Types.Rations, 1 }
+								{ Inventory.Types.Rations, 1 }
 							}
 						),
 						1f
@@ -406,9 +406,9 @@ namespace Lunra.Hothouse.Services
 					m.Position.Value = new Vector3(1f, 0f, -5f);
 					m.Job.Value = Jobs.None;
 					m.Inventory.Value = new Inventory(
-						new Dictionary<Item.Types, int>
+						new Dictionary<Inventory.Types, int>
 						{
-							{ Item.Types.Scrap, 1 }
+							{ Inventory.Types.Scrap, 1 }
 						}
 					);
 				}

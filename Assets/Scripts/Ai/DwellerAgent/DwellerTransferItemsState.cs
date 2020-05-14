@@ -16,7 +16,7 @@ namespace Lunra.Hothouse.Ai
 		{
 			public readonly Action<Inventory> SetDestination;
 			public readonly Func<Inventory> GetDestination;
-			public readonly Func<Item.Types, int> GetDestinationCapacity;
+			public readonly Func<Inventory.Types, int> GetDestinationCapacity;
 			
 			public readonly Action<Inventory> SetSource;
 			public readonly Func<Inventory> GetSource;
@@ -29,7 +29,7 @@ namespace Lunra.Hothouse.Ai
 			public Target(
 				Action<Inventory> setDestination,
 				Func<Inventory> getDestination,
-				Func<Item.Types, int> getDestinationCapacity,
+				Func<Inventory.Types, int> getDestinationCapacity,
 				Action<Inventory> setSource,
 				Func<Inventory> getSource,
 				Inventory itemsToTransfer,
@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Ai
 
 			cooldownElapsed = cooldownElapsed % target.TransferCooldown;
 
-			(Item.Types Type, int Weight) itemToUnload = (Item.Types.Unknown, 0);
+			(Inventory.Types Type, int Weight) itemToUnload = (Inventory.Types.Unknown, 0);
 
 			foreach (var item in target.ItemsToTransfer.Entries)
 			{
@@ -94,7 +94,7 @@ namespace Lunra.Hothouse.Ai
 				break;
 			}
 			
-			if (itemToUnload.Type == Item.Types.Unknown)
+			if (itemToUnload.Type == Inventory.Types.Unknown)
 			{
 				target = target.NewItemsToUnload(Inventory.Empty);
 				return;

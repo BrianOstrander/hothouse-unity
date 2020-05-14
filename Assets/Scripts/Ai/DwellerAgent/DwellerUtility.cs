@@ -94,7 +94,7 @@ namespace Lunra.Hothouse.Ai
 		public static bool CalculateNearestCleanupWithdrawal(
 			DwellerModel agent,
 			GameModel world,
-			Item.Types[] validItems,
+			Inventory.Types[] validItems,
 			Jobs[] validJobs,
 			out NavMeshPath path,
 			out InventoryPromise promise,

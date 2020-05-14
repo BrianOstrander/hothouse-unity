@@ -80,7 +80,7 @@ namespace Lunra.Hothouse.Models
 
 		public bool HasCapacityFor(
 			Inventory inventory,
-			Item.Types type
+			Inventory.Types type
 		)
 		{
 			return 0 < GetCapacityFor(inventory, type);
@@ -88,7 +88,7 @@ namespace Lunra.Hothouse.Models
 		
 		public bool HasCapacityFor(
 			Inventory inventory,
-			Item.Types type,
+			Inventory.Types type,
 			out int weight
 		)
 		{
@@ -97,7 +97,7 @@ namespace Lunra.Hothouse.Models
 		
 		public bool HasCapacityFor(
 			Inventory inventory,
-			(Item.Types Type, int Weight) entry
+			(Inventory.Types Type, int Weight) entry
 		)
 		{
 			return entry.Weight <= GetCapacityFor(inventory, entry.Type);
@@ -105,7 +105,7 @@ namespace Lunra.Hothouse.Models
 
 		public bool HasCapacityFor(
 			Inventory inventory,
-			(Item.Types Type, int Weight) entry,
+			(Inventory.Types Type, int Weight) entry,
 			out int weight
 		)
 		{
@@ -114,7 +114,7 @@ namespace Lunra.Hothouse.Models
 
 		public int GetMaximumFor(
 			Inventory inventory,
-			Item.Types type
+			Inventory.Types type
 		)
 		{
 			switch (Clamping)
@@ -145,13 +145,13 @@ namespace Lunra.Hothouse.Models
 					var weightRemaining = weightMaximum - inventory.TotalWeight;
 					if (weightRemaining <= 0) return Inventory.Empty;
 					return new Inventory(
-						EnumExtensions.GetValues(Item.Types.Unknown).ToDictionary(
+						EnumExtensions.GetValues(Inventory.Types.Unknown).ToDictionary(
 							type => type,
 							type => weightRemaining
 						)	
 					);
 				case Clamps.IndividualWeight:
-					var individualWeightResult = new Dictionary<Item.Types, int>();
+					var individualWeightResult = new Dictionary<Inventory.Types, int>();
 					foreach (var entryMaximum in inventoryMaximum.Entries)
 					{
 						individualWeightResult.Add(entryMaximum.Type, Mathf.Max(0, entryMaximum.Weight - inventory[entryMaximum.Type]));
@@ -165,7 +165,7 @@ namespace Lunra.Hothouse.Models
 		
 		public int GetCapacityFor(
 			Inventory inventory,
-			Item.Types type
+			Inventory.Types type
 		)
 		{
 			switch (Clamping)
@@ -214,8 +214,8 @@ namespace Lunra.Hothouse.Models
 					return false;
 			}
 
-			var clampedResult = new Dictionary<Item.Types, int>();
-			var overflowResult = new Dictionary<Item.Types, int>();
+			var clampedResult = new Dictionary<Inventory.Types, int>();
+			var overflowResult = new Dictionary<Inventory.Types, int>();
 
 			switch (Clamping)
 			{
@@ -305,14 +305,14 @@ namespace Lunra.Hothouse.Models
 					return false;
 			}
 			
-			var clampedResult = new Dictionary<Item.Types, int>();
-			var overflowResult = new Dictionary<Item.Types, int>();
+			var clampedResult = new Dictionary<Inventory.Types, int>();
+			var overflowResult = new Dictionary<Inventory.Types, int>();
 
 			switch (Clamping)
 			{
 				case Clamps.TotalWeight:
 					var weightExtraRemaining = Mathf.Max(0, weightMaximum - inventory0.TotalWeight);
-					foreach (var type in Item.Valid)
+					foreach (var type in Inventory.ValidTypes)
 					{
 						if (0 < weightExtraRemaining)
 						{
@@ -329,7 +329,7 @@ namespace Lunra.Hothouse.Models
 					}
 					break;
 				case Clamps.IndividualWeight:
-					foreach (var type in Item.Valid)
+					foreach (var type in Inventory.ValidTypes)
 					{
 						var currentWeightMaximum = inventoryMaximum[type];
 						var weightToAdd = inventory0[type] + inventory1[type];

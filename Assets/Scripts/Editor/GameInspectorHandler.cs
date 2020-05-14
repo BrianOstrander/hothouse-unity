@@ -213,7 +213,7 @@ namespace Lunra.Editor.Core
 		{
 			var result = string.Empty;
 
-			foreach (var type in EnumExtensions.GetValues(Item.Types.Unknown))
+			foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
 			{
 				var value = inventory[type];
 				var valueMaximum = capacity?.GetMaximumFor(inventory, type);

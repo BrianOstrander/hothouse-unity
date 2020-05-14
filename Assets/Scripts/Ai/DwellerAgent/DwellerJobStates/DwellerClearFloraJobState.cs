@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			var validJobs = new[] { Jobs.ClearFlora, Jobs.None };
-			var validCleanupItems = Item.Valid;
+			var validCleanupItems = Inventory.ValidTypes;
 			
 			var attackState = new DwellerAttackState<DwellerClearFloraJobState>();
 			var cleanupState = new DwellerItemCleanupState<DwellerClearFloraJobState>(

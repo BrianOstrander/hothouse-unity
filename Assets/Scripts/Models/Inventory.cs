@@ -15,48 +15,43 @@ namespace Lunra.Hothouse.Models
 #pragma warning restore CS0659 // Overrides Object.Equals(object) but does not override Object.GetHashCode()
 #pragma warning restore CS0661 // Defines == or != operator but does not override Object.GetHashCode()
 	{
-		public struct Entry
+		public enum Types
 		{
-			public readonly Item.Types Type;
-			public readonly int Weight;
-
-			public Entry(
-				Item.Types type,
-				int weight
-			)
-			{
-				Type = type;
-				Weight = weight;
-			}
+			Unknown = 0,
+			Stalks = 10,
+			Rations = 20,
+			Scrap = 30,
 		}
 		
-		public static Inventory Empty => new Inventory(new Dictionary<Item.Types, int>());
+		public static Inventory Empty => new Inventory(new Dictionary<Types, int>());
 		public static Inventory MaximumValue => new Inventory(
-			EnumExtensions.GetValues(Item.Types.Unknown).ToDictionary(
+			EnumExtensions.GetValues(Types.Unknown).ToDictionary(
 				type => type,
-				type => int.MaxValue
+				type => Int32.MaxValue
 			)	
 		);
 		
-		readonly ReadOnlyDictionary<Item.Types, int> entries;
+		public static Types[] ValidTypes = EnumExtensions.GetValues(Types.Unknown);
+		
+		[JsonProperty] readonly ReadOnlyDictionary<Types, int> entries;
 		public readonly int TotalWeight;
 
 		[JsonIgnore]
 		public bool IsEmpty => 0 == TotalWeight;
 		[JsonIgnore]
-		public IEnumerable<(Item.Types Type, int Weight)> Entries
+		public IEnumerable<(Types Type, int Weight)> Entries
 		{
 			get
 			{
 				var current = this;
-				return EnumExtensions.GetValues(Item.Types.Unknown)
+				return EnumExtensions.GetValues(Types.Unknown)
 					.Select(t => (t, current[t]));
 			}
 		}
 
-		public Inventory(Dictionary<Item.Types, int> entries)
+		public Inventory(Dictionary<Types, int> entries)
 		{
-			this.entries = new ReadOnlyDictionary<Item.Types, int>(entries);
+			this.entries = new ReadOnlyDictionary<Types, int>(entries);
 			TotalWeight = entries.Select(kv => kv.Value).Sum();
 			
 			Assert.IsTrue(
@@ -66,7 +61,7 @@ namespace Lunra.Hothouse.Models
 		}
 
 		[JsonIgnore]
-		public int this[Item.Types type]
+		public int this[Types type]
 		{
 			get
 			{
@@ -117,7 +112,7 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		public static Inventory operator +(Inventory inventory, (Item.Types Type, int Weight) entry)
+		public static Inventory operator +(Inventory inventory, (Types Type, int Weight) entry)
 		{
 			return new Inventory(
 				inventory.Entries.ToDictionary(
@@ -137,7 +132,7 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		public static Inventory operator -(Inventory inventory, (Item.Types Type, int Weight) entry)
+		public static Inventory operator -(Inventory inventory, (Types Type, int Weight) entry)
 		{
 			return new Inventory(
 				inventory.Entries.ToDictionary(
@@ -167,7 +162,7 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		public static Inventory operator *(Inventory inventory, (Item.Types Type, int Weight) entry)
+		public static Inventory operator *(Inventory inventory, (Types Type, int Weight) entry)
 		{
 			return new Inventory(
 				inventory.Entries.ToDictionary(

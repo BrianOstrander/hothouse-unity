@@ -107,7 +107,7 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			var validJobs = new[] { Jobs.Construction, Jobs.None };
-			var validCleanupItems = Item.Valid;
+			var validCleanupItems = Inventory.ValidTypes;
 			
 			var transferItemsState = new DwellerTransferItemsState<DwellerConstructionJobState>();
 			var timeoutState = new DwellerTimeoutState<DwellerConstructionJobState>();

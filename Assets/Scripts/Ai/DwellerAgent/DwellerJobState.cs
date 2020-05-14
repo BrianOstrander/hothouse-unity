@@ -88,7 +88,7 @@ namespace Lunra.Hothouse.Ai
 			DwellerItemCleanupState<S> cleanupState;
 			InventoryTrigger inventoryTrigger;
 			Jobs[] validJobs;
-			Item.Types[] validItems;
+			Inventory.Types[] validItems;
 			
 			NavMeshPath targetPath = new NavMeshPath();
 
@@ -96,7 +96,7 @@ namespace Lunra.Hothouse.Ai
 				DwellerItemCleanupState<S> cleanupState,
 				InventoryTrigger inventoryTrigger,
 				Jobs[] validJobs,
-				Item.Types[] validItems
+				Inventory.Types[] validItems
 			)
 			{
 				this.cleanupState = cleanupState;
