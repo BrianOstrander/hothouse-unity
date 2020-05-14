@@ -14,20 +14,21 @@ namespace Lunra.Hothouse.Models
 		{
 			Unknown = 0,
 			None = 10,
-			Construction = 20
+			ConstructionDeposit = 20,
+			CleanupWithdrawal = 30
 		}
 		
-		public readonly string BuildingId;
+		public readonly string TargetId;
 		public readonly Operations Operation;
 		public readonly Inventory Inventory;
 
 		public InventoryPromise(
-			string buildingId,
+			string targetId,
 			Operations operation,
 			Inventory inventory
 		)
 		{
-			BuildingId = buildingId;
+			TargetId = targetId;
 			Operation = operation;
 			Inventory = inventory;
 		}
@@ -35,7 +36,7 @@ namespace Lunra.Hothouse.Models
 		public InventoryPromise NewInventory(Inventory inventory)
 		{
 			return new InventoryPromise(
-				BuildingId,
+				TargetId,
 				Operation,
 				inventory
 			);

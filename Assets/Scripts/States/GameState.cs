@@ -106,19 +106,10 @@ namespace Lunra.Hothouse.Services
 			App.Heartbeat.Wait(
 				() =>
 				{
-					var wagon = Payload.Game.Buildings.AllActive.First(b => b.Id.Value.StartsWith("wagon"));
-					wagon.InventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							EnumExtensions.GetValues(Item.Types.Unknown).ToDictionary(
-								type => type,
-								type => 50
-							)
-						)	
-					);
-					// Debug.Log("Killing dweller id : 0");
-					// Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
+					Debug.Log("Killing dweller id : 0");
+					Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
 				},
-				10f
+				2f
 			);
 		}
 

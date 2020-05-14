@@ -178,7 +178,11 @@ namespace Lunra.Editor.Core
 					label += GetInventory(
 						"Inventory",
 						model.Inventory.Value
-						
+					);
+					
+					label += GetInventory(
+						"Cleanup Promised",
+						model.WithdrawalInventoryPromised.Value
 					);
 
 					Handles.Label(

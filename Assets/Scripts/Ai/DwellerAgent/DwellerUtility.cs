@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -87,6 +89,69 @@ namespace Lunra.Hothouse.Ai
 			}
 
 			return false;
+		}
+
+		public static bool CalculateNearestCleanupWithdrawal(
+			DwellerModel agent,
+			GameModel world,
+			Item.Types[] validItems,
+			Jobs[] validJobs,
+			out NavMeshPath path,
+			out InventoryPromise promise,
+			out Inventory inventoryToWithdrawal,
+			out ItemDropModel target
+		)
+		{
+			path = default;
+			promise = default;
+			inventoryToWithdrawal = default;
+			target = default;
+			
+			var itemsWithCapacity = validItems.Where(i => agent.InventoryCapacity.Value.HasCapacityFor(agent.Inventory.Value, i));
+			if (itemsWithCapacity.None())
+			{
+				return false;
+			}
+			
+			var pathResult = new NavMeshPath();
+
+			target = world.ItemDrops.AllActive
+				.Where(
+					possibleItemDrop =>
+					{
+						if (!validJobs.Contains(possibleItemDrop.Job.Value)) return false;
+						var nonPromisedInventory = possibleItemDrop.Inventory.Value - possibleItemDrop.WithdrawalInventoryPromised.Value;
+						if (nonPromisedInventory.IsEmpty) return false;
+						return itemsWithCapacity.Any(i => 0 < nonPromisedInventory[i]);
+					}
+				)
+				.OrderBy(t => Vector3.Distance(agent.Position.Value, t.Position.Value))
+				.FirstOrDefault(
+					t =>  NavMesh.CalculatePath(
+						agent.Position.Value,
+						t.Position.Value,
+						NavMesh.AllAreas,
+						pathResult
+					)
+				);
+
+			if (target == null) return false;
+
+			path = pathResult;
+			
+			agent.InventoryCapacity.Value.GetCapacityFor(agent.Inventory.Value)
+				.Intersects(
+					target.Inventory.Value - target.WithdrawalInventoryPromised.Value,
+					out inventoryToWithdrawal
+				);
+
+			promise = new InventoryPromise(
+				target.Id.Value,
+				InventoryPromise.Operations.CleanupWithdrawal,
+				inventoryToWithdrawal
+			);
+			
+			return true;	
 		}
 	}
 }

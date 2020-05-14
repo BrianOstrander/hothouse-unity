@@ -114,7 +114,7 @@ namespace Lunra.Hothouse.Ai
 				{
 					case InventoryTrigger.OnEmpty:
 						if (!Agent.Inventory.Value.IsEmpty) return false;
-						return IsAnyValidItemReachable();
+						return IsAnyValidItemDropReachable();
 					case InventoryTrigger.OnFull:
 						if (Agent.InventoryCapacity.Value.IsNotFull(Agent.Inventory.Value)) return false;
 						return true;
@@ -128,21 +128,18 @@ namespace Lunra.Hothouse.Ai
 				return false;
 			}
 
-			bool IsAnyValidItemReachable()
+			bool IsAnyValidItemDropReachable()
 			{
-				var target = World.ItemDrops.AllActive
-					.Where(t => validJobs.Contains(t.Job.Value) && validItems.Any(i => 0 < t.Inventory.Value[i]))
-					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
-					.FirstOrDefault(
-						t =>  NavMesh.CalculatePath(
-							Agent.Position.Value,
-							t.Position.Value,
-							NavMesh.AllAreas,
-							targetPath
-						)
-					);
-
-				return target != null;
+				return DwellerUtility.CalculateNearestCleanupWithdrawal(
+					Agent,
+					World,
+					validItems,
+					validJobs,
+					out _,
+					out _,
+					out _,
+					out _
+				);
 			}
 
 			bool IsAnyBuildingWithInventoryReachable()

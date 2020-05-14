@@ -74,7 +74,7 @@ namespace Lunra.Hothouse.Ai
 							
 							promiseResult = new InventoryPromise(
 								kv.Key.Id.Value,
-								InventoryPromise.Operations.Construction,
+								InventoryPromise.Operations.ConstructionDeposit,
 								promisedInventory
 							);
 							
@@ -97,8 +97,7 @@ namespace Lunra.Hothouse.Ai
 		enum Steps
 		{
 			Unknown = 0,
-			WithdrawingItemsFromCache = 10,
-			DepositingItemsAtConstructionSite = 20
+			WithdrawingItemsFromCache = 10
 		}
 		
 		public override Jobs Job => Jobs.Construction;
@@ -162,7 +161,7 @@ namespace Lunra.Hothouse.Ai
 					return;
 			}
 			
-			var constructionSite = World.Buildings.AllActive.FirstOrDefault(b => b.Id.Value == Agent.InventoryPromise.Value.BuildingId);
+			var constructionSite = World.Buildings.AllActive.FirstOrDefault(b => b.Id.Value == Agent.InventoryPromise.Value.TargetId);
 			
 			if (constructionSite == null)
 			{
@@ -187,10 +186,6 @@ namespace Lunra.Hothouse.Ai
 
 						Agent.InventoryPromise.Value = Agent.InventoryPromise.Value.NewInventory(newPromise);
 					}
-					break;
-				case Steps.DepositingItemsAtConstructionSite:
-					constructionSite.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory;
-					Agent.InventoryPromise.Value = InventoryPromise.Default();
 					break;
 			}
 			
@@ -288,7 +283,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				var constructionSite = World.Buildings.AllActive.First(b => b.Id.Value == promise.BuildingId);
+				var constructionSite = World.Buildings.AllActive.First(b => b.Id.Value == promise.TargetId);
 				
 				Agent.InventoryPromise.Value = promise;
 				constructionSite.ConstructionInventoryPromised.Value += promise.Inventory;
@@ -348,7 +343,7 @@ namespace Lunra.Hothouse.Ai
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.Construction) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
 				if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory))
 				{
 					Debug.LogError("This should not be able to happen!");
@@ -358,7 +353,7 @@ namespace Lunra.Hothouse.Ai
 				target = World.Buildings.AllActive.FirstOrDefault(
 					m =>
 					{
-						if (m.Id.Value != Agent.InventoryPromise.Value.BuildingId) return false;
+						if (m.Id.Value != Agent.InventoryPromise.Value.TargetId) return false;
 						
 						return m.Entrances.Value.Any(e => Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), e.Position.NewY(0f))));
 					}
@@ -377,11 +372,14 @@ namespace Lunra.Hothouse.Ai
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
 						Agent.InventoryPromise.Value.Inventory,
-						Agent.DepositCooldown.Value
+						Agent.DepositCooldown.Value,
+						() =>
+						{
+							target.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory;
+							Agent.InventoryPromise.Value = InventoryPromise.Default();
+						}
 					)
 				);
-
-				sourceState.step = Steps.DepositingItemsAtConstructionSite;
 			}
 		}
 
@@ -391,7 +389,7 @@ namespace Lunra.Hothouse.Ai
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.Construction) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
 
 				var target = DwellerUtility.CalculateNearestEntrance(
 					Agent.Position.Value,
@@ -400,7 +398,7 @@ namespace Lunra.Hothouse.Ai
 					b =>
 					{
 						if (b.BuildingState.Value != BuildingStates.Constructing) return false;
-						return b.Id.Value == Agent.InventoryPromise.Value.BuildingId;
+						return b.Id.Value == Agent.InventoryPromise.Value.TargetId;
 					},
 					World.Buildings.AllActive
 				);

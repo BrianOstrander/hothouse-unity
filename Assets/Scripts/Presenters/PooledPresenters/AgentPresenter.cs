@@ -110,12 +110,26 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
-			if (Model.InventoryPromise.Value.Operation != InventoryPromise.Operations.Unknown)
+			switch (Model.InventoryPromise.Value.Operation)
 			{
-				var building = Game.Buildings.AllActive.FirstOrDefault(b => b.Id.Value == Model.InventoryPromise.Value.BuildingId);
+				case InventoryPromise.Operations.None: break;
+				case InventoryPromise.Operations.ConstructionDeposit:
+					var building = Game.Buildings.FirstOrDefaultActive(Model.InventoryPromise.Value.TargetId);
 				
-				if (building == null) Debug.LogError("Cannot find an active building with id \"" + Model.InventoryPromise.Value.BuildingId + "\" to cancel out promise operation: " + Model.InventoryPromise.Value.Operation);
-				else building.ConstructionInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory;
+					if (building == null) Debug.LogError("Cannot find an active building with id \"" + Model.InventoryPromise.Value.TargetId + "\" to cancel out promise operation: " + Model.InventoryPromise.Value.Operation+", this should never happen");
+					else building.ConstructionInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory;
+					
+					break;
+				case InventoryPromise.Operations.CleanupWithdrawal:
+					var itemDrop = Game.ItemDrops.FirstOrDefaultActive(Model.InventoryPromise.Value.TargetId);
+
+					if (itemDrop == null) Debug.LogError("Cannot find an active itemDrop with id \"" + Model.InventoryPromise.Value.TargetId + "\" to cancel out operation: " + Model.InventoryPromise.Value.Operation + ", this should never happen");
+					else itemDrop.WithdrawalInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory;
+					
+					break;
+				default:
+					Debug.LogError("Unrecognized operation: " + Model.InventoryPromise.Value.Operation);
+					break;
 			}
 			
 			Model.PooledState.Value = PooledStates.InActive;

@@ -139,5 +139,14 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		#endregion
+		
+		#region Linq Extensions
+		public M FirstActive() => AllActive.First();
+		public M FirstActive(string id) => FirstActive(m => m.Id.Value == id);
+		public M FirstActive(Func<M, bool> predicate) => AllActive.First(predicate);
+		public M FirstOrDefaultActive() => AllActive.FirstOrDefault();
+		public M FirstOrDefaultActive(string id) => FirstOrDefaultActive(m => m.Id.Value == id);
+		public M FirstOrDefaultActive(Func<M, bool> predicate) => AllActive.FirstOrDefault(predicate);
+		#endregion
 	}
 }

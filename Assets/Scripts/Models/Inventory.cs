@@ -5,6 +5,7 @@ using System.Linq;
 using Lunra.Core;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Lunra.Hothouse.Models
 {
@@ -57,6 +58,11 @@ namespace Lunra.Hothouse.Models
 		{
 			this.entries = new ReadOnlyDictionary<Item.Types, int>(entries);
 			TotalWeight = entries.Select(kv => kv.Value).Sum();
+			
+			Assert.IsTrue(
+				entries.None(e => e.Value < 0),
+				nameof(entries)+" should never contain values less than zero\n"+ToString(true)
+			);
 		}
 
 		[JsonIgnore]
@@ -219,9 +225,11 @@ namespace Lunra.Hothouse.Models
 		public static bool operator !=(Inventory inventory0, Inventory inventory1) { return !(inventory0 == inventory1); }
 		#endregion
 
-		public override string ToString()
+		public override string ToString() => ToString(false);
+		
+		public string ToString(bool ignoreWeight)
 		{
-			if (TotalWeight == 0) return "Empty";
+			if (!ignoreWeight && TotalWeight == 0) return "Empty";
 			
 			var result = "[";
 			foreach (var kv in entries.Where(kv => kv.Value != 0))

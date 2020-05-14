@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
@@ -176,16 +175,15 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
-				
-				var itemsWithCapacity = sourceState.validItems.Where(i => Agent.InventoryCapacity.Value.HasCapacityFor(Agent.Inventory.Value, i));
-				if (itemsWithCapacity.None()) return false;
-				
-				target = World.ItemDrops.AllActive
-					.Where(t => sourceState.validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => 0 < t.Inventory.Value[i]))
-					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
-					.FirstOrDefault();
-				
-				if (target == null) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.CleanupWithdrawal) return false;
+
+				target = World.ItemDrops.FirstOrDefaultActive(Agent.InventoryPromise.Value.TargetId);
+
+				if (target == null)
+				{
+					Debug.LogError("Unable to find an active model of type \""+nameof(ItemDropModel)+"\" with id \""+Agent.InventoryPromise.Value.TargetId+"\", this should never happen");
+					return false;
+				}
 
 				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), target.Position.Value.NewY(0f)));
 			}
@@ -204,7 +202,12 @@ namespace Lunra.Hothouse.Ai
 						i => target.Inventory.Value = i,
 						() => target.Inventory.Value,
 						new Inventory(itemsToTransfer),
-						Agent.WithdrawalCooldown.Value
+						Agent.WithdrawalCooldown.Value,
+						() =>
+						{
+							target.WithdrawalInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory;
+							Agent.InventoryPromise.Value = InventoryPromise.Default();
+						}
 					)
 				);
 			}
@@ -213,35 +216,35 @@ namespace Lunra.Hothouse.Ai
 		class ToNavigateToNearestItemDrop : AgentTransition<DwellerNavigateState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
 			DwellerItemCleanupState<S> sourceState;
-			ItemDropModel target;
 			NavMeshPath targetPath = new NavMeshPath();
+			InventoryPromise promise;
+			Inventory inventoryToWithdrawal;
+			ItemDropModel target;
 
 			public ToNavigateToNearestItemDrop(DwellerItemCleanupState<S> sourceState) => this.sourceState = sourceState;
 
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
-				
-				var itemsWithCapacity = sourceState.validItems.Where(i => Agent.InventoryCapacity.Value.HasCapacityFor(Agent.Inventory.Value, i));
-				if (itemsWithCapacity.None()) return false;
 
-				target = World.ItemDrops.AllActive
-					.Where(t => sourceState.validJobs.Contains(t.Job.Value) && itemsWithCapacity.Any(i => 0 < t.Inventory.Value[i]))
-					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
-					.FirstOrDefault(
-						t =>  NavMesh.CalculatePath(
-							Agent.Position.Value,
-							t.Position.Value,
-							NavMesh.AllAreas,
-							targetPath
-						)
-					);
-
-				return target != null;
+				return DwellerUtility.CalculateNearestCleanupWithdrawal(
+					Agent,
+					World,
+					sourceState.validItems,
+					sourceState.validJobs,
+					out targetPath,
+					out promise,
+					out inventoryToWithdrawal,
+					out target
+				);
 			}
 
 			public override void Transition()
 			{
+				target.WithdrawalInventoryPromised.Value += inventoryToWithdrawal;
+
+				Agent.InventoryPromise.Value = promise;
+				
 				Agent.NavigationPlan.Value = NavigationPlan.Navigating(targetPath);
 			}
 		}

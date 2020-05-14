@@ -24,6 +24,8 @@ namespace Lunra.Hothouse.Ai
 			public readonly Inventory ItemsToTransfer;
 			public readonly float TransferCooldown;
 
+			public readonly Action Done;
+
 			public Target(
 				Action<Inventory> setDestination,
 				Func<Inventory> getDestination,
@@ -31,7 +33,8 @@ namespace Lunra.Hothouse.Ai
 				Action<Inventory> setSource,
 				Func<Inventory> getSource,
 				Inventory itemsToTransfer,
-				float transferCooldown
+				float transferCooldown,
+				Action done = null
 			)
 			{
 				SetDestination = setDestination;
@@ -41,6 +44,7 @@ namespace Lunra.Hothouse.Ai
 				GetSource = getSource;
 				ItemsToTransfer = itemsToTransfer;
 				TransferCooldown = transferCooldown;
+				Done = done;
 			}
 
 			public Target NewItemsToUnload(Inventory itemsToUnload)
@@ -52,7 +56,8 @@ namespace Lunra.Hothouse.Ai
 					SetSource,
 					GetSource,
 					itemsToUnload,
-					TransferCooldown
+					TransferCooldown,
+					Done
 				);
 			}
 		}
@@ -106,7 +111,9 @@ namespace Lunra.Hothouse.Ai
 
 		public override void End()
 		{
+			var done = target.Done;
 			target = default;
+			done?.Invoke();
 			cooldownElapsed = 0f;
 		}
 
