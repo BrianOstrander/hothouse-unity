@@ -141,6 +141,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2081618020461291662}
     m_Modifications:
+    - target: {fileID: -9213628692342801781, guid: 9df3f93e4c246492e920a97462c6b254,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
     - target: {fileID: -4216859302048453862, guid: 9df3f93e4c246492e920a97462c6b254,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -201,6 +206,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wagon
       objectReference: {fileID: 0}
+    - target: {fileID: 6073720608296782137, guid: 9df3f93e4c246492e920a97462c6b254,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9df3f93e4c246492e920a97462c6b254, type: 3}
 --- !u!4 &5463896733405235545 stripped
