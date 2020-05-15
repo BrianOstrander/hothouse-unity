@@ -37,6 +37,8 @@ namespace Lunra.StyxMvp.Models
 			property.Changed += OnProperty;
 
 			foreach (var listener in listeners) Changed += listener;
+			
+			OnProperty(property.Value);
 		}
 
 		void OnProperty(P property) { Value = derive(property); }
@@ -81,6 +83,8 @@ namespace Lunra.StyxMvp.Models
 			property1.Changed += value => OnProperty();
 
 			foreach (var listener in listeners) Changed += listener;
+			
+			OnProperty();
 		}
 
 		void OnProperty() { Value = derive(property0.Value, property1.Value); }
@@ -129,6 +133,8 @@ namespace Lunra.StyxMvp.Models
 			property2.Changed += value => OnProperty();
 
 			foreach (var listener in listeners) Changed += listener;
+			
+			OnProperty();
 		}
 
 		void OnProperty() { Value = derive(property0.Value, property1.Value, property2.Value); }
@@ -181,6 +187,8 @@ namespace Lunra.StyxMvp.Models
 			property3.Changed += value => OnProperty();
 
 			foreach (var listener in listeners) Changed += listener;
+			
+			OnProperty();
 		}
 
 		void OnProperty() { Value = derive(property0.Value, property1.Value, property2.Value, property3.Value); }
@@ -237,6 +245,8 @@ namespace Lunra.StyxMvp.Models
 			property4.Changed += value => OnProperty();
 
 			foreach (var listener in listeners) Changed += listener;
+			
+			OnProperty();
 		}
 
 		void OnProperty() { Value = derive(property0.Value, property1.Value, property2.Value, property3.Value, property4.Value); }

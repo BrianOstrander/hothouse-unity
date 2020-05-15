@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class FloraModel : PrefabModel
+	public class FloraModel : ClearablePrefabModel
 	{
 		#region Serialized
 		[JsonProperty] string[] validPrefabIds = new string[0];
@@ -35,18 +35,6 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] float spreadDamage;
 		[JsonIgnore] public ListenerProperty<float> SpreadDamage { get; }
-		
-		[JsonProperty] float health;
-		[JsonIgnore] public ListenerProperty<float> Health { get; }
-		
-		[JsonProperty] float healthMaximum;
-		[JsonIgnore] public ListenerProperty<float> HealthMaximum { get; }
-		
-		[JsonProperty] bool markedForClearing;
-		[JsonIgnore] public ListenerProperty<bool> MarkedForClearing { get; }
-		
-		[JsonProperty] Inventory itemDrops = Inventory.Empty;
-		[JsonIgnore] public ListenerProperty<Inventory> ItemDrops { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -65,10 +53,6 @@ namespace Lunra.Hothouse.Models
 			ReproductionFailureLimit = new ListenerProperty<int>(value => reproductionFailureLimit = value, () => reproductionFailureLimit);
 			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
 			SpreadDamage = new ListenerProperty<float>(value => spreadDamage = value, () => spreadDamage);
-			Health = new ListenerProperty<float>(value => health = value, () => health);
-			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
-			MarkedForClearing = new ListenerProperty<bool>(value => markedForClearing = value, () => markedForClearing);
-			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
 			
 			IsReproducing = new DerivedProperty<bool, int, int>(
 				value => isReproducing = value,

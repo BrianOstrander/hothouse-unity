@@ -62,7 +62,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0.19954129
-      value: 25
+      value: 41.906807
       inSlope: 0.03196678
       outSlope: 0.03196678
       tangentMode: 0
@@ -71,7 +71,7 @@ MonoBehaviour:
       outWeight: 0.2352941
     - serializedVersion: 3
       time: 0.40022942
-      value: 75
+      value: 60.839848
       inSlope: 0
       outSlope: 0
       tangentMode: 136
@@ -80,7 +80,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 0.5929556
-      value: 75
+      value: 60.839848
       inSlope: 0
       outSlope: 0
       tangentMode: 136
@@ -89,7 +89,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 0.79472476
-      value: 25
+      value: 41.906807
       inSlope: 0.057327792
       outSlope: 0.057327792
       tangentMode: 0
@@ -238,7 +238,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &5626137879710273256
 Transform:
   m_ObjectHideFlags: 0

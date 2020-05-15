@@ -75,7 +75,7 @@ namespace Lunra.Hothouse.Ai
 				targetFlora = World.Flora.AllActive.FirstOrDefault(
 					flora =>
 					{
-						if (!flora.MarkedForClearing.Value) return false;
+						if (!flora.IsMarkedForClearance.Value) return false;
 						return Vector3.Distance(Agent.Position.Value, flora.Position.Value) < Agent.MeleeRange.Value;
 					}
 				);
@@ -127,7 +127,7 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				target = World.Flora.AllActive
-					.Where(t => t.MarkedForClearing.Value)
+					.Where(t => t.IsMarkedForClearance.Value)
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault();
 

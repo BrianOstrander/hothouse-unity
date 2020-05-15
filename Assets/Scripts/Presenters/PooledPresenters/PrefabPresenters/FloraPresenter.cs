@@ -91,12 +91,12 @@ namespace Lunra.Hothouse.Presenters
 			switch (selectionState)
 			{
 				case SelectionStates.Deselected:
-					if (!Model.MarkedForClearing.Value) View.Deselect();
+					if (!Model.IsMarkedForClearance.Value) View.Deselect();
 					break;
 				case SelectionStates.Highlighted: View.Highlight(); break;
 				case SelectionStates.Selected:
 					View.Select();
-					Model.MarkedForClearing.Value = true;
+					Model.ClearancePriority.Value = 0;
 					break;
 			}
 		}
@@ -158,7 +158,7 @@ namespace Lunra.Hothouse.Presenters
 									newFlora.SpreadDamage.Value = Model.SpreadDamage.Value;
 									newFlora.HealthMaximum.Value = Model.HealthMaximum.Value;
 									newFlora.Health.Value = Model.HealthMaximum.Value;
-									newFlora.MarkedForClearing.Value = false;
+									newFlora.ClearancePriority.Value = null;
 									newFlora.ItemDrops.Value = Model.ItemDrops.Value;
 									
 									if (Game.Selection.Current.Value.State == SelectionModel.States.Highlighting && Game.Selection.Current.Value.Contains(newFlora.Position.Value))
