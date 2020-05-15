@@ -1,17 +1,15 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
-using Lunra.StyxMvp.Presenters;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class FloraPresenter : PrefabPresenter<FloraModel, FloraView>
+	public class FloraPresenter : ClearablePresenter<FloraModel, FloraView>
 	{
 		public FloraPresenter(GameModel game, FloraModel model) : base(game, model) { }
 
@@ -21,9 +19,8 @@ namespace Lunra.Hothouse.Presenters
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
-			Model.IsReproducing.Changed += OnFloraIsReproducing;
-			Model.SelectionState.Changed += OnFloraSelectionState;
 			Model.Health.Changed += OnFloraHealth;
+			Model.IsReproducing.Changed += OnFloraIsReproducing;
 		}
 
 		protected override void UnBind()
@@ -32,17 +29,16 @@ namespace Lunra.Hothouse.Presenters
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 
-			Model.IsReproducing.Changed -= OnFloraIsReproducing;
-			Model.SelectionState.Changed -= OnFloraSelectionState;
 			Model.Health.Changed -= OnFloraHealth;
+			Model.IsReproducing.Changed -= OnFloraIsReproducing;
 		}
 
 		protected override void OnViewPrepare()
 		{
+			base.OnViewPrepare();
+			
 			View.Age = Model.Age.Value.Normalized;
 			View.IsReproducing = Model.IsReproducing.Value;
-			
-			View.Shown += () => OnFloraSelectionState(Model.SelectionState.Value);
 			
 			if (Mathf.Approximately(0f, Model.Age.Value.Current)) Game.FloraEffects.SpawnQueue.Enqueue(new FloraEffectsModel.Request(Model.Position.Value));
 		}
@@ -83,23 +79,6 @@ namespace Lunra.Hothouse.Presenters
 			if (View.NotVisible) return;
 			View.IsReproducing = isReproducing;
 		}
-		
-		void OnFloraSelectionState(SelectionStates selectionState)
-		{
-			if (View.NotVisible) return;
-			
-			switch (selectionState)
-			{
-				case SelectionStates.Deselected:
-					if (!Model.IsMarkedForClearance.Value) View.Deselect();
-					break;
-				case SelectionStates.Highlighted: View.Highlight(); break;
-				case SelectionStates.Selected:
-					View.Select();
-					Model.ClearancePriority.Value = 0;
-					break;
-			}
-		}
 
 		void OnFloraHealth(float health)
 		{
@@ -110,8 +89,6 @@ namespace Lunra.Hothouse.Presenters
 			}
 			
 			if (View.Visible) Game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(Model.Position.Value));
-			
-			Game.Flora.InActivate(Model);
 		}
 		#endregion
 		

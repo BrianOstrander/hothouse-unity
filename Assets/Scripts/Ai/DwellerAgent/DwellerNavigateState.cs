@@ -1,6 +1,6 @@
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
-
+using UnityEngine;
 using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai
@@ -33,7 +33,7 @@ namespace Lunra.Hothouse.Ai
 
 		public override void Idle()
 		{
-			if (Agent.NavigationPlan.Value.Created < World.LastNavigationCalculation.Value && Agent.NavigationPlan.Value.State != NavigationPlan.States.NavigatingForced)
+			if (Agent.NavigationPlan.Value.Created < World.NavigationMesh.LastUpdated.Value && Agent.NavigationPlan.Value.State != NavigationPlan.States.NavigatingForced)
 			{
 				if (!CalculatePath()) return;
 			}
@@ -43,10 +43,27 @@ namespace Lunra.Hothouse.Ai
 
 		bool CalculatePath()
 		{
+			var endPosition = Agent.NavigationPlan.Value.EndPosition;
+			if (!Mathf.Approximately(0f, Agent.NavigationPlan.Value.Threshold))
+			{
+				var hasSample = NavMesh.SamplePosition(
+					endPosition,
+					out var sampleHit,
+					Agent.NavigationPlan.Value.Threshold,
+					NavMesh.AllAreas
+				);
+				if (hasSample) endPosition = sampleHit.position;
+				else
+				{
+					Agent.NavigationPlan.Value = NavigationPlan.Invalid(Agent.NavigationPlan.Value);
+					return false;
+				}
+			}
+			
 			var path = new NavMeshPath();
 			var hasPath = NavMesh.CalculatePath(
 				Agent.NavigationPlan.Value.Position,
-				Agent.NavigationPlan.Value.EndPosition,
+				endPosition,
 				NavMesh.AllAreas,
 				path
 			);

@@ -1,8 +1,6 @@
 ﻿using Lunra.Core;
 using Lunra.StyxMvp.Models;
-using Lunra.NumberDemon;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -30,9 +28,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] int reproductionFailureLimit;
 		[JsonIgnore] public ListenerProperty<int> ReproductionFailureLimit { get; }
 
-		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
-		[JsonIgnore] public ListenerProperty<SelectionStates> SelectionState { get; }
-
 		[JsonProperty] float spreadDamage;
 		[JsonIgnore] public ListenerProperty<float> SpreadDamage { get; }
 		#endregion
@@ -51,7 +46,6 @@ namespace Lunra.Hothouse.Models
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);
 			ReproductionFailures = new ListenerProperty<int>(value => reproductionFailures = value, () => reproductionFailures);
 			ReproductionFailureLimit = new ListenerProperty<int>(value => reproductionFailureLimit = value, () => reproductionFailureLimit);
-			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
 			SpreadDamage = new ListenerProperty<float>(value => spreadDamage = value, () => spreadDamage);
 			
 			IsReproducing = new DerivedProperty<bool, int, int>(

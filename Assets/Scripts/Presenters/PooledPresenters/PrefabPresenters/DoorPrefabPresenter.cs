@@ -1,3 +1,4 @@
+using System;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
@@ -34,6 +35,8 @@ namespace Lunra.Hothouse.Presenters
 			
 			if (isOpen) View.Open();
 			else Debug.LogError("Currently no way to re-close a door...");
+			
+			Game.NavigationMesh.QueueCalculation();
 		}
 		#endregion
 	}

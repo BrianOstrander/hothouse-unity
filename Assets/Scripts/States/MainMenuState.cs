@@ -229,6 +229,45 @@ namespace Lunra.Hothouse.Services
 					FloraSpecies.Edible
 				)
 			);
+			
+			void initializeClearable(
+				ClearableModel clearable,
+				Vector3 position,
+				Inventory itemDrops
+			)
+			{
+				clearable.Position.Value = position;
+				clearable.Rotation.Value = Quaternion.identity;
+				clearable.ItemDrops.Value = itemDrops;
+			}
+
+			game.Debris.Activate(
+				"debris_small",
+				debris => initializeClearable(
+					debris,
+					new Vector3(0, 0f, -6f),
+					new Inventory(
+						new Dictionary<Inventory.Types, int>
+						{
+							{ Inventory.Types.Scrap, 1 }
+						}
+					)
+				)
+			);
+			
+			game.Debris.Activate(
+				"debris_large",
+				debris => initializeClearable(
+					debris,
+					new Vector3(1, 0f, -5f),
+					new Inventory(
+						new Dictionary<Inventory.Types, int>
+						{
+							{ Inventory.Types.Scrap, 1 }
+						}
+					)
+				)
+			);
 
 			void initializeDweller(
 				DwellerModel dweller,
@@ -265,31 +304,31 @@ namespace Lunra.Hothouse.Services
 				};
 			}
 			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"0",
-					new Vector3(-6f, -0.8386866f, 3f),
-					Jobs.Construction
-				)
-			);
-			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"1",
-					new Vector3(-2f, -0.8386866f, 10f),
-					Jobs.Construction
-				)
-			);
+			// game.Dwellers.Activate(
+			// 	dweller => initializeDweller(
+			// 		dweller,
+			// 		"0",
+			// 		new Vector3(-6f, -0.8386866f, 3f),
+			// 		Jobs.Construction
+			// 	)
+			// );
+			//
+			// game.Dwellers.Activate(
+			// 	dweller => initializeDweller(
+			// 		dweller,
+			// 		"1",
+			// 		new Vector3(-2f, -0.8386866f, 10f),
+			// 		Jobs.Construction
+			// 	)
+			// );
 			
 			game.Dwellers.Activate(
 				dweller => initializeDweller(
 					dweller,
 					"2",
 					new Vector3(-4f, -0.8386866f, 3f),
-					Jobs.Clearer,
-					debugAgentStates: true
+					Jobs.Clearer
+					// debugAgentStates: true
 				)
 			);
 			
@@ -421,19 +460,19 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 
-			game.ItemDrops.Activate(
-				m =>
-				{
-					m.Position.Value = new Vector3(1f, 0f, -5f);
-					m.Job.Value = Jobs.None;
-					m.Inventory.Value = new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Scrap, 1 }
-						}
-					);
-				}
-			);
+			// game.ItemDrops.Activate(
+			// 	m =>
+			// 	{
+			// 		m.Position.Value = new Vector3(1f, 0f, -5f);
+			// 		m.Job.Value = Jobs.None;
+			// 		m.Inventory.Value = new Inventory(
+			// 			new Dictionary<Inventory.Types, int>
+			// 			{
+			// 				{ Inventory.Types.Scrap, 1 }
+			// 			}
+			// 		);
+			// 	}
+			// );
 			
 			// game.ItemDrops.Activate(
 			// 	m =>

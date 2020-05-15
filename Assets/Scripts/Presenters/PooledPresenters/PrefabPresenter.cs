@@ -4,9 +4,9 @@ using Lunra.StyxMvp;
 
 namespace Lunra.Hothouse.Presenters
 { 
-	public abstract class PrefabPresenter<M, V> : PooledPresenter<M, V>
-		where M : PrefabModel
-		where V : PrefabView
+	public class PrefabPresenter<M, V> : PooledPresenter<M, V>
+		where M : IPrefabModel
+		where V : class, IPrefabView
 	{
 		public PrefabPresenter(
 			GameModel game,

@@ -73,7 +73,8 @@ namespace Lunra.Hothouse.Ai
 					clearable =>
 					{
 						if (!clearable.IsMarkedForClearance.Value) return false;
-						return Vector3.Distance(Agent.Position.Value, clearable.Position.Value) < Agent.MeleeRange.Value;
+						// if (Mathf.Approximately(0f, clearable.Health.Value)) return false;
+						return Vector3.Distance(Agent.Position.Value, clearable.Position.Value) <= (Agent.MeleeRange.Value + clearable.MeleeRangeBonus.Value);
 					}
 				);
 
@@ -136,7 +137,7 @@ namespace Lunra.Hothouse.Ai
 				Agent.NavigationPlan.Value = NavigationPlan.Calculating(
 					Agent.Position.Value,
 					target.Position.Value,
-					Agent.MeleeRange.Value
+					Agent.MeleeRange.Value + target.MeleeRangeBonus.Value
 				);
 			}
 		}

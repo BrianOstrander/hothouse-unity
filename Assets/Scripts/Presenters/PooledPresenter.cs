@@ -7,8 +7,8 @@ using UnityEngine;
 namespace Lunra.Hothouse.Presenters
 {
 	public class PooledPresenter<M, V> : Presenter<V>
-		where M : PooledModel
-		where V : View
+		where M : IPooledModel
+		where V : class, IView
 	{
 		protected readonly GameModel Game;
 		protected M Model;
@@ -44,21 +44,27 @@ namespace Lunra.Hothouse.Presenters
 		protected virtual void Bind()
 		{
 			Model.PooledState.Changed += OnPooledState;
-			if (Game.IsSimulationInitialized) Initialize();
-			else Game.SimulationInitialize += Initialize;
+			Initialize();
+			if (Game.IsSimulationInitialized) SimulationInitialize();
+			else Game.SimulationInitialize += SimulationInitialize;
 		}
 
 		protected override void UnBind()
 		{
 			Model.PooledState.Changed -= OnPooledState;
 			
-			Game.SimulationInitialize -= Initialize;
+			Game.SimulationInitialize -= SimulationInitialize;
 		}
 		
 		void Initialize()
 		{
 			OnPooledState(Model.PooledState.Value);
 			OnInitialized();
+		}
+		
+		void SimulationInitialize()
+		{
+			OnSimulationInitialized();
 		}
 		
 		void Show()
@@ -75,7 +81,7 @@ namespace Lunra.Hothouse.Presenters
 			View.PrepareClose += OnViewPrepareClose;
 			View.Closed += OnViewClosed;
 			
-			ShowView(instant: true);
+			ShowView(Game.NavigationMesh.Root.Value, true);
 		}
 
 		void Close()
@@ -93,6 +99,7 @@ namespace Lunra.Hothouse.Presenters
 		
 		#region Events
 		protected virtual void OnInitialized() { }
+		protected virtual void OnSimulationInitialized() { }
 		#endregion
 		
 		#region View Event
@@ -117,7 +124,16 @@ namespace Lunra.Hothouse.Presenters
 					Debug.LogError("Unrecognized state: " + pooledState);
 					break;
 			}
+
+			if (QueueNavigationCalculation && Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
+			{
+				Game.NavigationMesh.QueueCalculation();
+			}
 		}
+		#endregion
+		
+		#region Utility
+		protected virtual bool QueueNavigationCalculation => false;
 		#endregion
 	}
 }

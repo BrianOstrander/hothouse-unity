@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 722882633044156164}
   - component: {fileID: 3580928674492630798}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: DwellerView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -63,7 +63,7 @@ GameObject:
   - component: {fileID: 758933084844385106}
   - component: {fileID: 7831776978468133616}
   - component: {fileID: 1279252015675853815}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}

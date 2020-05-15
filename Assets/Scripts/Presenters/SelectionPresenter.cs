@@ -96,16 +96,16 @@ namespace Lunra.Hothouse.Presenters
 			{
 				case SelectionModel.States.Highlighting:
 					View.Highlight(current.Begin, current.End);
-					foreach (var flora in game.Flora.AllActive)
+					foreach (var clearable in game.Clearables)
 					{
-						flora.SelectionState.Value = current.Contains(flora.Position.Value) ? SelectionStates.Highlighted : SelectionStates.Deselected;
+						clearable.SelectionState.Value = current.Contains(clearable.Position.Value) ? SelectionStates.Highlighted : SelectionStates.Deselected;
 					}
 					break;
 				case SelectionModel.States.Selected:
 					View.Select(current.Begin, current.End);
-					foreach (var flora in game.Flora.AllActive)
+					foreach (var clearable in game.Clearables)
 					{
-						flora.SelectionState.Value = current.Contains(flora.Position.Value) ? SelectionStates.Selected : SelectionStates.Deselected;
+						clearable.SelectionState.Value = current.Contains(clearable.Position.Value) ? SelectionStates.Selected : SelectionStates.Deselected;
 					}
 					break;
 				default:
@@ -117,7 +117,7 @@ namespace Lunra.Hothouse.Presenters
 		
 		#region Utility
 		Ray CurrentRay => game.WorldCamera.CameraInstance.Value.ScreenPointToRay(Input.mousePosition);
-		bool HasCollision(out RaycastHit hit) => Physics.Raycast(CurrentRay, out hit);
+		bool HasCollision(out RaycastHit hit) => Physics.Raycast(CurrentRay, out hit, float.MaxValue, LayerMasks.Floor);
 		#endregion
 	}
 }

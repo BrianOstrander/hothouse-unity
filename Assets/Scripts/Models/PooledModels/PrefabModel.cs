@@ -4,7 +4,14 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public abstract class PrefabModel : PooledModel
+	public interface IPrefabModel : IPooledModel
+	{
+		#region Serialized
+		ListenerProperty<string> PrefabId { get; }
+		#endregion
+	}
+	
+	public abstract class PrefabModel : PooledModel, IPrefabModel
 	{
 		[JsonProperty] string prefabId;
 		[JsonIgnore] public ListenerProperty<string> PrefabId { get; }

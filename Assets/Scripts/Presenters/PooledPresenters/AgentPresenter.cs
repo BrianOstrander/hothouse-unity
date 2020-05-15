@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region GameModel Events
-		protected override void OnInitialized()
+		protected override void OnSimulationInitialized()
 		{
 			StateMachine.Initialize(Game, Model);
 		}

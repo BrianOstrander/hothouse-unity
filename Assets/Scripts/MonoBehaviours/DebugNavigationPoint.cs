@@ -105,7 +105,7 @@ namespace Lunra.Hothouse.Debugging
 
 					var game = (App.S.CurrentHandler as GameState).Payload.Game;
 
-					game.LastNavigationCalculation.Changed += OnGameLastNavigationCalculation;
+					game.NavigationMesh.LastUpdated.Changed += OnNavigationMeshLastUpdated;
 
 					hasInitialized = true;
 				}
@@ -140,7 +140,7 @@ namespace Lunra.Hothouse.Debugging
 		}
 		
 		#region Events
-		void OnGameLastNavigationCalculation(DateTime dateTime)
+		void OnNavigationMeshLastUpdated(DateTime dateTime)
 		{
 			if (dateTime < lastNavigationCalculation) return;
 			lastNavigationCalculation = dateTime;

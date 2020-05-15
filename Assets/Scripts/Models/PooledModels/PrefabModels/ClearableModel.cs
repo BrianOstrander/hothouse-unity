@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IClearableModel : IPooledModel
+	public interface IClearableModel : IPrefabModel
 	{
 		#region Serialized
 		ListenerProperty<float> Health { get; }
@@ -14,6 +14,7 @@ namespace Lunra.Hothouse.Models
 		ListenerProperty<int> PromisedClearerMaximum { get; }
 		ListenerProperty<bool> PromisedClearersAtCapacity { get; }
 		ListenerProperty<int?> ClearancePriority { get; }
+		ListenerProperty<SelectionStates> SelectionState { get; }
 		#endregion
 		
 		#region NonSerialized
@@ -24,7 +25,7 @@ namespace Lunra.Hothouse.Models
 	public class ClearableModel : PrefabModel, IClearableModel
 	{
 		#region Serialized
-		[JsonProperty] float health;
+		[JsonProperty] float health = -1f;
 		[JsonIgnore] public ListenerProperty<float> Health { get; }
 		
 		[JsonProperty] float healthMaximum;
@@ -47,6 +48,9 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] int? clearancePriority;
 		[JsonIgnore] public ListenerProperty<int?> ClearancePriority { get; }
+		
+		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
+		[JsonIgnore] public ListenerProperty<SelectionStates> SelectionState { get; }
 		#endregion
 		
 		#region NonSerialized
@@ -64,6 +68,7 @@ namespace Lunra.Hothouse.Models
 			PromisedClearerMaximum = new ListenerProperty<int>(value => promisedClearerMaximum = value, () => promisedClearerMaximum);
 			PromisedClearersAtCapacity = new ListenerProperty<bool>(value => promisedClearersAtCapacity = value, () => promisedClearersAtCapacity);
 			ClearancePriority = new ListenerProperty<int?>(value => clearancePriority = value, () => clearancePriority);
+			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
 			
 			IsMarkedForClearance = new DerivedProperty<bool, int?>(
 				value => isMarkedForClearance = value,

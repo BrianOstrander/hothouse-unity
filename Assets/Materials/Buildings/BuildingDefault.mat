@@ -65,7 +65,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - AttenuationMultiplier: 0.01
+    - AttenuationMultiplier: 1
     - AttenuationPower: 1
     - InputSmoothness: 0.5
     - _AlphaClip: 0

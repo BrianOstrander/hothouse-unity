@@ -23,13 +23,11 @@ namespace Lunra.Hothouse.Models
 		public PoolModel<ItemDropModel> ItemDrops { get; } = new PoolModel<ItemDropModel>();
 		public PoolModel<DwellerModel> Dwellers { get; } = new PoolModel<DwellerModel>();
 		
+		public PrefabPoolModel<ClearableModel> Debris { get; } = new PrefabPoolModel<ClearableModel>();
 		public PrefabPoolModel<FloraModel> Flora { get; } = new PrefabPoolModel<FloraModel>();
 		public PrefabPoolModel<RoomPrefabModel> Rooms { get; } = new PrefabPoolModel<RoomPrefabModel>();
 		public PrefabPoolModel<DoorPrefabModel> Doors { get; } = new PrefabPoolModel<DoorPrefabModel>();
 		public PrefabPoolModel<BuildingModel> Buildings { get; } = new PrefabPoolModel<BuildingModel>();
-		
-		[JsonProperty] DateTime lastNavigationCalculation;
-		[JsonIgnore] public ListenerProperty<DateTime> LastNavigationCalculation { get; }
 
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc
@@ -45,10 +43,13 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region NonSerialized
+		public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
 		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
-		[JsonIgnore] public IEnumerable<IClearableModel> Clearables => Flora.AllActive;
+		[JsonIgnore] public IEnumerable<IClearableModel> Clearables => 
+			Debris.AllActive
+			.Concat(Flora.AllActive);
 		#endregion
 		
 		#region Events
@@ -58,7 +59,6 @@ namespace Lunra.Hothouse.Models
 
 		public GameModel()
 		{
-			LastNavigationCalculation = new ListenerProperty<DateTime>(value => lastNavigationCalculation = value, () => lastNavigationCalculation);
 			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
 			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);

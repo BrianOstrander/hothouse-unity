@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class FloraView : PrefabView
+	public class FloraView : ClearableView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
@@ -27,10 +27,6 @@ namespace Lunra.Hothouse.Views
 				SetColor(color => color.NewS(saturation));
 			}
 		}
-
-		public void Highlight() => SetColor(color => color.NewV(0.5f));
-		public void Select() => SetColor(color => color.NewV(0.75f));
-		public void Deselect() => SetColor(color => color.NewV(1f));
 		#endregion
 		
 		#region Reverse Bindings
@@ -42,15 +38,7 @@ namespace Lunra.Hothouse.Views
 
 			Age = 0f;
 			IsReproducing = false;
-			Deselect();
 		}
-
-		#region Utility
-		void SetColor(Func<Color, Color> apply)
-		{
-			foreach (var renderer in gameObject.GetComponentsInChildren<MeshRenderer>()) renderer.material.color = apply(renderer.material.color);
-		}
-		#endregion
 	}
 
 }

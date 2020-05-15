@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.Operate -= OnBuildingOperate;
 		}
 
-		protected override void OnInitialized()
+		protected override void OnSimulationInitialized()
 		{
 			OnBuildingInventory(Model.Inventory.Value);
 		}

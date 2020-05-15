@@ -94,6 +94,7 @@ namespace Lunra.Hothouse.Models
 			if (result == null)
 			{
 				result = new M();
+				result.PooledState.ChangedSource += (value, source) => OnPooledState(result, value, source);
 				initialize?.Invoke(result);
 				
 				All.Value = new Reservoir(
@@ -103,6 +104,7 @@ namespace Lunra.Hothouse.Models
 			}
 			else
 			{
+				result.Id.Value = null;
 				initialize?.Invoke(result);
 				All.Value = new Reservoir(
 					All.Value.Active.Append(result).ToArray(),

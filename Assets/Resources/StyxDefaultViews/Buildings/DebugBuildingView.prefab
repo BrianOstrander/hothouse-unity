@@ -338,7 +338,6 @@ GameObject:
   - component: {fileID: 2016706811961670236}
   - component: {fileID: 2426033229724696923}
   - component: {fileID: 1930056407453216268}
-  - component: {fileID: 6586342883874595802}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -407,19 +406,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &6586342883874595802
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5840307319868858384}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7891588836702804578
 GameObject:
   m_ObjectHideFlags: 0
@@ -430,7 +416,6 @@ GameObject:
   m_Component:
   - component: {fileID: 624211895944601708}
   - component: {fileID: 2070434652407403227}
-  - component: {fileID: 7353317441349290497}
   m_Layer: 0
   m_Name: DebugBuildingView
   m_TagString: Untagged
@@ -479,19 +464,3 @@ MonoBehaviour:
   entrances:
   - {fileID: 2217704237645697402}
   label: {fileID: 2029496293870269055}
---- !u!208 &7353317441349290497
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7891588836702804578}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 1, y: 1, z: 1}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: 0, z: 0}
-  m_TimeToStationary: 0.5
