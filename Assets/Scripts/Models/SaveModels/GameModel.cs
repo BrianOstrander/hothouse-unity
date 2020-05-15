@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Models.AgentModels;
 using Newtonsoft.Json;
@@ -46,6 +48,10 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
 		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
+		[JsonIgnore] public IEnumerable<IClearableModel> Clearables => Flora.AllActive;
+		#endregion
+		
+		#region Events
 		public event Action SimulationInitialize = ActionExtensions.Empty;
 		public Action SimulationUpdate = ActionExtensions.Empty;
 		#endregion

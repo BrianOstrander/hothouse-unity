@@ -69,11 +69,11 @@ namespace Lunra.Hothouse.Ai
 			
 			public override bool IsTriggered()
 			{
-				target = World.Flora.AllActive.FirstOrDefault(
-					flora =>
+				target = World.Clearables.FirstOrDefault(
+					clearable =>
 					{
-						if (!flora.IsMarkedForClearance.Value) return false;
-						return Vector3.Distance(Agent.Position.Value, flora.Position.Value) < Agent.MeleeRange.Value;
+						if (!clearable.IsMarkedForClearance.Value) return false;
+						return Vector3.Distance(Agent.Position.Value, clearable.Position.Value) < Agent.MeleeRange.Value;
 					}
 				);
 
@@ -119,11 +119,11 @@ namespace Lunra.Hothouse.Ai
 		
 		class ToNavigateToNearestClearable : AgentTransition<DwellerNavigateState<DwellerClearerJobState>, GameModel, DwellerModel>
 		{
-			FloraModel target;
+			IClearableModel target;
 			
 			public override bool IsTriggered()
 			{
-				target = World.Flora.AllActive
+				target = World.Clearables
 					.Where(t => t.IsMarkedForClearance.Value)
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault();
