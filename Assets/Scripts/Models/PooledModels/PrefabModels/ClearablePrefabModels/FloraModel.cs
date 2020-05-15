@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class FloraModel : ClearablePrefabModel
+	public class FloraModel : ClearableModel
 	{
 		#region Serialized
 		[JsonProperty] string[] validPrefabIds = new string[0];

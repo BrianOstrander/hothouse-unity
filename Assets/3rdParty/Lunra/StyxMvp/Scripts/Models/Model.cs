@@ -6,7 +6,9 @@ namespace Lunra.StyxMvp.Models
 {
 	public interface IModel 
 	{
+		#region Serialized
 		ListenerProperty<string> Id { get; }
+		#endregion
 	}
 
 	public abstract class Model : IModel

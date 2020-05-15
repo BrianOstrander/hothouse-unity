@@ -10,10 +10,23 @@ namespace Lunra.Hothouse.Models
 		InActive = 10,
 		Active = 20
 	}
-	
-	public class PooledModel : Model
+
+	public interface IPooledModel : IModel
 	{
+		#region Serialized
+		ListenerProperty<string> RoomId { get; }
+		ListenerProperty<Vector3> Position { get; }
+		ListenerProperty<Quaternion> Rotation { get; }
+		ListenerProperty<PooledStates> PooledState { get; }
+		#endregion
 		
+		#region Non Serialized
+		ListenerProperty<bool> HasPresenter { get; }
+		#endregion
+	}
+	
+	public class PooledModel : Model, IPooledModel
+	{
 		#region Serialized
 		[JsonProperty] string roomId;
 		[JsonIgnore] public ListenerProperty<string> RoomId { get; }
@@ -35,7 +48,6 @@ namespace Lunra.Hothouse.Models
 
 		public PooledModel()
 		{
-			// ThemeId = new ListenerProperty<string>(value => themeId = value, () => themeId);
 			RoomId = new ListenerProperty<string>(value => roomId = value, () => roomId);
 			Position = new ListenerProperty<Vector3>(value => position = value, () => position);
 			Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);

@@ -288,7 +288,7 @@ namespace Lunra.Hothouse.Services
 					dweller,
 					"2",
 					new Vector3(-4f, -0.8386866f, 3f),
-					Jobs.ClearFlora,
+					Jobs.Clearer,
 					debugAgentStates: true
 				)
 			);

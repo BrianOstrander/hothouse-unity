@@ -3,7 +3,25 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public class ClearablePrefabModel : PrefabModel, IClearable
+	public interface IClearableModel : IPooledModel
+	{
+		#region Serialized
+		ListenerProperty<float> Health { get; }
+		ListenerProperty<float> HealthMaximum { get; }
+		ListenerProperty<Inventory> ItemDrops { get; }
+		ListenerProperty<float> MeleeRangeBonus { get; }
+		ListenerProperty<int> PromisedClearerCount { get; }
+		ListenerProperty<int> PromisedClearerMaximum { get; }
+		ListenerProperty<bool> PromisedClearersAtCapacity { get; }
+		ListenerProperty<int?> ClearancePriority { get; }
+		#endregion
+		
+		#region NonSerialized
+		DerivedProperty<bool, int?> IsMarkedForClearance { get; }
+		#endregion
+	}
+	
+	public class ClearableModel : PrefabModel, IClearableModel
 	{
 		#region Serialized
 		[JsonProperty] float health;
@@ -36,7 +54,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public DerivedProperty<bool, int?> IsMarkedForClearance { get; }
 		#endregion
 		
-		public ClearablePrefabModel()
+		public ClearableModel()
 		{
 			Health = new ListenerProperty<float>(value => health = value, () => health);
 			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);

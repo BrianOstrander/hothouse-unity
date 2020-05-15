@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Ai
 
 		public override void OnInitialize()
 		{
-			InstantiateJob<DwellerClearFloraJobState>();
+			InstantiateJob<DwellerClearerJobState>();
 			InstantiateJob<DwellerConstructionJobState>();
 			InstantiateDesire<DwellerSleepDesireState>();
 			InstantiateDesire<DwellerEatDesireState>();

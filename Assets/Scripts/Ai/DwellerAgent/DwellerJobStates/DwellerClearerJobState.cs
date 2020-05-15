@@ -1,34 +1,31 @@
-using System.Collections.Generic;
 using System.Linq;
-using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai
 {
-	public class DwellerClearFloraJobState : DwellerJobState<DwellerClearFloraJobState>
+	public class DwellerClearerJobState : DwellerJobState<DwellerClearerJobState>
 	{
-		public override Jobs Job => Jobs.ClearFlora;
+		public override Jobs Job => Jobs.Clearer;
 
 		public override void OnInitialize()
 		{
-			var validJobs = new[] { Jobs.ClearFlora, Jobs.None };
+			var validJobs = new[] { Jobs.Clearer, Jobs.None };
 			var validCleanupItems = Inventory.ValidTypes;
 			
-			var attackState = new DwellerAttackState<DwellerClearFloraJobState>();
-			var cleanupState = new DwellerItemCleanupState<DwellerClearFloraJobState>(
+			var attackState = new DwellerAttackState<DwellerClearerJobState>();
+			var cleanupState = new DwellerItemCleanupState<DwellerClearerJobState>(
 				validJobs,
 				validCleanupItems
 			);
-			var timeoutState = new DwellerTimeoutState<DwellerClearFloraJobState>();
+			var timeoutState = new DwellerTimeoutState<DwellerClearerJobState>();
 			
 			AddChildStates(
 				attackState,
 				cleanupState,	
 				timeoutState,
-				new DwellerNavigateState<DwellerClearFloraJobState>()
+				new DwellerNavigateState<DwellerClearerJobState>()
 			);
 			
 			AddTransitions(
@@ -41,11 +38,11 @@ namespace Lunra.Hothouse.Ai
 					validCleanupItems
 				),
 				
-				new ToAttackNearestFlora(attackState),
+				new ToAttackNearestClearable(attackState),
 				
 				new ToIdleOnShiftEnd(this),
 				
-				new ToNavigateToNearestFlora(),
+				new ToNavigateToNearestClearable(),
 				
 				new ToItemCleanupOnValidInventory(
 					cleanupState,
@@ -63,16 +60,16 @@ namespace Lunra.Hothouse.Ai
 			);
 		}
 
-		class ToAttackNearestFlora : AgentTransition<DwellerAttackState<DwellerClearFloraJobState>, GameModel, DwellerModel>
+		class ToAttackNearestClearable : AgentTransition<DwellerAttackState<DwellerClearerJobState>, GameModel, DwellerModel>
 		{
-			DwellerAttackState<DwellerClearFloraJobState> attackState;
-			FloraModel targetFlora;
+			DwellerAttackState<DwellerClearerJobState> attackState;
+			IClearableModel target;
 
-			public ToAttackNearestFlora(DwellerAttackState<DwellerClearFloraJobState> attackState) => this.attackState = attackState;
+			public ToAttackNearestClearable(DwellerAttackState<DwellerClearerJobState> attackState) => this.attackState = attackState;
 			
 			public override bool IsTriggered()
 			{
-				targetFlora = World.Flora.AllActive.FirstOrDefault(
+				target = World.Flora.AllActive.FirstOrDefault(
 					flora =>
 					{
 						if (!flora.IsMarkedForClearance.Value) return false;
@@ -80,17 +77,17 @@ namespace Lunra.Hothouse.Ai
 					}
 				);
 
-				return targetFlora != null;
+				return target != null;
 			}
 
 			public override void Transition()
 			{
-				var itemDrops = targetFlora.ItemDrops.Value;
+				var itemDrops = target.ItemDrops.Value;
 				attackState.SetTarget(
-					new DwellerAttackState<DwellerClearFloraJobState>.Target(
-						() => targetFlora.Id.Value,
-						() => targetFlora.Health.Value,
-						health => targetFlora.Health.Value = health,
+					new DwellerAttackState<DwellerClearerJobState>.Target(
+						() => target.Id.Value,
+						() => target.Health.Value,
+						health => target.Health.Value = health,
 						() =>
 						{
 							var hasOverflow = Agent.InventoryCapacity.Value.AddClamped(
@@ -107,11 +104,11 @@ namespace Lunra.Hothouse.Ai
 							World.ItemDrops.Activate(
 								itemDrop =>
 								{
-									itemDrop.RoomId.Value = targetFlora.RoomId.Value;
-									itemDrop.Position.Value = targetFlora.Position.Value;
+									itemDrop.RoomId.Value = target.RoomId.Value;
+									itemDrop.Position.Value = target.Position.Value;
 									itemDrop.Rotation.Value = Quaternion.identity;
 									itemDrop.Inventory.Value = overflow;
-									itemDrop.Job.Value = Jobs.ClearFlora;
+									itemDrop.Job.Value = Jobs.Clearer;
 								}
 							);
 						}
@@ -120,7 +117,7 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 		
-		class ToNavigateToNearestFlora : AgentTransition<DwellerNavigateState<DwellerClearFloraJobState>, GameModel, DwellerModel>
+		class ToNavigateToNearestClearable : AgentTransition<DwellerNavigateState<DwellerClearerJobState>, GameModel, DwellerModel>
 		{
 			FloraModel target;
 			
