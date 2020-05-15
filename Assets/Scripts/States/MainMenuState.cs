@@ -399,6 +399,27 @@ namespace Lunra.Hothouse.Services
 					)
 				)
 			);
+			
+			game.Buildings.Activate(
+				"campfire_barrel",
+				m => initializeBuilding(
+					m,
+					"campfire_0",
+					new Vector3(2f, -0.8386866f, 6f),
+					Inventory.Empty,
+					InventoryCapacity.None()
+					// new DesireQuality(
+					// 	Desires.Eat, 
+					// 	new Inventory(
+					// 		new Dictionary<Inventory.Types, int>
+					// 		{
+					// 			{ Inventory.Types.Rations, 1 }
+					// 		}
+					// 	),
+					// 	1f
+					// )
+				)
+			);
 
 			game.ItemDrops.Activate(
 				m =>
