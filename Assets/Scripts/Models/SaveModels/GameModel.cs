@@ -14,32 +14,32 @@ namespace Lunra.Hothouse.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
-		public readonly WorldCameraModel WorldCamera = new WorldCameraModel();
-		public readonly SelectionModel Selection = new SelectionModel();
-		public readonly FloraEffectsModel FloraEffects = new FloraEffectsModel();
+		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
+		public SelectionModel Selection  { get; } = new SelectionModel();
+		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		
-		public readonly PoolModel<ItemDropModel> ItemDrops = new PoolModel<ItemDropModel>();
-		public readonly PoolModel<DwellerModel> Dwellers = new PoolModel<DwellerModel>();
+		public PoolModel<ItemDropModel> ItemDrops { get; } = new PoolModel<ItemDropModel>();
+		public PoolModel<DwellerModel> Dwellers { get; } = new PoolModel<DwellerModel>();
 		
-		public readonly PrefabPoolModel<FloraModel> Flora = new PrefabPoolModel<FloraModel>();
-		public readonly PrefabPoolModel<RoomPrefabModel> Rooms = new PrefabPoolModel<RoomPrefabModel>();
-		public readonly PrefabPoolModel<DoorPrefabModel> Doors = new PrefabPoolModel<DoorPrefabModel>();
-		public readonly PrefabPoolModel<BuildingModel> Buildings = new PrefabPoolModel<BuildingModel>();
+		public PrefabPoolModel<FloraModel> Flora { get; } = new PrefabPoolModel<FloraModel>();
+		public PrefabPoolModel<RoomPrefabModel> Rooms { get; } = new PrefabPoolModel<RoomPrefabModel>();
+		public PrefabPoolModel<DoorPrefabModel> Doors { get; } = new PrefabPoolModel<DoorPrefabModel>();
+		public PrefabPoolModel<BuildingModel> Buildings { get; } = new PrefabPoolModel<BuildingModel>();
 		
 		[JsonProperty] DateTime lastNavigationCalculation;
-		[JsonIgnore] public readonly ListenerProperty<DateTime> LastNavigationCalculation;
+		[JsonIgnore] public ListenerProperty<DateTime> LastNavigationCalculation { get; }
 
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc
 		/// </summary>
 		[JsonProperty] float simulationMultiplier = 1f;
-		[JsonIgnore] public readonly ListenerProperty<float> SimulationMultiplier;
+		[JsonIgnore] public ListenerProperty<float> SimulationMultiplier { get; }
 		
 		[JsonProperty] float simulationTimeConversion = 1f;
-		[JsonIgnore] public readonly ListenerProperty<float> SimulationTimeConversion;
+		[JsonIgnore] public ListenerProperty<float> SimulationTimeConversion { get; }
 		
 		[JsonProperty] DayTime simulationTime = DayTime.Zero;
-		[JsonIgnore] public readonly ListenerProperty<DayTime> SimulationTime;
+		[JsonIgnore] public ListenerProperty<DayTime> SimulationTime { get; }
 		#endregion
 
 		#region NonSerialized

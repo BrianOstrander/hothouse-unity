@@ -12,15 +12,14 @@ namespace Lunra.StyxMvp.Models
 	public abstract class Model : IModel
 	{
 		[JsonProperty] string id;
-		readonly ListenerProperty<string> idListener;
 		/// <summary>
 		/// Id used to identify serialized models.
 		/// </summary>
-		[JsonIgnore] public ListenerProperty<string> Id => idListener;
+		[JsonIgnore] public ListenerProperty<string> Id { get; }
 
 		public Model()
 		{
-			idListener = new ListenerProperty<string>(value => id = value, () => id);
+			Id = new ListenerProperty<string>(value => id = value, () => id);
 		}
 
 		public override string ToString() => this.ToReadableJson();

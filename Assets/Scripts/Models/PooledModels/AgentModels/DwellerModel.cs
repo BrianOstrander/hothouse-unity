@@ -10,31 +10,31 @@ namespace Lunra.Hothouse.Models.AgentModels
 	{
 		#region Serialized
 		[JsonProperty] Jobs job;
-		[JsonIgnore] public readonly ListenerProperty<Jobs> Job;
+		[JsonIgnore] public ListenerProperty<Jobs> Job { get; }
 
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
-		[JsonIgnore] public readonly ListenerProperty<DayTimeFrame> JobShift;
+		[JsonIgnore] public ListenerProperty<DayTimeFrame> JobShift { get; }
 		
 		[JsonProperty] Desires desire;
-		[JsonIgnore] public readonly ListenerProperty<Desires> Desire;
+		[JsonIgnore] public ListenerProperty<Desires> Desire { get; }
 		
 		[JsonProperty] Dictionary<Desires, float> desireDamage = new Dictionary<Desires, float>();
-		[JsonIgnore] public readonly ListenerProperty<Dictionary<Desires, float>> DesireDamage;
+		[JsonIgnore] public ListenerProperty<Dictionary<Desires, float>> DesireDamage { get; }
 		
 		[JsonProperty] float meleeRange;
-		[JsonIgnore] public readonly ListenerProperty<float> MeleeRange;
+		[JsonIgnore] public ListenerProperty<float> MeleeRange { get; }
 		
 		[JsonProperty] float meleeCooldown;
-		[JsonIgnore] public readonly ListenerProperty<float> MeleeCooldown;
+		[JsonIgnore] public ListenerProperty<float> MeleeCooldown { get; }
 		
 		[JsonProperty] float meleeDamage;
-		[JsonIgnore] public readonly ListenerProperty<float> MeleeDamage;
+		[JsonIgnore] public ListenerProperty<float> MeleeDamage { get; }
 		
 		[JsonProperty] float withdrawalCooldown;
-		[JsonIgnore] public readonly ListenerProperty<float> WithdrawalCooldown;
+		[JsonIgnore] public ListenerProperty<float> WithdrawalCooldown { get; }
 		
 		[JsonProperty] float depositCooldown;
-		[JsonIgnore] public readonly ListenerProperty<float> DepositCooldown;
+		[JsonIgnore] public ListenerProperty<float> DepositCooldown { get; }
 		#endregion
 		
 		#region Non Serialized

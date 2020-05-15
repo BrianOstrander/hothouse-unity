@@ -7,7 +7,7 @@ namespace Lunra.Hothouse.Models
 	public abstract class PrefabModel : PooledModel
 	{
 		[JsonProperty] string prefabId;
-		[JsonIgnore] public readonly ListenerProperty<string> PrefabId;
+		[JsonIgnore] public ListenerProperty<string> PrefabId { get; }
 
 		public PrefabModel()
 		{

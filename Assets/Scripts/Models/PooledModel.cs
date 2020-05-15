@@ -16,21 +16,21 @@ namespace Lunra.Hothouse.Models
 		
 		#region Serialized
 		[JsonProperty] string roomId;
-		[JsonIgnore] public readonly ListenerProperty<string> RoomId;
+		[JsonIgnore] public ListenerProperty<string> RoomId { get; }
 		
 		[JsonProperty] Vector3 position = Vector3.zero;
-		[JsonIgnore] public readonly ListenerProperty<Vector3> Position;
+		[JsonIgnore] public ListenerProperty<Vector3> Position { get; }
 		
 		[JsonProperty] Quaternion rotation = Quaternion.identity;
-		[JsonIgnore] public readonly ListenerProperty<Quaternion> Rotation;
+		[JsonIgnore] public ListenerProperty<Quaternion> Rotation { get; }
 
 		[JsonProperty] PooledStates pooledState = PooledStates.InActive;
-		[JsonIgnore] public readonly ListenerProperty<PooledStates> PooledState;
+		[JsonIgnore] public ListenerProperty<PooledStates> PooledState { get; }
 		#endregion
 		
 		#region Non Serialized
 		bool hasPresenter;
-		[JsonIgnore] public readonly ListenerProperty<bool> HasPresenter;
+		[JsonIgnore] public ListenerProperty<bool> HasPresenter { get; }
 		#endregion
 
 		public PooledModel()

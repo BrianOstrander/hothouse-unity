@@ -27,13 +27,13 @@ namespace Lunra.StyxMvp.Models
 		/// <summary>
 		/// Is this loadable, or is the version too old.
 		/// </summary>
-		public readonly ListenerProperty<bool> SupportedVersion;
+		public ListenerProperty<bool> SupportedVersion { get; }
 		
 		string absolutePath;
 		/// <summary>
 		/// The path of this save, depends on the SaveLoadService in use.
 		/// </summary>
-		public readonly ListenerProperty<string> AbsolutePath;
+		public ListenerProperty<string> AbsolutePath { get; }
 		#endregion
 		
 		#region Serialized
@@ -41,13 +41,13 @@ namespace Lunra.StyxMvp.Models
 		/// <summary>
 		/// If true, this should be ignored.
 		/// </summary>
-		public readonly ListenerProperty<bool> Ignore;
+		public ListenerProperty<bool> Ignore { get; }
 		
 		[JsonProperty] int version;
 		/// <summary>
 		/// The version of the app this was saved under.
 		/// </summary>
-		public readonly ListenerProperty<int> Version;
+		public ListenerProperty<int> Version { get; }
 
 		[JsonProperty] DateTime created;
 		/// <summary>
@@ -56,7 +56,7 @@ namespace Lunra.StyxMvp.Models
 		/// <remarks>
 		/// If this is equal to DateTime.MinValue it has never been saved.
 		/// </remarks>
-		public readonly ListenerProperty<DateTime> Created;
+		public ListenerProperty<DateTime> Created { get; }
 		
 		[JsonProperty] DateTime modified;
 		/// <summary>
@@ -65,7 +65,7 @@ namespace Lunra.StyxMvp.Models
 		/// <remarks>
 		/// If this is equal to DateTime.MinValue it has never been saved.
 		/// </remarks>
-		public readonly ListenerProperty<DateTime> Modified;
+		public ListenerProperty<DateTime> Modified { get; }
 
 		/// <summary>
 		/// How are sibling files consumed? If None is specified, no sibling

@@ -10,48 +10,48 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		[JsonProperty] string[] validPrefabIds = new string[0];
-		[JsonIgnore] public readonly ListenerProperty<string[]> ValidPrefabIds;
+		[JsonIgnore] public ListenerProperty<string[]> ValidPrefabIds { get; }
 		
 		[JsonProperty] FloraSpecies species;
-		[JsonIgnore] public readonly ListenerProperty<FloraSpecies> Species;
+		[JsonIgnore] public ListenerProperty<FloraSpecies> Species { get; }
 
 		[JsonProperty] Interval age;
-		[JsonIgnore] public readonly ListenerProperty<Interval> Age;
+		[JsonIgnore] public ListenerProperty<Interval> Age { get; }
 
 		[JsonProperty] Interval reproductionElapsed;
-		[JsonIgnore] public readonly ListenerProperty<Interval> ReproductionElapsed;
+		[JsonIgnore] public ListenerProperty<Interval> ReproductionElapsed { get; }
 		
 		[JsonProperty] FloatRange reproductionRadius;
-		[JsonIgnore] public readonly ListenerProperty<FloatRange> ReproductionRadius;
+		[JsonIgnore] public ListenerProperty<FloatRange> ReproductionRadius { get; }
 		
 		[JsonProperty] int reproductionFailures;
-		[JsonIgnore] public readonly ListenerProperty<int> ReproductionFailures;
+		[JsonIgnore] public ListenerProperty<int> ReproductionFailures { get; }
 		
 		[JsonProperty] int reproductionFailureLimit;
-		[JsonIgnore] public readonly ListenerProperty<int> ReproductionFailureLimit;
+		[JsonIgnore] public ListenerProperty<int> ReproductionFailureLimit { get; }
 
 		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
-		[JsonIgnore] public readonly ListenerProperty<SelectionStates> SelectionState;
+		[JsonIgnore] public ListenerProperty<SelectionStates> SelectionState { get; }
 
 		[JsonProperty] float spreadDamage;
-		[JsonIgnore] public readonly ListenerProperty<float> SpreadDamage;
+		[JsonIgnore] public ListenerProperty<float> SpreadDamage { get; }
 		
 		[JsonProperty] float health;
-		[JsonIgnore] public readonly ListenerProperty<float> Health;
+		[JsonIgnore] public ListenerProperty<float> Health { get; }
 		
 		[JsonProperty] float healthMaximum;
-		[JsonIgnore] public readonly ListenerProperty<float> HealthMaximum;
+		[JsonIgnore] public ListenerProperty<float> HealthMaximum { get; }
 		
 		[JsonProperty] bool markedForClearing;
-		[JsonIgnore] public readonly ListenerProperty<bool> MarkedForClearing;
+		[JsonIgnore] public ListenerProperty<bool> MarkedForClearing { get; }
 		
 		[JsonProperty] Inventory itemDrops = Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ItemDrops;
+		[JsonIgnore] public ListenerProperty<Inventory> ItemDrops { get; }
 		#endregion
 		
 		#region Non Serialized
 		bool isReproducing;
-		[JsonIgnore] public readonly DerivedProperty<bool, int, int> IsReproducing;
+		[JsonIgnore] public DerivedProperty<bool, int, int> IsReproducing { get; }
 		#endregion
 		
 		public FloraModel()

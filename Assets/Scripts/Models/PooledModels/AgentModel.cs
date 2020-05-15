@@ -7,28 +7,28 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		[JsonProperty] float navigationVelocity;
-		[JsonIgnore] public readonly ListenerProperty<float> NavigationVelocity;
+		[JsonIgnore] public ListenerProperty<float> NavigationVelocity { get; }
 		
 		[JsonProperty] float navigationForceDistanceMaximum;
-		[JsonIgnore] public readonly ListenerProperty<float> NavigationForceDistanceMaximum;
+		[JsonIgnore] public ListenerProperty<float> NavigationForceDistanceMaximum { get; }
 		
 		[JsonProperty] NavigationPlan navigationPlan = Models.NavigationPlan.Done();
-		[JsonIgnore] public readonly ListenerProperty<NavigationPlan> NavigationPlan;
+		[JsonIgnore] public ListenerProperty<NavigationPlan> NavigationPlan { get; }
 
 		[JsonProperty] float health;
-		[JsonIgnore] public readonly ListenerProperty<float> Health;
+		[JsonIgnore] public ListenerProperty<float> Health { get; }
 		
 		[JsonProperty] float healthMaximum;
-		[JsonIgnore] public readonly ListenerProperty<float> HealthMaximum;
+		[JsonIgnore] public ListenerProperty<float> HealthMaximum { get; }
 		
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
+		[JsonIgnore] public ListenerProperty<Inventory> Inventory { get; }
 
 		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.None();
-		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> InventoryCapacity;
+		[JsonIgnore] public ListenerProperty<InventoryCapacity> InventoryCapacity { get; }
 
 		[JsonProperty] InventoryPromise inventoryPromise = Models.InventoryPromise.Default();
-		[JsonIgnore] public readonly ListenerProperty<InventoryPromise> InventoryPromise;
+		[JsonIgnore] public ListenerProperty<InventoryPromise> InventoryPromise { get; }
 		#endregion
 		
 		#region Non Serialized

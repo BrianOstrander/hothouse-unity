@@ -21,10 +21,10 @@ namespace Lunra.Hothouse.Models
         }
         
         [JsonProperty] bool isOpen;
-        [JsonIgnore] public readonly ListenerProperty<bool> IsOpen;
+        [JsonIgnore] public ListenerProperty<bool> IsOpen { get; }
 
         [JsonProperty] Connection roomConnection;
-        [JsonIgnore] public readonly ListenerProperty<Connection> RoomConnection; 
+        [JsonIgnore] public ListenerProperty<Connection> RoomConnection { get; } 
         
 
         public DoorPrefabModel()

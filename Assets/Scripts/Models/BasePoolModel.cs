@@ -37,7 +37,7 @@ namespace Lunra.Hothouse.Models
 		
 		#region Serialized
 		[JsonProperty] Reservoir all = new Reservoir();
-		[JsonIgnore] public readonly ListenerProperty<Reservoir> All;
+		[JsonIgnore] public ListenerProperty<Reservoir> All { get; }
 		#endregion
 		
 		#region Non Serialized

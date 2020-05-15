@@ -11,36 +11,36 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		[JsonProperty] BuildingStates buildingState;
-		[JsonIgnore] public readonly ListenerProperty<BuildingStates> BuildingState;
+		[JsonIgnore] public ListenerProperty<BuildingStates> BuildingState { get; }
 		
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
+		[JsonIgnore] public ListenerProperty<Inventory> Inventory { get; }
 		
 		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.None();
-		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> InventoryCapacity;
+		[JsonIgnore] public ListenerProperty<InventoryCapacity> InventoryCapacity { get; }
 		
 		[JsonProperty] InventoryPermission inventoryPermission = Models.InventoryPermission.AllForAnyJob();
-		[JsonIgnore] public readonly ListenerProperty<InventoryPermission> InventoryPermission;
+		[JsonIgnore] public ListenerProperty<InventoryPermission> InventoryPermission { get; }
 		
 		[JsonProperty] Inventory constructionInventory = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventory;
+		[JsonIgnore] public ListenerProperty<Inventory> ConstructionInventory { get; }
 		
 		[JsonProperty] InventoryCapacity constructionInventoryCapacity = Models.InventoryCapacity.None();
-		[JsonIgnore] public readonly ListenerProperty<InventoryCapacity> ConstructionInventoryCapacity;
+		[JsonIgnore] public ListenerProperty<InventoryCapacity> ConstructionInventoryCapacity { get; }
 
 		[JsonProperty] Inventory constructionInventoryPromised = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> ConstructionInventoryPromised;
+		[JsonIgnore] public ListenerProperty<Inventory> ConstructionInventoryPromised { get; }
 		
 		[JsonProperty] Inventory salvageInventory = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> SalvageInventory;
+		[JsonIgnore] public ListenerProperty<Inventory> SalvageInventory { get; }
 
 		[JsonProperty] DesireQuality[] desireQuality = new DesireQuality[0];
-		[JsonIgnore] public readonly ListenerProperty<DesireQuality[]> DesireQuality;
+		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQuality { get; }
 		#endregion
 		
 		#region Non Serialized
 		Entrance[] entrances = new Entrance[0];
-		public readonly ListenerProperty<Entrance[]> Entrances;
+		public ListenerProperty<Entrance[]> Entrances { get; }
 		#endregion
 
 		public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();

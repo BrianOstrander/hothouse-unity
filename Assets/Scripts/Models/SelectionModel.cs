@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Models
 		
 		#region Serialized
 		[JsonProperty] Selection current = Selection.Deselected();
-		[JsonIgnore] public readonly ListenerProperty<Selection> Current;
+		[JsonIgnore] public ListenerProperty<Selection> Current { get; }
 		#endregion
 		
 		#region Non Serialized

@@ -8,13 +8,13 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> Inventory;
+		[JsonIgnore] public ListenerProperty<Inventory> Inventory { get; }
 		
 		[JsonProperty] Inventory withdrawalInventoryPromised = Models.Inventory.Empty;
-		[JsonIgnore] public readonly ListenerProperty<Inventory> WithdrawalInventoryPromised;
+		[JsonIgnore] public ListenerProperty<Inventory> WithdrawalInventoryPromised { get; }
 
 		[JsonProperty] Jobs job;
-		[JsonIgnore] public readonly ListenerProperty<Jobs> Job;
+		[JsonIgnore] public ListenerProperty<Jobs> Job { get; }
 		#endregion
 
 		public ItemDropModel()

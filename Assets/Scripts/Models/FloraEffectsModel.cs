@@ -23,16 +23,16 @@ namespace Lunra.Hothouse.Models
 
 		#region Serialized
 		[JsonProperty] bool isEnabled;
-		[JsonIgnore] public readonly ListenerProperty<bool> IsEnabled;
+		[JsonIgnore] public ListenerProperty<bool> IsEnabled { get; }
 
 		[JsonProperty] Queue<Request> spawnQueue = new Queue<Request>();
-		[JsonIgnore] public readonly QueueProperty<Request> SpawnQueue;
+		[JsonIgnore] public QueueProperty<Request> SpawnQueue { get; }
 		
 		[JsonProperty] Queue<Request> hurtQueue = new Queue<Request>();
-		[JsonIgnore] public readonly QueueProperty<Request> HurtQueue;
+		[JsonIgnore] public QueueProperty<Request> HurtQueue { get; }
 		
 		[JsonProperty] Queue<Request> deathQueue = new Queue<Request>();
-		[JsonIgnore] public readonly QueueProperty<Request> DeathQueue;
+		[JsonIgnore] public QueueProperty<Request> DeathQueue { get; }
 		#endregion
 
 		public FloraEffectsModel()

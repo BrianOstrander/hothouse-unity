@@ -8,12 +8,12 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		[JsonProperty] bool isEnabled;
-		[JsonIgnore] public readonly ListenerProperty<bool> IsEnabled;
+		[JsonIgnore] public ListenerProperty<bool> IsEnabled { get; }
 		#endregion
 
 		#region Non Serialized
 		Camera cameraInstance;
-		[JsonIgnore] public readonly ListenerProperty<Camera> CameraInstance;
+		[JsonIgnore] public ListenerProperty<Camera> CameraInstance { get; }
 		#endregion
 		
 		public WorldCameraModel()
