@@ -420,9 +420,9 @@ namespace Lunra.Hothouse.Services
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks, 50 },
-								{ Inventory.Types.Scrap, 50 },
-								{ Inventory.Types.Rations, 50 }
+								// { Inventory.Types.Stalks, 50 },
+								// { Inventory.Types.Scrap, 50 },
+								// { Inventory.Types.Rations, 50 }
 							}
 						)	
 					),
@@ -440,24 +440,35 @@ namespace Lunra.Hothouse.Services
 			);
 			
 			game.Buildings.Activate(
-				"campfire_barrel",
-				m => initializeBuilding(
-					m,
-					"campfire_0",
-					new Vector3(2f, -0.8386866f, 6f),
-					Inventory.Empty,
-					InventoryCapacity.None()
-					// new DesireQuality(
-					// 	Desires.Eat, 
-					// 	new Inventory(
-					// 		new Dictionary<Inventory.Types, int>
-					// 		{
-					// 			{ Inventory.Types.Rations, 1 }
-					// 		}
-					// 	),
-					// 	1f
-					// )
-				)
+				"fire_bonfire",
+				m =>
+				{
+					initializeBuilding(
+						m,
+						"fire_bonfire0",
+						new Vector3(2f, -0.8386866f, 6f),
+						Inventory.Empty, 
+						InventoryCapacity.ByIndividualWeight(
+							new Inventory(
+								new Dictionary<Inventory.Types, int>
+								{
+									{ Inventory.Types.Stalks, 50 }
+								}
+							)
+						)
+					);
+
+					m.IsLight.Value = true;
+					m.LightState.Value = LightStates.Fueled;
+					m.LightFuel.Value = new Inventory(
+						new Dictionary<Inventory.Types, int>
+						{
+							{ Inventory.Types.Stalks, 1 }
+						}
+					);
+					m.LightFuelInterval.Value = Interval.WithMaximum(10f);
+					m.IsLightRefueling.Value = true;
+				}
 			);
 
 			// game.ItemDrops.Activate(

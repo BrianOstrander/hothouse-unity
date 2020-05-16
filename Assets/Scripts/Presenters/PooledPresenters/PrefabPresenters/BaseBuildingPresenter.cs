@@ -24,6 +24,17 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
+			Model.IsLight.Value = View.IsLight;
+			if (Model.IsLight.Value)
+			{
+				Model.LightRadius.Value = View.LightRadius;
+				Model.LightIntensity.Value = View.LightIntensity;
+				
+				Game.SimulationUpdate += OnLightSimulationUpdate;
+
+				Model.Inventory.Changed += OnLightBuildingInventory;
+			}
+
 			Model.Inventory.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
@@ -34,6 +45,9 @@ namespace Lunra.Hothouse.Presenters
 		{
 			base.UnBind();
 
+			Game.SimulationUpdate -= OnLightSimulationUpdate;
+			
+			Model.Inventory.Changed -= OnLightBuildingInventory;
 			Model.Inventory.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
@@ -43,6 +57,60 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnSimulationInitialized()
 		{
 			OnBuildingInventory(Model.Inventory.Value);
+		}
+
+		protected virtual void OnLightSimulationUpdate()
+		{
+			if (Model.PooledState.Value != PooledStates.Active) return;
+			if (Model.LightState.Value == LightStates.Extinguished) return;
+
+			Model.LightFuelInterval.Value = Model.LightFuelInterval.Value.Update(Game.SimulationDelta);
+
+			if (Model.LightFuelInterval.Value.IsDone)
+			{
+				var canRefuel = Model.Inventory.Value.Contains(Model.LightFuel.Value);
+
+				if (canRefuel)
+				{
+					Model.Inventory.Value -= Model.LightFuel.Value;
+					Model.LightFuelInterval.Value = Model.LightFuelInterval.Value.Restarted();
+					if (View.Visible) View.LightFuelNormal = 1f;
+					return;
+				}
+
+				switch (Model.LightState.Value)
+				{
+					case LightStates.Extinguishing:
+						if (View.Visible) View.LightFuelNormal = 0f;
+						Model.LightState.Value = LightStates.Extinguished;
+						return;
+					case LightStates.Fueled:
+						Model.LightState.Value = LightStates.Extinguishing;
+						Model.LightFuelInterval.Value = Model.LightFuelInterval.Value.Restarted();
+						return;
+					default:
+						Debug.LogError("Unrecognized LightState: "+Model.LightState.Value);
+						return;
+				}
+			}
+
+			switch (Model.LightState.Value)
+			{
+				case LightStates.Extinguishing:
+					if (View.Visible) View.LightFuelNormal = Model.LightFuelInterval.Value.InverseNormalized;
+					break;
+			}
+		}
+
+		protected virtual void OnLightBuildingInventory(Inventory inventory)
+		{
+			if (Model.LightState.Value != LightStates.Extinguishing) return;
+			if (!Model.Inventory.Value.Contains(Model.LightFuel.Value)) return;
+			
+			Model.Inventory.Value -= Model.LightFuel.Value;
+			Model.LightFuelInterval.Value = Model.LightFuelInterval.Value.Restarted();
+			if (View.Visible) View.LightFuelNormal = 1f;
+			Model.LightState.Value = LightStates.Fueled;
 		}
 
 		#region Building Events
@@ -108,6 +176,18 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnViewShown()
 		{
 			Model.Entrances.Value = View.Entrances.Select(e => new Entrance(e, Entrance.States.Available)).ToArray();
+			if (Model.IsLight.Value)
+			{
+				switch (Model.LightState.Value)
+				{
+					case LightStates.Fueled: View.LightFuelNormal = 1f; break;
+					case LightStates.Extinguishing: View.LightFuelNormal = Model.LightFuelInterval.Value.InverseNormalized; break; 
+					case LightStates.Extinguished: View.LightFuelNormal = 0f; break;
+					default:
+						Debug.LogError("Unrecognized LightState: "+Model.LightState.Value);
+						break;
+				}
+			}
 		}
 		#endregion
 	}

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Lunra.NumberDemon;
+using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
@@ -23,6 +24,9 @@ namespace Lunra.Hothouse.Models
 		public readonly float Normalized;
 		public readonly bool IsDone;
 
+		[JsonIgnore]
+		public float InverseNormalized => 1f - Normalized;
+		
 		Interval(
 			float current,
 			float maximum
@@ -44,5 +48,7 @@ namespace Lunra.Hothouse.Models
 				Maximum
 			);
 		}
+
+		public Interval Restarted() => WithMaximum(Maximum);
 	}
 }
