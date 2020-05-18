@@ -458,7 +458,6 @@ namespace Lunra.Hothouse.Services
 						)
 					);
 
-					m.IsLight.Value = true;
 					m.LightState.Value = LightStates.Fueled;
 					m.LightFuel.Value = new Inventory(
 						new Dictionary<Inventory.Types, int>
