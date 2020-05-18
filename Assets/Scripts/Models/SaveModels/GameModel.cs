@@ -40,6 +40,9 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] DayTime simulationTime = DayTime.Zero;
 		[JsonIgnore] public ListenerProperty<DayTime> SimulationTime { get; }
+
+		[JsonProperty] LightDelta lastLightUpdate = LightDelta.Default();
+		[JsonIgnore] public ListenerProperty<LightDelta> LastLightUpdate { get; }
 		#endregion
 
 		#region NonSerialized
@@ -47,9 +50,18 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
 		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
-		[JsonIgnore] public IEnumerable<IClearableModel> Clearables => 
+		[JsonIgnore] public IEnumerable<IClearableModel> Clearables =>
 			Debris.AllActive
 			.Concat(Flora.AllActive);
+		
+		[JsonIgnore] public IEnumerable<ILightModel> Lights => 
+			Buildings.AllActive;
+
+		[JsonIgnore]
+		public IEnumerable<ILightSensitiveModel> LightSensitives =>
+			Buildings.AllActive
+			.Concat<ILightSensitiveModel>(ItemDrops.AllActive)
+			.Concat(Clearables);
 		#endregion
 		
 		#region Events
@@ -62,6 +74,7 @@ namespace Lunra.Hothouse.Models
 			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
 			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
+			LastLightUpdate = new ListenerProperty<LightDelta>(value => lastLightUpdate = value, () => lastLightUpdate);
 		}
 
 		public void TriggerSimulationInitialize()
@@ -75,6 +88,38 @@ namespace Lunra.Hothouse.Models
 			IsSimulationInitialized = true;
 
 			SimulationInitialize();
+		}
+		
+		public IEnumerable<RoomPrefabModel> GetOpenAdjacentRooms(params string[] roomIds)
+		{
+			var results = Rooms.AllActive.Where(r => roomIds.Contains(r.RoomId.Value)).ToList();
+
+			foreach (var door in Doors.AllActive.Where(d => roomIds.Any(d.IsOpenTo)))
+			{
+				var idToAdd = string.Empty;
+				if (results.Any(r => r.RoomId.Value == door.RoomConnection.Value.RoomId0))
+				{
+					if (results.None(r => r.RoomId.Value == door.RoomConnection.Value.RoomId1)) idToAdd = door.RoomConnection.Value.RoomId1;
+					else continue;
+				}
+				else idToAdd = door.RoomConnection.Value.RoomId0;
+				
+				results.Add(Rooms.AllActive.First(r => r.RoomId.Value == idToAdd));
+			}
+			return results;
+		}
+
+		public Dictionary<string, List<RoomPrefabModel>> GetOpenAdjacentRoomsMap(params string[] roomIds)
+		{
+			var result = new Dictionary<string, List<RoomPrefabModel>>();
+			foreach (var roomId in roomIds)
+			{
+				result.Add(
+					roomId,
+					GetOpenAdjacentRooms(roomId).ToList()
+				);
+			}
+			return result;
 		}
 	}
 }

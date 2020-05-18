@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Views
@@ -10,6 +12,7 @@ namespace Lunra.Hothouse.Views
 		[SerializeField] Transform[] entrances = new Transform[0];
 		[SerializeField] LightEntry[] lights = new LightEntry[0];
 		[SerializeField] ParticleSystem[] lightParticles = new ParticleSystem[0];
+		[SerializeField] float lightRange;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 
@@ -30,8 +33,8 @@ namespace Lunra.Hothouse.Views
 		#endregion
 		
 		#region Reverse Bindings
-		public bool IsLight => lights != null && lights.Any();
-		public float LightRadius => lights.Max(e => e.Light.range);
+		public bool IsLight => !Mathf.Approximately(0f, lightRange);
+		public float LightRange => lightRange;
 		public float LightIntensity => lights.Max(e => e.Intensity.Maximum);
 		public Vector3[] Entrances => entrances.Select(e => e.position).ToArray();
 		#endregion
@@ -43,5 +46,10 @@ namespace Lunra.Hothouse.Views
 			LightFuelNormal = 0f;
 		}
 
+		void OnDrawGizmosSelected()
+		{
+			Handles.color = Color.yellow;
+			Handles.DrawWireDisc(transform.position, Vector3.up, lightRange);	
+		}
 	}
 }

@@ -7,7 +7,7 @@ using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {
-	public class BuildingModel : PrefabModel, ILightModel
+	public class BuildingModel : PrefabModel, ILightModel, ILightSensitiveModel
 	{
 		#region Serialized
 		[JsonProperty] BuildingStates buildingState;
@@ -47,6 +47,9 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ListenerProperty<Interval> LightFuelInterval { get; }
 		[JsonProperty] bool isLightRefueling;
 		[JsonIgnore] public ListenerProperty<bool> IsLightRefueling { get; }
+		
+		[JsonProperty] float lightLevel;
+		[JsonIgnore] public ListenerProperty<float> LightLevel { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -54,7 +57,7 @@ namespace Lunra.Hothouse.Models
 		public ListenerProperty<Entrance[]> Entrances { get; }
 		
 		[JsonProperty] float lightRadius;
-		[JsonProperty] public ListenerProperty<float> LightRadius { get; }
+		[JsonProperty] public ListenerProperty<float> LightRange { get; }
 		[JsonProperty] float lightIntensity;
 		[JsonProperty] public ListenerProperty<float> LightIntensity { get; }
 		#endregion
@@ -77,9 +80,10 @@ namespace Lunra.Hothouse.Models
 			LightFuel = new ListenerProperty<Inventory>(value => lightFuel = value, () => lightFuel);
 			LightFuelInterval = new ListenerProperty<Interval>(value => lightFuelInterval = value, () => lightFuelInterval);
 			IsLightRefueling = new ListenerProperty<bool>(value => isLightRefueling = value, () => isLightRefueling);
+			LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
 			
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
-			LightRadius = new ListenerProperty<float>(value => lightRadius = value, () => lightRadius);
+			LightRange = new ListenerProperty<float>(value => lightRadius = value, () => lightRadius);
 			LightIntensity = new ListenerProperty<float>(value => lightIntensity = value, () => lightIntensity);
 		}
 	}

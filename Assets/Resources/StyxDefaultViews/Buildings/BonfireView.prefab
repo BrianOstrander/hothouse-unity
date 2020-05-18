@@ -136,7 +136,7 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 1, g: 0.46619305, b: 0, a: 1}
-  m_Intensity: 8
+  m_Intensity: 10
   m_Range: 18
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -340,6 +340,7 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
   lightParticles:
   - {fileID: 6713742523325709184}
+  lightRange: 7.71
 --- !u!1 &6598605821536865864
 GameObject:
   m_ObjectHideFlags: 0

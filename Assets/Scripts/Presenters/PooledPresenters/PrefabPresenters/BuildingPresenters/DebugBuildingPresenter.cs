@@ -11,18 +11,18 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			base.Bind();
-
 			Model.Inventory.Changed += OnBuildingInventory;
 			Model.DesireQuality.Changed += OnBuildingDesireQuality;
+			
+			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			base.UnBind();
-			
 			Model.Inventory.Changed -= OnBuildingInventory;
 			Model.DesireQuality.Changed -= OnBuildingDesireQuality;
+			
+			base.UnBind();
 		}
 
 		protected override void OnViewShown()

@@ -12,20 +12,20 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			base.Bind();
-
 			Model.MeleeRangeBonus.Value = View.MeleeRangeBonus;
 			
 			Model.SelectionState.Changed += OnClearableSelectionState;
 			Model.Health.Changed += OnClearableHealth;
+			
+			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			base.UnBind();
-			
 			Model.SelectionState.Changed -= OnClearableSelectionState;
 			Model.Health.Changed -= OnClearableHealth;
+			
+			base.UnBind();
 		}
 
 		protected override void OnViewPrepare()

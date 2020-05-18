@@ -9,16 +9,16 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			base.Bind();
-
 			Game.SimulationTime.Changed += GameSimulationTime;
+
+			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			base.UnBind();
-
 			Game.SimulationTime.Changed -= GameSimulationTime;
+
+			base.UnBind();
 		}
 
 		#region Game Events

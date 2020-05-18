@@ -11,16 +11,16 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			base.Bind();
-			
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
+			
+			base.Bind();
 		}
 		
 		protected override void UnBind()
 		{
-			base.UnBind();
-			
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
+			
+			base.UnBind();
 		}
 
 		protected override void OnViewPrepare()

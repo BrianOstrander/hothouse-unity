@@ -11,11 +11,9 @@ namespace Lunra.Hothouse.Models
 		Active = 20
 	}
 
-	public interface IPooledModel : IModel
+	public interface IPooledModel : IModel, IRoomPositionModel
 	{
 		#region Serialized
-		ListenerProperty<string> RoomId { get; }
-		ListenerProperty<Vector3> Position { get; }
 		ListenerProperty<Quaternion> Rotation { get; }
 		ListenerProperty<PooledStates> PooledState { get; }
 		#endregion

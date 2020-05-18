@@ -236,6 +236,7 @@ namespace Lunra.Hothouse.Services
 				Inventory itemDrops
 			)
 			{
+				clearable.RoomId.Value = room0.Id.Value;
 				clearable.Position.Value = position;
 				clearable.Rotation.Value = Quaternion.identity;
 				clearable.ItemDrops.Value = itemDrops;
@@ -342,6 +343,7 @@ namespace Lunra.Hothouse.Services
 			)
 			{
 				model.BuildingState.Value = BuildingStates.Operating;
+				model.RoomId.Value = room0.Id.Value;
 				model.Id.Value = id;
 				model.Position.Value = position;
 				model.Inventory.Value = inventory;
@@ -465,7 +467,7 @@ namespace Lunra.Hothouse.Services
 							{ Inventory.Types.Stalks, 1 }
 						}
 					);
-					m.LightFuelInterval.Value = Interval.WithMaximum(10f);
+					m.LightFuelInterval.Value = Interval.WithMaximum(10000f);
 					m.IsLightRefueling.Value = true;
 				}
 			);

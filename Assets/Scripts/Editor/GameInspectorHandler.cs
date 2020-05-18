@@ -8,6 +8,7 @@ using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Lunra.Editor.Core
 {
@@ -64,6 +65,11 @@ namespace Lunra.Editor.Core
 					if (model.BuildingState.Value != BuildingStates.Operating)
 					{
 						label += "\nState: " + model.BuildingState.Value;
+					}
+
+					if (GameInspectionSettings.IsInspectingLightLevels.Value)
+					{
+						label += "\nLight Level: " + model.LightLevel.Value.ToString("N2");
 					}
 					
 					label += GetInventory(
@@ -201,6 +207,23 @@ namespace Lunra.Editor.Core
 					Handles.color = Color.red;
 					Handles.DrawWireCube(model.Position.Value, Vector3.one);
 				}
+			}
+
+			if (GameInspectionSettings.IsInspectingLightLevels.Value)
+			{
+				Handles.color = Color.yellow.NewA(0.25f);
+				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
+				{
+					foreach (var model in current.Payload.Game.Lights)
+					{
+						Handles.DrawSolidDisc(
+							model.Position.Value,
+							Vector3.up,
+							model.LightRange.Value
+						);
+					}
+				}
+				HandlesExtensions.EndDepthCheck();
 			}
 		}
 

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IClearableModel : IPrefabModel
+	public interface IClearableModel : IPrefabModel, ILightSensitiveModel
 	{
 		#region Serialized
 		ListenerProperty<float> Health { get; }
@@ -51,6 +51,9 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
 		[JsonIgnore] public ListenerProperty<SelectionStates> SelectionState { get; }
+		
+		[JsonProperty] float lightLevel;
+		[JsonIgnore] public ListenerProperty<float> LightLevel { get; }
 		#endregion
 		
 		#region NonSerialized
@@ -69,6 +72,7 @@ namespace Lunra.Hothouse.Models
 			PromisedClearersAtCapacity = new ListenerProperty<bool>(value => promisedClearersAtCapacity = value, () => promisedClearersAtCapacity);
 			ClearancePriority = new ListenerProperty<int?>(value => clearancePriority = value, () => clearancePriority);
 			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
+			LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
 			
 			IsMarkedForClearance = new DerivedProperty<bool, int?>(
 				value => isMarkedForClearance = value,

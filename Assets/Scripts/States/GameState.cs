@@ -9,6 +9,7 @@ using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
 using Lunra.Hothouse.Models.AgentModels;
+using Lunra.Hothouse.Utility;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Services
@@ -35,6 +36,7 @@ namespace Lunra.Hothouse.Services
 				done => App.Scenes.Request(SceneRequest.Load(result => done(), Scenes))    
 			);
 			App.S.PushBlocking(OnBeginInstantiatePresenters);
+			App.S.PushBlocking(OnBeginInitializeLighting);
 			App.S.PushBlocking(
 				OnBeginInitializeNavigationMesh,
 				() => Payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
@@ -68,6 +70,24 @@ namespace Lunra.Hothouse.Services
 		}
 
 		void OnBeginInitializeNavigationMesh() => Payload.Game.NavigationMesh.TriggerInitialize();
+
+		void OnBeginInitializeLighting(Action done)
+		{
+			switch (Payload.Game.LastLightUpdate.Value.State)
+			{
+				case LightDelta.States.Calculated:
+					done();
+					return;
+				case LightDelta.States.Unknown:
+					Payload.Game.LastLightUpdate.Value = Payload.Game.LastLightUpdate.Value.GetStale(
+						Payload.Game.Rooms.AllActive.Select(r => r.Id.Value).ToArray()
+					);
+					break;
+			}
+			CalculateLighting();
+
+			done();
+		}
 		#endregion
 
 		#region Idle
@@ -92,6 +112,18 @@ namespace Lunra.Hothouse.Services
 		{
 			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
 			Payload.Game.SimulationUpdate();
+
+			switch (Payload.Game.LastLightUpdate.Value.State)
+			{
+				case LightDelta.States.Calculated:
+					break;
+				case LightDelta.States.Stale:
+					CalculateLighting();
+					break;
+				default:
+					Debug.LogError("Unrecognized LightingState: "+Payload.Game.LastLightUpdate.Value.State);
+					break;
+			}
 		}
 		#endregion
         
@@ -120,7 +152,38 @@ namespace Lunra.Hothouse.Services
 		#endregion
 		
 		#region Utility
-		
+		void CalculateLighting()
+		{
+			var roomMap = Payload.Game.GetOpenAdjacentRoomsMap(Payload.Game.LastLightUpdate.Value.RoomIds);
+
+			var allRooms = roomMap.Values.SelectMany(v => v).Distinct();
+			var allLights = Payload.Game.Lights.Where(l => allRooms.Any(r => r.RoomId.Value == l.RoomId.Value)).ToList();
+			
+			foreach (var lightSensitive in Payload.Game.LightSensitives)
+			{
+				if (!roomMap.TryGetValue(lightSensitive.RoomId.Value, out var map)) continue;
+
+				var result = 0f;
+				
+				foreach (var light in allLights.Where(l => map.Any(r => r.RoomId.Value == l.RoomId.Value)))
+				{
+					if (light.LightState.Value == LightStates.Extinguished) continue;
+					
+					result = Mathf.Max(
+						result,
+						LightUtility.CalculateIntensity(
+							Mathf.Max(1f, Vector3.Distance(lightSensitive.Position.Value, light.Position.Value)),
+							light.LightRange.Value,
+							light.LightIntensity.Value
+						)
+					);
+				}
+
+				lightSensitive.LightLevel.Value = result;
+			}
+			
+			Payload.Game.LastLightUpdate.Value = LightDelta.Calculated();
+		}
 		#endregion
 	}
 }

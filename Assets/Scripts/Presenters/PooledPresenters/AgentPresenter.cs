@@ -19,8 +19,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			base.Bind();
-			
 			StateMachine = new S();
 			
 			View.InstanceName = typeof(V).Name + "_" + (string.IsNullOrEmpty(Model.Id.Value) ? "null_or_empty_id" : Model.Id.Value);
@@ -32,6 +30,8 @@ namespace Lunra.Hothouse.Presenters
 			Model.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 			Model.Health.Changed += OnAgentHealth;
+			
+			base.Bind();
 		}
 
 		protected override void UnBind()

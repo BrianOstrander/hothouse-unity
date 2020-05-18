@@ -15,8 +15,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			base.Bind();
-
 			if (View.Entrances.None())
 			{
 				Debug.LogError(
@@ -25,40 +23,49 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			Model.IsLight.Value = View.IsLight;
+			
 			if (Model.IsLight.Value)
 			{
-				Model.LightRadius.Value = View.LightRadius;
+				Model.LightRange.Value = View.LightRange;
 				Model.LightIntensity.Value = View.LightIntensity;
-				
-				Game.SimulationUpdate += OnLightSimulationUpdate;
 
+				// ILightModel Bindings
+				Game.SimulationUpdate += OnLightSimulationUpdate;
+				Model.LightState.Changed += OnLightState;
 				Model.Inventory.Changed += OnLightBuildingInventory;
 			}
 
+			// Misc Bindings
 			Model.Inventory.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
 			Model.Operate += OnBuildingOperate;
+			
+			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			base.UnBind();
-
+			// ILightModel UnBindings
 			Game.SimulationUpdate -= OnLightSimulationUpdate;
-			
+			Model.LightState.Changed += OnLightState;
 			Model.Inventory.Changed -= OnLightBuildingInventory;
+			
+			// Misc UnBindings
 			Model.Inventory.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
 			Model.Operate -= OnBuildingOperate;
+			
+			base.UnBind();
 		}
 
 		protected override void OnSimulationInitialized()
 		{
 			OnBuildingInventory(Model.Inventory.Value);
 		}
-
+		
+		#region LightSourceModel Events
 		protected virtual void OnLightSimulationUpdate()
 		{
 			if (Model.PooledState.Value != PooledStates.Active) return;
@@ -101,6 +108,11 @@ namespace Lunra.Hothouse.Presenters
 					break;
 			}
 		}
+		
+		protected virtual void OnLightState(LightStates lightState)
+		{
+			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.GetStale(Model.RoomId.Value);
+		}
 
 		protected virtual void OnLightBuildingInventory(Inventory inventory)
 		{
@@ -112,6 +124,7 @@ namespace Lunra.Hothouse.Presenters
 			if (View.Visible) View.LightFuelNormal = 1f;
 			Model.LightState.Value = LightStates.Fueled;
 		}
+		#endregion
 
 		#region Building Events
 		void OnBuildingInventory(Inventory inventory)
@@ -176,6 +189,7 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnViewShown()
 		{
 			Model.Entrances.Value = View.Entrances.Select(e => new Entrance(e, Entrance.States.Available)).ToArray();
+			
 			if (Model.IsLight.Value)
 			{
 				switch (Model.LightState.Value)

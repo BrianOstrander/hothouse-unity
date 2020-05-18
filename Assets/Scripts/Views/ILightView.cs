@@ -5,7 +5,7 @@ namespace Lunra.Hothouse.Views
 		float LightFuelNormal { set; }
 		
 		bool IsLight { get; }
-		float LightRadius { get; }
+		float LightRange { get; }
 		float LightIntensity { get; }
 	}
 }

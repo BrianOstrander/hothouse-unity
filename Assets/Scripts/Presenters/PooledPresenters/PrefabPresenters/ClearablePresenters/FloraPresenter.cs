@@ -145,6 +145,8 @@ namespace Lunra.Hothouse.Presenters
 									else newFlora.SelectionState.Value = SelectionStates.Deselected;
 								}
 							);
+
+							// Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.GetStale(Model.RoomId.Value);
 						}
 					}
 				}

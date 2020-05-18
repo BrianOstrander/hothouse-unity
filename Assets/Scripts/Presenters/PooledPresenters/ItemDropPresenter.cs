@@ -10,16 +10,16 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			base.Bind();
-			
 			Model.Inventory.Changed += OnItemDropInventory;
+			
+			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			base.UnBind();
-			
 			Model.Inventory.Changed -= OnItemDropInventory;
+			
+			base.UnBind();
 		}
 
 		protected override void OnViewPrepare()
