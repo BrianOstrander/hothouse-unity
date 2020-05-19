@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using Lunra.Core;
+using UnityEngine.Assertions;
 
 namespace Lunra.Hothouse.Models
 {
@@ -35,6 +37,8 @@ namespace Lunra.Hothouse.Models
 
 		public LightDelta SetRoomStale(params string[] roomIds)
 		{
+			Assert.IsFalse(roomIds.None(), "Cannot specify no roomIds");
+			Assert.IsFalse(roomIds.Any(r => string.IsNullOrEmpty(r)), "Cannot specify a null or empty roomId");
 			return new LightDelta(
 				States.Stale,
 				DateTime.Now,

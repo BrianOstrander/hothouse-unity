@@ -69,7 +69,8 @@ namespace Lunra.Hothouse.Presenters
 		#region LightSourceModel Events
 		protected virtual void OnLightSimulationUpdate()
 		{
-			if (Model.PooledState.Value != PooledStates.Active) return;
+			if (IsNotActive) return;
+			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 			if (Model.LightState.Value == LightStates.Extinguished) return;
 
 			Model.LightFuelInterval.Value = Model.LightFuelInterval.Value.Update(Game.SimulationDelta);
@@ -112,11 +113,13 @@ namespace Lunra.Hothouse.Presenters
 		
 		protected virtual void OnLightState(LightStates lightState)
 		{
+			if (IsNotActive) return;
 			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
 		}
 
 		protected virtual void OnLightBuildingInventory(Inventory inventory)
 		{
+			if (IsNotActive) return;
 			if (Model.LightState.Value != LightStates.Extinguishing) return;
 			if (!Model.Inventory.Value.Contains(Model.LightFuel.Value)) return;
 			
@@ -128,6 +131,10 @@ namespace Lunra.Hothouse.Presenters
 		
 		void OnLightBuildingState(BuildingStates buildingState)
 		{
+			if (IsNotActive) return;
+			
+			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
+			
 			if (View.NotVisible) return;
 			
 			OnViewInitializeLighting();
@@ -137,6 +144,8 @@ namespace Lunra.Hothouse.Presenters
 		#region Building Events
 		void OnBuildingInventory(Inventory inventory)
 		{
+			if (IsNotActive) return;
+			
 			var anyChanged = false;
 			var newDesireQuality = Model.DesireQuality.Value.Select(
 				d =>
@@ -152,6 +161,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingConstructionInventory(Inventory constructionInventory)
 		{
+			if (IsNotActive) return;
 			if (constructionInventory.IsEmpty || Model.ConstructionInventoryCapacity.Value.IsNotFull(constructionInventory)) return;
 
 			switch (Model.BuildingState.Value)
@@ -167,6 +177,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingSalvageInventory(Inventory salvageInventory)
 		{
+			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Salvaging || !salvageInventory.IsEmpty) return;
 
 			Model.PooledState.Value = PooledStates.InActive;
@@ -174,6 +185,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
 		{
+			if (IsNotActive) return;
 			var quality = Model.DesireQuality.Value.FirstOrDefault(d => d.Desire == desire);
 
 			if (quality.Desire != desire)

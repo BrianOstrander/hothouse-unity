@@ -6,6 +6,7 @@ using Lunra.StyxMvp.Models;
 using Lunra.Hothouse.Presenters;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Lunra.Hothouse.Models
 {
@@ -113,6 +114,7 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			if (string.IsNullOrEmpty(result.Id.Value)) result.Id.Value = Guid.NewGuid().ToString();
+			Assert.IsFalse(string.IsNullOrEmpty(result.RoomId.Value), "Cannot have a null or empty RoomId");
 
 			result.PooledState.SetValue(PooledStates.Active, this);
 			

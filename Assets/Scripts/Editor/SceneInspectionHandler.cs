@@ -62,8 +62,9 @@ namespace Lunra.Hothouse.Editor
 					if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 					{
 						label += "\nLight Level: " + model.LightLevel.Value.ToString("N2");
+						if (model.IsLight.Value) label += "\nLight State: " + model.LightState.Value;
 					}
-					
+
 					label += GetInventory(
 						"Inventory",
 						model.Inventory.Value,

@@ -134,6 +134,8 @@ namespace Lunra.Hothouse.Presenters
 		
 		#region Utility
 		protected virtual bool QueueNavigationCalculation => false;
+		protected bool IsActive => Model.PooledState.Value == PooledStates.Active;
+		protected bool IsNotActive => !IsActive;
 		#endregion
 	}
 }

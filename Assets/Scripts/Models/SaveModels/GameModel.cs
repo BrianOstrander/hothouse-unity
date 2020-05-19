@@ -55,7 +55,7 @@ namespace Lunra.Hothouse.Models
 			.Concat(Flora.AllActive);
 		
 		[JsonIgnore] public IEnumerable<ILightModel> Lights => 
-			Buildings.AllActive;
+			Buildings.AllActive.Where(b => b.IsLight.Value && b.BuildingState.Value == BuildingStates.Operating);
 
 		[JsonIgnore]
 		public IEnumerable<ILightSensitiveModel> LightSensitives =>

@@ -116,6 +116,7 @@ namespace Lunra.Hothouse.Services
 			)
 			{
 				door.RoomConnection.Value = connection;
+				door.RoomId.Value = connection.RoomId0;
 				door.Position.Value = position;
 			}
 
@@ -280,6 +281,7 @@ namespace Lunra.Hothouse.Services
 			)
 			{
 				dweller.Id.Value = id;
+				dweller.RoomId.Value = room0.Id.Value;
 				dweller.Position.Value = position;
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
@@ -377,7 +379,7 @@ namespace Lunra.Hothouse.Services
 							{ Inventory.Types.Stalks, 1 }
 						}
 					);
-					m.LightFuelInterval.Value = Interval.WithMaximum(10000f);
+					m.LightFuelInterval.Value = Interval.WithMaximum(1f);
 					m.IsLightRefueling.Value = true;
 				}
 			);
@@ -504,8 +506,10 @@ namespace Lunra.Hothouse.Services
 			// 				{ Inventory.Types.Scrap, 1 }
 			// 			}
 			// 		);
+			// 		m.Id.Value = "scrap without room";
 			// 	}
 			// );
+			
 			
 			// game.ItemDrops.Activate(
 			// 	m =>

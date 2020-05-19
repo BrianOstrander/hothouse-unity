@@ -375,7 +375,6 @@ namespace Lunra.Hothouse.Ai
 						Agent.DepositCooldown.Value,
 						() =>
 						{
-							Debug.Log(Agent.InventoryPromise.Value.Inventory);
 							target.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory;
 							Agent.InventoryPromise.Value = InventoryPromise.Default();
 						}
