@@ -38,6 +38,13 @@ namespace Lunra.Hothouse.Ai
 					validCleanupItems
 				),
 				
+				new ToItemCleanupOnValidInventory(
+					cleanupState,
+					ToItemCleanupOnValidInventory.InventoryTrigger.OnGreaterThanZeroAndShiftOver,
+					validJobs,
+					validCleanupItems
+				),
+				
 				new ToAttackNearestClearable(attackState),
 				
 				new ToIdleOnShiftEnd(this),

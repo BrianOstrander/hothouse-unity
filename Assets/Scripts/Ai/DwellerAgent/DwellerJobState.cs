@@ -80,7 +80,8 @@ namespace Lunra.Hothouse.Ai
 				Always = 10,
 				OnEmpty = 20,
 				OnFull = 40,
-				OnGreaterThanZero = 50
+				OnGreaterThanZero = 50,
+				OnGreaterThanZeroAndShiftOver = 60
 			}
 
 			public override string Name => base.Name + "." + inventoryTrigger;
@@ -90,8 +91,6 @@ namespace Lunra.Hothouse.Ai
 			Jobs[] validJobs;
 			Inventory.Types[] validItems;
 			
-			NavMeshPath targetPath = new NavMeshPath();
-
 			public ToItemCleanupOnValidInventory(
 				DwellerItemCleanupState<S> cleanupState,
 				InventoryTrigger inventoryTrigger,
@@ -108,22 +107,34 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				if (inventoryTrigger == InventoryTrigger.Always) return true;
+				
+				switch (inventoryTrigger)
+				{
+					case InventoryTrigger.OnEmpty:
+						if (!Agent.Inventory.Value.IsEmpty) return false;
+						break;
+					case InventoryTrigger.OnFull:
+						if (Agent.InventoryCapacity.Value.IsNotFull(Agent.Inventory.Value)) return false;
+						break;
+					case InventoryTrigger.OnGreaterThanZero:
+						if (Agent.Inventory.Value.IsEmpty) return false;
+						break;
+					case InventoryTrigger.OnGreaterThanZeroAndShiftOver:
+						if (Agent.Inventory.Value.IsEmpty) return false;
+						if (Agent.JobShift.Value.Contains(World.SimulationTime.Value)) return false;
+						break;
+				}
+				
 				if (!IsAnyBuildingWithInventoryReachable(Inventory.ValidTypes)) return false;
 
 				switch (inventoryTrigger)
 				{
 					case InventoryTrigger.OnEmpty:
-						if (!Agent.Inventory.Value.IsEmpty) return false;
 						return IsAnyValidItemDropReachable();
 					case InventoryTrigger.OnFull:
-						if (Agent.InventoryCapacity.Value.IsNotFull(Agent.Inventory.Value)) return false;
-						if (!IsAnyBuildingMatchingCurrentInventoryReachable()) return false;
-						return true;
 					case InventoryTrigger.OnGreaterThanZero:
-						if (Agent.Inventory.Value.IsEmpty) return false;
-						if (!IsAnyBuildingMatchingCurrentInventoryReachable()) return false;
-						// if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return true;
-						return true;
+					case InventoryTrigger.OnGreaterThanZeroAndShiftOver:
+						return IsAnyBuildingMatchingCurrentInventoryReachable();
 				}
 				
 				Debug.LogError("Unrecognized "+nameof(inventoryTrigger)+": "+inventoryTrigger);
@@ -155,7 +166,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				var target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
-					out targetPath,
+					out _,
 					out _,
 					b =>
 					{

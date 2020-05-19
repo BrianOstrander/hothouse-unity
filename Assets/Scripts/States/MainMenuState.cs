@@ -150,7 +150,7 @@ namespace Lunra.Hothouse.Services
 				flora.RoomId.Value = room0.Id.Value;
 				flora.Position.Value = position;
 				flora.Rotation.Value = Quaternion.identity;
-				flora.Age.Value = Interval.WithMaximum(1f);
+				flora.Age.Value = Interval.WithMaximum(100000f);
 				flora.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
 				flora.ReproductionFailureLimit.Value = 40;
 				flora.HealthMaximum.Value = 100f;
@@ -286,7 +286,7 @@ namespace Lunra.Hothouse.Services
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.5f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
