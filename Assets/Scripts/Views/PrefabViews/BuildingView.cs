@@ -35,7 +35,6 @@ namespace Lunra.Hothouse.Views
 		#region Reverse Bindings
 		public bool IsLight => !Mathf.Approximately(0f, lightRange);
 		public float LightRange => lightRange;
-		public float LightIntensity => lights.Max(e => e.Intensity.Maximum);
 		public Vector3[] Entrances => entrances.Select(e => e.position).ToArray();
 		#endregion
 

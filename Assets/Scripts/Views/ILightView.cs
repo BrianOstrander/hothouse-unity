@@ -6,6 +6,5 @@ namespace Lunra.Hothouse.Views
 		
 		bool IsLight { get; }
 		float LightRange { get; }
-		float LightIntensity { get; }
 	}
 }

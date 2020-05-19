@@ -8,8 +8,6 @@ using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
-using Lunra.Hothouse.Models.AgentModels;
-using Lunra.Hothouse.Utility;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Services
@@ -79,7 +77,7 @@ namespace Lunra.Hothouse.Services
 					done();
 					return;
 				case LightDelta.States.Unknown:
-					Payload.Game.LastLightUpdate.Value = Payload.Game.LastLightUpdate.Value.GetStale(
+					Payload.Game.LastLightUpdate.Value = Payload.Game.LastLightUpdate.Value.SetRoomStale(
 						Payload.Game.Rooms.AllActive.Select(r => r.Id.Value).ToArray()
 					);
 					break;
@@ -97,15 +95,15 @@ namespace Lunra.Hothouse.Services
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 
-			App.Heartbeat.Wait(
-				() =>
-				{
-					Debug.Log("Recalculating...");
-					Payload.Game.Doors.FirstActive().IsOpen.Value = true;
-					// Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
-				},
-				6f
-			);
+			// App.Heartbeat.Wait(
+			// 	() =>
+			// 	{
+			// 		Debug.Log("Recalculating...");
+			// 		Payload.Game.Doors.FirstActive().IsOpen.Value = true;
+			// 		// Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
+			// 	},
+			// 	6f
+			// );
 		}
 
 		void OnHeartbeatUpdate()
@@ -154,34 +152,53 @@ namespace Lunra.Hothouse.Services
 		#region Utility
 		void CalculateLighting()
 		{
-			var roomMap = Payload.Game.GetOpenAdjacentRoomsMap(Payload.Game.LastLightUpdate.Value.RoomIds);
+
+			Dictionary<string, List<RoomPrefabModel>> roomMap;
+			IEnumerable<ILightSensitiveModel> lightSensitives;
+			
+			if (Payload.Game.LastLightUpdate.Value.SensitiveIds.Any())
+			{
+				lightSensitives = Payload.Game.LightSensitives.Where(l => Payload.Game.LastLightUpdate.Value.SensitiveIds.Contains(l.Id.Value));
+				roomMap = Payload.Game.GetOpenAdjacentRoomsMap(
+					Payload.Game.LastLightUpdate.Value.RoomIds
+						.Union(lightSensitives.Select(l => l.RoomId.Value))
+						.ToArray()
+				);
+
+				if (Payload.Game.LastLightUpdate.Value.RoomIds.Any()) lightSensitives = Payload.Game.LightSensitives;
+			}
+			else
+			{
+				roomMap = Payload.Game.GetOpenAdjacentRoomsMap(Payload.Game.LastLightUpdate.Value.RoomIds);
+				lightSensitives = Payload.Game.LightSensitives;
+			}
 
 			var allRooms = roomMap.Values.SelectMany(v => v).Distinct();
 			var allLights = Payload.Game.Lights.Where(l => allRooms.Any(r => r.RoomId.Value == l.RoomId.Value)).ToList();
-			
-			foreach (var lightSensitive in Payload.Game.LightSensitives)
+
+			foreach (var lightSensitive in lightSensitives)
 			{
 				if (!roomMap.TryGetValue(lightSensitive.RoomId.Value, out var map)) continue;
 
 				var result = 0f;
-				
+
 				foreach (var light in allLights.Where(l => map.Any(r => r.RoomId.Value == l.RoomId.Value)))
 				{
 					if (light.LightState.Value == LightStates.Extinguished) continue;
-					
+
+					var distance = Vector3.Distance(lightSensitive.Position.Value, light.Position.Value);
+
+					if (light.LightRange.Value <= distance) continue;
+
 					result = Mathf.Max(
 						result,
-						LightUtility.CalculateIntensity(
-							Mathf.Max(1f, Vector3.Distance(lightSensitive.Position.Value, light.Position.Value)),
-							light.LightRange.Value,
-							light.LightIntensity.Value
-						)
+						1f - (distance / light.LightRange.Value)
 					);
 				}
-
+				
 				lightSensitive.LightLevel.Value = result;
 			}
-			
+
 			Payload.Game.LastLightUpdate.Value = LightDelta.Calculated();
 		}
 		#endregion

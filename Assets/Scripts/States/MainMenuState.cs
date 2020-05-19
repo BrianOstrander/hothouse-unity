@@ -284,7 +284,7 @@ namespace Lunra.Hothouse.Services
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.5f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -328,8 +328,8 @@ namespace Lunra.Hothouse.Services
 					dweller,
 					"2",
 					new Vector3(-4f, -0.8386866f, 3f),
-					Jobs.Clearer
-					// debugAgentStates: true
+					Jobs.Clearer,
+					debugAgentStates: true
 				)
 			);
 			
@@ -351,25 +351,46 @@ namespace Lunra.Hothouse.Services
 				model.DesireQuality.Value = desireQualities;
 			}
 
-			var sleepBuilding0 = game.Buildings.Activate(
-				"debug",
-				m => initializeBuilding(
-					m,
-					"sleep_0",
-					new Vector3(-12f, -0.8386866f, 6f),
-					Inventory.Empty,
-					InventoryCapacity.None(),
-					DesireQuality.New(Desires.Sleep, 1f)
-				)
+			var fireBuilding1 = game.Buildings.Activate(
+				"fire_bonfire",
+				m =>
+				{
+					initializeBuilding(
+						m,
+						"fire_bonfire0",
+						new Vector3(-12f, -0.8386866f, 6f),
+						Inventory.Empty, 
+						InventoryCapacity.ByIndividualWeight(
+							new Inventory(
+								new Dictionary<Inventory.Types, int>
+								{
+									{ Inventory.Types.Stalks, 50 }
+								}
+							)
+						)
+					);
+
+					m.LightState.Value = LightStates.Fueled;
+					m.LightFuel.Value = new Inventory(
+						new Dictionary<Inventory.Types, int>
+						{
+							{ Inventory.Types.Stalks, 1 }
+						}
+					);
+					m.LightFuelInterval.Value = Interval.WithMaximum(10000f);
+					m.IsLightRefueling.Value = true;
+				}
 			);
 
-			// sleepBuilding0.BuildingState.Value = BuildingStates.Salvaging;
-			sleepBuilding0.SalvageInventory.Value = new Inventory(
-				new Dictionary<Inventory.Types, int>
-				{
-					{Inventory.Types.Stalks, 1},
-					{Inventory.Types.Scrap, 1}
-				}
+			fireBuilding1.BuildingState.Value = BuildingStates.Constructing;
+			fireBuilding1.ConstructionInventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
+				new Inventory(
+					new Dictionary<Inventory.Types, int>
+					{
+						{Inventory.Types.Stalks, 1},
+						// {Inventory.Types.Scrap, 1}
+					}
+				)
 			);
 			
 			var sleepBuilding1 = game.Buildings.Activate(
@@ -447,14 +468,14 @@ namespace Lunra.Hothouse.Services
 				{
 					initializeBuilding(
 						m,
-						"fire_bonfire0",
+						"fire_bonfire1",
 						new Vector3(2f, -0.8386866f, 6f),
 						Inventory.Empty, 
 						InventoryCapacity.ByIndividualWeight(
 							new Inventory(
 								new Dictionary<Inventory.Types, int>
 								{
-									{ Inventory.Types.Stalks, 50 }
+									{ Inventory.Types.Stalks, 2 }
 								}
 							)
 						)

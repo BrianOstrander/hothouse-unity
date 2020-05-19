@@ -23,7 +23,6 @@ namespace Lunra.Hothouse.Models
 
 		#region Non Serialized
 		ListenerProperty<float> LightRange { get; }
-		ListenerProperty<float> LightIntensity { get; }
 		#endregion
 	}
 }

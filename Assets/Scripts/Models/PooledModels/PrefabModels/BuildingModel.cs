@@ -58,8 +58,6 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] float lightRadius;
 		[JsonProperty] public ListenerProperty<float> LightRange { get; }
-		[JsonProperty] float lightIntensity;
-		[JsonProperty] public ListenerProperty<float> LightIntensity { get; }
 		#endregion
 
 		public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
@@ -84,7 +82,6 @@ namespace Lunra.Hothouse.Models
 			
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
 			LightRange = new ListenerProperty<float>(value => lightRadius = value, () => lightRadius);
-			LightIntensity = new ListenerProperty<float>(value => lightIntensity = value, () => lightIntensity);
 		}
 	}
 }

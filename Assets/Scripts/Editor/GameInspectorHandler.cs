@@ -211,7 +211,7 @@ namespace Lunra.Editor.Core
 
 			if (GameInspectionSettings.IsInspectingLightLevels.Value)
 			{
-				Handles.color = Color.yellow.NewA(0.25f);
+				Handles.color = Color.yellow.NewA(0.05f);
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
 					foreach (var model in current.Payload.Game.Lights)
@@ -224,6 +224,16 @@ namespace Lunra.Editor.Core
 					}
 				}
 				HandlesExtensions.EndDepthCheck();
+
+				var lightSensitiveOffset = Vector3.up * 4f;
+				foreach (var model in current.Payload.Game.LightSensitives)
+				{
+					Debug.DrawLine(
+						model.Position.Value + lightSensitiveOffset,
+						model.Position.Value + lightSensitiveOffset + (Vector3.up * model.LightLevel.Value),
+						Color.yellow
+					);
+				}
 			}
 		}
 

@@ -31,6 +31,11 @@ namespace Lunra.Hothouse.Presenters
 		#region DoorPrefabModel Events
 		void OnDoorPrefabIsOpen(bool isOpen)
 		{
+			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(
+				Model.RoomConnection.Value.RoomId0,
+				Model.RoomConnection.Value.RoomId1	
+			); 
+			
 			if (View.NotVisible) return;
 			
 			if (isOpen) View.Open();

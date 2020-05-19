@@ -108,8 +108,8 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				if (inventoryTrigger == InventoryTrigger.Always) return true;
-				if (!IsAnyBuildingWithInventoryReachable()) return false;
-				
+				if (!IsAnyBuildingWithInventoryReachable(Inventory.ValidTypes)) return false;
+
 				switch (inventoryTrigger)
 				{
 					case InventoryTrigger.OnEmpty:
@@ -117,10 +117,12 @@ namespace Lunra.Hothouse.Ai
 						return IsAnyValidItemDropReachable();
 					case InventoryTrigger.OnFull:
 						if (Agent.InventoryCapacity.Value.IsNotFull(Agent.Inventory.Value)) return false;
+						if (!IsAnyBuildingMatchingCurrentInventoryReachable()) return false;
 						return true;
 					case InventoryTrigger.OnGreaterThanZero:
 						if (Agent.Inventory.Value.IsEmpty) return false;
-						if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return true;
+						if (!IsAnyBuildingMatchingCurrentInventoryReachable()) return false;
+						// if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return true;
 						return true;
 				}
 				
@@ -130,19 +132,26 @@ namespace Lunra.Hothouse.Ai
 
 			bool IsAnyValidItemDropReachable()
 			{
-				return DwellerUtility.CalculateNearestCleanupWithdrawal(
-					Agent,
-					World,
-					validItems,
-					validJobs,
-					out _,
-					out _,
-					out _,
-					out _
-				);
+				foreach (var item in validItems)
+				{
+					var itemEnumerable = new[] { item };
+					var isValid = DwellerUtility.CalculateNearestCleanupWithdrawal(
+						Agent,
+						World,
+						itemEnumerable,
+						validJobs,
+						out _,
+						out _,
+						out _,
+						out _
+					);
+					if (isValid && IsAnyBuildingWithInventoryReachable(itemEnumerable)) return true;
+				}
+
+				return false;
 			}
 
-			bool IsAnyBuildingWithInventoryReachable()
+			bool IsAnyBuildingWithInventoryReachable(IEnumerable<Inventory.Types> types)
 			{
 				var target = DwellerUtility.CalculateNearestOperatingEntrance(
 					Agent.Position.Value,
@@ -151,49 +160,26 @@ namespace Lunra.Hothouse.Ai
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
-						return validItems.Any(i => b.InventoryCapacity.Value.IsNotFull(b.Inventory.Value + (i, 1)));
+						return types.Any(i => 0 < b.InventoryCapacity.Value.GetCapacityFor(b.Inventory.Value + (i, 1), i));
 					},
 					World.Buildings.AllActive
 				);
 
 				return target != null;
 			}
+			
+			bool IsAnyBuildingMatchingCurrentInventoryReachable()
+			{
+				return IsAnyBuildingWithInventoryReachable(
+					Agent.Inventory.Value.Entries
+						.Where(e => 0 < e.Weight)
+						.Select(e => e.Type)
+				);
+			}
 
 			public override void Transition()
 			{
 				cleanupState.ResetCleanupCount();
-			}
-		}
-		
-		protected class ToDropItems : AgentTransition<DwellerTimeoutState<S>, GameModel, DwellerModel>
-		{
-			DwellerTimeoutState<S> timeoutState;
-
-			public ToDropItems(
-				DwellerTimeoutState<S> timeoutState
-			)
-			{
-				this.timeoutState = timeoutState;
-			}
-
-			public override bool IsTriggered() => !Agent.Inventory.Value.IsEmpty;
-
-			public override void Transition()
-			{
-				World.ItemDrops.Activate(
-					itemDrop =>
-					{
-						itemDrop.RoomId.Value = Agent.RoomId.Value;
-						itemDrop.Position.Value = Agent.Position.Value;
-						itemDrop.Rotation.Value = Quaternion.identity;
-						itemDrop.Inventory.Value = Agent.Inventory.Value;
-						itemDrop.Job.Value = Agent.Job.Value;
-					}
-				);
-				
-				Agent.Inventory.Value = Inventory.Empty;
-				
-				timeoutState.ConfigureForInterval(Interval.WithMaximum(Agent.DepositCooldown.Value));
 			}
 		}
 	}

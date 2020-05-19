@@ -118,7 +118,7 @@ namespace Lunra.Hothouse.Presenters
 						{
 							increaseReproductionFailures = false;
 
-							Game.Flora.Activate(
+							var result = Game.Flora.Activate(
 								Model.ValidPrefabIds.Value.Random(),
 								newFlora =>
 								{
@@ -146,7 +146,7 @@ namespace Lunra.Hothouse.Presenters
 								}
 							);
 
-							// Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.GetStale(Model.RoomId.Value);
+							Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 						}
 					}
 				}

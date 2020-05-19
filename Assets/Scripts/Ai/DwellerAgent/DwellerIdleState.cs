@@ -13,6 +13,15 @@ namespace Lunra.Hothouse.Ai
 
 		public override void OnInitialize()
 		{
+			var timeoutState = new DwellerTimeoutState<DwellerIdleState>();
+			
+			AddChildStates(
+				timeoutState	
+			);
+			AddTransitions(
+				new DwellerDropItemsTransition<DwellerIdleState>(timeoutState)
+			);
+			
 			InstantiateJob<DwellerClearerJobState>();
 			InstantiateJob<DwellerConstructionJobState>();
 			InstantiateDesire<DwellerSleepDesireState>();

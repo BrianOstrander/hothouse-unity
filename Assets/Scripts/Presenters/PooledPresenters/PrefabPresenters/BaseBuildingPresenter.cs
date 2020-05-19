@@ -27,12 +27,12 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.IsLight.Value)
 			{
 				Model.LightRange.Value = View.LightRange;
-				Model.LightIntensity.Value = View.LightIntensity;
 
 				// ILightModel Bindings
 				Game.SimulationUpdate += OnLightSimulationUpdate;
 				Model.LightState.Changed += OnLightState;
 				Model.Inventory.Changed += OnLightBuildingInventory;
+				Model.BuildingState.Changed += OnLightBuildingState;
 			}
 
 			// Misc Bindings
@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
 			Model.Operate += OnBuildingOperate;
-			
+
 			base.Bind();
 		}
 
@@ -50,6 +50,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationUpdate -= OnLightSimulationUpdate;
 			Model.LightState.Changed += OnLightState;
 			Model.Inventory.Changed -= OnLightBuildingInventory;
+			Model.BuildingState.Changed -= OnLightBuildingState;
 			
 			// Misc UnBindings
 			Model.Inventory.Changed -= OnBuildingInventory;
@@ -111,7 +112,7 @@ namespace Lunra.Hothouse.Presenters
 		
 		protected virtual void OnLightState(LightStates lightState)
 		{
-			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.GetStale(Model.RoomId.Value);
+			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
 		}
 
 		protected virtual void OnLightBuildingInventory(Inventory inventory)
@@ -123,6 +124,13 @@ namespace Lunra.Hothouse.Presenters
 			Model.LightFuelInterval.Value = Model.LightFuelInterval.Value.Restarted();
 			if (View.Visible) View.LightFuelNormal = 1f;
 			Model.LightState.Value = LightStates.Fueled;
+		}
+		
+		void OnLightBuildingState(BuildingStates buildingState)
+		{
+			if (View.NotVisible) return;
+			
+			OnViewInitializeLighting();
 		}
 		#endregion
 
@@ -163,7 +171,7 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.PooledState.Value = PooledStates.InActive;
 		}
-		
+
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
 		{
 			var quality = Model.DesireQuality.Value.FirstOrDefault(d => d.Desire == desire);
@@ -189,16 +197,29 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnViewShown()
 		{
 			Model.Entrances.Value = View.Entrances.Select(e => new Entrance(e, Entrance.States.Available)).ToArray();
-			
+			OnViewInitializeLighting();
+		}
+
+		void OnViewInitializeLighting()
+		{
 			if (Model.IsLight.Value)
 			{
-				switch (Model.LightState.Value)
+				switch (Model.BuildingState.Value)
 				{
-					case LightStates.Fueled: View.LightFuelNormal = 1f; break;
-					case LightStates.Extinguishing: View.LightFuelNormal = Model.LightFuelInterval.Value.InverseNormalized; break; 
-					case LightStates.Extinguished: View.LightFuelNormal = 0f; break;
-					default:
-						Debug.LogError("Unrecognized LightState: "+Model.LightState.Value);
+					case BuildingStates.Operating:
+						switch (Model.LightState.Value)
+						{
+							case LightStates.Fueled: View.LightFuelNormal = 1f; break;
+							case LightStates.Extinguishing: View.LightFuelNormal = Model.LightFuelInterval.Value.InverseNormalized; break; 
+							case LightStates.Extinguished: View.LightFuelNormal = 0f; break;
+							default:
+								Debug.LogError("Unrecognized LightState: "+Model.LightState.Value);
+								break;
+						}
+						break;
+					case BuildingStates.Decaying:
+					case BuildingStates.Salvaging:
+						View.LightFuelNormal = 0f;
 						break;
 				}
 			}

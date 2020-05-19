@@ -56,7 +56,7 @@ namespace Lunra.Hothouse.Ai
 					validJobs,
 					validCleanupItems
 				),
-				new ToDropItems(timeoutState)
+				new DwellerDropItemsTransition<DwellerClearerJobState>(timeoutState)
 			);
 		}
 
