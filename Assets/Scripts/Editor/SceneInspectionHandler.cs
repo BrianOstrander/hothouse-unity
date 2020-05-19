@@ -207,7 +207,7 @@ namespace Lunra.Hothouse.Editor
 				Handles.color = Color.yellow.NewA(0.05f);
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
-					foreach (var model in gameState.Payload.Game.Lights)
+					foreach (var model in gameState.Payload.Game.Lights.Where(l => l.LightState.Value != LightStates.Extinguished))
 					{
 						Handles.DrawSolidDisc(
 							model.Position.Value,
