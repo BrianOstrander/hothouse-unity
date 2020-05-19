@@ -24,14 +24,15 @@ namespace Lunra.Hothouse.Ai
 				.Where(
 					possibleConstructionSite =>
 					{
-						if (possibleConstructionSite.BuildingState.Value != BuildingStates.Constructing) return false;
+						if (!possibleConstructionSite.IsBuildingState(BuildingStates.Constructing)) return false;
+						if (possibleConstructionSite.IsNotLit()) return false;
 
 						return possibleConstructionSite.ConstructionInventoryCapacity.Value.IsNotFull(possibleConstructionSite.ConstructionInventory.Value + possibleConstructionSite.ConstructionInventoryPromised.Value);
 					}
 				)
 				.ToDictionary(b => b, b => false);
 
-			var itemSourceResult = DwellerUtility.CalculateNearestOperatingEntrance(
+			var itemSourceResult = DwellerUtility.CalculateNearestLitOperatingEntrance(
 				agent.Position.Value,
 				out path,
 				out entrancePosition,
@@ -213,7 +214,7 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 				
-				target = DwellerUtility.CalculateNearestEntrance(
+				target = DwellerUtility.CalculateNearestLitEntrance(
 					Agent.Position.Value,
 					out _,
 					out var entrancePosition,
@@ -391,7 +392,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
 
-				var target = DwellerUtility.CalculateNearestEntrance(
+				var target = DwellerUtility.CalculateNearestLitEntrance(
 					Agent.Position.Value,
 					out path,
 					out _,
@@ -418,7 +419,7 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 
-				var target = DwellerUtility.CalculateNearestEntrance(
+				var target = DwellerUtility.CalculateNearestLitEntrance(
 					Agent.Position.Value,
 					out path,
 					out _,

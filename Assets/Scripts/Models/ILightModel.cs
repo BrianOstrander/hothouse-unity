@@ -1,3 +1,4 @@
+using System;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
 
@@ -24,5 +25,25 @@ namespace Lunra.Hothouse.Models
 		#region Non Serialized
 		ListenerProperty<float> LightRange { get; }
 		#endregion
+	}
+	
+	public static class LightModelExtensions
+	{
+		public static bool IsLightActive(this ILightModel target)
+		{
+			switch (target.LightState.Value)
+			{
+				case LightStates.Fueled:
+				case LightStates.Extinguishing:
+					return true;
+				case LightStates.Extinguished:
+					return false;
+				default:
+					Debug.LogError("Unrecognized LightState: "+target.LightState.Value);
+					return false;
+			}
+		}
+
+		public static bool IsLightNotActive(this ILightModel target) => !target.IsLightActive();
 	}
 }

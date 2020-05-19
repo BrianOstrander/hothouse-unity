@@ -150,7 +150,7 @@ namespace Lunra.Hothouse.Services
 				flora.RoomId.Value = room0.Id.Value;
 				flora.Position.Value = position;
 				flora.Rotation.Value = Quaternion.identity;
-				flora.Age.Value = Interval.WithMaximum(100000f);
+				flora.Age.Value = Interval.WithMaximum(1f);
 				flora.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
 				flora.ReproductionFailureLimit.Value = 40;
 				flora.HealthMaximum.Value = 100f;
@@ -286,7 +286,7 @@ namespace Lunra.Hothouse.Services
 				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
+				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1f);
 				dweller.Desire.Value = desire;
 				dweller.IsDebugging = debugAgentStates;
 				dweller.NavigationForceDistanceMaximum.Value = 4f;
@@ -360,7 +360,7 @@ namespace Lunra.Hothouse.Services
 					initializeBuilding(
 						m,
 						"fire_bonfire0",
-						new Vector3(-12f, -0.8386866f, 6f),
+						new Vector3(-6f, -0.8386866f, 6f),
 						Inventory.Empty, 
 						InventoryCapacity.ByIndividualWeight(
 							new Inventory(
@@ -407,7 +407,18 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 
-			// sleepBuilding1.BuildingState.Value = BuildingStates.Salvaging;
+			// sleepBuilding1.BuildingState.Value = BuildingStates.Constructing;
+			// sleepBuilding1.ConstructionInventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
+			// 	new Inventory(
+			// 		new Dictionary<Inventory.Types, int>
+			// 		{
+			// 			{Inventory.Types.Stalks, 1},
+			// 			// {Inventory.Types.Scrap, 1}
+			// 		}
+			// 	)
+			// );
+			
+			sleepBuilding1.BuildingState.Value = BuildingStates.Salvaging;
 			sleepBuilding1.SalvageInventory.Value = new Inventory(
 				new Dictionary<Inventory.Types, int>
 				{

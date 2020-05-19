@@ -11,7 +11,7 @@ namespace Lunra.Hothouse.Ai
 {
 	public static class DwellerUtility
 	{
-		public static M CalculateNearestOperatingEntrance<M>(
+		public static M CalculateNearestLitOperatingEntrance<M>(
 			Vector3 beginPosition,
 			out NavMeshPath path,
 			out Vector3 entrancePosition,
@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Ai
 		)
 			where M : BuildingModel
 		{
-			return CalculateNearestEntrance(
+			return CalculateNearestLitEntrance(
 				beginPosition,
 				out path,
 				out entrancePosition,
@@ -29,7 +29,7 @@ namespace Lunra.Hothouse.Ai
 			);
 		}
 
-		public static M CalculateNearestEntrance<M>(
+		public static M CalculateNearestLitEntrance<M>(
 			Vector3 beginPosition,
 			out NavMeshPath path,
 			out Vector3 entrancePosition,
@@ -42,7 +42,7 @@ namespace Lunra.Hothouse.Ai
 			var entranceResult = Vector3.zero;
 	
 			var result = buildings
-				.Where(buildingPredicate)
+				.Where(b => b.IsLit() && buildingPredicate(b))
 				.OrderBy(t => Vector3.Distance(beginPosition, t.Position.Value))
 				.FirstOrDefault(
 					t => CalculateNearestEntrance(

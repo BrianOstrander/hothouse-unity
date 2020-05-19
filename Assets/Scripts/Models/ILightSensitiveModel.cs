@@ -9,4 +9,10 @@ namespace Lunra.Hothouse.Models
 		ListenerProperty<float> LightLevel { get; }
 		#endregion
 	}
+
+	public static class LightSensitiveModelExtensions
+	{
+		public static bool IsLit(this ILightSensitiveModel target) => 0f < target.LightLevel.Value;
+		public static bool IsNotLit(this ILightSensitiveModel target) => !target.IsLit();
+	}
 }

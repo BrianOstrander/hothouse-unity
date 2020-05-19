@@ -184,7 +184,7 @@ namespace Lunra.Hothouse.Services
 
 				foreach (var light in allLights.Where(l => map.Any(r => r.RoomId.Value == l.RoomId.Value)))
 				{
-					if (light.LightState.Value == LightStates.Extinguished) continue;
+					if (light.IsLightNotActive()) continue;
 
 					var distance = Vector3.Distance(lightSensitive.Position.Value, light.Position.Value);
 

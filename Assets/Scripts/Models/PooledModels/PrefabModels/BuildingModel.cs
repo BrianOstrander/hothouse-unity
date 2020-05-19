@@ -58,9 +58,12 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] float lightRadius;
 		[JsonIgnore] public ListenerProperty<float> LightRange { get; }
+		
+		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
 		#endregion
 
-		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
+		public bool IsBuildingState(BuildingStates buildingState) => BuildingState.Value == buildingState;
+
 		
 		public BuildingModel()
 		{

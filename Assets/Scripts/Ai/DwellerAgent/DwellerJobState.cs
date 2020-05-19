@@ -164,7 +164,7 @@ namespace Lunra.Hothouse.Ai
 
 			bool IsAnyBuildingWithInventoryReachable(IEnumerable<Inventory.Types> types)
 			{
-				var target = DwellerUtility.CalculateNearestOperatingEntrance(
+				var target = DwellerUtility.CalculateNearestLitOperatingEntrance(
 					Agent.Position.Value,
 					out _,
 					out _,

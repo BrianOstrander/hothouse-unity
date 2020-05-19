@@ -340,7 +340,7 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
   lightParticles:
   - {fileID: 6713742523325709184}
-  lightRange: 7.71
+  lightRange: 10
 --- !u!1 &6598605821536865864
 GameObject:
   m_ObjectHideFlags: 0
