@@ -27,13 +27,13 @@ namespace Lunra.StyxMvp.Models
 		/// <summary>
 		/// Is this loadable, or is the version too old.
 		/// </summary>
-		public ListenerProperty<bool> SupportedVersion { get; }
+		[JsonIgnore] public ListenerProperty<bool> SupportedVersion { get; }
 		
 		string absolutePath;
 		/// <summary>
 		/// The path of this save, depends on the SaveLoadService in use.
 		/// </summary>
-		public ListenerProperty<string> AbsolutePath { get; }
+		[JsonIgnore] public ListenerProperty<string> AbsolutePath { get; }
 		#endregion
 		
 		#region Serialized
@@ -41,13 +41,13 @@ namespace Lunra.StyxMvp.Models
 		/// <summary>
 		/// If true, this should be ignored.
 		/// </summary>
-		public ListenerProperty<bool> Ignore { get; }
+		[JsonIgnore] public ListenerProperty<bool> Ignore { get; }
 		
 		[JsonProperty] int version;
 		/// <summary>
 		/// The version of the app this was saved under.
 		/// </summary>
-		public ListenerProperty<int> Version { get; }
+		[JsonIgnore] public ListenerProperty<int> Version { get; }
 
 		[JsonProperty] DateTime created;
 		/// <summary>
@@ -56,7 +56,7 @@ namespace Lunra.StyxMvp.Models
 		/// <remarks>
 		/// If this is equal to DateTime.MinValue it has never been saved.
 		/// </remarks>
-		public ListenerProperty<DateTime> Created { get; }
+		[JsonIgnore] public ListenerProperty<DateTime> Created { get; }
 		
 		[JsonProperty] DateTime modified;
 		/// <summary>
@@ -65,7 +65,7 @@ namespace Lunra.StyxMvp.Models
 		/// <remarks>
 		/// If this is equal to DateTime.MinValue it has never been saved.
 		/// </remarks>
-		public ListenerProperty<DateTime> Modified { get; }
+		[JsonIgnore] public ListenerProperty<DateTime> Modified { get; }
 
 		/// <summary>
 		/// How are sibling files consumed? If None is specified, no sibling
@@ -77,14 +77,15 @@ namespace Lunra.StyxMvp.Models
 
 		#endregion
 		
-		public bool IsStreaming => AbsolutePath.Value.StartsWith(Application.dataPath);
+		[JsonIgnore] public bool IsStreaming => AbsolutePath.Value.StartsWith(Application.dataPath);
 
-		public string Path => IsStreaming ? "Assets" + AbsolutePath.Value.Substring(Application.dataPath.Length) : AbsolutePath.Value;
+		[JsonIgnore] public string Path => IsStreaming ? "Assets" + AbsolutePath.Value.Substring(Application.dataPath.Length) : AbsolutePath.Value;
 
 		/// <summary>
 		/// Is there a directory with the same name as this file next to it where it's saved?
 		/// </summary>
 		/// <value>True if it should have a sibling directory.</value>
+		[JsonIgnore] 
 		public bool HasSiblingDirectory
 		{
 			get
@@ -104,6 +105,7 @@ namespace Lunra.StyxMvp.Models
 			}
 		}
 
+		[JsonIgnore]
 		public string SiblingDirectory
 		{
 			get
@@ -118,6 +120,7 @@ namespace Lunra.StyxMvp.Models
 			}
 		}
 
+		[JsonIgnore]
 		public Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>();
 
 		public Texture2D GetTexture(string name)

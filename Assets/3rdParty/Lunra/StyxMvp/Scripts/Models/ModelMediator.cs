@@ -6,12 +6,14 @@ using Lunra.Core;
 
 namespace Lunra.StyxMvp.Models
 {
-	public struct ModelResult<M> where M : SaveModel
+	public struct ModelResult<M> : IResult
+		where M : SaveModel
 	{
-		public readonly ResultStatus Status;
-		public readonly SaveModel Model;
-		public readonly M TypedModel;
-		public readonly string Error;
+		public ResultStatus Status { get; }
+		public SaveModel Model { get; }
+		public M TypedModel { get; }
+		public string Error { get; }
+		public string ReadableType => "ModelResult<" + typeof(M).Name + ">";
 
 		public Type SaveModelType => typeof(M);
 		
@@ -46,13 +48,17 @@ namespace Lunra.StyxMvp.Models
 			TypedModel = typedModel;
 			Error = error;
 		}
+		
+		public override string ToString() => this.ResultToString();
 	}
 	
-	public struct ModelArrayResult<M> where M : SaveModel
+	public struct ModelArrayResult<M> : IResult
+		where M : SaveModel
 	{
-		public readonly ResultStatus Status;
-		public readonly string Error;
-		public readonly ModelResult<M>[] Models;
+		public ResultStatus Status { get; }
+		public string Error { get; }
+		public ModelResult<M>[] Models { get; }
+		public string ReadableType => "ModelArrayResult<" + typeof(M).Name + ">";
 
 		public static ModelArrayResult<M> Success(
 			ModelResult<M>[] models
@@ -88,14 +94,18 @@ namespace Lunra.StyxMvp.Models
 		}
 
 		public M[] TypedModels => Models.Select(m => m.TypedModel).ToArray();
+		
+		public override string ToString() => this.ResultToString();
 	}
 
-	public struct ModelIndexResult<M> where M : SaveModel
+	public struct ModelIndexResult<M> : IResult
+		where M : SaveModel
 	{
-		public readonly ResultStatus Status;
-		public readonly SaveModel[] Models;
-		public readonly string Error;
-		public readonly int Length;
+		public ResultStatus Status { get; }
+		public SaveModel[] Models { get; }
+		public string Error { get; }
+		public string ReadableType => "ModelIndexResult<" + typeof(M).Name + ">";
+		public int Length { get; }
 
 		public static ModelIndexResult<M> Success(SaveModel[] models)
 		{
@@ -125,14 +135,17 @@ namespace Lunra.StyxMvp.Models
 			Error = error;
 			Length = models?.Length ?? 0;
 		}
+		
+		public override string ToString() => this.ResultToString();
 	}
 
-	public struct ReadWriteRequest
+	public struct ReadWriteRequest : IResult
 	{
-		public readonly ResultStatus Status;
-		public readonly string Path;
-		public readonly byte[] Bytes;
-		public readonly string Error;
+		public ResultStatus Status { get; }
+		public string Path { get; }
+		public byte[] Bytes { get; }
+		public string Error { get; }
+		public string ReadableType => "ReadWriteRequest";
 
 		public static ReadWriteRequest Success(string path, byte[] bytes)
 		{
@@ -165,6 +178,8 @@ namespace Lunra.StyxMvp.Models
 			Bytes = bytes;
 			Error = error;
 		}
+		
+		public override string ToString() => this.ResultToString();
 	}
 	
 	public abstract class ModelMediator : IModelMediator
@@ -209,7 +224,7 @@ namespace Lunra.StyxMvp.Models
 				done(ModelResult<M>.Failure(
 					model,
 					null,
-					"Version " + model.Version + " of " + typeof(M).Name + " is not supported."
+					"Version " + model.Version.Value + " of " + typeof(M).Name + " is not supported."
 				));
 				return;
 			}
@@ -371,7 +386,7 @@ namespace Lunra.StyxMvp.Models
 				done(ModelResult<M>.Failure(
 					model,
 					model,
-					"Version " + model.Version + " of " + typeof(M).Name + " is not supported."
+					"Version " + model.Version.Value + " of " + typeof(M).Name + " is not supported."
 				));
 				return;
 			}

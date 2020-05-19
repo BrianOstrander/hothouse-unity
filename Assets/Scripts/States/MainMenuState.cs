@@ -73,7 +73,7 @@ namespace Lunra.Hothouse.Services
 
 		void GenerateNewGame(Action<Result<GameModel>> done)
 		{
-			var game = new GameModel();
+			var game = App.M.Create<GameModel>(App.M.CreateUniqueId());
 
 			game.SimulationTimeConversion.Value = 1f / 10f;
 			
@@ -305,14 +305,14 @@ namespace Lunra.Hothouse.Services
 				};
 			}
 			
-			// game.Dwellers.Activate(
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"0",
-			// 		new Vector3(-6f, -0.8386866f, 3f),
-			// 		Jobs.Construction
-			// 	)
-			// );
+			game.Dwellers.Activate(
+				dweller => initializeDweller(
+					dweller,
+					"0",
+					new Vector3(-6f, -0.8386866f, 3f),
+					Jobs.Construction
+				)
+			);
 			//
 			// game.Dwellers.Activate(
 			// 	dweller => initializeDweller(

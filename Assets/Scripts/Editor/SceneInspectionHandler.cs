@@ -1,19 +1,18 @@
-using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Editor.Core;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
-using Lunra.Hothouse.Editor;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Lunra.Editor.Core
+namespace Lunra.Hothouse.Editor
 {
 	[InitializeOnLoad]
-	public static class GameInspectorHandler
+	public static class SceneInspectionHandler
 	{
 		enum InventoryVisibilities
 		{
@@ -24,10 +23,9 @@ namespace Lunra.Editor.Core
 			IfNotFull = 40
 		}
 		
-		static GameState current;
 		static GUIStyle labelStyle;
 		
-		static GameInspectorHandler()
+		static SceneInspectionHandler()
 		{
 			EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 			SceneView.duringSceneGui += OnDuringSceneGui;
@@ -41,24 +39,18 @@ namespace Lunra.Editor.Core
 					labelStyle = new GUIStyle(EditorStyles.label);
 					labelStyle.richText = true;
 					break;
-				case PlayModeStateChange.ExitingEditMode:
-				case PlayModeStateChange.ExitingPlayMode:
-					current = null;
-					break;
 			}
 		}
 
 		static void OnDuringSceneGui(SceneView sceneView)
 		{
-			if (!GameInspectionSettings.IsInspecting.Value) return;
-			if (!Application.isPlaying || !App.HasInstance || App.S == null) return;
-			if (!App.S.Is(typeof(GameState), StateMachine.Events.Idle)) return;
-			
-			if (current == null) current = App.S.CurrentHandler as GameState;
+			if (!SceneInspectionSettings.IsInspecting.Value) return;
 
-			if (GameInspectionSettings.IsInspectingBuildings.Value)
+			if (!SettingsProviderCache.GetGameState(out var gameState)) return;
+
+			if (SceneInspectionSettings.IsInspectingBuildings.Value)
 			{
-				foreach (var model in current.Payload.Game.Buildings.AllActive)
+				foreach (var model in gameState.Payload.Game.Buildings.AllActive)
 				{
 					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
 
@@ -67,7 +59,7 @@ namespace Lunra.Editor.Core
 						label += "\nState: " + model.BuildingState.Value;
 					}
 
-					if (GameInspectionSettings.IsInspectingLightLevels.Value)
+					if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 					{
 						label += "\nLight Level: " + model.LightLevel.Value.ToString("N2");
 					}
@@ -125,9 +117,9 @@ namespace Lunra.Editor.Core
 				}
 			}
 
-			if (GameInspectionSettings.IsInspectingDwellers.Value)
+			if (SceneInspectionSettings.IsInspectingDwellers.Value)
 			{
-				foreach (var model in current.Payload.Game.Dwellers.AllActive)
+				foreach (var model in gameState.Payload.Game.Dwellers.AllActive)
 				{
 					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
 
@@ -173,9 +165,9 @@ namespace Lunra.Editor.Core
 				}
 			}
 			
-			if (GameInspectionSettings.IsInspectingItemDrops.Value)
+			if (SceneInspectionSettings.IsInspectingItemDrops.Value)
 			{
-				foreach (var model in current.Payload.Game.ItemDrops.AllActive)
+				foreach (var model in gameState.Payload.Game.ItemDrops.AllActive)
 				{
 					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
 					
@@ -199,9 +191,9 @@ namespace Lunra.Editor.Core
 				}
 			}
 
-			if (GameInspectionSettings.IsInspectingFlora.Value)
+			if (SceneInspectionSettings.IsInspectingFlora.Value)
 			{
-				foreach (var model in current.Payload.Game.Flora.AllActive)
+				foreach (var model in gameState.Payload.Game.Flora.AllActive)
 				{
 					if (model.IsReproducing.Value) continue;
 					Handles.color = Color.red;
@@ -209,12 +201,12 @@ namespace Lunra.Editor.Core
 				}
 			}
 
-			if (GameInspectionSettings.IsInspectingLightLevels.Value)
+			if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 			{
 				Handles.color = Color.yellow.NewA(0.05f);
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
-					foreach (var model in current.Payload.Game.Lights)
+					foreach (var model in gameState.Payload.Game.Lights)
 					{
 						Handles.DrawSolidDisc(
 							model.Position.Value,
@@ -226,7 +218,7 @@ namespace Lunra.Editor.Core
 				HandlesExtensions.EndDepthCheck();
 
 				var lightSensitiveOffset = Vector3.up * 4f;
-				foreach (var model in current.Payload.Game.LightSensitives)
+				foreach (var model in gameState.Payload.Game.LightSensitives)
 				{
 					Debug.DrawLine(
 						model.Position.Value + lightSensitiveOffset,
@@ -275,7 +267,7 @@ namespace Lunra.Editor.Core
 		public static void OpenHandlerAsset()
 		{
 			AssetDatabase.OpenAsset(
-				AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/Scripts/Editor/" + nameof(GameInspectorHandler) + ".cs"),
+				AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/Scripts/Editor/" + nameof(SceneInspectionHandler) + ".cs"),
 				40
 			);
 		}

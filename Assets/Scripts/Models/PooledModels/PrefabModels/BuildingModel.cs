@@ -57,10 +57,10 @@ namespace Lunra.Hothouse.Models
 		public ListenerProperty<Entrance[]> Entrances { get; }
 		
 		[JsonProperty] float lightRadius;
-		[JsonProperty] public ListenerProperty<float> LightRange { get; }
+		[JsonIgnore] public ListenerProperty<float> LightRange { get; }
 		#endregion
 
-		public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
+		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
 		
 		public BuildingModel()
 		{

@@ -65,6 +65,7 @@ namespace Lunra.Hothouse.Models
 		{
 			get
 			{
+				if (entries == null) return 0; // TODO: Why when serializing does this get called and trigger an error?
 				if (entries.TryGetValue(type, out var value)) return value;
 				return 0;
 			}

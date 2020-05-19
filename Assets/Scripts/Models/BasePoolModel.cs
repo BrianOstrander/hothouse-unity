@@ -41,9 +41,9 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
-		public M[] AllActive => All.Value.Active;
-		public M[] AllInActive => All.Value.InActive;
-		public bool IsInitialized { get; private set; }
+		[JsonIgnore] public M[] AllActive => All.Value.Active;
+		[JsonIgnore] public M[] AllInActive => All.Value.InActive;
+		[JsonIgnore] public bool IsInitialized { get; private set; }
 		public event Action<M> InstantiatePresenter;
 		#endregion
 

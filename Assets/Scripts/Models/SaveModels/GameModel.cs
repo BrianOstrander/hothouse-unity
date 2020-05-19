@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region NonSerialized
-		public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
+		[JsonIgnore] public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
 		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
@@ -66,7 +66,7 @@ namespace Lunra.Hothouse.Models
 		
 		#region Events
 		public event Action SimulationInitialize = ActionExtensions.Empty;
-		public Action SimulationUpdate = ActionExtensions.Empty;
+		[JsonIgnore] public Action SimulationUpdate = ActionExtensions.Empty;
 		#endregion
 
 		public GameModel()

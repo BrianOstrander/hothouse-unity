@@ -4,10 +4,18 @@ using UnityEngine;
 
 namespace Lunra.Core
 {
-	public struct Result
+	public interface IResult
 	{
-		public readonly ResultStatus Status;
-		public readonly string Error;
+		ResultStatus Status { get; }
+		string Error { get; }
+		string ReadableType { get; }
+	}
+	
+	public struct Result : IResult
+	{
+		public ResultStatus Status { get; }
+		public string Error { get; }
+		public string ReadableType => "Result";
 
 		public static Result Success() => new Result(ResultStatus.Success);
 
@@ -22,49 +30,16 @@ namespace Lunra.Core
 			Status = status;
 			Error = error;
 		}
-
-		public Result LogIfNotSuccess(string message = null)
-		{
-			switch (Status)
-			{
-				case ResultStatus.Success: break;
-				default: Log(message); break;
-			}
-			return this;
-		}
 		
-		public Result Log(string message = null)
-		{
-			message = string.IsNullOrEmpty(message) ? string.Empty : (message + "\n");
-			switch (Status)
-			{
-				case ResultStatus.Failure: Debug.LogError(message + this); break;
-				case ResultStatus.Cancel: Debug.LogWarning(message + this); break;
-				case ResultStatus.Success: Debug.Log(message + this); break;
-				default: Debug.LogError(message + "Unrecognized RequestStatus: " + Status + ", result:\n" + this); break;
-			}
-			return this;
-		}
-
-		public override string ToString()
-		{
-			var result = "Result.Status : " + Status;
-			switch (Status)
-			{
-				case ResultStatus.Success: break;
-				default:
-					result += " - " + Error;
-					break;
-			}
-			return result;
-		}
+		public override string ToString() => this.ResultToString();
 	}
 	
-	public struct Result<T>
+	public struct Result<T> : IResult
 	{
-		public readonly ResultStatus Status;
-		public readonly T Payload;
-		public readonly string Error;
+		public ResultStatus Status { get; }
+		public T Payload { get; }
+		public string Error { get; }
+		public string ReadableType => "Result<" + typeof(T).Name + ">";
 
 		public static Result<T> Success(T payload)
 		{
@@ -94,32 +69,6 @@ namespace Lunra.Core
 			Error = error;
 		}
 		
-		public Result<T> Log(string message = null)
-		{
-			message = string.IsNullOrEmpty(message) ? string.Empty : (message + "\n");
-			switch (Status)
-			{
-				case ResultStatus.Failure: Debug.LogError(message + this); break;
-				case ResultStatus.Cancel: Debug.LogWarning(message + this); break;
-				case ResultStatus.Success: Debug.Log(message + this); break;
-				default: Debug.LogError(message + "Unrecognized RequestStatus: " + Status + ", result:\n" + this); break;
-			}
-			return this;
-		}
-
-		public override string ToString()
-		{
-			var result = "Result<" + typeof(T).Name + ">.Status : " + Status;
-			switch (Status)
-			{
-				case ResultStatus.Success: break;
-				default:
-					result += " - " + Error;
-					break;
-			}
-
-			try { return result + "\n- Payload -\n" + Payload.ToReadableJson(); }
-			catch { return result + "\n- Payload -\n<CANNOT PARSE TO JSON>"; }
-		}
+		public override string ToString() => this.ResultToString();
 	}
 }

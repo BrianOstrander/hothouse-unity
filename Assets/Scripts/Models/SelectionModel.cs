@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Models
 			public readonly Vector3 End;
 			public readonly States State;
 
-			public readonly Plane Surface;
+			[JsonIgnore] public Plane Surface => new Plane(Vector3.up, Begin); 
 
 			Selection(
 				Vector3 begin,
@@ -35,8 +35,6 @@ namespace Lunra.Hothouse.Models
 				Begin = begin;
 				End = end;
 				State = state;
-				
-				Surface = new Plane(Vector3.up, begin);
 			}
 			
 			public Selection NewState(States state) => new Selection(Begin, End, state);
