@@ -30,9 +30,7 @@ namespace Lunra.Hothouse.Services
 		#region Begin
 		protected override void Begin()
 		{
-			App.S.PushBlocking(
-				done => App.Scenes.Request(SceneRequest.Load(result => done(), Scenes))    
-			);
+			App.S.PushBlocking(OnBeginLoadScenes);
 			App.S.PushBlocking(OnBeginInstantiatePresenters);
 			App.S.PushBlocking(OnBeginInitializeLighting);
 			App.S.PushBlocking(
@@ -40,6 +38,16 @@ namespace Lunra.Hothouse.Services
 				() => Payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
 			);
 			App.S.Push(Payload.Game.TriggerSimulationInitialize);
+		}
+
+		void OnBeginLoadScenes(Action done)
+		{
+			App.Scenes.Request(
+				SceneRequest.Load(
+					result => done(),
+					Scenes
+				)
+			);
 		}
 
 		void OnBeginInstantiatePresenters(Action done)
@@ -91,6 +99,7 @@ namespace Lunra.Hothouse.Services
 		#region Idle
 		protected override void Idle()
 		{
+			Payload.Game.CalculateMaximumLighting = OnCalculateMaximumLighting;
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
@@ -128,6 +137,7 @@ namespace Lunra.Hothouse.Services
 		#region End
 		protected override void End()
 		{
+			Payload.Game.CalculateMaximumLighting = null;
 			Payload.Game.SimulationMultiplier.Changed -= OnGameSimulationMultiplier;
 			
 			App.Heartbeat.Update -= OnHeartbeatUpdate;
@@ -152,7 +162,6 @@ namespace Lunra.Hothouse.Services
 		#region Utility
 		void CalculateLighting()
 		{
-
 			Dictionary<string, List<RoomPrefabModel>> roomMap;
 			IEnumerable<ILightSensitiveModel> lightSensitives;
 			
@@ -178,28 +187,51 @@ namespace Lunra.Hothouse.Services
 
 			foreach (var lightSensitive in lightSensitives)
 			{
-				if (!roomMap.TryGetValue(lightSensitive.RoomId.Value, out var map)) continue;
+				if (!roomMap.TryGetValue(lightSensitive.RoomId.Value, out var rooms)) continue;
 
-				var result = 0f;
-
-				foreach (var light in allLights.Where(l => map.Any(r => r.RoomId.Value == l.RoomId.Value)))
-				{
-					if (light.IsLightNotActive()) continue;
-
-					var distance = Vector3.Distance(lightSensitive.Position.Value, light.Position.Value);
-
-					if (light.LightRange.Value <= distance) continue;
-
-					result = Mathf.Max(
-						result,
-						1f - (distance / light.LightRange.Value)
-					);
-				}
-				
-				lightSensitive.LightLevel.Value = result;
+				lightSensitive.LightLevel.Value = OnCalculateMaximumLighting(
+					lightSensitive.Position.Value,
+					allLights.Where(l => rooms.Any(r => r.RoomId.Value == l.RoomId.Value))
+				);
 			}
 
 			Payload.Game.LastLightUpdate.Value = LightDelta.Calculated();
+		}
+
+		float OnCalculateMaximumLighting(
+			(string RoomId, Vector3 Position) roomPosition
+		)
+		{
+			var rooms = Payload.Game.GetOpenAdjacentRooms(roomPosition.RoomId);
+
+			return OnCalculateMaximumLighting(
+				roomPosition.Position,
+				Payload.Game.Lights.Where(l => rooms.Any(r => r.RoomId.Value == l.RoomId.Value))
+			);
+		}
+		
+		float OnCalculateMaximumLighting(
+			Vector3 position,
+			IEnumerable<ILightModel> lights
+		)
+		{
+			var result = 0f;
+
+			foreach (var light in lights)
+			{
+				if (light.IsLightNotActive()) continue;
+
+				var distance = Vector3.Distance(position, light.Position.Value);
+
+				if (light.LightRange.Value <= distance) continue;
+
+				result = Mathf.Max(
+					result,
+					1f - (distance / light.LightRange.Value)
+				);
+			}
+
+			return result;
 		}
 		#endregion
 	}

@@ -150,7 +150,8 @@ namespace Lunra.Hothouse.Ai
 					validJobs,
 					validCleanupItems
 				),
-				new DwellerDropItemsTransition<DwellerConstructionJobState>(timeoutState)
+				new DwellerDropItemsTransition<DwellerConstructionJobState>(timeoutState),
+				new DwellerNavigateToNearestLightTransition<DwellerConstructionJobState>()
 			);
 		}
 

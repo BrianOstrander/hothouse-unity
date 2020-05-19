@@ -312,7 +312,8 @@ namespace Lunra.Hothouse.Services
 					dweller,
 					"0",
 					new Vector3(-6f, -0.8386866f, 3f),
-					Jobs.Construction
+					Jobs.Construction,
+					debugAgentStates: true
 				)
 			);
 			//
@@ -330,8 +331,7 @@ namespace Lunra.Hothouse.Services
 					dweller,
 					"2",
 					new Vector3(-4f, -0.8386866f, 3f),
-					Jobs.Clearer,
-					debugAgentStates: true
+					Jobs.Clearer
 				)
 			);
 			

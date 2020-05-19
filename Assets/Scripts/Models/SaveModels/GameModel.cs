@@ -62,6 +62,8 @@ namespace Lunra.Hothouse.Models
 			Buildings.AllActive
 			.Concat<ILightSensitiveModel>(ItemDrops.AllActive)
 			.Concat(Clearables);
+
+		[JsonIgnore] public Func<(string RoomId, Vector3 Position), float> CalculateMaximumLighting;
 		#endregion
 		
 		#region Events
