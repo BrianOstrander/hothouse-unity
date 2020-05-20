@@ -10,33 +10,33 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Editor
 {
-	public static class GameSaveSettings
+	public static class DebugSettings
 	{
-		const string KeyPrefix = SettingsProviderStrings.ProjectKeyPrefix + "GameSaveSettings.";
+		const string KeyPrefix = SettingsProviderStrings.ProjectKeyPrefix + "DebugSettings.";
 
 		// public static EditorPrefsBool IsInspecting = new EditorPrefsBool(KeyPrefix + "IsInspecting");
 	}
 	
-	public class GameSaveSettingsProvider : SettingsProvider
+	public class DebugSettingsProvider : SettingsProvider
 	{
 		static class Content
 		{
 			public static GUIContent OpenSaveLocation = new GUIContent("Open save location");
-			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard"); 
+			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard");
+			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation"); 
 		}
 		
-		public GameSaveSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
+		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
 		
 		[SettingsProvider]
 		public static SettingsProvider CreateSettingsProvider()
 		{
-			var provider = new GameSaveSettingsProvider("Hothouse/Game Saves");
+			var provider = new DebugSettingsProvider("Hothouse/Debug");
 
-			provider.keywords = new []
+			provider.keywords = new string[]
 			{
 				Content.OpenSaveLocation.text,
 				Content.SaveAndCopySerializedGameToClipboard.text
-				// InspectionSettings.IsInspecting.LabelName,
 			};
 			
 			return provider;
@@ -49,13 +49,10 @@ namespace Lunra.Hothouse.Editor
 			GUIExtensions.PushEnabled(
 				SettingsProviderCache.GetGame(out var game)	
 			);
-			
-			GUILayout.BeginHorizontal();
-			{
-				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
-			}
-			GUILayout.EndHorizontal();
-			
+
+			if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
+			if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
+
 			GUIExtensions.PopEnabled();
 			
 			// if (GUILayout.Button(Content.OpenInspectorHandler)) InspectionHandler.OpenHandlerAsset();

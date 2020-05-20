@@ -39,6 +39,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.Inventory.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
+			Model.BuildingState.Changed += OnBuildingState;
 			Model.Operate += OnBuildingOperate;
 
 			base.Bind();
@@ -56,6 +57,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.Inventory.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
+			Model.BuildingState.Changed -= OnBuildingState;
 			Model.Operate -= OnBuildingOperate;
 			
 			base.UnBind();
@@ -115,6 +117,13 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (IsNotActive) return;
 			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
+			
+			switch (lightState)
+			{
+				case LightStates.Extinguished:
+					Model.BuildingState.Value = BuildingStates.Salvaging;
+					break;
+			}
 		}
 
 		protected virtual void OnLightBuildingInventory(Inventory inventory)
@@ -183,6 +192,19 @@ namespace Lunra.Hothouse.Presenters
 			Model.PooledState.Value = PooledStates.InActive;
 		}
 
+		void OnBuildingState(BuildingStates buildingState)
+		{
+			if (IsNotActive) return;
+			if (View.NotVisible) return;
+
+			View.IsNavigationModified = buildingState == BuildingStates.Operating;
+			
+			if (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
+			{
+				Game.NavigationMesh.QueueCalculation();
+			}
+		}
+
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
 		{
 			if (IsNotActive) return;
@@ -209,6 +231,7 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnViewShown()
 		{
 			Model.Entrances.Value = View.Entrances.Select(e => new Entrance(e, Entrance.States.Available)).ToArray();
+			View.IsNavigationModified = Model.BuildingState.Value == BuildingStates.Operating;
 			OnViewInitializeLighting();
 		}
 
@@ -237,5 +260,7 @@ namespace Lunra.Hothouse.Presenters
 			}
 		}
 		#endregion
+
+		protected override bool QueueNavigationCalculation => Model.IsBuildingState(BuildingStates.Operating);
 	}
 }

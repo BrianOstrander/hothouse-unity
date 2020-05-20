@@ -241,6 +241,8 @@ MonoBehaviour:
     CloseDuration: 0
   animations: []
   prefabId: fire_bonfire
+  navigationModifierColliders:
+  - {fileID: 1311359037803919897}
   entrances:
   - {fileID: 6558807796252768482}
   - {fileID: 7726990765462570418}

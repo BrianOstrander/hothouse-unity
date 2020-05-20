@@ -190,7 +190,7 @@ namespace Lunra.Hothouse.Services
 				fastFloraPrefabIds.First(),
 				flora => initializeFlora(
 					flora,
-					new Vector3(7f, 0f, -5f),
+					new Vector3(7f, 0f, -4f),
 					FloraSpecies.Fast
 				)
 			);
@@ -199,7 +199,7 @@ namespace Lunra.Hothouse.Services
 				fastFloraPrefabIds.First(),
 				flora => initializeFlora(
 					flora,
-					new Vector3(10f, 0f, -5f),
+					new Vector3(10f, 0f, -4f),
 					FloraSpecies.Fast
 				)
 			);
@@ -208,7 +208,7 @@ namespace Lunra.Hothouse.Services
 				fastFloraPrefabIds.First(),
 				flora => initializeFlora(
 					flora,
-					new Vector3(4f, 0f, -5f),
+					new Vector3(4f, 0f, -4f),
 					FloraSpecies.Fast
 				)
 			);
@@ -379,6 +379,14 @@ namespace Lunra.Hothouse.Services
 							{ Inventory.Types.Stalks, 1 }
 						}
 					);
+					
+					m.SalvageInventory.Value = new Inventory(
+						new Dictionary<Inventory.Types, int>
+						{
+							{ Inventory.Types.Stalks, 1 }
+						}
+					);
+					
 					m.LightFuelInterval.Value = Interval.WithMaximum(1f);
 					m.IsLightRefueling.Value = true;
 				}

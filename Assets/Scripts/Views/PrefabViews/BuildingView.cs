@@ -9,6 +9,7 @@ namespace Lunra.Hothouse.Views
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
+		[SerializeField] Collider[] navigationModifierColliders = new Collider[0];
 		[SerializeField] Transform[] entrances = new Transform[0];
 		[SerializeField] LightEntry[] lights = new LightEntry[0];
 		[SerializeField] ParticleSystem[] lightParticles = new ParticleSystem[0];
@@ -30,6 +31,14 @@ namespace Lunra.Hothouse.Views
 				}
 			}
 		}
+
+		public bool IsNavigationModified
+		{
+			set
+			{
+				foreach (var navigationModifier in navigationModifierColliders) navigationModifier.enabled = value;
+			}
+		}
 		#endregion
 		
 		#region Reverse Bindings
@@ -42,6 +51,7 @@ namespace Lunra.Hothouse.Views
 		{
 			base.Reset();
 
+			IsNavigationModified = false;
 			LightFuelNormal = 0f;
 		}
 
