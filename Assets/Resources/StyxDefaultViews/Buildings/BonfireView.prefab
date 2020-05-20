@@ -250,7 +250,7 @@ MonoBehaviour:
   - Light: {fileID: 7230728734799278843}
     Intensity:
       primary: 0
-      secondary: 10
+      secondary: 12
     IntensityCurve:
       serializedVersion: 2
       m_Curve:
@@ -342,7 +342,7 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
   lightParticles:
   - {fileID: 6713742523325709184}
-  lightRange: 10
+  lightRange: 12.52
 --- !u!1 &6598605821536865864
 GameObject:
   m_ObjectHideFlags: 0
