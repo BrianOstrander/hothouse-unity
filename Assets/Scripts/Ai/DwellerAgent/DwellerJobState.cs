@@ -1,11 +1,9 @@
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai
 {
@@ -90,7 +88,8 @@ namespace Lunra.Hothouse.Ai
 			InventoryTrigger inventoryTrigger;
 			Jobs[] validJobs;
 			Inventory.Types[] validItems;
-			
+			Inventory.Types[] validItemsToCleanup;
+
 			public ToItemCleanupOnValidInventory(
 				DwellerItemCleanupState<S> cleanupState,
 				InventoryTrigger inventoryTrigger,
@@ -124,26 +123,49 @@ namespace Lunra.Hothouse.Ai
 						if (Agent.JobShift.Value.Contains(World.SimulationTime.Value)) return false;
 						break;
 				}
-				
-				if (!IsAnyBuildingWithInventoryReachable(Inventory.ValidTypes)) return false;
 
+				Inventory.Types[] validItemsWithBuildingInventoryCapacity;
+				
 				switch (inventoryTrigger)
 				{
 					case InventoryTrigger.OnEmpty:
-						return IsAnyValidItemDropReachable();
+						// Since the inventory is empty, only check items we're allowed to pick up.
+						if (!IsAnyBuildingWithInventoryReachable(validItems, out validItemsWithBuildingInventoryCapacity)) return false;
+						return IsAnyValidItemDropReachable(
+							validItemsWithBuildingInventoryCapacity,
+							out validItemsToCleanup
+						);
 					case InventoryTrigger.OnFull:
 					case InventoryTrigger.OnGreaterThanZero:
 					case InventoryTrigger.OnGreaterThanZeroAndShiftOver:
-						return IsAnyBuildingMatchingCurrentInventoryReachable();
+						// Since we have items of any type in our inventory, check against all valid ones so we can
+						// remove any random items wasting space in our inventory.
+						if (!IsAnyBuildingWithInventoryReachable(Inventory.ValidTypes, out validItemsWithBuildingInventoryCapacity)) return false;
+						return IsAnyBuildingMatchingCurrentInventoryReachable(out validItemsToCleanup);
 				}
 				
 				Debug.LogError("Unrecognized "+nameof(inventoryTrigger)+": "+inventoryTrigger);
 				return false;
 			}
 
-			bool IsAnyValidItemDropReachable()
+			/// <summary>
+			/// Takes a list of items and finds the first item drop containing any of the specified items. If additional
+			/// specified items happen to be available at that drop, they will be included as well.
+			/// </summary>
+			/// <remarks>
+			/// This does not check if there is storage available for any of the specified items, so make sure to check
+			/// after that or to only specify items that you know there is capacity for. 
+			/// </remarks>
+			/// <param name="items"></param>
+			/// <param name="itemsAvailable"></param>
+			/// <returns></returns>
+			bool IsAnyValidItemDropReachable(
+				Inventory.Types[] items,
+				out Inventory.Types[] itemsAvailable
+			)
 			{
-				foreach (var item in validItems)
+				itemsAvailable = null;
+				foreach (var item in items)
 				{
 					var itemEnumerable = new[] { item };
 					var isValid = DwellerUtility.CalculateNearestCleanupWithdrawal(
@@ -154,16 +176,39 @@ namespace Lunra.Hothouse.Ai
 						out _,
 						out _,
 						out _,
-						out _
+						out var target
 					);
-					if (isValid && IsAnyBuildingWithInventoryReachable(itemEnumerable)) return true;
+					if (isValid)
+					{
+						itemsAvailable = target.Inventory.Value.Entries
+							.Where(i => 0 < i.Weight && items.Contains(i.Type))
+							.Select(i => i.Type)
+							.ToArray();
+						return true;
+					}
 				}
 
 				return false;
 			}
 
-			bool IsAnyBuildingWithInventoryReachable(IEnumerable<Inventory.Types> types)
+			/// <summary>
+			/// Takes a list of items and finds the first building that has capacity for storing any of them. If
+			/// additional specified items happen to fit in that building, they will be included as well.
+			/// </summary>
+			/// <remarks>
+			///	This does not check if these items are in the dweller's inventory or available as a drop, so make sure
+			/// to check that the returned items are available somewhere.
+			/// </remarks>
+			/// <param name="items"></param>
+			/// <param name="itemsAvailable"></param>
+			/// <returns></returns>
+			bool IsAnyBuildingWithInventoryReachable(
+				IEnumerable<Inventory.Types> items,
+				out Inventory.Types[] itemsAvailable
+			)
 			{
+				Inventory.Types[] itemsWithBuildingInventoryCapacityResult = null;
+				
 				var target = DwellerUtility.CalculateNearestLitOperatingEntrance(
 					Agent.Position.Value,
 					out _,
@@ -171,26 +216,48 @@ namespace Lunra.Hothouse.Ai
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
-						return types.Any(i => 0 < b.InventoryCapacity.Value.GetCapacityFor(b.Inventory.Value + (i, 1), i));
+						
+						var itemsWithCapacity = items.Where(i => 0 < b.InventoryCapacity.Value.GetCapacityFor(b.Inventory.Value, i)).ToArray();
+						
+						if (itemsWithCapacity.Any())
+						{
+							itemsWithBuildingInventoryCapacityResult = itemsWithCapacity.ToArray();
+							return true;
+						}
+
+						return false;
 					},
 					World.Buildings.AllActive
 				);
 
+				itemsAvailable = itemsWithBuildingInventoryCapacityResult;
 				return target != null;
 			}
 			
-			bool IsAnyBuildingMatchingCurrentInventoryReachable()
+			/// <summary>
+			/// Checks to see if any items in the current dweller's inventory has storage at an available building. This
+			/// ignores the list of specified valid items since there may be junk in the dweller's inventory that needs
+			/// to be disposed of. 
+			/// </summary>
+			/// <remarks>
+			/// This will find the first building with any capacity for items in the dweller's inventory, if additional
+			/// capacity is available those items will be returned as well.
+			/// </remarks>
+			/// <param name="itemsAvailable"></param>
+			/// <returns></returns>
+			bool IsAnyBuildingMatchingCurrentInventoryReachable(out Inventory.Types[] itemsAvailable)
 			{
 				return IsAnyBuildingWithInventoryReachable(
 					Agent.Inventory.Value.Entries
 						.Where(e => 0 < e.Weight)
-						.Select(e => e.Type)
+						.Select(e => e.Type),
+					out itemsAvailable
 				);
 			}
 
 			public override void Transition()
 			{
-				cleanupState.ResetCleanupCount();
+				cleanupState.ResetCleanupCount(validItemsToCleanup);
 			}
 		}
 	}

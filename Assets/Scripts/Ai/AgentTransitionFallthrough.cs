@@ -11,16 +11,21 @@ namespace Lunra.Hothouse.Ai
 
 		string name;
 		Func<bool> isTriggered;
+		Action transition;
 
 		public AgentTransitionFallthrough(
 			string name,
-			Func<bool> isTriggered = null
+			Func<bool> isTriggered = null,
+			Action transition = null
 		)
 		{
 			this.name = name;
 			this.isTriggered = isTriggered;
+			this.transition = transition;
 		}
 
 		public override bool IsTriggered() => isTriggered?.Invoke() ?? true;
+
+		public override void Transition() => transition?.Invoke();
 	}
 }

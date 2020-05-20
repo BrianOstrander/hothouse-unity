@@ -4,7 +4,7 @@ using Lunra.Hothouse.Models.AgentModels;
 
 namespace Lunra.Hothouse.Models
 {
-	public class ItemDropModel : PooledModel, ILightSensitiveModel
+	public class ItemDropModel : PrefabModel, ILightSensitiveModel
 	{
 		#region Serialized
 		[JsonProperty] Inventory inventory = Models.Inventory.Empty;

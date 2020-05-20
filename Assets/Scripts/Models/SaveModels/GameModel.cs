@@ -20,9 +20,8 @@ namespace Lunra.Hothouse.Models
 		public SelectionModel Selection  { get; } = new SelectionModel();
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		
-		public PoolModel<ItemDropModel> ItemDrops { get; } = new PoolModel<ItemDropModel>();
-		public PoolModel<DwellerModel> Dwellers { get; } = new PoolModel<DwellerModel>();
-		
+		public PrefabPoolModel<ItemDropModel> ItemDrops { get; } = new PrefabPoolModel<ItemDropModel>();
+		public PrefabPoolModel<DwellerModel> Dwellers { get; } = new PrefabPoolModel<DwellerModel>();
 		public PrefabPoolModel<ClearableModel> Debris { get; } = new PrefabPoolModel<ClearableModel>();
 		public PrefabPoolModel<FloraModel> Flora { get; } = new PrefabPoolModel<FloraModel>();
 		public PrefabPoolModel<RoomPrefabModel> Rooms { get; } = new PrefabPoolModel<RoomPrefabModel>();

@@ -114,8 +114,7 @@ namespace Lunra.Hothouse.Ai
 			var timeoutState = new DwellerTimeoutState<DwellerConstructionJobState>();
 			
 			var cleanupState = new DwellerItemCleanupState<DwellerConstructionJobState>(
-				validJobs,
-				validCleanupItems
+				validJobs
 			);
 			
 			AddChildStates(

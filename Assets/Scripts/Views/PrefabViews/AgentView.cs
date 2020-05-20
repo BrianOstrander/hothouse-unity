@@ -4,7 +4,7 @@ using Lunra.StyxMvp;
 
 namespace Lunra.Hothouse.Views
 {
-	public class AgentView : View
+	public class AgentView : PrefabView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
@@ -16,11 +16,6 @@ namespace Lunra.Hothouse.Views
 		
 		#region Reverse Bindings
 		#endregion
-
-		public override void Reset()
-		{
-			base.Reset();
-		}
 	}
 
 }

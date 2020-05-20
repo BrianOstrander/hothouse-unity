@@ -51,6 +51,7 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
+  prefabId: default
 --- !u!1 &7357660260908120058
 GameObject:
   m_ObjectHideFlags: 0

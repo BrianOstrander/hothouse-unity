@@ -16,8 +16,7 @@ namespace Lunra.Hothouse.Ai
 			
 			var attackState = new DwellerAttackState<DwellerClearerJobState>();
 			var cleanupState = new DwellerItemCleanupState<DwellerClearerJobState>(
-				validJobs,
-				validCleanupItems
+				validJobs
 			);
 			var timeoutState = new DwellerTimeoutState<DwellerClearerJobState>();
 			
@@ -111,6 +110,7 @@ namespace Lunra.Hothouse.Ai
 							if (!hasOverflow) return;
 
 							World.ItemDrops.Activate(
+								"default",
 								itemDrop =>
 								{
 									itemDrop.RoomId.Value = target.RoomId.Value;

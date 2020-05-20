@@ -4,7 +4,7 @@ using Lunra.Hothouse.Views;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class ItemDropPresenter : PooledPresenter<ItemDropModel, ItemDropView>
+	public class ItemDropPresenter : PrefabPresenter<ItemDropModel, ItemDropView>
 	{
 		public ItemDropPresenter(GameModel game, ItemDropModel model) : base(game, model) { }
 

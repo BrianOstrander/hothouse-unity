@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public abstract class AgentPresenter<M, V, S> : PooledPresenter<M, V>
+	public abstract class AgentPresenter<M, V, S> : PrefabPresenter<M, V>
 		where M : AgentModel
 		where V : AgentView
 		where S : AgentStateMachine<GameModel, M>, new()
@@ -99,6 +99,7 @@ namespace Lunra.Hothouse.Presenters
 			if (!Model.Inventory.Value.IsEmpty)
 			{
 				Game.ItemDrops.Activate(
+					"default",
 					m =>
 					{
 						m.Inventory.Value = Model.Inventory.Value;

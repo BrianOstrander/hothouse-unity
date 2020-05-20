@@ -307,15 +307,16 @@ namespace Lunra.Hothouse.Services
 				};
 			}
 			
-			game.Dwellers.Activate(
-				dweller => initializeDweller(
-					dweller,
-					"0",
-					new Vector3(-6f, -0.8386866f, 3f),
-					Jobs.Construction,
-					debugAgentStates: true
-				)
-			);
+			// game.Dwellers.Activate(
+			// 	"default",
+			// 	dweller => initializeDweller(
+			// 		dweller,
+			// 		"0",
+			// 		new Vector3(-6f, -0.8386866f, 3f),
+			// 		Jobs.Construction
+			// 		// debugAgentStates: true
+			// 	)
+			// );
 			//
 			// game.Dwellers.Activate(
 			// 	dweller => initializeDweller(
@@ -327,11 +328,13 @@ namespace Lunra.Hothouse.Services
 			// );
 			
 			game.Dwellers.Activate(
+				"default",
 				dweller => initializeDweller(
 					dweller,
 					"2",
 					new Vector3(-4f, -0.8386866f, 3f),
-					Jobs.Clearer
+					Jobs.Clearer,
+					debugAgentStates: true
 				)
 			);
 			

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
@@ -20,17 +21,15 @@ namespace Lunra.Hothouse.Ai
 
 		int cleanupCount;
 
-		public void ResetCleanupCount() => cleanupCount = validItems?.Length ?? CleanupCountTimeout;
-		
-		public DwellerItemCleanupState(
-			Jobs[] validJobs,
-			Inventory.Types[] validItems
-		)
+		public void ResetCleanupCount(Inventory.Types[] validItems)
+		{
+			this.validItems = validItems; 
+			cleanupCount = validItems?.Length ?? CleanupCountTimeout;
+		}
+
+		public DwellerItemCleanupState(Jobs[] validJobs)
 		{
 			this.validJobs = validJobs;
-			this.validItems = validItems;
-
-			ResetCleanupCount();
 		}
 
 		public override void OnInitialize()
@@ -45,7 +44,8 @@ namespace Lunra.Hothouse.Ai
 			AddTransitions(
 				new AgentTransitionFallthrough<S,GameModel,DwellerModel>(
 					"CleanupTimeout",
-					() => cleanupCount <= 0
+					() => cleanupCount <= 0,
+					() => validItems = null
 				),
 				new ToDepositItemsInNearestBuilding(
 					this,	
@@ -58,6 +58,12 @@ namespace Lunra.Hothouse.Ai
 				new ToNavigateToNearestItemDrop(this),
 				new ToNavigateToNearestBuilding(this)
 			);
+		}
+
+		public override void Begin()
+		{
+			if (validItems == null) throw new NullReferenceException(nameof(validItems) + " cannot be null, did you forget to call " + nameof(ResetCleanupCount) + "?");
+			if (validItems.None()) Debug.LogWarning("Transitioned to " + Name + " with an empty list of items, nothing will be cleaned up");
 		}
 
 		public override void Idle() => cleanupCount--;

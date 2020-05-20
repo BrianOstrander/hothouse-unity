@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class ItemDropView : View
+	public class ItemDropView : PrefabView
 	{
 		[Serializable]
 		struct ItemEntry

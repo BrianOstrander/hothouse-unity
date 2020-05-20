@@ -130,6 +130,7 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
+  prefabId: default
   meshFilter: {fileID: 7072165924045363877}
   meshRenderer: {fileID: 6021936348207950809}
   itemEntryDefault:

@@ -21,6 +21,7 @@ namespace Lunra.Hothouse.Ai
 		public override void Transition()
 		{
 			World.ItemDrops.Activate(
+				"default",
 				itemDrop =>
 				{
 					itemDrop.RoomId.Value = Agent.RoomId.Value;

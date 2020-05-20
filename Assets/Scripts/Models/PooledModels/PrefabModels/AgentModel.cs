@@ -3,7 +3,7 @@ using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {
-	public abstract class AgentModel : PooledModel
+	public abstract class AgentModel : PrefabModel
 	{
 		#region Serialized
 		[JsonProperty] float navigationVelocity;
