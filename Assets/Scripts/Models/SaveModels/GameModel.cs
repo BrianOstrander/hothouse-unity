@@ -43,6 +43,9 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] LightDelta lastLightUpdate = LightDelta.Default();
 		[JsonIgnore] public ListenerProperty<LightDelta> LastLightUpdate { get; }
+
+		[JsonProperty] GameResult gameResult = Models.GameResult.Default();
+		[JsonIgnore] public ListenerProperty<GameResult> GameResult { get; }
 		#endregion
 
 		#region NonSerialized
@@ -77,6 +80,7 @@ namespace Lunra.Hothouse.Models
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
 			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
 			LastLightUpdate = new ListenerProperty<LightDelta>(value => lastLightUpdate = value, () => lastLightUpdate);
+			GameResult = new ListenerProperty<GameResult>(value => gameResult = value, () => gameResult);
 		}
 
 		public void TriggerSimulationInitialize()

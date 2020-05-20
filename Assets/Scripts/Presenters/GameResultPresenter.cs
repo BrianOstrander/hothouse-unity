@@ -23,20 +23,22 @@ namespace Lunra.Hothouse.Presenters
 			this.preferences = preferences;
 
 			game.Dwellers.All.Changed += OnDwellersAll;
+			game.LastLightUpdate.Changed += OnLastLightUpdate;
 		}
 
 		protected override void UnBind()
 		{
 			game.Dwellers.All.Changed -= OnDwellersAll;
+			game.LastLightUpdate.Changed -= OnLastLightUpdate;
 		}
 
-		void Show()
+		void Show(string reason)
 		{
 			if (View.Visible) return;
 			
 			View.Reset();
 
-			View.Description = "All your dwellers died!";
+			View.Description = reason;
 			View.ButtonDescription = "Restart";
 
 			View.Click += OnViewClick;
@@ -55,12 +57,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnViewClick()
 		{
 			Close();
-			App.S.RequestState(
-				new MainMenuPayload
-				{
-					Preferences = preferences
-				}
-			);
+			game.GameResult.Value = new GameResult(GameResult.States.Failure, "todo record this");
 		}
 		#endregion
 		
@@ -69,7 +66,15 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (all.Active.Any()) return;
 
-			Show();
+			Show("All your dwellers died!");
+		}
+
+		void OnLastLightUpdate(LightDelta lightUpdate)
+		{
+			if (lightUpdate.State != LightDelta.States.Calculated) return;
+			if (game.Lights.Any(l => l.IsLightActive())) return;
+			
+			Show("Plunged into darkness, your fires went out!");
 		}
 		#endregion
 	}

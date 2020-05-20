@@ -100,10 +100,11 @@ namespace Lunra.Hothouse.Services
 		protected override void Idle()
 		{
 			Payload.Game.CalculateMaximumLighting = OnCalculateMaximumLighting;
-			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
+			App.Heartbeat.LateUpdate += OnHeartbeatLateUpdate;
 
+			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			// App.Heartbeat.Wait(
 			// 	() =>
 			// 	{
@@ -132,16 +133,30 @@ namespace Lunra.Hothouse.Services
 					break;
 			}
 		}
+
+		void OnHeartbeatLateUpdate()
+		{
+			if (Payload.Game.GameResult.Value.State == GameResult.States.Unknown) return;
+			
+			Payload.Game.SimulationMultiplier.Changed -= OnGameSimulationMultiplier;
+			
+			App.Heartbeat.Update -= OnHeartbeatUpdate;
+			App.Heartbeat.LateUpdate -= OnHeartbeatLateUpdate;
+			
+			Payload.Game.CalculateMaximumLighting = null;
+			
+			App.S.RequestState(
+				new MainMenuPayload
+				{
+					Preferences = Payload.Preferences
+				}
+			);
+		}
 		#endregion
         
 		#region End
 		protected override void End()
 		{
-			Payload.Game.CalculateMaximumLighting = null;
-			Payload.Game.SimulationMultiplier.Changed -= OnGameSimulationMultiplier;
-			
-			App.Heartbeat.Update -= OnHeartbeatUpdate;
-			
 			App.S.PushBlocking(
 				done => App.P.UnRegisterAll(done)
 			);

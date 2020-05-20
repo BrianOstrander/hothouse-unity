@@ -509,7 +509,7 @@ namespace Lunra.Hothouse.Services
 							{ Inventory.Types.Stalks, 1 }
 						}
 					);
-					m.LightFuelInterval.Value = Interval.WithMaximum(10000f);
+					m.LightFuelInterval.Value = Interval.WithMaximum(2f);
 					m.IsLightRefueling.Value = true;
 				}
 			);

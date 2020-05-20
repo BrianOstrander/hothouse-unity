@@ -36,13 +36,13 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
-			base.UnBind();
-			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
 			Model.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 			Model.Health.Changed -= OnAgentHealth;
+			
+			base.UnBind();
 		}
 		
 		#region GameModel Events
