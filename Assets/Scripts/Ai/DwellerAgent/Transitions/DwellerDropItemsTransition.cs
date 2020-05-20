@@ -7,6 +7,8 @@ namespace Lunra.Hothouse.Ai
 	public class DwellerDropItemsTransition<S> : AgentTransition<DwellerTimeoutState<S>, GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
+		public override string Name => "DropItems";
+
 		DwellerTimeoutState<S> timeoutState;
 
 		public DwellerDropItemsTransition(

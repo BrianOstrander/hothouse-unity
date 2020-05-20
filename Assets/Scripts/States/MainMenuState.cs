@@ -118,115 +118,37 @@ namespace Lunra.Hothouse.Services
 					new DoorPrefabModel.Connection(room0.Id.Value, room1.Id.Value)
 				)
 			);
+	
+			game.Flora.ActivateAdult(
+				FloraSpecies.Fast,
+				room0.Id.Value,
+				new Vector3(7f, 0f, -4f)
+			);
+			
+			game.Flora.ActivateAdult(
+				FloraSpecies.Fast,
+				room0.Id.Value,
+				new Vector3(10f, 0f, -4f)
+			);
+			
+			game.Flora.ActivateAdult(
+				FloraSpecies.Fast,
+				room0.Id.Value,
+				new Vector3(4f, 0f, -4f)
+			);
+			
+			game.Flora.ActivateAdult(
+				FloraSpecies.Edible,
+				room0.Id.Value,
+				new Vector3(-4f, 0f, -5f)
+			);
+			
+			game.Flora.ActivateAdult(
+				FloraSpecies.Edible,
+				room0.Id.Value,
+				new Vector3(-6f, 0f, -5f)
+			);
 
-			var fastFloraPrefabIds = new string[]
-			{
-				"fast0",
-				"fast1"
-			};
-			
-			var edibleFloraPrefabIds = new string[]
-			{
-				"edible0"
-			};
-			
-			void initializeFlora(
-				FloraModel flora,
-				Vector3 position,
-				FloraSpecies species
-			)
-			{
-				flora.Species.Value = species;
-				flora.Position.Value = position;
-				flora.Rotation.Value = Quaternion.identity;
-				flora.Age.Value = Interval.WithMaximum(1f);
-				flora.ReproductionRadius.Value = new FloatRange(0.5f, 1f);
-				flora.ReproductionFailureLimit.Value = 40;
-				flora.HealthMaximum.Value = 100f;
-				flora.Health.Value = flora.HealthMaximum.Value;
-
-				switch (species)
-				{
-					case FloraSpecies.Fast:
-						flora.SpreadDamage.Value = 50f;
-						flora.ValidPrefabIds.Value = fastFloraPrefabIds;
-						flora.ReproductionElapsed.Value = Interval.WithMaximum(2f);
-						flora.ItemDrops.Value = new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Stalks, 1 }
-							}
-						);
-						break;
-					case FloraSpecies.Edible:
-						flora.SpreadDamage.Value = 0f;
-						flora.ValidPrefabIds.Value = edibleFloraPrefabIds;
-						flora.ReproductionElapsed.Value = Interval.WithMaximum(10f);
-						flora.ItemDrops.Value = new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Rations, 1 }
-							}
-						);
-						break;
-					default:
-						Debug.LogError("Unrecognized species: "+species);
-						break;
-				}
-			}
-			
-			/*
-			game.Flora.Activate(
-				fastFloraPrefabIds.First(),
-				room0.Id.Value,
-				flora => initializeFlora(
-					flora,
-					new Vector3(7f, 0f, -4f),
-					FloraSpecies.Fast
-				)
-			);
-			
-			game.Flora.Activate(
-				fastFloraPrefabIds.First(),
-				room0.Id.Value,
-				flora => initializeFlora(
-					flora,
-					new Vector3(10f, 0f, -4f),
-					FloraSpecies.Fast
-				)
-			);
-			
-			game.Flora.Activate(
-				fastFloraPrefabIds.First(),
-				room0.Id.Value,
-				flora => initializeFlora(
-					flora,
-					new Vector3(4f, 0f, -4f),
-					FloraSpecies.Fast
-				)
-			);
-			
-			game.Flora.Activate(
-				edibleFloraPrefabIds.First(),
-				room0.Id.Value,
-				flora => initializeFlora(
-					flora,
-					new Vector3(-4f, 0f, -5f),
-					FloraSpecies.Edible
-				)
-			);
-			
-			game.Flora.Activate(
-				edibleFloraPrefabIds.First(),
-				room0.Id.Value,
-				flora => initializeFlora(
-					flora,
-					new Vector3(-6f, 0f, -5f),
-					FloraSpecies.Edible
-				)
-			);
-			*/
-			
 			void initializeClearable(
 				ClearableModel clearable,
 				Inventory itemDrops

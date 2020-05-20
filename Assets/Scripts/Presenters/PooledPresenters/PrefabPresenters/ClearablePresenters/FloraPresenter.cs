@@ -118,35 +118,11 @@ namespace Lunra.Hothouse.Presenters
 						{
 							increaseReproductionFailures = false;
 
-							var result = Game.Flora.Activate(
-								Model.ValidPrefabIds.Value.Random(),
+							Game.Flora.ActivateChild(
+								Model.Species.Value,
 								Model.RoomId.Value,
-								hit.position,
-								Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up),
-								newFlora =>
-								{
-									newFlora.ValidPrefabIds.Value = Model.ValidPrefabIds.Value;
-									newFlora.Species.Value = Model.Species.Value;
-									newFlora.Age.Value = Interval.WithMaximum(Model.Age.Value.Maximum);
-									newFlora.ReproductionElapsed.Value = Interval.WithMaximum(Model.ReproductionElapsed.Value.Maximum);
-									newFlora.ReproductionRadius.Value = Model.ReproductionRadius.Value;
-									newFlora.ReproductionFailures.Value = 0;
-									newFlora.ReproductionFailureLimit.Value = Model.ReproductionFailureLimit.Value;
-									newFlora.SpreadDamage.Value = Model.SpreadDamage.Value;
-									newFlora.HealthMaximum.Value = Model.HealthMaximum.Value;
-									newFlora.Health.Value = Model.HealthMaximum.Value;
-									newFlora.ClearancePriority.Value = null;
-									newFlora.ItemDrops.Value = Model.ItemDrops.Value;
-									
-									if (Game.Selection.Current.Value.State == SelectionModel.States.Highlighting && Game.Selection.Current.Value.Contains(newFlora.Position.Value))
-									{
-										newFlora.SelectionState.Value = SelectionStates.Highlighted;
-									}
-									else newFlora.SelectionState.Value = SelectionStates.Deselected;
-								}
+								hit.position
 							);
-
-							Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 						}
 					}
 				}

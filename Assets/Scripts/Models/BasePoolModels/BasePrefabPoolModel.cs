@@ -4,14 +4,18 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class BasePrefabPoolModel<M> : BasePoolModel<M>
+	public abstract class BasePrefabPoolModel<M> : BasePoolModel<M>
 		where M : PrefabModel, new()
 	{
+		public abstract void Initialize(GameModel game);
+		
 		protected M Activate(
 			string prefabId,
 			string roomId,
 			Vector3 position,
-			Quaternion rotation
+			Quaternion rotation,
+			Action<M> initialize = null,
+			Func<M, bool> predicate = null
 		)
 		{
 			if (string.IsNullOrEmpty(prefabId)) throw new ArgumentException("Cannot be null or empty", nameof(prefabId));
@@ -24,18 +28,14 @@ namespace Lunra.Hothouse.Models
 					m.RoomId.Value = roomId;
 					m.Position.Value = position;
 					m.Rotation.Value = rotation;
-					OnActivate(m);
+					initialize?.Invoke(m);
 				},
 				m =>
 				{
 					if (m.PrefabId.Value != prefabId) return false;
-					return OnPredicate(m);
+					return predicate?.Invoke(m) ?? true;
 				}
 			);
 		}
-
-		protected virtual void OnActivate(M model) { }
-
-		protected virtual bool OnPredicate(Model model) => true;
 	}
 }

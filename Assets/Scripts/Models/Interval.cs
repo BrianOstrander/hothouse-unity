@@ -50,5 +50,7 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public Interval Restarted() => WithMaximum(Maximum);
+		
+		public Interval Done() => new Interval(Maximum, Maximum);
 	}
 }

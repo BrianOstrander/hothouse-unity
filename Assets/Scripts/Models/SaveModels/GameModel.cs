@@ -20,13 +20,13 @@ namespace Lunra.Hothouse.Models
 		public SelectionModel Selection  { get; } = new SelectionModel();
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		
-		public PrefabPoolModel<ItemDropModel> ItemDrops { get; } = new PrefabPoolModel<ItemDropModel>();
-		public PrefabPoolModel<DwellerModel> Dwellers { get; } = new PrefabPoolModel<DwellerModel>();
-		public PrefabPoolModel<ClearableModel> Debris { get; } = new PrefabPoolModel<ClearableModel>();
-		public PrefabPoolModel<FloraModel> Flora { get; } = new PrefabPoolModel<FloraModel>();
-		public PrefabPoolModel<RoomPrefabModel> Rooms { get; } = new PrefabPoolModel<RoomPrefabModel>();
-		public PrefabPoolModel<DoorPrefabModel> Doors { get; } = new PrefabPoolModel<DoorPrefabModel>();
-		public PrefabPoolModel<BuildingModel> Buildings { get; } = new PrefabPoolModel<BuildingModel>();
+		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
+		public GenericPrefabPoolModel<DwellerModel> Dwellers { get; } = new GenericPrefabPoolModel<DwellerModel>();
+		public GenericPrefabPoolModel<ClearableModel> Debris { get; } = new GenericPrefabPoolModel<ClearableModel>();
+		public FloraPoolModel Flora { get; } = new FloraPoolModel();
+		public GenericPrefabPoolModel<RoomPrefabModel> Rooms { get; } = new GenericPrefabPoolModel<RoomPrefabModel>();
+		public GenericPrefabPoolModel<DoorPrefabModel> Doors { get; } = new GenericPrefabPoolModel<DoorPrefabModel>();
+		public GenericPrefabPoolModel<BuildingModel> Buildings { get; } = new GenericPrefabPoolModel<BuildingModel>();
 
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc

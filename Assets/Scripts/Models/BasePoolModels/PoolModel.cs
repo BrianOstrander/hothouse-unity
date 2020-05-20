@@ -1,4 +1,3 @@
-/*
 using System;
 
 namespace Lunra.Hothouse.Models
@@ -11,7 +10,10 @@ namespace Lunra.Hothouse.Models
 			base.Initialize(instantiatePresenter);
 		}
 
-		public new M Activate(Action<M> initialize = null, Func<M, bool> predicate = null)
+		public new M Activate(
+			Action<M> initialize = null,
+			Func<M, bool> predicate = null
+		)
 		{
 			return base.Activate(initialize, predicate);
 		}
@@ -22,4 +24,3 @@ namespace Lunra.Hothouse.Models
 		}
 	}
 }
-*/

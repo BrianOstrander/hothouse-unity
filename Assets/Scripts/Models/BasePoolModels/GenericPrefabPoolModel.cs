@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public sealed class PrefabPoolModel<M> : BasePoolModel<M>
+	public sealed class GenericPrefabPoolModel<M> : BasePoolModel<M>
 		where M : PrefabModel, new()
 	{
 		public new void Initialize(Action<M> instantiatePresenter)

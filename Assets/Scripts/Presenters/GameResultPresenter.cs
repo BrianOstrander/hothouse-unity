@@ -62,7 +62,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region GameModel Events
-		void OnDwellersAll(PrefabPoolModel<DwellerModel>.Reservoir all)
+		void OnDwellersAll(GenericPrefabPoolModel<DwellerModel>.Reservoir all)
 		{
 			if (all.Active.Any()) return;
 
