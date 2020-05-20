@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Models
 		Extinguished = 30
 	}
 	
-	public interface ILightModel : IModel, IRoomPositionModel
+	public interface ILightModel : IModel, IRoomTransform
 	{
 		#region Serialized
 		ListenerProperty<bool> IsLight { get; }

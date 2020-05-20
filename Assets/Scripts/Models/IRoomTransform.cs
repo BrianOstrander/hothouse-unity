@@ -3,11 +3,10 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IRoomPositionModel
+	public interface IRoomTransform : ITransform
 	{
 		#region Serialized
 		ListenerProperty<string> RoomId { get; }
-		ListenerProperty<Vector3> Position { get; }
 		#endregion
 	}
 }

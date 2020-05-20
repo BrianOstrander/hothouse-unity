@@ -1,23 +1,17 @@
 using System;
+using Lunra.StyxMvp.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public sealed class PrefabPoolModel<M> : BasePoolModel<M>
+	public class BasePrefabPoolModel<M> : BasePoolModel<M>
 		where M : PrefabModel, new()
 	{
-		public new void Initialize(Action<M> instantiatePresenter)
-		{
-			base.Initialize(instantiatePresenter);
-		}
-		
-		public M Activate(
+		protected M Activate(
 			string prefabId,
 			string roomId,
 			Vector3 position,
-			Quaternion rotation,
-			Action<M> initialize = null,
-			Func<M, bool> predicate = null
+			Quaternion rotation
 		)
 		{
 			if (string.IsNullOrEmpty(prefabId)) throw new ArgumentException("Cannot be null or empty", nameof(prefabId));
@@ -30,19 +24,18 @@ namespace Lunra.Hothouse.Models
 					m.RoomId.Value = roomId;
 					m.Position.Value = position;
 					m.Rotation.Value = rotation;
-					initialize?.Invoke(m);
+					OnActivate(m);
 				},
 				m =>
 				{
 					if (m.PrefabId.Value != prefabId) return false;
-					return predicate?.Invoke(m) ?? true;
+					return OnPredicate(m);
 				}
 			);
 		}
 
-		public new void InActivate(params M[] models)
-		{
-			base.InActivate(models);
-		}
+		protected virtual void OnActivate(M model) { }
+
+		protected virtual bool OnPredicate(Model model) => true;
 	}
 }

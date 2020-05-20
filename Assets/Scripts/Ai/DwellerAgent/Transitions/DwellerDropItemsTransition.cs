@@ -22,11 +22,11 @@ namespace Lunra.Hothouse.Ai
 		{
 			World.ItemDrops.Activate(
 				"default",
+				Agent.RoomId.Value,
+				Agent.Position.Value,
+				Quaternion.identity,
 				itemDrop =>
 				{
-					itemDrop.RoomId.Value = Agent.RoomId.Value;
-					itemDrop.Position.Value = Agent.Position.Value;
-					itemDrop.Rotation.Value = Quaternion.identity;
 					itemDrop.Inventory.Value = Agent.Inventory.Value;
 					itemDrop.Job.Value = Agent.Job.Value;
 				}

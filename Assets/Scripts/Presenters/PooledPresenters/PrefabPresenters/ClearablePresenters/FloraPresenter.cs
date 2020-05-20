@@ -120,13 +120,13 @@ namespace Lunra.Hothouse.Presenters
 
 							var result = Game.Flora.Activate(
 								Model.ValidPrefabIds.Value.Random(),
+								Model.RoomId.Value,
+								hit.position,
+								Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up),
 								newFlora =>
 								{
 									newFlora.ValidPrefabIds.Value = Model.ValidPrefabIds.Value;
 									newFlora.Species.Value = Model.Species.Value;
-									newFlora.RoomId.Value = Model.RoomId.Value;
-									newFlora.Position.Value = hit.position;
-									newFlora.Rotation.Value = Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
 									newFlora.Age.Value = Interval.WithMaximum(Model.Age.Value.Maximum);
 									newFlora.ReproductionElapsed.Value = Interval.WithMaximum(Model.ReproductionElapsed.Value.Maximum);
 									newFlora.ReproductionRadius.Value = Model.ReproductionRadius.Value;

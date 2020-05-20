@@ -111,11 +111,11 @@ namespace Lunra.Hothouse.Ai
 
 							World.ItemDrops.Activate(
 								"default",
+								target.RoomId.Value,
+								target.Position.Value,
+								Quaternion.identity,
 								itemDrop =>
 								{
-									itemDrop.RoomId.Value = target.RoomId.Value;
-									itemDrop.Position.Value = target.Position.Value;
-									itemDrop.Rotation.Value = Quaternion.identity;
 									itemDrop.Inventory.Value = overflow;
 									itemDrop.Job.Value = Jobs.Clearer;
 								}

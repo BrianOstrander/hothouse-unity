@@ -11,7 +11,7 @@ using UnityEngine.Assertions;
 namespace Lunra.Hothouse.Models
 {
 	public class BasePoolModel<M> : Model
-		where M : PooledModel, new()
+		where M : class, IPooledModel, new()
 	{
 		public class Reservoir
 		{
@@ -71,20 +71,6 @@ namespace Lunra.Hothouse.Models
 			IsInitialized = true;
 		}
 
-		protected void InActivate(params M[] models)
-		{
-			if (models == null || models.None()) return;
-
-			foreach (var model in models) model.Id.Value = null;
-			
-			All.Value = new Reservoir(
-				All.Value.Active.Except(models).ToArray(),
-				All.Value.InActive.Union(models).ToArray()
-			);
-
-			foreach (var model in models) model.PooledState.SetValue(PooledStates.InActive, this);
-		}
-
 		protected M Activate(
 			Action<M> initialize = null,
 			Func<M, bool> predicate = null
@@ -114,7 +100,6 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			if (string.IsNullOrEmpty(result.Id.Value)) result.Id.Value = Guid.NewGuid().ToString();
-			Assert.IsFalse(string.IsNullOrEmpty(result.RoomId.Value), "Cannot have a null or empty RoomId");
 
 			result.PooledState.SetValue(PooledStates.Active, this);
 			
@@ -122,6 +107,23 @@ namespace Lunra.Hothouse.Models
 
 			return result;
 		}
+		
+		protected void InActivate(params M[] models)
+		{
+			if (models == null || models.None()) return;
+
+			foreach (var model in models) model.Id.Value = null;
+			
+			All.Value = new Reservoir(
+				All.Value.Active.Except(models).ToArray(),
+				All.Value.InActive.Union(models).ToArray()
+			);
+
+			foreach (var model in models) model.PooledState.SetValue(PooledStates.InActive, this);
+		}
+
+		// protected virtual void CheckActivationValid(M model) { }
+		// Assert.IsFalse(string.IsNullOrEmpty(result.RoomId.Value), "Cannot have a null or empty RoomId");
 		
 		#region Events
 		void OnPooledState(

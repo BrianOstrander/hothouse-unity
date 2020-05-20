@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IPrefabModel : IPooledModel
+	public interface IPrefabModel : IPooledModel, IRoomTransform
 	{
 		#region Serialized
 		ListenerProperty<string> PrefabId { get; }
@@ -15,10 +15,14 @@ namespace Lunra.Hothouse.Models
 	{
 		[JsonProperty] string prefabId;
 		[JsonIgnore] public ListenerProperty<string> PrefabId { get; }
+		
+		[JsonProperty] string roomId;
+		[JsonIgnore] public ListenerProperty<string> RoomId { get; }
 
 		public PrefabModel()
 		{
 			PrefabId = new ListenerProperty<string>(value => prefabId = value, () => prefabId);
+			RoomId = new ListenerProperty<string>(value => roomId = value, () => roomId);
 		}
 	}
 }

@@ -79,53 +79,43 @@ namespace Lunra.Hothouse.Services
 			
 			game.WorldCamera.IsEnabled.Value = true;
 
-			void initializeRoom(
-				RoomPrefabModel room,
-				string id,
-				Vector3 position
-			)
+			void initializeRoom(RoomPrefabModel room)
 			{
-				room.Id.Value = id;
-				room.RoomId.Value = id;
-				room.Position.Value = position;
-				room.Rotation.Value = Quaternion.identity;
+				room.Id.Value = room.RoomId.Value;
 			}
 			
 			var room0 = game.Rooms.Activate(
 				"default_spawn",
-				room => initializeRoom(
-					room,
-					"room_0",
-					Vector3.zero
-				)
+				"room_0",
+				Vector3.zero,
+				Quaternion.identity,
+				initializeRoom
 			);
 			
 			var room1 = game.Rooms.Activate(
 				"rectangle",
-				room => initializeRoom(
-					room,
-					"room_1",
-					new Vector3(0f, 3.01f, -18.74f)
-				)
+				"room_1",
+				new Vector3(0f, 3.01f, -18.74f),
+				Quaternion.identity,
+				initializeRoom
 			);
 
 			void initializeDoor(
 				DoorPrefabModel door,
-				DoorPrefabModel.Connection connection,
-				Vector3 position
+				DoorPrefabModel.Connection connection
 			)
 			{
 				door.RoomConnection.Value = connection;
-				door.RoomId.Value = connection.RoomId0;
-				door.Position.Value = position;
 			}
 
 			game.Doors.Activate(
 				"default",
+				room0.Id.Value,
+				new Vector3(0f, -0.02f, -15.74f),
+				Quaternion.identity,
 				door => initializeDoor(
 					door,
-					new DoorPrefabModel.Connection(room0.Id.Value, room1.Id.Value),
-					new Vector3(0f, -0.02f, -15.74f)
+					new DoorPrefabModel.Connection(room0.Id.Value, room1.Id.Value)
 				)
 			);
 
@@ -147,7 +137,6 @@ namespace Lunra.Hothouse.Services
 			)
 			{
 				flora.Species.Value = species;
-				flora.RoomId.Value = room0.Id.Value;
 				flora.Position.Value = position;
 				flora.Rotation.Value = Quaternion.identity;
 				flora.Age.Value = Interval.WithMaximum(1f);
@@ -186,8 +175,10 @@ namespace Lunra.Hothouse.Services
 				}
 			}
 			
+			/*
 			game.Flora.Activate(
 				fastFloraPrefabIds.First(),
+				room0.Id.Value,
 				flora => initializeFlora(
 					flora,
 					new Vector3(7f, 0f, -4f),
@@ -197,6 +188,7 @@ namespace Lunra.Hothouse.Services
 			
 			game.Flora.Activate(
 				fastFloraPrefabIds.First(),
+				room0.Id.Value,
 				flora => initializeFlora(
 					flora,
 					new Vector3(10f, 0f, -4f),
@@ -206,6 +198,7 @@ namespace Lunra.Hothouse.Services
 			
 			game.Flora.Activate(
 				fastFloraPrefabIds.First(),
+				room0.Id.Value,
 				flora => initializeFlora(
 					flora,
 					new Vector3(4f, 0f, -4f),
@@ -215,6 +208,7 @@ namespace Lunra.Hothouse.Services
 			
 			game.Flora.Activate(
 				edibleFloraPrefabIds.First(),
+				room0.Id.Value,
 				flora => initializeFlora(
 					flora,
 					new Vector3(-4f, 0f, -5f),
@@ -224,30 +218,30 @@ namespace Lunra.Hothouse.Services
 			
 			game.Flora.Activate(
 				edibleFloraPrefabIds.First(),
+				room0.Id.Value,
 				flora => initializeFlora(
 					flora,
 					new Vector3(-6f, 0f, -5f),
 					FloraSpecies.Edible
 				)
 			);
+			*/
 			
 			void initializeClearable(
 				ClearableModel clearable,
-				Vector3 position,
 				Inventory itemDrops
 			)
 			{
-				clearable.RoomId.Value = room0.Id.Value;
-				clearable.Position.Value = position;
-				clearable.Rotation.Value = Quaternion.identity;
 				clearable.ItemDrops.Value = itemDrops;
 			}
 
 			game.Debris.Activate(
 				"debris_small",
+				room0.Id.Value, 
+				new Vector3(0, 0f, -6f),
+				Quaternion.identity,
 				debris => initializeClearable(
 					debris,
-					new Vector3(0, 0f, -6f),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
@@ -259,9 +253,11 @@ namespace Lunra.Hothouse.Services
 			
 			game.Debris.Activate(
 				"debris_large",
+				room0.Id.Value,
+				new Vector3(1, 0f, -5f),
+				Quaternion.identity,
 				debris => initializeClearable(
 					debris,
-					new Vector3(1, 0f, -5f),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
@@ -274,16 +270,12 @@ namespace Lunra.Hothouse.Services
 			void initializeDweller(
 				DwellerModel dweller,
 				string id,
-				Vector3 position,
 				Jobs job = Jobs.None,
 				Desires desire = Desires.None,
 				bool debugAgentStates = false
 			)
 			{
 				dweller.Id.Value = id;
-				dweller.RoomId.Value = room0.Id.Value;
-				dweller.Position.Value = position;
-				dweller.Rotation.Value = Quaternion.identity;
 				dweller.NavigationVelocity.Value = 4f;
 				dweller.Job.Value = job;
 				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1f);
@@ -306,33 +298,15 @@ namespace Lunra.Hothouse.Services
 					{ Desires.Sleep , 0.1f }
 				};
 			}
-			
-			// game.Dwellers.Activate(
-			// 	"default",
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"0",
-			// 		new Vector3(-6f, -0.8386866f, 3f),
-			// 		Jobs.Construction
-			// 		// debugAgentStates: true
-			// 	)
-			// );
-			//
-			// game.Dwellers.Activate(
-			// 	dweller => initializeDweller(
-			// 		dweller,
-			// 		"1",
-			// 		new Vector3(-2f, -0.8386866f, 10f),
-			// 		Jobs.Construction
-			// 	)
-			// );
-			
+
 			game.Dwellers.Activate(
 				"default",
+				room0.Id.Value,
+				new Vector3(-4f, -0.8386866f, 3f),
+				Quaternion.identity,
 				dweller => initializeDweller(
 					dweller,
 					"2",
-					new Vector3(-4f, -0.8386866f, 3f),
 					Jobs.Clearer,
 					debugAgentStates: true
 				)
@@ -341,16 +315,13 @@ namespace Lunra.Hothouse.Services
 			void initializeBuilding(
 				BuildingModel model,
 				string id,
-				Vector3 position,
 				Inventory inventory,
 				InventoryCapacity inventoryCapacity,
 				params DesireQuality[] desireQualities
 			)
 			{
 				model.BuildingState.Value = BuildingStates.Operating;
-				model.RoomId.Value = room0.Id.Value;
 				model.Id.Value = id;
-				model.Position.Value = position;
 				model.Inventory.Value = inventory;
 				model.InventoryCapacity.Value = inventoryCapacity;
 				model.DesireQuality.Value = desireQualities;
@@ -358,12 +329,14 @@ namespace Lunra.Hothouse.Services
 
 			var fireBuilding1 = game.Buildings.Activate(
 				"fire_bonfire",
+				room0.Id.Value,
+				new Vector3(-6f, -0.8386866f, 6f),
+				Quaternion.identity,
 				m =>
 				{
 					initializeBuilding(
 						m,
 						"fire_bonfire0",
-						new Vector3(-6f, -0.8386866f, 6f),
 						Inventory.Empty, 
 						InventoryCapacity.ByIndividualWeight(
 							new Inventory(
@@ -408,26 +381,17 @@ namespace Lunra.Hothouse.Services
 			
 			var sleepBuilding1 = game.Buildings.Activate(
 				"debug",
+				room0.Id.Value,
+				new Vector3(-12f, -0.8386866f, 0f),
+				Quaternion.identity,
 				m => initializeBuilding(
 					m,
 					"sleep_1",
-					new Vector3(-12f, -0.8386866f, 0f),
 					Inventory.Empty,
 					InventoryCapacity.None(),
 					DesireQuality.New(Desires.Sleep, 1f)
 				)
 			);
-
-			// sleepBuilding1.BuildingState.Value = BuildingStates.Constructing;
-			// sleepBuilding1.ConstructionInventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
-			// 	new Inventory(
-			// 		new Dictionary<Inventory.Types, int>
-			// 		{
-			// 			{Inventory.Types.Stalks, 1},
-			// 			// {Inventory.Types.Scrap, 1}
-			// 		}
-			// 	)
-			// );
 			
 			sleepBuilding1.BuildingState.Value = BuildingStates.Salvaging;
 			sleepBuilding1.SalvageInventory.Value = new Inventory(
@@ -437,24 +401,15 @@ namespace Lunra.Hothouse.Services
 					{Inventory.Types.Scrap, 2}
 				}
 			);
-			/*
-			sleepBuilding.ConstructionInventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
-				new Inventory(
-					new Dictionary<Item.Types, int>
-					{
-						{Item.Types.Stalks, 2},
-						{Item.Types.Scrap, 2}
-					}
-				)
-			);
-			*/
 			
 			game.Buildings.Activate(
 				"default_wagon",
+				room0.Id.Value,
+				new Vector3(0f, -0.8386866f, 4f),
+				Quaternion.identity,
 				m => initializeBuilding(
 					m,
 					"wagon_0",
-					new Vector3(0f, -0.8386866f, 4f),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
@@ -488,12 +443,14 @@ namespace Lunra.Hothouse.Services
 			
 			game.Buildings.Activate(
 				"fire_bonfire",
+				room0.Id.Value,
+				new Vector3(2f, -0.8386866f, 6f),
+				Quaternion.identity,
 				m =>
 				{
 					initializeBuilding(
 						m,
 						"fire_bonfire1",
-						new Vector3(2f, -0.8386866f, 6f),
 						Inventory.Empty, 
 						InventoryCapacity.ByIndividualWeight(
 							new Inventory(
@@ -516,36 +473,7 @@ namespace Lunra.Hothouse.Services
 					m.IsLightRefueling.Value = true;
 				}
 			);
-
-			// game.ItemDrops.Activate(
-			// 	m =>
-			// 	{
-			// 		m.Position.Value = new Vector3(1f, 0f, -5f);
-			// 		m.Job.Value = Jobs.None;
-			// 		m.Inventory.Value = new Inventory(
-			// 			new Dictionary<Inventory.Types, int>
-			// 			{
-			// 				{ Inventory.Types.Scrap, 1 }
-			// 			}
-			// 		);
-			// 		m.Id.Value = "scrap without room";
-			// 	}
-			// );
 			
-			
-			// game.ItemDrops.Activate(
-			// 	m =>
-			// 	{
-			// 		m.Position.Value = new Vector3(0f, 0f, -5f);
-			// 		m.Job.Value = Jobs.ClearFlora;
-			// 		m.Inventory.Value = new Inventory(
-			// 			new Dictionary<Item.Types, int>
-			// 			{
-			// 				{ Item.Types.Rations, 1 }
-			// 			}
-			// 		);
-			// 	}
-			// );
 
 			done(Result<GameModel>.Success(game));
 		}

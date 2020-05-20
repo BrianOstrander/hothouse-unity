@@ -11,10 +11,9 @@ namespace Lunra.Hothouse.Models
 		Active = 20
 	}
 
-	public interface IPooledModel : IModel, IRoomPositionModel
+	public interface IPooledModel : IModel, ITransform
 	{
 		#region Serialized
-		ListenerProperty<Quaternion> Rotation { get; }
 		ListenerProperty<PooledStates> PooledState { get; }
 		#endregion
 		
@@ -26,17 +25,12 @@ namespace Lunra.Hothouse.Models
 	public class PooledModel : Model, IPooledModel
 	{
 		#region Serialized
-		[JsonProperty] string roomId;
-		[JsonIgnore] public ListenerProperty<string> RoomId { get; }
-		
-		[JsonProperty] Vector3 position = Vector3.zero;
-		[JsonIgnore] public ListenerProperty<Vector3> Position { get; }
-		
-		[JsonProperty] Quaternion rotation = Quaternion.identity;
-		[JsonIgnore] public ListenerProperty<Quaternion> Rotation { get; }
-
 		[JsonProperty] PooledStates pooledState = PooledStates.InActive;
 		[JsonIgnore] public ListenerProperty<PooledStates> PooledState { get; }
+		[JsonProperty] Vector3 position = Vector3.zero;
+		[JsonIgnore] public ListenerProperty<Vector3> Position { get; }
+		[JsonProperty] Quaternion rotation = Quaternion.identity;
+		[JsonIgnore] public ListenerProperty<Quaternion> Rotation { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -46,11 +40,10 @@ namespace Lunra.Hothouse.Models
 
 		public PooledModel()
 		{
-			RoomId = new ListenerProperty<string>(value => roomId = value, () => roomId);
+			PooledState = new ListenerProperty<PooledStates>(value => pooledState = value, () => pooledState);
 			Position = new ListenerProperty<Vector3>(value => position = value, () => position);
 			Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);
-			PooledState = new ListenerProperty<PooledStates>(value => pooledState = value, () => pooledState);
-
+			
 			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
 		}
 	}

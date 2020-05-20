@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface ILightSensitiveModel : IModel, IRoomPositionModel
+	public interface ILightSensitiveModel : IModel, IRoomTransform
 	{
 		#region Serialized
 		ListenerProperty<float> LightLevel { get; }

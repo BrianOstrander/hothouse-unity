@@ -100,11 +100,13 @@ namespace Lunra.Hothouse.Presenters
 			{
 				Game.ItemDrops.Activate(
 					"default",
+					Model.RoomId.Value,
+					Model.Position.Value,
+					Quaternion.identity,
 					m =>
 					{
 						m.Inventory.Value = Model.Inventory.Value;
 						m.Job.Value = Jobs.None;
-						m.RoomId.Value = Model.RoomId.Value;
 						m.Position.Value = Model.Position.Value;
 						m.Rotation.Value = Quaternion.identity;
 					}
