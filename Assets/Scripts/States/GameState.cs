@@ -67,7 +67,7 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.Doors.Initialize(m => new DoorPrefabPresenter(Payload.Game, m));
 			Payload.Game.Buildings.Initialize(m => new BuildingPresenter(Payload.Game, m));
 			
-			Payload.Game.Debris.Initialize(m => new ClearablePresenter<ClearableModel, ClearableView>(Payload.Game, m));
+			Payload.Game.Debris.Initialize(Payload.Game);
 			Payload.Game.Flora.Initialize(Payload.Game);
 			Payload.Game.ItemDrops.Initialize(m => new ItemDropPresenter(Payload.Game, m));
 			Payload.Game.Dwellers.Initialize(m => new DwellerPresenter(Payload.Game, m));

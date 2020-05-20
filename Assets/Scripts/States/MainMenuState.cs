@@ -158,35 +158,13 @@ namespace Lunra.Hothouse.Services
 			}
 
 			game.Debris.Activate(
-				"debris_small",
 				room0.Id.Value, 
-				new Vector3(0, 0f, -6f),
-				Quaternion.identity,
-				debris => initializeClearable(
-					debris,
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Scrap, 1 }
-						}
-					)
-				)
+				new Vector3(0, 0f, -6f)
 			);
 			
 			game.Debris.Activate(
-				"debris_large",
 				room0.Id.Value,
-				new Vector3(1, 0f, -5f),
-				Quaternion.identity,
-				debris => initializeClearable(
-					debris,
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Scrap, 1 }
-						}
-					)
-				)
+				new Vector3(1, 0f, -5f)
 			);
 
 			void initializeDweller(

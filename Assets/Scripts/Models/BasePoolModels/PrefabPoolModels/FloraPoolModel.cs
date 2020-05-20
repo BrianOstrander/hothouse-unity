@@ -73,7 +73,7 @@ namespace Lunra.Hothouse.Models
 					Defaults.ReproductionFailureLimit,
 					100f,
 					50f,
-					Defaults.GenerateDrops(Inventory.Types.Stalks),
+					Defaults.GenerateDrops(Inventory.Types.Stalks, 4),
 					new []
 					{
 						"fast0",
