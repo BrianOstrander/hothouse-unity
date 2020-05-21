@@ -36,11 +36,11 @@ namespace Lunra.Hothouse.Presenters
 			if (Input.GetMouseButtonDown(0))
 			{
 				Model.Display.Value = new Interaction.Display(
-					Models.Interaction.States.Begin,
-					Models.Interaction.Vector3Delta.Point(
+					Interaction.States.Begin,
+					Interaction.Vector3Delta.Point(
 						Input.mousePosition
 					),
-					Models.Interaction.Vector3Delta.Point(
+					Interaction.Vector3Delta.Point(
 						Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 					)
 				);
@@ -48,15 +48,17 @@ namespace Lunra.Hothouse.Presenters
 			else if (Input.GetMouseButton(0))
 			{
 				Model.Display.Value = Model.Display.Value.NewEnds(
-					Models.Interaction.States.Active,
+					Interaction.States.Active,
 					Input.mousePosition,
 					Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 				);
+				
+				// TODO: Add ability to cancel here!
 			}
 			else if (Input.GetMouseButtonUp(0))
 			{
 				Model.Display.Value = Model.Display.Value.NewEnds(
-					Models.Interaction.States.End,
+					Interaction.States.End,
 					Input.mousePosition,
 					Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 				);
@@ -64,11 +66,11 @@ namespace Lunra.Hothouse.Presenters
 			else
 			{
 				Model.Display.Value = new Interaction.Display(
-					Models.Interaction.States.Idle,
-					Models.Interaction.Vector3Delta.Point(
+					Interaction.States.Idle,
+					Interaction.Vector3Delta.Point(
 						Input.mousePosition
 					),
-					Models.Interaction.Vector3Delta.Point(
+					Interaction.Vector3Delta.Point(
 						Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 					)
 				);

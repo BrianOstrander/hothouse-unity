@@ -27,20 +27,26 @@ namespace Lunra.Hothouse.Presenters
 			switch (display.State)
 			{
 				case Interaction.States.Idle:
-					Model.Floor.Value = Interaction.Generic.Idle(hit.point);
+					Model.RadialFloorSelection.Value = Interaction.Generic.Idle(hit.point);
 					break;
 				case Interaction.States.Begin:
-					Model.Floor.Value = Interaction.Generic.Begin(hit.point);
+					Model.RadialFloorSelection.Value = Interaction.Generic.Begin(hit.point);
 					break;
 				case Interaction.States.Active:
-					Model.Floor.Value = Model.Floor.Value.NewEnd(
+					Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewEnd(
 						Interaction.States.Active,
 						hit.point
 					);
 					break;
 				case Interaction.States.End:
-					Model.Floor.Value = Model.Floor.Value.NewEnd(
+					Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewEnd(
 						Interaction.States.End,
+						hit.point
+					);
+					break;
+				case Interaction.States.Cancel:
+					Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewEnd(
+						Interaction.States.Cancel,
 						hit.point
 					);
 					break;
