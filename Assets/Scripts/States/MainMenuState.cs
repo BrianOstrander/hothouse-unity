@@ -119,6 +119,8 @@ namespace Lunra.Hothouse.Services
 				)
 			);
 	
+			// FLORA
+			
 			game.Flora.ActivateAdult(
 				FloraSpecies.Fast,
 				room0.Id.Value,
@@ -149,14 +151,8 @@ namespace Lunra.Hothouse.Services
 				new Vector3(-6f, 0f, -5f)
 			);
 
-			void initializeClearable(
-				ClearableModel clearable,
-				Inventory itemDrops
-			)
-			{
-				clearable.ItemDrops.Value = itemDrops;
-			}
-
+			// DEBRIS
+			
 			game.Debris.Activate(
 				room0.Id.Value, 
 				new Vector3(0, 0f, -6f)
@@ -167,213 +163,57 @@ namespace Lunra.Hothouse.Services
 				new Vector3(1, 0f, -5f)
 			);
 
-			void initializeDweller(
-				DwellerModel dweller,
-				string id,
-				Jobs job = Jobs.None,
-				Desires desire = Desires.None,
-				bool debugAgentStates = false
-			)
-			{
-				dweller.Id.Value = id;
-				dweller.NavigationVelocity.Value = 4f;
-				dweller.Job.Value = job;
-				dweller.JobShift.Value = new DayTimeFrame(0.0f, 1f);
-				dweller.Desire.Value = desire;
-				dweller.IsDebugging = debugAgentStates;
-				dweller.NavigationForceDistanceMaximum.Value = 4f;
-				dweller.MeleeRange.Value = 0.75f;
-				dweller.MeleeCooldown.Value = 0.5f;
-				dweller.MeleeDamage.Value = 60f;
-				dweller.HealthMaximum.Value = 100f;
-				dweller.Health.Value = dweller.HealthMaximum.Value;
-
-				dweller.WithdrawalCooldown.Value = 0.5f;
-				dweller.DepositCooldown.Value = dweller.WithdrawalCooldown.Value;
-				dweller.InventoryCapacity.Value = InventoryCapacity.ByTotalWeight(2);
-				
-				dweller.DesireDamage.Value = new Dictionary<Desires, float>
-				{
-					{ Desires.Eat , 0.3f },
-					{ Desires.Sleep , 0.1f }
-				};
-			}
-
-			game.Dwellers.Activate(
-				"default",
-				room0.Id.Value,
-				new Vector3(-4f, -0.8386866f, 3f),
-				Quaternion.identity,
-				dweller => initializeDweller(
-					dweller,
-					"2",
-					Jobs.Clearer,
-					debugAgentStates: true
-				)
-			);
+			// DWELLERS
 			
-			void initializeBuilding(
-				BuildingModel model,
-				string id,
-				Inventory inventory,
-				InventoryCapacity inventoryCapacity,
-				params DesireQuality[] desireQualities
-			)
-			{
-				model.BuildingState.Value = BuildingStates.Operating;
-				model.Id.Value = id;
-				model.Inventory.Value = inventory;
-				model.InventoryCapacity.Value = inventoryCapacity;
-				model.DesireQuality.Value = desireQualities;
-			}
-
-			var fireBuilding1 = game.Buildings.Activate(
-				"fire_bonfire",
+			var dweller0 = game.Dwellers.Activate(
 				room0.Id.Value,
-				new Vector3(-6f, -0.8386866f, 6f),
-				Quaternion.identity,
-				m =>
-				{
-					initializeBuilding(
-						m,
-						"fire_bonfire0",
-						Inventory.Empty, 
-						InventoryCapacity.ByIndividualWeight(
-							new Inventory(
-								new Dictionary<Inventory.Types, int>
-								{
-									{ Inventory.Types.Stalks, 50 }
-								}
-							)
-						)
-					);
-
-					m.LightState.Value = LightStates.Fueled;
-					m.LightFuel.Value = new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks, 1 }
-						}
-					);
-					
-					m.SalvageInventory.Value = new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks, 1 }
-						}
-					);
-					
-					m.LightFuelInterval.Value = Interval.WithMaximum(1f);
-					m.IsLightRefueling.Value = true;
-				}
+				new Vector3(-4f, -0.8386866f, 3f)
 			);
-
-			fireBuilding1.BuildingState.Value = BuildingStates.Constructing;
-			fireBuilding1.ConstructionInventoryCapacity.Value = InventoryCapacity.ByIndividualWeight(
-				new Inventory(
-					new Dictionary<Inventory.Types, int>
-					{
-						{Inventory.Types.Stalks, 1},
-						// {Inventory.Types.Scrap, 1}
-					}
-				)
-			);
+			dweller0.Id.Value = "0";
+			dweller0.Job.Value = Jobs.Clearer;
+			// dweller0.IsDebugging = true;
 			
-			var sleepBuilding1 = game.Buildings.Activate(
-				"debug",
+			var dweller1 = game.Dwellers.Activate(
 				room0.Id.Value,
-				new Vector3(-12f, -0.8386866f, 0f),
-				Quaternion.identity,
-				m => initializeBuilding(
-					m,
-					"sleep_1",
-					Inventory.Empty,
-					InventoryCapacity.None(),
-					DesireQuality.New(Desires.Sleep, 1f)
-				)
+				new Vector3(-4f, -0.8386866f, 3f)
 			);
+			dweller1.Id.Value = "1";
+			dweller1.Job.Value = Jobs.Construction;
+			// dweller1.IsDebugging = true;
 			
-			sleepBuilding1.BuildingState.Value = BuildingStates.Salvaging;
-			sleepBuilding1.SalvageInventory.Value = new Inventory(
-				new Dictionary<Inventory.Types, int>
-				{
-					{Inventory.Types.Stalks, 1},
-					{Inventory.Types.Scrap, 2}
-				}
-			);
+			// BUILDINGS
 			
 			game.Buildings.Activate(
-				"default_wagon",
-				room0.Id.Value,
-				new Vector3(0f, -0.8386866f, 4f),
-				Quaternion.identity,
-				m => initializeBuilding(
-					m,
-					"wagon_0",
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							// { Item.Types.Stalks, 4 },
-							// { Item.Types.Scrap, 4 },
-							// { Item.Types.Rations, 4 }
-						}
-					),
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								// { Inventory.Types.Stalks, 50 },
-								// { Inventory.Types.Scrap, 50 },
-								// { Inventory.Types.Rations, 50 }
-							}
-						)	
-					),
-					new DesireQuality(
-						Desires.Eat, 
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Rations, 1 }
-							}
-						),
-						1f
-					)
-				)
-			);
-			
-			game.Buildings.Activate(
-				"fire_bonfire",
+				Buildings.Bonfire,
 				room0.Id.Value,
 				new Vector3(2f, -0.8386866f, 6f),
 				Quaternion.identity,
-				m =>
-				{
-					initializeBuilding(
-						m,
-						"fire_bonfire1",
-						Inventory.Empty, 
-						InventoryCapacity.ByIndividualWeight(
-							new Inventory(
-								new Dictionary<Inventory.Types, int>
-								{
-									{ Inventory.Types.Stalks, 2 }
-								}
-							)
-						)
-					);
-
-					m.LightState.Value = LightStates.Fueled;
-					m.LightFuel.Value = new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks, 1 }
-						}
-					);
-					m.LightFuelInterval.Value = Interval.WithMaximum(10f);
-					m.IsLightRefueling.Value = true;
-				}
+				BuildingStates.Operating
 			);
 			
+			game.Buildings.Activate(
+				Buildings.Bonfire,
+				room0.Id.Value,
+				new Vector3(-6f, -0.8386866f, 6f),
+				Quaternion.identity,
+				BuildingStates.Constructing
+			);
+
+			game.Buildings.Activate(
+				Buildings.Bedroll,
+				room0.Id.Value,
+				new Vector3(-12f, -0.8386866f, 0f),
+				Quaternion.identity,
+				BuildingStates.Constructing
+			);
+			
+			game.Buildings.Activate(
+				Buildings.StartingWagon,
+				room0.Id.Value,
+				new Vector3(0f, -0.8386866f, 4f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
 
 			done(Result<GameModel>.Success(game));
 		}

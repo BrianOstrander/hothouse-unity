@@ -156,7 +156,7 @@ namespace Lunra.Hothouse.Presenters
 			if (IsNotActive) return;
 			
 			var anyChanged = false;
-			var newDesireQuality = Model.DesireQuality.Value.Select(
+			var newDesireQuality = Model.DesireQualities.Value.Select(
 				d =>
 				{
 					var result = d.CalculateState(inventory);
@@ -165,7 +165,7 @@ namespace Lunra.Hothouse.Presenters
 				}
 			).ToArray(); // Has to call ToArray otherwise anyChanged will never get called...
 			
-			if (anyChanged) Model.DesireQuality.Value = newDesireQuality;
+			if (anyChanged) Model.DesireQualities.Value = newDesireQuality;
 		}
 
 		void OnBuildingConstructionInventory(Inventory constructionInventory)
@@ -208,7 +208,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
 		{
 			if (IsNotActive) return;
-			var quality = Model.DesireQuality.Value.FirstOrDefault(d => d.Desire == desire);
+			var quality = Model.DesireQualities.Value.FirstOrDefault(d => d.Desire == desire);
 
 			if (quality.Desire != desire)
 			{
@@ -248,7 +248,7 @@ namespace Lunra.Hothouse.Presenters
 							case LightStates.Extinguishing: View.LightFuelNormal = Model.LightFuelInterval.Value.InverseNormalized; break; 
 							case LightStates.Extinguished: View.LightFuelNormal = 0f; break;
 							default:
-								Debug.LogError("Unrecognized LightState: "+Model.LightState.Value);
+								Debug.LogError("Unrecognized LightState: "+Model.LightState.Value+" on "+Model.Id.Value);
 								break;
 						}
 						break;

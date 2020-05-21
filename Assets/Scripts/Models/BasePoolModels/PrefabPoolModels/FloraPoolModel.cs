@@ -62,7 +62,7 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 
-		static readonly Dictionary<FloraSpecies, SpeciesInfo> Species = new Dictionary<FloraSpecies, SpeciesInfo>
+		static readonly Dictionary<FloraSpecies, SpeciesInfo> Infos = new Dictionary<FloraSpecies, SpeciesInfo>
 		{
 			{
 				FloraSpecies.Fast,
@@ -73,7 +73,7 @@ namespace Lunra.Hothouse.Models
 					Defaults.ReproductionFailureLimit,
 					100f,
 					50f,
-					Defaults.GenerateDrops(Inventory.Types.Stalks, 4),
+					Defaults.GenerateDrops(Inventory.Types.Stalks),
 					new []
 					{
 						"fast0",
@@ -115,7 +115,7 @@ namespace Lunra.Hothouse.Models
 			Vector3 position
 		)
 		{
-			var info = Species[species];
+			var info = Infos[species];
 			var result = Activate(
 				info.ValidPrefabIds.Random(),
 				roomId,
@@ -133,7 +133,7 @@ namespace Lunra.Hothouse.Models
 			Vector3 position
 		)
 		{
-			var info = Species[species];
+			var info = Infos[species];
 			var result = Activate(
 				info.ValidPrefabIds.Random(),
 				roomId,

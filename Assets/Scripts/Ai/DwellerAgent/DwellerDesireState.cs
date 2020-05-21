@@ -21,7 +21,7 @@ namespace Lunra.Hothouse.Ai
 				agent.Position.Value,
 				out path,
 				out entrancePosition,
-				b => 0f < b.DesireQuality.Value.FirstAvailableQualityOrDefault(Desire),
+				b => 0f < b.DesireQualities.Value.FirstAvailableQualityOrDefault(Desire),
 				world.Buildings.AllActive
 			);
 		}

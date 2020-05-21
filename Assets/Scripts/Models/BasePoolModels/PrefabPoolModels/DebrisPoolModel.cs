@@ -16,26 +16,6 @@ namespace Lunra.Hothouse.Models
 			"debris_large"
 		};
 		
-		static class Defaults
-		{
-			public const int ReproductionFailureLimit = 40;
-
-			public static Func<Inventory> GenerateDropsEmpty() => () => Inventory.Empty;
-			
-			public static Func<Inventory> GenerateDrops(
-				Inventory.Types type,
-				int weight = 1
-			)
-			{
-				return () => new Inventory(
-					new Dictionary<Inventory.Types, int>
-					{
-						{ type , weight }
-					}
-				);
-			}
-		}
-		
 		GameModel game;
 		
 		public override void Initialize(GameModel game)

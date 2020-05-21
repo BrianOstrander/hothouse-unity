@@ -35,11 +35,11 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ListenerProperty<Inventory> SalvageInventory { get; }
 
 		[JsonProperty] DesireQuality[] desireQuality = new DesireQuality[0];
-		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQuality { get; }
+		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQualities { get; }
 
 		[JsonProperty] bool isLight;
 		[JsonIgnore] public ListenerProperty<bool> IsLight { get; }
-		[JsonProperty] LightStates isLightExtinguishing;
+		[JsonProperty] LightStates lightState;
 		[JsonIgnore] public ListenerProperty<LightStates> LightState { get; }
 		[JsonProperty] Inventory lightFuel;
 		[JsonIgnore] public ListenerProperty<Inventory> LightFuel { get; }
@@ -75,9 +75,9 @@ namespace Lunra.Hothouse.Models
 			ConstructionInventoryCapacity = new ListenerProperty<InventoryCapacity>(value => constructionInventoryCapacity = value, () => constructionInventoryCapacity);
 			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);
 			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
-			DesireQuality = new ListenerProperty<DesireQuality[]>(value => desireQuality = value, () => desireQuality);
+			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQuality = value, () => desireQuality);
 			IsLight = new ListenerProperty<bool>(value => isLight = value, () => isLight);
-			LightState = new ListenerProperty<LightStates>(value => isLightExtinguishing = value, () => isLightExtinguishing);
+			LightState = new ListenerProperty<LightStates>(value => lightState = value, () => lightState);
 			LightFuel = new ListenerProperty<Inventory>(value => lightFuel = value, () => lightFuel);
 			LightFuelInterval = new ListenerProperty<Interval>(value => lightFuelInterval = value, () => lightFuelInterval);
 			IsLightRefueling = new ListenerProperty<bool>(value => isLightRefueling = value, () => isLightRefueling);

@@ -54,10 +54,14 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: default_wagon
+  prefabId: starting_wagon
+  navigationModifierColliders: []
   entrances:
   - {fileID: 6558807796252768482}
   - {fileID: 7726990765462570418}
+  lights: []
+  lightParticles: []
+  lightRange: 0
 --- !u!114 &6025853717628333945
 MonoBehaviour:
   m_ObjectHideFlags: 0

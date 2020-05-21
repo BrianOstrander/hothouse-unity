@@ -95,10 +95,10 @@ namespace Lunra.Hothouse.Editor
 							break;
 					}
 
-					if (model.DesireQuality.Value.Any())
+					if (model.DesireQualities.Value.Any())
 					{
 						label += "\nDesires:";
-						foreach (var desireQuality in model.DesireQuality.Value)
+						foreach (var desireQuality in model.DesireQualities.Value)
 						{
 							label += "\n  " + desireQuality.Desire + " : " + desireQuality.Quality.ToString("N1") + " - " + desireQuality.State;
 						}

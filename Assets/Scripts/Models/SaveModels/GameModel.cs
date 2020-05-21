@@ -21,12 +21,12 @@ namespace Lunra.Hothouse.Models
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		
 		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
-		public GenericPrefabPoolModel<DwellerModel> Dwellers { get; } = new GenericPrefabPoolModel<DwellerModel>();
+		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
 		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
 		public FloraPoolModel Flora { get; } = new FloraPoolModel();
 		public GenericPrefabPoolModel<RoomPrefabModel> Rooms { get; } = new GenericPrefabPoolModel<RoomPrefabModel>();
 		public GenericPrefabPoolModel<DoorPrefabModel> Doors { get; } = new GenericPrefabPoolModel<DoorPrefabModel>();
-		public GenericPrefabPoolModel<BuildingModel> Buildings { get; } = new GenericPrefabPoolModel<BuildingModel>();
+		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
 
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc

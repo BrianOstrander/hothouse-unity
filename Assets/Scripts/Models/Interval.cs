@@ -7,6 +7,7 @@ namespace Lunra.Hothouse.Models
 {
 	public struct Interval
 	{
+		public static Interval Zero() => new Interval(0f, 0f);
 		public static Interval WithMaximum(float maximum) => new Interval(0f, maximum);
 
 		public static Interval WithRandomMaximum(float maximum) => WithRandomMaximum(0f, maximum);
