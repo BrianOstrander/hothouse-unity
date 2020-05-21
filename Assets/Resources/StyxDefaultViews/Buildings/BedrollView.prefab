@@ -462,7 +462,9 @@ MonoBehaviour:
     CloseDuration: 0
   animations: []
   prefabId: bed_bedroll
-  navigationModifierColliders: []
+  navigationModifiers: []
+  navigationColliders:
+  - {fileID: 8348105340903504755}
   entrances:
   - {fileID: 2217704237645697402}
   lights: []

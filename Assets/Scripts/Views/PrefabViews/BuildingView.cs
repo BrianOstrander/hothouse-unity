@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Serialization;
 
 namespace Lunra.Hothouse.Views
 {
@@ -9,7 +11,9 @@ namespace Lunra.Hothouse.Views
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
-		[SerializeField] Collider[] navigationModifierColliders = new Collider[0];
+		// [SerializeField] NavMeshModifier[] navigationModifiers = new NavMeshModifier[0];
+		[FormerlySerializedAs("navigationModifierColliders"), SerializeField]
+		Collider[] navigationColliders = new Collider[0];
 		[SerializeField] Transform[] entrances = new Transform[0];
 		[SerializeField] LightEntry[] lights = new LightEntry[0];
 		[SerializeField] ParticleSystem[] lightParticles = new ParticleSystem[0];
@@ -36,7 +40,8 @@ namespace Lunra.Hothouse.Views
 		{
 			set
 			{
-				foreach (var navigationModifier in navigationModifierColliders) navigationModifier.enabled = value;
+				// foreach (var behaviour in navigationModifiers) behaviour.enabled = value;
+				foreach (var behaviour in navigationColliders) behaviour.enabled = value;
 			}
 		}
 		#endregion

@@ -462,6 +462,10 @@ MonoBehaviour:
     CloseDuration: 0
   animations: []
   prefabId: debug
+  navigationModifiers:
+  - {fileID: 1823652012535546700}
+  navigationColliders:
+  - {fileID: 0}
   entrances:
   - {fileID: 2217704237645697402}
   lights: []
