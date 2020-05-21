@@ -29,6 +29,7 @@ namespace Lunra.Hothouse.Views
 					widget.SetActive(true);
 					break;
 				case Models.Interaction.States.End:
+				case Models.Interaction.States.Cancel:
 					widget.SetActive(false);
 					break;
 				default:

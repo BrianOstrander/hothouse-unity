@@ -10,7 +10,8 @@ namespace Lunra.Hothouse.Models
 			Idle = 10,
 			Begin = 20,
 			Active = 30,
-			End = 40
+			End = 40,
+			Cancel = 50
 		}
 
 		public struct Vector3Delta
@@ -88,8 +89,7 @@ namespace Lunra.Hothouse.Models
 		public struct Generic
 		{
 			public static Generic Default() => new Generic(States.Idle, new Vector3Delta());
-			public static Generic Idle(Vector3 position) => new Generic(States.Idle, Vector3Delta.Point(position));
-			public static Generic Begin(Vector3 position) => new Generic(States.Begin, Vector3Delta.Point(position));
+			public static Generic Point(States state, Vector3 position) => new Generic(state, Vector3Delta.Point(position));
 			
 			public States State { get; }
 			public Vector3Delta Position { get; }

@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class GameInteractionPresenter : InputPresenter<GameInteractionModel>
+	public class GameInteractionPresenter : InteractionPresenter<GameInteractionModel>
 	{
 		public GameInteractionPresenter(GameInteractionModel model) : base(model)
 		{
 			Model.Display.Changed += OnDisplay;
 
-			// Model.Floor.Changed += v => Debug.Log(v);
+			// Model.RadialFloorSelection.Changed += v => Debug.Log(v);
 		}
 
 		protected override void UnBind()
@@ -27,26 +27,17 @@ namespace Lunra.Hothouse.Presenters
 			switch (display.State)
 			{
 				case Interaction.States.Idle:
-					Model.RadialFloorSelection.Value = Interaction.Generic.Idle(hit.point);
-					break;
 				case Interaction.States.Begin:
-					Model.RadialFloorSelection.Value = Interaction.Generic.Begin(hit.point);
+					Model.RadialFloorSelection.Value = Interaction.Generic.Point(
+						display.State,
+						hit.point
+					);
 					break;
 				case Interaction.States.Active:
-					Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewEnd(
-						Interaction.States.Active,
-						hit.point
-					);
-					break;
 				case Interaction.States.End:
-					Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewEnd(
-						Interaction.States.End,
-						hit.point
-					);
-					break;
 				case Interaction.States.Cancel:
 					Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewEnd(
-						Interaction.States.Cancel,
+						display.State,
 						hit.point
 					);
 					break;

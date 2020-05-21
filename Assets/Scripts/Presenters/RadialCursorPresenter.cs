@@ -13,16 +13,16 @@ namespace Lunra.Hothouse.Presenters
 		{
 			this.game = game;
 
-			game.Interaction.Floor.Changed += OnInteractionFloor;
+			game.Interaction.RadialFloorSelection.Changed += OnInteractionRadialFloorSelection;
 		}
 
 		protected override void UnBind()
 		{
-			game.Interaction.Floor.Changed += OnInteractionFloor;
+			game.Interaction.RadialFloorSelection.Changed -= OnInteractionRadialFloorSelection;
 		}
 		
 		#region InteractionModel Events
-		void OnInteractionFloor(Interaction.Generic interaction)
+		void OnInteractionRadialFloorSelection(Interaction.Generic interaction)
 		{
 			switch (interaction.State)
 			{
@@ -36,6 +36,7 @@ namespace Lunra.Hothouse.Presenters
 					View.Interaction(interaction.State, interaction.Position);
 					break;
 				case Interaction.States.End:
+				case Interaction.States.Cancel:
 					View.Interaction(interaction.State, interaction.Position);
 					CloseView(true);
 					break;

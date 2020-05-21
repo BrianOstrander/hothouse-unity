@@ -5,12 +5,12 @@ namespace Lunra.Hothouse.Models
 {
 	public class GameInteractionModel : InteractionModel
 	{
-		Interaction.Generic floor = Interaction.Generic.Default();
-		[JsonIgnore] public readonly ListenerProperty<Interaction.Generic> Floor;
+		Interaction.Generic radialFloorSelection = Interaction.Generic.Default();
+		[JsonIgnore] public readonly ListenerProperty<Interaction.Generic> RadialFloorSelection;
 
 		public GameInteractionModel()
 		{
-			Floor = new ListenerProperty<Interaction.Generic>(value => floor = value, () => floor);
+			RadialFloorSelection = new ListenerProperty<Interaction.Generic>(value => radialFloorSelection = value, () => radialFloorSelection);
 		}
 	}
 }

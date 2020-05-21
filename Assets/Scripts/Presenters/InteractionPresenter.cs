@@ -1,3 +1,4 @@
+using System;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
@@ -6,12 +7,12 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class InputPresenter<M> : Presenter<InteractionView>
+	public class InteractionPresenter<M> : Presenter<InteractionView>
 		where M : InteractionModel
 	{
 		protected M Model { get; private set; }
 
-		public InputPresenter(
+		public InteractionPresenter(
 			M model
 		)
 		{
@@ -28,52 +29,75 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region Heartbeat Events
-		void OnHeartbeatUpdate() => UpdateInputs();
+		void OnHeartbeatUpdate() => UpdateInteractions();
 		#endregion
 
-		protected virtual void UpdateInputs()
+		protected virtual void UpdateInteractions()
 		{
-			if (Input.GetMouseButtonDown(0))
+			if (Input.GetKeyUp(KeyCode.Escape))
 			{
-				Model.Display.Value = new Interaction.Display(
-					Interaction.States.Begin,
-					Interaction.Vector3Delta.Point(
-						Input.mousePosition
-					),
-					Interaction.Vector3Delta.Point(
-						Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
-					)
-				);
+				if (Model.Display.Value.State == Interaction.States.Active)
+				{
+					Model.Display.Value = Model.Display.Value.NewEnds(
+						Interaction.States.Cancel,
+						Input.mousePosition,
+						Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)	
+					);
+				}
 			}
-			else if (Input.GetMouseButton(0))
+
+			switch (Model.Display.Value.State)
 			{
-				Model.Display.Value = Model.Display.Value.NewEnds(
-					Interaction.States.Active,
-					Input.mousePosition,
-					Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
-				);
-				
-				// TODO: Add ability to cancel here!
-			}
-			else if (Input.GetMouseButtonUp(0))
-			{
-				Model.Display.Value = Model.Display.Value.NewEnds(
-					Interaction.States.End,
-					Input.mousePosition,
-					Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
-				);
-			}
-			else
-			{
-				Model.Display.Value = new Interaction.Display(
-					Interaction.States.Idle,
-					Interaction.Vector3Delta.Point(
-						Input.mousePosition
-					),
-					Interaction.Vector3Delta.Point(
-						Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
-					)
-				);
+				case Interaction.States.Idle:
+				case Interaction.States.End:
+				case Interaction.States.Cancel:
+					if (Input.GetMouseButtonDown(0))
+					{
+						Model.Display.Value = new Interaction.Display(
+							Interaction.States.Begin,
+							Interaction.Vector3Delta.Point(
+								Input.mousePosition
+							),
+							Interaction.Vector3Delta.Point(
+								Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
+							)
+						);
+					}
+					else
+					{
+						Model.Display.Value = new Interaction.Display(
+							Interaction.States.Idle,
+							Interaction.Vector3Delta.Point(
+								Input.mousePosition
+							),
+							Interaction.Vector3Delta.Point(
+								Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
+							)
+						);
+					}
+					break;
+				case Interaction.States.Begin:
+				case Interaction.States.Active:
+					if (Input.GetMouseButton(0))
+					{
+						Model.Display.Value = Model.Display.Value.NewEnds(
+							Interaction.States.Active,
+							Input.mousePosition,
+							Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
+						);
+					}
+					else if (Input.GetMouseButtonUp(0))
+					{
+						Model.Display.Value = Model.Display.Value.NewEnds(
+							Interaction.States.End,
+							Input.mousePosition,
+							Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
+						);
+					}
+					break;
+				default:
+					Debug.LogError("Unrecognized Interaction.State: "+Model.Display.Value.State);
+					break;
 			}
 		}
 
