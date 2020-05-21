@@ -58,7 +58,6 @@ namespace Lunra.Hothouse.Services
 			new GameInteractionPresenter(Payload.Game.Interaction);
 			
 			new WorldCameraPresenter(Payload.Game);
-			new RadialCursorPresenter(Payload.Game);
 			new ToolbarPresenter(Payload.Game);
 			new FloraEffectsPresenter(Payload.Game);
 

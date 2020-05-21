@@ -1,5 +1,6 @@
 ﻿using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Presenters;
 using UnityEngine;
 
@@ -8,21 +9,26 @@ namespace Lunra.Hothouse.Presenters
 	public class RadialCursorPresenter : Presenter<RadialCursorView>
 	{
 		GameModel game;
+		ListenerProperty<Interaction.Generic> interaction;
 
-		public RadialCursorPresenter(GameModel game)
+		public RadialCursorPresenter(
+			GameModel game,
+			ListenerProperty<Interaction.Generic> interaction
+		)
 		{
 			this.game = game;
+			this.interaction = interaction;
 
-			game.Interaction.RadialFloorSelection.Changed += OnInteractionRadialFloorSelection;
+			interaction.Changed += OnInteraction;
 		}
 
 		protected override void UnBind()
 		{
-			game.Interaction.RadialFloorSelection.Changed -= OnInteractionRadialFloorSelection;
+			interaction.Changed -= OnInteraction;
 		}
 		
 		#region InteractionModel Events
-		void OnInteractionRadialFloorSelection(Interaction.Generic interaction)
+		void OnInteraction(Interaction.Generic interaction)
 		{
 			switch (interaction.State)
 			{

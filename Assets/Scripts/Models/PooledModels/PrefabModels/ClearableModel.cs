@@ -49,7 +49,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] int? clearancePriority;
 		[JsonIgnore] public ListenerProperty<int?> ClearancePriority { get; }
 		
-		[JsonProperty] SelectionStates selectionState = SelectionStates.Deselected;
+		[JsonProperty] SelectionStates selectionState = SelectionStates.NotSelected;
 		[JsonIgnore] public ListenerProperty<SelectionStates> SelectionState { get; }
 		
 		[JsonProperty] float lightLevel;

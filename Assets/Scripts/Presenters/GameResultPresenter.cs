@@ -35,6 +35,8 @@ namespace Lunra.Hothouse.Presenters
 		void Show(string reason)
 		{
 			if (View.Visible) return;
+
+			game.Toolbar.IsEnabled.Value = false;
 			
 			View.Reset();
 

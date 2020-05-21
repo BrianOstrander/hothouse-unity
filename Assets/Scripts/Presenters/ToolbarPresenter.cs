@@ -1,6 +1,9 @@
+using System;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
+using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Lunra.Hothouse.Presenters
 {
@@ -17,13 +20,22 @@ namespace Lunra.Hothouse.Presenters
 			toolbar = game.Toolbar;
 			
 			game.SimulationInitialize += OnGameSimulationInitialize;
+			
+			game.Interaction.RadialFloorSelection.Changed += OnInteractionRadialFloorSelection;
 
 			toolbar.IsEnabled.Changed += OnToolbarIsEnabled;
+			
+			new RadialCursorPresenter(
+				game,
+				toolbar.ClearanceTask
+			);
 		}
 
 		protected override void UnBind()
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
+			
+			game.Interaction.RadialFloorSelection.Changed -= OnInteractionRadialFloorSelection;
 			
 			toolbar.IsEnabled.Changed -= OnToolbarIsEnabled;
 		}
@@ -34,9 +46,9 @@ namespace Lunra.Hothouse.Presenters
 			
 			View.Reset();
 
-			View.GatherClick += OnGatherClick;
-			View.BuildFireClick += OnBuildFireClick;
-			View.BuildBedClick += OnBuildBedClick;
+			View.ClearanceClick += OnClearanceClick;
+			View.ConstructFireClick += OnConstructFireClick;
+			View.ConstructBedClick += OnConstructBedClick;
 			
 			ShowView(instant: true);
 		}
@@ -63,54 +75,79 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 		
-		#region GameInputModel Events
-		// void OnGameInputFloor(Input)
+		#region InteractionModel Events
+		void OnInteractionRadialFloorSelection(Interaction.Generic interaction)
+		{
+			switch (toolbar.Task.Value)
+			{
+				case ToolbarModel.Tasks.Clearance:
+					toolbar.ClearanceTask.Value = interaction;
+					break;
+				case ToolbarModel.Tasks.Construction:
+					toolbar.ConstructionTask.Value = interaction;
+					break;
+				case ToolbarModel.Tasks.None: break;
+				default:
+					Debug.LogError("Unrecognized Task: "+toolbar.Task.Value);
+					break;
+			}
+		}
 		#endregion
 		
 		#region View Events
-		void OnGatherClick()
+		void OnClearanceClick()
 		{
-			// if (game.Interaction.Value.Type == gat)
+			View.ClearanceSelected = ToggleTask(ToolbarModel.Tasks.Clearance);
+		}
+
+		void OnConstructFireClick()
+		{
+			View.ConstructFireSelected = ToggleTask(
+				ToolbarModel.Tasks.Construction,
+				Buildings.Bonfire
+			);
 			
-			// game.Interaction.Value =
 		}
 		
-		void OnBuildFireClick()
+		void OnConstructBedClick()
 		{
-			
-		}
-		
-		void OnBuildBedClick()
-		{
-			
+			View.ConstructBedSelected = ToggleTask(
+				ToolbarModel.Tasks.Construction,
+				Buildings.Bedroll
+			);
 		}
 		#endregion
 		
 		#region Utility
-		/*
-		void ToggleOrChangeInteraction(Interaction.Types type)
+		bool ToggleTask(
+			ToolbarModel.Tasks task,
+			Buildings building = Buildings.Unknown
+		)
 		{
-			Assert.IsFalse(type == Interaction.Types.None, "It should not be possible to toggle to "+nameof(Interaction.Types.None));
-			
-			if (type == game.Interaction.Value.Type)
+			Assert.IsFalse(task == ToolbarModel.Tasks.None, "It should not be possible to toggle to "+nameof(ToolbarModel.Tasks.None));
+
+			switch (task)
 			{
-				game.Interaction.Value = Interaction.None();
-				return;
+				case ToolbarModel.Tasks.Clearance:
+					task = task == toolbar.Task.Value ? ToolbarModel.Tasks.None : task;
+					break;
+				case ToolbarModel.Tasks.Construction:
+					task = toolbar.Building.Value == building ? ToolbarModel.Tasks.None : task;
+					break;
+				default:
+					Debug.LogError("Unrecognized Task: " + task);
+					break;
 			}
-			//
-			// switch (type)
-			// {
-			// 	case Interaction.Types.AddClearance:
-			// 		game.Interaction.Value = Interaction.AddClearanceIdle();
-			// 		break;
-			// 	case Interaction.Types.Construct:
-			// 		break;
-			// 	default:
-			// 		Debug.LogError("Unrecognized Interaction.Type: "+type);
-			// 		break;
-			// }
+			
+			toolbar.Task.Value = task;
+			toolbar.Building.Value = task == ToolbarModel.Tasks.None ? Buildings.Unknown : building;
+
+			View.ClearanceSelected = false;
+			View.ConstructFireSelected = false;
+			View.ConstructBedSelected = false;
+			
+			return task != ToolbarModel.Tasks.None;
 		}
-		*/
 		#endregion
 	}
 }

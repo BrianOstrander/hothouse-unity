@@ -42,6 +42,8 @@ namespace Lunra.Hothouse.Models
 					end
 				);
 			}
+			
+			public bool RadiusContains(Vector3 position) => Vector3.Distance(Begin, position) < Delta.magnitude;
 
 			public override string ToString()
 			{
