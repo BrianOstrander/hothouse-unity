@@ -70,7 +70,7 @@ namespace Lunra.Hothouse.Ai
 			path = new NavMeshPath();
 			entrancePosition = Vector3.zero;
 
-			foreach (var entrance in building.Entrances.Value)
+			foreach (var entrance in building.Entrances.Value.OrderBy(e => Vector3.Distance(e.Position, beginPosition)))
 			{
 				if (entrance.State != Entrance.States.Available) continue;
 
