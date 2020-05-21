@@ -17,16 +17,18 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
-		public SelectionModel Selection  { get; } = new SelectionModel();
+		public CursorModel Cursor  { get; } = new CursorModel();
+		public ToolbarModel Toolbar { get; } = new ToolbarModel();
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		
-		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
-		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
-		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
-		public FloraPoolModel Flora { get; } = new FloraPoolModel();
 		public GenericPrefabPoolModel<RoomPrefabModel> Rooms { get; } = new GenericPrefabPoolModel<RoomPrefabModel>();
 		public GenericPrefabPoolModel<DoorPrefabModel> Doors { get; } = new GenericPrefabPoolModel<DoorPrefabModel>();
+		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
+		
+		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
+		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
 		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
+		public FloraPoolModel Flora { get; } = new FloraPoolModel();
 
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc
@@ -48,6 +50,9 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region NonSerialized
+		Interaction interaction = Models.Interaction.None();
+		[JsonIgnore] public ListenerProperty<Interaction> Interaction { get; }
+		
 		[JsonIgnore] public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
 		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
@@ -80,6 +85,8 @@ namespace Lunra.Hothouse.Models
 			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
 			LastLightUpdate = new ListenerProperty<LightDelta>(value => lastLightUpdate = value, () => lastLightUpdate);
 			GameResult = new ListenerProperty<GameResult>(value => gameResult = value, () => gameResult);
+			
+			Interaction = new ListenerProperty<Interaction>(value => interaction = value, () => interaction);
 		}
 
 		public void TriggerSimulationInitialize()

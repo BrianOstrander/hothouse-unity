@@ -37,11 +37,11 @@ namespace Lunra.Hothouse.Views
 
 			Description = string.Empty;
 			ButtonDescription = string.Empty;
-			Click = ActionExtensions.Empty;
+			Click = null;
 		}
 
 		#region Events
-		public void OnClick() => Click();
+		public void OnClick() => Click?.Invoke();
 		#endregion
 	}
 

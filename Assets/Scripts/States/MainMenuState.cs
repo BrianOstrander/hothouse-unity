@@ -78,6 +78,8 @@ namespace Lunra.Hothouse.Services
 			game.SimulationTimeConversion.Value = 1f / 10f;
 			
 			game.WorldCamera.IsEnabled.Value = true;
+			game.FloraEffects.IsEnabled.Value = true;
+			game.Toolbar.IsEnabled.Value = true;
 
 			void initializeRoom(RoomPrefabModel room)
 			{

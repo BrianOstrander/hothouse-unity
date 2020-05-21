@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class SelectionModel : Model
+	public class CursorModel : Model
 	{
 		public enum States
 		{
@@ -50,7 +50,7 @@ namespace Lunra.Hothouse.Models
 		#region Non Serialized
 		#endregion
 		
-		public SelectionModel()
+		public CursorModel()
 		{
 			Current = new ListenerProperty<Selection>(value => current = value, () => current);
 		}

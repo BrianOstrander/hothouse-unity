@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class SelectionView : View
+	public class CursorView : View
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null

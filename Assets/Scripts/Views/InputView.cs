@@ -2,5 +2,5 @@
  
 namespace Lunra.Hothouse.Views
 {
-	public class EventSystemView : View { }
+	public class InputView : View { }
 }

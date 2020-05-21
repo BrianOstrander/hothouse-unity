@@ -54,13 +54,12 @@ namespace Lunra.Hothouse.Services
 		{
 			new NavigationMeshPresenter(Payload.Game);
 			
-			Payload.Game.FloraEffects.IsEnabled.Value = true; // This should probably be true by default or on init...
-
 			new GameResultPresenter(Payload.Game, Payload.Preferences);
-			new GenericPresenter<EventSystemView>().Show();
+			new GenericPresenter<InputView>().Show();
 			
 			new WorldCameraPresenter(Payload.Game);
-			new SelectionPresenter(Payload.Game);
+			new CursorPresenter(Payload.Game);
+			new ToolbarPresenter(Payload.Game);
 			new FloraEffectsPresenter(Payload.Game);
 
 			Payload.Game.Rooms.Initialize(m => new RoomPrefabPresenter(Payload.Game, m));

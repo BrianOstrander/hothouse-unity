@@ -4,24 +4,25 @@ using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using UnityEngine;
+using UnityInput = UnityEngine.Input;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class SelectionPresenter : Presenter<SelectionView>
+	public class CursorPresenter : Presenter<CursorView>
 	{
 		GameModel game;
-		SelectionModel selection;
+		CursorModel cursor;
 
-		public SelectionPresenter(
+		public CursorPresenter(
 			GameModel game
 		)
 		{
 			this.game = game;
-			selection = game.Selection;
+			cursor = game.Cursor;
 
 			game.SimulationInitialize += OnGameSimulationInitialize;
 			
-			selection.Current.Changed += OnSelectionCurrent;
+			cursor.Current.Changed += OnCursorCurrent;
 
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 		}
@@ -30,7 +31,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			
-			selection.Current.Changed -= OnSelectionCurrent;
+			cursor.Current.Changed -= OnCursorCurrent;
 			
 			App.Heartbeat.Update -= OnHeartbeatUpdate;
 		}
@@ -38,9 +39,9 @@ namespace Lunra.Hothouse.Presenters
 		#region Heartbeat Events
 		void OnHeartbeatUpdate()
 		{
-			if (Input.GetMouseButtonDown(0)) OnInputMousePrimaryDown();
-			else if (Input.GetMouseButton(0)) OnInputMousePrimaryPressed();
-			else if (Input.GetMouseButtonUp(0)) OnInputMousePrimaryUp();
+			if (UnityInput.GetMouseButtonDown(0)) OnInputMousePrimaryDown();
+			else if (UnityInput.GetMouseButton(0)) OnInputMousePrimaryPressed();
+			else if (UnityInput.GetMouseButtonUp(0)) OnInputMousePrimaryUp();
 			
 			// var hits = Physics.RaycastAll(
 			// 	game.WorldCamera.CameraInstance.Value.ScreenPointToRay(Input.mousePosition),
@@ -58,27 +59,27 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (!HasCollision(out var hit)) return;
 			
-			selection.Current.Value = SelectionModel.Selection.Highlighting(hit.point, hit.point);
+			cursor.Current.Value = CursorModel.Selection.Highlighting(hit.point, hit.point);
 		}
 		
 		void OnInputMousePrimaryPressed()
 		{
-			if (selection.Current.Value.State != SelectionModel.States.Highlighting) return;
+			if (cursor.Current.Value.State != CursorModel.States.Highlighting) return;
 
 			var currentRay = CurrentRay;
-			if (!selection.Current.Value.Surface.Raycast(currentRay, out var surfaceDistance)) return;
+			if (!cursor.Current.Value.Surface.Raycast(currentRay, out var surfaceDistance)) return;
 			
-			selection.Current.Value = SelectionModel.Selection.Highlighting(
-				selection.Current.Value.Begin,
+			cursor.Current.Value = CursorModel.Selection.Highlighting(
+				cursor.Current.Value.Begin,
 				currentRay.origin + (currentRay.direction * surfaceDistance)
 			);
 		}
 		
 		void OnInputMousePrimaryUp()
 		{
-			if (selection.Current.Value.State != SelectionModel.States.Highlighting) return;
+			if (cursor.Current.Value.State != CursorModel.States.Highlighting) return;
 
-			selection.Current.Value = selection.Current.Value.NewState(SelectionModel.States.Selected);
+			cursor.Current.Value = cursor.Current.Value.NewState(CursorModel.States.Selected);
 		}
 		#endregion
 		
@@ -89,19 +90,19 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 		
-		#region SelectionModel Events
-		void OnSelectionCurrent(SelectionModel.Selection current)
+		#region CursorModel Events
+		void OnCursorCurrent(CursorModel.Selection current)
 		{
 			switch (current.State)
 			{
-				case SelectionModel.States.Highlighting:
+				case CursorModel.States.Highlighting:
 					View.Highlight(current.Begin, current.End);
 					foreach (var clearable in game.Clearables)
 					{
 						clearable.SelectionState.Value = current.Contains(clearable.Position.Value) ? SelectionStates.Highlighted : SelectionStates.Deselected;
 					}
 					break;
-				case SelectionModel.States.Selected:
+				case CursorModel.States.Selected:
 					View.Select(current.Begin, current.End);
 					foreach (var clearable in game.Clearables)
 					{
@@ -116,7 +117,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region Utility
-		Ray CurrentRay => game.WorldCamera.CameraInstance.Value.ScreenPointToRay(Input.mousePosition);
+		Ray CurrentRay => game.WorldCamera.CameraInstance.Value.ScreenPointToRay(UnityInput.mousePosition);
 		bool HasCollision(out RaycastHit hit) => Physics.Raycast(CurrentRay, out hit, float.MaxValue, LayerMasks.Floor);
 		#endregion
 	}
