@@ -55,10 +55,10 @@ namespace Lunra.Hothouse.Services
 			new NavigationMeshPresenter(Payload.Game);
 			
 			new GameResultPresenter(Payload.Game, Payload.Preferences);
-			new GameInputPresenter(Payload.Game.Input);
+			new GameInteractionPresenter(Payload.Game.Interaction);
 			
 			new WorldCameraPresenter(Payload.Game);
-			new CursorPresenter(Payload.Game);
+			new RadialCursorPresenter(Payload.Game);
 			new ToolbarPresenter(Payload.Game);
 			new FloraEffectsPresenter(Payload.Game);
 

@@ -3,21 +3,19 @@ using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using UnityEngine;
-using Input = Lunra.Hothouse.Models.Input;
-using UnityInput = UnityEngine.Input;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class InputPresenter<M> : Presenter<InputView>
-		where M : InputModel
+	public class InputPresenter<M> : Presenter<InteractionView>
+		where M : InteractionModel
 	{
-		protected M Input { get; private set; }
+		protected M Model { get; private set; }
 
 		public InputPresenter(
-			M input
+			M model
 		)
 		{
-			Input = input;
+			Model = model;
 
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 			
@@ -35,50 +33,50 @@ namespace Lunra.Hothouse.Presenters
 
 		protected virtual void UpdateInputs()
 		{
-			if (UnityInput.GetMouseButtonDown(0))
+			if (Input.GetMouseButtonDown(0))
 			{
-				Input.Display.Value = new Input.Display(
-					Models.Input.States.Begin,
-					Models.Input.Vector3Delta.Point(
-						UnityInput.mousePosition
+				Model.Display.Value = new Interaction.Display(
+					Models.Interaction.States.Begin,
+					Models.Interaction.Vector3Delta.Point(
+						Input.mousePosition
 					),
-					Models.Input.Vector3Delta.Point(
-						Input.Camera.Value.ScreenToViewportPoint(UnityInput.mousePosition)
+					Models.Interaction.Vector3Delta.Point(
+						Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 					)
 				);
 			}
-			else if (UnityInput.GetMouseButton(0))
+			else if (Input.GetMouseButton(0))
 			{
-				Input.Display.Value = Input.Display.Value.NewEnds(
-					Models.Input.States.Active,
-					UnityInput.mousePosition,
-					Input.Camera.Value.ScreenToViewportPoint(UnityInput.mousePosition)
+				Model.Display.Value = Model.Display.Value.NewEnds(
+					Models.Interaction.States.Active,
+					Input.mousePosition,
+					Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 				);
 			}
-			else if (UnityInput.GetMouseButtonUp(0))
+			else if (Input.GetMouseButtonUp(0))
 			{
-				Input.Display.Value = Input.Display.Value.NewEnds(
-					Models.Input.States.End,
-					UnityInput.mousePosition,
-					Input.Camera.Value.ScreenToViewportPoint(UnityInput.mousePosition)
+				Model.Display.Value = Model.Display.Value.NewEnds(
+					Models.Interaction.States.End,
+					Input.mousePosition,
+					Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 				);
 			}
 			else
 			{
-				Input.Display.Value = new Input.Display(
-					Models.Input.States.Idle,
-					Models.Input.Vector3Delta.Point(
-						UnityInput.mousePosition
+				Model.Display.Value = new Interaction.Display(
+					Models.Interaction.States.Idle,
+					Models.Interaction.Vector3Delta.Point(
+						Input.mousePosition
 					),
-					Models.Input.Vector3Delta.Point(
-						Input.Camera.Value.ScreenToViewportPoint(UnityInput.mousePosition)
+					Models.Interaction.Vector3Delta.Point(
+						Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 					)
 				);
 			}
 		}
 
 		#region Utility
-		protected Ray CurrentRay => Input.Camera.Value.ScreenPointToRay(UnityInput.mousePosition);
+		protected Ray CurrentRay => Model.Camera.Value.ScreenPointToRay(Input.mousePosition);
 		protected bool HasCollision(
 			out RaycastHit hit,
 			int layerMask

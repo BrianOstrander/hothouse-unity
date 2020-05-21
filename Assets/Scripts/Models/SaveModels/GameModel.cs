@@ -16,7 +16,6 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
-		public CursorModel Cursor  { get; } = new CursorModel();
 		public ToolbarModel Toolbar { get; } = new ToolbarModel();
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		
@@ -49,11 +48,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region NonSerialized
-		[JsonIgnore] public GameInputModel Input { get; } = new GameInputModel();
-		
-		Interaction interaction = Models.Interaction.None();
-		[JsonIgnore] public ListenerProperty<Interaction> Interaction { get; }
-		
+		[JsonIgnore] public GameInteractionModel Interaction { get; } = new GameInteractionModel();
 		[JsonIgnore] public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
 		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
@@ -86,8 +81,6 @@ namespace Lunra.Hothouse.Models
 			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
 			LastLightUpdate = new ListenerProperty<LightDelta>(value => lastLightUpdate = value, () => lastLightUpdate);
 			GameResult = new ListenerProperty<GameResult>(value => gameResult = value, () => gameResult);
-			
-			Interaction = new ListenerProperty<Interaction>(value => interaction = value, () => interaction);
 		}
 
 		public void TriggerSimulationInitialize()

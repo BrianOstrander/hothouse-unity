@@ -2,5 +2,5 @@
  
 namespace Lunra.Hothouse.Views
 {
-	public class InputView : View { }
+	public class InteractionView : View { }
 }

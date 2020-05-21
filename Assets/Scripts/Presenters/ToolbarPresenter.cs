@@ -1,9 +1,6 @@
-using System;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
-using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace Lunra.Hothouse.Presenters
 {
@@ -66,6 +63,10 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 		
+		#region GameInputModel Events
+		// void OnGameInputFloor(Input)
+		#endregion
+		
 		#region View Events
 		void OnGatherClick()
 		{
@@ -86,6 +87,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region Utility
+		/*
 		void ToggleOrChangeInteraction(Interaction.Types type)
 		{
 			Assert.IsFalse(type == Interaction.Types.None, "It should not be possible to toggle to "+nameof(Interaction.Types.None));
@@ -108,6 +110,7 @@ namespace Lunra.Hothouse.Presenters
 			// 		break;
 			// }
 		}
+		*/
 		#endregion
 	}
 }
