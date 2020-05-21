@@ -41,6 +41,11 @@ namespace Lunra.Hothouse.Models
 					end
 				);
 			}
+
+			public override string ToString()
+			{
+				return "[ " + Begin + " , " + End + " ] ";
+			}
 		}
 		
 		public struct Display
@@ -82,6 +87,10 @@ namespace Lunra.Hothouse.Models
 		
 		public struct Generic
 		{
+			public static Generic Default() => new Generic(States.Idle, new Vector3Delta());
+			public static Generic Idle(Vector3 position) => new Generic(States.Idle, Vector3Delta.Point(position));
+			public static Generic Begin(Vector3 position) => new Generic(States.Begin, Vector3Delta.Point(position));
+			
 			public States State { get; }
 			public Vector3Delta Position { get; }
 
@@ -92,6 +101,22 @@ namespace Lunra.Hothouse.Models
 			{
 				State = state;
 				Position = position;
+			}
+
+			public Generic NewEnd(
+				States state,
+				Vector3 positionEnd
+			)
+			{
+				return new Generic(
+					state,
+					Position.NewEnd(positionEnd)
+				);
+			}
+
+			public override string ToString()
+			{
+				return nameof(Input) + "." + nameof(Generic) + ": "+State+"\n"+Position;
 			}
 		}
 	}

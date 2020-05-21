@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
-using Lunra.Hothouse.Models.AgentModels;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
@@ -50,6 +49,8 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region NonSerialized
+		[JsonIgnore] public GameInputModel Input { get; } = new GameInputModel();
+		
 		Interaction interaction = Models.Interaction.None();
 		[JsonIgnore] public ListenerProperty<Interaction> Interaction { get; }
 		

@@ -11,15 +11,17 @@ namespace Lunra.Hothouse.Presenters
 	public class InputPresenter<M> : Presenter<InputView>
 		where M : InputModel
 	{
-		protected InputModel Input { get; private set; }
+		protected M Input { get; private set; }
 
 		public InputPresenter(
-			InputModel input
+			M input
 		)
 		{
 			Input = input;
 
 			App.Heartbeat.Update += OnHeartbeatUpdate;
+			
+			ShowView(instant: true);
 		}
 
 		protected override void UnBind()

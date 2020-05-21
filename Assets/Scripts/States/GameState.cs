@@ -55,7 +55,7 @@ namespace Lunra.Hothouse.Services
 			new NavigationMeshPresenter(Payload.Game);
 			
 			new GameResultPresenter(Payload.Game, Payload.Preferences);
-			new GenericPresenter<InputView>().Show();
+			new GameInputPresenter(Payload.Game.Input);
 			
 			new WorldCameraPresenter(Payload.Game);
 			new CursorPresenter(Payload.Game);
