@@ -69,12 +69,14 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (IsNotActive) return;
 			if (Model.IsMarkedForClearance.Value) return;
-
+			if (interaction.State == Interaction.States.OutOfRange) return;
+			
 			var radiusContains = interaction.Position.RadiusContains(Model.Position.Value);
 			
 			switch (interaction.State)
 			{
-				case Interaction.States.Idle: break;
+				case Interaction.States.Idle:
+					break;
 				case Interaction.States.Begin:
 				case Interaction.States.Active:
 					Model.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;

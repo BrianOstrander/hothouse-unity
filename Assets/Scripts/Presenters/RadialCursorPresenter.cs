@@ -32,7 +32,9 @@ namespace Lunra.Hothouse.Presenters
 		{
 			switch (interaction.State)
 			{
-				case Interaction.States.Idle: break;
+				case Interaction.States.Idle:
+				case Interaction.States.OutOfRange:
+					break;
 				case Interaction.States.Begin:
 					View.Reset();
 					View.Interaction(interaction.State, interaction.Position);

@@ -1,4 +1,3 @@
-using System;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
@@ -114,6 +113,22 @@ namespace Lunra.Hothouse.Presenters
 				float.MaxValue,
 				layerMask
 			);
+		}
+		
+		protected bool HasCollision(
+			out Vector3 hitPosition,
+			Plane plane
+		)
+		{
+			hitPosition = Vector3.zero;
+			var ray = CurrentRay;
+			if (plane.Raycast(ray, out var distance))
+			{
+				hitPosition = ray.origin + (ray.direction * distance);
+				return true;
+			}
+
+			return false;
 		}
 		#endregion
 	}

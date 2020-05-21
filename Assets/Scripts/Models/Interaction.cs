@@ -7,11 +7,12 @@ namespace Lunra.Hothouse.Models
 		public enum States
 		{
 			Unknown = 0,
-			Idle = 10,
-			Begin = 20,
-			Active = 30,
-			End = 40,
-			Cancel = 50
+			OutOfRange = 10,
+			Idle = 20,
+			Begin = 30,
+			Active = 40,
+			End = 50,
+			Cancel = 60
 		}
 
 		public struct Vector3Delta
@@ -103,6 +104,14 @@ namespace Lunra.Hothouse.Models
 			{
 				State = state;
 				Position = position;
+			}
+
+			public Generic NewState(States state)
+			{
+				return new Generic(
+					state,
+					Position
+				);
 			}
 
 			public Generic NewEnd(

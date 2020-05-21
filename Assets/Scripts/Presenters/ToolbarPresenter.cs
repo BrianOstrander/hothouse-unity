@@ -84,7 +84,7 @@ namespace Lunra.Hothouse.Presenters
 					toolbar.ClearanceTask.Value = interaction;
 					break;
 				case ToolbarModel.Tasks.Construction:
-					toolbar.ConstructionTask.Value = interaction;
+					// toolbar.ConstructionTask.Value = interaction;
 					break;
 				case ToolbarModel.Tasks.None: break;
 				default:
@@ -145,6 +145,17 @@ namespace Lunra.Hothouse.Presenters
 			View.ClearanceSelected = false;
 			View.ConstructFireSelected = false;
 			View.ConstructBedSelected = false;
+
+			if (task == ToolbarModel.Tasks.Construction)
+			{
+				game.Buildings.Activate(
+					building,
+					game.Rooms.FirstActive().Id.Value,
+					Vector3.zero,
+					Quaternion.identity,
+					BuildingStates.Placing
+				);
+			}
 			
 			return task != ToolbarModel.Tasks.None;
 		}

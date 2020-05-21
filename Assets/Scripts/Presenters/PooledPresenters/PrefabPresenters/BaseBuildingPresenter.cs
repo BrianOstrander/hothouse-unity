@@ -150,7 +150,11 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 
-		#region Building Events
+		#region InteractionModel Events
+		
+		#endregion
+		
+		#region BuildingModel Events
 		void OnBuildingInventory(Inventory inventory)
 		{
 			if (IsNotActive) return;
