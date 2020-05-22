@@ -1,4 +1,5 @@
-﻿using Lunra.Hothouse.Models;
+﻿using System;
+using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
 
@@ -13,7 +14,9 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{
 			Model.MeleeRangeBonus.Value = View.MeleeRangeBonus;
-			
+
+			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
+				
 			Model.SelectionState.Changed += OnClearableSelectionState;
 			Model.Health.Changed += OnClearableHealth;
 			
@@ -22,6 +25,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
+			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
+			
 			Model.SelectionState.Changed -= OnClearableSelectionState;
 			Model.Health.Changed -= OnClearableHealth;
 			
@@ -36,11 +41,12 @@ namespace Lunra.Hothouse.Presenters
 		#region ClearableModel Events
 		void OnClearableSelectionState(SelectionStates selectionState)
 		{
+			if (IsNotActive) return;
 			if (View.NotVisible) return;
 			
 			switch (selectionState)
 			{
-				case SelectionStates.Deselected:
+				case SelectionStates.NotSelected:
 					if (!Model.IsMarkedForClearance.Value) View.Deselect();
 					break;
 				case SelectionStates.Highlighted: View.Highlight(); break;
@@ -53,7 +59,38 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnClearableHealth(float health)
 		{
+			if (IsNotActive) return;
 			if (Mathf.Approximately(0f, health)) Model.PooledState.Value = PooledStates.InActive;
+		}
+		#endregion
+
+		#region ToolbarModel Events
+		void OnToolbarClearanceTask(Interaction.Generic interaction)
+		{
+			if (IsNotActive) return;
+			if (Model.IsMarkedForClearance.Value) return;
+			if (interaction.State == Interaction.States.OutOfRange) return;
+			
+			var radiusContains = interaction.Position.RadiusContains(Model.Position.Value);
+			
+			switch (interaction.State)
+			{
+				case Interaction.States.Idle:
+					break;
+				case Interaction.States.Begin:
+				case Interaction.States.Active:
+					Model.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
+					break;
+				case Interaction.States.End:
+					Model.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
+					break;
+				case Interaction.States.Cancel:
+					Model.SelectionState.Value = SelectionStates.NotSelected;
+					break;
+				default:
+					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
+					break;
+			}
 		}
 		#endregion
 		

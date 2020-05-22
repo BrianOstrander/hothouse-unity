@@ -78,6 +78,8 @@ namespace Lunra.Hothouse.Services
 			game.SimulationTimeConversion.Value = 1f / 10f;
 			
 			game.WorldCamera.IsEnabled.Value = true;
+			game.FloraEffects.IsEnabled.Value = true;
+			game.Toolbar.IsEnabled.Value = true;
 
 			void initializeRoom(RoomPrefabModel room)
 			{
@@ -122,31 +124,31 @@ namespace Lunra.Hothouse.Services
 			// FLORA
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Fast,
+				FloraSpecies.Grass,
 				room0.Id.Value,
 				new Vector3(7f, 0f, -4f)
 			);
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Fast,
+				FloraSpecies.Grass,
 				room0.Id.Value,
 				new Vector3(10f, 0f, -4f)
 			);
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Fast,
+				FloraSpecies.Grass,
 				room0.Id.Value,
 				new Vector3(4f, 0f, -4f)
 			);
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Edible,
+				FloraSpecies.Wheat,
 				room0.Id.Value,
 				new Vector3(-4f, 0f, -5f)
 			);
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Edible,
+				FloraSpecies.Wheat,
 				room0.Id.Value,
 				new Vector3(-6f, 0f, -5f)
 			);
@@ -179,7 +181,7 @@ namespace Lunra.Hothouse.Services
 			);
 			dweller1.Id.Value = "1";
 			dweller1.Job.Value = Jobs.Construction;
-			// dweller1.IsDebugging = true;
+			dweller1.IsDebugging = true;
 			
 			// BUILDINGS
 			
@@ -191,6 +193,7 @@ namespace Lunra.Hothouse.Services
 				BuildingStates.Operating
 			);
 			
+			/*
 			game.Buildings.Activate(
 				Buildings.Bonfire,
 				room0.Id.Value,
@@ -206,14 +209,17 @@ namespace Lunra.Hothouse.Services
 				Quaternion.identity,
 				BuildingStates.Constructing
 			);
+			*/
 			
-			game.Buildings.Activate(
+			var wagon = game.Buildings.Activate(
 				Buildings.StartingWagon,
 				room0.Id.Value,
 				new Vector3(0f, -0.8386866f, 4f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
+
+			wagon.Inventory.Value += (Inventory.Types.Stalks, 4);
 
 			done(Result<GameModel>.Success(game));
 		}

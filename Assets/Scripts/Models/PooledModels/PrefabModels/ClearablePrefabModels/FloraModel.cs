@@ -7,9 +7,6 @@ namespace Lunra.Hothouse.Models
 	public class FloraModel : ClearableModel
 	{
 		#region Serialized
-		[JsonProperty] string[] validPrefabIds = new string[0];
-		[JsonIgnore] public ListenerProperty<string[]> ValidPrefabIds { get; }
-		
 		[JsonProperty] FloraSpecies species;
 		[JsonIgnore] public ListenerProperty<FloraSpecies> Species { get; }
 
@@ -39,7 +36,6 @@ namespace Lunra.Hothouse.Models
 		
 		public FloraModel()
 		{
-			ValidPrefabIds = new ListenerProperty<string[]>(value => validPrefabIds = value, () => validPrefabIds);
 			Species = new ListenerProperty<FloraSpecies>(value => species = value, () => species);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);

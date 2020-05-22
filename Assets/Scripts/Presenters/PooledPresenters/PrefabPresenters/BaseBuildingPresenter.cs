@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
@@ -36,6 +37,9 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			// Misc Bindings
+			Game.Toolbar.ConstructionTask.Changed += OnToolbarConstruction;
+			Game.Toolbar.Task.Changed += OnToolbarTask;
+
 			Model.Inventory.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
@@ -54,6 +58,9 @@ namespace Lunra.Hothouse.Presenters
 			Model.BuildingState.Changed -= OnLightBuildingState;
 			
 			// Misc UnBindings
+			Game.Toolbar.ConstructionTask.Changed -= OnToolbarConstruction;
+			Game.Toolbar.Task.Changed -= OnToolbarTask;
+			
 			Model.Inventory.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
@@ -150,7 +157,48 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 
-		#region Building Events
+		#region InteractionModel Events
+		void OnToolbarConstruction(Interaction.Generic interaction)
+		{
+			if (IsNotActive) return;
+			if (Model.BuildingState.Value != BuildingStates.Placing) return;
+
+			switch (interaction.State)
+			{
+				case Interaction.States.OutOfRange:
+					if (View.Visible) Close();
+					break;
+				case Interaction.States.Idle:
+				case Interaction.States.Begin:
+				case Interaction.States.Active:
+					if (View.NotVisible) Show();
+					Model.Position.Value = interaction.Position.Begin;
+					break;
+				case Interaction.States.Cancel:
+					break;
+				case Interaction.States.End:
+					Model.BuildingState.Value = BuildingStates.Constructing;
+					// TODO: There should probably be a better way to handle this...
+					Game.Toolbar.Task.Value = ToolbarModel.Tasks.None;
+					Game.Toolbar.Building.Value = Buildings.Unknown;
+					break;
+				default:
+					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
+					break;
+			}
+		}
+
+		void OnToolbarTask(ToolbarModel.Tasks task)
+		{
+			if (IsNotActive) return;
+			if (Model.BuildingState.Value != BuildingStates.Placing) return;
+			if (task == ToolbarModel.Tasks.Construction) return;
+
+			Model.PooledState.Value = PooledStates.InActive;
+		}
+		#endregion
+		
+		#region BuildingModel Events
 		void OnBuildingInventory(Inventory inventory)
 		{
 			if (IsNotActive) return;
@@ -227,10 +275,24 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 		
+		#region ITransform Events
+		protected override void OnPosition(Vector3 position)
+		{
+			base.OnPosition(position);
+			if (IsActive && View.Visible) RecalculateEntrances();
+		}
+
+		protected override void OnRotation(Quaternion rotation)
+		{
+			base.OnRotation(rotation);
+			if (IsActive && View.Visible) RecalculateEntrances();
+		}
+		#endregion
+		
 		#region View Events
 		protected override void OnViewShown()
 		{
-			Model.Entrances.Value = View.Entrances.Select(e => new Entrance(e, Entrance.States.Available)).ToArray();
+			RecalculateEntrances();
 			View.IsNavigationModified = Model.BuildingState.Value == BuildingStates.Operating;
 			OnViewInitializeLighting();
 		}
@@ -262,5 +324,13 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		protected override bool QueueNavigationCalculation => Model.IsBuildingState(BuildingStates.Operating);
+		
+		#region Utility
+		void RecalculateEntrances()
+		{
+			if (View.NotVisible) return;
+			Model.Entrances.Value = View.Entrances.Select(e => new Entrance(e, Entrance.States.Available)).ToArray();
+		}
+		#endregion
 	}
 }

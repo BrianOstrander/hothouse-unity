@@ -3,7 +3,8 @@ namespace Lunra.Hothouse.Models
 	public enum FloraSpecies
 	{
 		Unknown = 0,
-		Fast = 10,
-		Edible = 20
+		Grass = 10,
+		Wheat = 20,
+		Shroom = 30
 	}
 }

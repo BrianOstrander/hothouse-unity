@@ -44,7 +44,11 @@ namespace Lunra.Hothouse.Presenters
 		protected virtual void Bind()
 		{
 			Model.PooledState.Changed += OnPooledState;
+			Model.Position.Changed += OnPosition;
+			Model.Rotation.Changed += OnRotation;
+			
 			Initialize();
+			
 			if (Game.IsSimulationInitialized) SimulationInitialize();
 			else Game.SimulationInitialize += SimulationInitialize;
 		}
@@ -52,6 +56,8 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Model.PooledState.Changed -= OnPooledState;
+			Model.Position.Changed -= OnPosition;
+			Model.Rotation.Changed -= OnRotation;
 			
 			Game.SimulationInitialize -= SimulationInitialize;
 		}
@@ -67,7 +73,7 @@ namespace Lunra.Hothouse.Presenters
 			OnSimulationInitialized();
 		}
 		
-		void Show()
+		protected void Show()
 		{
 			if (View.Visible) return;
 			
@@ -84,7 +90,7 @@ namespace Lunra.Hothouse.Presenters
 			ShowView(Game.NavigationMesh.Root.Value, true);
 		}
 
-		void Close()
+		protected void Close()
 		{
 			if (View.NotVisible) return;
 			
@@ -93,8 +99,8 @@ namespace Lunra.Hothouse.Presenters
 
 		void ViewSetTransform()
 		{
-			View.RootTransform.position = Model.Position.Value;
-			View.RootTransform.rotation = Model.Rotation.Value;
+			OnPosition(Model.Position.Value);
+			OnRotation(Model.Rotation.Value);
 		}
 		
 		#region Events
@@ -129,6 +135,22 @@ namespace Lunra.Hothouse.Presenters
 			{
 				Game.NavigationMesh.QueueCalculation();
 			}
+		}
+		#endregion
+		
+		#region ITransform Events
+		protected virtual void OnPosition(Vector3 position)
+		{
+			if (IsNotActive || View.NotVisible) return;
+
+			View.RootTransform.position = position;
+		}
+		
+		protected virtual void OnRotation(Quaternion rotation)
+		{
+			if (IsNotActive || View.NotVisible) return;
+			
+			View.RootTransform.rotation = rotation;
 		}
 		#endregion
 		

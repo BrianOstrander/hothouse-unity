@@ -3,9 +3,10 @@ namespace Lunra.Hothouse.Models
 	public enum BuildingStates
 	{
 		Unknown = 0,
-		Constructing = 10,
-		Operating = 20,
-		Salvaging = 30,
-		Decaying = 40
+		Placing = 10,
+		Constructing = 20,
+		Operating = 30,
+		Salvaging = 40,
+		Decaying = 50
 	}
 }

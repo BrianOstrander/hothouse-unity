@@ -17,6 +17,7 @@ namespace Lunra.Hothouse.Presenters
 			game.WorldCamera.IsEnabled.Changed += OnWorldCameraIsEnabled;
 			
 			game.WorldCamera.CameraInstance.Value = View.CameraInstance;
+			game.Interaction.Camera.Value = View.CameraInstance;
 		}
 
 		protected override void UnBind()

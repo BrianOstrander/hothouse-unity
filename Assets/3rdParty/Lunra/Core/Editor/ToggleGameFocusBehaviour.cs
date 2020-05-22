@@ -17,6 +17,7 @@ namespace Lunra.Editor.Core
 
 		static void OnPlayModeStateChanged(PlayModeStateChange playModeState)
 		{
+			if (!isFocusSceneEnabled.Value) return;
 			switch (playModeState)
 			{
 				case PlayModeStateChange.EnteredPlayMode:
@@ -27,6 +28,7 @@ namespace Lunra.Editor.Core
 
 		static void OnPauseStateChanged(PauseState pauseState)
 		{
+			if (!isFocusSceneEnabled.Value) return;
 			switch (pauseState)
 			{
 				case PauseState.Unpaused:

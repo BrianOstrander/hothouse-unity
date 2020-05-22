@@ -149,7 +149,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7233379631256066315}
-  m_Mesh: {fileID: 8688538118215608824, guid: 94cb8c6628e5942b39d0c59d20ccc632, type: 3}
+  m_Mesh: {fileID: 1971997408960008682, guid: 94cb8c6628e5942b39d0c59d20ccc632, type: 3}
 --- !u!23 &4585987135065609475
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -200,7 +200,7 @@ GameObject:
   - component: {fileID: 6278881143626287066}
   - component: {fileID: 6075714665180566942}
   m_Layer: 0
-  m_Name: Fast1FloraView
+  m_Name: Shroom0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -242,7 +242,8 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: fast1
+  prefabId: shroom0
+  meleeRangeBonus: 0
   maximumHeight: 3
   heightRoot: {fileID: 466282901779698963}
 --- !u!1 &8589697350366588450

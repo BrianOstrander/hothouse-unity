@@ -21,12 +21,16 @@ namespace Lunra.Hothouse.Presenters
 			
 			game.SimulationInitialize += OnGameSimulationInitialize;
 			game.SimulationUpdate += OnGameSimulationUpdate;
+
+			floraEffects.IsEnabled.Changed += OnFloraEffectsIsEnabled;
 		}
 
 		protected override void UnBind()
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			game.SimulationUpdate -= OnGameSimulationUpdate;
+			
+			floraEffects.IsEnabled.Changed -= OnFloraEffectsIsEnabled;
 		}
 		
 		void Show()
