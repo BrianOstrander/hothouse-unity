@@ -67,6 +67,8 @@ namespace Lunra.Hothouse.Models
 				{ Desires.Eat , 0.3f },
 				{ Desires.Sleep , 0.1f }
 			};
+
+			model.LowRationThreshold.Value = 1;
 		}
 	}
 }

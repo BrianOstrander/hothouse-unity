@@ -181,7 +181,7 @@ namespace Lunra.Hothouse.Services
 			);
 			dweller1.Id.Value = "1";
 			dweller1.Job.Value = Jobs.Construction;
-			dweller1.IsDebugging = true;
+			// dweller1.IsDebugging = true;
 			
 			// BUILDINGS
 			

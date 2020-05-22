@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 
 using UnityEngine;
@@ -136,6 +137,25 @@ namespace Lunra.Core
 		public static IEnumerable<T> Union<T>(this IEnumerable<T> source, T element)
 		{
 			return source.Union(Enumerable.Repeat(element, 1));
+		}
+
+		public static ReadOnlyDictionary<TKey, TElement> ToReadonlyDictionary<TKey, TElement>(
+			this Dictionary<TKey, TElement> source
+		)
+		{
+			return new ReadOnlyDictionary<TKey, TElement>(source);	
+		}
+		
+		public static ReadOnlyDictionary<TKey, TElement> ToReadonlyDictionary<TSource, TKey, TElement>(
+			this IEnumerable<TSource> source,
+			Func<TSource, TKey> keySelector,
+			Func<TSource, TElement> elementSelector
+		)
+		{
+			return source.ToDictionary(
+				keySelector,
+				elementSelector
+			).ToReadonlyDictionary();
 		}
 	}
 }

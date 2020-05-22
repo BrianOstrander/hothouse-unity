@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models.AgentModels;
 using Newtonsoft.Json;
@@ -34,7 +35,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] Inventory salvageInventory = Models.Inventory.Empty;
 		[JsonIgnore] public ListenerProperty<Inventory> SalvageInventory { get; }
 
-		[JsonProperty] DesireQuality[] desireQuality = new DesireQuality[0];
+		[JsonProperty] DesireQuality[] desireQualities = new DesireQuality[0];
 		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQualities { get; }
 
 		[JsonProperty] bool isLight;
@@ -63,7 +64,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		public bool IsBuildingState(BuildingStates buildingState) => BuildingState.Value == buildingState;
-
+		public bool IsDesireAvailable(Desires desire) => DesireQualities.Value.Any(d => d.Desire == desire && d.State == DesireQuality.States.Available);
 		
 		public BuildingModel()
 		{
@@ -75,7 +76,7 @@ namespace Lunra.Hothouse.Models
 			ConstructionInventoryCapacity = new ListenerProperty<InventoryCapacity>(value => constructionInventoryCapacity = value, () => constructionInventoryCapacity);
 			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);
 			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
-			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQuality = value, () => desireQuality);
+			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
 			IsLight = new ListenerProperty<bool>(value => isLight = value, () => isLight);
 			LightState = new ListenerProperty<LightStates>(value => lightState = value, () => lightState);
 			LightFuel = new ListenerProperty<Inventory>(value => lightFuel = value, () => lightFuel);

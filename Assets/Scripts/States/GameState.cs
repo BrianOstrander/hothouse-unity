@@ -4,9 +4,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Presenters;
-using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
-using Lunra.StyxMvp.Presenters;
 using Lunra.StyxMvp.Services;
 using UnityEngine;
 
@@ -31,6 +29,7 @@ namespace Lunra.Hothouse.Services
 		protected override void Begin()
 		{
 			App.S.PushBlocking(OnBeginLoadScenes);
+			App.S.PushBlocking(OnBeginInitializeCache);
 			App.S.PushBlocking(OnBeginInstantiatePresenters);
 			App.S.PushBlocking(OnBeginInitializeLighting);
 			App.S.PushBlocking(
@@ -48,6 +47,13 @@ namespace Lunra.Hothouse.Services
 					Scenes
 				)
 			);
+		}
+
+		void OnBeginInitializeCache(Action done)
+		{
+			Payload.Game.CalculateCache(); 
+			
+			done();
 		}
 
 		void OnBeginInstantiatePresenters(Action done)
@@ -114,6 +120,8 @@ namespace Lunra.Hothouse.Services
 			// );
 		}
 
+		string lastResult = string.Empty;
+
 		void OnHeartbeatUpdate()
 		{
 			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
@@ -129,6 +137,22 @@ namespace Lunra.Hothouse.Services
 				default:
 					Debug.LogError("Unrecognized LightingState: "+Payload.Game.LastLightUpdate.Value.State);
 					break;
+			}
+
+			Payload.Game.CalculateCache();
+
+			var result = "Results:";
+
+			foreach (var condition in EnumExtensions.GetValues(Condition.Types.Unknown))
+			{
+				// result += "\n - " + conditionType + " : " + Condition.Calculate(Payload.Game, conditionType);
+				result += "\n - " + condition + " : " + Payload.Game.Cache.Value.Conditions[condition];
+			}
+
+			if (lastResult != result)
+			{
+				lastResult = result;
+				Debug.Log(result);
 			}
 		}
 

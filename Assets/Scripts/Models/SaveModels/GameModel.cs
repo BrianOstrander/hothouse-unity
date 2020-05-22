@@ -67,6 +67,10 @@ namespace Lunra.Hothouse.Models
 			.Concat(Clearables);
 
 		[JsonIgnore] public Func<(string RoomId, Vector3 Position), float> CalculateMaximumLighting;
+
+		GameCache cache;
+		readonly ListenerProperty<GameCache> cacheListener;
+		[JsonIgnore] public ReadonlyProperty<GameCache> Cache { get; }
 		#endregion
 		
 		#region Events
@@ -81,6 +85,12 @@ namespace Lunra.Hothouse.Models
 			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
 			LastLightUpdate = new ListenerProperty<LightDelta>(value => lastLightUpdate = value, () => lastLightUpdate);
 			GameResult = new ListenerProperty<GameResult>(value => gameResult = value, () => gameResult);
+
+			Cache = new ReadonlyProperty<GameCache>(
+				value => cache = value,
+				() => cache,
+				out cacheListener
+			);
 		}
 
 		public void TriggerSimulationInitialize()
@@ -95,7 +105,9 @@ namespace Lunra.Hothouse.Models
 
 			SimulationInitialize();
 		}
-		
+
+		public void CalculateCache() => cacheListener.Value = cacheListener.Value.Calculate(this);
+
 		public IEnumerable<RoomPrefabModel> GetOpenAdjacentRooms(params string[] roomIds)
 		{
 			var results = Rooms.AllActive.Where(r => roomIds.Contains(r.RoomId.Value)).ToList();

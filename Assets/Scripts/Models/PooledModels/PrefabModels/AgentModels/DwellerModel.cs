@@ -38,6 +38,9 @@ namespace Lunra.Hothouse.Models.AgentModels
 		
 		[JsonProperty] float transferDistance;
 		[JsonIgnore] public ListenerProperty<float> TransferDistance { get; }
+		
+		[JsonProperty] int lowRationThreshold;
+		[JsonIgnore] public ListenerProperty<int> LowRationThreshold { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -63,6 +66,7 @@ namespace Lunra.Hothouse.Models.AgentModels
 			WithdrawalCooldown = new ListenerProperty<float>(value => withdrawalCooldown = value, () => withdrawalCooldown); 
 			DepositCooldown = new ListenerProperty<float>(value => depositCooldown = value, () => depositCooldown);
 			TransferDistance = new ListenerProperty<float>(value => transferDistance = value, () => transferDistance);
+			LowRationThreshold = new ListenerProperty<int>(value => lowRationThreshold = value, () => lowRationThreshold);
 		}
 	}
 }
