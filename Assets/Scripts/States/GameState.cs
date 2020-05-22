@@ -107,8 +107,9 @@ namespace Lunra.Hothouse.Services
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 			App.Heartbeat.LateUpdate += OnHeartbeatLateUpdate;
-
+			
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
+			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 			// App.Heartbeat.Wait(
 			// 	() =>
 			// 	{
@@ -126,6 +127,9 @@ namespace Lunra.Hothouse.Services
 		{
 			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
 			Payload.Game.SimulationUpdate();
+			
+			Payload.Game.SimulationPlaytimeElapsed.Value += TimeSpan.FromSeconds(Time.deltaTime);
+			Payload.Game.PlaytimeElapsed.Value += TimeSpan.FromSeconds(Time.unscaledDeltaTime);
 
 			switch (Payload.Game.LastLightUpdate.Value.State)
 			{

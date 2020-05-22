@@ -3,38 +3,6 @@ namespace Lunra.Hothouse.Models
 	public struct Hint
 	{
 		/*
-		Hint.DismissTriggers
-		- Unknown
-		- Timeout 
-		- ClickConfirm
-		- Condition
-
-			Hint.Conditions
-		- Unknown
-		- None
-		- SingleFire
-		- FireExtinguishing
-		- ZeroBeds
-		- LowRations
-		- LowStalks
-		- LowScrap
-		- ZeroOpenDoors
-
-		struct Hint.Condition
-		- Conditions[] All
-		- Conditions[] Any
-		- Conditions[] None
-		- bool IsTriggered(GameModel game)
-			- bool Evaluate(GameModel game, Conditions condition)
-
-		struct Hint
-		- Condition TriggerCondition
-		- DismissTriggers DismissTrigger
-		- float DismissTimeout
-		- Condition DismissCondition
-		- string Message
-		- States State
-
 		struct HintCollection
 		- Hint[] Hints
 		- States State
@@ -43,12 +11,31 @@ namespace Lunra.Hothouse.Models
 		- HintCollection[] HintCollections
 		*/
 
+		public enum States
+		{
+			Unknown = 0,
+			Idle = 10,
+			Active = 20,
+			Dismissed = 30
+		}
+
 		public enum DismissTriggers
 		{
 			Unknown = 0,
 			Timeout = 10,
-			Confirmed = 20,
-			Condition = 30
+			Condition = 20,
+			Confirmed = 30
 		}
+
+		States state;
+		string message;
+		Condition activateCondition;
+		
+		DismissTriggers dismissTrigger;
+
+		float dismissTimeout;
+		Condition dismissCondition;
+		
+		
 	}
 }

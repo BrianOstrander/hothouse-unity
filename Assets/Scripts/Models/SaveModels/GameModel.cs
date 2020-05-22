@@ -39,6 +39,12 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] DayTime simulationTime = DayTime.Zero;
 		[JsonIgnore] public ListenerProperty<DayTime> SimulationTime { get; }
+		
+		[JsonProperty] TimeSpan simulationPlaytimeElapsed;
+		[JsonIgnore] public ListenerProperty<TimeSpan> SimulationPlaytimeElapsed { get; }
+		
+		[JsonProperty] TimeSpan playtimeElapsed;
+		[JsonIgnore] public ListenerProperty<TimeSpan> PlaytimeElapsed { get; }
 
 		[JsonProperty] LightDelta lastLightUpdate = LightDelta.Default();
 		[JsonIgnore] public ListenerProperty<LightDelta> LastLightUpdate { get; }
@@ -83,9 +89,11 @@ namespace Lunra.Hothouse.Models
 			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
 			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
+			SimulationPlaytimeElapsed = new ListenerProperty<TimeSpan>(value => simulationPlaytimeElapsed = value, () => simulationPlaytimeElapsed);
+			PlaytimeElapsed = new ListenerProperty<TimeSpan>(value => playtimeElapsed = value, () => playtimeElapsed);
 			LastLightUpdate = new ListenerProperty<LightDelta>(value => lastLightUpdate = value, () => lastLightUpdate);
 			GameResult = new ListenerProperty<GameResult>(value => gameResult = value, () => gameResult);
-
+			
 			Cache = new ReadonlyProperty<GameCache>(
 				value => cache = value,
 				() => cache,
