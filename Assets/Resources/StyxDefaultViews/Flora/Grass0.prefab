@@ -200,7 +200,7 @@ GameObject:
   - component: {fileID: 6278881143626287066}
   - component: {fileID: 6075714665180566942}
   m_Layer: 0
-  m_Name: FastFloraView
+  m_Name: Grass0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -242,7 +242,8 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: fast0
+  prefabId: grass0
+  meleeRangeBonus: 0
   maximumHeight: 3
   heightRoot: {fileID: 466282901779698963}
 --- !u!1 &8589697350366588450

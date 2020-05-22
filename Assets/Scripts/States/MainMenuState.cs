@@ -124,31 +124,31 @@ namespace Lunra.Hothouse.Services
 			// FLORA
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Fast,
+				FloraSpecies.Grass,
 				room0.Id.Value,
 				new Vector3(7f, 0f, -4f)
 			);
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Fast,
+				FloraSpecies.Grass,
 				room0.Id.Value,
 				new Vector3(10f, 0f, -4f)
 			);
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Fast,
+				FloraSpecies.Grass,
 				room0.Id.Value,
 				new Vector3(4f, 0f, -4f)
 			);
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Edible,
+				FloraSpecies.Wheat,
 				room0.Id.Value,
 				new Vector3(-4f, 0f, -5f)
 			);
 			
 			game.Flora.ActivateAdult(
-				FloraSpecies.Edible,
+				FloraSpecies.Wheat,
 				room0.Id.Value,
 				new Vector3(-6f, 0f, -5f)
 			);

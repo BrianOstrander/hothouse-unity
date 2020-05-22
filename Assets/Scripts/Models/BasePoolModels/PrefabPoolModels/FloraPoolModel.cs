@@ -65,10 +65,10 @@ namespace Lunra.Hothouse.Models
 		static readonly Dictionary<FloraSpecies, SpeciesInfo> Infos = new Dictionary<FloraSpecies, SpeciesInfo>
 		{
 			{
-				FloraSpecies.Fast,
+				FloraSpecies.Grass,
 				new SpeciesInfo(
 					new FloatRange(1f, 2f), 
-					new FloatRange(1f, 2f), 
+					new FloatRange(4f, 8f), 
 					new FloatRange(0.5f, 1f),
 					Defaults.ReproductionFailureLimit,
 					100f,
@@ -76,13 +76,29 @@ namespace Lunra.Hothouse.Models
 					Defaults.GenerateDrops(Inventory.Types.Stalks),
 					new []
 					{
-						"fast0",
-						"fast1"
+						"grass0",
+						"grass1"
 					}
 				)
 			},
 			{
-				FloraSpecies.Edible,
+				FloraSpecies.Shroom,
+				new SpeciesInfo(
+					new FloatRange(1f, 2f), 
+					new FloatRange(1f, 2f), 
+					new FloatRange(0.75f, 1.25f),
+					Defaults.ReproductionFailureLimit,
+					100f,
+					50f,
+					Defaults.GenerateDrops(Inventory.Types.Stalks),
+					new []
+					{
+						"shroom0"
+					}
+				)
+			},
+			{
+				FloraSpecies.Wheat,
 				new SpeciesInfo(
 					new FloatRange(10f, 20f), 
 					new FloatRange(8f, 16f), 
@@ -93,7 +109,7 @@ namespace Lunra.Hothouse.Models
 					Defaults.GenerateDrops(Inventory.Types.Rations),
 					new []
 					{
-						"edible0"
+						"wheat0"
 					}
 				)
 			}
