@@ -181,7 +181,7 @@ namespace Lunra.Hothouse.Services
 			);
 			dweller1.Id.Value = "1";
 			dweller1.Job.Value = Jobs.Construction;
-			// dweller1.IsDebugging = true;
+			dweller1.IsDebugging = true;
 			
 			// BUILDINGS
 			
@@ -193,6 +193,7 @@ namespace Lunra.Hothouse.Services
 				BuildingStates.Operating
 			);
 			
+			/*
 			game.Buildings.Activate(
 				Buildings.Bonfire,
 				room0.Id.Value,
@@ -208,14 +209,17 @@ namespace Lunra.Hothouse.Services
 				Quaternion.identity,
 				BuildingStates.Constructing
 			);
+			*/
 			
-			game.Buildings.Activate(
+			var wagon = game.Buildings.Activate(
 				Buildings.StartingWagon,
 				room0.Id.Value,
 				new Vector3(0f, -0.8386866f, 4f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
+
+			wagon.Inventory.Value += (Inventory.Types.Stalks, 4);
 
 			done(Result<GameModel>.Success(game));
 		}

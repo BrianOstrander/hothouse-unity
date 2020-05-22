@@ -207,13 +207,15 @@ namespace Lunra.Hothouse.Editor
 				Handles.color = Color.yellow.NewA(0.05f);
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
+					var yOffset = 0f;
 					foreach (var model in gameState.Payload.Game.Lights.Where(l => l.IsLightActive()))
 					{
 						Handles.DrawSolidDisc(
-							model.Position.Value,
+							model.Position.Value + new Vector3(0f, yOffset, 0f),
 							Vector3.up,
 							model.LightRange.Value
 						);
+						yOffset += 0.01f;
 					}
 				}
 				HandlesExtensions.EndDepthCheck();

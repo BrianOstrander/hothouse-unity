@@ -29,14 +29,14 @@ namespace Lunra.Hothouse.Presenters
 				case Interaction.States.Begin:
 					if (HasCollision(out var hit, LayerMasks.Floor))
 					{
-						Model.RadialFloorSelection.Value = Interaction.Generic.Point(
+						Model.FloorSelection.Value = Interaction.Generic.Point(
 							display.State,
 							hit.point
 						);
 					}
 					else
 					{
-						Model.RadialFloorSelection.Value = Interaction.Generic.Point(
+						Model.FloorSelection.Value = Interaction.Generic.Point(
 							Interaction.States.OutOfRange,
 							Vector3.zero
 						);
@@ -44,13 +44,13 @@ namespace Lunra.Hothouse.Presenters
 					break;
 				case Interaction.States.Active:
 					if (
-						Model.RadialFloorSelection.Value.State != Interaction.States.Active &&
-						Model.RadialFloorSelection.Value.State != Interaction.States.Begin
+						Model.FloorSelection.Value.State != Interaction.States.Active &&
+						Model.FloorSelection.Value.State != Interaction.States.Begin
 					) break;
 
-					if (HasCollision(out var hitPositionActive, new Plane(Vector3.up, Model.RadialFloorSelection.Value.Position.Begin)))
+					if (HasCollision(out var hitPositionActive, new Plane(Vector3.up, Model.FloorSelection.Value.Position.Begin)))
 					{
-						Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewEnd(
+						Model.FloorSelection.Value = Model.FloorSelection.Value.NewEnd(
 							display.State,
 							hitPositionActive
 						);
@@ -59,18 +59,18 @@ namespace Lunra.Hothouse.Presenters
 					break;
 				case Interaction.States.End:
 				case Interaction.States.Cancel:
-					if (Model.RadialFloorSelection.Value.State != Interaction.States.Active) break;
+					if (Model.FloorSelection.Value.State != Interaction.States.Active) break;
 					
-					if (HasCollision(out var hitPositionEndOrCancel, new Plane(Vector3.up, Model.RadialFloorSelection.Value.Position.Begin)))
+					if (HasCollision(out var hitPositionEndOrCancel, new Plane(Vector3.up, Model.FloorSelection.Value.Position.Begin)))
 					{
-						Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewEnd(
+						Model.FloorSelection.Value = Model.FloorSelection.Value.NewEnd(
 							display.State,
 							hitPositionEndOrCancel
 						);
 					}
 					else
 					{
-						Model.RadialFloorSelection.Value = Model.RadialFloorSelection.Value.NewState(display.State);
+						Model.FloorSelection.Value = Model.FloorSelection.Value.NewState(display.State);
 					}
 					
 					break;

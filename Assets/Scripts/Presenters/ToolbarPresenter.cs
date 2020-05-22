@@ -20,10 +20,11 @@ namespace Lunra.Hothouse.Presenters
 			toolbar = game.Toolbar;
 			
 			game.SimulationInitialize += OnGameSimulationInitialize;
-			
-			game.Interaction.RadialFloorSelection.Changed += OnInteractionRadialFloorSelection;
+
+			game.Interaction.FloorSelection.Changed += OnInteractionFloorSelection;
 
 			toolbar.IsEnabled.Changed += OnToolbarIsEnabled;
+			toolbar.Task.Changed += OnToolbarTask;
 			
 			new RadialCursorPresenter(
 				game,
@@ -35,9 +36,10 @@ namespace Lunra.Hothouse.Presenters
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			
-			game.Interaction.RadialFloorSelection.Changed -= OnInteractionRadialFloorSelection;
+			game.Interaction.FloorSelection.Changed -= OnInteractionFloorSelection;
 			
 			toolbar.IsEnabled.Changed -= OnToolbarIsEnabled;
+			toolbar.Task.Changed -= OnToolbarTask;
 		}
 		
 		void Show()
@@ -73,10 +75,15 @@ namespace Lunra.Hothouse.Presenters
 			if (isEnabled) Show();
 			else Close();
 		}
+
+		void OnToolbarTask(ToolbarModel.Tasks task)
+		{
+			ResetSelections();
+		}
 		#endregion
 		
 		#region InteractionModel Events
-		void OnInteractionRadialFloorSelection(Interaction.Generic interaction)
+		void OnInteractionFloorSelection(Interaction.Generic interaction)
 		{
 			switch (toolbar.Task.Value)
 			{
@@ -84,7 +91,7 @@ namespace Lunra.Hothouse.Presenters
 					toolbar.ClearanceTask.Value = interaction;
 					break;
 				case ToolbarModel.Tasks.Construction:
-					// toolbar.ConstructionTask.Value = interaction;
+					toolbar.ConstructionTask.Value = interaction;
 					break;
 				case ToolbarModel.Tasks.None: break;
 				default:
@@ -142,22 +149,29 @@ namespace Lunra.Hothouse.Presenters
 			toolbar.Task.Value = task;
 			toolbar.Building.Value = task == ToolbarModel.Tasks.None ? Buildings.Unknown : building;
 
-			View.ClearanceSelected = false;
-			View.ConstructFireSelected = false;
-			View.ConstructBedSelected = false;
+			ResetSelections();
 
 			if (task == ToolbarModel.Tasks.Construction)
 			{
 				game.Buildings.Activate(
 					building,
 					game.Rooms.FirstActive().Id.Value,
-					Vector3.zero,
+					Vector3.down * 100f, // Just stick it under everything for the moment...
 					Quaternion.identity,
 					BuildingStates.Placing
 				);
 			}
 			
 			return task != ToolbarModel.Tasks.None;
+		}
+
+		void ResetSelections()
+		{
+			if (View.NotVisible) return;
+			
+			View.ClearanceSelected = false;
+			View.ConstructFireSelected = false;
+			View.ConstructBedSelected = false;
 		}
 		#endregion
 	}

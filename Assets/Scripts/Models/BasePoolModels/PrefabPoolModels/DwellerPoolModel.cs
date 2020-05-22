@@ -59,6 +59,7 @@ namespace Lunra.Hothouse.Models
 
 			model.WithdrawalCooldown.Value = 0.5f;
 			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;
+			model.TransferDistance.Value = 0.75f;
 			model.InventoryCapacity.Value = InventoryCapacity.ByTotalWeight(2);
 			
 			model.DesireDamage.Value = new Dictionary<Desires, float>

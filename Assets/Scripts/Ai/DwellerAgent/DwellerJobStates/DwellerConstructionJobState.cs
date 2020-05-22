@@ -230,7 +230,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 				
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
+				return Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
@@ -279,7 +279,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 				
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
+				return Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
@@ -356,7 +356,7 @@ namespace Lunra.Hothouse.Ai
 					{
 						if (m.Id.Value != Agent.InventoryPromise.Value.TargetId) return false;
 						
-						return m.Entrances.Value.Any(e => Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), e.Position.NewY(0f))));
+						return m.Entrances.Value.Any(e => Vector3.Distance(Agent.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
 					}
 				);
 

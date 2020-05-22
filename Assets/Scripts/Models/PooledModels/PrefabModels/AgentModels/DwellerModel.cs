@@ -35,6 +35,9 @@ namespace Lunra.Hothouse.Models.AgentModels
 		
 		[JsonProperty] float depositCooldown;
 		[JsonIgnore] public ListenerProperty<float> DepositCooldown { get; }
+		
+		[JsonProperty] float transferDistance;
+		[JsonIgnore] public ListenerProperty<float> TransferDistance { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -59,6 +62,7 @@ namespace Lunra.Hothouse.Models.AgentModels
 			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);
 			WithdrawalCooldown = new ListenerProperty<float>(value => withdrawalCooldown = value, () => withdrawalCooldown); 
 			DepositCooldown = new ListenerProperty<float>(value => depositCooldown = value, () => depositCooldown);
+			TransferDistance = new ListenerProperty<float>(value => transferDistance = value, () => transferDistance);
 		}
 	}
 }
