@@ -221,6 +221,32 @@ namespace Lunra.Hothouse.Services
 
 			wagon.Inventory.Value += (Inventory.Types.Stalks, 4);
 
+			game.Hints.HintCollections.Value = new[]
+			{
+				HintCollection.New(
+					Hint.NewDismissedOnTimeout(
+						"This should appear right away and dismiss in 10 seconds",
+						Condition.Any(Condition.Types.DebugTrue)
+					),
+					Hint.NewDismissedOnCondition(
+						"This should appear right away and dismiss when any fire is extinguishing",
+						Condition.Any(Condition.Types.DebugTrue),
+						Condition.All(Condition.Types.AnyFireExtinguishing)
+					),
+					Hint.NewDismissedOnCondition(
+						"This should appear when a fire is extinguishing and disappear when there are zero beds (so right away)",
+						Condition.All(Condition.Types.DebugTrue),
+						Condition.All(Condition.Types.ZeroBeds)
+					)
+				),
+				HintCollection.New(
+					Hint.NewDismissedOnTimeout(
+						"This should appear after all the others and then dismiss in 10 seconds",
+						Condition.Any(Condition.Types.DebugTrue)
+					)
+				)
+			};
+			
 			done(Result<GameModel>.Success(game));
 		}
 	}

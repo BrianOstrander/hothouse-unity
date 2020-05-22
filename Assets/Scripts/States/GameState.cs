@@ -29,7 +29,6 @@ namespace Lunra.Hothouse.Services
 		protected override void Begin()
 		{
 			App.S.PushBlocking(OnBeginLoadScenes);
-			App.S.PushBlocking(OnBeginInitializeCache);
 			App.S.PushBlocking(OnBeginInstantiatePresenters);
 			App.S.PushBlocking(OnBeginInitializeLighting);
 			App.S.PushBlocking(
@@ -37,6 +36,7 @@ namespace Lunra.Hothouse.Services
 				() => Payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
 			);
 			App.S.Push(Payload.Game.TriggerSimulationInitialize);
+			App.S.PushBlocking(OnBeginInitializeCache);
 		}
 
 		void OnBeginLoadScenes(Action done)
@@ -49,13 +49,6 @@ namespace Lunra.Hothouse.Services
 			);
 		}
 
-		void OnBeginInitializeCache(Action done)
-		{
-			Payload.Game.CalculateCache(); 
-			
-			done();
-		}
-
 		void OnBeginInstantiatePresenters(Action done)
 		{
 			new NavigationMeshPresenter(Payload.Game);
@@ -66,6 +59,8 @@ namespace Lunra.Hothouse.Services
 			new WorldCameraPresenter(Payload.Game);
 			new ToolbarPresenter(Payload.Game);
 			new FloraEffectsPresenter(Payload.Game);
+
+			new HintsPresenter(Payload.Game);
 
 			Payload.Game.Rooms.Initialize(m => new RoomPrefabPresenter(Payload.Game, m));
 			Payload.Game.Doors.Initialize(m => new DoorPrefabPresenter(Payload.Game, m));
@@ -98,6 +93,13 @@ namespace Lunra.Hothouse.Services
 
 			done();
 		}
+		
+		void OnBeginInitializeCache(Action done)
+		{
+			Payload.Game.InitializeCache(); 
+			
+			done();
+		}
 		#endregion
 
 		#region Idle
@@ -121,8 +123,6 @@ namespace Lunra.Hothouse.Services
 			// );
 		}
 
-		string lastResult = string.Empty;
-
 		void OnHeartbeatUpdate()
 		{
 			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
@@ -144,20 +144,6 @@ namespace Lunra.Hothouse.Services
 			}
 
 			Payload.Game.CalculateCache();
-
-			var result = "Results:";
-
-			foreach (var condition in EnumExtensions.GetValues(Condition.Types.Unknown))
-			{
-				// result += "\n - " + conditionType + " : " + Condition.Calculate(Payload.Game, conditionType);
-				result += "\n - " + condition + " : " + Payload.Game.Cache.Value.Conditions[condition];
-			}
-
-			if (lastResult != result)
-			{
-				lastResult = result;
-				Debug.Log(result);
-			}
 		}
 
 		void OnHeartbeatLateUpdate()

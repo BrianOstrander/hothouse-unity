@@ -18,6 +18,7 @@ namespace Lunra.Hothouse.Models
 		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
 		public ToolbarModel Toolbar { get; } = new ToolbarModel();
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
+		public HintsModel Hints { get; } = new HintsModel();
 		
 		public GenericPrefabPoolModel<RoomPrefabModel> Rooms { get; } = new GenericPrefabPoolModel<RoomPrefabModel>();
 		public GenericPrefabPoolModel<DoorPrefabModel> Doors { get; } = new GenericPrefabPoolModel<DoorPrefabModel>();
@@ -114,6 +115,12 @@ namespace Lunra.Hothouse.Models
 			SimulationInitialize();
 		}
 
+		public void InitializeCache()
+		{
+			// This is a little broken but ok...
+			CalculateCache();
+			CalculateCache();
+		}
 		public void CalculateCache() => cacheListener.Value = cacheListener.Value.Calculate(this);
 
 		public IEnumerable<RoomPrefabModel> GetOpenAdjacentRooms(params string[] roomIds)

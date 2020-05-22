@@ -1,13 +1,54 @@
+using System.Diagnostics.Contracts;
 using System.Linq;
 using Lunra.Core;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
 	public struct Condition
 	{
+		public static Condition New(
+			Types[] any = null,
+			Types[] all = null,
+			Types[] none = null
+		)
+		{
+			return new Condition(
+				any,
+				all,
+				none
+			);
+		}
+		
+		public static Condition Any(params Types[] types)
+		{
+			return new Condition(
+				any: types
+			);
+		}
+		
+		public static Condition All(params Types[] types)
+		{
+			return new Condition(
+				all: types
+			);
+		}
+		
+		public static Condition None(params Types[] types)
+		{
+			return new Condition(
+				none: types
+			);
+		}
+		
 		public enum Types
 		{
+			// Debug
+			DebugFalse = -2,
+			DebugTrue = -1,
+			
+			// Default
 			Unknown = 0,
 			
 			// Building
@@ -25,68 +66,73 @@ namespace Lunra.Hothouse.Models
 			ZeroOpenDoors = 200
 		}
 
-		public readonly bool DefaultValue;
-		public readonly Types[] Any;
-		public readonly Types[] All;
-		public readonly Types[] None;
+		[JsonProperty] readonly Types[] any;
+		[JsonProperty] readonly Types[] all;
+		[JsonProperty] readonly Types[] none;
 
 		public Condition(
-			bool defaultValue,
-			Types[] any,
-			Types[] all,
-			Types[] none	
+			Types[] any = null,
+			Types[] all = null,
+			Types[] none = null
 		)
 		{
-			DefaultValue = defaultValue;
-			Any = any ?? new Types[0];
-			All = all ?? new Types[0];
-			None = none ?? new Types[0];
+			this.any = any ?? new Types[0];
+			this.all = all ?? new Types[0];
+			this.none = none ?? new Types[0];
 		}
 
+		[Pure]
 		public bool Evaluate(GameCache gameCache)
 		{
-			foreach (var current in All)
+			foreach (var current in all)
 			{
 				if (!gameCache.Conditions[current]) return false;
 			}
 			
-			foreach (var current in None)
+			foreach (var current in none)
 			{
 				if (gameCache.Conditions[current]) return false;
 			}
 			
-			foreach (var current in Any)
+			foreach (var current in any)
 			{
 				if (gameCache.Conditions[current]) return true;
 			}
 
-			return DefaultValue;
+			return true;
 		}
 		
+		[Pure]
 		public bool Evaluate(GameModel game)
 		{
-			foreach (var current in All)
+			foreach (var current in all)
 			{
 				if (!Calculate(game, current)) return false;
 			}
 			
-			foreach (var current in None)
+			foreach (var current in none)
 			{
 				if (Calculate(game, current)) return false;
 			}
 			
-			foreach (var current in Any)
+			foreach (var current in any)
 			{
 				if (Calculate(game, current)) return true;
 			}
 
-			return DefaultValue;
+			return true;
 		}
 
 		public static bool Calculate(GameModel game, Types type)
 		{
 			switch (type)
 			{
+				// Debug
+				case Types.DebugFalse:
+					return false;
+				case Types.DebugTrue:
+					return true;
+				
 				// Building
 				case Types.SingleOperationalFire:
 					return game.Lights.Count() == 1;

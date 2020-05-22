@@ -8,7 +8,7 @@ namespace Lunra.Hothouse.Models
 {
 	public struct GameCache
 	{
-		public DateTime LastUpdated { get; private set; }
+		public TimeSpan LastUpdated { get; private set; }
 		public Inventory GlobalInventory { get; private set; }
 		public int LowRationThreshold { get; private set; }
 		public ReadOnlyDictionary<Condition.Types, bool> Conditions { get; private set; }
@@ -16,22 +16,16 @@ namespace Lunra.Hothouse.Models
 		public GameCache Calculate(GameModel game)
 		{
 			var result = new GameCache();
+
+			result.LastUpdated = game.PlaytimeElapsed.Value;
 			
-			result.LastUpdated = DateTime.Now;
 			result.GlobalInventory = game.Buildings.AllActive
 				.Where(b => b.IsBuildingState(BuildingStates.Operating))
 				.Select(b => b.Inventory.Value)
 				.Sum();
 
 			result.LowRationThreshold = game.Dwellers.AllActive.Sum(d => d.LowRationThreshold.Value);
-
-			var conditions = new Dictionary<Condition.Types, bool>();
-
-			foreach (var condition in EnumExtensions.GetValues(Condition.Types.Unknown))
-			{
-				conditions.Add(condition, Condition.Calculate(game, condition));
-			}
-
+			
 			result.Conditions = EnumExtensions
 				.GetValues(Condition.Types.Unknown)
 				.ToReadonlyDictionary(
