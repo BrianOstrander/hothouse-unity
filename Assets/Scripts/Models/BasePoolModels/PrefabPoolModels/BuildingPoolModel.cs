@@ -7,6 +7,11 @@ namespace Lunra.Hothouse.Models
 {
 	public class BuildingPoolModel : BasePrefabPoolModel<BuildingModel>
 	{
+		static class Constants
+		{
+			public const int BonfireStalkCost = 2;
+		}
+		
 		struct BuildingInfo
 		{
 			public Inventory Inventory;
@@ -107,7 +112,8 @@ namespace Lunra.Hothouse.Models
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Rations , 20 }
+							{ Inventory.Types.Stalks , Constants.BonfireStalkCost },
+							{ Inventory.Types.Rations , 5 }
 						}
 					), 
 					InventoryCapacity.ByIndividualWeight(
@@ -154,14 +160,14 @@ namespace Lunra.Hothouse.Models
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 4 }
+							{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
 						}
 					), 
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , 4 }
+								{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
 							}
 						)	
 					),
@@ -170,7 +176,7 @@ namespace Lunra.Hothouse.Models
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , 4 }
+								{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
 							}
 						)	
 					),
@@ -186,11 +192,11 @@ namespace Lunra.Hothouse.Models
 							{ Inventory.Types.Stalks , 1 }
 						}
 					), 
-					Interval.WithMaximum(10f),
+					Interval.WithMaximum(60f),
 					LightStates.Fueled,
-					new []
+					new DesireQuality[]
 					{
-						DesireQuality.New(Desires.Warmup, 1f) 
+						// DesireQuality.New(Desires.Warmup, 1f) 
 					},
 					new []
 					{

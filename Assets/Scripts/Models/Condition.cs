@@ -145,9 +145,9 @@ namespace Lunra.Hothouse.Models
 				case Types.NoRations:
 					return game.Cache.Value.GlobalInventory[Inventory.Types.Rations] <= 0;
 				case Types.NoStalks: 
-					return game.Cache.Value.GlobalInventory[Inventory.Types.Rations] <= 0;
+					return game.Cache.Value.GlobalInventory[Inventory.Types.Stalks] <= 0;
 				case Types.NoScrap: 
-					return game.Cache.Value.GlobalInventory[Inventory.Types.Rations] <= 0;
+					return game.Cache.Value.GlobalInventory[Inventory.Types.Scrap] <= 0;
 				case Types.LowRations:
 					return game.Cache.Value.GlobalInventory[Inventory.Types.Rations] <= game.Cache.Value.LowRationThreshold;
 				

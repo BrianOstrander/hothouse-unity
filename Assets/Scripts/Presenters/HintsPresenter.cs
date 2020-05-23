@@ -62,7 +62,7 @@ namespace Lunra.Hothouse.Presenters
 					if (hint.State != HintStates.Active) continue;
 					if (hint.IsDelay) continue;
 
-					result += "\n - " + hint.Message;
+					result += hint.Message + "\n";
 				}
 			}
 

@@ -219,34 +219,61 @@ namespace Lunra.Hothouse.Services
 				BuildingStates.Operating
 			);
 
-			wagon.Inventory.Value += (Inventory.Types.Stalks, 4);
-
 			game.Hints.HintCollections.Value = new[]
 			{
-				// HintCollection.NewDelay(10f), 
+				HintCollection.NewDelay(2f),
 				HintCollection.New(
 					Hint.NewDismissedOnTimeout(
-						"This should appear right away and dismiss in 10 seconds",
-						Condition.Any(Condition.Types.ConstantTrue)
-					),
-					Hint.NewDismissedOnCondition(
-						"This should appear right away and dismiss when any fire is extinguishing",
+						"Your people are lost, and their fire is low...",
 						Condition.Any(Condition.Types.ConstantTrue),
-						Condition.All(Condition.Types.AnyFireExtinguishing)
-					),
-					Hint.NewDismissedOnCondition(
-						"This should appear when a fire is extinguishing and disappear when there are zero beds (so right away)",
-						Condition.All(Condition.Types.ConstantTrue),
-						Condition.All(Condition.Types.ZeroBeds)
+						5f
 					)
 				),
+				HintCollection.NewDelay(1f),
+				HintCollection.New(
+					Hint.NewDismissedOnCondition(
+						"Build another fire to illuminate the darkness...",
+						Condition.Any(Condition.Types.ConstantTrue),
+						Condition.None(Condition.Types.SingleOperationalFire)
+					)
+				),
+				HintCollection.NewDelay(0.5f),
 				HintCollection.New(
 					Hint.NewDismissedOnTimeout(
-						"This should appear after all the others and then dismiss in 10 seconds",
+						"All remaining stalks were used to build that fire...",
 						Condition.Any(Condition.Types.ConstantTrue),
-						9999f
+						4f
 					)
-				)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
+					Hint.NewDismissedOnCondition(
+						"Gather more stalks to keep your fires burning...",
+						Condition.Any(Condition.Types.ConstantTrue),
+						Condition.None(Condition.Types.NoStalks)
+					)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
+					Hint.NewDismissedOnTimeout(
+						"Your dwellers won't leave the safety of their campfires for long, build more to explore the area...",
+						Condition.Any(Condition.Types.ConstantTrue),
+						10f
+					),
+					Hint.NewDismissedOnCondition(
+						"Your dwellers grow hungry, mark morsels for gathering...",
+						Condition.Any(Condition.Types.NoRations),
+						Condition.None(Condition.Types.LowRations)
+					)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
+					Hint.NewDismissedOnTimeout(
+						"TO BE CONTINUED",
+						Condition.Any(Condition.Types.ConstantTrue),
+						10f
+					)
+				),
 			};
 			
 			done(Result<GameModel>.Success(game));
