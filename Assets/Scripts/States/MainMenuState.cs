@@ -223,26 +223,28 @@ namespace Lunra.Hothouse.Services
 
 			game.Hints.HintCollections.Value = new[]
 			{
+				// HintCollection.NewDelay(10f), 
 				HintCollection.New(
 					Hint.NewDismissedOnTimeout(
 						"This should appear right away and dismiss in 10 seconds",
-						Condition.Any(Condition.Types.DebugTrue)
+						Condition.Any(Condition.Types.ConstantTrue)
 					),
 					Hint.NewDismissedOnCondition(
 						"This should appear right away and dismiss when any fire is extinguishing",
-						Condition.Any(Condition.Types.DebugTrue),
+						Condition.Any(Condition.Types.ConstantTrue),
 						Condition.All(Condition.Types.AnyFireExtinguishing)
 					),
 					Hint.NewDismissedOnCondition(
 						"This should appear when a fire is extinguishing and disappear when there are zero beds (so right away)",
-						Condition.All(Condition.Types.DebugTrue),
+						Condition.All(Condition.Types.ConstantTrue),
 						Condition.All(Condition.Types.ZeroBeds)
 					)
 				),
 				HintCollection.New(
 					Hint.NewDismissedOnTimeout(
 						"This should appear after all the others and then dismiss in 10 seconds",
-						Condition.Any(Condition.Types.DebugTrue)
+						Condition.Any(Condition.Types.ConstantTrue),
+						9999f
 					)
 				)
 			};

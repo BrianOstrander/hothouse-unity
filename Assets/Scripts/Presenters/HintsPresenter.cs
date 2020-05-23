@@ -1,3 +1,4 @@
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class HintsPresenter : GenericPresenter<TestView>
+	public class HintsPresenter : GenericPresenter<HintView>
 	{
 		GameModel game;
 		HintsModel hints;
@@ -17,12 +18,57 @@ namespace Lunra.Hothouse.Presenters
 			hints = game.Hints;
 
 			game.SimulationUpdate += OnGameSimulationUpdate;
+			
+			game.Toolbar.IsEnabled.Changed += OnToolbarIsEnabled;
+			
+			hints.HintCollections.Changed += OnHintsHintCollections;
+			
+			Show();
 		}
 
 		protected override void UnBind()
 		{
 			game.SimulationUpdate -= OnGameSimulationUpdate;
+			
+			game.Toolbar.IsEnabled.Changed -= OnToolbarIsEnabled;
+			
+			hints.HintCollections.Changed -= OnHintsHintCollections;
 		}
+
+		void Show()
+		{
+			if (View.Visible) return;
+			
+			View.Reset();
+
+			View.Prepare += () => OnHintsHintCollections(hints.HintCollections.Value);
+
+			ShowView(instant: true);
+		}
+		
+		#region HintModel Events
+		void OnHintsHintCollections(HintCollection[] hintsCollections)
+		{
+			if (View.NotVisible) return;
+			
+			var result = string.Empty;
+
+			foreach (var hintsCollection in hintsCollections)
+			{
+				if (hintsCollection.State != HintStates.Active) continue;
+				
+				foreach (var hint in hintsCollection.Hints)
+				{
+					if (hint.State != HintStates.Active) continue;
+					if (hint.IsDelay) continue;
+
+					result += "\n - " + hint.Message;
+				}
+			}
+
+			View.Message = result;
+		}
+		#endregion
 		
 		#region GameModel Events
 		void OnGameSimulationUpdate()
@@ -62,12 +108,23 @@ namespace Lunra.Hothouse.Presenters
 				break;
 			}
 
-			if (hasDelta) hints.HintCollections.Value = instance;
+			if (hasDelta) hints.HintCollections.Value = instance.ToArray();
+		}
+		#endregion
+		
+		#region ToolbarModel Events
+		void OnToolbarIsEnabled(bool isEnabled)
+		{
+			if (isEnabled) Show();
+			else if (View.Visible) CloseView(true);
 		}
 		#endregion
 
 		void UpdateHint(Hint hint)
 		{
+			/*
+			if (hint.IsDelay) return;
+			
 			switch (hint.State)
 			{
 				case HintStates.Idle:
@@ -83,6 +140,7 @@ namespace Lunra.Hothouse.Presenters
 					Debug.LogError("Unrecognized "+nameof(hint.State)+": "+hint.State);
 					break;
 			}
+			*/
 		}
 		
 		#region View Events

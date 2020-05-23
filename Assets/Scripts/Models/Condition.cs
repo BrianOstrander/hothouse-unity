@@ -44,9 +44,9 @@ namespace Lunra.Hothouse.Models
 		
 		public enum Types
 		{
-			// Debug
-			DebugFalse = -2,
-			DebugTrue = -1,
+			// Constant
+			ConstantFalse = -2,
+			ConstantTrue = -1,
 			
 			// Default
 			Unknown = 0,
@@ -127,10 +127,10 @@ namespace Lunra.Hothouse.Models
 		{
 			switch (type)
 			{
-				// Debug
-				case Types.DebugFalse:
+				// Constant
+				case Types.ConstantFalse:
 					return false;
-				case Types.DebugTrue:
+				case Types.ConstantTrue:
 					return true;
 				
 				// Building

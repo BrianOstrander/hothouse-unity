@@ -9,6 +9,18 @@ namespace Lunra.Hothouse.Models
 	public struct Hint
 	{
 		static string GetUniqueId() => Guid.NewGuid().ToString();
+
+		public static Hint NewDelay(float timeoutDuration)
+		{
+			return new Hint(
+				GetUniqueId(),
+				HintStates.Idle,
+				null,
+				Condition.Any(Condition.Types.ConstantTrue),
+				DismissTriggers.Timeout,
+				dismissTimeoutDuration: timeoutDuration
+			);
+		}
 		
 		public static Hint NewDismissedOnTimeout(
 			string message,
@@ -76,6 +88,8 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] readonly TimeSpan dismissTimeoutExpires;
 
+		[JsonIgnore] public bool IsDelay => dismissTrigger == DismissTriggers.Timeout && string.IsNullOrEmpty(Message);
+		
 		Hint(
 			string id,
 			HintStates state,

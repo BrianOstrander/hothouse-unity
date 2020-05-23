@@ -2,6 +2,13 @@ namespace Lunra.Hothouse.Models
 {
 	public struct HintCollection
 	{
+		public static HintCollection NewDelay(float timeoutDuration)
+		{
+			return New(
+				Hint.NewDelay(timeoutDuration)
+			);
+		}
+		
 		public static HintCollection New(
 			params Hint[] hints
 		)
