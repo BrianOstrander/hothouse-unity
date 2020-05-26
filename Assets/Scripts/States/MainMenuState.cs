@@ -265,7 +265,7 @@ namespace Lunra.Hothouse.Services
 				HintCollection.New(
 					Hint.NewDismissedOnCondition(
 						"Your dwellers grow hungry, mark morsels for gathering...",
-						Condition.Any(Condition.Types.NoRations),
+						Condition.Any(Condition.Types.ConstantTrue),
 						Condition.None(Condition.Types.LowRations)
 					)
 				),
@@ -273,8 +273,24 @@ namespace Lunra.Hothouse.Services
 				HintCollection.New(
 					Hint.NewDismissedOnCondition(
 						"Your dwellers need a place to sleep, build a bedroll for them...",
-						Condition.Any(Condition.Types.ZeroBeds),
+						Condition.Any(Condition.Types.ConstantTrue),
 						Condition.None(Condition.Types.ZeroBeds)
+					)
+				),
+				HintCollection.NewDelay(4f),
+				HintCollection.New(
+					Hint.NewDismissedOnCondition(
+						"This area is nearly depleted, try opening the nearby hatch...",
+						Condition.Any(Condition.Types.ConstantTrue),
+						Condition.None(Condition.Types.ZeroOpenDoors)
+					)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
+					Hint.NewDismissedOnTimeout(
+						"New areas lead to unknown dangers, exercise caution when exploring...",
+						Condition.Any(Condition.Types.ConstantTrue),
+						8f
 					)
 				),
 				HintCollection.NewDelay(0.5f),

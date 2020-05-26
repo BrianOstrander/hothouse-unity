@@ -30,10 +30,34 @@ namespace Lunra.Hothouse.Editor
 			if (GUILayout.Button(Content.OpenInspectorHandler)) SceneInspectionHandler.OpenHandlerAsset();
 			SceneInspectionSettings.IsInspecting.Draw();
 			SceneInspectionSettings.IsInspectingBuildings.Draw();
+			
 			SceneInspectionSettings.IsInspectingDwellers.Draw();
+			OnDwellersGui();
+			
 			SceneInspectionSettings.IsInspectingFlora.Draw();
 			SceneInspectionSettings.IsInspectingItemDrops.Draw();
 			SceneInspectionSettings.IsInspectingLightLevels.Draw();
+		}
+
+		void OnDwellersGui()
+		{
+			if (!SceneInspectionSettings.IsInspectingDwellers.Value) return;
+			if (!SettingsProviderCache.GetGameState(out var gameState)) return;
+			
+			EditorGUIExtensions.PushIndent();
+			{
+				foreach (var dweller in gameState.Payload.Game.Dwellers.AllActive)
+				{
+					GUILayoutExtensions.BeginVertical(EditorStyles.helpBox, Color.white);
+					{
+						GUILayout.Label("Dweller : "+dweller.Id.Value+" - "+dweller.Job.Value, EditorStyles.boldLabel);
+						dweller.IsDebugging = EditorGUILayout.Toggle(nameof(dweller.IsDebugging), dweller.IsDebugging);
+
+					}
+					GUILayoutExtensions.EndVertical();
+				}
+			}
+			EditorGUIExtensions.PopIndent();
 		}
 
 		[SettingsProvider]
