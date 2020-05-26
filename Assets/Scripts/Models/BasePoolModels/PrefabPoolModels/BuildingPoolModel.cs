@@ -192,7 +192,7 @@ namespace Lunra.Hothouse.Models
 							{ Inventory.Types.Stalks , 1 }
 						}
 					), 
-					Interval.WithMaximum(60f),
+					Interval.WithMaximum(99999f),
 					LightStates.Fueled,
 					new DesireQuality[]
 					{
