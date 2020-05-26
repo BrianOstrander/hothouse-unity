@@ -146,8 +146,6 @@ namespace Lunra.Hothouse.Presenters
 					break;
 			}
 			
-			toolbar.Task.Value = task;
-
 			if (toolbar.Building.Value != null)
 			{
 				toolbar.Building.Value.PooledState.Value = PooledStates.InActive;
@@ -164,6 +162,8 @@ namespace Lunra.Hothouse.Presenters
 					BuildingStates.Placing
 				);	
 			}
+
+			toolbar.Task.Value = task;
 			
 			ResetSelections();
 			

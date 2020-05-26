@@ -10,6 +10,8 @@ namespace Lunra.Hothouse.Models
 		static class Constants
 		{
 			public const int BonfireStalkCost = 2;
+			public static readonly FloatRange DefaultPlacementLightRequirement = new FloatRange(0.001f, 1f);
+			public static readonly FloatRange LightSourcePlacementLightRequirement = new FloatRange(0.001f, 0.33f);
 		}
 		
 		struct BuildingInfo
@@ -17,6 +19,7 @@ namespace Lunra.Hothouse.Models
 			public Inventory Inventory;
 			public InventoryCapacity InventoryCapacity;
 			public InventoryPermission InventoryPermission;
+			public FloatRange PlacementLightRequirement;
 			public InventoryCapacity ConstructionInventoryCapacity;
 			public Inventory SalvageInventory;
 			public Inventory LightFuel;
@@ -29,6 +32,7 @@ namespace Lunra.Hothouse.Models
 				Inventory inventory,
 				InventoryCapacity inventoryCapacity,
 				InventoryPermission inventoryPermission,
+				FloatRange placementLightRequirement,
 				InventoryCapacity constructionInventoryCapacity,
 				Inventory salvageInventory,
 				Inventory lightFuel,
@@ -41,6 +45,7 @@ namespace Lunra.Hothouse.Models
 				Inventory = inventory;
 				InventoryCapacity = inventoryCapacity;
 				InventoryPermission = inventoryPermission;
+				PlacementLightRequirement = placementLightRequirement;
 				ConstructionInventoryCapacity = constructionInventoryCapacity;
 				SalvageInventory = salvageInventory;
 				LightFuel = lightFuel;
@@ -126,7 +131,8 @@ namespace Lunra.Hothouse.Models
 							}
 						)	
 					),
-					InventoryPermission.AllForAnyJob(), 
+					InventoryPermission.AllForAnyJob(),
+					Constants.DefaultPlacementLightRequirement,
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
@@ -171,7 +177,8 @@ namespace Lunra.Hothouse.Models
 							}
 						)	
 					),
-					InventoryPermission.DepositForJobs(Jobs.Stoker), 
+					InventoryPermission.DepositForJobs(Jobs.Stoker),
+					Constants.LightSourcePlacementLightRequirement,
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
@@ -209,7 +216,8 @@ namespace Lunra.Hothouse.Models
 			new BuildingInfo(
 				Inventory.Empty, 
 				InventoryCapacity.None(),
-				InventoryPermission.NoneForAnyJob(), 
+				InventoryPermission.NoneForAnyJob(),
+				Constants.DefaultPlacementLightRequirement,
 				InventoryCapacity.ByIndividualWeight(
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
@@ -287,6 +295,7 @@ namespace Lunra.Hothouse.Models
 			model.Inventory.Value = info.Inventory;
 			model.InventoryCapacity.Value = info.InventoryCapacity;
 			model.InventoryPermission.Value = info.InventoryPermission;
+			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
 			model.ConstructionInventoryCapacity.Value = info.ConstructionInventoryCapacity;
 			model.SalvageInventory.Value = info.SalvageInventory;
 			model.LightFuel.Value = info.LightFuel;

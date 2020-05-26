@@ -211,7 +211,7 @@ namespace Lunra.Hothouse.Services
 			}
 
 			var allRooms = roomMap.Values.SelectMany(v => v).Distinct();
-			var allLights = Payload.Game.Lights.Where(l => allRooms.Any(r => r.RoomId.Value == l.RoomId.Value)).ToList();
+			var allLights = Payload.Game.GetLights().Where(l => allRooms.Any(r => r.RoomId.Value == l.RoomId.Value)).ToList();
 
 			foreach (var lightSensitive in lightSensitives)
 			{
@@ -226,16 +226,30 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.LastLightUpdate.Value = LightDelta.Calculated();
 		}
 
-		float OnCalculateMaximumLighting(
+		LightingResult OnCalculateMaximumLighting(
 			(string RoomId, Vector3 Position) roomPosition
 		)
 		{
+			var result = new LightingResult();
+			
 			var rooms = Payload.Game.GetOpenAdjacentRooms(roomPosition.RoomId);
 
-			return OnCalculateMaximumLighting(
+			bool isInRoomAndOfState(BuildingModel building, BuildingStates buildingState)
+			{
+				return building.IsBuildingState(buildingState) && rooms.Any(r => r.RoomId.Value == building.RoomId.Value);
+			}
+			
+			result.OperatingMaximum = OnCalculateMaximumLighting(
 				roomPosition.Position,
-				Payload.Game.Lights.Where(l => rooms.Any(r => r.RoomId.Value == l.RoomId.Value))
+				Payload.Game.GetLights(b => isInRoomAndOfState(b, BuildingStates.Operating))
 			);
+
+			result.ConstructingMaximum = OnCalculateMaximumLighting(
+				roomPosition.Position,
+				Payload.Game.GetLights(b => isInRoomAndOfState(b, BuildingStates.Constructing))
+			);
+
+			return result;
 		}
 		
 		float OnCalculateMaximumLighting(

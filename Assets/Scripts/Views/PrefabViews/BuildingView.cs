@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Lunra.Core;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -63,7 +64,21 @@ namespace Lunra.Hothouse.Views
 		void OnDrawGizmosSelected()
 		{
 			Handles.color = Color.yellow;
-			Handles.DrawWireDisc(transform.position, Vector3.up, lightRange);	
+			Handles.DrawWireDisc(
+				transform.position,
+				Vector3.up,
+				lightRange
+			);
+
+			var childLight = GetComponentInChildren<Light>();
+			if (childLight == null) return;
+			
+			Handles.color = childLight.color;
+			Handles.DrawWireDisc(
+				childLight.transform.position.NewY(transform.position.y),
+				Vector3.up,
+				childLight.range
+			);
 		}
 	}
 }

@@ -175,12 +175,7 @@ namespace Lunra.Hothouse.Presenters
 					Model.Position.Value = interaction.Position.Begin;
 					break;
 				case Interaction.States.Cancel:
-					break;
 				case Interaction.States.End:
-					Model.BuildingState.Value = BuildingStates.Constructing;
-					// TODO: There should probably be a better way to handle this...
-					Game.Toolbar.Task.Value = ToolbarModel.Tasks.None;
-					Game.Toolbar.Building.Value = null;
 					break;
 				default:
 					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);

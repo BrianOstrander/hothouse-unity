@@ -25,6 +25,9 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] InventoryPermission inventoryPermission = Models.InventoryPermission.AllForAnyJob();
 		[JsonIgnore] public ListenerProperty<InventoryPermission> InventoryPermission { get; }
+
+		[JsonProperty] FloatRange placementLightRequirement = FloatRange.Zero;
+		[JsonIgnore] public ListenerProperty<FloatRange> PlacementLightRequirement { get; }
 		
 		[JsonProperty] Inventory constructionInventory = Models.Inventory.Empty;
 		[JsonIgnore] public ListenerProperty<Inventory> ConstructionInventory { get; }
@@ -76,6 +79,7 @@ namespace Lunra.Hothouse.Models
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			InventoryCapacity = new ListenerProperty<InventoryCapacity>(value => inventoryCapacity = value, () => inventoryCapacity);
 			InventoryPermission = new ListenerProperty<InventoryPermission>(value => inventoryPermission = value, () => inventoryPermission);
+			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
 			ConstructionInventory = new ListenerProperty<Inventory>(value => constructionInventory = value, () => constructionInventory);
 			ConstructionInventoryCapacity = new ListenerProperty<InventoryCapacity>(value => constructionInventoryCapacity = value, () => constructionInventoryCapacity);
 			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);

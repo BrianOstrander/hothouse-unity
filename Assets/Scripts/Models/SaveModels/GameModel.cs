@@ -17,6 +17,7 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
 		public ToolbarModel Toolbar { get; } = new ToolbarModel();
+		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		public HintsModel Hints { get; } = new HintsModel();
 		
@@ -63,9 +64,12 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public IEnumerable<IClearableModel> Clearables =>
 			Debris.AllActive
 			.Concat(Flora.AllActive);
-		
-		[JsonIgnore] public IEnumerable<ILightModel> Lights => 
-			Buildings.AllActive.Where(b => b.IsLight.Value && b.BuildingState.Value == BuildingStates.Operating);
+
+		public IEnumerable<ILightModel> GetLights(Func<BuildingModel, bool> predicate = null)
+		{
+			predicate = predicate ?? (b => b.BuildingState.Value == BuildingStates.Operating); 
+			return Buildings.AllActive.Where(b => b.IsLight.Value && predicate(b));	
+		}
 
 		[JsonIgnore]
 		public IEnumerable<ILightSensitiveModel> LightSensitives =>
@@ -73,7 +77,7 @@ namespace Lunra.Hothouse.Models
 			.Concat<ILightSensitiveModel>(ItemDrops.AllActive)
 			.Concat(Clearables);
 
-		[JsonIgnore] public Func<(string RoomId, Vector3 Position), float> CalculateMaximumLighting;
+		[JsonIgnore] public Func<(string RoomId, Vector3 Position), LightingResult> CalculateMaximumLighting;
 
 		GameCache cache;
 		readonly ListenerProperty<GameCache> cacheListener;

@@ -135,9 +135,9 @@ namespace Lunra.Hothouse.Models
 				
 				// Building
 				case Types.SingleOperationalFire:
-					return game.Lights.Count() == 1;
+					return game.GetLights().Count() == 1;
 				case Types.AnyFireExtinguishing:
-					return game.Lights.Any(l => l.LightState.Value == LightStates.Extinguishing);
+					return game.GetLights().Any(l => l.LightState.Value == LightStates.Extinguishing);
 				case Types.ZeroBeds:
 					return game.Buildings.AllActive.None(t => t.IsDesireAvailable(Desires.Sleep));
 				
