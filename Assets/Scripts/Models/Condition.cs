@@ -139,7 +139,7 @@ namespace Lunra.Hothouse.Models
 				case Types.AnyFireExtinguishing:
 					return game.GetLights().Any(l => l.LightState.Value == LightStates.Extinguishing);
 				case Types.ZeroBeds:
-					return game.Buildings.AllActive.None(t => t.IsDesireAvailable(Desires.Sleep));
+					return game.Buildings.AllActive.None(t => t.IsBuildingState(BuildingStates.Operating) && t.IsDesireAvailable(Desires.Sleep));
 				
 				// Inventory
 				case Types.NoRations:

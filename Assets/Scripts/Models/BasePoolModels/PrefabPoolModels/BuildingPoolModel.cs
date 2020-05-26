@@ -117,8 +117,7 @@ namespace Lunra.Hothouse.Models
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , Constants.BonfireStalkCost },
-							{ Inventory.Types.Rations , 5 }
+							{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
 						}
 					), 
 					InventoryCapacity.ByIndividualWeight(

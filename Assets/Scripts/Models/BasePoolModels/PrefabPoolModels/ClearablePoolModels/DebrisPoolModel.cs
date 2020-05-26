@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class DebrisPoolModel : BasePrefabPoolModel<ClearableModel>
+	public class DebrisPoolModel : ClearablePoolModel<ClearableModel>
 	{
 		static readonly string[] ValidPrefabIds = new[]
 		{
@@ -44,13 +44,14 @@ namespace Lunra.Hothouse.Models
 		
 		Quaternion RandomRotation => Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
 
-		void Reset(
+		protected override void Reset(
 			ClearableModel model
 		)
 		{
+			base.Reset(model);
+			
 			model.HealthMaximum.Value = 10f;
 			model.Health.Value = 10f;
-			model.ClearancePriority.Value = null;
 			model.ItemDrops.Value = new Inventory(
 				new Dictionary<Inventory.Types, int>
 				{

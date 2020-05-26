@@ -259,11 +259,22 @@ namespace Lunra.Hothouse.Services
 						"Your dwellers won't leave the safety of their campfires for long, build more to explore the area...",
 						Condition.Any(Condition.Types.ConstantTrue),
 						10f
-					),
+					)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
 					Hint.NewDismissedOnCondition(
 						"Your dwellers grow hungry, mark morsels for gathering...",
 						Condition.Any(Condition.Types.NoRations),
 						Condition.None(Condition.Types.LowRations)
+					)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
+					Hint.NewDismissedOnCondition(
+						"Your dwellers need a place to sleep, build a bedroll for them...",
+						Condition.Any(Condition.Types.ZeroBeds),
+						Condition.None(Condition.Types.ZeroBeds)
 					)
 				),
 				HintCollection.NewDelay(0.5f),

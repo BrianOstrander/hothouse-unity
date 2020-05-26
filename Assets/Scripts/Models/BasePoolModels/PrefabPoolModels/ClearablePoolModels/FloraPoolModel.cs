@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class FloraPoolModel : BasePrefabPoolModel<FloraModel>
+	public class FloraPoolModel : ClearablePoolModel<FloraModel>
 	{
 		struct SpeciesInfo
 		{
@@ -173,6 +173,8 @@ namespace Lunra.Hothouse.Models
 			SpeciesInfo info
 		)
 		{
+			base.Reset(model);
+			
 			model.Species.Value = species;
 			model.Age.Value = Interval.WithMaximum(info.AgeDuration.Evaluate(DemonUtility.NextFloat));
 			model.ReproductionElapsed.Value = Interval.WithMaximum(info.ReproductionDuration.Evaluate(DemonUtility.NextFloat));
@@ -182,7 +184,6 @@ namespace Lunra.Hothouse.Models
 			model.SpreadDamage.Value = info.SpreadDamage;
 			model.HealthMaximum.Value = info.HealthMaximum;
 			model.Health.Value = info.HealthMaximum;
-			model.ClearancePriority.Value = null;
 			model.ItemDrops.Value = info.GenerateDrops();
 		}
 	}
