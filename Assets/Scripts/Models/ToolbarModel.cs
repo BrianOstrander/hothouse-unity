@@ -23,8 +23,8 @@ namespace Lunra.Hothouse.Models
 		Tasks task = Tasks.None;
 		[JsonIgnore] public ListenerProperty<Tasks> Task { get; }
 
-		Buildings building = Buildings.Unknown;
-		[JsonIgnore] public ListenerProperty<Buildings> Building { get; }
+		BuildingModel building;
+		[JsonIgnore] public ListenerProperty<BuildingModel> Building { get; }
 		
 		Interaction.Generic clearanceTask;
 		[JsonIgnore] public ListenerProperty<Interaction.Generic> ClearanceTask { get; }
@@ -38,7 +38,7 @@ namespace Lunra.Hothouse.Models
 			IsEnabled = new ListenerProperty<bool>(value => isEnabled = value, () => isEnabled);
 			
 			Task = new ListenerProperty<Tasks>(value => task = value, () => task);
-			Building = new ListenerProperty<Buildings>(value => building = value, () => building);
+			Building = new ListenerProperty<BuildingModel>(value => building = value, () => building);
 			ClearanceTask = new ListenerProperty<Interaction.Generic>(value => clearanceTask = value, () => clearanceTask);
 			ConstructionTask = new ListenerProperty<Interaction.Generic>(value => constructionTask = value, () => constructionTask);
 		}

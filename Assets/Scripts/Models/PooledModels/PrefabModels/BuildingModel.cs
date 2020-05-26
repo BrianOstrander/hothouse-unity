@@ -11,6 +11,9 @@ namespace Lunra.Hothouse.Models
 	public class BuildingModel : PrefabModel, ILightModel, ILightSensitiveModel
 	{
 		#region Serialized
+		[JsonProperty] Buildings type;
+		[JsonIgnore] public ListenerProperty<Buildings> Type { get; }
+		
 		[JsonProperty] BuildingStates buildingState;
 		[JsonIgnore] public ListenerProperty<BuildingStates> BuildingState { get; }
 		
@@ -68,6 +71,7 @@ namespace Lunra.Hothouse.Models
 		
 		public BuildingModel()
 		{
+			Type = new ListenerProperty<Buildings>(value => type = value, () => type);
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			InventoryCapacity = new ListenerProperty<InventoryCapacity>(value => inventoryCapacity = value, () => inventoryCapacity);

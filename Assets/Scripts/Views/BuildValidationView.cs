@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class BuildWidgetView : View
+	public class BuildValidationView : View
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null

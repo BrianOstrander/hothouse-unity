@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class BuildWidgetPresenter : Presenter<BuildWidgetView>
+	public class BuildValidationPresenter : Presenter<BuildValidationView>
 	{
 		GameModel game;
 
-		public BuildWidgetPresenter(GameModel game)
+		public BuildValidationPresenter(GameModel game)
 		{
 			this.game = game;
 

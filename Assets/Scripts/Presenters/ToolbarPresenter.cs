@@ -139,7 +139,7 @@ namespace Lunra.Hothouse.Presenters
 					task = task == toolbar.Task.Value ? ToolbarModel.Tasks.None : task;
 					break;
 				case ToolbarModel.Tasks.Construction:
-					task = toolbar.Building.Value == building ? ToolbarModel.Tasks.None : task;
+					task = toolbar.Building.Value != null && toolbar.Building.Value.Type.Value == building ? ToolbarModel.Tasks.None : task;
 					break;
 				default:
 					Debug.LogError("Unrecognized Task: " + task);
@@ -147,20 +147,25 @@ namespace Lunra.Hothouse.Presenters
 			}
 			
 			toolbar.Task.Value = task;
-			toolbar.Building.Value = task == ToolbarModel.Tasks.None ? Buildings.Unknown : building;
 
-			ResetSelections();
+			if (toolbar.Building.Value != null)
+			{
+				toolbar.Building.Value.PooledState.Value = PooledStates.InActive;
+				toolbar.Building.Value = null;
+			}
 
 			if (task == ToolbarModel.Tasks.Construction)
 			{
-				game.Buildings.Activate(
+				toolbar.Building.Value = game.Buildings.Activate(
 					building,
 					game.Rooms.FirstActive().Id.Value,
 					Vector3.down * 100f, // Just stick it under everything for the moment...
 					Quaternion.identity,
 					BuildingStates.Placing
-				);
+				);	
 			}
+			
+			ResetSelections();
 			
 			return task != ToolbarModel.Tasks.None;
 		}

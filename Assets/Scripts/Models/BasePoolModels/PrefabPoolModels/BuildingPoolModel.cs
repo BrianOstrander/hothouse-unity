@@ -258,23 +258,32 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			var info = Infos[building];
+			
 			var result = Activate(
 				info.ValidPrefabIds.Random(),
 				roomId,
 				position,
 				rotation,
-				model => Reset(model, info, buildingState)
+				model => Reset(
+					model,
+					building,
+					info,
+					buildingState
+				)
 			);
+
 			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 
 		void Reset(
 			BuildingModel model,
+			Buildings building,
 			BuildingInfo info,
 			BuildingStates buildingState
 		)
 		{
+			model.Type.Value = building;
 			model.Inventory.Value = info.Inventory;
 			model.InventoryCapacity.Value = info.InventoryCapacity;
 			model.InventoryPermission.Value = info.InventoryPermission;

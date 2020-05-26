@@ -180,7 +180,7 @@ namespace Lunra.Hothouse.Presenters
 					Model.BuildingState.Value = BuildingStates.Constructing;
 					// TODO: There should probably be a better way to handle this...
 					Game.Toolbar.Task.Value = ToolbarModel.Tasks.None;
-					Game.Toolbar.Building.Value = Buildings.Unknown;
+					Game.Toolbar.Building.Value = null;
 					break;
 				default:
 					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
