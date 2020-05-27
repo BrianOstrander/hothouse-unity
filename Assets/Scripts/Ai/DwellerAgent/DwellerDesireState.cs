@@ -17,7 +17,7 @@ namespace Lunra.Hothouse.Ai
 			out Vector3 entrancePosition
 		)
 		{
-			return DwellerUtility.CalculateNearestLitOperatingEntrance(
+			return DwellerUtility.CalculateNearestAvailableOperatingEntrance(
 				agent.Position.Value,
 				out path,
 				out entrancePosition,

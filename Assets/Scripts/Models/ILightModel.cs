@@ -16,7 +16,12 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		ListenerProperty<bool> IsLight { get; }
-		ListenerProperty<bool> IsLightEnabled { get; }
+		/// <summary>
+		/// Is this light included in calculating lighting? If not that means this light may be fueled or extinguishing,
+		/// but should be ignored when calculating lighting. This could occur, for example, when placing, constructing,
+		/// or salvaging a light source -- if it's a building, which may not always be true.
+		/// </summary>
+		ListenerProperty<bool> IsLightCalculationsEnabled { get; }
 		ListenerProperty<LightStates> LightState { get; }
 		ListenerProperty<Inventory> LightFuel { get; }
 		ListenerProperty<Interval> LightFuelInterval { get; }
@@ -30,19 +35,19 @@ namespace Lunra.Hothouse.Models
 	
 	public static class LightModelExtensions
 	{
-		public static bool ReseltLightEnabled(this ILightModel target, bool defaultValue)
+		public static bool ReseltLightCalculationsEnabled(this ILightModel target, bool defaultValue)
 		{
-			var wasLightEnabled = target.IsLightEnabled.Value;
+			var wasLightEnabled = target.IsLightCalculationsEnabled.Value;
 			if (target.IsLight.Value)
 			{
 				switch (target.LightState.Value)
 				{
 					case LightStates.Fueled:
 					case LightStates.Extinguishing:
-						target.IsLightEnabled.Value = defaultValue;
+						target.IsLightCalculationsEnabled.Value = defaultValue;
 						break;
 					case LightStates.Extinguished:
-						target.IsLightEnabled.Value = false;
+						target.IsLightCalculationsEnabled.Value = false;
 						break;
 					default:
 						Debug.LogError("Unrecognized LightState: " + target.LightState.Value);
@@ -50,7 +55,7 @@ namespace Lunra.Hothouse.Models
 				}
 			}
 
-			return wasLightEnabled != target.IsLightEnabled.Value;
+			return wasLightEnabled != target.IsLightCalculationsEnabled.Value;
 		}
 		
 		public static bool IsLightActive(this ILightModel target)
@@ -59,7 +64,7 @@ namespace Lunra.Hothouse.Models
 			{
 				case LightStates.Fueled:
 				case LightStates.Extinguishing:
-					return target.IsLightEnabled.Value;
+					return target.IsLightCalculationsEnabled.Value;
 				case LightStates.Extinguished:
 					return false;
 				default:

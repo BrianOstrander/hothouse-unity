@@ -135,6 +135,8 @@ namespace Lunra.Hothouse.Presenters
 					break;
 			}
 			
+			Debug.LogWarning("Handle unfulfilled obligation promises here!");
+			
 			Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion

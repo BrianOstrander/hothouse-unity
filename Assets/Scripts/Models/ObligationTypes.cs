@@ -1,6 +1,6 @@
 namespace Lunra.Hothouse.Models
 {
-	public static class ObligationLibrary
+	public static class ObligationTypes
 	{
 		public static Jobs[] GetJobs(params Jobs[] jobs) => jobs;
 		

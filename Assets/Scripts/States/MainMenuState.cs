@@ -303,15 +303,17 @@ namespace Lunra.Hothouse.Services
 
 			door0.Obligations.Value = new[]
 			{
-				new Obligation(
-					ObligationLibrary.Door.Open,
+				Obligation.New(
+					ObligationTypes.Door.Open,
 					0,
 					Obligation.States.Unknown,
-					ObligationLibrary.GetJobs(Jobs.Construction),
+					ObligationTypes.GetJobs(Jobs.Construction),
 					Obligation.ConcentrationRequirements.Instant,
 					Interval.Zero()
 				)
 			};
+
+			game.Dwellers.AllActive.First().IsDebugging = true;
 			
 			done(Result<GameModel>.Success(game));
 		}

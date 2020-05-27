@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.IsLight.Value)
 			{
 				Model.LightRange.Value = View.LightRange;
-				Model.ReseltLightEnabled(Model.IsBuildingState(BuildingStates.Operating));
+				Model.ReseltLightCalculationsEnabled(Model.IsBuildingState(BuildingStates.Operating));
 
 				// ILightModel Bindings
 				Game.SimulationUpdate += OnLightSimulationUpdate;
@@ -268,7 +268,7 @@ namespace Lunra.Hothouse.Presenters
 
 					if (Model.IsLight.Value)
 					{
-						if (Model.ReseltLightEnabled(Model.IsBuildingState(BuildingStates.Operating)))
+						if (Model.ReseltLightCalculationsEnabled(Model.IsBuildingState(BuildingStates.Operating)))
 						{
 							Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
 						}

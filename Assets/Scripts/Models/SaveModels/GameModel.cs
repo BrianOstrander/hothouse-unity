@@ -73,8 +73,9 @@ namespace Lunra.Hothouse.Models
 			return GetLights(m => m.IsLightActive());
 		}
 		
-		public IEnumerable<ILightModel> GetLights(Func<ILightModel, bool> predicate)
+		public IEnumerable<ILightModel> GetLights(Func<ILightModel, bool> predicate = null)
 		{
+			predicate = predicate ?? (m => true);
 			return Buildings.AllActive.Where(m => m.IsLight.Value && predicate(m));	
 		}
 
@@ -83,24 +84,24 @@ namespace Lunra.Hothouse.Models
 			return GetEnterables(m => m.Entrances.Value.Any(e => e.State == Entrance.States.Available));
 		}
 		
-		public IEnumerable<IEnterableModel> GetEnterables(Func<IEnterableModel, bool> predicate)
+		public IEnumerable<IEnterableModel> GetEnterables(Func<IEnterableModel, bool> predicate = null)
 		{
+			predicate = predicate ?? (m => true);
+			
 			return Buildings.AllActive.Where(predicate)
 				.Concat(Doors.AllActive.Where(predicate));
 		}
 
-		/*
-		public IEnumerable<IObligationModel> GetObligations()
+		public IEnumerable<IObligationModel> GetObligationsAvailable()
 		{
-			return GetObligations(m => m.Obligations.an)
+			return GetObligations(m => m.Obligations.Value.Any(o => o.State == Obligation.States.Available));
 		}
 		
-		public IEnumerable<IObligationModel> GetObligations(Func<IObligationModel, bool> predicate)
+		public IEnumerable<IObligationModel> GetObligations(Func<IObligationModel, bool> predicate = null)
 		{
-			// predicate = predicate ?? (c => c.Entrances.Value.Any(e => e.State == Entrance.States.Available));
+			predicate = predicate ?? (m => true);
 			return Doors.AllActive.Where(predicate);
 		}
-		*/
 
 		public IEnumerable<ILightSensitiveModel> GetLightSensitives()
 		{

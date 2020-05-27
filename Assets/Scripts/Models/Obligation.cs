@@ -1,9 +1,32 @@
+using System;
+using System.Linq;
+using Lunra.Core;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
 	public struct Obligation
 	{
+		public static Obligation New(
+			string type,
+			int priority,
+			States state,
+			Jobs[] validJobs,
+			ConcentrationRequirements concentrationRequirement,
+			Interval concentrationElapsed
+		)
+		{
+			return new Obligation(
+				Guid.NewGuid().ToString(),
+				type,
+				priority,
+				state,
+				validJobs,
+				concentrationRequirement,
+				concentrationElapsed
+			);
+		}
+		
 		public enum States
 		{
 			Unknown = 0,
@@ -22,14 +45,18 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public string Id { get; private set; }
+		public string Type { get; private set; }
 		public int Priority { get; private set; }
 		public States State { get; private set; }
 		public Jobs[] ValidJobs { get; private set; }
 		public ConcentrationRequirements ConcentrationRequirement { get; private set; }
 		public Interval ConcentrationElapsed { get; private set; }
 
-		public Obligation(
+		public bool IsValidJob(Jobs job) => ValidJobs.None() || ValidJobs.Contains(job);
+		
+		Obligation(
 			string id,
+			string type,
 			int priority,
 			States state,
 			Jobs[] validJobs,
@@ -38,6 +65,7 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			Id = id;
+			Type = type;
 			Priority = priority;
 			State = state;
 			ValidJobs = validJobs;
@@ -49,6 +77,7 @@ namespace Lunra.Hothouse.Models
 		{
 			var result = new Obligation(
 				Id,
+				Type,
 				Priority,
 				State,
 				ValidJobs,
@@ -93,6 +122,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return new Obligation(
 				Id,
+				Type,
 				Priority,
 				State,
 				ValidJobs,
@@ -108,6 +138,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return new Obligation(
 				Id,
+				Type,
 				priority ?? Priority,
 				state ?? State,
 				ValidJobs,

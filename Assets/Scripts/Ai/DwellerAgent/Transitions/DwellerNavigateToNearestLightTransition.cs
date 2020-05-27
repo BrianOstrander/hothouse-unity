@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Ai
 			lastLightUpdateChecked = World.LastLightUpdate.Value.LastUpdate;
 			if (0 < World.CalculateMaximumLighting((Agent.RoomId.Value, Agent.Position.Value)).OperatingMaximum) return false;
 
-			var target = DwellerUtility.CalculateNearestLitOperatingEntrance(
+			var target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
 				Agent.Position.Value,
 				out path,
 				out _,

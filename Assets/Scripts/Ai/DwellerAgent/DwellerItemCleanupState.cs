@@ -89,7 +89,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				target = DwellerUtility.CalculateNearestLitOperatingEntrance(
+				target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
 					Agent.Position.Value,
 					out _,
 					out var entrancePosition,
@@ -142,7 +142,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				target = DwellerUtility.CalculateNearestLitOperatingEntrance(
+				target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
 					Agent.Position.Value,
 					out targetPath,
 					out _,

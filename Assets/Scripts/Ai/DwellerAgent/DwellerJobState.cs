@@ -209,7 +209,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				Inventory.Types[] itemsWithBuildingInventoryCapacityResult = null;
 				
-				var target = DwellerUtility.CalculateNearestLitOperatingEntrance(
+				var target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
 					Agent.Position.Value,
 					out _,
 					out _,
@@ -258,6 +258,39 @@ namespace Lunra.Hothouse.Ai
 			public override void Transition()
 			{
 				cleanupState.ResetCleanupCount(validItemsToCleanup);
+			}
+		}
+
+		protected class ToObligationOnObligationAvailable : AgentTransition<DwellerObligationState<S>, GameModel, DwellerModel>
+		{
+			(IObligationModel Model, Obligation Obligation) target;
+			
+			public override bool IsTriggered()
+			{
+				if (Agent.Obligation.Value.IsEnabled) return true;
+				target = World.GetObligationsAvailable()
+					.GetIndividualObligations(o => o.State == Obligation.States.Available && o.IsValidJob(Agent.Job.Value))
+					.OrderBy(e => e.Obligation.Priority)
+					.FirstOrDefault();
+
+				if (target.Model == null) return false;
+
+				var result = DwellerUtility.CalculateNearestAvailableEntrance(
+					Agent.Position.Value,
+					out _,
+					out _,
+					target.Model
+				);
+
+				return result != null;
+			}
+
+			public override void Transition()
+			{
+				Agent.Obligation.Value = ObligationPromise.New(
+					target.Model.Id.Value,
+					target.Obligation.Id
+				);
 			}
 		}
 	}

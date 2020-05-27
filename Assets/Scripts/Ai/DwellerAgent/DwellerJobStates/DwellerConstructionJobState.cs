@@ -32,7 +32,7 @@ namespace Lunra.Hothouse.Ai
 				)
 				.ToDictionary(b => b, b => false);
 
-			var itemSourceResult = DwellerUtility.CalculateNearestLitOperatingEntrance(
+			var itemSourceResult = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
 				agent.Position.Value,
 				out path,
 				out entrancePosition,
@@ -121,7 +121,8 @@ namespace Lunra.Hothouse.Ai
 				transferItemsState,
 				timeoutState,
 				cleanupState,
-				new DwellerNavigateState<DwellerConstructionJobState>()
+				new DwellerNavigateState<DwellerConstructionJobState>(),
+				new DwellerObligationState<DwellerConstructionJobState>()
 			);
 			
 			AddTransitions(
@@ -133,6 +134,8 @@ namespace Lunra.Hothouse.Ai
 				new ToNavigateToSalvageSite(),
 				new ToNavigateToConstructionSite(),
 
+				new ToObligationOnObligationAvailable(),
+				
 				new ToIdleOnShiftEnd(this),
 				
 				new ToNavigateToWithdrawalItemsFromCache(),
