@@ -68,8 +68,8 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			AddTransitions(
-				new ToReturnOnAllItemsTransferred(this),
-				new ToReturnOnDestinationAtCapacity(this)
+				new ToReturnOnAllItemsTransferred(),
+				new ToReturnOnDestinationAtCapacity()
 			);
 		}
 		
@@ -117,26 +117,18 @@ namespace Lunra.Hothouse.Ai
 			cooldownElapsed = 0f;
 		}
 
-		class ToReturnOnAllItemsTransferred : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnAllItemsTransferred : AgentTransition<DwellerTransferItemsState<S>, S, GameModel, DwellerModel>
 		{
-			DwellerTransferItemsState<S> sourceState;
-
-			public ToReturnOnAllItemsTransferred(DwellerTransferItemsState<S> sourceState) => this.sourceState = sourceState;
-			
-			public override bool IsTriggered() => sourceState.target.ItemsToTransfer.IsEmpty;
+			public override bool IsTriggered() => SourceState.target.ItemsToTransfer.IsEmpty;
 		}
 		
-		class ToReturnOnDestinationAtCapacity : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnDestinationAtCapacity : AgentTransition<DwellerTransferItemsState<S>, S, GameModel, DwellerModel>
 		{
-			DwellerTransferItemsState<S> sourceState;
-
-			public ToReturnOnDestinationAtCapacity(DwellerTransferItemsState<S> sourceState) => this.sourceState = sourceState;
-
 			public override bool IsTriggered()
 			{
-				return sourceState.target.ItemsToTransfer.Entries
+				return SourceState.target.ItemsToTransfer.Entries
 					.Where(i => 0 < i.Weight)
-					.None(i => 0 <= sourceState.target.GetDestinationCapacity(i.Type));
+					.None(i => 0 <= SourceState.target.GetDestinationCapacity(i.Type));
 			}
 		}
 	}

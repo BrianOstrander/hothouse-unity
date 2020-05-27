@@ -22,9 +22,9 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			AddTransitions(
-				new ToReturnOnIntervalElapsed(this),
-				new ToReturnOnTimeElapsed(this),
-				new ToReturnOnInvalid(this)
+				new ToReturnOnIntervalElapsed(),
+				new ToReturnOnTimeElapsed(),
+				new ToReturnOnInvalid()
 			);
 		}
 
@@ -69,31 +69,19 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		class ToReturnOnIntervalElapsed : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnIntervalElapsed : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
 		{
-			DwellerTimeoutState<S> sourceState;
-
-			public ToReturnOnIntervalElapsed(DwellerTimeoutState<S> sourceState) => this.sourceState = sourceState;
-			
-			public override bool IsTriggered() => sourceState.type == Types.Interval && sourceState.interval.IsDone;
+			public override bool IsTriggered() => SourceState.type == Types.Interval && SourceState.interval.IsDone;
 		}
 		
-		class ToReturnOnTimeElapsed : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnTimeElapsed : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
 		{
-			DwellerTimeoutState<S> sourceState;
-
-			public ToReturnOnTimeElapsed(DwellerTimeoutState<S> sourceState) => this.sourceState = sourceState;
-			
-			public override bool IsTriggered() => sourceState.type == Types.Time && sourceState.dayTime <= World.SimulationTime.Value;
+			public override bool IsTriggered() => SourceState.type == Types.Time && SourceState.dayTime <= World.SimulationTime.Value;
 		}
 		
-		class ToReturnOnInvalid : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnInvalid : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
 		{
-			DwellerTimeoutState<S> sourceState;
-
-			public ToReturnOnInvalid(DwellerTimeoutState<S> sourceState) => this.sourceState = sourceState;
-
-			public override bool IsTriggered() => sourceState.type == Types.Unknown;
+			public override bool IsTriggered() => SourceState.type == Types.Unknown;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
@@ -16,7 +17,9 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			AddTransitions(
-				new ToReturnOnTargetIdMismatch(this)
+				new ToReturnOnTargetNull(),
+				new ToReturnOnTargetIdMismatch(),
+				new ToReturnOnObligationMissingFromTarget()
 			);
 		}
 
@@ -59,15 +62,37 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		class ToReturnOnTargetIdMismatch : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnTargetNull : AgentTransition<DwellerObligationState<S>, S, GameModel, DwellerModel>
 		{
-			DwellerObligationState<S> sourceState;
+			public override bool IsTriggered() => SourceState.target == null;
 
-			public ToReturnOnTargetIdMismatch(DwellerObligationState<S> sourceState) => this.sourceState = sourceState;
+			public override void Transition()
+			{
+				SourceState.Reset();
+				Agent.Obligation.Value = ObligationPromise.Default();
+			}
+		}
+		
+		class ToReturnOnTargetIdMismatch : AgentTransition<DwellerObligationState<S>, S, GameModel, DwellerModel>
+		{
+			public override bool IsTriggered() => SourceState.initialTargetId != SourceState.target.Id.Value;
 
-			public override bool IsTriggered() => sourceState.initialTargetId != sourceState.target.Id.Value;
+			public override void Transition()
+			{
+				SourceState.Reset();
+				Agent.Obligation.Value = ObligationPromise.Default();
+			}
+		}
+		
+		class ToReturnOnObligationMissingFromTarget : AgentTransition<DwellerObligationState<S>, S, GameModel, DwellerModel>
+		{
+			public override bool IsTriggered() => SourceState.target.Obligations.Value.None(o => o.Id == Agent.Obligation.Value.ObligationId);
 
-			public override void Transition() => sourceState.Reset();
+			public override void Transition()
+			{
+				SourceState.Reset();
+				Agent.Obligation.Value = ObligationPromise.Default();
+			}
 		}
 		
 		/*

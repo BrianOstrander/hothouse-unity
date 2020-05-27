@@ -128,9 +128,9 @@ namespace Lunra.Hothouse.Ai
 			AddTransitions(
 				new ToIdleOnJobUnassigned(this),
 			
-				new ToWithdrawalItemsFromCache(this, transferItemsState),
-				new ToDepositToNearestConstructionSite(this, transferItemsState),
-				new ToWithdrawalItemsFromSalvageSite(this, transferItemsState),
+				new ToWithdrawalItemsFromCache(transferItemsState),
+				new ToDepositToNearestConstructionSite(transferItemsState),
+				new ToWithdrawalItemsFromSalvageSite(transferItemsState),
 				new ToNavigateToSalvageSite(),
 				new ToNavigateToConstructionSite(),
 
@@ -198,17 +198,12 @@ namespace Lunra.Hothouse.Ai
 		
 		class ToWithdrawalItemsFromSalvageSite : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
-			DwellerConstructionJobState sourceState;
 			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
 			BuildingModel target;
 			Inventory itemsToLoad;
 			
-			public ToWithdrawalItemsFromSalvageSite(
-				DwellerConstructionJobState sourceState,
-				DwellerTransferItemsState<DwellerConstructionJobState> transferState
-			)
+			public ToWithdrawalItemsFromSalvageSite(DwellerTransferItemsState<DwellerConstructionJobState> transferState)
 			{
-				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 			
@@ -252,19 +247,14 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		class ToWithdrawalItemsFromCache : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
+		class ToWithdrawalItemsFromCache : AgentTransition<DwellerConstructionJobState, DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
-			DwellerConstructionJobState sourceState;
 			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
 			BuildingModel target;
 			InventoryPromise promise;
 
-			public ToWithdrawalItemsFromCache(
-				DwellerConstructionJobState sourceState,
-				DwellerTransferItemsState<DwellerConstructionJobState> transferState
-			)
+			public ToWithdrawalItemsFromCache(DwellerTransferItemsState<DwellerConstructionJobState> transferState)
 			{
-				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 			
@@ -304,7 +294,7 @@ namespace Lunra.Hothouse.Ai
 					)
 				);
 
-				sourceState.step = Steps.WithdrawingItemsFromCache;
+				SourceState.step = Steps.WithdrawingItemsFromCache;
 			}
 		}
 
@@ -332,16 +322,11 @@ namespace Lunra.Hothouse.Ai
 
 		class ToDepositToNearestConstructionSite : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
-			DwellerConstructionJobState sourceState;
 			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
 			BuildingModel target;
 
-			public ToDepositToNearestConstructionSite(
-				DwellerConstructionJobState sourceState,
-				DwellerTransferItemsState<DwellerConstructionJobState> transferState
-			)
+			public ToDepositToNearestConstructionSite(DwellerTransferItemsState<DwellerConstructionJobState> transferState)
 			{
-				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 			

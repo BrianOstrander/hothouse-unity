@@ -55,7 +55,7 @@ namespace Lunra.Hothouse.Editor
 			string ShortenId(string id)
 			{
 				return StringExtensions.GetNonNullOrEmpty(
-					id.Length < 8 ? id : id.Substring(0, 8),
+					id.Length < 4 ? id : id.Substring(0, 4),
 					"< null or empty Id >"
 				);
 			}
@@ -207,6 +207,28 @@ namespace Lunra.Hothouse.Editor
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
 					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;
 
+					if (SceneInspectionSettings.IsInspectingObligations.Value)
+					{
+						label += "\nObligationPromise: ";
+
+						if (model.Obligation.Value.IsEnabled)
+						{
+							var obligation = gameState.Payload.Game.GetObligations()
+								.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.Id == model.Obligation.Value.ObligationId)
+								.FirstOrDefault();
+
+							if (obligation.Model == null)
+							{
+								label += "Missing ObligationId \"" + ShortenId(model.Obligation.Value.ObligationId) + "\" or TargetId \"" + ShortenId(model.Obligation.Value.TargetId) + "\"";
+							}
+							else
+							{
+								label += ShortenId(model.Obligation.Value.TargetId) + "[ " + ShortenId(model.Obligation.Value.ObligationId) + " ]." + obligation.Obligation.Type;
+							}
+						}
+						else label += "None";
+					}
+					
 					label += GetInventory(
 						"Inventory",
 						model.Inventory.Value,
