@@ -291,13 +291,13 @@ namespace Lunra.Hothouse.Services
 			
 			// DEBUGGING
 			
-			game.Buildings.Activate(
-				Buildings.Bonfire,
-				room0.Id.Value,
-				new Vector3(-2.68479f, 0.000807253062f, -5.512804f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
+			// game.Buildings.Activate(
+			// 	Buildings.Bonfire,
+			// 	room0.Id.Value,
+			// 	new Vector3(-2.68479f, 0.000807253062f, -5.512804f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Operating
+			// );
 
 			var door0 = game.Doors.AllActive.First();
 
@@ -306,7 +306,6 @@ namespace Lunra.Hothouse.Services
 				Obligation.New(
 					ObligationTypes.Door.Open,
 					0,
-					Obligation.States.Unknown,
 					ObligationTypes.GetJobs(Jobs.Construction),
 					Obligation.ConcentrationRequirements.Instant,
 					Interval.Zero()

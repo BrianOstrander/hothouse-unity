@@ -7,20 +7,21 @@ namespace Lunra.Hothouse.Models
 {
 	public struct Obligation
 	{
+		static string GenerateId => Guid.NewGuid().ToString(); 
+		
 		public static Obligation New(
 			string type,
 			int priority,
-			States state,
 			Jobs[] validJobs,
 			ConcentrationRequirements concentrationRequirement,
 			Interval concentrationElapsed
 		)
 		{
 			return new Obligation(
-				Guid.NewGuid().ToString(),
+				GenerateId,
 				type,
+				States.NotInitialized,
 				priority,
-				state,
 				validJobs,
 				concentrationRequirement,
 				concentrationElapsed
@@ -30,10 +31,11 @@ namespace Lunra.Hothouse.Models
 		public enum States
 		{
 			Unknown = 0,
-			Blocked = 10,
-			Promised = 20,
-			Available = 30,
-			Complete = 40
+			NotInitialized = 10,
+			Blocked = 20,
+			Promised = 30,
+			Available = 40,
+			Complete = 50
 		}
 
 		public enum ConcentrationRequirements
@@ -46,8 +48,8 @@ namespace Lunra.Hothouse.Models
 
 		public string Id { get; private set; }
 		public string Type { get; private set; }
-		public int Priority { get; private set; }
 		public States State { get; private set; }
+		public int Priority { get; private set; }
 		public Jobs[] ValidJobs { get; private set; }
 		public ConcentrationRequirements ConcentrationRequirement { get; private set; }
 		public Interval ConcentrationElapsed { get; private set; }
@@ -57,17 +59,17 @@ namespace Lunra.Hothouse.Models
 		Obligation(
 			string id,
 			string type,
-			int priority,
 			States state,
+			int priority,
 			Jobs[] validJobs,
 			ConcentrationRequirements concentrationRequirement,
 			Interval concentrationElapsed
 		)
 		{
 			Id = id;
+			State = state;
 			Type = type;
 			Priority = priority;
-			State = state;
 			ValidJobs = validJobs;
 			ConcentrationRequirement = concentrationRequirement;
 			ConcentrationElapsed = concentrationElapsed;
@@ -78,8 +80,8 @@ namespace Lunra.Hothouse.Models
 			var result = new Obligation(
 				Id,
 				Type,
-				Priority,
 				State,
+				Priority,
 				ValidJobs,
 				ConcentrationRequirement,
 				ConcentrationElapsed
@@ -123,8 +125,8 @@ namespace Lunra.Hothouse.Models
 			return new Obligation(
 				Id,
 				Type,
-				Priority,
 				State,
+				Priority,
 				ValidJobs,
 				ConcentrationRequirement,
 				ConcentrationElapsed.Restarted()
@@ -132,15 +134,28 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		public Obligation New(
-			int? priority = null,
-			States? state = null
+			States? state = null,
+			int? priority = null
 		)
 		{
 			return new Obligation(
 				Id,
 				Type,
-				priority ?? Priority,
 				state ?? State,
+				priority ?? Priority,
+				ValidJobs,
+				ConcentrationRequirement,
+				ConcentrationElapsed.Restarted()
+			);
+		}
+		
+		public Obligation NewId()
+		{
+			return new Obligation(
+				GenerateId,
+				Type,
+				State,
+				Priority,
 				ValidJobs,
 				ConcentrationRequirement,
 				ConcentrationElapsed.Restarted()

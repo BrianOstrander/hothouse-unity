@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
@@ -15,6 +17,9 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
 			Model.LightLevel.Changed += OnLightLevel;
 
+			Model.Obligations.ChangedSource += OnObligationObligations;
+			Model.Entrances.Changed += OnEnterableEntrances;
+
 			base.Bind();
 		}
 		
@@ -25,6 +30,9 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
 			Model.LightLevel.Changed -= OnLightLevel;
 			
+			Model.Obligations.ChangedSource -= OnObligationObligations;
+			Model.Entrances.Changed -= OnEnterableEntrances;
+			
 			base.UnBind();
 		}
 
@@ -32,7 +40,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (Model.IsOpen.Value) View.Open();
 			
-			Model.Recalculate(View);
+			Model.RecalculateEntrances(View);
 		}
 		
 		#region NavigationMeshModel Events
@@ -41,7 +49,7 @@ namespace Lunra.Hothouse.Presenters
 			if (calculationState != NavigationMeshModel.CalculationStates.Completed) return;
 			if (IsNotActive) return;
 			
-			Model.Recalculate();
+			Model.RecalculateEntrances();
 		}
 		#endregion
 		
@@ -63,7 +71,72 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnLightLevel(float lightLevel)
 		{
-			Model.Recalculate();
+			Model.RecalculateEntrances();
+		}
+		#endregion
+		
+		#region ObligationModel Events
+		void OnObligationObligations(Obligation[] obligations, object source)
+		{
+			if (IsNotActive) return;
+			if (source == this) return;
+			RecalculateObligations();
+		}
+		#endregion
+		
+		#region EnterableModel Events
+		void OnEnterableEntrances(Entrance[] entrances)
+		{
+			if (IsNotActive) return;
+			RecalculateObligations();
+		}
+		#endregion
+		
+		#region Utility
+		void RecalculateObligations()
+		{
+			var obligations = Model.Obligations.Value.ToArray();
+
+			var anyEntranceAvailable = Model.Entrances.Value.Any(e => e.State == Entrance.States.Available);
+			var anyChanges = false;
+			
+			for (var i = 0; i < obligations.Length; i++)
+			{
+				var previousState = obligations[i].State;
+				
+				switch (obligations[i].State)
+				{
+					case Obligation.States.NotInitialized:
+					case Obligation.States.Blocked:
+					case Obligation.States.Available:
+						obligations[i] = obligations[i].New(
+							anyEntranceAvailable ? Obligation.States.Available : Obligation.States.Blocked 
+						);
+						break;
+					case Obligation.States.Promised:
+						if (!anyEntranceAvailable)
+						{
+							// Something is blocking this door, or its no longer lit, so anyone trying to go to it
+							// should lose track of this obligation, which is why we block it AND change the Id.
+							obligations[i] = obligations[i]
+								.New(Obligation.States.Blocked)
+								.NewId();
+							
+						}
+						break;
+					case Obligation.States.Complete:
+						break;
+					default:
+						Debug.LogError("Unrecognized State: "+obligations[i].State);
+						break;
+				}
+
+				anyChanges |= previousState != obligations[i].State;
+			}
+
+			if (!anyChanges) return;
+
+			Model.Obligations.SetValue(obligations, this);
 		}
 		#endregion
 	}

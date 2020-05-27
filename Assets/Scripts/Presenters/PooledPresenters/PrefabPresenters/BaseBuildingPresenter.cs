@@ -205,7 +205,7 @@ namespace Lunra.Hothouse.Presenters
 			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 			
-			Model.Recalculate();
+			Model.RecalculateEntrances();
 		}
 		#endregion
 		
@@ -298,7 +298,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingLightLevel(float lightLevel)
 		{
-			Model.Recalculate();
+			Model.RecalculateEntrances();
 		}
 
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
@@ -327,20 +327,20 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnPosition(Vector3 position)
 		{
 			base.OnPosition(position);
-			if (IsActive && View.Visible) Model.Recalculate(View);
+			if (IsActive && View.Visible) Model.RecalculateEntrances(View);
 		}
 
 		protected override void OnRotation(Quaternion rotation)
 		{
 			base.OnRotation(rotation);
-			if (IsActive && View.Visible) Model.Recalculate(View);
+			if (IsActive && View.Visible) Model.RecalculateEntrances(View);
 		}
 		#endregion
 		
 		#region View Events
 		protected override void OnViewShown()
 		{
-			Model.Recalculate(View);
+			Model.RecalculateEntrances(View);
 			
 			View.IsNavigationModified = Model.BuildingState.Value == BuildingStates.Operating;
 			OnViewInitializeLighting();

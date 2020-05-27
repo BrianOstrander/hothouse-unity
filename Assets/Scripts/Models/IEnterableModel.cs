@@ -14,17 +14,17 @@ namespace Lunra.Hothouse.Models
 
 	public static class IEnterableExtensions
 	{
-		public static void Recalculate(this IEnterableModel model)
+		public static void RecalculateEntrances(this IEnterableModel model)
 		{
-			model.Recalculate(model.Entrances.Value.Select(e => e.Position));
+			model.RecalculateEntrances(model.Entrances.Value.Select(e => e.Position));
 		}
 		
-		public static void Recalculate(this IEnterableModel model, IEnterableView view)
+		public static void RecalculateEntrances(this IEnterableModel model, IEnterableView view)
 		{
-			if (view.Visible) model.Recalculate(view.Entrances);
+			if (view.Visible) model.RecalculateEntrances(view.Entrances);
 		}
 
-		static void Recalculate(this IEnterableModel model, IEnumerable<Vector3> entrances)
+		static void RecalculateEntrances(this IEnterableModel model, IEnumerable<Vector3> entrances)
 		{
 			model.Entrances.Value = entrances
 				.Select(
