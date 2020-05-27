@@ -167,6 +167,7 @@ namespace Lunra.Hothouse.Services
 
 			// DWELLERS
 			
+			/*
 			var dweller0 = game.Dwellers.Activate(
 				room0.Id.Value,
 				new Vector3(-4f, -0.8386866f, 3f)
@@ -174,6 +175,7 @@ namespace Lunra.Hothouse.Services
 			dweller0.Id.Value = "0";
 			dweller0.Job.Value = Jobs.Clearer;
 			// dweller0.IsDebugging = true;
+			*/
 			
 			var dweller1 = game.Dwellers.Activate(
 				room0.Id.Value,
@@ -193,24 +195,14 @@ namespace Lunra.Hothouse.Services
 				BuildingStates.Operating
 			);
 			
-			/*
 			game.Buildings.Activate(
 				Buildings.Bonfire,
 				room0.Id.Value,
-				new Vector3(-6f, -0.8386866f, 6f),
+				new Vector3(-2.68479f, 0.000807253062f, -5.512804f),
 				Quaternion.identity,
-				BuildingStates.Constructing
+				BuildingStates.Operating
 			);
 
-			game.Buildings.Activate(
-				Buildings.Bedroll,
-				room0.Id.Value,
-				new Vector3(-12f, -0.8386866f, 0f),
-				Quaternion.identity,
-				BuildingStates.Constructing
-			);
-			*/
-			
 			var wagon = game.Buildings.Activate(
 				Buildings.StartingWagon,
 				room0.Id.Value,
