@@ -10,6 +10,7 @@ namespace Lunra.Hothouse.Editor
 
 		public static EditorPrefsBool IsInspecting = new EditorPrefsBool(KeyPrefix + "IsInspecting");
 		public static EditorPrefsBool IsInspectingBuildings = new EditorPrefsBool(KeyPrefix + "IsInspectingBuildings");
+		public static EditorPrefsBool IsInspectingEntrances = new EditorPrefsBool(KeyPrefix + "IsInspectingEntrances");
 		public static EditorPrefsBool IsInspectingDwellers = new EditorPrefsBool(KeyPrefix + "IsInspectingDwellers");
 		public static EditorPrefsBool IsInspectingFlora = new EditorPrefsBool(KeyPrefix + "IsInspectingFlora");
 		public static EditorPrefsBool IsInspectingItemDrops = new EditorPrefsBool(KeyPrefix + "IsInspectingItemDrops");
@@ -30,6 +31,7 @@ namespace Lunra.Hothouse.Editor
 			if (GUILayout.Button(Content.OpenInspectorHandler)) SceneInspectionHandler.OpenHandlerAsset();
 			SceneInspectionSettings.IsInspecting.Draw();
 			SceneInspectionSettings.IsInspectingBuildings.Draw();
+			SceneInspectionSettings.IsInspectingEntrances.Draw();
 			
 			SceneInspectionSettings.IsInspectingDwellers.Draw();
 			OnDwellersGui();
@@ -70,6 +72,7 @@ namespace Lunra.Hothouse.Editor
 				Content.OpenInspectorHandler.text,
 				SceneInspectionSettings.IsInspecting.LabelName,
 				SceneInspectionSettings.IsInspectingBuildings.LabelName,
+				SceneInspectionSettings.IsInspectingEntrances.LabelName,
 				SceneInspectionSettings.IsInspectingDwellers.LabelName,
 				SceneInspectionSettings.IsInspectingFlora.LabelName,
 				SceneInspectionSettings.IsInspectingItemDrops.LabelName,

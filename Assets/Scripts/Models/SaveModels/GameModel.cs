@@ -70,6 +70,12 @@ namespace Lunra.Hothouse.Models
 			predicate = predicate ?? (b => b.BuildingState.Value == BuildingStates.Operating); 
 			return Buildings.AllActive.Where(b => b.IsLight.Value && predicate(b));	
 		}
+		
+		public IEnumerable<IEnterable> GetEnterables(Func<IEnterable, bool> predicate = null)
+		{
+			predicate = predicate ?? (c => c.Entrances.Value.Any(e => e.State == Entrance.States.Available));
+			return Buildings.AllActive.Where(predicate);
+		}
 
 		[JsonIgnore]
 		public IEnumerable<ILightSensitiveModel> LightSensitives =>

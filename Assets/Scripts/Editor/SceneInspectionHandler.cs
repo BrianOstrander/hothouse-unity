@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
@@ -116,6 +117,42 @@ namespace Lunra.Hothouse.Editor
 						Handles.DrawWireCube(model.Position.Value, Vector3.one);
 					}
 				}
+			}
+
+			if (SceneInspectionSettings.IsInspectingEntrances.Value)
+			{
+				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
+				{
+					foreach (var model in gameState.Payload.Game.GetEnterables(e => true))
+					{
+						foreach (var entrance in model.Entrances.Value)
+						{
+							var color = Color.grey;
+
+							switch (entrance.State)
+							{
+								case Entrance.States.Available:
+									color = Color.green;
+									break;
+								case Entrance.States.NotAvailable:
+									color = entrance.IsNavigable ? Color.yellow : Color.red;
+									break;
+							}
+
+							Handles.color = color;
+							Handles.DrawDottedLine(
+								model.Position.Value,
+								entrance.Position,
+								4f
+							);
+							Handles.DrawWireCube(
+								entrance.Position,
+								Vector3.one * 0.1f
+							);
+						}
+					}
+				}
+				HandlesExtensions.EndDepthCheck();
 			}
 
 			if (SceneInspectionSettings.IsInspectingDwellers.Value)

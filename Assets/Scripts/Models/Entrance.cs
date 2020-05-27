@@ -8,18 +8,21 @@ namespace Lunra.Hothouse.Models
 		{
 			Unknown = 0,
 			Available = 10,
-			Blocked = 20
+			NotAvailable = 20
 		}
 			
 		public readonly Vector3 Position;
+		public readonly bool IsNavigable;
 		public readonly States State;
 
 		public Entrance(
 			Vector3 position,
+			bool isNavigable,
 			States state
 		)
 		{
 			Position = position;
+			IsNavigable = isNavigable;
 			State = state;
 		}
 	}

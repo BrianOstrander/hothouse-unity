@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Ai
 		)
 			where M : BuildingModel
 		{
-			return CalculateNearestLitEntrance(
+			return CalculateNearestAvailableEntrance(
 				beginPosition,
 				out path,
 				out entrancePosition,
@@ -29,20 +29,20 @@ namespace Lunra.Hothouse.Ai
 			);
 		}
 
-		public static M CalculateNearestLitEntrance<M>(
+		public static M CalculateNearestAvailableEntrance<M>(
 			Vector3 beginPosition,
 			out NavMeshPath path,
 			out Vector3 entrancePosition,
-			Func<M, bool> buildingPredicate,
-			params M[] buildings
+			Func<M, bool> predicate,
+			params M[] models
 		)
-			where M : BuildingModel
+			where M : IEnterable
 		{
 			var pathResult = new NavMeshPath();
 			var entranceResult = Vector3.zero;
 	
-			var result = buildings
-				.Where(b => b.IsLit() && buildingPredicate(b))
+			var result = models
+				.Where(b => b.Entrances.Value.Any(e => e.State == Entrance.States.Available) && predicate(b))
 				.OrderBy(t => Vector3.Distance(beginPosition, t.Position.Value))
 				.FirstOrDefault(
 					t => CalculateNearestEntrance(
@@ -63,14 +63,14 @@ namespace Lunra.Hothouse.Ai
 			Vector3 beginPosition,
 			out NavMeshPath path,
 			out Vector3 entrancePosition,
-			M building
+			M model
 		)
-			where M : BuildingModel
+			where M : IEnterable
 		{
 			path = new NavMeshPath();
 			entrancePosition = Vector3.zero;
 
-			foreach (var entrance in building.Entrances.Value.OrderBy(e => Vector3.Distance(e.Position, beginPosition)))
+			foreach (var entrance in model.Entrances.Value.OrderBy(e => Vector3.Distance(e.Position, beginPosition)))
 			{
 				if (entrance.State != Entrance.States.Available) continue;
 

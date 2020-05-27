@@ -5,6 +5,7 @@ using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 using Lunra.Hothouse.Views;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Presenters
 {
@@ -39,11 +40,13 @@ namespace Lunra.Hothouse.Presenters
 			// Misc Bindings
 			Game.Toolbar.ConstructionTask.Changed += OnToolbarConstruction;
 			Game.Toolbar.Task.Changed += OnToolbarTask;
+			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
 			Model.Inventory.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
 			Model.BuildingState.Changed += OnBuildingState;
+			Model.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Operate += OnBuildingOperate;
 
 			base.Bind();
@@ -60,11 +63,13 @@ namespace Lunra.Hothouse.Presenters
 			// Misc UnBindings
 			Game.Toolbar.ConstructionTask.Changed -= OnToolbarConstruction;
 			Game.Toolbar.Task.Changed -= OnToolbarTask;
+			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
 			Model.Inventory.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
+			Model.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Operate -= OnBuildingOperate;
 			
 			base.UnBind();
@@ -193,6 +198,17 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 		
+		#region NavigationMeshModel Events
+		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
+		{
+			if (calculationState != NavigationMeshModel.CalculationStates.Completed) return;
+			if (IsNotActive) return;
+			if (Model.BuildingState.Value != BuildingStates.Operating) return;
+			
+			RecalculateEntrances(false);
+		}
+		#endregion
+		
 		#region BuildingModel Events
 		void OnBuildingInventory(Inventory inventory)
 		{
@@ -248,6 +264,11 @@ namespace Lunra.Hothouse.Presenters
 			}
 		}
 
+		void OnBuildingLightLevel(float lightLevel)
+		{
+			RecalculateEntrances(false);
+		}
+
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
 		{
 			if (IsNotActive) return;
@@ -274,20 +295,20 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnPosition(Vector3 position)
 		{
 			base.OnPosition(position);
-			if (IsActive && View.Visible) RecalculateEntrances();
+			if (IsActive && View.Visible) RecalculateEntrances(true);
 		}
 
 		protected override void OnRotation(Quaternion rotation)
 		{
 			base.OnRotation(rotation);
-			if (IsActive && View.Visible) RecalculateEntrances();
+			if (IsActive && View.Visible) RecalculateEntrances(true);
 		}
 		#endregion
 		
 		#region View Events
 		protected override void OnViewShown()
 		{
-			RecalculateEntrances();
+			RecalculateEntrances(true);
 			View.IsNavigationModified = Model.BuildingState.Value == BuildingStates.Operating;
 			OnViewInitializeLighting();
 		}
@@ -321,10 +342,29 @@ namespace Lunra.Hothouse.Presenters
 		protected override bool QueueNavigationCalculation => Model.IsBuildingState(BuildingStates.Operating);
 		
 		#region Utility
-		void RecalculateEntrances()
+		void RecalculateEntrances(bool fromView)
 		{
-			if (View.NotVisible) return;
-			Model.Entrances.Value = View.Entrances.Select(e => new Entrance(e, Entrance.States.Available)).ToArray();
+			if (View.NotVisible && fromView) return;
+			
+			Model.Entrances.Value = (fromView ? View.Entrances : Model.Entrances.Value.Select(e => e.Position))
+				.Select(
+					e =>
+					{
+						var isNavigable = NavMesh.SamplePosition(
+							e,
+							out _,
+							0.1f, // TODO: This should not be hardcoded here...
+							NavMesh.AllAreas
+						);
+						
+						return new Entrance(
+							e,
+							isNavigable,
+							isNavigable && Model.IsLit() ? Entrance.States.Available : Entrance.States.NotAvailable
+						);
+					}
+				)
+				.ToArray();
 		}
 		#endregion
 	}

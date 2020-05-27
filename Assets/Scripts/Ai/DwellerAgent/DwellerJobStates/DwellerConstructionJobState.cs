@@ -214,7 +214,7 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 				
-				target = DwellerUtility.CalculateNearestLitEntrance(
+				target = DwellerUtility.CalculateNearestAvailableEntrance(
 					Agent.Position.Value,
 					out _,
 					out var entrancePosition,
@@ -392,7 +392,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
 
-				var target = DwellerUtility.CalculateNearestLitEntrance(
+				var target = DwellerUtility.CalculateNearestAvailableEntrance(
 					Agent.Position.Value,
 					out path,
 					out _,
@@ -419,7 +419,7 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 
-				var target = DwellerUtility.CalculateNearestLitEntrance(
+				var target = DwellerUtility.CalculateNearestAvailableEntrance(
 					Agent.Position.Value,
 					out path,
 					out _,

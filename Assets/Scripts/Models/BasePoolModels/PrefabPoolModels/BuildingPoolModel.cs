@@ -10,6 +10,7 @@ namespace Lunra.Hothouse.Models
 		static class Constants
 		{
 			public const int BonfireStalkCost = 2;
+			// public static readonly FloatRange DefaultPlacementLightRequirement = new FloatRange(-1f, 1f);
 			public static readonly FloatRange DefaultPlacementLightRequirement = new FloatRange(0.001f, 1f);
 			public static readonly FloatRange LightSourcePlacementLightRequirement = new FloatRange(0.001f, 0.33f);
 		}

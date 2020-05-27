@@ -222,7 +222,7 @@ namespace Lunra.Hothouse.Services
 					allLights.Where(l => rooms.Any(r => r.RoomId.Value == l.RoomId.Value))
 				);
 			}
-
+			
 			Payload.Game.LastLightUpdate.Value = LightDelta.Calculated();
 		}
 
