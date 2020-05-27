@@ -152,7 +152,16 @@ namespace Lunra.Hothouse.Models
 					LightStates.Unknown,
 					new []
 					{
-						DesireQuality.New(Desires.Eat, 1f) 
+						DesireQuality.New(
+							Desires.Eat,
+							1f,
+							new Inventory(
+								new Dictionary<Inventory.Types, int>
+								{
+									{ Inventory.Types.Rations , 1 }
+								}
+							)
+						) 
 					},
 					new []
 					{

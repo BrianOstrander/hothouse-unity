@@ -96,6 +96,22 @@ namespace Lunra.Hothouse.Ai
 		}
 		
 		/*
+		class ToNavigateToObligation : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
+		{
+			// IObligationModel target;
+			//
+			// public override bool IsTriggered()
+			// {
+			// 	target = 
+			// }
+			//
+			// public override void Transition()
+			// {
+			// 	
+			// }
+		}
+		*/
+		/*
 		class ToNavigateToObligation : AgentTransition<DwellerNavigateState<DwellerObligationState<S>>, GameModel, DwellerModel>
 		{
 			DwellerObligationState<S> sourceState;
