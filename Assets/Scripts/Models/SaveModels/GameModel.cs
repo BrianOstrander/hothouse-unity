@@ -68,21 +68,23 @@ namespace Lunra.Hothouse.Models
 				.Concat(Flora.AllActive);
 		}
 
-		public IEnumerable<ILightModel> GetLights()
+		public IEnumerable<ILightModel> GetLightsActive()
 		{
-			return GetLights(m => m.BuildingState.Value == BuildingStates.Operating);
+			return GetLights(m => m.IsLightActive());
 		}
 		
-		public IEnumerable<ILightModel> GetLights(Func<BuildingModel, bool> predicate) // TODO change that to ILightModel filtering...
+		public IEnumerable<ILightModel> GetLights(Func<ILightModel, bool> predicate)
 		{
-			predicate = predicate ?? (b => b.BuildingState.Value == BuildingStates.Operating); 
-			return Buildings.AllActive.Where(b => b.IsLight.Value && predicate(b));	
+			return Buildings.AllActive.Where(m => m.IsLight.Value && predicate(m));	
+		}
+
+		public IEnumerable<IEnterableModel> GetEnterablesAvailable()
+		{
+			return GetEnterables(m => m.Entrances.Value.Any(e => e.State == Entrance.States.Available));
 		}
 		
-		
-		public IEnumerable<IEnterableModel> GetEnterables(Func<IEnterableModel, bool> predicate = null)
+		public IEnumerable<IEnterableModel> GetEnterables(Func<IEnterableModel, bool> predicate)
 		{
-			predicate = predicate ?? (c => c.Entrances.Value.Any(e => e.State == Entrance.States.Available));
 			return Buildings.AllActive.Where(predicate)
 				.Concat(Doors.AllActive.Where(predicate));
 		}

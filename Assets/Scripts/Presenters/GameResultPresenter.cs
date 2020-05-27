@@ -74,7 +74,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnLastLightUpdate(LightDelta lightUpdate)
 		{
 			if (lightUpdate.State != LightDelta.States.Calculated) return;
-			if (game.GetLights().Any(l => l.IsLightActive())) return;
+			if (game.GetLightsActive().Any(l => l.IsLightActive())) return;
 			
 			Show("Plunged into darkness, your fires went out!");
 		}
