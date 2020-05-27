@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
@@ -86,6 +87,15 @@ namespace Lunra.Hothouse.Presenters
 				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
 					interaction,
 					"Too close to a light source under construction"
+				);
+				return;
+			}
+
+			if (game.Toolbar.Building.Value.Entrances.Value.None(e => e.IsNavigable))
+			{
+				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
+					interaction,
+					"Entrances blocked"
 				);
 				return;
 			}

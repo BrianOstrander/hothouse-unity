@@ -1,9 +1,14 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Models
 {
 	public struct Entrance
 	{
+		// TODO: This shouldn't be hardcoded...
+		public const float RangeMaximum = 0.1f;
+		public const int DefaultMask = NavMesh.AllAreas;
+		
 		public enum States
 		{
 			Unknown = 0,

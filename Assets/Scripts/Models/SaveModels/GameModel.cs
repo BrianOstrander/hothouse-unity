@@ -80,8 +80,9 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore]
 		public IEnumerable<ILightSensitiveModel> LightSensitives =>
 			Buildings.AllActive
-			.Concat<ILightSensitiveModel>(ItemDrops.AllActive)
-			.Concat(Clearables);
+				.Concat<ILightSensitiveModel>(ItemDrops.AllActive)
+				.Concat(Doors.AllActive)
+				.Concat(Clearables);
 
 		[JsonIgnore] public Func<(string RoomId, Vector3 Position), LightingResult> CalculateMaximumLighting;
 

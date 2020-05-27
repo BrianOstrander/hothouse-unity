@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 
 namespace Lunra.Hothouse.Views
 {
-	public class BuildingView : PrefabView, ILightView
+	public class BuildingView : PrefabView, ILightView, IEnterableView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null

@@ -1,4 +1,3 @@
-using System;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
@@ -11,14 +10,20 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
+			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 			
+			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
+			Model.LightLevel.Changed += OnLightLevel;
+
 			base.Bind();
 		}
 		
 		protected override void UnBind()
 		{
+			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
+			
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
+			Model.LightLevel.Changed -= OnLightLevel;
 			
 			base.UnBind();
 		}
@@ -26,7 +31,19 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnViewPrepare()
 		{
 			if (Model.IsOpen.Value) View.Open();
+			
+			Model.Recalculate(View);
 		}
+		
+		#region NavigationMeshModel Events
+		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
+		{
+			if (calculationState != NavigationMeshModel.CalculationStates.Completed) return;
+			if (IsNotActive) return;
+			
+			Model.Recalculate();
+		}
+		#endregion
 		
 		#region DoorPrefabModel Events
 		void OnDoorPrefabIsOpen(bool isOpen)
@@ -42,6 +59,11 @@ namespace Lunra.Hothouse.Presenters
 			else Debug.LogError("Currently no way to re-close a door...");
 			
 			Game.NavigationMesh.QueueCalculation();
+		}
+
+		void OnLightLevel(float lightLevel)
+		{
+			Model.Recalculate();
 		}
 		#endregion
 	}

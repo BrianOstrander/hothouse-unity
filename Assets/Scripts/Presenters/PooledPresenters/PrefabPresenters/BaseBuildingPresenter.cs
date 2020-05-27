@@ -5,7 +5,6 @@ using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 using Lunra.Hothouse.Views;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Presenters
 {
@@ -205,7 +204,7 @@ namespace Lunra.Hothouse.Presenters
 			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 			
-			RecalculateEntrances(false);
+			Model.Recalculate();
 		}
 		#endregion
 		
@@ -256,17 +255,40 @@ namespace Lunra.Hothouse.Presenters
 			if (IsNotActive) return;
 			if (View.NotVisible) return;
 
-			View.IsNavigationModified = buildingState == BuildingStates.Operating;
+			//if (buildingState == BuildingStates.Constructing) Model.Recalculate();
 			
+			View.IsNavigationModified = buildingState == BuildingStates.Operating;
+
+			switch (buildingState)
+			{
+				case BuildingStates.Placing:
+					break;
+				case BuildingStates.Constructing:
+				case BuildingStates.Operating:
+				case BuildingStates.Salvaging:
+					Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(Model.Id.Value); 
+					
+					if (buildingState == BuildingStates.Operating && Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
+					{
+						Game.NavigationMesh.QueueCalculation();
+					}
+					break;
+				default:
+					Debug.LogError("Unrecognized BuildingState: "+buildingState);
+					break;
+			}
+			
+			/*
 			if (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
 			{
 				Game.NavigationMesh.QueueCalculation();
 			}
+			*/
 		}
 
 		void OnBuildingLightLevel(float lightLevel)
 		{
-			RecalculateEntrances(false);
+			Model.Recalculate();
 		}
 
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
@@ -295,20 +317,21 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnPosition(Vector3 position)
 		{
 			base.OnPosition(position);
-			if (IsActive && View.Visible) RecalculateEntrances(true);
+			if (IsActive && View.Visible) Model.Recalculate(View);
 		}
 
 		protected override void OnRotation(Quaternion rotation)
 		{
 			base.OnRotation(rotation);
-			if (IsActive && View.Visible) RecalculateEntrances(true);
+			if (IsActive && View.Visible) Model.Recalculate(View);
 		}
 		#endregion
 		
 		#region View Events
 		protected override void OnViewShown()
 		{
-			RecalculateEntrances(true);
+			Model.Recalculate(View);
+			
 			View.IsNavigationModified = Model.BuildingState.Value == BuildingStates.Operating;
 			OnViewInitializeLighting();
 		}
@@ -340,32 +363,5 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		protected override bool QueueNavigationCalculation => Model.IsBuildingState(BuildingStates.Operating);
-		
-		#region Utility
-		void RecalculateEntrances(bool fromView)
-		{
-			if (View.NotVisible && fromView) return;
-			
-			Model.Entrances.Value = (fromView ? View.Entrances : Model.Entrances.Value.Select(e => e.Position))
-				.Select(
-					e =>
-					{
-						var isNavigable = NavMesh.SamplePosition(
-							e,
-							out _,
-							0.1f, // TODO: This should not be hardcoded here...
-							NavMesh.AllAreas
-						);
-						
-						return new Entrance(
-							e,
-							isNavigable,
-							isNavigable && Model.IsLit() ? Entrance.States.Available : Entrance.States.NotAvailable
-						);
-					}
-				)
-				.ToArray();
-		}
-		#endregion
 	}
 }

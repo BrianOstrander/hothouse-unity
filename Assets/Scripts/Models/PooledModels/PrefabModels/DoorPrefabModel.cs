@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-    public class DoorPrefabModel : PrefabModel
+    public class DoorPrefabModel : PrefabModel, ILightSensitiveModel, IObligationModel
     {
         public class Connection
         {
@@ -20,16 +20,33 @@ namespace Lunra.Hothouse.Models
             }
         }
         
+        #region Serialized
         [JsonProperty] bool isOpen;
         [JsonIgnore] public ListenerProperty<bool> IsOpen { get; }
 
         [JsonProperty] Connection roomConnection;
-        [JsonIgnore] public ListenerProperty<Connection> RoomConnection { get; } 
+        [JsonIgnore] public ListenerProperty<Connection> RoomConnection { get; }
+        
+        [JsonProperty] float lightLevel;
+        [JsonIgnore] public ListenerProperty<float> LightLevel { get; }
+        
+        [JsonProperty] Obligation[] obligations = new Obligation[0];
+        [JsonIgnore] public ListenerProperty<Obligation[]> Obligations { get; }
+        #endregion
+        
+        #region Non Serialized
+        Entrance[] entrances = new Entrance[0];
+        public ListenerProperty<Entrance[]> Entrances { get; }
+        #endregion
         
         public DoorPrefabModel()
         {
             IsOpen = new ListenerProperty<bool>(value => isOpen = value, () => isOpen);
             RoomConnection = new ListenerProperty<Connection>(value => roomConnection = value, () => roomConnection);
+            LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
+            Obligations = new ListenerProperty<Obligation[]>(value => obligations = value, () => obligations);
+            
+            Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
         }
 
         public bool IsOpenTo(string roomId) => IsOpen.Value && (RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId);
