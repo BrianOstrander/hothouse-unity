@@ -195,19 +195,19 @@ namespace Lunra.Hothouse.Services
 			
 			if (Payload.Game.LastLightUpdate.Value.SensitiveIds.Any())
 			{
-				lightSensitives = Payload.Game.LightSensitives.Where(l => Payload.Game.LastLightUpdate.Value.SensitiveIds.Contains(l.Id.Value));
+				lightSensitives = Payload.Game.GetLightSensitives().Where(l => Payload.Game.LastLightUpdate.Value.SensitiveIds.Contains(l.Id.Value));
 				roomMap = Payload.Game.GetOpenAdjacentRoomsMap(
 					Payload.Game.LastLightUpdate.Value.RoomIds
 						.Union(lightSensitives.Select(l => l.RoomId.Value))
 						.ToArray()
 				);
 
-				if (Payload.Game.LastLightUpdate.Value.RoomIds.Any()) lightSensitives = Payload.Game.LightSensitives;
+				if (Payload.Game.LastLightUpdate.Value.RoomIds.Any()) lightSensitives = Payload.Game.GetLightSensitives();
 			}
 			else
 			{
 				roomMap = Payload.Game.GetOpenAdjacentRoomsMap(Payload.Game.LastLightUpdate.Value.RoomIds);
-				lightSensitives = Payload.Game.LightSensitives;
+				lightSensitives = Payload.Game.GetLightSensitives();
 			}
 
 			var allRooms = roomMap.Values.SelectMany(v => v).Distinct();

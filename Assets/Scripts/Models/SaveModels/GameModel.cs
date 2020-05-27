@@ -61,15 +61,24 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
 		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
-		[JsonIgnore] public IEnumerable<IClearableModel> Clearables =>
-			Debris.AllActive
-			.Concat(Flora.AllActive);
 
-		public IEnumerable<ILightModel> GetLights(Func<BuildingModel, bool> predicate = null)
+		public IEnumerable<IClearableModel> GetClearables()
+		{
+			return Debris.AllActive
+				.Concat(Flora.AllActive);
+		}
+
+		public IEnumerable<ILightModel> GetLights()
+		{
+			return GetLights(m => m.BuildingState.Value == BuildingStates.Operating);
+		}
+		
+		public IEnumerable<ILightModel> GetLights(Func<BuildingModel, bool> predicate) // TODO change that to ILightModel filtering...
 		{
 			predicate = predicate ?? (b => b.BuildingState.Value == BuildingStates.Operating); 
 			return Buildings.AllActive.Where(b => b.IsLight.Value && predicate(b));	
 		}
+		
 		
 		public IEnumerable<IEnterableModel> GetEnterables(Func<IEnterableModel, bool> predicate = null)
 		{
@@ -77,19 +86,27 @@ namespace Lunra.Hothouse.Models
 			return Buildings.AllActive.Where(predicate)
 				.Concat(Doors.AllActive.Where(predicate));
 		}
-		
-		public IEnumerable<IEnterableModel> GetObligations(Func<IObligationModel, bool> predicate = null)
+
+		/*
+		public IEnumerable<IObligationModel> GetObligations()
 		{
-			predicate = predicate ?? (c => c.Entrances.Value.Any(e => e.State == Entrance.States.Available));
+			return GetObligations(m => m.Obligations.an)
+		}
+		
+		public IEnumerable<IObligationModel> GetObligations(Func<IObligationModel, bool> predicate)
+		{
+			// predicate = predicate ?? (c => c.Entrances.Value.Any(e => e.State == Entrance.States.Available));
 			return Doors.AllActive.Where(predicate);
 		}
+		*/
 
-		[JsonIgnore]
-		public IEnumerable<ILightSensitiveModel> LightSensitives =>
-			Buildings.AllActive
+		public IEnumerable<ILightSensitiveModel> GetLightSensitives()
+		{
+			return Buildings.AllActive
 				.Concat<ILightSensitiveModel>(ItemDrops.AllActive)
 				.Concat(Doors.AllActive)
-				.Concat(Clearables);
+				.Concat(GetClearables());
+		}
 
 		[JsonIgnore] public Func<(string RoomId, Vector3 Position), LightingResult> CalculateMaximumLighting;
 

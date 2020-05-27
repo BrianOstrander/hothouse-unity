@@ -196,20 +196,14 @@ namespace Lunra.Hothouse.Services
 			);
 			
 			game.Buildings.Activate(
-				Buildings.Bonfire,
-				room0.Id.Value,
-				new Vector3(-2.68479f, 0.000807253062f, -5.512804f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-
-			var wagon = game.Buildings.Activate(
 				Buildings.StartingWagon,
 				room0.Id.Value,
 				new Vector3(0f, -0.8386866f, 4f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
+			
+			// HINTS			
 
 			game.Hints.HintCollections.Value = new[]
 			{
@@ -293,6 +287,30 @@ namespace Lunra.Hothouse.Services
 						10f
 					)
 				),
+			};
+			
+			// DEBUGGING
+			
+			game.Buildings.Activate(
+				Buildings.Bonfire,
+				room0.Id.Value,
+				new Vector3(-2.68479f, 0.000807253062f, -5.512804f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
+
+			var door0 = game.Doors.AllActive.First();
+
+			door0.Obligations.Value = new[]
+			{
+				new Obligation(
+					ObligationLibrary.Door.Open,
+					0,
+					Obligation.States.Unknown,
+					ObligationLibrary.GetJobs(Jobs.Construction),
+					Obligation.ConcentrationRequirements.Instant,
+					Interval.Zero()
+				)
 			};
 			
 			done(Result<GameModel>.Success(game));

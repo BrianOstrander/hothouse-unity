@@ -76,7 +76,7 @@ namespace Lunra.Hothouse.Ai
 			
 			public override bool IsTriggered()
 			{
-				target = World.Clearables.FirstOrDefault(
+				target = World.GetClearables().FirstOrDefault(
 					clearable =>
 					{
 						if (!clearable.IsMarkedForClearance.Value) return false;
@@ -132,7 +132,7 @@ namespace Lunra.Hothouse.Ai
 			
 			public override bool IsTriggered()
 			{
-				target = World.Clearables
+				target = World.GetClearables()
 					.Where(t => t.IsMarkedForClearance.Value && t.IsLit())
 					.OrderBy(t => Vector3.Distance(Agent.Position.Value, t.Position.Value))
 					.FirstOrDefault();

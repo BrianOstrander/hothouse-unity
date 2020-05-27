@@ -15,6 +15,7 @@ namespace Lunra.Hothouse.Editor
 		public static EditorPrefsBool IsInspectingFlora = new EditorPrefsBool(KeyPrefix + "IsInspectingFlora");
 		public static EditorPrefsBool IsInspectingItemDrops = new EditorPrefsBool(KeyPrefix + "IsInspectingItemDrops");
 		public static EditorPrefsBool IsInspectingLightLevels = new EditorPrefsBool(KeyPrefix + "IsInspectingLightLevels");
+		public static EditorPrefsBool IsInspectingObligations = new EditorPrefsBool(KeyPrefix + "IsObligations");
 	}
 	
 	public class SceneInspectionSettingsProvider : SettingsProvider
@@ -39,6 +40,7 @@ namespace Lunra.Hothouse.Editor
 			SceneInspectionSettings.IsInspectingFlora.Draw();
 			SceneInspectionSettings.IsInspectingItemDrops.Draw();
 			SceneInspectionSettings.IsInspectingLightLevels.Draw();
+			SceneInspectionSettings.IsInspectingObligations.Draw();
 		}
 
 		void OnDwellersGui()
@@ -76,7 +78,8 @@ namespace Lunra.Hothouse.Editor
 				SceneInspectionSettings.IsInspectingDwellers.LabelName,
 				SceneInspectionSettings.IsInspectingFlora.LabelName,
 				SceneInspectionSettings.IsInspectingItemDrops.LabelName,
-				SceneInspectionSettings.IsInspectingLightLevels.LabelName
+				SceneInspectionSettings.IsInspectingLightLevels.LabelName,
+				SceneInspectionSettings.IsInspectingObligations.LabelName
 			};
 			
 			return provider;

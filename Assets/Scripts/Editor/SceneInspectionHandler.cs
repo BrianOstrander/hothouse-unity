@@ -258,7 +258,7 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.EndDepthCheck();
 
 				var lightSensitiveOffset = Vector3.up * 4f;
-				foreach (var model in gameState.Payload.Game.LightSensitives)
+				foreach (var model in gameState.Payload.Game.GetLightSensitives())
 				{
 					Debug.DrawLine(
 						model.Position.Value + lightSensitiveOffset,
@@ -266,6 +266,14 @@ namespace Lunra.Hothouse.Editor
 						Color.yellow
 					);
 				}
+			}
+
+			if (SceneInspectionSettings.IsInspectingObligations.Value)
+			{
+				// foreach (var obligation in gameState.Payload.Game.GetObligations())
+				// {
+				// 	
+				// }
 			}
 		}
 
