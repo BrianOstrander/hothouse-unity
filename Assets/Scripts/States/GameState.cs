@@ -190,6 +190,10 @@ namespace Lunra.Hothouse.Services
 		#region Utility
 		void CalculateLighting()
 		{
+			// TODO: This seems messy, ideally we should calculate only things sensitive to light, and if a room has
+			// been set stale, assume it's because a light was placed in there and calculate all sensitive objects in
+			// and around that room.
+			
 			Dictionary<string, List<RoomPrefabModel>> roomMap;
 			IEnumerable<ILightSensitiveModel> lightSensitives;
 			

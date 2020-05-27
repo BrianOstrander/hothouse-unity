@@ -28,6 +28,7 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.IsLight.Value)
 			{
 				Model.LightRange.Value = View.LightRange;
+				Model.ReseltLightEnabled(Model.IsBuildingState(BuildingStates.Operating));
 
 				// ILightModel Bindings
 				Game.SimulationUpdate += OnLightSimulationUpdate;
@@ -255,8 +256,6 @@ namespace Lunra.Hothouse.Presenters
 			if (IsNotActive) return;
 			if (View.NotVisible) return;
 
-			//if (buildingState == BuildingStates.Constructing) Model.Recalculate();
-			
 			View.IsNavigationModified = buildingState == BuildingStates.Operating;
 
 			switch (buildingState)
@@ -266,8 +265,19 @@ namespace Lunra.Hothouse.Presenters
 				case BuildingStates.Constructing:
 				case BuildingStates.Operating:
 				case BuildingStates.Salvaging:
-					Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(Model.Id.Value); 
-					
+
+					if (Model.IsLight.Value)
+					{
+						if (Model.ReseltLightEnabled(Model.IsBuildingState(BuildingStates.Operating)))
+						{
+							Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
+						}
+					}
+					else
+					{
+						Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(Model.Id.Value);
+					}
+
 					if (buildingState == BuildingStates.Operating && Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
 					{
 						Game.NavigationMesh.QueueCalculation();

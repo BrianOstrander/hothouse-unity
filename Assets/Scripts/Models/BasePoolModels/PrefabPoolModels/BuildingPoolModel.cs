@@ -298,6 +298,7 @@ namespace Lunra.Hothouse.Models
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
 			model.ConstructionInventoryCapacity.Value = info.ConstructionInventoryCapacity;
 			model.SalvageInventory.Value = info.SalvageInventory;
+			model.IsLightEnabled.Value = false;
 			model.LightFuel.Value = info.LightFuel;
 			model.LightFuelInterval.Value = info.LightFuelInterval;
 			model.LightState.Value = info.LightStateDefault;

@@ -16,6 +16,7 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		ListenerProperty<bool> IsLight { get; }
+		ListenerProperty<bool> IsLightEnabled { get; }
 		ListenerProperty<LightStates> LightState { get; }
 		ListenerProperty<Inventory> LightFuel { get; }
 		ListenerProperty<Interval> LightFuelInterval { get; }
@@ -29,13 +30,36 @@ namespace Lunra.Hothouse.Models
 	
 	public static class LightModelExtensions
 	{
+		public static bool ReseltLightEnabled(this ILightModel target, bool defaultValue)
+		{
+			var wasLightEnabled = target.IsLightEnabled.Value;
+			if (target.IsLight.Value)
+			{
+				switch (target.LightState.Value)
+				{
+					case LightStates.Fueled:
+					case LightStates.Extinguishing:
+						target.IsLightEnabled.Value = defaultValue;
+						break;
+					case LightStates.Extinguished:
+						target.IsLightEnabled.Value = false;
+						break;
+					default:
+						Debug.LogError("Unrecognized LightState: " + target.LightState.Value);
+						break;
+				}
+			}
+
+			return wasLightEnabled != target.IsLightEnabled.Value;
+		}
+		
 		public static bool IsLightActive(this ILightModel target)
 		{
 			switch (target.LightState.Value)
 			{
 				case LightStates.Fueled:
 				case LightStates.Extinguishing:
-					return true;
+					return target.IsLightEnabled.Value;
 				case LightStates.Extinguished:
 					return false;
 				default:

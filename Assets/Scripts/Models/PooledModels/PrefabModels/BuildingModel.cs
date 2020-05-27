@@ -46,6 +46,8 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] bool isLight;
 		[JsonIgnore] public ListenerProperty<bool> IsLight { get; }
+		[JsonProperty] bool isLightEnabled;
+		[JsonIgnore] public ListenerProperty<bool> IsLightEnabled { get; }
 		[JsonProperty] LightStates lightState;
 		[JsonIgnore] public ListenerProperty<LightStates> LightState { get; }
 		[JsonProperty] Inventory lightFuel;
@@ -86,6 +88,7 @@ namespace Lunra.Hothouse.Models
 			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
 			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
 			IsLight = new ListenerProperty<bool>(value => isLight = value, () => isLight);
+			IsLightEnabled = new ListenerProperty<bool>(value => isLightEnabled = value, () => isLightEnabled);
 			LightState = new ListenerProperty<LightStates>(value => lightState = value, () => lightState);
 			LightFuel = new ListenerProperty<Inventory>(value => lightFuel = value, () => lightFuel);
 			LightFuelInterval = new ListenerProperty<Interval>(value => lightFuelInterval = value, () => lightFuelInterval);
