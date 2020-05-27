@@ -79,9 +79,9 @@ namespace Lunra.Hothouse.Presenters
 			
 			View.Reset();
 
+			View.Prepare += ViewSetTransform;
 			View.Prepare += OnViewPrepare;
 
-			View.Shown += ViewSetTransform;
 			View.Shown += OnViewShown;
 			
 			View.PrepareClose += OnViewPrepareClose;

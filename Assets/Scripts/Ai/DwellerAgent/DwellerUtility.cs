@@ -36,7 +36,7 @@ namespace Lunra.Hothouse.Ai
 			Func<M, bool> predicate,
 			params M[] models
 		)
-			where M : IEnterable
+			where M : IEnterableModel
 		{
 			var pathResult = new NavMeshPath();
 			var entranceResult = Vector3.zero;
@@ -65,7 +65,7 @@ namespace Lunra.Hothouse.Ai
 			out Vector3 entrancePosition,
 			M model
 		)
-			where M : IEnterable
+			where M : IEnterableModel
 		{
 			path = new NavMeshPath();
 			entrancePosition = Vector3.zero;

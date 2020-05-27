@@ -71,10 +71,17 @@ namespace Lunra.Hothouse.Models
 			return Buildings.AllActive.Where(b => b.IsLight.Value && predicate(b));	
 		}
 		
-		public IEnumerable<IEnterable> GetEnterables(Func<IEnterable, bool> predicate = null)
+		public IEnumerable<IEnterableModel> GetEnterables(Func<IEnterableModel, bool> predicate = null)
 		{
 			predicate = predicate ?? (c => c.Entrances.Value.Any(e => e.State == Entrance.States.Available));
-			return Buildings.AllActive.Where(predicate);
+			return Buildings.AllActive.Where(predicate)
+				.Concat(Doors.AllActive.Where(predicate));
+		}
+		
+		public IEnumerable<IEnterableModel> GetObligations(Func<IObligationModel, bool> predicate = null)
+		{
+			predicate = predicate ?? (c => c.Entrances.Value.Any(e => e.State == Entrance.States.Available));
+			return Doors.AllActive.Where(predicate);
 		}
 
 		[JsonIgnore]

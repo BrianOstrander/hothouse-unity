@@ -7,24 +7,24 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IEnterable : ILightSensitiveModel
+	public interface IEnterableModel : ILightSensitiveModel
 	{
 		ListenerProperty<Entrance[]> Entrances { get; }
 	}
 
 	public static class IEnterableExtensions
 	{
-		public static void Recalculate(this IEnterable model)
+		public static void Recalculate(this IEnterableModel model)
 		{
 			model.Recalculate(model.Entrances.Value.Select(e => e.Position));
 		}
 		
-		public static void Recalculate(this IEnterable model, IEnterableView view)
+		public static void Recalculate(this IEnterableModel model, IEnterableView view)
 		{
 			if (view.Visible) model.Recalculate(view.Entrances);
 		}
 
-		static void Recalculate(this IEnterable model, IEnumerable<Vector3> entrances)
+		static void Recalculate(this IEnterableModel model, IEnumerable<Vector3> entrances)
 		{
 			model.Entrances.Value = entrances
 				.Select(
