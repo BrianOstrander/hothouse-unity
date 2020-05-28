@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Ai
 
 		void Cache()
 		{
-			obligation = target?.Obligations.Value.FirstOrDefault(o => o.Id == Agent.Obligation.Value.ObligationId) ?? default;
+			obligation = target?.Obligations.Obligations.Value.FirstOrDefault(o => o.Id == Agent.Obligation.Value.ObligationId) ?? default;
 		}
 
 		public override void Begin()
@@ -67,7 +67,7 @@ namespace Lunra.Hothouse.Ai
 						m =>
 						{
 							if (m.Id.Value != Agent.Obligation.Value.TargetId) return false;
-							return m.Obligations.Value.Any(o => o.Id == Agent.Obligation.Value.ObligationId);
+							return m.Obligations.Obligations.Value.Any(o => o.Id == Agent.Obligation.Value.ObligationId);
 						}
 					)
 					.FirstOrDefault();
@@ -146,12 +146,12 @@ namespace Lunra.Hothouse.Ai
 			{
 				Obligation get()
 				{
-					return SourceState.target.Obligations.Value.FirstOrDefault(o => o.Id == Agent.Obligation.Value.ObligationId);
+					return SourceState.target.Obligations.Obligations.Value.FirstOrDefault(o => o.Id == Agent.Obligation.Value.ObligationId);
 				}
 				
 				void set(Obligation newObligation)
 				{
-					SourceState.target.Obligations.Value = SourceState.target.Obligations.Value
+					SourceState.target.Obligations.Obligations.Value = SourceState.target.Obligations.Obligations.Value
 						.Select(o => o.Id == newObligation.Id ? newObligation : o)
 						.ToArray();
 				}

@@ -17,7 +17,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
 			Model.LightSensitive.LightLevel.Changed += OnLightLevel;
 
-			Model.Obligations.ChangedSource += OnObligationObligations;
+			Model.Obligations.Obligations.ChangedSource += OnObligationObligations;
 			Model.Enterable.Entrances.Changed += OnEnterableEntrances;
 
 			base.Bind();
@@ -30,7 +30,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
 			Model.LightSensitive.LightLevel.Changed -= OnLightLevel;
 			
-			Model.Obligations.ChangedSource -= OnObligationObligations;
+			Model.Obligations.Obligations.ChangedSource -= OnObligationObligations;
 			Model.Enterable.Entrances.Changed -= OnEnterableEntrances;
 			
 			base.UnBind();
@@ -119,7 +119,7 @@ namespace Lunra.Hothouse.Presenters
 		#region Utility
 		void RecalculateObligations()
 		{
-			var obligations = Model.Obligations.Value.ToArray();
+			var obligations = Model.Obligations.Obligations.Value.ToArray();
 
 			var anyEntranceAvailable = Model.Enterable.Entrances.Value.Any(e => e.State == Entrance.States.Available);
 			var anyChanges = false;
@@ -162,7 +162,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!anyChanges && !anyCompleted) return;
 
-			Model.Obligations.SetValue(
+			Model.Obligations.Obligations.SetValue(
 				anyCompleted ? obligations.Where(o => o.State != Obligation.States.Complete).ToArray() : obligations,
 				this
 			);

@@ -27,9 +27,8 @@ namespace Lunra.Hothouse.Models
         [JsonProperty] Connection roomConnection;
         [JsonIgnore] public ListenerProperty<Connection> RoomConnection { get; }
 
-        [JsonProperty] Obligation[] obligations = new Obligation[0];
-        [JsonIgnore] public ListenerProperty<Obligation[]> Obligations { get; }
-        
+        public ObligationComponent Obligations { get; } = new ObligationComponent();
+
         public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
         #endregion
         
@@ -41,7 +40,6 @@ namespace Lunra.Hothouse.Models
         {
             IsOpen = new ListenerProperty<bool>(value => isOpen = value, () => isOpen);
             RoomConnection = new ListenerProperty<Connection>(value => roomConnection = value, () => roomConnection);
-            Obligations = new ListenerProperty<Obligation[]>(value => obligations = value, () => obligations);
         }
 
         public bool IsOpenTo(string roomId) => IsOpen.Value && (RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId);

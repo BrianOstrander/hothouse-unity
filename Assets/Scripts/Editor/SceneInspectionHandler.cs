@@ -72,13 +72,13 @@ namespace Lunra.Hothouse.Editor
 				obligationIdsHandled.Add(model.Id.Value);
 				
 				label += "\nObligations:";
-				if (model.Obligations.Value.None())
+				if (model.Obligations.Obligations.Value.None())
 				{
 					label += " None";
 				}
 				else
 				{
-					foreach (var obligation in model.Obligations.Value)
+					foreach (var obligation in model.Obligations.Obligations.Value)
 					{
 						label += "\n  [ " + ShortenId(obligation.Id) + " ] " + obligation.Type + "." + obligation.State + " #" + obligation.Priority + " : " + obligation.ConcentrationRequirement + "( " + obligation.ConcentrationElapsed.Current + " / " + obligation.ConcentrationElapsed.Maximum + " )";
 					}

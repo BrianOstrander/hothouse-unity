@@ -289,7 +289,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				var newObligation = target.Obligation.New(Obligation.States.Promised);
 
-				target.Model.Obligations.Value = target.Model.Obligations.Value
+				target.Model.Obligations.Obligations.Value = target.Model.Obligations.Obligations.Value
 					.Select(o => o.Id == newObligation.Id ? newObligation : o)
 					.ToArray();
 				

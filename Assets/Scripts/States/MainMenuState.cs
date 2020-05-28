@@ -299,7 +299,7 @@ namespace Lunra.Hothouse.Services
 
 			var door0 = game.Doors.AllActive.First();
 
-			door0.Obligations.Value = new[]
+			door0.Obligations.Obligations.Value = new[]
 			{
 				Obligation.New(
 					ObligationTypes.Door.Open,
