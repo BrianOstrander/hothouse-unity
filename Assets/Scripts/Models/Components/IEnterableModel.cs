@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Models;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -9,14 +10,27 @@ namespace Lunra.Hothouse.Models
 {
 	public interface IEnterableModel : ILightSensitiveModel
 	{
-		ListenerProperty<Entrance[]> Entrances { get; }
+		EnterableComponent Enterable { get; }
+	}
+	
+	public class EnterableComponent : Model
+	{
+		#region Non Serialized
+		Entrance[] entrances = new Entrance[0];
+		[JsonIgnore] public ListenerProperty<Entrance[]> Entrances { get; }
+		#endregion
+
+		public EnterableComponent()
+		{
+			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
+		}
 	}
 
 	public static class IEnterableExtensions
 	{
 		public static void RecalculateEntrances(this IEnterableModel model)
 		{
-			model.RecalculateEntrances(model.Entrances.Value.Select(e => e.Position));
+			model.RecalculateEntrances(model.Enterable.Entrances.Value.Select(e => e.Position));
 		}
 		
 		public static void RecalculateEntrances(this IEnterableModel model, IEnterableView view)
@@ -26,7 +40,7 @@ namespace Lunra.Hothouse.Models
 
 		static void RecalculateEntrances(this IEnterableModel model, IEnumerable<Vector3> entrances)
 		{
-			model.Entrances.Value = entrances
+			model.Enterable.Entrances.Value = entrances
 				.Select(
 					e =>
 					{

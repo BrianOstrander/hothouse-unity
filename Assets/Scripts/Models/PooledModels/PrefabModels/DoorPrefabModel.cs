@@ -34,8 +34,7 @@ namespace Lunra.Hothouse.Models
         #endregion
         
         #region Non Serialized
-        Entrance[] entrances = new Entrance[0];
-        public ListenerProperty<Entrance[]> Entrances { get; }
+        [JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
         #endregion
         
         public DoorPrefabModel()
@@ -43,8 +42,6 @@ namespace Lunra.Hothouse.Models
             IsOpen = new ListenerProperty<bool>(value => isOpen = value, () => isOpen);
             RoomConnection = new ListenerProperty<Connection>(value => roomConnection = value, () => roomConnection);
             Obligations = new ListenerProperty<Obligation[]>(value => obligations = value, () => obligations);
-            
-            Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
         }
 
         public bool IsOpenTo(string roomId) => IsOpen.Value && (RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId);

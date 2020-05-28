@@ -137,7 +137,7 @@ namespace Lunra.Hothouse.Ai
 		{
 			public override bool IsTriggered()
 			{
-				return SourceState.target.Entrances.Value.Any(
+				return SourceState.target.Enterable.Entrances.Value.Any(
 					e => e.State == Entrance.States.Available && Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.ObligationDistance.Value 
 				);
 			}

@@ -18,7 +18,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.LightSensitive.LightLevel.Changed += OnLightLevel;
 
 			Model.Obligations.ChangedSource += OnObligationObligations;
-			Model.Entrances.Changed += OnEnterableEntrances;
+			Model.Enterable.Entrances.Changed += OnEnterableEntrances;
 
 			base.Bind();
 		}
@@ -31,7 +31,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.LightSensitive.LightLevel.Changed -= OnLightLevel;
 			
 			Model.Obligations.ChangedSource -= OnObligationObligations;
-			Model.Entrances.Changed -= OnEnterableEntrances;
+			Model.Enterable.Entrances.Changed -= OnEnterableEntrances;
 			
 			base.UnBind();
 		}
@@ -121,7 +121,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			var obligations = Model.Obligations.Value.ToArray();
 
-			var anyEntranceAvailable = Model.Entrances.Value.Any(e => e.State == Entrance.States.Available);
+			var anyEntranceAvailable = Model.Enterable.Entrances.Value.Any(e => e.State == Entrance.States.Available);
 			var anyChanges = false;
 			var anyCompleted = false;
 			

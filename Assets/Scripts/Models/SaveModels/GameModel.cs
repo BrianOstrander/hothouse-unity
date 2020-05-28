@@ -81,7 +81,7 @@ namespace Lunra.Hothouse.Models
 
 		public IEnumerable<IEnterableModel> GetEnterablesAvailable()
 		{
-			return GetEnterables(m => m.Entrances.Value.Any(e => e.State == Entrance.States.Available));
+			return GetEnterables(m => m.Enterable.Entrances.Value.Any(e => e.State == Entrance.States.Available));
 		}
 		
 		public IEnumerable<IEnterableModel> GetEnterables(Func<IEnterableModel, bool> predicate = null)

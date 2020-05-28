@@ -49,9 +49,8 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
-		Entrance[] entrances = new Entrance[0];
-		public ListenerProperty<Entrance[]> Entrances { get; }
-
+		[JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
+		
 		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
 		#endregion
 
@@ -71,8 +70,6 @@ namespace Lunra.Hothouse.Models
 			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);
 			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
 			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
-			
-			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
 		}
 	}
 }

@@ -91,7 +91,7 @@ namespace Lunra.Hothouse.Presenters
 				return;
 			}
 
-			if (game.Toolbar.Building.Value.Entrances.Value.None(e => e.IsNavigable))
+			if (game.Toolbar.Building.Value.Enterable.Entrances.Value.None(e => e.IsNavigable))
 			{
 				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
 					interaction,

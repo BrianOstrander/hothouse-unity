@@ -344,7 +344,7 @@ namespace Lunra.Hothouse.Ai
 					{
 						if (m.Id.Value != Agent.InventoryPromise.Value.TargetId) return false;
 						
-						return m.Entrances.Value.Any(e => Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
+						return m.Enterable.Entrances.Value.Any(e => Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
 					}
 				);
 

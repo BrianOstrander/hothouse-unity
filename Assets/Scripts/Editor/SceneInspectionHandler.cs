@@ -164,7 +164,7 @@ namespace Lunra.Hothouse.Editor
 				{
 					foreach (var model in gameState.Payload.Game.GetEnterables())
 					{
-						foreach (var entrance in model.Entrances.Value)
+						foreach (var entrance in model.Enterable.Entrances.Value)
 						{
 							var color = Color.grey;
 
