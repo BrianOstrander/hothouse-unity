@@ -72,6 +72,20 @@ namespace Lunra.Hothouse.Editor
 				{
 					game.Doors.FirstActive().Obligations.All.Value = new Obligation[0];
 				}
+				
+				if (GUILayout.Button("first door rando obl"))
+				{
+					game.ObligationIndicators.Register(
+						Obligation.New(
+							ObligationCategories.Door.Open,
+							0,
+							ObligationCategories.GetJobs(),
+							Obligation.ConcentrationRequirements.Instant,
+							Interval.Zero()
+						),
+						game.Doors.FirstActive()
+					);
+				}
 			}
 			GUIExtensions.PopEnabled();
 			

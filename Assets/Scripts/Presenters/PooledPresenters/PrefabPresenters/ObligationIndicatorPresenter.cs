@@ -1,28 +1,56 @@
-using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
-using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Lunra.Hothouse.Presenters
 {
 	public class ObligationIndicatorPresenter : PrefabPresenter<ObligationIndicatorModel, ObligationIndicatorView>
 	{
+		IObligationModel lastTargetInstance;
+		
 		public ObligationIndicatorPresenter(GameModel game, ObligationIndicatorModel model) : base(game, model) { }
 
 		protected override void Bind()
 		{
-			Model.TargetInstance.Obligations.All.Changed += OnTargetInstanceObligations;
+			Model.TargetInstance.Changed += OnObligationIndicatorTargetInstance; 
+			OnObligationIndicatorTargetInstance(Model.TargetInstance.Value);
 			
 			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			Model.TargetInstance.Obligations.All.Changed -= OnTargetInstanceObligations;
+			Model.TargetInstance.Changed -= OnObligationIndicatorTargetInstance;
+			OnObligationIndicatorTargetInstance(null);
 			
 			base.UnBind();
 		}
 		
+		#region ObligationIndicatorModel Events
+		void OnObligationIndicatorTargetInstance(IObligationModel targetInstance)
+		{
+			Assert.IsFalse(
+				targetInstance == lastTargetInstance,
+				"It should not be possible for this event to fire if the current and last instances match"
+			);
+			
+			if (lastTargetInstance != null)
+			{
+				lastTargetInstance.Obligations.All.Changed -= OnTargetInstanceObligations;
+			}
+			lastTargetInstance = targetInstance;
+
+			if (targetInstance == null)
+			{
+				Model.ObligationId.Value = null;
+				Model.PooledState.Value = PooledStates.InActive;
+				return;
+			}
+			
+			targetInstance.Obligations.All.Changed += OnTargetInstanceObligations;
+		}
+		#endregion
+
 		#region TargetInstance Events
 		void OnTargetInstanceObligations(Obligation[] obligations)
 		{
@@ -30,7 +58,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!obligation.IsValid)
 			{
-				Model.PooledState.Value = PooledStates.InActive;
+				Model.TargetInstance.Value = null;
 				return;
 			}
 			

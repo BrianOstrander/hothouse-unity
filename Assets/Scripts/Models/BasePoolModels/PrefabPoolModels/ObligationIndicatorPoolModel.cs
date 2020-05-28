@@ -19,32 +19,35 @@ namespace Lunra.Hothouse.Models
 					.FirstOrDefault(m => m.Obligations.All.Value.Any(o => o.Id == model.ObligationId.Value));
 
 				if (target == null) Debug.LogError("Unable to find any target with obligation id: " + model.ObligationId.Value);
-				else model.TargetInstance = target;
+				else model.TargetInstance.Value = target;
 			}
 			
 			Initialize(
 				model => new ObligationIndicatorPresenter(game, model)	
 			);
 		}
-
-		public ObligationIndicatorModel Activate(
-			string obligationId,
+		
+		public ObligationIndicatorModel Register(
+			Obligation obligation,
 			IObligationModel target
 		)
 		{
-			var result = AllActive.FirstOrDefault(o => o.ObligationId.Value == obligationId);
+			var result = AllActive.FirstOrDefault(o => o.ObligationId.Value == obligation.Id);
 			if (result != null)
 			{
+				Debug.LogError("Trying to register an obligation but there is already a indicator with the same id: "+obligation.Id);
 				return result;
 			}
 
-			var obligation = target.Obligations.All.Value.FirstOrDefault(o => o.Id == obligationId);
-
-			if (!obligation.IsValid)
+			if (target.Obligations.All.Value.FirstOrDefault(o => o.Id == obligation.Id).IsValid)
 			{
-				Debug.LogError("Unable to find an obligation on " + target.Id.Value + " with id: " + obligationId);
+				Debug.LogError("Trying to register an obligation but there is already an obligation with the same id on this target: "+obligation.Id);
 				return null;
 			}
+
+			target.Obligations.All.Value = target.Obligations.All.Value
+				.Append(obligation)
+				.ToArray();
 			
 			result = Activate(
 				obligation.Type.PrefabId,
@@ -53,7 +56,7 @@ namespace Lunra.Hothouse.Models
 				target.Transform.Rotation.Value,
 				model => Reset(
 					model,
-					obligationId,
+					obligation,
 					target
 				)
 			);
@@ -63,12 +66,12 @@ namespace Lunra.Hothouse.Models
 
 		void Reset(
 			ObligationIndicatorModel model,
-			string obligationId,
+			Obligation obligation,
 			IObligationModel target
 		)
 		{
-			model.ObligationId.Value = obligationId;
-			model.TargetInstance = target;
+			model.ObligationId.Value = obligation.Id;
+			model.TargetInstance.Value = target;
 		}
 	}
 }

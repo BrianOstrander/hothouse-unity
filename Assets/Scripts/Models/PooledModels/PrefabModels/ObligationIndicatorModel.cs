@@ -13,17 +13,18 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region NonSerialized
-		[JsonIgnore] public IObligationModel TargetInstance { get; set; }
+		[JsonIgnore] IObligationModel targetInstance;
+		[JsonIgnore] public ListenerProperty<IObligationModel> TargetInstance { get; }
 		[JsonIgnore] public Obligation ObligationInstance
 		{
 			get
 			{
-				if (TargetInstance == null)
+				if (TargetInstance.Value == null)
 				{
 					Debug.LogError("Attempting to get obligation instance when target is null");
 					return default;
 				}
-				return TargetInstance.Obligations.All.Value.FirstOrDefault(o => o.Id == ObligationId.Value);
+				return TargetInstance.Value.Obligations.All.Value.FirstOrDefault(o => o.Id == ObligationId.Value);
 			}
 		}
 		#endregion
@@ -31,6 +32,7 @@ namespace Lunra.Hothouse.Models
 		public ObligationIndicatorModel()
 		{
 			ObligationId = new ListenerProperty<string>(value => obligationId = value, () => obligationId);
+			TargetInstance = new ListenerProperty<IObligationModel>(value => targetInstance = value, () => targetInstance);
 		}
 	}
 }

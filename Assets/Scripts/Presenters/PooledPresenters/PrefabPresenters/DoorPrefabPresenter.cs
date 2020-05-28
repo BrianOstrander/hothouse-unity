@@ -83,6 +83,7 @@ namespace Lunra.Hothouse.Presenters
 
 			foreach (var obligation in obligations)
 			{
+				/*
 				switch (obligation.State)
 				{
 					// case Obligation.States.NotInitialized: break;
@@ -90,15 +91,16 @@ namespace Lunra.Hothouse.Presenters
 					case Obligation.States.Available:
 					case Obligation.States.Promised:
 					case Obligation.States.Complete:
-						Game.ObligationIndicators.Activate(
-							obligation.Id,
-							Model
-						);
+						// Game.ObligationIndicators.Activate(
+						// 	obligation.Id,
+						// 	Model
+						// );
 						break;
 					default:
 						Debug.LogError("Unrecognized obligation state: "+obligation.State);
 						break;
 				}
+				*/
 				
 				if (obligation.State != Obligation.States.Complete) return;
 				OnObligationHandle(obligation.Type);

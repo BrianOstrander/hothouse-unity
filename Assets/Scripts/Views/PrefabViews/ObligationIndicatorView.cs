@@ -9,8 +9,10 @@ namespace Lunra.Hothouse.Views
 		[Serializable]
 		struct ActionEntry
 		{
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 			public string Action;
 			public GameObject Root;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		}
 		
 		#region Serialized
