@@ -44,30 +44,16 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] DesireQuality[] desireQualities = new DesireQuality[0];
 		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQualities { get; }
 
-		[JsonProperty] bool isLight;
-		[JsonIgnore] public ListenerProperty<bool> IsLight { get; }
-		[JsonProperty] bool isLightEnabled;
-		[JsonIgnore] public ListenerProperty<bool> IsLightCalculationsEnabled { get; }
-		[JsonProperty] LightStates lightState;
-		[JsonIgnore] public ListenerProperty<LightStates> LightState { get; }
-		[JsonProperty] Inventory lightFuel;
-		[JsonIgnore] public ListenerProperty<Inventory> LightFuel { get; }
-		[JsonProperty] Interval lightFuelInterval;
-		[JsonIgnore] public ListenerProperty<Interval> LightFuelInterval { get; }
-		[JsonProperty] bool isLightRefueling;
-		[JsonIgnore] public ListenerProperty<bool> IsLightRefueling { get; }
-		
 		[JsonProperty] float lightLevel;
 		[JsonIgnore] public ListenerProperty<float> LightLevel { get; }
+		
+		public LightComponent Light { get; } = new LightComponent();
 		#endregion
 		
 		#region Non Serialized
 		Entrance[] entrances = new Entrance[0];
 		public ListenerProperty<Entrance[]> Entrances { get; }
-		
-		[JsonProperty] float lightRadius;
-		[JsonIgnore] public ListenerProperty<float> LightRange { get; }
-		
+
 		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
 		#endregion
 
@@ -87,16 +73,9 @@ namespace Lunra.Hothouse.Models
 			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);
 			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
 			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
-			IsLight = new ListenerProperty<bool>(value => isLight = value, () => isLight);
-			IsLightCalculationsEnabled = new ListenerProperty<bool>(value => isLightEnabled = value, () => isLightEnabled);
-			LightState = new ListenerProperty<LightStates>(value => lightState = value, () => lightState);
-			LightFuel = new ListenerProperty<Inventory>(value => lightFuel = value, () => lightFuel);
-			LightFuelInterval = new ListenerProperty<Interval>(value => lightFuelInterval = value, () => lightFuelInterval);
-			IsLightRefueling = new ListenerProperty<bool>(value => isLightRefueling = value, () => isLightRefueling);
 			LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
 			
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
-			LightRange = new ListenerProperty<float>(value => lightRadius = value, () => lightRadius);
 		}
 	}
 }

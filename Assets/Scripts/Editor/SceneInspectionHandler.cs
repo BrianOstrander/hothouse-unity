@@ -102,7 +102,7 @@ namespace Lunra.Hothouse.Editor
 					if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 					{
 						label += "\nLight Level: " + model.LightLevel.Value.ToString("N2");
-						if (model.IsLight.Value) label += "\nLight State: " + model.LightState.Value;
+						if (model.Light.IsLight.Value) label += "\nLight State: " + model.Light.LightState.Value;
 					}
 
 					label += GetInventory(
@@ -306,12 +306,12 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
 					var yOffset = 0f;
-					foreach (var model in gameState.Payload.Game.GetLightsActive().Where(l => l.IsLightActive()))
+					foreach (var model in gameState.Payload.Game.GetLightsActive().Where(l => l.Light.IsLightActive()))
 					{
 						Handles.DrawSolidDisc(
 							model.Position.Value + new Vector3(0f, yOffset, 0f),
 							Vector3.up,
-							model.LightRange.Value
+							model.Light.LightRange.Value
 						);
 						yOffset += 0.01f;
 					}

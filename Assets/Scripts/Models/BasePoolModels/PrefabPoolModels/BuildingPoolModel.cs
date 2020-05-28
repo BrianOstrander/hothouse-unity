@@ -307,14 +307,14 @@ namespace Lunra.Hothouse.Models
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
 			model.ConstructionInventoryCapacity.Value = info.ConstructionInventoryCapacity;
 			model.SalvageInventory.Value = info.SalvageInventory;
-			model.IsLightCalculationsEnabled.Value = false;
-			model.LightFuel.Value = info.LightFuel;
-			model.LightFuelInterval.Value = info.LightFuelInterval;
-			model.LightState.Value = info.LightStateDefault;
+			model.Light.IsLightCalculationsEnabled.Value = false;
+			model.Light.LightFuel.Value = info.LightFuel;
+			model.Light.LightFuelInterval.Value = info.LightFuelInterval;
+			model.Light.LightState.Value = info.LightStateDefault;
 			model.DesireQualities.Value = info.DesireQualities;
 			model.BuildingState.Value = buildingState;
 			
-			model.IsLightRefueling.Value = true;
+			model.Light.IsLightRefueling.Value = true;
 			model.LightLevel.Value = 0f;
 		}
 	}

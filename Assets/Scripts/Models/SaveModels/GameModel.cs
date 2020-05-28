@@ -70,13 +70,13 @@ namespace Lunra.Hothouse.Models
 
 		public IEnumerable<ILightModel> GetLightsActive()
 		{
-			return GetLights(m => m.IsLightActive());
+			return GetLights(m => m.Light.IsLightActive());
 		}
 		
 		public IEnumerable<ILightModel> GetLights(Func<ILightModel, bool> predicate = null)
 		{
 			predicate = predicate ?? (m => true);
-			return Buildings.AllActive.Where(m => m.IsLight.Value && predicate(m));	
+			return Buildings.AllActive.Where(m => m.Light.IsLight.Value && predicate(m));	
 		}
 
 		public IEnumerable<IEnterableModel> GetEnterablesAvailable()

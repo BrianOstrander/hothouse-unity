@@ -240,7 +240,7 @@ namespace Lunra.Hothouse.Services
 
 			bool isLightActiveAndInRoom(ILightModel light)
 			{
-				return light.IsLightActive() && rooms.Any(r => r.RoomId.Value == light.RoomId.Value);
+				return light.Light.IsLightActive() && rooms.Any(r => r.RoomId.Value == light.RoomId.Value);
 			}
 			
 			result.OperatingMaximum = OnCalculateMaximumLighting(
@@ -265,15 +265,15 @@ namespace Lunra.Hothouse.Services
 
 			foreach (var light in lights)
 			{
-				if (light.IsLightNotActive()) continue;
+				if (light.Light.IsLightNotActive()) continue;
 
 				var distance = Vector3.Distance(position, light.Position.Value);
 
-				if (light.LightRange.Value <= distance) continue;
+				if (light.Light.LightRange.Value <= distance) continue;
 
 				result = Mathf.Max(
 					result,
-					1f - (distance / light.LightRange.Value)
+					1f - (distance / light.Light.LightRange.Value)
 				);
 			}
 

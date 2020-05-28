@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Models
 			result.LastUpdated = game.PlaytimeElapsed.Value;
 			
 			result.GlobalInventory = game.Buildings.AllActive
-				.Where(b => b.IsBuildingState(BuildingStates.Operating) && !b.IsLight.Value)
+				.Where(b => b.IsBuildingState(BuildingStates.Operating) && !b.Light.IsLight.Value)
 				.Select(b => b.Inventory.Value)
 				.Sum();
 
