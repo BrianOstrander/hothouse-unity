@@ -163,19 +163,19 @@ namespace Lunra.Hothouse.Models
 
 		public IEnumerable<RoomPrefabModel> GetOpenAdjacentRooms(params string[] roomIds)
 		{
-			var results = Rooms.AllActive.Where(r => roomIds.Contains(r.RoomId.Value)).ToList();
+			var results = Rooms.AllActive.Where(r => roomIds.Contains(r.RoomTransform.Id.Value)).ToList();
 
 			foreach (var door in Doors.AllActive.Where(d => roomIds.Any(d.IsOpenTo)))
 			{
 				var idToAdd = string.Empty;
-				if (results.Any(r => r.RoomId.Value == door.RoomConnection.Value.RoomId0))
+				if (results.Any(r => r.RoomTransform.Id.Value == door.RoomConnection.Value.RoomId0))
 				{
-					if (results.None(r => r.RoomId.Value == door.RoomConnection.Value.RoomId1)) idToAdd = door.RoomConnection.Value.RoomId1;
+					if (results.None(r => r.RoomTransform.Id.Value == door.RoomConnection.Value.RoomId1)) idToAdd = door.RoomConnection.Value.RoomId1;
 					else continue;
 				}
 				else idToAdd = door.RoomConnection.Value.RoomId0;
 				
-				results.Add(Rooms.AllActive.First(r => r.RoomId.Value == idToAdd));
+				results.Add(Rooms.AllActive.First(r => r.RoomTransform.Id.Value == idToAdd));
 			}
 			return results;
 		}

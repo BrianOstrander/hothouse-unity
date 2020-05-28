@@ -128,7 +128,7 @@ namespace Lunra.Hothouse.Presenters
 		protected virtual void OnLightState(LightStates lightState)
 		{
 			if (IsNotActive) return;
-			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
+			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomTransform.Id.Value);
 			
 			switch (lightState)
 			{
@@ -154,7 +154,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (IsNotActive) return;
 			
-			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
+			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomTransform.Id.Value);
 			
 			if (View.NotVisible) return;
 			
@@ -270,7 +270,7 @@ namespace Lunra.Hothouse.Presenters
 					{
 						if (Model.Light.ReseltLightCalculationsEnabled(Model.IsBuildingState(BuildingStates.Operating)))
 						{
-							Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomId.Value);
+							Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomTransform.Id.Value);
 						}
 					}
 					else

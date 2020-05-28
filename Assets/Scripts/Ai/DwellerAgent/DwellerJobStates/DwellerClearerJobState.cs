@@ -111,7 +111,7 @@ namespace Lunra.Hothouse.Ai
 
 							World.ItemDrops.Activate(
 								"default",
-								target.RoomId.Value,
+								target.RoomTransform.Id.Value,
 								target.Transform.Position.Value,
 								Quaternion.identity,
 								itemDrop =>

@@ -100,7 +100,7 @@ namespace Lunra.Hothouse.Presenters
 			{
 				Game.ItemDrops.Activate(
 					"default",
-					Model.RoomId.Value,
+					Model.RoomTransform.Id.Value,
 					Model.Transform.Position.Value,
 					Quaternion.identity,
 					m =>

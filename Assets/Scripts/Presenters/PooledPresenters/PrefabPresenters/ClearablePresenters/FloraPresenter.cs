@@ -98,7 +98,7 @@ namespace Lunra.Hothouse.Presenters
 			var nearbyFlora = Game.Flora.AllActive.Where(
 				f =>
 				{
-					if (f.RoomId.Value != Model.RoomId.Value) return false;
+					if (f.RoomTransform.Id.Value != Model.RoomTransform.Id.Value) return false;
 					return Vector3.Distance(f.Transform.Position.Value, Model.Transform.Position.Value) < (f.ReproductionRadius.Value.Maximum + Model.ReproductionRadius.Value.Maximum);
 				}
 			);
@@ -120,7 +120,7 @@ namespace Lunra.Hothouse.Presenters
 
 							Game.Flora.ActivateChild(
 								Model.Species.Value,
-								Model.RoomId.Value,
+								Model.RoomTransform.Id.Value,
 								hit.position
 							);
 						}

@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Services
 
 			void initializeRoom(RoomPrefabModel room)
 			{
-				room.Id.Value = room.RoomId.Value;
+				room.Id.Value = room.RoomTransform.Id.Value;
 			}
 			
 			var room0 = game.Rooms.Activate(

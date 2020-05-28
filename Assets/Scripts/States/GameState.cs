@@ -202,7 +202,7 @@ namespace Lunra.Hothouse.Services
 				lightSensitives = Payload.Game.GetLightSensitives().Where(l => Payload.Game.LastLightUpdate.Value.SensitiveIds.Contains(l.Id.Value));
 				roomMap = Payload.Game.GetOpenAdjacentRoomsMap(
 					Payload.Game.LastLightUpdate.Value.RoomIds
-						.Union(lightSensitives.Select(l => l.RoomId.Value))
+						.Union(lightSensitives.Select(l => l.RoomTransform.Id.Value))
 						.ToArray()
 				);
 
@@ -215,15 +215,15 @@ namespace Lunra.Hothouse.Services
 			}
 
 			var allRooms = roomMap.Values.SelectMany(v => v).Distinct();
-			var allLights = Payload.Game.GetLightsActive().Where(l => allRooms.Any(r => r.RoomId.Value == l.RoomId.Value)).ToList();
+			var allLights = Payload.Game.GetLightsActive().Where(l => allRooms.Any(r => r.RoomTransform.Id.Value == l.RoomTransform.Id.Value)).ToList();
 
 			foreach (var lightSensitive in lightSensitives)
 			{
-				if (!roomMap.TryGetValue(lightSensitive.RoomId.Value, out var rooms)) continue;
+				if (!roomMap.TryGetValue(lightSensitive.RoomTransform.Id.Value, out var rooms)) continue;
 
 				lightSensitive.LightSensitive.LightLevel.Value = OnCalculateMaximumLighting(
 					lightSensitive.Transform.Position.Value,
-					allLights.Where(l => rooms.Any(r => r.RoomId.Value == l.RoomId.Value))
+					allLights.Where(l => rooms.Any(r => r.RoomTransform.Id.Value == l.RoomTransform.Id.Value))
 				);
 			}
 			
@@ -240,7 +240,7 @@ namespace Lunra.Hothouse.Services
 
 			bool isLightActiveAndInRoom(ILightModel light)
 			{
-				return light.Light.IsLightActive() && rooms.Any(r => r.RoomId.Value == light.RoomId.Value);
+				return light.Light.IsLightActive() && rooms.Any(r => r.RoomTransform.Id.Value == light.RoomTransform.Id.Value);
 			}
 			
 			result.OperatingMaximum = OnCalculateMaximumLighting(
