@@ -302,9 +302,9 @@ namespace Lunra.Hothouse.Services
 			door0.Obligations.All.Value = new[]
 			{
 				Obligation.New(
-					ObligationTypes.Door.Open,
+					ObligationCategories.Door.Open,
 					0,
-					ObligationTypes.GetJobs(Jobs.Construction),
+					ObligationCategories.GetJobs(Jobs.Construction),
 					Obligation.ConcentrationRequirements.Instant,
 					Interval.Zero()
 				)

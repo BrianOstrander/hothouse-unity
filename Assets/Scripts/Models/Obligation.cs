@@ -10,7 +10,7 @@ namespace Lunra.Hothouse.Models
 		static string GenerateId => Guid.NewGuid().ToString(); 
 		
 		public static Obligation New(
-			string type,
+			ObligationType type,
 			int priority,
 			Jobs[] validJobs,
 			ConcentrationRequirements concentrationRequirement,
@@ -47,7 +47,7 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public string Id { get; private set; }
-		public string Type { get; private set; }
+		public ObligationType Type { get; private set; }
 		public States State { get; private set; }
 		public int Priority { get; private set; }
 		public Jobs[] ValidJobs { get; private set; }
@@ -58,7 +58,7 @@ namespace Lunra.Hothouse.Models
 		
 		Obligation(
 			string id,
-			string type,
+			ObligationType type,
 			States state,
 			int priority,
 			Jobs[] validJobs,

@@ -90,11 +90,17 @@ namespace Lunra.Hothouse.Presenters
 			RecalculateObligations();
 		}
 
-		void OnObligationHandle(string type)
+		void OnObligationHandle(ObligationType type)
 		{
-			switch (type)
+			if (!ObligationCategories.Door.Contains(type))
 			{
-				case ObligationTypes.Door.Open:
+				Debug.LogError("Unrecognized category on this obligation: "+type);
+				return;
+			}
+			
+			switch (type.Action)
+			{
+				case ObligationCategories.Door.Actions.Open:
 					if (Model.IsOpen.Value) Debug.LogWarning("Handling obligation \""+type+"\" but the door is already open");
 					else
 					{
