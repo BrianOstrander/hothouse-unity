@@ -112,7 +112,7 @@ namespace Lunra.Hothouse.Models
 				.Concat(GetClearables());
 		}
 
-		[JsonIgnore] public Func<(string RoomId, Vector3 Position), LightingResult> CalculateMaximumLighting;
+		[JsonIgnore] public Func<(string RoomId, Vector3 Position, ILightModel[] Except), LightingResult> CalculateMaximumLighting;
 
 		GameCache cache;
 		readonly ListenerProperty<GameCache> cacheListener;

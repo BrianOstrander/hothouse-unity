@@ -59,7 +59,8 @@ namespace Lunra.Hothouse.Presenters
 			var lightValue = game.CalculateMaximumLighting(
 				(
 					game.Rooms.AllActive.First().Id.Value,
-					interaction.Position.Begin
+					interaction.Position.Begin,
+					new ILightModel[] { game.Toolbar.Building.Value }
 				)
 			);
 			var placementLightRequirement = game.Toolbar.Building.Value.PlacementLightRequirement.Value;

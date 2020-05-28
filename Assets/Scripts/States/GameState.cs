@@ -233,26 +233,51 @@ namespace Lunra.Hothouse.Services
 		}
 
 		LightingResult OnCalculateMaximumLighting(
-			(string RoomId, Vector3 Position) roomPosition
+			(
+				string RoomId,
+				Vector3 Position,
+				ILightModel[] Except
+			)
+				request
 		)
 		{
 			var result = new LightingResult();
 			
-			var rooms = Payload.Game.GetOpenAdjacentRooms(roomPosition.RoomId);
+			var rooms = Payload.Game.GetOpenAdjacentRooms(request.RoomId);
 
-			bool isLightActiveAndInRoom(ILightModel light)
+			bool isLightNotExceptedAndInRoom(ILightModel light)
 			{
-				return light.Light.IsLightActive() && rooms.Any(r => r.RoomTransform.Id.Value == light.RoomTransform.Id.Value);
+				if (request.Except != null  && request.Except.Any(l => l.Id.Value == light.Id.Value)) return false;
+				return rooms.Any(r => r.RoomTransform.Id.Value == light.RoomTransform.Id.Value);
 			}
 			
 			result.OperatingMaximum = OnCalculateMaximumLighting(
-				roomPosition.Position,
-				Payload.Game.GetLights(isLightActiveAndInRoom)
+				request.Position,
+				Payload.Game.GetLightsActive().Where(isLightNotExceptedAndInRoom)
 			);
 
 			result.ConstructingMaximum = OnCalculateMaximumLighting(
-				roomPosition.Position,
-				Payload.Game.GetLights(isLightActiveAndInRoom)
+				request.Position,
+				Payload.Game.GetLights(
+					l =>
+					{
+						if (l.Light.IsLightActive()) return false;
+						
+						switch (l.Light.LightState.Value)
+						{
+							case LightStates.Fueled:
+							case LightStates.Extinguishing:
+								break;
+							case LightStates.Extinguished:
+								return false;
+							default:
+								Debug.LogError("Unrecognized LightState: "+l.Light.LightState.Value);
+								return false;
+						}
+
+						return isLightNotExceptedAndInRoom(l);
+					}
+				)
 			);
 
 			return result;
@@ -267,8 +292,6 @@ namespace Lunra.Hothouse.Services
 
 			foreach (var light in lights)
 			{
-				if (light.Light.IsLightNotActive()) continue;
-
 				var distance = Vector3.Distance(position, light.Transform.Position.Value);
 
 				if (light.Light.LightRange.Value <= distance) continue;
