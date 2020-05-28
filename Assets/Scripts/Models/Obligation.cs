@@ -33,8 +33,8 @@ namespace Lunra.Hothouse.Models
 			Unknown = 0,
 			NotInitialized = 10,
 			Blocked = 20,
-			Promised = 30,
-			Available = 40,
+			Available = 30,
+			Promised = 40,
 			Complete = 50
 		}
 
@@ -75,7 +75,7 @@ namespace Lunra.Hothouse.Models
 			ConcentrationElapsed = concentrationElapsed;
 		}
 
-		public Obligation Update(float time)
+		public Obligation NewConcentrationElapsed(Interval concentrationElapsed)
 		{
 			var result = new Obligation(
 				Id,
@@ -108,7 +108,7 @@ namespace Lunra.Hothouse.Models
 					break;
 				case ConcentrationRequirements.Interruptible:
 				case ConcentrationRequirements.NonInterruptible:
-					result.ConcentrationElapsed = ConcentrationElapsed.Update(time);
+					result.ConcentrationElapsed = concentrationElapsed;
 					break;
 				default:
 					Debug.LogError("Unrecognized ConcentrationRequirement: "+ConcentrationRequirement);

@@ -80,7 +80,31 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (IsNotActive) return;
 			if (source == this) return;
+
+			foreach (var obligation in obligations)
+			{
+				if (obligation.State != Obligation.States.Complete) return;
+				OnObligationHandle(obligation.Type);
+			}
+			
 			RecalculateObligations();
+		}
+
+		void OnObligationHandle(string type)
+		{
+			switch (type)
+			{
+				case ObligationTypes.Door.Open:
+					if (Model.IsOpen.Value) Debug.LogWarning("Handling obligation \""+type+"\" but the door is already open");
+					else
+					{
+						Model.IsOpen.Value = true;
+					}
+					break;
+				default:
+					Debug.LogError("Unrecognized obligation type: "+type);
+					break;
+			}
 		}
 		#endregion
 		
@@ -99,6 +123,7 @@ namespace Lunra.Hothouse.Presenters
 
 			var anyEntranceAvailable = Model.Entrances.Value.Any(e => e.State == Entrance.States.Available);
 			var anyChanges = false;
+			var anyCompleted = false;
 			
 			for (var i = 0; i < obligations.Length; i++)
 			{
@@ -125,6 +150,7 @@ namespace Lunra.Hothouse.Presenters
 						}
 						break;
 					case Obligation.States.Complete:
+						anyCompleted = true;
 						break;
 					default:
 						Debug.LogError("Unrecognized State: "+obligations[i].State);
@@ -134,9 +160,12 @@ namespace Lunra.Hothouse.Presenters
 				anyChanges |= previousState != obligations[i].State;
 			}
 
-			if (!anyChanges) return;
+			if (!anyChanges && !anyCompleted) return;
 
-			Model.Obligations.SetValue(obligations, this);
+			Model.Obligations.SetValue(
+				anyCompleted ? obligations.Where(o => o.State != Obligation.States.Complete).ToArray() : obligations,
+				this
+			);
 		}
 		#endregion
 	}

@@ -36,6 +36,11 @@ namespace Lunra.Hothouse.Models.AgentModels
 		[JsonProperty] float depositCooldown;
 		[JsonIgnore] public ListenerProperty<float> DepositCooldown { get; }
 		
+		[JsonProperty] float obligationDistance;
+		[JsonIgnore] public ListenerProperty<float> ObligationDistance { get; }
+		[JsonProperty] float obligationMinimumConcentrationDuration;
+		[JsonIgnore] public ListenerProperty<float> ObligationMinimumConcentrationDuration { get; }
+		
 		[JsonProperty] float transferDistance;
 		[JsonIgnore] public ListenerProperty<float> TransferDistance { get; }
 		
@@ -65,6 +70,8 @@ namespace Lunra.Hothouse.Models.AgentModels
 			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);
 			WithdrawalCooldown = new ListenerProperty<float>(value => withdrawalCooldown = value, () => withdrawalCooldown); 
 			DepositCooldown = new ListenerProperty<float>(value => depositCooldown = value, () => depositCooldown);
+			ObligationDistance = new ListenerProperty<float>(value => obligationDistance = value, () => obligationDistance);
+			ObligationMinimumConcentrationDuration = new ListenerProperty<float>(value => obligationMinimumConcentrationDuration = value, () => obligationMinimumConcentrationDuration);
 			TransferDistance = new ListenerProperty<float>(value => transferDistance = value, () => transferDistance);
 			LowRationThreshold = new ListenerProperty<int>(value => lowRationThreshold = value, () => lowRationThreshold);
 		}

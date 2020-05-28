@@ -301,16 +301,16 @@ namespace Lunra.Hothouse.Services
 
 			var door0 = game.Doors.AllActive.First();
 
-			// door0.Obligations.Value = new[]
-			// {
-			// 	Obligation.New(
-			// 		ObligationTypes.Door.Open,
-			// 		0,
-			// 		ObligationTypes.GetJobs(Jobs.Construction),
-			// 		Obligation.ConcentrationRequirements.Instant,
-			// 		Interval.Zero()
-			// 	)
-			// };
+			door0.Obligations.Value = new[]
+			{
+				Obligation.New(
+					ObligationTypes.Door.Open,
+					0,
+					ObligationTypes.GetJobs(Jobs.Construction),
+					Obligation.ConcentrationRequirements.Instant,
+					Interval.Zero()
+				)
+			};
 
 			game.Dwellers.AllActive.First().IsDebugging = true;
 			

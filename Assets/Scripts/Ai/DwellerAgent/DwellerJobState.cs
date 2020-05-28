@@ -287,9 +287,15 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
+				var newObligation = target.Obligation.New(Obligation.States.Promised);
+
+				target.Model.Obligations.Value = target.Model.Obligations.Value
+					.Select(o => o.Id == newObligation.Id ? newObligation : o)
+					.ToArray();
+				
 				Agent.Obligation.Value = ObligationPromise.New(
 					target.Model.Id.Value,
-					target.Obligation.Id
+					newObligation.Id
 				);
 			}
 		}

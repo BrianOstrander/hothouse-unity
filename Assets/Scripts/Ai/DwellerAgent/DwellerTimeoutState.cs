@@ -1,5 +1,7 @@
-using Lunra.Hothouse.Models;
+using System;
 using Lunra.Hothouse.Models.AgentModels;
+using Lunra.Hothouse.Models;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Ai
 {
@@ -15,9 +17,17 @@ namespace Lunra.Hothouse.Ai
 
 		public override string Name => "Timeout";
 
-		Types type;
-		Interval interval;
-		DayTime dayTime;
+		public struct Configuration
+		{
+			public Types TimeoutType;
+			public Interval TimeoutInterval;
+			public DayTime TimeoutBeginDayTime;
+			public DayTime TimeoutDayTime;
+
+			public Action<(float Progress, bool IsDone)> Updated;
+		}
+
+		Configuration configuration;
 		
 		public override void OnInitialize()
 		{
@@ -30,58 +40,104 @@ namespace Lunra.Hothouse.Ai
 
 		void Reset()
 		{
-			type = Types.Unknown;
-			interval = default;
-			dayTime = default;
+			configuration = default;
 		}
 
-		public void ConfigureForInterval(Interval interval)
+		public void ConfigureForInterval(
+			Interval interval,
+			Action<(float Progress, bool IsDone)> updated = null
+		)
 		{
 			Reset();
-			type = Types.Interval;
-			this.interval = interval;	
+			configuration.TimeoutType = Types.Interval;
+			configuration.TimeoutInterval = interval;
+			
+			configuration.Updated = updated;
 		}
 
-		public void ConfigureForNextTimeOfDay(float timeOfDay)
+		public void ConfigureForNextTimeOfDay(
+			float timeOfDay,
+			Action<(float Progress, bool IsDone)> updated = null
+		)
 		{
 			Reset();
-			type = Types.Time;
-			dayTime = new DayTime(
+			configuration.TimeoutType = Types.Time;
+			configuration.TimeoutBeginDayTime = World.SimulationTime.Value;
+			configuration.TimeoutDayTime = new DayTime(
 				timeOfDay < World.SimulationTime.Value.Time ? World.SimulationTime.Value.Day + 1 : World.SimulationTime.Value.Day,
 				timeOfDay
-			);	
+			);
+
+			configuration.Updated = updated;
 		}
 
-		public void ConfigureForDayAndTime(DayTime atDayTime)
+		public void ConfigureForDayAndTime(
+			DayTime atDayTime,
+			Action<(float Progress, bool IsDone)> updated = null
+		)
 		{
 			Reset();
-			type = Types.Time;
-			dayTime = DayTime.Max(World.SimulationTime.Value, atDayTime);
+			configuration.TimeoutType = Types.Time;
+			configuration.TimeoutBeginDayTime = World.SimulationTime.Value;
+			configuration.TimeoutDayTime = DayTime.Max(World.SimulationTime.Value, atDayTime);
+
+			configuration.Updated = updated;
+		}
+
+		public override void Begin()
+		{
+			if (configuration.TimeoutType == Types.Unknown)
+			{
+				Debug.LogError("Unable to process this timeout, are you sure you configured it before entering?");
+			}
 		}
 
 		public override void Idle()
 		{
-			switch (type)
+			var progress = 0f;
+			switch (configuration.TimeoutType)
 			{
 				case Types.Interval:
-					interval = interval.Update(World.SimulationDelta);
+					configuration.TimeoutInterval = configuration.TimeoutInterval.Update(World.SimulationDelta);
+					progress = configuration.TimeoutInterval.Normalized;
+					break;
+				case Types.Time:
+					// TODO: Does this really return a negative ever? that's probably not great...
+					var total = Mathf.Abs((configuration.TimeoutDayTime - configuration.TimeoutBeginDayTime).TotalTime);
+					var remaining = Mathf.Abs((configuration.TimeoutDayTime - World.SimulationTime.Value).TotalTime);
+					// TODO: This isn't super tested...
+					progress = Mathf.Approximately(0f, total) ? 1f : Mathf.Min(remaining / total, 1f);
+					break;
+				default:
+					Debug.LogError("Unrecognized Type: " + configuration.TimeoutType);
 					break;
 			}
+
+			configuration.Updated?.Invoke((progress, false));
+		}
+
+		public override void End()
+		{
+			var finalUpdated = configuration.Updated;
+			
+			Reset();
+			
+			finalUpdated?.Invoke((1f, true));
 		}
 
 		class ToReturnOnIntervalElapsed : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
 		{
-			public override bool IsTriggered() => SourceState.type == Types.Interval && SourceState.interval.IsDone;
+			public override bool IsTriggered() => SourceState.configuration.TimeoutType == Types.Interval && SourceState.configuration.TimeoutInterval.IsDone;
 		}
 		
 		class ToReturnOnTimeElapsed : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
 		{
-			public override bool IsTriggered() => SourceState.type == Types.Time && SourceState.dayTime <= World.SimulationTime.Value;
+			public override bool IsTriggered() => SourceState.configuration.TimeoutType == Types.Time && SourceState.configuration.TimeoutDayTime <= World.SimulationTime.Value;
 		}
 		
 		class ToReturnOnInvalid : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
 		{
-			public override bool IsTriggered() => SourceState.type == Types.Unknown;
+			public override bool IsTriggered() => SourceState.configuration.TimeoutType == Types.Unknown;
 		}
 	}
 }
