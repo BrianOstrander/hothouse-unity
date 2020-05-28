@@ -83,6 +83,23 @@ namespace Lunra.Hothouse.Presenters
 
 			foreach (var obligation in obligations)
 			{
+				switch (obligation.State)
+				{
+					// case Obligation.States.NotInitialized: break;
+					case Obligation.States.Blocked:
+					case Obligation.States.Available:
+					case Obligation.States.Promised:
+					case Obligation.States.Complete:
+						Game.ObligationIndicators.Activate(
+							obligation.Id,
+							Model
+						);
+						break;
+					default:
+						Debug.LogError("Unrecognized obligation state: "+obligation.State);
+						break;
+				}
+				
 				if (obligation.State != Obligation.States.Complete) return;
 				OnObligationHandle(obligation.Type);
 			}
@@ -151,7 +168,7 @@ namespace Lunra.Hothouse.Presenters
 							// should lose track of this obligation, which is why we block it AND change the Id.
 							obligations[i] = obligations[i]
 								.New(Obligation.States.Blocked)
-								.NewId();
+								.NewPromiseId();
 							
 						}
 						break;

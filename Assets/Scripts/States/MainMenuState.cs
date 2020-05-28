@@ -299,18 +299,24 @@ namespace Lunra.Hothouse.Services
 
 			var door0 = game.Doors.AllActive.First();
 
+			var doorOpenObl = Obligation.New(
+				ObligationCategories.Door.Open,
+				0,
+				ObligationCategories.GetJobs(Jobs.Construction),
+				Obligation.ConcentrationRequirements.Instant,
+				Interval.Zero()
+			);
+			
 			door0.Obligations.All.Value = new[]
 			{
-				Obligation.New(
-					ObligationCategories.Door.Open,
-					0,
-					ObligationCategories.GetJobs(Jobs.Construction),
-					Obligation.ConcentrationRequirements.Instant,
-					Interval.Zero()
-				)
+				doorOpenObl
 			};
 
-			
+			game.ObligationIndicators.Activate(
+				doorOpenObl.Id,
+				door0
+			);
+
 			done(Result<GameModel>.Success(game));
 		}
 	}

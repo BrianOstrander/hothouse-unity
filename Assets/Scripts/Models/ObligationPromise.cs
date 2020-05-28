@@ -6,29 +6,29 @@ namespace Lunra.Hothouse.Models
 
 		public static ObligationPromise New(
 			string targetId,
-			string obligationId
+			string obligationPromiseId
 		)
 		{
 			return new ObligationPromise(
 				true,
 				targetId,
-				obligationId
+				obligationPromiseId
 			);
 		}
 		
 		public readonly bool IsEnabled;
 		public readonly string TargetId;
-		public readonly string ObligationId;
+		public readonly string ObligationPromiseId;
 
 		ObligationPromise(
 			bool isEnabled,
 			string targetId,
-			string obligationId
+			string obligationPromiseId
 		)
 		{
 			IsEnabled = isEnabled;
 			TargetId = targetId;
-			ObligationId = obligationId;
+			ObligationPromiseId = obligationPromiseId;
 		}
 	}
 }

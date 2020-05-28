@@ -60,12 +60,17 @@ namespace Lunra.Hothouse.Editor
 				
 				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 
-				if (GUILayout.Button("clear first door's obligations"))
+				if (GUILayout.Button("reset promiseId of first door's obligations"))
 				{
 					var door = game.Doors.FirstActive();
 					var ob = door.Obligations.All.Value.First();
-					ob = ob.New(Obligation.States.Blocked).NewId();
+					ob = ob.New(Obligation.States.Blocked).NewPromiseId();
 					door.Obligations.All.Value = new[] { ob };
+				}
+				
+				if (GUILayout.Button("clear first door's obligations"))
+				{
+					game.Doors.FirstActive().Obligations.All.Value = new Obligation[0];
 				}
 			}
 			GUIExtensions.PopEnabled();

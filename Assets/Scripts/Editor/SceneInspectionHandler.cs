@@ -80,7 +80,7 @@ namespace Lunra.Hothouse.Editor
 				{
 					foreach (var obligation in model.Obligations.All.Value)
 					{
-						label += "\n  [ " + ShortenId(obligation.Id) + " ] " + obligation.Type + "." + obligation.State + " #" + obligation.Priority + " : " + obligation.ConcentrationRequirement + "( " + obligation.ConcentrationElapsed.Current + " / " + obligation.ConcentrationElapsed.Maximum + " )";
+						label += "\n  [ " + ShortenId(obligation.PromiseId) + " ] " + obligation.Type + "." + obligation.State + " #" + obligation.Priority + " : " + obligation.ConcentrationRequirement + "( " + obligation.ConcentrationElapsed.Current + " / " + obligation.ConcentrationElapsed.Maximum + " )";
 					}
 				}
 
@@ -214,16 +214,16 @@ namespace Lunra.Hothouse.Editor
 						if (model.Obligation.Value.IsEnabled)
 						{
 							var obligation = gameState.Payload.Game.GetObligations()
-								.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.Id == model.Obligation.Value.ObligationId)
+								.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.PromiseId == model.Obligation.Value.ObligationPromiseId)
 								.FirstOrDefault();
 
 							if (obligation.Model == null)
 							{
-								label += "Missing ObligationId \"" + ShortenId(model.Obligation.Value.ObligationId) + "\" or TargetId \"" + ShortenId(model.Obligation.Value.TargetId) + "\"";
+								label += "Missing ObligationId \"" + ShortenId(model.Obligation.Value.ObligationPromiseId) + "\" or TargetId \"" + ShortenId(model.Obligation.Value.TargetId) + "\"";
 							}
 							else
 							{
-								label += ShortenId(model.Obligation.Value.TargetId) + "[ " + ShortenId(model.Obligation.Value.ObligationId) + " ]." + obligation.Obligation.Type;
+								label += ShortenId(model.Obligation.Value.TargetId) + "[ " + ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
 							}
 						}
 						else label += "None";

@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Ai
 
 		void Cache()
 		{
-			obligation = target?.Obligations.All.Value.FirstOrDefault(o => o.Id == Agent.Obligation.Value.ObligationId) ?? default;
+			obligation = target?.Obligations.All.Value.FirstOrDefault(o => o.PromiseId == Agent.Obligation.Value.ObligationPromiseId) ?? default;
 		}
 
 		public override void Begin()
@@ -67,7 +67,7 @@ namespace Lunra.Hothouse.Ai
 						m =>
 						{
 							if (m.Id.Value != Agent.Obligation.Value.TargetId) return false;
-							return m.Obligations.All.Value.Any(o => o.Id == Agent.Obligation.Value.ObligationId);
+							return m.Obligations.All.Value.Any(o => o.PromiseId == Agent.Obligation.Value.ObligationPromiseId);
 						}
 					)
 					.FirstOrDefault();
@@ -113,7 +113,7 @@ namespace Lunra.Hothouse.Ai
 		
 		class ToReturnOnObligationMissingFromTarget : AgentTransition<DwellerObligationState<S>, S, GameModel, DwellerModel>
 		{
-			public override bool IsTriggered() => string.IsNullOrEmpty(SourceState.obligation.Id);
+			public override bool IsTriggered() => string.IsNullOrEmpty(SourceState.obligation.PromiseId);
 
 			public override void Transition()
 			{
@@ -146,13 +146,13 @@ namespace Lunra.Hothouse.Ai
 			{
 				Obligation get()
 				{
-					return SourceState.target.Obligations.All.Value.FirstOrDefault(o => o.Id == Agent.Obligation.Value.ObligationId);
+					return SourceState.target.Obligations.All.Value.FirstOrDefault(o => o.PromiseId == Agent.Obligation.Value.ObligationPromiseId);
 				}
 				
 				void set(Obligation newObligation)
 				{
 					SourceState.target.Obligations.All.Value = SourceState.target.Obligations.All.Value
-						.Select(o => o.Id == newObligation.Id ? newObligation : o)
+						.Select(o => o.PromiseId == newObligation.PromiseId ? newObligation : o)
 						.ToArray();
 				}
 				
@@ -203,7 +203,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				var obligation = get();
 
-				if (string.IsNullOrEmpty(obligation.Id)) return; // This can occur if the model with the obligation detects the completion and cleans up...
+				if (string.IsNullOrEmpty(obligation.PromiseId)) return; // This can occur if the model with the obligation detects the completion and cleans up...
 				if (obligation.State == Obligation.States.Complete) return; 
 
 				var interval = obligation.ConcentrationElapsed;

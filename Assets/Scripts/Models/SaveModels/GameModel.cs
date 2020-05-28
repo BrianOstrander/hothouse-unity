@@ -29,6 +29,7 @@ namespace Lunra.Hothouse.Models
 		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
 		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
 		public FloraPoolModel Flora { get; } = new FloraPoolModel();
+		public ObligationIndicatorPoolModel ObligationIndicators { get; } = new ObligationIndicatorPoolModel();
 
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc

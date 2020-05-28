@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Lunra.Core;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -18,6 +19,7 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			return new Obligation(
+				GenerateId,
 				GenerateId,
 				type,
 				States.NotInitialized,
@@ -47,6 +49,7 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public string Id { get; private set; }
+		public string PromiseId { get; private set; }
 		public ObligationType Type { get; private set; }
 		public States State { get; private set; }
 		public int Priority { get; private set; }
@@ -55,9 +58,11 @@ namespace Lunra.Hothouse.Models
 		public Interval ConcentrationElapsed { get; private set; }
 
 		public bool IsValidJob(Jobs job) => ValidJobs.None() || ValidJobs.Contains(job);
+		[JsonIgnore] public bool IsValid => !(State == States.Unknown || ConcentrationRequirement == ConcentrationRequirements.Unknown || string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(PromiseId));
 		
 		Obligation(
 			string id,
+			string promiseId,
 			ObligationType type,
 			States state,
 			int priority,
@@ -67,6 +72,7 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			Id = id;
+			PromiseId = promiseId;
 			State = state;
 			Type = type;
 			Priority = priority;
@@ -79,6 +85,7 @@ namespace Lunra.Hothouse.Models
 		{
 			var result = new Obligation(
 				Id,
+				PromiseId,
 				Type,
 				State,
 				Priority,
@@ -124,6 +131,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return new Obligation(
 				Id,
+				PromiseId,
 				Type,
 				State,
 				Priority,
@@ -140,6 +148,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return new Obligation(
 				Id,
+				PromiseId,
 				Type,
 				state ?? State,
 				priority ?? Priority,
@@ -149,9 +158,10 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		public Obligation NewId()
+		public Obligation NewPromiseId()
 		{
 			return new Obligation(
+				Id,
 				GenerateId,
 				Type,
 				State,
