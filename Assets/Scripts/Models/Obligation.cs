@@ -48,7 +48,14 @@ namespace Lunra.Hothouse.Models
 			NonInterruptible = 30
 		}
 
+		/// <summary>
+		/// The static Id this promise is assigned, it will not change even if the state changes.
+		/// </summary>
 		public string Id { get; private set; }
+		/// <summary>
+		/// The promise Id, which is changed anytime the state of this obligation changes in a way that would require
+		/// agents to recalculate if they can even access it.
+		/// </summary>
 		public string PromiseId { get; private set; }
 		public ObligationType Type { get; private set; }
 		public States State { get; private set; }

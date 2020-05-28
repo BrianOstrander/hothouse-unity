@@ -22,6 +22,8 @@ namespace Lunra.Hothouse.Models
 		{
 			All = new ListenerProperty<Obligation[]>(value => all = value, () => all);
 		}
+
+		public bool ContainsType(ObligationType type) => All.Value.Any(o => o.Type == type);
 	}
 
 	public static class IObligationModelExtensions

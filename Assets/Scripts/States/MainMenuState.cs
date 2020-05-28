@@ -297,18 +297,18 @@ namespace Lunra.Hothouse.Services
 			// 	BuildingStates.Operating
 			// );
 
-			var door0 = game.Doors.AllActive.First();
-
-			game.ObligationIndicators.Register(
-				Obligation.New(
-					ObligationCategories.Door.Open,
-					0,
-					ObligationCategories.GetJobs(Jobs.Construction),
-					Obligation.ConcentrationRequirements.Instant,
-					Interval.Zero()
-				),
-				door0
-			);
+			// var door0 = game.Doors.AllActive.First();
+			//
+			// game.ObligationIndicators.Register(
+			// 	Obligation.New(
+			// 		ObligationCategories.Door.Open,
+			// 		0,
+			// 		ObligationCategories.GetJobs(Jobs.Construction),
+			// 		Obligation.ConcentrationRequirements.Instant,
+			// 		Interval.Zero()
+			// 	),
+			// 	door0
+			// );
 
 			done(Result<GameModel>.Success(game));
 		}
