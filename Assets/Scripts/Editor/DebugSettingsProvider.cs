@@ -63,9 +63,9 @@ namespace Lunra.Hothouse.Editor
 				if (GUILayout.Button("clear first door's obligations"))
 				{
 					var door = game.Doors.FirstActive();
-					var ob = door.Obligations.Obligations.Value.First();
+					var ob = door.Obligations.All.Value.First();
 					ob = ob.New(Obligation.States.Blocked).NewId();
-					door.Obligations.Obligations.Value = new[] { ob };
+					door.Obligations.All.Value = new[] { ob };
 				}
 			}
 			GUIExtensions.PopEnabled();

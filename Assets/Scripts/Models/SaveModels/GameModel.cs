@@ -94,7 +94,7 @@ namespace Lunra.Hothouse.Models
 
 		public IEnumerable<IObligationModel> GetObligationsAvailable()
 		{
-			return GetObligations(m => m.Obligations.Obligations.Value.Any(o => o.State == Obligation.States.Available));
+			return GetObligations(m => m.Obligations.All.Value.Any(o => o.State == Obligation.States.Available));
 		}
 		
 		public IEnumerable<IObligationModel> GetObligations(Func<IObligationModel, bool> predicate = null)

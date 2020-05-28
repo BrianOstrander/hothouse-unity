@@ -14,13 +14,13 @@ namespace Lunra.Hothouse.Models
 	public class ObligationComponent : Model
 	{
 		#region Serialized
-		[JsonProperty] Obligation[] obligations = new Obligation[0];
-		[JsonIgnore] public ListenerProperty<Obligation[]> Obligations { get; }
+		[JsonProperty] Obligation[] all = new Obligation[0];
+		[JsonIgnore] public ListenerProperty<Obligation[]> All { get; }
 		#endregion
 
 		public ObligationComponent()
 		{
-			Obligations = new ListenerProperty<Obligation[]>(value => obligations = value, () => obligations);
+			All = new ListenerProperty<Obligation[]>(value => all = value, () => all);
 		}
 	}
 
@@ -30,7 +30,7 @@ namespace Lunra.Hothouse.Models
 			this IEnumerable<IObligationModel> elements
 		)
 		{
-			return elements.SelectMany(e => e.Obligations.Obligations.Value.Select(o => (e, o)));
+			return elements.SelectMany(e => e.Obligations.All.Value.Select(o => (e, o)));
 		}
 		
 		public static IEnumerable<(IObligationModel Model, Obligation Obligation)> GetIndividualObligations(
@@ -38,7 +38,7 @@ namespace Lunra.Hothouse.Models
 			Func<IObligationModel, bool> predicate
 		)
 		{
-			return elements.Where(predicate).SelectMany(e => e.Obligations.Obligations.Value.Select(o => (e, o)));
+			return elements.Where(predicate).SelectMany(e => e.Obligations.All.Value.Select(o => (e, o)));
 		}
 		
 		public static IEnumerable<(IObligationModel Model, Obligation Obligation)> GetIndividualObligations(
@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Models
 			Func<Obligation, bool> predicate
 		)
 		{
-			return elements.SelectMany(e => e.Obligations.Obligations.Value.Where(predicate).Select(o => (e, o)));
+			return elements.SelectMany(e => e.Obligations.All.Value.Where(predicate).Select(o => (e, o)));
 		}
 		
 		public static IEnumerable<(IObligationModel Model, Obligation Obligation)> GetIndividualObligations(
@@ -55,7 +55,7 @@ namespace Lunra.Hothouse.Models
 			Func<Obligation, bool> obligationPredicate
 		)
 		{
-			return elements.Where(modelPredicate).SelectMany(e => e.Obligations.Obligations.Value.Where(obligationPredicate).Select(o => (e, o)));
+			return elements.Where(modelPredicate).SelectMany(e => e.Obligations.All.Value.Where(obligationPredicate).Select(o => (e, o)));
 		}
 		
 		public static IEnumerable<(IObligationModel Model, Obligation Obligation)> GetIndividualObligations(
@@ -63,7 +63,7 @@ namespace Lunra.Hothouse.Models
 			Func<(IObligationModel Model, Obligation Obligation), bool> predicate
 		)
 		{
-			return elements.SelectMany(e => e.Obligations.Obligations.Value.Select(o => (e, o))).Where(predicate);
+			return elements.SelectMany(e => e.Obligations.All.Value.Select(o => (e, o))).Where(predicate);
 		}
 	}
 }
