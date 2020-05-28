@@ -37,10 +37,43 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnViewPrepare()
 		{
-			if (Model.IsOpen.Value) View.Open();
+			View.IsOpen = Model.IsOpen.Value;
+
+			View.Click += OnViewClick;
+			View.Highlight += OnViewHighlight;
 			
 			Model.RecalculateEntrances(View);
 		}
+
+		#region View Events
+		void OnViewClick()
+		{
+			if (Model.IsOpen.Value) return;
+			
+			if (Model.Obligations.ContainsType(ObligationCategories.Door.Open))
+			{
+				Model.Obligations.Remove(ObligationCategories.Door.Open);
+			}
+			else
+			{
+				Game.ObligationIndicators.Register(
+					Obligation.New(
+						ObligationCategories.Door.Open,
+						0,
+						ObligationCategories.GetJobs(Jobs.Construction),
+						Obligation.ConcentrationRequirements.Instant,
+						Interval.Zero()
+					),
+					Model
+				);
+			}
+		}
+
+		void OnViewHighlight(bool isHighlighted)
+		{
+			
+		}
+		#endregion
 		
 		#region NavigationMeshModel Events
 		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
@@ -61,9 +94,8 @@ namespace Lunra.Hothouse.Presenters
 			); 
 			
 			if (View.NotVisible) return;
-			
-			if (isOpen) View.Open();
-			else Debug.LogError("Currently no way to re-close a door...");
+
+			View.IsOpen = isOpen;
 			
 			Game.NavigationMesh.QueueCalculation();
 		}
@@ -82,8 +114,7 @@ namespace Lunra.Hothouse.Presenters
 
 			foreach (var obligation in obligations)
 			{
-				if (obligation.State != Obligation.States.Complete) return;
-				OnObligationHandle(obligation.Type);
+				if (obligation.State == Obligation.States.Complete) OnObligationHandle(obligation.Type);
 			}
 			
 			RecalculateObligations();

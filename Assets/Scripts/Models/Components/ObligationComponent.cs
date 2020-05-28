@@ -24,6 +24,13 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public bool ContainsType(ObligationType type) => All.Value.Any(o => o.Type == type);
+
+		public bool Remove(ObligationType type)
+		{
+			if (!ContainsType(type)) return false;
+			All.Value = All.Value.Where(o => o.Type != type).ToArray();
+			return true;
+		}
 	}
 
 	public static class IObligationModelExtensions
