@@ -79,7 +79,7 @@ namespace Lunra.Hothouse.Ai
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
 				target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
-					Agent.Position.Value,
+					Agent.Transform.Position.Value,
 					out _,
 					out var entrancePosition,
 					b =>
@@ -92,7 +92,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
+				return Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
 			}
 
 			public override void Transition()
@@ -129,7 +129,7 @@ namespace Lunra.Hothouse.Ai
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
 				target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
-					Agent.Position.Value,
+					Agent.Transform.Position.Value,
 					out targetPath,
 					out _,
 					b =>
@@ -172,7 +172,7 @@ namespace Lunra.Hothouse.Ai
 					return false;
 				}
 
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), target.Position.Value.NewY(0f)));
+				return Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), target.Transform.Position.Value.NewY(0f)));
 			}
 
 			public override void Transition()

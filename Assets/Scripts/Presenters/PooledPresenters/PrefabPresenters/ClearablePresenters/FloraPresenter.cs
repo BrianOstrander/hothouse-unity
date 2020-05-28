@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Presenters
 			View.Age = Model.Age.Value.Normalized;
 			View.IsReproducing = Model.IsReproducing.Value;
 			
-			if (Mathf.Approximately(0f, Model.Age.Value.Current)) Game.FloraEffects.SpawnQueue.Enqueue(new FloraEffectsModel.Request(Model.Position.Value));
+			if (Mathf.Approximately(0f, Model.Age.Value.Current)) Game.FloraEffects.SpawnQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
 		}
 
 		#region GameModel Events
@@ -84,11 +84,11 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (!Mathf.Approximately(0f, health))
 			{
-				if (View.Visible) Game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(Model.Position.Value));
+				if (View.Visible) Game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
 				return;
 			}
 			
-			if (View.Visible) Game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(Model.Position.Value));
+			if (View.Visible) Game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
 		}
 		#endregion
 		
@@ -99,22 +99,22 @@ namespace Lunra.Hothouse.Presenters
 				f =>
 				{
 					if (f.RoomId.Value != Model.RoomId.Value) return false;
-					return Vector3.Distance(f.Position.Value, Model.Position.Value) < (f.ReproductionRadius.Value.Maximum + Model.ReproductionRadius.Value.Maximum);
+					return Vector3.Distance(f.Transform.Position.Value, Model.Transform.Position.Value) < (f.ReproductionRadius.Value.Maximum + Model.ReproductionRadius.Value.Maximum);
 				}
 			);
 
-			var randomPosition = Model.Position.Value + (Random.insideUnitSphere.NewY(0f).normalized * Model.ReproductionRadius.Value.Evaluate(DemonUtility.NextFloat));
+			var randomPosition = Model.Transform.Position.Value + (Random.insideUnitSphere.NewY(0f).normalized * Model.ReproductionRadius.Value.Evaluate(DemonUtility.NextFloat));
 
 			var increaseReproductionFailures = true;
 			
 			if (NavMesh.SamplePosition(randomPosition, out var hit, Model.ReproductionRadius.Value.Delta, NavMesh.AllAreas))
 			{
-				var distance = Vector3.Distance(Model.Position.Value, hit.position);
+				var distance = Vector3.Distance(Model.Transform.Position.Value, hit.position);
 				if (Model.ReproductionRadius.Value.Minimum < distance && distance < Model.ReproductionRadius.Value.Maximum)
 				{
-					if (nearbyFlora.None(f => Vector3.Distance(f.Position.Value, hit.position) < f.ReproductionRadius.Value.Minimum))
+					if (nearbyFlora.None(f => Vector3.Distance(f.Transform.Position.Value, hit.position) < f.ReproductionRadius.Value.Minimum))
 					{
-						if (Game.Dwellers.AllActive.None(d => Vector3.Distance(d.Position.Value, hit.position) < Model.ReproductionRadius.Value.Minimum))
+						if (Game.Dwellers.AllActive.None(d => Vector3.Distance(d.Transform.Position.Value, hit.position) < Model.ReproductionRadius.Value.Minimum))
 						{
 							increaseReproductionFailures = false;
 
@@ -135,10 +135,10 @@ namespace Lunra.Hothouse.Presenters
 						f =>
 						{
 							if (f.Species.Value == Model.Species.Value) return false;
-							return Vector3.Distance(f.Position.Value, Model.Position.Value) < Model.ReproductionRadius.Value.Maximum;
+							return Vector3.Distance(f.Transform.Position.Value, Model.Transform.Position.Value) < Model.ReproductionRadius.Value.Maximum;
 						}
 					)
-					.OrderBy(f => Vector3.Distance(f.Position.Value, Model.Position.Value))
+					.OrderBy(f => Vector3.Distance(f.Transform.Position.Value, Model.Transform.Position.Value))
 					.FirstOrDefault();
 				
 				if (nearestFloraOfDifferentSpecies != null)

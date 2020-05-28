@@ -145,7 +145,7 @@ namespace Lunra.Hothouse.Editor
 					}
 
 					Handles.Label(
-						model.Position.Value,
+						model.Transform.Position.Value,
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
@@ -153,7 +153,7 @@ namespace Lunra.Hothouse.Editor
 					if (model.BuildingState.Value == BuildingStates.Constructing)
 					{
 						Handles.color = Color.yellow.NewA(0.2f);
-						Handles.DrawWireCube(model.Position.Value, Vector3.one);
+						Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
 					}
 				}
 			}
@@ -180,7 +180,7 @@ namespace Lunra.Hothouse.Editor
 
 							Handles.color = color;
 							Handles.DrawDottedLine(
-								model.Position.Value,
+								model.Transform.Position.Value,
 								entrance.Position,
 								4f
 							);
@@ -246,7 +246,7 @@ namespace Lunra.Hothouse.Editor
 					}
 
 					Handles.Label(
-						model.Position.Value + (Vector3.up * 3f),
+						model.Transform.Position.Value + (Vector3.up * 3f),
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
@@ -283,7 +283,7 @@ namespace Lunra.Hothouse.Editor
 					);
 
 					Handles.Label(
-						model.Position.Value + (Vector3.up * 1f),
+						model.Transform.Position.Value + (Vector3.up * 1f),
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
@@ -296,7 +296,7 @@ namespace Lunra.Hothouse.Editor
 				{
 					if (model.IsReproducing.Value) continue;
 					Handles.color = Color.red;
-					Handles.DrawWireCube(model.Position.Value, Vector3.one);
+					Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
 				}
 			}
 
@@ -309,7 +309,7 @@ namespace Lunra.Hothouse.Editor
 					foreach (var model in gameState.Payload.Game.GetLightsActive().Where(l => l.Light.IsLightActive()))
 					{
 						Handles.DrawSolidDisc(
-							model.Position.Value + new Vector3(0f, yOffset, 0f),
+							model.Transform.Position.Value + new Vector3(0f, yOffset, 0f),
 							Vector3.up,
 							model.Light.LightRange.Value
 						);
@@ -322,8 +322,8 @@ namespace Lunra.Hothouse.Editor
 				foreach (var model in gameState.Payload.Game.GetLightSensitives())
 				{
 					Debug.DrawLine(
-						model.Position.Value + lightSensitiveOffset,
-						model.Position.Value + lightSensitiveOffset + (Vector3.up * model.LightSensitive.LightLevel.Value),
+						model.Transform.Position.Value + lightSensitiveOffset,
+						model.Transform.Position.Value + lightSensitiveOffset + (Vector3.up * model.LightSensitive.LightLevel.Value),
 						Color.yellow
 					);
 				}
@@ -342,7 +342,7 @@ namespace Lunra.Hothouse.Editor
 					// TODO: Something fancy with how we render the color of this label...
 					
 					Handles.Label(
-						model.Position.Value + (Vector3.up * 3f),
+						model.Transform.Position.Value + (Vector3.up * 3f),
 						StringExtensions.Wrap(
 							label,
 							labelColor,

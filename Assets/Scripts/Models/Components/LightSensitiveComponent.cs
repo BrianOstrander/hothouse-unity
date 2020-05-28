@@ -6,9 +6,7 @@ namespace Lunra.Hothouse.Models
 {
 	public interface ILightSensitiveModel : IModel, IRoomTransform
 	{
-		#region Serialized
 		LightSensitiveComponent LightSensitive { get; }
-		#endregion
 	}
 
 	public class LightSensitiveComponent : Model

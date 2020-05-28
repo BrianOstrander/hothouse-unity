@@ -210,7 +210,7 @@ namespace Lunra.Hothouse.Ai
 				Inventory.Types[] itemsWithBuildingInventoryCapacityResult = null;
 				
 				var target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
-					Agent.Position.Value,
+					Agent.Transform.Position.Value,
 					out _,
 					out _,
 					b =>
@@ -276,7 +276,7 @@ namespace Lunra.Hothouse.Ai
 				if (target.Model == null) return false;
 
 				var result = DwellerUtility.CalculateNearestAvailableEntrance(
-					Agent.Position.Value,
+					Agent.Transform.Position.Value,
 					out _,
 					out _,
 					target.Model

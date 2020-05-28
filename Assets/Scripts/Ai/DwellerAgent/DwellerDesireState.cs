@@ -18,7 +18,7 @@ namespace Lunra.Hothouse.Ai
 		)
 		{
 			return DwellerUtility.CalculateNearestAvailableOperatingEntrance(
-				agent.Position.Value,
+				agent.Transform.Position.Value,
 				out path,
 				out entrancePosition,
 				b => 0f < b.DesireQualities.Value.FirstAvailableQualityOrDefault(Desire),
@@ -110,7 +110,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 
-				return Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
+				return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()

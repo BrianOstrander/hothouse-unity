@@ -222,7 +222,7 @@ namespace Lunra.Hothouse.Services
 				if (!roomMap.TryGetValue(lightSensitive.RoomId.Value, out var rooms)) continue;
 
 				lightSensitive.LightSensitive.LightLevel.Value = OnCalculateMaximumLighting(
-					lightSensitive.Position.Value,
+					lightSensitive.Transform.Position.Value,
 					allLights.Where(l => rooms.Any(r => r.RoomId.Value == l.RoomId.Value))
 				);
 			}
@@ -267,7 +267,7 @@ namespace Lunra.Hothouse.Services
 			{
 				if (light.Light.IsLightNotActive()) continue;
 
-				var distance = Vector3.Distance(position, light.Position.Value);
+				var distance = Vector3.Distance(position, light.Transform.Position.Value);
 
 				if (light.Light.LightRange.Value <= distance) continue;
 

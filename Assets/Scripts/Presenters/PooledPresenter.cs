@@ -44,8 +44,8 @@ namespace Lunra.Hothouse.Presenters
 		protected virtual void Bind()
 		{
 			Model.PooledState.Changed += OnPooledState;
-			Model.Position.Changed += OnPosition;
-			Model.Rotation.Changed += OnRotation;
+			Model.Transform.Position.Changed += OnPosition;
+			Model.Transform.Rotation.Changed += OnRotation;
 			
 			Initialize();
 			
@@ -56,8 +56,8 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Model.PooledState.Changed -= OnPooledState;
-			Model.Position.Changed -= OnPosition;
-			Model.Rotation.Changed -= OnRotation;
+			Model.Transform.Position.Changed -= OnPosition;
+			Model.Transform.Rotation.Changed -= OnRotation;
 			
 			Game.SimulationInitialize -= SimulationInitialize;
 		}
@@ -99,8 +99,8 @@ namespace Lunra.Hothouse.Presenters
 
 		void ViewSetTransform()
 		{
-			OnPosition(Model.Position.Value);
-			OnRotation(Model.Rotation.Value);
+			OnPosition(Model.Transform.Position.Value);
+			OnRotation(Model.Transform.Rotation.Value);
 		}
 		
 		#region Events

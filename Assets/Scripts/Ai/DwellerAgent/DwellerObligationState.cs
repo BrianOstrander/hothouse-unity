@@ -138,7 +138,7 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				return SourceState.target.Entrances.Value.Any(
-					e => e.State == Entrance.States.Available && Vector3.Distance(Agent.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.ObligationDistance.Value 
+					e => e.State == Entrance.States.Available && Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.ObligationDistance.Value 
 				);
 			}
 
@@ -228,7 +228,7 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				var target = DwellerUtility.CalculateNearestAvailableEntrance(
-					Agent.Position.Value,
+					Agent.Transform.Position.Value,
 					out path,
 					out _,
 					SourceState.target

@@ -60,7 +60,7 @@ namespace Lunra.Hothouse.Ai
 	
 			var result = models
 				.Where(b => b.Entrances.Value.Any(e => e.State == Entrance.States.Available) && predicate(b))
-				.OrderBy(t => Vector3.Distance(beginPosition, t.Position.Value))
+				.OrderBy(t => Vector3.Distance(beginPosition, t.Transform.Position.Value))
 				.FirstOrDefault(
 					t => CalculateNearestEntrance(
 						beginPosition,
@@ -142,11 +142,11 @@ namespace Lunra.Hothouse.Ai
 						return itemsWithCapacity.Any(i => 0 < nonPromisedInventory[i]);
 					}
 				)
-				.OrderBy(t => Vector3.Distance(agent.Position.Value, t.Position.Value))
+				.OrderBy(t => Vector3.Distance(agent.Transform.Position.Value, t.Transform.Position.Value))
 				.FirstOrDefault(
 					t =>  NavMesh.CalculatePath(
-						agent.Position.Value,
-						t.Position.Value,
+						agent.Transform.Position.Value,
+						t.Transform.Position.Value,
 						NavMesh.AllAreas,
 						pathResult
 					)

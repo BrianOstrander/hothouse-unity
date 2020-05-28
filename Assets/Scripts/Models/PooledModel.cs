@@ -27,10 +27,8 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		[JsonProperty] PooledStates pooledState = PooledStates.InActive;
 		[JsonIgnore] public ListenerProperty<PooledStates> PooledState { get; }
-		[JsonProperty] Vector3 position = Vector3.zero;
-		[JsonIgnore] public ListenerProperty<Vector3> Position { get; }
-		[JsonProperty] Quaternion rotation = Quaternion.identity;
-		[JsonIgnore] public ListenerProperty<Quaternion> Rotation { get; }
+
+		public TransformComponent Transform { get; } = new TransformComponent();
 		#endregion
 		
 		#region Non Serialized
@@ -41,8 +39,6 @@ namespace Lunra.Hothouse.Models
 		public PooledModel()
 		{
 			PooledState = new ListenerProperty<PooledStates>(value => pooledState = value, () => pooledState);
-			Position = new ListenerProperty<Vector3>(value => position = value, () => position);
-			Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);
 			
 			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
 		}

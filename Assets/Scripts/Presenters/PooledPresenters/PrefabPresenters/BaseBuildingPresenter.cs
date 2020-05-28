@@ -177,7 +177,7 @@ namespace Lunra.Hothouse.Presenters
 				case Interaction.States.Begin:
 				case Interaction.States.Active:
 					if (View.NotVisible) Show();
-					Model.Position.Value = interaction.Position.Begin;
+					Model.Transform.Position.Value = interaction.Position.Begin;
 					break;
 				case Interaction.States.Cancel:
 				case Interaction.States.End:

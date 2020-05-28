@@ -33,7 +33,7 @@ namespace Lunra.Hothouse.Ai
 				.ToDictionary(b => b, b => false);
 
 			var itemSourceResult = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
-				agent.Position.Value,
+				agent.Transform.Position.Value,
 				out path,
 				out entrancePosition,
 				possibleItemSource =>
@@ -48,7 +48,7 @@ namespace Lunra.Hothouse.Ai
 						if (!kv.Value)
 						{
 							var navigationValid = DwellerUtility.CalculateNearestEntrance(
-								agent.Position.Value,
+								agent.Transform.Position.Value,
 								out _,
 								out _,
 								kv.Key
@@ -213,7 +213,7 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 				
 				target = DwellerUtility.CalculateNearestAvailableEntrance(
-					Agent.Position.Value,
+					Agent.Transform.Position.Value,
 					out _,
 					out var entrancePosition,
 					salvageSite =>
@@ -228,7 +228,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 				
-				return Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
+				return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
@@ -272,7 +272,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 				
-				return Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
+				return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
@@ -344,7 +344,7 @@ namespace Lunra.Hothouse.Ai
 					{
 						if (m.Id.Value != Agent.InventoryPromise.Value.TargetId) return false;
 						
-						return m.Entrances.Value.Any(e => Vector3.Distance(Agent.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
+						return m.Entrances.Value.Any(e => Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
 					}
 				);
 
@@ -381,7 +381,7 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
 
 				var target = DwellerUtility.CalculateNearestAvailableEntrance(
-					Agent.Position.Value,
+					Agent.Transform.Position.Value,
 					out path,
 					out _,
 					b =>
@@ -408,7 +408,7 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 
 				var target = DwellerUtility.CalculateNearestAvailableEntrance(
-					Agent.Position.Value,
+					Agent.Transform.Position.Value,
 					out path,
 					out _,
 					salvageSite =>
