@@ -4,6 +4,19 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
+	public enum LightStates
+	{
+		Unknown = 0,
+		Fueled = 10,
+		Extinguishing = 20,
+		Extinguished = 30
+	}
+	
+	public interface ILightModel : IModel, IRoomTransform
+	{
+		LightComponent Light { get; }
+	}
+	
 	public class LightComponent : Model
 	{
 		#region Serialized

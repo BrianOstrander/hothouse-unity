@@ -44,10 +44,8 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] DesireQuality[] desireQualities = new DesireQuality[0];
 		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQualities { get; }
 
-		[JsonProperty] float lightLevel;
-		[JsonIgnore] public ListenerProperty<float> LightLevel { get; }
-		
 		public LightComponent Light { get; } = new LightComponent();
+		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
 		#endregion
 		
 		#region Non Serialized
@@ -73,7 +71,6 @@ namespace Lunra.Hothouse.Models
 			ConstructionInventoryPromised = new ListenerProperty<Inventory>(value => constructionInventoryPromised = value, () => constructionInventoryPromised);
 			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
 			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
-			LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
 			
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
 		}

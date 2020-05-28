@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Ai
 					possibleConstructionSite =>
 					{
 						if (!possibleConstructionSite.IsBuildingState(BuildingStates.Constructing)) return false;
-						if (possibleConstructionSite.IsNotLit()) return false;
+						if (possibleConstructionSite.LightSensitive.IsNotLit()) return false;
 
 						return possibleConstructionSite.ConstructionInventoryCapacity.Value.IsNotFull(possibleConstructionSite.ConstructionInventory.Value + possibleConstructionSite.ConstructionInventoryPromised.Value);
 					}

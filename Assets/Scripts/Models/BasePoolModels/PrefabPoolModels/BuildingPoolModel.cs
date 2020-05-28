@@ -315,7 +315,7 @@ namespace Lunra.Hothouse.Models
 			model.BuildingState.Value = buildingState;
 			
 			model.Light.IsLightRefueling.Value = true;
-			model.LightLevel.Value = 0f;
+			model.LightSensitive.LightLevel.Value = 0f;
 		}
 	}
 }

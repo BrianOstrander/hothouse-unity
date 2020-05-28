@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 			
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
-			Model.LightLevel.Changed += OnLightLevel;
+			Model.LightSensitive.LightLevel.Changed += OnLightLevel;
 
 			Model.Obligations.ChangedSource += OnObligationObligations;
 			Model.Entrances.Changed += OnEnterableEntrances;
@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
-			Model.LightLevel.Changed -= OnLightLevel;
+			Model.LightSensitive.LightLevel.Changed -= OnLightLevel;
 			
 			Model.Obligations.ChangedSource -= OnObligationObligations;
 			Model.Entrances.Changed -= OnEnterableEntrances;

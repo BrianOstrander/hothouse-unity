@@ -101,7 +101,7 @@ namespace Lunra.Hothouse.Editor
 
 					if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 					{
-						label += "\nLight Level: " + model.LightLevel.Value.ToString("N2");
+						label += "\nLight Level: " + model.LightSensitive.LightLevel.Value.ToString("N2");
 						if (model.Light.IsLight.Value) label += "\nLight State: " + model.Light.LightState.Value;
 					}
 
@@ -323,7 +323,7 @@ namespace Lunra.Hothouse.Editor
 				{
 					Debug.DrawLine(
 						model.Position.Value + lightSensitiveOffset,
-						model.Position.Value + lightSensitiveOffset + (Vector3.up * model.LightLevel.Value),
+						model.Position.Value + lightSensitiveOffset + (Vector3.up * model.LightSensitive.LightLevel.Value),
 						Color.yellow
 					);
 				}

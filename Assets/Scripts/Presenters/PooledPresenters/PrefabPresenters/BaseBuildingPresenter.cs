@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
 			Model.BuildingState.Changed += OnBuildingState;
-			Model.LightLevel.Changed += OnBuildingLightLevel;
+			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Operate += OnBuildingOperate;
 
 			base.Bind();
@@ -69,7 +69,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
-			Model.LightLevel.Changed -= OnBuildingLightLevel;
+			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Operate -= OnBuildingOperate;
 			
 			base.UnBind();

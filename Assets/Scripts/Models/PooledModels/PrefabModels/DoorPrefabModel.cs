@@ -26,12 +26,11 @@ namespace Lunra.Hothouse.Models
 
         [JsonProperty] Connection roomConnection;
         [JsonIgnore] public ListenerProperty<Connection> RoomConnection { get; }
-        
-        [JsonProperty] float lightLevel;
-        [JsonIgnore] public ListenerProperty<float> LightLevel { get; }
-        
+
         [JsonProperty] Obligation[] obligations = new Obligation[0];
         [JsonIgnore] public ListenerProperty<Obligation[]> Obligations { get; }
+        
+        public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
         #endregion
         
         #region Non Serialized
@@ -43,7 +42,6 @@ namespace Lunra.Hothouse.Models
         {
             IsOpen = new ListenerProperty<bool>(value => isOpen = value, () => isOpen);
             RoomConnection = new ListenerProperty<Connection>(value => roomConnection = value, () => roomConnection);
-            LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
             Obligations = new ListenerProperty<Obligation[]>(value => obligations = value, () => obligations);
             
             Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);

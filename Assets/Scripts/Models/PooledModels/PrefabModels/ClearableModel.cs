@@ -52,8 +52,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] SelectionStates selectionState = SelectionStates.NotSelected;
 		[JsonIgnore] public ListenerProperty<SelectionStates> SelectionState { get; }
 		
-		[JsonProperty] float lightLevel;
-		[JsonIgnore] public ListenerProperty<float> LightLevel { get; }
+		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
 		#endregion
 		
 		#region NonSerialized
@@ -72,7 +71,6 @@ namespace Lunra.Hothouse.Models
 			PromisedClearersAtCapacity = new ListenerProperty<bool>(value => promisedClearersAtCapacity = value, () => promisedClearersAtCapacity);
 			ClearancePriority = new ListenerProperty<int?>(value => clearancePriority = value, () => clearancePriority);
 			SelectionState = new ListenerProperty<SelectionStates>(value => selectionState = value, () => selectionState);
-			LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
 			
 			IsMarkedForClearance = new DerivedProperty<bool, int?>(
 				value => isMarkedForClearance = value,
