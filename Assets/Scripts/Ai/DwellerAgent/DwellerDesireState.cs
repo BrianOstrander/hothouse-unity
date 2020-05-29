@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				if (Agent.GetDesireDamage(SourceState.Desire, out var damage))
+				if (Agent.GetDesireDamage(SourceState.Desire, World, out var damage))
 				{
 					Agent.Health.Value = Mathf.Max(0f, Agent.Health.Value - damage);
 				}

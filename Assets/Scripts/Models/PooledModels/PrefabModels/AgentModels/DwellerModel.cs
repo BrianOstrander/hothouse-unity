@@ -51,10 +51,10 @@ namespace Lunra.Hothouse.Models.AgentModels
 		#region Non Serialized
 		#endregion
 
-		public bool GetDesireDamage(Desires desire, out float damage)
+		public bool GetDesireDamage(Desires desire, GameModel game, out float damage)
 		{
 			if (!DesireDamage.Value.TryGetValue(desire, out damage)) damage = 0f;
-			else damage *= HealthMaximum.Value;
+			else damage *= HealthMaximum.Value * game.DesireDamageMultiplier.Value;
 
 			return !Mathf.Approximately(0f, damage);
 		}

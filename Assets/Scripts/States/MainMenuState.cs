@@ -75,6 +75,7 @@ namespace Lunra.Hothouse.Services
 		{
 			var game = App.M.Create<GameModel>(App.M.CreateUniqueId());
 
+			game.DesireDamageMultiplier.Value = 0f;
 			game.SimulationTimeConversion.Value = 1f / 10f;
 			
 			game.WorldCamera.IsEnabled.Value = true;

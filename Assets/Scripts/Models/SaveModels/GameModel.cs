@@ -31,6 +31,8 @@ namespace Lunra.Hothouse.Models
 		public FloraPoolModel Flora { get; } = new FloraPoolModel();
 		public ObligationIndicatorPoolModel ObligationIndicators { get; } = new ObligationIndicatorPoolModel();
 
+		[JsonProperty] float desireDamageMultiplier = 1f;
+		[JsonIgnore] public ListenerProperty<float> DesireDamageMultiplier { get; }
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc
 		/// </summary>
@@ -126,6 +128,7 @@ namespace Lunra.Hothouse.Models
 
 		public GameModel()
 		{
+			DesireDamageMultiplier = new ListenerProperty<float>(value => desireDamageMultiplier = value, () => desireDamageMultiplier);
 			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
 			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
