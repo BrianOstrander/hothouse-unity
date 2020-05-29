@@ -137,7 +137,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.46619305, b: 0, a: 1}
   m_Intensity: 10
-  m_Range: 18
+  m_Range: 10.75024
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -241,7 +241,7 @@ MonoBehaviour:
     CloseDuration: 0
   animations: []
   prefabId: fire_bonfire
-  navigationModifierColliders:
+  navigationColliders:
   - {fileID: 1311359037803919897}
   entrances:
   - {fileID: 6558807796252768482}

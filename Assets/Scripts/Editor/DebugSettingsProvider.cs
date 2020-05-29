@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
@@ -21,6 +22,7 @@ namespace Lunra.Hothouse.Editor
 	{
 		static class Content
 		{
+			public static GUIContent OpenDebugSettingsProvider = new GUIContent("Open Debug Settings Provider");
 			public static GUIContent OpenSaveLocation = new GUIContent("Open save location");
 			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard");
 			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation"); 
@@ -33,10 +35,12 @@ namespace Lunra.Hothouse.Editor
 		{
 			var provider = new DebugSettingsProvider("Hothouse/Debug");
 
-			provider.keywords = new string[]
+			provider.keywords = new []
 			{
+				Content.OpenDebugSettingsProvider.text,
 				Content.OpenSaveLocation.text,
-				Content.SaveAndCopySerializedGameToClipboard.text
+				Content.SaveAndCopySerializedGameToClipboard.text,
+				Content.QueueNavigationCalculation.text
 			};
 			
 			return provider;
@@ -44,15 +48,45 @@ namespace Lunra.Hothouse.Editor
 
 		public override void OnGUI(string searchContext)
 		{
+			if (GUILayout.Button(Content.OpenDebugSettingsProvider)) OpenSettingsProviderAsset();
 			if (GUILayout.Button(Content.OpenSaveLocation)) EditorUtility.RevealInFinder(Application.persistentDataPath);
 			
 			GUIExtensions.PushEnabled(
 				SettingsProviderCache.GetGame(out var game)	
 			);
+			{
+				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
+				if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
+				
+				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 
-			if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
-			if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
-
+				if (GUILayout.Button("reset promiseId of first door's obligations"))
+				{
+					var door = game.Doors.FirstActive();
+					var ob = door.Obligations.All.Value.First();
+					ob = ob.New(Obligation.States.Blocked).NewPromiseId();
+					door.Obligations.All.Value = new[] { ob };
+				}
+				
+				if (GUILayout.Button("clear first door's obligations"))
+				{
+					game.Doors.FirstActive().Obligations.All.Value = new Obligation[0];
+				}
+				
+				if (GUILayout.Button("first door rando obl"))
+				{
+					game.ObligationIndicators.Register(
+						Obligation.New(
+							ObligationCategories.Door.Open,
+							0,
+							ObligationCategories.GetJobs(),
+							Obligation.ConcentrationRequirements.Instant,
+							Interval.Zero()
+						),
+						game.Doors.FirstActive()
+					);
+				}
+			}
 			GUIExtensions.PopEnabled();
 			
 			// if (GUILayout.Button(Content.OpenInspectorHandler)) InspectionHandler.OpenHandlerAsset();
@@ -65,6 +99,14 @@ namespace Lunra.Hothouse.Editor
 		}
 		
 		#region Events
+		public static void OpenSettingsProviderAsset()
+		{
+			AssetDatabase.OpenAsset(
+				AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/Scripts/Editor/" + nameof(DebugSettingsProvider) + ".cs"),
+				20
+			);
+		}
+		
 		static void OnSaveAndCopySerializedGameToClipboard(ModelResult<GameModel> result)
 		{
 			result.LogIfNotSuccess();

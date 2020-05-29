@@ -14,10 +14,10 @@ namespace Lunra.Hothouse.Ai
 		{
 			if (Agent.NavigationPlan.Value.State != NavigationPlan.States.Invalid) return false;
 
-			if (NavMesh.SamplePosition(Agent.Position.Value, out var hit, Agent.NavigationForceDistanceMaximum.Value, NavMesh.AllAreas))
+			if (NavMesh.SamplePosition(Agent.Transform.Position.Value, out var hit, Agent.NavigationForceDistanceMaximum.Value, NavMesh.AllAreas))
 			{
 				nearestValidPosition = hit.position;
-				return !Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value, hit.position));
+				return !Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value, hit.position));
 			}
 
 			return false;
@@ -26,7 +26,7 @@ namespace Lunra.Hothouse.Ai
 		public override void Transition()
 		{
 			Agent.NavigationPlan.Value = NavigationPlan.NavigatingForced(
-				Agent.Position.Value,
+				Agent.Transform.Position.Value,
 				nearestValidPosition
 			);
 

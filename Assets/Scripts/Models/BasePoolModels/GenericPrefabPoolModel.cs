@@ -27,9 +27,9 @@ namespace Lunra.Hothouse.Models
 				m =>
 				{
 					m.PrefabId.Value = prefabId;
-					m.RoomId.Value = roomId;
-					m.Position.Value = position;
-					m.Rotation.Value = rotation;
+					m.RoomTransform.Id.Value = roomId;
+					m.Transform.Position.Value = position;
+					m.Transform.Rotation.Value = rotation;
 					initialize?.Invoke(m);
 				},
 				m =>

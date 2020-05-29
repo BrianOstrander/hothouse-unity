@@ -7,11 +7,20 @@ namespace Lunra.Hothouse.Models
 {
 	public class BuildingPoolModel : BasePrefabPoolModel<BuildingModel>
 	{
+		static class Constants
+		{
+			public const int BonfireStalkCost = 2;
+			// public static readonly FloatRange DefaultPlacementLightRequirement = new FloatRange(-1f, 1f);
+			public static readonly FloatRange DefaultPlacementLightRequirement = new FloatRange(0.001f, 1f);
+			public static readonly FloatRange LightSourcePlacementLightRequirement = new FloatRange(0.001f, 0.33f);
+		}
+		
 		struct BuildingInfo
 		{
 			public Inventory Inventory;
 			public InventoryCapacity InventoryCapacity;
 			public InventoryPermission InventoryPermission;
+			public FloatRange PlacementLightRequirement;
 			public InventoryCapacity ConstructionInventoryCapacity;
 			public Inventory SalvageInventory;
 			public Inventory LightFuel;
@@ -24,6 +33,7 @@ namespace Lunra.Hothouse.Models
 				Inventory inventory,
 				InventoryCapacity inventoryCapacity,
 				InventoryPermission inventoryPermission,
+				FloatRange placementLightRequirement,
 				InventoryCapacity constructionInventoryCapacity,
 				Inventory salvageInventory,
 				Inventory lightFuel,
@@ -36,6 +46,7 @@ namespace Lunra.Hothouse.Models
 				Inventory = inventory;
 				InventoryCapacity = inventoryCapacity;
 				InventoryPermission = inventoryPermission;
+				PlacementLightRequirement = placementLightRequirement;
 				ConstructionInventoryCapacity = constructionInventoryCapacity;
 				SalvageInventory = salvageInventory;
 				LightFuel = lightFuel;
@@ -107,7 +118,7 @@ namespace Lunra.Hothouse.Models
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Rations , 20 }
+							{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
 						}
 					), 
 					InventoryCapacity.ByIndividualWeight(
@@ -120,7 +131,8 @@ namespace Lunra.Hothouse.Models
 							}
 						)	
 					),
-					InventoryPermission.AllForAnyJob(), 
+					InventoryPermission.AllForAnyJob(),
+					Constants.DefaultPlacementLightRequirement,
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
@@ -140,7 +152,16 @@ namespace Lunra.Hothouse.Models
 					LightStates.Unknown,
 					new []
 					{
-						DesireQuality.New(Desires.Eat, 1f) 
+						DesireQuality.New(
+							Desires.Eat,
+							1f,
+							new Inventory(
+								new Dictionary<Inventory.Types, int>
+								{
+									{ Inventory.Types.Rations , 1 }
+								}
+							)
+						) 
 					},
 					new []
 					{
@@ -154,23 +175,24 @@ namespace Lunra.Hothouse.Models
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 4 }
+							{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
 						}
 					), 
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , 4 }
+								{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
 							}
 						)	
 					),
-					InventoryPermission.DepositForJobs(Jobs.Stoker), 
+					InventoryPermission.DepositForJobs(Jobs.Stoker),
+					Constants.LightSourcePlacementLightRequirement,
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , 4 }
+								{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
 							}
 						)	
 					),
@@ -186,11 +208,11 @@ namespace Lunra.Hothouse.Models
 							{ Inventory.Types.Stalks , 1 }
 						}
 					), 
-					Interval.WithMaximum(10f),
+					Interval.WithMaximum(99999f),
 					LightStates.Fueled,
-					new []
+					new DesireQuality[]
 					{
-						DesireQuality.New(Desires.Warmup, 1f) 
+						// DesireQuality.New(Desires.Warmup, 1f) 
 					},
 					new []
 					{
@@ -203,7 +225,8 @@ namespace Lunra.Hothouse.Models
 			new BuildingInfo(
 				Inventory.Empty, 
 				InventoryCapacity.None(),
-				InventoryPermission.NoneForAnyJob(), 
+				InventoryPermission.NoneForAnyJob(),
+				Constants.DefaultPlacementLightRequirement,
 				InventoryCapacity.ByIndividualWeight(
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
@@ -252,36 +275,47 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			var info = Infos[building];
+			
 			var result = Activate(
 				info.ValidPrefabIds.Random(),
 				roomId,
 				position,
 				rotation,
-				model => Reset(model, info, buildingState)
+				model => Reset(
+					model,
+					building,
+					info,
+					buildingState
+				)
 			);
+
 			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 
 		void Reset(
 			BuildingModel model,
+			Buildings building,
 			BuildingInfo info,
 			BuildingStates buildingState
 		)
 		{
+			model.Type.Value = building;
 			model.Inventory.Value = info.Inventory;
 			model.InventoryCapacity.Value = info.InventoryCapacity;
 			model.InventoryPermission.Value = info.InventoryPermission;
+			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
 			model.ConstructionInventoryCapacity.Value = info.ConstructionInventoryCapacity;
 			model.SalvageInventory.Value = info.SalvageInventory;
-			model.LightFuel.Value = info.LightFuel;
-			model.LightFuelInterval.Value = info.LightFuelInterval;
-			model.LightState.Value = info.LightStateDefault;
+			model.Light.IsLightCalculationsEnabled.Value = false;
+			model.Light.LightFuel.Value = info.LightFuel;
+			model.Light.LightFuelInterval.Value = info.LightFuelInterval;
+			model.Light.LightState.Value = info.LightStateDefault;
 			model.DesireQualities.Value = info.DesireQualities;
 			model.BuildingState.Value = buildingState;
 			
-			model.IsLightRefueling.Value = true;
-			model.LightLevel.Value = 0f;
+			model.Light.IsLightRefueling.Value = true;
+			model.LightSensitive.LightLevel.Value = 0f;
 		}
 	}
 }

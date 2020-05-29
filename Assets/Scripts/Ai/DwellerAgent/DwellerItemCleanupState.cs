@@ -47,16 +47,10 @@ namespace Lunra.Hothouse.Ai
 					() => cleanupCount <= 0,
 					() => validItems = null
 				),
-				new ToDepositItemsInNearestBuilding(
-					this,	
-					transferItemsState
-				),
-				new ToWithdrawalItemsFromNearestItemDrop(
-					this,
-					transferItemsState
-				),
-				new ToNavigateToNearestItemDrop(this),
-				new ToNavigateToNearestBuilding(this)
+				new ToDepositItemsInNearestBuilding(transferItemsState),
+				new ToWithdrawalItemsFromNearestItemDrop(transferItemsState),
+				new ToNavigateToNearestItemDrop(),
+				new ToNavigateToNearestBuilding()
 			);
 		}
 
@@ -68,29 +62,24 @@ namespace Lunra.Hothouse.Ai
 
 		public override void Idle() => cleanupCount--;
 
-		class ToDepositItemsInNearestBuilding : AgentTransition<DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
+		class ToDepositItemsInNearestBuilding : AgentTransition<DwellerItemCleanupState<S>, DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
-			DwellerItemCleanupState<S> sourceState;
 			DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState;
 			BuildingModel target;
 
-			public ToDepositItemsInNearestBuilding(
-				DwellerItemCleanupState<S> sourceState,
-				DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState
-			)
+			public ToDepositItemsInNearestBuilding(DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState)
 			{
-				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 
 			public override bool IsTriggered()
 			{
-				var currentlyValidItems = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value[i]);
+				var currentlyValidItems = SourceState.validItems.Where(i => 0 < Agent.Inventory.Value[i]);
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				target = DwellerUtility.CalculateNearestLitOperatingEntrance(
-					Agent.Position.Value,
+				target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
+					Agent.Transform.Position.Value,
 					out _,
 					out var entrancePosition,
 					b =>
@@ -103,14 +92,14 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
+				return Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)));
 			}
 
 			public override void Transition()
 			{
 				var itemsToTransfer = new Dictionary<Inventory.Types, int>();
 				
-				foreach (var validItem in sourceState.validItems) itemsToTransfer.Add(validItem, Agent.Inventory.Value[validItem]);
+				foreach (var validItem in SourceState.validItems) itemsToTransfer.Add(validItem, Agent.Inventory.Value[validItem]);
 				
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerItemCleanupState<S>>.Target(
@@ -124,26 +113,23 @@ namespace Lunra.Hothouse.Ai
 					)
 				);
 
-				sourceState.cleanupCount--;
+				SourceState.cleanupCount--;
 			}
 		}
 		
-		class ToNavigateToNearestBuilding : AgentTransition<DwellerNavigateState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
+		class ToNavigateToNearestBuilding : AgentTransition<DwellerItemCleanupState<S>, DwellerNavigateState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
-			DwellerItemCleanupState<S> sourceState;
 			BuildingModel target;
 			NavMeshPath targetPath = new NavMeshPath();
 			
-			public ToNavigateToNearestBuilding(DwellerItemCleanupState<S> sourceState) => this.sourceState = sourceState;
-
 			public override bool IsTriggered()
 			{
-				var currentlyValidItems = sourceState.validItems.Where(i => 0 < Agent.Inventory.Value[i]);
+				var currentlyValidItems = SourceState.validItems.Where(i => 0 < Agent.Inventory.Value[i]);
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				target = DwellerUtility.CalculateNearestLitOperatingEntrance(
-					Agent.Position.Value,
+				target = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
+					Agent.Transform.Position.Value,
 					out targetPath,
 					out _,
 					b =>
@@ -163,18 +149,13 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 		
-		class ToWithdrawalItemsFromNearestItemDrop : AgentTransition<DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
+		class ToWithdrawalItemsFromNearestItemDrop : AgentTransition<DwellerItemCleanupState<S>, DwellerTransferItemsState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
-			DwellerItemCleanupState<S> sourceState;
 			DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState;
 			ItemDropModel target;
 
-			public ToWithdrawalItemsFromNearestItemDrop(
-				DwellerItemCleanupState<S> sourceState,
-				DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState
-			)
+			public ToWithdrawalItemsFromNearestItemDrop(DwellerTransferItemsState<DwellerItemCleanupState<S>> transferState)
 			{
-				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 
@@ -191,14 +172,14 @@ namespace Lunra.Hothouse.Ai
 					return false;
 				}
 
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Position.Value.NewY(0f), target.Position.Value.NewY(0f)));
+				return Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), target.Transform.Position.Value.NewY(0f)));
 			}
 
 			public override void Transition()
 			{
 				var itemsToTransfer = new Dictionary<Inventory.Types, int>();
 				
-				foreach (var validItem in sourceState.validItems) itemsToTransfer.Add(validItem, target.Inventory.Value[validItem]);
+				foreach (var validItem in SourceState.validItems) itemsToTransfer.Add(validItem, target.Inventory.Value[validItem]);
 				
 				transferState.SetTarget(
 					new DwellerTransferItemsState<DwellerItemCleanupState<S>>.Target(
@@ -219,15 +200,12 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 		
-		class ToNavigateToNearestItemDrop : AgentTransition<DwellerNavigateState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
+		class ToNavigateToNearestItemDrop : AgentTransition<DwellerItemCleanupState<S>, DwellerNavigateState<DwellerItemCleanupState<S>>, GameModel, DwellerModel>
 		{
-			DwellerItemCleanupState<S> sourceState;
 			NavMeshPath targetPath = new NavMeshPath();
 			InventoryPromise promise;
 			Inventory inventoryToWithdrawal;
 			ItemDropModel target;
-
-			public ToNavigateToNearestItemDrop(DwellerItemCleanupState<S> sourceState) => this.sourceState = sourceState;
 
 			public override bool IsTriggered()
 			{
@@ -236,8 +214,8 @@ namespace Lunra.Hothouse.Ai
 				return DwellerUtility.CalculateNearestCleanupWithdrawal(
 					Agent,
 					World,
-					sourceState.validItems,
-					sourceState.validJobs,
+					SourceState.validItems,
+					SourceState.validJobs,
 					out targetPath,
 					out promise,
 					out inventoryToWithdrawal,

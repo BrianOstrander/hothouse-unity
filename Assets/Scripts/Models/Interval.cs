@@ -27,8 +27,10 @@ namespace Lunra.Hothouse.Models
 
 		[JsonIgnore]
 		public float InverseNormalized => 1f - Normalized;
+
+		[JsonIgnore] public float Remaining => IsDone ? 0f : Maximum - Current;
 		
-		Interval(
+		public Interval(
 			float current,
 			float maximum
 		)

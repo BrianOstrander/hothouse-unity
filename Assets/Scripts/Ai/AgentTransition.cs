@@ -15,11 +15,12 @@ namespace Lunra.Hothouse.Ai
 
 		void Transition();
 		
-		void Initialize(W world, A agent);
+		void Initialize(W world, A agent, AgentState<W, A> sourceState);
 	}
 	
-	public abstract class AgentTransition<S, W, A> : IAgentTransition<W, A>
-		where S : AgentState<W, A>
+	public abstract class AgentTransition<S0, S1, W, A> : IAgentTransition<W, A>
+		where S0 : AgentState<W, A>
+		where S1 : AgentState<W, A>
 		where A : AgentModel
 	{
 		public virtual string Name => GetType().Name;
@@ -27,19 +28,27 @@ namespace Lunra.Hothouse.Ai
 		public W World { get; private set; }
 		public A Agent { get; private set; }
 
-		public Type TargetState => typeof(S); 
-		
+		public Type TargetState => typeof(S1);
+		public S0 SourceState { get; private set; }
+
 		public abstract bool IsTriggered();
 
 		public virtual void Transition() {}
 
-		public void Initialize(
+		public virtual void Initialize(
 			W world,
-			A agent
+			A agent,
+			AgentState<W, A> sourceState
 		)
 		{
 			World = world;
 			Agent = agent;
+			SourceState = sourceState as S0;
 		}
 	}
+	
+	public abstract class AgentTransition<S, W, A> : AgentTransition<AgentState<W, A>, S, W, A>
+		where S : AgentState<W, A>
+		where A : AgentModel
+	{ }
 }

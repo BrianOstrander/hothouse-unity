@@ -112,10 +112,31 @@ namespace Lunra.Hothouse.Models
 			return entry.Weight <= (weight = GetCapacityFor(inventory, entry.Type));
 		}
 
-		public int GetMaximumFor(
-			Inventory inventory,
-			Inventory.Types type
-		)
+		public Inventory GetMaximum()
+		{
+			switch (Clamping)
+			{
+				case Clamps.None:
+					return Inventory.Empty;
+				case Clamps.Unlimited:
+					return Inventory.MaximumValue;
+				case Clamps.IndividualWeight:
+					return inventoryMaximum;
+				case Clamps.TotalWeight:
+					var currentWeightMaximum = weightMaximum;
+					return new Inventory(
+						EnumExtensions.GetValues(Inventory.Types.Unknown).ToDictionary(
+							type => type,
+							type => currentWeightMaximum
+						)	
+					);
+				default:
+					Debug.LogError("Unrecognized clamp: "+Clamping);
+					return Inventory.MaximumValue;
+			}
+		}
+
+		public int GetMaximumFor(Inventory.Types type)
 		{
 			switch (Clamping)
 			{

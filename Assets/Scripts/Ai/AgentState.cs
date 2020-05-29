@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Ai
             
             OnInitialize();
             
-            foreach (var transition in Transitions) transition.Initialize(world, agent);
+            foreach (var transition in Transitions) transition.Initialize(world, agent, this);
         }
 
         public virtual void OnInitialize() { }

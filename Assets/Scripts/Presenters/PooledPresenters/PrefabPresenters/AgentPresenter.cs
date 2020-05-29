@@ -23,11 +23,11 @@ namespace Lunra.Hothouse.Presenters
 			
 			View.InstanceName = typeof(V).Name + "_" + (string.IsNullOrEmpty(Model.Id.Value) ? "null_or_empty_id" : Model.Id.Value);
 
-			Model.NavigationPlan.Value = NavigationPlan.Done(Model.Position.Value);
+			Model.NavigationPlan.Value = NavigationPlan.Done(Model.Transform.Position.Value);
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 			
-			Model.Position.Changed += OnAgentPosition;
+			Model.Transform.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 			Model.Health.Changed += OnAgentHealth;
 			
@@ -38,7 +38,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
-			Model.Position.Changed -= OnAgentPosition;
+			Model.Transform.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 			Model.Health.Changed -= OnAgentHealth;
 			
@@ -77,7 +77,7 @@ namespace Lunra.Hothouse.Presenters
 
 		protected virtual void OnAgentNavigationPlan(NavigationPlan navigationPlan)
 		{
-			Model.Position.Value = navigationPlan.Position;
+			Model.Transform.Position.Value = navigationPlan.Position;
 		}
 
 		protected override void OnPooledState(PooledStates pooledState)
@@ -100,15 +100,15 @@ namespace Lunra.Hothouse.Presenters
 			{
 				Game.ItemDrops.Activate(
 					"default",
-					Model.RoomId.Value,
-					Model.Position.Value,
+					Model.RoomTransform.Id.Value,
+					Model.Transform.Position.Value,
 					Quaternion.identity,
 					m =>
 					{
 						m.Inventory.Value = Model.Inventory.Value;
 						m.Job.Value = Jobs.None;
-						m.Position.Value = Model.Position.Value;
-						m.Rotation.Value = Quaternion.identity;
+						m.Transform.Position.Value = Model.Transform.Position.Value;
+						m.Transform.Rotation.Value = Quaternion.identity;
 					}
 				);
 			}
@@ -134,6 +134,8 @@ namespace Lunra.Hothouse.Presenters
 					Debug.LogError("Unrecognized operation: " + Model.InventoryPromise.Value.Operation);
 					break;
 			}
+			
+			Debug.LogWarning("Handle unfulfilled obligation promises here!");
 			
 			Model.PooledState.Value = PooledStates.InActive;
 		}

@@ -24,8 +24,8 @@ namespace Lunra.Hothouse.Ai
 		{
 			World.ItemDrops.Activate(
 				"default",
-				Agent.RoomId.Value,
-				Agent.Position.Value,
+				Agent.RoomTransform.Id.Value,
+				Agent.Transform.Position.Value,
 				Quaternion.identity,
 				itemDrop =>
 				{

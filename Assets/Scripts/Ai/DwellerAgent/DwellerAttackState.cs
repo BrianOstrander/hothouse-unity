@@ -39,8 +39,8 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			AddTransitions(
-				new ToReturnOnTargetIdMismatch(this),
-				new ToReturnOnTargetKilled(this)
+				new ToReturnOnTargetIdMismatch(),
+				new ToReturnOnTargetKilled()
 			);
 		}
 		
@@ -76,22 +76,14 @@ namespace Lunra.Hothouse.Ai
 			cooldownElapsed = 0f;
 		}
 
-		class ToReturnOnTargetIdMismatch : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnTargetIdMismatch : AgentTransition<DwellerAttackState<S>, S, GameModel, DwellerModel>
 		{
-			DwellerAttackState<S> sourceState;
-
-			public ToReturnOnTargetIdMismatch(DwellerAttackState<S> sourceState) => this.sourceState = sourceState;
-			
-			public override bool IsTriggered() => sourceState.initialTargetId != sourceState.target.GetId();
+			public override bool IsTriggered() => SourceState.initialTargetId != SourceState.target.GetId();
 		}
 		
-		class ToReturnOnTargetKilled : AgentTransition<S, GameModel, DwellerModel>
+		class ToReturnOnTargetKilled : AgentTransition<DwellerAttackState<S>, S, GameModel, DwellerModel>
 		{
-			DwellerAttackState<S> sourceState;
-
-			public ToReturnOnTargetKilled(DwellerAttackState<S> sourceState) => this.sourceState = sourceState;
-			
-			public override bool IsTriggered() => Mathf.Approximately(0f, sourceState.target.GetHealth());
+			public override bool IsTriggered() => Mathf.Approximately(0f, SourceState.target.GetHealth());
 		}
 	}
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
@@ -5,6 +6,7 @@ using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services;
+using Lunra.StyxMvp.Models;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -48,11 +50,49 @@ namespace Lunra.Hothouse.Editor
 
 			if (!SettingsProviderCache.GetGameState(out var gameState)) return;
 
+			var obligationIdsHandled = new List<string>();
+
+			string ShortenId(string id)
+			{
+				return StringExtensions.GetNonNullOrEmpty(
+					id.Length < 4 ? id : id.Substring(0, 4),
+					"< null or empty Id >"
+				);
+			}
+			
+			string GetId(IModel model)
+			{
+				return "Id: " + ShortenId(model.Id.Value);	
+			}
+			
+			bool AppendObligations(ref string label, IObligationModel model)
+			{
+				if (obligationIdsHandled.Contains(model.Id.Value)) return false;
+				
+				obligationIdsHandled.Add(model.Id.Value);
+				
+				label += "\nObligations:";
+				if (model.Obligations.All.Value.None())
+				{
+					label += " None";
+				}
+				else
+				{
+					foreach (var obligation in model.Obligations.All.Value)
+					{
+						label += "\n  [ " + ShortenId(obligation.PromiseId) + " ] " + obligation.Type + "." + obligation.State + " #" + obligation.Priority + " : " + obligation.ConcentrationRequirement + "( " + obligation.ConcentrationElapsed.Current + " / " + obligation.ConcentrationElapsed.Maximum + " )";
+					}
+				}
+
+				return true;
+			}
+			
+
 			if (SceneInspectionSettings.IsInspectingBuildings.Value)
 			{
 				foreach (var model in gameState.Payload.Game.Buildings.AllActive)
 				{
-					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
+					var label = GetId(model);
 
 					if (model.BuildingState.Value != BuildingStates.Operating)
 					{
@@ -61,8 +101,8 @@ namespace Lunra.Hothouse.Editor
 
 					if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 					{
-						label += "\nLight Level: " + model.LightLevel.Value.ToString("N2");
-						if (model.IsLight.Value) label += "\nLight State: " + model.LightState.Value;
+						label += "\nLight Level: " + model.LightSensitive.LightLevel.Value.ToString("N2");
+						if (model.Light.IsLight.Value) label += "\nLight State: " + model.Light.LightState.Value;
 					}
 
 					label += GetInventory(
@@ -105,7 +145,7 @@ namespace Lunra.Hothouse.Editor
 					}
 
 					Handles.Label(
-						model.Position.Value,
+						model.Transform.Position.Value,
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
@@ -113,16 +153,52 @@ namespace Lunra.Hothouse.Editor
 					if (model.BuildingState.Value == BuildingStates.Constructing)
 					{
 						Handles.color = Color.yellow.NewA(0.2f);
-						Handles.DrawWireCube(model.Position.Value, Vector3.one);
+						Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
 					}
 				}
+			}
+
+			if (SceneInspectionSettings.IsInspectingEntrances.Value)
+			{
+				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
+				{
+					foreach (var model in gameState.Payload.Game.GetEnterables())
+					{
+						foreach (var entrance in model.Enterable.Entrances.Value)
+						{
+							var color = Color.grey;
+
+							switch (entrance.State)
+							{
+								case Entrance.States.Available:
+									color = Color.green;
+									break;
+								case Entrance.States.NotAvailable:
+									color = entrance.IsNavigable ? Color.yellow : Color.red;
+									break;
+							}
+
+							Handles.color = color;
+							Handles.DrawDottedLine(
+								model.Transform.Position.Value,
+								entrance.Position,
+								4f
+							);
+							Handles.DrawWireCube(
+								entrance.Position,
+								Vector3.one * 0.1f
+							);
+						}
+					}
+				}
+				HandlesExtensions.EndDepthCheck();
 			}
 
 			if (SceneInspectionSettings.IsInspectingDwellers.Value)
 			{
 				foreach (var model in gameState.Payload.Game.Dwellers.AllActive)
 				{
-					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
+					var label = GetId(model);
 
 					if (!Mathf.Approximately(model.Health.Value, model.HealthMaximum.Value)) label += "\nHealth: " + model.Health.Value.ToString("N1") + " / " + model.HealthMaximum.Value.ToString("N1");
 					
@@ -131,6 +207,28 @@ namespace Lunra.Hothouse.Editor
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
 					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;
 
+					if (SceneInspectionSettings.IsInspectingObligations.Value)
+					{
+						label += "\nObligationPromise: ";
+
+						if (model.Obligation.Value.IsEnabled)
+						{
+							var obligation = gameState.Payload.Game.GetObligations()
+								.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.PromiseId == model.Obligation.Value.ObligationPromiseId)
+								.FirstOrDefault();
+
+							if (obligation.Model == null)
+							{
+								label += "Missing ObligationId \"" + ShortenId(model.Obligation.Value.ObligationPromiseId) + "\" or TargetId \"" + ShortenId(model.Obligation.Value.TargetId) + "\"";
+							}
+							else
+							{
+								label += ShortenId(model.Obligation.Value.TargetId) + "[ " + ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
+							}
+						}
+						else label += "None";
+					}
+					
 					label += GetInventory(
 						"Inventory",
 						model.Inventory.Value,
@@ -148,7 +246,7 @@ namespace Lunra.Hothouse.Editor
 					}
 
 					Handles.Label(
-						model.Position.Value + (Vector3.up * 3f),
+						model.Transform.Position.Value + (Vector3.up * 3f),
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
@@ -170,7 +268,7 @@ namespace Lunra.Hothouse.Editor
 			{
 				foreach (var model in gameState.Payload.Game.ItemDrops.AllActive)
 				{
-					var label = "Id: " + StringExtensions.GetNonNullOrEmpty(model.Id.Value, "< null or empty Id >");
+					var label = GetId(model);
 					
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
 					
@@ -185,7 +283,7 @@ namespace Lunra.Hothouse.Editor
 					);
 
 					Handles.Label(
-						model.Position.Value + (Vector3.up * 1f),
+						model.Transform.Position.Value + (Vector3.up * 1f),
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
@@ -198,7 +296,7 @@ namespace Lunra.Hothouse.Editor
 				{
 					if (model.IsReproducing.Value) continue;
 					Handles.color = Color.red;
-					Handles.DrawWireCube(model.Position.Value, Vector3.one);
+					Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
 				}
 			}
 
@@ -208,12 +306,12 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
 					var yOffset = 0f;
-					foreach (var model in gameState.Payload.Game.Lights.Where(l => l.IsLightActive()))
+					foreach (var model in gameState.Payload.Game.GetLightsActive().Where(l => l.Light.IsLightActive()))
 					{
 						Handles.DrawSolidDisc(
-							model.Position.Value + new Vector3(0f, yOffset, 0f),
+							model.Transform.Position.Value + new Vector3(0f, yOffset, 0f),
 							Vector3.up,
-							model.LightRange.Value
+							model.Light.LightRange.Value
 						);
 						yOffset += 0.01f;
 					}
@@ -221,12 +319,36 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.EndDepthCheck();
 
 				var lightSensitiveOffset = Vector3.up * 4f;
-				foreach (var model in gameState.Payload.Game.LightSensitives)
+				foreach (var model in gameState.Payload.Game.GetLightSensitives())
 				{
 					Debug.DrawLine(
-						model.Position.Value + lightSensitiveOffset,
-						model.Position.Value + lightSensitiveOffset + (Vector3.up * model.LightLevel.Value),
+						model.Transform.Position.Value + lightSensitiveOffset,
+						model.Transform.Position.Value + lightSensitiveOffset + (Vector3.up * model.LightSensitive.LightLevel.Value),
 						Color.yellow
+					);
+				}
+			}
+
+			if (SceneInspectionSettings.IsInspectingObligations.Value)
+			{
+				foreach (var model in gameState.Payload.Game.GetObligations())
+				{
+					var label = GetId(model);
+
+					if (!AppendObligations(ref label, model)) continue;
+
+					var labelColor = "<color=cyan>";
+					
+					// TODO: Something fancy with how we render the color of this label...
+					
+					Handles.Label(
+						model.Transform.Position.Value + (Vector3.up * 3f),
+						StringExtensions.Wrap(
+							label,
+							labelColor,
+							"</color>"
+						),
+						labelStyle
 					);
 				}
 			}
@@ -244,7 +366,7 @@ namespace Lunra.Hothouse.Editor
 			foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
 			{
 				var value = inventory[type];
-				var valueMaximum = capacity?.GetMaximumFor(inventory, type);
+				var valueMaximum = capacity?.GetMaximumFor(type);
 				
 				switch (inventoryVisibilities)
 				{

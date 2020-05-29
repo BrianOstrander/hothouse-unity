@@ -17,8 +17,8 @@ namespace Lunra.Hothouse.Ai
 			out Vector3 entrancePosition
 		)
 		{
-			return DwellerUtility.CalculateNearestLitOperatingEntrance(
-				agent.Position.Value,
+			return DwellerUtility.CalculateNearestAvailableOperatingEntrance(
+				agent.Transform.Position.Value,
 				out path,
 				out entrancePosition,
 				b => 0f < b.DesireQualities.Value.FirstAvailableQualityOrDefault(Desire),
@@ -40,10 +40,10 @@ namespace Lunra.Hothouse.Ai
 			);
 			
 			AddTransitions(
-				new ToIdleOnDesireChanged(this),
-				new ToTimeoutForDesire(this, timeoutState),
-				new ToNavigateToNearestDesireBuilding(this),
-				new ToIdleOnShiftBegin(this)
+				new ToIdleOnDesireChanged(),
+				new ToTimeoutForDesire(timeoutState),
+				new ToNavigateToNearestDesireBuilding(),
+				new ToIdleOnShiftBegin()
 			);
 		}
 
@@ -68,30 +68,22 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 		
-		protected class ToIdleOnDesireChanged : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnDesireChanged : AgentTransition<DwellerDesireState<S>, DwellerIdleState, GameModel, DwellerModel>
 		{
-			public override string Name => base.Name + "<" + desireState.Name + ">";
-			
-			DwellerDesireState<S> desireState;
+			public override string Name => base.Name + "<" + SourceState.Name + ">";
 
-			public ToIdleOnDesireChanged(DwellerDesireState<S> desireState) => this.desireState = desireState; 
-			
-			public override bool IsTriggered() => desireState.Desire != Agent.Desire.Value;
+			public override bool IsTriggered() => SourceState.Desire != Agent.Desire.Value;
 		}
 		
-		protected class ToIdleOnShiftBegin : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnShiftBegin : AgentTransition<DwellerDesireState<S>, DwellerIdleState, GameModel, DwellerModel>
 		{
-			public override string Name => base.Name + "<" + desireState.Name + ">";
-			
-			DwellerDesireState<S> desireState;
+			public override string Name => base.Name + "<" + SourceState.Name + ">";
 
-			public ToIdleOnShiftBegin(DwellerDesireState<S> desireState) => this.desireState = desireState; 
-			
 			public override bool IsTriggered() => Agent.JobShift.Value.Contains(World.SimulationTime.Value);
 
 			public override void Transition()
 			{
-				if (Agent.GetDesireDamage(desireState.Desire, out var damage))
+				if (Agent.GetDesireDamage(SourceState.Desire, World, out var damage))
 				{
 					Agent.Health.Value = Mathf.Max(0f, Agent.Health.Value - damage);
 				}
@@ -100,49 +92,43 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 		
-		protected class ToTimeoutForDesire : AgentTransition<DwellerTimeoutState<S>, GameModel, DwellerModel>
+		protected class ToTimeoutForDesire : AgentTransition<DwellerDesireState<S>, DwellerTimeoutState<S>, GameModel, DwellerModel>
 		{
-			DwellerDesireState<S> desireState;
 			DwellerTimeoutState<S> timeoutState;
 			BuildingModel target;
 
 			public ToTimeoutForDesire(
-				DwellerDesireState<S> desireState,
 				DwellerTimeoutState<S> timeoutState
 			)
 			{
-				this.desireState = desireState;
 				this.timeoutState = timeoutState;
 			}
 
 			public override bool IsTriggered()
 			{
-				target = desireState.GetNearestDesireBuilding(World, Agent, out _, out var entrancePosition);
+				target = SourceState.GetNearestDesireBuilding(World, Agent, out _, out var entrancePosition);
 
 				if (target == null) return false;
 
-				return Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
+				return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
 			{
 				timeoutState.ConfigureForNextTimeOfDay(Agent.JobShift.Value.Begin);
-				target.Operate(Agent, desireState.Desire);
+				target.Operate(Agent, SourceState.Desire);
 				Agent.Desire.Value = Desires.None;
 			}
 		}
 		
-		protected class ToNavigateToNearestDesireBuilding : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
+		protected class ToNavigateToNearestDesireBuilding : AgentTransition<DwellerDesireState<S>, DwellerNavigateState<S>, GameModel, DwellerModel>
 		{
-			DwellerDesireState<S> desireState;
 			BuildingModel target;
 			NavMeshPath targetPath = new NavMeshPath();
 
-			public ToNavigateToNearestDesireBuilding(DwellerDesireState<S> desireState) => this.desireState = desireState;
-			
 			public override bool IsTriggered()
 			{
-				target = desireState.GetNearestDesireBuilding(World, Agent, out targetPath, out _);
+				target = SourceState.GetNearestDesireBuilding(World, Agent, out targetPath, out _);
 
 				return target != null;
 			}

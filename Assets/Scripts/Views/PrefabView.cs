@@ -8,7 +8,7 @@ namespace Lunra.Hothouse.Views
 		string PrefabId { get; }
 	}
 	
-	public abstract class PrefabView : View, IPrefabView
+	public class PrefabView : View, IPrefabView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null

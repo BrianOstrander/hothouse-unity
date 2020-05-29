@@ -71,7 +71,7 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.IsMarkedForClearance.Value) return;
 			if (interaction.State == Interaction.States.OutOfRange) return;
 			
-			var radiusContains = interaction.Position.RadiusContains(Model.Position.Value);
+			var radiusContains = interaction.Position.RadiusContains(Model.Transform.Position.Value);
 			
 			switch (interaction.State)
 			{

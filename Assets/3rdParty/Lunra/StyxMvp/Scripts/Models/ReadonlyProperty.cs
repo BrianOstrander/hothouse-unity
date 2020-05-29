@@ -26,6 +26,17 @@ namespace Lunra.StyxMvp.Models
             property = this.property;
         }
 
-        public ReadonlyProperty(Action<T> set, Func<T> get, out ListenerProperty<T> property, params Action<T>[] listeners) : this(set, get, out property, null, listeners) {}
+        public ReadonlyProperty(
+            Action<T> set,
+            Func<T> get,
+            out ListenerProperty<T> property,
+            params Action<T>[] listeners
+        ) : this(
+            set,
+            get,
+            out property,
+            null,
+            listeners
+        ) { }
     }
 }

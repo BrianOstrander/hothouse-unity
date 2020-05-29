@@ -25,15 +25,15 @@ namespace Lunra.Hothouse.Ai
 					possibleConstructionSite =>
 					{
 						if (!possibleConstructionSite.IsBuildingState(BuildingStates.Constructing)) return false;
-						if (possibleConstructionSite.IsNotLit()) return false;
+						if (possibleConstructionSite.LightSensitive.IsNotLit) return false;
 
 						return possibleConstructionSite.ConstructionInventoryCapacity.Value.IsNotFull(possibleConstructionSite.ConstructionInventory.Value + possibleConstructionSite.ConstructionInventoryPromised.Value);
 					}
 				)
 				.ToDictionary(b => b, b => false);
 
-			var itemSourceResult = DwellerUtility.CalculateNearestLitOperatingEntrance(
-				agent.Position.Value,
+			var itemSourceResult = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
+				agent.Transform.Position.Value,
 				out path,
 				out entrancePosition,
 				possibleItemSource =>
@@ -48,7 +48,7 @@ namespace Lunra.Hothouse.Ai
 						if (!kv.Value)
 						{
 							var navigationValid = DwellerUtility.CalculateNearestEntrance(
-								agent.Position.Value,
+								agent.Transform.Position.Value,
 								out _,
 								out _,
 								kv.Key
@@ -121,18 +121,21 @@ namespace Lunra.Hothouse.Ai
 				transferItemsState,
 				timeoutState,
 				cleanupState,
-				new DwellerNavigateState<DwellerConstructionJobState>()
+				new DwellerNavigateState<DwellerConstructionJobState>(),
+				new DwellerObligationState<DwellerConstructionJobState>()
 			);
 			
 			AddTransitions(
 				new ToIdleOnJobUnassigned(this),
 			
-				new ToWithdrawalItemsFromCache(this, transferItemsState),
-				new ToDepositToNearestConstructionSite(this, transferItemsState),
-				new ToWithdrawalItemsFromSalvageSite(this, transferItemsState),
+				new ToWithdrawalItemsFromCache(transferItemsState),
+				new ToDepositToNearestConstructionSite(transferItemsState),
+				new ToWithdrawalItemsFromSalvageSite(transferItemsState),
 				new ToNavigateToSalvageSite(),
 				new ToNavigateToConstructionSite(),
 
+				new ToObligationOnObligationAvailable(),
+				
 				new ToIdleOnShiftEnd(this),
 				
 				new ToNavigateToWithdrawalItemsFromCache(),
@@ -195,17 +198,12 @@ namespace Lunra.Hothouse.Ai
 		
 		class ToWithdrawalItemsFromSalvageSite : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
-			DwellerConstructionJobState sourceState;
 			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
 			BuildingModel target;
 			Inventory itemsToLoad;
 			
-			public ToWithdrawalItemsFromSalvageSite(
-				DwellerConstructionJobState sourceState,
-				DwellerTransferItemsState<DwellerConstructionJobState> transferState
-			)
+			public ToWithdrawalItemsFromSalvageSite(DwellerTransferItemsState<DwellerConstructionJobState> transferState)
 			{
-				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 			
@@ -214,8 +212,8 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 				
-				target = DwellerUtility.CalculateNearestLitEntrance(
-					Agent.Position.Value,
+				target = DwellerUtility.CalculateNearestAvailableEntrance(
+					Agent.Transform.Position.Value,
 					out _,
 					out var entrancePosition,
 					salvageSite =>
@@ -230,7 +228,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 				
-				return Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
+				return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
@@ -249,19 +247,14 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		class ToWithdrawalItemsFromCache : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
+		class ToWithdrawalItemsFromCache : AgentTransition<DwellerConstructionJobState, DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
-			DwellerConstructionJobState sourceState;
 			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
 			BuildingModel target;
 			InventoryPromise promise;
 
-			public ToWithdrawalItemsFromCache(
-				DwellerConstructionJobState sourceState,
-				DwellerTransferItemsState<DwellerConstructionJobState> transferState
-			)
+			public ToWithdrawalItemsFromCache(DwellerTransferItemsState<DwellerConstructionJobState> transferState)
 			{
-				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 			
@@ -279,7 +272,7 @@ namespace Lunra.Hothouse.Ai
 
 				if (target == null) return false;
 				
-				return Vector3.Distance(Agent.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
+				return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
@@ -301,7 +294,7 @@ namespace Lunra.Hothouse.Ai
 					)
 				);
 
-				sourceState.step = Steps.WithdrawingItemsFromCache;
+				SourceState.step = Steps.WithdrawingItemsFromCache;
 			}
 		}
 
@@ -329,16 +322,11 @@ namespace Lunra.Hothouse.Ai
 
 		class ToDepositToNearestConstructionSite : AgentTransition<DwellerTransferItemsState<DwellerConstructionJobState>, GameModel, DwellerModel>
 		{
-			DwellerConstructionJobState sourceState;
 			DwellerTransferItemsState<DwellerConstructionJobState> transferState;
 			BuildingModel target;
 
-			public ToDepositToNearestConstructionSite(
-				DwellerConstructionJobState sourceState,
-				DwellerTransferItemsState<DwellerConstructionJobState> transferState
-			)
+			public ToDepositToNearestConstructionSite(DwellerTransferItemsState<DwellerConstructionJobState> transferState)
 			{
-				this.sourceState = sourceState;
 				this.transferState = transferState;
 			}
 			
@@ -356,7 +344,7 @@ namespace Lunra.Hothouse.Ai
 					{
 						if (m.Id.Value != Agent.InventoryPromise.Value.TargetId) return false;
 						
-						return m.Entrances.Value.Any(e => Vector3.Distance(Agent.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
+						return m.Enterable.Entrances.Value.Any(e => Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
 					}
 				);
 
@@ -392,8 +380,8 @@ namespace Lunra.Hothouse.Ai
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
 
-				var target = DwellerUtility.CalculateNearestLitEntrance(
-					Agent.Position.Value,
+				var target = DwellerUtility.CalculateNearestAvailableEntrance(
+					Agent.Transform.Position.Value,
 					out path,
 					out _,
 					b =>
@@ -419,8 +407,8 @@ namespace Lunra.Hothouse.Ai
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 
-				var target = DwellerUtility.CalculateNearestLitEntrance(
-					Agent.Position.Value,
+				var target = DwellerUtility.CalculateNearestAvailableEntrance(
+					Agent.Transform.Position.Value,
 					out path,
 					out _,
 					salvageSite =>

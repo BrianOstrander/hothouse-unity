@@ -1,0 +1,48 @@
+using Lunra.StyxMvp.Models;
+using Newtonsoft.Json;
+
+namespace Lunra.Hothouse.Models
+{
+	public class BuildValidationModel
+	{
+		public enum ValidationStates
+		{
+			Unknown = 0,
+			None = 10,
+			Valid = 20,
+			Invalid = 30
+		}
+		
+		public struct Validation
+		{
+			public static Validation None() => new Validation(ValidationStates.None, Models.Interaction.Generic.Default());
+			public static Validation Valid(Interaction.Generic interaction, string message = null) => new Validation(ValidationStates.Valid, interaction, message);
+			public static Validation Invalid(Interaction.Generic interaction, string message = null) => new Validation(ValidationStates.Invalid, interaction, message);
+			
+			public readonly ValidationStates State;
+			public readonly Interaction.Generic Interaction;
+			public readonly string Message;
+
+			Validation(
+				ValidationStates state,
+				Interaction.Generic interaction,
+				string message = null
+			)
+			{
+				State = state;
+				Interaction = interaction;
+				Message = message;
+			}
+		}
+		
+		#region Non Serialized
+		Validation current = Validation.None();
+		[JsonIgnore] public ListenerProperty<Validation> Current { get; }
+		#endregion
+
+		public BuildValidationModel()
+		{
+			Current = new ListenerProperty<Validation>(value => current = value, () => current);
+		}
+	}
+}

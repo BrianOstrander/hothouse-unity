@@ -16,8 +16,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] Jobs job;
 		[JsonIgnore] public ListenerProperty<Jobs> Job { get; }
 		
-		[JsonProperty] float lightLevel;
-		[JsonIgnore] public ListenerProperty<float> LightLevel { get; }
+		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
 		#endregion
 
 		public ItemDropModel()
@@ -25,7 +24,6 @@ namespace Lunra.Hothouse.Models
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			WithdrawalInventoryPromised = new ListenerProperty<Inventory>(value => withdrawalInventoryPromised = value, () => withdrawalInventoryPromised);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
-			LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
 		}
 	}
 }

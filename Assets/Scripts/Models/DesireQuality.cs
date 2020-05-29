@@ -19,6 +19,20 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
+		public static DesireQuality New(
+			Desires desire,
+			float quality,
+			Inventory inventory
+		)
+		{
+			return new DesireQuality(
+				desire,
+				inventory,
+				quality,
+				States.Available
+			);
+		}
+		
 		public enum States
 		{
 			Unknown = 0,

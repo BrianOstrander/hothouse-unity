@@ -29,6 +29,9 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] InventoryPromise inventoryPromise = Models.InventoryPromise.Default();
 		[JsonIgnore] public ListenerProperty<InventoryPromise> InventoryPromise { get; }
+		
+		[JsonProperty] ObligationPromise obligation = ObligationPromise.Default();
+		[JsonIgnore] public ListenerProperty<ObligationPromise> Obligation { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -46,6 +49,7 @@ namespace Lunra.Hothouse.Models
 			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
 			InventoryCapacity = new ListenerProperty<InventoryCapacity>(value => inventoryCapacity = value, () => inventoryCapacity);
 			InventoryPromise = new ListenerProperty<InventoryPromise>(value => inventoryPromise = value, () => inventoryPromise);
+			Obligation = new ListenerProperty<ObligationPromise>(value => obligation = value, () => obligation);
 		}
 	}
 }

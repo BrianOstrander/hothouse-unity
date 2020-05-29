@@ -1,16 +1,24 @@
 ﻿using Lunra.StyxMvp;
- using UnityEngine;
- 
- namespace Lunra.Hothouse.Views
- {
- 	public class TestView : View
- 	{
- 		protected override void OnShown()
- 		{
- 			base.OnShown();
- 			
- 			Debug.Log("Shown this view!");
- 		}
- 	}
- 
- }
+   
+   namespace Lunra.Hothouse.Views
+   {
+   	public class TestView : View
+   	{
+  	    #region Serialized
+  #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
+  #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
+  	    #endregion
+  
+  	    #region Bindings
+  	    #endregion
+  
+  	    public override void Reset()
+  	    {
+  		    base.Reset();
+  	    }
+  
+  	    #region Events
+  	    #endregion
+      }
+   
+   }

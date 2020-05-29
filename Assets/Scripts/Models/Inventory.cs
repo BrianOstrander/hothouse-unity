@@ -237,4 +237,14 @@ namespace Lunra.Hothouse.Models
 			return result + "\nWeight : " + TotalWeight;
 		}
 	}
+
+	public static class InventoryExtensions
+	{
+		public static Inventory Sum(this IEnumerable<Inventory> entries)
+		{
+			var result = Inventory.Empty;
+			foreach (var entry in entries) result += entry;
+			return result;
+		}
+	}
 }
