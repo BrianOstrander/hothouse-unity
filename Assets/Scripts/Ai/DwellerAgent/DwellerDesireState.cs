@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
@@ -30,23 +31,43 @@ namespace Lunra.Hothouse.Ai
 
 		public abstract Desires Desire { get; }
 
+		DwellerTimeoutState<S> timeoutState;
+		TimeSpan lastEmotedMissedDesire = TimeSpan.FromSeconds(-9999.0);
+
 		public override void OnInitialize()
 		{
-			var timeoutState = new DwellerTimeoutState<S>();
 			
 			AddChildStates(
-				timeoutState,
+				timeoutState = new DwellerTimeoutState<S>(),
 				new DwellerNavigateState<S>()
 			);
 			
 			AddTransitions(
 				new ToIdleOnDesireChanged(),
-				new ToTimeoutForDesire(timeoutState),
+				new ToTimeoutForDesire(),
 				new ToNavigateToNearestDesireBuilding(),
+				new ToNavigateToNearestLightSourceOnDesireMissed(),
+				new ToTimeoutForDesireMissed(),
+				
 				new ToIdleOnShiftBegin()
 			);
 		}
 
+		bool CanEmoteMissedDesire => Agent.DesireMissedEmoteTimeout.Value < (World.SimulationPlaytimeElapsed.Value - lastEmotedMissedDesire).Seconds;
+
+		IEnterableModel CalculateNearestAvailableEntranceToEmoteMissedDesire(
+			out NavMeshPath path,
+			out Vector3 entrancePosition
+		)
+		{
+			return DwellerUtility.CalculateNearestAvailableEntrance(
+				Agent.Transform.Position.Value,
+				out path,
+				out entrancePosition,
+				World.Buildings.AllActive.Where(m => m.IsBuildingState(BuildingStates.Operating) && m.Light.IsLightActive()).ToArray()
+			);
+		}
+		
 		public class ToDesireOnShiftEnd : AgentTransition<S, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + desireState.Name + ">";
@@ -87,23 +108,14 @@ namespace Lunra.Hothouse.Ai
 				{
 					Agent.Health.Value = Mathf.Max(0f, Agent.Health.Value - damage);
 				}
-
-				Agent.DesireUpdated(Agent.Desire.Value, false);
+				
 				Agent.Desire.Value = Desires.None;
 			}
 		}
 		
 		protected class ToTimeoutForDesire : AgentTransition<DwellerDesireState<S>, DwellerTimeoutState<S>, GameModel, DwellerModel>
 		{
-			DwellerTimeoutState<S> timeoutState;
 			BuildingModel target;
-
-			public ToTimeoutForDesire(
-				DwellerTimeoutState<S> timeoutState
-			)
-			{
-				this.timeoutState = timeoutState;
-			}
 
 			public override bool IsTriggered()
 			{
@@ -116,7 +128,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				timeoutState.ConfigureForNextTimeOfDay(Agent.JobShift.Value.Begin);
+				SourceState.timeoutState.ConfigureForNextTimeOfDay(Agent.JobShift.Value.Begin);
 				target.Operate(Agent, SourceState.Desire);
 				Agent.DesireUpdated(Agent.Desire.Value, true);
 				Agent.Desire.Value = Desires.None;
@@ -133,6 +145,57 @@ namespace Lunra.Hothouse.Ai
 				target = SourceState.GetNearestDesireBuilding(World, Agent, out targetPath, out _);
 
 				return target != null;
+			}
+
+			public override void Transition()
+			{
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(targetPath);
+			}
+		}
+		
+		protected class ToTimeoutForDesireMissed : AgentTransition<DwellerDesireState<S>, DwellerTimeoutState<S>, GameModel, DwellerModel>
+		{
+			public override bool IsTriggered()
+			{
+				if (!SourceState.CanEmoteMissedDesire) return false;
+				
+				var target = SourceState.CalculateNearestAvailableEntranceToEmoteMissedDesire(
+					out _,
+					out var entrancePosition
+				);
+
+				return target == null || Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.ObligationDistance.Value;
+			}
+
+			public override void Transition()
+			{
+				SourceState.timeoutState.ConfigureForNextTimeOfDay(
+					Agent.JobShift.Value.Begin,
+					delta =>
+					{
+						if (delta.IsDone) SourceState.lastEmotedMissedDesire = World.SimulationPlaytimeElapsed.Value; 	
+					}
+				);
+				Agent.DesireUpdated(Agent.Desire.Value, false);
+			}
+		}
+		
+		protected class ToNavigateToNearestLightSourceOnDesireMissed : AgentTransition<DwellerDesireState<S>, DwellerNavigateState<S>, GameModel, DwellerModel>
+		{
+			NavMeshPath targetPath = new NavMeshPath();
+
+			public override bool IsTriggered()
+			{
+				if (!SourceState.CanEmoteMissedDesire) return false;
+
+				var target = SourceState.CalculateNearestAvailableEntranceToEmoteMissedDesire(
+					out targetPath,
+					out var entrancePosition
+				);
+
+				if (target == null) return false;
+				
+				return Agent.ObligationDistance.Value < Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f));
 			}
 
 			public override void Transition()

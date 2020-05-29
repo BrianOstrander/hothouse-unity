@@ -239,20 +239,5 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
 		}
-		
-		/*
-		class ToNavigateToObligation : AgentTransition<DwellerNavigateState<DwellerObligationState<S>>, GameModel, DwellerModel>
-		{
-			DwellerObligationState<S> sourceState;
-
-			public ToNavigateToObligation(DwellerObligationState<S> sourceState) => this.sourceState = sourceState;
-
-			public override bool IsTriggered()
-			{
-				if (!Agent.Obligation.Value.IsEnabled) return false;
-				
-			}
-		}
-		*/
 	}
 }

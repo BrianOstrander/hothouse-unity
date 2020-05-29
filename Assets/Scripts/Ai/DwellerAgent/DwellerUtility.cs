@@ -55,25 +55,26 @@ namespace Lunra.Hothouse.Ai
 		)
 			where M : IEnterableModel
 		{
-			var pathResult = new NavMeshPath();
-			var entranceResult = Vector3.zero;
-	
-			var result = models
+			var modelsSorted = models
 				.Where(b => b.Enterable.Entrances.Value.Any(e => e.State == Entrance.States.Available) && predicate(b))
-				.OrderBy(t => Vector3.Distance(beginPosition, t.Transform.Position.Value))
-				.FirstOrDefault(
-					t => CalculateNearestEntrance(
-						beginPosition,
-						out pathResult,
-						out entranceResult,
-						t
-					)
+				.OrderBy(t => Vector3.Distance(beginPosition, t.Transform.Position.Value));
+
+			foreach (var model in modelsSorted)
+			{
+				var found = CalculateNearestEntrance(
+					beginPosition,
+					out path,
+					out entrancePosition,
+					model
 				);
 
-			path = pathResult;
-			entrancePosition = entranceResult;
+				if (found) return model;
+			}
+
+			path = new NavMeshPath();
+			entrancePosition = Vector3.zero;
 			
-			return result;
+			return default;
 		}
 
 		public static bool CalculateNearestEntrance<M>(

@@ -9,6 +9,10 @@ namespace Lunra.StyxMvp.Models
 		#region Serialized
 		ListenerProperty<string> Id { get; }
 		#endregion
+		
+		#region Non Serialized
+		string ShortId { get; }
+		#endregion
 	}
 
 	public abstract class Model : IModel
@@ -25,5 +29,12 @@ namespace Lunra.StyxMvp.Models
 		}
 
 		public override string ToString() => this.ToReadableJson();
+
+		[JsonIgnore] public string ShortId => ShortenId(Id.Value);
+		
+		public static string ShortenId(string id) => StringExtensions.GetNonNullOrEmpty(
+			id == null ? "< null Id >" : (id.Length < 4 ? id : id.Substring(0, 4)),
+			"< empty Id >"
+		); 
 	}
 }

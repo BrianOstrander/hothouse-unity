@@ -67,6 +67,7 @@ namespace Lunra.Hothouse.Models
 				{ Desires.Eat , 0.3f },
 				{ Desires.Sleep , 0.1f }
 			};
+			model.DesireMissedEmoteTimeout.Value = 2;
 
 			model.LowRationThreshold.Value = 1;
 			model.ObligationDistance.Value = 0.75f;

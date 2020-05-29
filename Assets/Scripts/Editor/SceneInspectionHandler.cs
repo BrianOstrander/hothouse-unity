@@ -52,18 +52,7 @@ namespace Lunra.Hothouse.Editor
 
 			var obligationIdsHandled = new List<string>();
 
-			string ShortenId(string id)
-			{
-				return StringExtensions.GetNonNullOrEmpty(
-					id.Length < 4 ? id : id.Substring(0, 4),
-					"< null or empty Id >"
-				);
-			}
-			
-			string GetId(IModel model)
-			{
-				return "Id: " + ShortenId(model.Id.Value);	
-			}
+			string GetId(IModel model) => "Id: " + model.ShortId;
 			
 			bool AppendObligations(ref string label, IObligationModel model)
 			{
@@ -80,7 +69,7 @@ namespace Lunra.Hothouse.Editor
 				{
 					foreach (var obligation in model.Obligations.All.Value)
 					{
-						label += "\n  [ " + ShortenId(obligation.PromiseId) + " ] " + obligation.Type + "." + obligation.State + " #" + obligation.Priority + " : " + obligation.ConcentrationRequirement + "( " + obligation.ConcentrationElapsed.Current + " / " + obligation.ConcentrationElapsed.Maximum + " )";
+						label += "\n  [ " + Model.ShortenId(obligation.PromiseId) + " ] " + obligation.Type + "." + obligation.State + " #" + obligation.Priority + " : " + obligation.ConcentrationRequirement + "( " + obligation.ConcentrationElapsed.Current + " / " + obligation.ConcentrationElapsed.Maximum + " )";
 					}
 				}
 
@@ -219,11 +208,11 @@ namespace Lunra.Hothouse.Editor
 
 							if (obligation.Model == null)
 							{
-								label += "Missing ObligationId \"" + ShortenId(model.Obligation.Value.ObligationPromiseId) + "\" or TargetId \"" + ShortenId(model.Obligation.Value.TargetId) + "\"";
+								label += "Missing ObligationId \"" + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + "\" or TargetId \"" + Model.ShortenId(model.Obligation.Value.TargetId) + "\"";
 							}
 							else
 							{
-								label += ShortenId(model.Obligation.Value.TargetId) + "[ " + ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
+								label += Model.ShortenId(model.Obligation.Value.TargetId) + "[ " + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
 							}
 						}
 						else label += "None";

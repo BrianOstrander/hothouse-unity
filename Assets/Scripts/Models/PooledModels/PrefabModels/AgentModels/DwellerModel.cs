@@ -22,6 +22,9 @@ namespace Lunra.Hothouse.Models.AgentModels
 		[JsonProperty] Dictionary<Desires, float> desireDamage = new Dictionary<Desires, float>();
 		[JsonIgnore] public ListenerProperty<Dictionary<Desires, float>> DesireDamage { get; }
 		
+		[JsonProperty] float desireMissedEmoteTimeout;
+		[JsonIgnore] public ListenerProperty<float> DesireMissedEmoteTimeout { get; }
+		
 		[JsonProperty] float meleeRange;
 		[JsonIgnore] public ListenerProperty<float> MeleeRange { get; }
 		
@@ -68,6 +71,7 @@ namespace Lunra.Hothouse.Models.AgentModels
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
 			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);
 			DesireDamage = new ListenerProperty<Dictionary<Desires, float>>(value => desireDamage = value, () => desireDamage);
+			DesireMissedEmoteTimeout = new ListenerProperty<float>(value => desireMissedEmoteTimeout = value, () => desireMissedEmoteTimeout);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
 			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);

@@ -157,5 +157,10 @@ namespace Lunra.Core
 				elementSelector
 			).ToReadonlyDictionary();
 		}
+		
+		public static IEnumerable<T> ToEnumerable<T>(this T element)
+		{
+			yield return element;
+		}    
 	}
 }

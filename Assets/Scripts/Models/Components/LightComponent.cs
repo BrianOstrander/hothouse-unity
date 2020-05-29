@@ -77,6 +77,8 @@ namespace Lunra.Hothouse.Models
 		
 		public bool IsLightActive()
 		{
+			if (!IsLight.Value) return false;
+			
 			switch (LightState.Value)
 			{
 				case LightStates.Fueled:
