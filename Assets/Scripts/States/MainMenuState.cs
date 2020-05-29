@@ -154,6 +154,12 @@ namespace Lunra.Hothouse.Services
 				new Vector3(-6f, 0f, -5f)
 			);
 
+			game.Flora.ActivateAdult(
+				FloraSpecies.Shroom,
+				room1.Id.Value,
+				new Vector3(0f, -0.02f, -20.74f)
+			);
+
 			// DEBRIS
 			
 			game.Debris.Activate(
@@ -249,25 +255,41 @@ namespace Lunra.Hothouse.Services
 				HintCollection.NewDelay(0.5f),
 				HintCollection.New(
 					Hint.NewDismissedOnCondition(
-						"Your dwellers grow hungry, mark morsels for gathering...",
+						"You need to find a source of food for your dwellers, keep exploring to find edible flora...",
 						Condition.Any(Condition.Types.ConstantTrue),
-						Condition.None(Condition.Types.LowRations)
+						Condition.All(Condition.Types.SeenEdibleFlora)
 					)
 				),
 				HintCollection.NewDelay(0.5f),
 				HintCollection.New(
 					Hint.NewDismissedOnCondition(
-						"Your dwellers need a place to sleep, build a bedroll for them...",
+						"Finally, something edible, mark them for gathering...",
+						Condition.Any(Condition.Types.ConstantTrue),
+						Condition.None(Condition.Types.NoRations)
+					)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
+					Hint.NewDismissedOnCondition(
+						"Your dwellers grow weary, build a bedroll so they have a place to rest...",
 						Condition.Any(Condition.Types.ConstantTrue),
 						Condition.None(Condition.Types.ZeroBeds)
 					)
 				),
-				HintCollection.NewDelay(4f),
+				HintCollection.NewDelay(0.5f),
 				HintCollection.New(
 					Hint.NewDismissedOnCondition(
-						"This area is nearly depleted, try opening the nearby hatch...",
+						"Keep exploring to find doorways to new areas...",
 						Condition.Any(Condition.Types.ConstantTrue),
-						Condition.None(Condition.Types.ZeroOpenDoors)
+						Condition.Any(Condition.Types.AnyDoorsOpen, Condition.Types.AnyDoorsClosedAndLit)
+					)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
+					Hint.NewDismissedOnCondition(
+						"Click on doors to instruct your dwellers to open them...",
+						Condition.Any(Condition.Types.ConstantTrue),
+						Condition.None(Condition.Types.ZeroDoorsOpen)
 					)
 				),
 				HintCollection.NewDelay(0.5f),
@@ -275,6 +297,14 @@ namespace Lunra.Hothouse.Services
 					Hint.NewDismissedOnTimeout(
 						"New areas lead to unknown dangers, exercise caution when exploring...",
 						Condition.Any(Condition.Types.ConstantTrue),
+						8f
+					)
+				),
+				HintCollection.NewDelay(0.5f),
+				HintCollection.New(
+					Hint.NewDismissedOnTimeout(
+						"Watch out for Fast Wart, it can grow out of control...",
+						Condition.All(Condition.Types.SeenAttackFlora),
 						8f
 					)
 				),

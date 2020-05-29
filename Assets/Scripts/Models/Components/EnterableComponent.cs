@@ -54,7 +54,7 @@ namespace Lunra.Hothouse.Models
 						return new Entrance(
 							e,
 							isNavigable,
-							isNavigable && model.LightSensitive.IsLit() ? Entrance.States.Available : Entrance.States.NotAvailable
+							isNavigable && model.LightSensitive.IsLit ? Entrance.States.Available : Entrance.States.NotAvailable
 						);
 					}
 				)

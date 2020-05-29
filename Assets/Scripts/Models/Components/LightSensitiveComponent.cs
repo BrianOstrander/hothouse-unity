@@ -21,7 +21,7 @@ namespace Lunra.Hothouse.Models
 			LightLevel = new ListenerProperty<float>(value => lightLevel = value, () => lightLevel);
 		}
 		
-		public bool IsLit() => 0f < LightLevel.Value;
-		public bool IsNotLit() => !IsLit();
+		[JsonIgnore] public bool IsLit => 0f < LightLevel.Value;
+		[JsonIgnore] public bool IsNotLit => !IsLit;
 	}
 }

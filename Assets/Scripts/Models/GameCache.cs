@@ -47,12 +47,16 @@ namespace Lunra.Hothouse.Models
 			result.GlobalInventoryCapacity = InventoryCapacity.ByIndividualWeight(globalInventoryMaximumByIndividualWeight);
 			
 			result.LowRationThreshold = game.Dwellers.AllActive.Sum(d => d.LowRationThreshold.Value);
-			
+
 			result.Conditions = EnumExtensions
 				.GetValues(Condition.Types.Unknown)
 				.ToReadonlyDictionary(
 					condition => condition,
-					condition => Condition.Calculate(game, condition)
+					condition =>
+					{
+						// TODO: Check certain one-time only conditions here... 
+						return Condition.Calculate(game, condition);
+					}
 				);
 			
 			return result;

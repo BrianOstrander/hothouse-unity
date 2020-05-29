@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Lunra.Core;
@@ -63,7 +64,14 @@ namespace Lunra.Hothouse.Models
 			LowRations = 103,
 			
 			// Environment
-			ZeroOpenDoors = 200
+			ZeroDoorsOpen = 200,
+			AnyDoorsOpen = 201,
+			AnyDoorsClosedAndLit = 202,
+			
+			// Flora
+			SeenStalksFlora = 300,
+			SeenEdibleFlora = 301,
+			SeenAttackFlora = 302
 		}
 
 		[JsonProperty] readonly Types[] any;
@@ -123,8 +131,19 @@ namespace Lunra.Hothouse.Models
 			return true;
 		}
 
-		public static bool Calculate(GameModel game, Types type)
+		public static bool Calculate(
+			GameModel game,
+			Types type
+		)
 		{
+			int doorOpenCount() => game.Doors.AllActive.Count(d => d.IsOpen.Value);
+
+			bool getCachedTrueOrCalculate(Func<bool> calculate)
+			{
+				if (game.Cache.Value.Conditions.TryGetValue(type, out var value) && value) return true;
+				return calculate();
+			}
+			
 			switch (type)
 			{
 				// Constant
@@ -152,8 +171,26 @@ namespace Lunra.Hothouse.Models
 					return game.Cache.Value.GlobalInventory[Inventory.Types.Rations] <= game.Cache.Value.LowRationThreshold;
 				
 				// Environment
-				case Types.ZeroOpenDoors:
-					return game.Doors.AllActive.None(d => d.IsOpen.Value);
+				case Types.ZeroDoorsOpen:
+					return 0 == doorOpenCount();
+				case Types.AnyDoorsOpen:
+					return 0 < doorOpenCount();
+				case Types.AnyDoorsClosedAndLit:
+					return game.Doors.AllActive.Any(d => !d.IsOpen.Value && d.LightSensitive.IsLit);
+				
+				// Flora
+				case Types.SeenStalksFlora:
+					return getCachedTrueOrCalculate(
+						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Grass && m.LightSensitive.IsLit)
+					);
+				case Types.SeenEdibleFlora:
+					return getCachedTrueOrCalculate(
+						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Wheat && m.LightSensitive.IsLit)
+					);
+				case Types.SeenAttackFlora:
+					return getCachedTrueOrCalculate(
+						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Shroom && m.LightSensitive.IsLit)
+					);
 				
 				// Invalid or Unrecognized
 				case Types.Unknown:

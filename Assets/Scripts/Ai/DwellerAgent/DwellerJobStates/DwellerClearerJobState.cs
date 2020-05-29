@@ -80,7 +80,7 @@ namespace Lunra.Hothouse.Ai
 					clearable =>
 					{
 						if (!clearable.IsMarkedForClearance.Value) return false;
-						if (clearable.LightSensitive.IsNotLit()) return false;
+						if (clearable.LightSensitive.IsNotLit) return false;
 						return Vector3.Distance(Agent.Transform.Position.Value, clearable.Transform.Position.Value) <= (Agent.MeleeRange.Value + clearable.MeleeRangeBonus.Value);
 					}
 				);
@@ -133,7 +133,7 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				target = World.GetClearables()
-					.Where(t => t.IsMarkedForClearance.Value && t.LightSensitive.IsLit())
+					.Where(t => t.IsMarkedForClearance.Value && t.LightSensitive.IsLit)
 					.OrderBy(t => Vector3.Distance(Agent.Transform.Position.Value, t.Transform.Position.Value))
 					.FirstOrDefault();
 
