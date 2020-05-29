@@ -88,6 +88,7 @@ namespace Lunra.Hothouse.Ai
 					Agent.Health.Value = Mathf.Max(0f, Agent.Health.Value - damage);
 				}
 
+				Agent.DesireUpdated(Agent.Desire.Value, false);
 				Agent.Desire.Value = Desires.None;
 			}
 		}
@@ -117,6 +118,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				timeoutState.ConfigureForNextTimeOfDay(Agent.JobShift.Value.Begin);
 				target.Operate(Agent, SourceState.Desire);
+				Agent.DesireUpdated(Agent.Desire.Value, true);
 				Agent.Desire.Value = Desires.None;
 			}
 		}

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
@@ -49,6 +50,8 @@ namespace Lunra.Hothouse.Models.AgentModels
 		#endregion
 		
 		#region Non Serialized
+
+		[JsonIgnore] public Action<Desires, bool> DesireUpdated = ActionExtensions.GetEmpty<Desires, bool>();
 		#endregion
 
 		public bool GetDesireDamage(Desires desire, GameModel game, out float damage)

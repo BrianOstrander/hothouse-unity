@@ -319,6 +319,10 @@ namespace Lunra.Hothouse.Services
 			};
 			
 			// DEBUGGING
+
+			// var wagon = game.Buildings.AllActive.First(b => b.Type.Value == Buildings.StartingWagon);
+			//
+			// wagon.Inventory.Value += (Inventory.Types.Rations, 50);
 			
 			// game.Buildings.Activate(
 			// 	Buildings.Bonfire,
