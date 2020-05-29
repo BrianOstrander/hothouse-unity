@@ -366,7 +366,7 @@ namespace Lunra.Hothouse.Editor
 			foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
 			{
 				var value = inventory[type];
-				var valueMaximum = capacity?.GetMaximumFor(inventory, type);
+				var valueMaximum = capacity?.GetMaximumFor(type);
 				
 				switch (inventoryVisibilities)
 				{

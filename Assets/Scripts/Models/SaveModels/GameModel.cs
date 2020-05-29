@@ -114,7 +114,7 @@ namespace Lunra.Hothouse.Models
 
 		[JsonIgnore] public Func<(string RoomId, Vector3 Position, ILightModel[] Except), LightingResult> CalculateMaximumLighting;
 
-		GameCache cache;
+		GameCache cache = GameCache.Default();
 		readonly ListenerProperty<GameCache> cacheListener;
 		[JsonIgnore] public ReadonlyProperty<GameCache> Cache { get; }
 		#endregion

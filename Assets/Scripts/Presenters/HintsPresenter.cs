@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class HintsPresenter : GenericPresenter<HintView>
+	public class HintsPresenter : Presenter<HintView>
 	{
 		GameModel game;
 		HintsModel hints;

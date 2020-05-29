@@ -31,7 +31,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Assert.IsFalse(
 				targetInstance == lastTargetInstance,
-				"It should not be possible for this event to fire if the current and last instances match"
+				"It should not be possible for this event to fire if the current and last instances match: "+targetInstance+" and "+lastTargetInstance
 			);
 			
 			if (lastTargetInstance != null)
