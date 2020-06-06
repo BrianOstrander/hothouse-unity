@@ -20,6 +20,107 @@ namespace Lunra.Hothouse.Presenters
 			Model.Display.Changed -= OnDisplay;
 		}
 
+		protected override void UpdateInteractions()
+		{
+			base.UpdateInteractions();
+
+			Vector3? pan = null;
+			
+			if (Input.GetKey(KeyCode.Comma)) pan = View.transform.forward;
+			if (Input.GetKey(KeyCode.O)) pan = (pan ?? Vector3.zero) - View.transform.forward;
+			if (Input.GetKey(KeyCode.A)) pan = (pan ?? Vector3.zero) - View.transform.right;
+			if (Input.GetKey(KeyCode.E)) pan = (pan ?? Vector3.zero) + View.transform.right;
+
+			if (pan.HasValue)
+			{
+				switch (Model.CameraPan.Value.State)
+				{
+					case Interaction.States.End:
+					case Interaction.States.Idle:
+						Model.CameraPan.Value = Interaction.GenericVector3.Point(
+							Interaction.States.Begin,
+							pan.Value
+						);
+						break;
+					case Interaction.States.Begin:
+					case Interaction.States.Active:
+						Model.CameraPan.Value = Model.CameraPan.Value.NewEnd(
+							Interaction.States.Active,
+							pan.Value
+						);
+						break;
+					default:
+						Debug.LogError("Unexpected State: " + Model.CameraPan.Value.State);
+						break;
+				}
+			}
+			else
+			{
+				switch (Model.CameraPan.Value.State)
+				{
+					case Interaction.States.Idle:
+						break;
+					case Interaction.States.End:
+						Model.CameraPan.Value = Interaction.GenericVector3.Point(Interaction.States.Idle, Vector3.zero);
+						break;
+					case Interaction.States.Begin:
+					case Interaction.States.Active:
+						Model.CameraPan.Value = Model.CameraPan.Value.NewState(Interaction.States.End);
+						break;
+					default:
+						Debug.LogError("Unexpected State: "+Model.CameraPan.Value.State);
+						break;
+				}
+			}
+			
+			float? orbit = null;
+			
+			if (Input.GetKey(KeyCode.Quote)) orbit = 1f;
+			if (Input.GetKey(KeyCode.Period)) orbit = (orbit ?? 0f) - 1f;
+			
+			if (orbit.HasValue)
+			{
+				switch (Model.CameraOrbit.Value.State)
+				{
+					case Interaction.States.End:
+					case Interaction.States.Idle:
+						Model.CameraOrbit.Value = Interaction.GenericFloat.Point(
+							Interaction.States.Begin,
+							orbit.Value
+						);
+						break;
+					case Interaction.States.Begin:
+					case Interaction.States.Active:
+						Model.CameraOrbit.Value = Model.CameraOrbit.Value.NewEnd(
+							Interaction.States.Active,
+							orbit.Value
+						); 
+						break;
+					default:
+						Debug.LogError("Unexpected State: " + Model.CameraOrbit.Value.State);
+						break;
+				}
+			}
+			else
+			{
+				switch (Model.CameraOrbit.Value.State)
+				{
+					case Interaction.States.Idle:
+						break;
+					case Interaction.States.End:
+						Model.CameraOrbit.Value = Interaction.GenericFloat.Point(Interaction.States.Idle, 0f);
+						break;
+					case Interaction.States.Begin:
+					case Interaction.States.Active:
+						Model.CameraOrbit.Value = Model.CameraOrbit.Value.NewState(Interaction.States.End);
+						break;
+					default:
+						Debug.LogError("Unexpected State: "+Model.CameraPan.Value.State);
+						break;
+				}
+			}
+		}
+
 		#region InputEvents
 		public void OnDisplay(Interaction.Display display)
 		{

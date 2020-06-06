@@ -23,11 +23,13 @@ namespace Lunra.Hothouse.Views
 			AlignCamera();
 		}
 
+		/*
 		void OnDrawGizmos()
 		{
 			Gizmos.color = Color.green;
 			Gizmos.DrawLine(CameraInstance.transform.position, RootTransform.position);
 		}
+		*/
 
 		#region Utility
 		[ContextMenu("Align Camera")]

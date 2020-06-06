@@ -1,7 +1,6 @@
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
-using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Presenters;
 using UnityEngine;
 
@@ -77,25 +76,35 @@ namespace Lunra.Hothouse.Presenters
 		void OnHeartbeatLateUpdate()
 		{
 			if (View.NotVisible) return;
+
+			switch (game.Interaction.CameraPan.Value.State)
+			{
+				case Interaction.States.Idle:
+				case Interaction.States.End:
+					break;
+				case Interaction.States.Begin:
+				case Interaction.States.Active:
+					camera.Transform.Position.Value += ((camera.Transform.Rotation.Value * game.Interaction.CameraPan.Value.Value.Current) * (camera.PanVelocity.Value * Time.deltaTime));
+					break;
+				default:
+					Debug.LogError("Unrecognized State: "+game.Interaction.CameraPan.Value.State);
+					break;
+			}
+
+			switch (game.Interaction.CameraOrbit.Value.State)
+			{
+				case Interaction.States.Idle:
+				case Interaction.States.End:
+					break;
+				case Interaction.States.Begin:
+				case Interaction.States.Active:
+					camera.Transform.Rotation.Value *= Quaternion.Euler(Vector3.up * (game.Interaction.CameraOrbit.Value.Value.Current * camera.OrbitVelocity.Value * Time.deltaTime));		
+					break;
+				default:
+					Debug.LogError("Unrecognized State: "+game.Interaction.CameraPan.Value.State);
+					break;
+			}
 			
-			// TODO: This should probably be handled by the GameInteractionPresenter...
-			
-			var pan = Vector3.zero;
-
-			if (Input.GetKey(KeyCode.Comma)) pan += View.transform.forward;
-			if (Input.GetKey(KeyCode.O)) pan -= View.transform.forward;
-			if (Input.GetKey(KeyCode.A)) pan -= View.transform.right;
-			if (Input.GetKey(KeyCode.E)) pan += View.transform.right;
-
-			camera.Transform.Position.Value += (pan * (camera.PanVelocity.Value * Time.deltaTime));
-
-			var orbit = 0f;
-			
-			if (Input.GetKey(KeyCode.Quote)) orbit += 1f;
-			if (Input.GetKey(KeyCode.Period)) orbit -= 1f;
-
-			camera.Transform.Rotation.Value *= Quaternion.Euler(Vector3.up * (orbit * camera.OrbitVelocity.Value * Time.deltaTime));
-
 			UpdateAndCalculateTransform();
 		}
 		#endregion
