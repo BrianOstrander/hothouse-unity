@@ -4,11 +4,17 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class WorldCameraModel : Model
+	public class WorldCameraModel : Model, ITransform
 	{
 		#region Serialized
 		[JsonProperty] bool isEnabled;
 		[JsonIgnore] public ListenerProperty<bool> IsEnabled { get; }
+		[JsonProperty] float panVelocity;
+		[JsonIgnore] public ListenerProperty<float> PanVelocity { get; }
+		[JsonProperty] float orbitVelocity;
+		[JsonIgnore] public ListenerProperty<float> OrbitVelocity { get; }
+		
+		public TransformComponent Transform { get; } = new TransformComponent();
 		#endregion
 
 		#region Non Serialized
@@ -19,6 +25,9 @@ namespace Lunra.Hothouse.Models
 		public WorldCameraModel()
 		{
 			IsEnabled = new ListenerProperty<bool>(value => isEnabled = value, () => isEnabled);
+			PanVelocity = new ListenerProperty<float>(value => panVelocity = value, () => panVelocity);
+			OrbitVelocity = new ListenerProperty<float>(value => orbitVelocity = value, () => orbitVelocity);
+			
 			CameraInstance = new ListenerProperty<Camera>(value => cameraInstance = value, () => cameraInstance);
 		}
 	}

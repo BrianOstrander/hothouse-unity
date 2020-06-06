@@ -14,7 +14,7 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		[JsonProperty] Vector3 position;
 		[JsonIgnore] public ListenerProperty<Vector3> Position { get; }
-		[JsonProperty] Quaternion rotation;
+		[JsonProperty] Quaternion rotation = Quaternion.identity;
 		[JsonIgnore] public ListenerProperty<Quaternion> Rotation { get; }
 		#endregion
 
