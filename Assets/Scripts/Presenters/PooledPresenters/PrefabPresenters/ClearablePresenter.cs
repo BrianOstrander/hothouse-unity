@@ -65,13 +65,13 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		#region ToolbarModel Events
-		void OnToolbarClearanceTask(Interaction.Generic interaction)
+		void OnToolbarClearanceTask(Interaction.GenericVector3 interaction)
 		{
 			if (IsNotActive) return;
 			if (Model.IsMarkedForClearance.Value) return;
 			if (interaction.State == Interaction.States.OutOfRange) return;
 			
-			var radiusContains = interaction.Position.RadiusContains(Model.Transform.Position.Value);
+			var radiusContains = interaction.Value.RadiusContains(Model.Transform.Position.Value);
 			
 			switch (interaction.State)
 			{

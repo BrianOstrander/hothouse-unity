@@ -26,11 +26,11 @@ namespace Lunra.Hothouse.Models
 		BuildingModel building;
 		[JsonIgnore] public ListenerProperty<BuildingModel> Building { get; }
 		
-		Interaction.Generic clearanceTask;
-		[JsonIgnore] public ListenerProperty<Interaction.Generic> ClearanceTask { get; }
+		Interaction.GenericVector3 clearanceTask;
+		[JsonIgnore] public ListenerProperty<Interaction.GenericVector3> ClearanceTask { get; }
 		
-		Interaction.Generic constructionTask;
-		[JsonIgnore] public ListenerProperty<Interaction.Generic> ConstructionTask { get; }
+		Interaction.GenericVector3 constructionTask;
+		[JsonIgnore] public ListenerProperty<Interaction.GenericVector3> ConstructionTask { get; }
 		#endregion
 
 		public ToolbarModel()
@@ -39,8 +39,8 @@ namespace Lunra.Hothouse.Models
 			
 			Task = new ListenerProperty<Tasks>(value => task = value, () => task);
 			Building = new ListenerProperty<BuildingModel>(value => building = value, () => building);
-			ClearanceTask = new ListenerProperty<Interaction.Generic>(value => clearanceTask = value, () => clearanceTask);
-			ConstructionTask = new ListenerProperty<Interaction.Generic>(value => constructionTask = value, () => constructionTask);
+			ClearanceTask = new ListenerProperty<Interaction.GenericVector3>(value => clearanceTask = value, () => clearanceTask);
+			ConstructionTask = new ListenerProperty<Interaction.GenericVector3>(value => constructionTask = value, () => constructionTask);
 		}
 	}
 }

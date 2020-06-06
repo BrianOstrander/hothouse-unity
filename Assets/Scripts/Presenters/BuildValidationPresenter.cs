@@ -54,12 +54,12 @@ namespace Lunra.Hothouse.Presenters
 			CloseView(true);
 		}
 
-		void UpdateValidation(Interaction.Generic interaction)
+		void UpdateValidation(Interaction.GenericVector3 interaction)
 		{
 			var lightValue = game.CalculateMaximumLighting(
 				(
 					game.Rooms.AllActive.First().Id.Value,
-					interaction.Position.Begin,
+					interaction.Value.Begin,
 					new ILightModel[] { game.Toolbar.Building.Value }
 				)
 			);
@@ -116,7 +116,7 @@ namespace Lunra.Hothouse.Presenters
 			OnToolbarTask(game.Toolbar.Task.Value);
 		}
 		
-		void OnToolbarConstructionTask(Interaction.Generic interaction)
+		void OnToolbarConstructionTask(Interaction.GenericVector3 interaction)
 		{
 			switch (interaction.State)
 			{
@@ -182,7 +182,7 @@ namespace Lunra.Hothouse.Presenters
 					return;
 			}
 			
-			View.RootTransform.position = current.Interaction.Position.Begin;
+			View.RootTransform.position = current.Interaction.Value.Begin;
 			
 			View.UpdateValidation(
 				current.State,

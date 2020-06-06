@@ -9,11 +9,11 @@ namespace Lunra.Hothouse.Presenters
 	public class RadialCursorPresenter : Presenter<RadialCursorView>
 	{
 		GameModel game;
-		ListenerProperty<Interaction.Generic> interaction;
+		ListenerProperty<Interaction.GenericVector3> interaction;
 
 		public RadialCursorPresenter(
 			GameModel game,
-			ListenerProperty<Interaction.Generic> interaction
+			ListenerProperty<Interaction.GenericVector3> interaction
 		)
 		{
 			this.game = game;
@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region InteractionModel Events
-		void OnInteraction(Interaction.Generic interaction)
+		void OnInteraction(Interaction.GenericVector3 interaction)
 		{
 			switch (interaction.State)
 			{
@@ -37,15 +37,15 @@ namespace Lunra.Hothouse.Presenters
 					break;
 				case Interaction.States.Begin:
 					View.Reset();
-					View.Interaction(interaction.State, interaction.Position);
+					View.Interaction(interaction.State, interaction.Value);
 					ShowView(instant: true);
 					break;
 				case Interaction.States.Active:
-					View.Interaction(interaction.State, interaction.Position);
+					View.Interaction(interaction.State, interaction.Value);
 					break;
 				case Interaction.States.End:
 				case Interaction.States.Cancel:
-					View.Interaction(interaction.State, interaction.Position);
+					View.Interaction(interaction.State, interaction.Value);
 					CloseView(true);
 					break;
 				default:

@@ -14,11 +14,46 @@ namespace Lunra.Hothouse.Models
 			End = 50,
 			Cancel = 60
 		}
-
-		public struct Vector3Delta
+	
+		public struct DeltaFloat
 		{
-			public static Vector3Delta Default() => new Vector3Delta(Vector3.zero, Vector3.zero);
-			public static Vector3Delta Point(Vector3 position) => new Vector3Delta(position, position);
+			public static DeltaFloat Default() => new DeltaFloat(0f, 0f);
+			public static DeltaFloat New(float value) => new DeltaFloat(value, value);
+			
+			public float Begin { get; }
+			public float End { get; }
+			public float Delta { get; }
+			
+			public float Current => End;
+
+			public DeltaFloat(
+				float begin,
+				float end
+			)
+			{
+				Begin = begin;
+				End = end;
+				Delta = end - begin;
+			}
+
+			public DeltaFloat NewEnd(float end)
+			{
+				return new DeltaFloat(
+					Begin,
+					end
+				);
+			}
+			
+			public override string ToString()
+			{
+				return "[ " + Begin + " , " + End + " ] ";
+			}
+		}
+		
+		public struct DeltaVector3
+		{
+			public static DeltaVector3 Default() => new DeltaVector3(Vector3.zero, Vector3.zero);
+			public static DeltaVector3 New(Vector3 position) => new DeltaVector3(position, position);
 			
 			public Vector3 Begin { get; }
 			public Vector3 End { get; }
@@ -26,7 +61,7 @@ namespace Lunra.Hothouse.Models
 			
 			public Vector3 Current => End;
 
-			public Vector3Delta(
+			public DeltaVector3(
 				Vector3 begin,
 				Vector3 end
 			)
@@ -36,9 +71,9 @@ namespace Lunra.Hothouse.Models
 				Delta = end - begin;
 			}
 
-			public Vector3Delta NewEnd(Vector3 end)
+			public DeltaVector3 NewEnd(Vector3 end)
 			{
-				return new Vector3Delta(
+				return new DeltaVector3(
 					Begin,
 					end
 				);
@@ -56,18 +91,18 @@ namespace Lunra.Hothouse.Models
 		{
 			public static Display Default() => new Display(
 				States.Idle,
-				Vector3Delta.Default(),
-				Vector3Delta.Default()
+				DeltaVector3.Default(),
+				DeltaVector3.Default()
 			);
 			
 			public States State { get; }
-			public Vector3Delta ScreenPosition { get; }
-			public Vector3Delta ViewportPosition { get; }
+			public DeltaVector3 ScreenPosition { get; }
+			public DeltaVector3 ViewportPosition { get; }
 
 			public Display(
 				States state,
-				Vector3Delta screenPosition,
-				Vector3Delta viewportPosition
+				DeltaVector3 screenPosition,
+				DeltaVector3 viewportPosition
 			)
 			{
 				State = state;
@@ -89,45 +124,87 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		
-		public struct Generic
+		public struct GenericFloat
 		{
-			public static Generic Default() => new Generic(States.Idle, new Vector3Delta());
-			public static Generic Point(States state, Vector3 position) => new Generic(state, Vector3Delta.Point(position));
+			public static GenericFloat Default() => new GenericFloat(States.Idle, new DeltaFloat());
+			public static GenericFloat Point(States state, float value) => new GenericFloat(state, DeltaFloat.New(value));
 			
 			public States State { get; }
-			public Vector3Delta Position { get; }
+			public DeltaFloat Value { get; }
 
-			public Generic(
+			public GenericFloat(
 				States state,
-				Vector3Delta position
+				DeltaFloat value
 			)
 			{
 				State = state;
-				Position = position;
+				Value = value;
 			}
 
-			public Generic NewState(States state)
+			public GenericFloat NewState(States state)
 			{
-				return new Generic(
+				return new GenericFloat(
 					state,
-					Position
+					Value
 				);
 			}
 
-			public Generic NewEnd(
+			public GenericFloat NewEnd(
 				States state,
-				Vector3 positionEnd
+				float valueEnd
 			)
 			{
-				return new Generic(
+				return new GenericFloat(
 					state,
-					Position.NewEnd(positionEnd)
+					Value.NewEnd(valueEnd)
 				);
 			}
 
 			public override string ToString()
 			{
-				return nameof(Interaction) + "." + nameof(Generic) + ": "+State+"\n"+Position;
+				return nameof(Interaction) + "." + nameof(GenericFloat) + ": "+State+"\n"+Value;
+			}
+		}
+		
+		public struct GenericVector3
+		{
+			public static GenericVector3 Default() => new GenericVector3(States.Idle, new DeltaVector3());
+			public static GenericVector3 Point(States state, Vector3 value) => new GenericVector3(state, DeltaVector3.New(value));
+			
+			public States State { get; }
+			public DeltaVector3 Value { get; }
+
+			public GenericVector3(
+				States state,
+				DeltaVector3 value
+			)
+			{
+				State = state;
+				Value = value;
+			}
+
+			public GenericVector3 NewState(States state)
+			{
+				return new GenericVector3(
+					state,
+					Value
+				);
+			}
+
+			public GenericVector3 NewEnd(
+				States state,
+				Vector3 valueEnd
+			)
+			{
+				return new GenericVector3(
+					state,
+					Value.NewEnd(valueEnd)
+				);
+			}
+
+			public override string ToString()
+			{
+				return nameof(Interaction) + "." + nameof(GenericVector3) + ": "+State+"\n"+Value;
 			}
 		}
 	}

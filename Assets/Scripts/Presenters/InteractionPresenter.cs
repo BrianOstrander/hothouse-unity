@@ -54,10 +54,10 @@ namespace Lunra.Hothouse.Presenters
 					{
 						Model.Display.Value = new Interaction.Display(
 							Interaction.States.Begin,
-							Interaction.Vector3Delta.Point(
+							Interaction.DeltaVector3.New(
 								Input.mousePosition
 							),
-							Interaction.Vector3Delta.Point(
+							Interaction.DeltaVector3.New(
 								Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 							)
 						);
@@ -66,10 +66,10 @@ namespace Lunra.Hothouse.Presenters
 					{
 						Model.Display.Value = new Interaction.Display(
 							Interaction.States.Idle,
-							Interaction.Vector3Delta.Point(
+							Interaction.DeltaVector3.New(
 								Input.mousePosition
 							),
-							Interaction.Vector3Delta.Point(
+							Interaction.DeltaVector3.New(
 								Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)
 							)
 						);

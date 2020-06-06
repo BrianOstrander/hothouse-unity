@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Views
 		#region Bindings
 		public void Interaction(
 			Models.Interaction.States state,
-			Models.Interaction.Vector3Delta position
+			Models.Interaction.DeltaVector3 position
 		)
 		{
 			switch (state)
@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Views
 			
 			Interaction(
 				Models.Interaction.States.End,
-				Models.Interaction.Vector3Delta.Default()
+				Models.Interaction.DeltaVector3.Default()
 			);
 		}
 	}

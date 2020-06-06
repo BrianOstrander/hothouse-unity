@@ -29,14 +29,14 @@ namespace Lunra.Hothouse.Presenters
 				case Interaction.States.Begin:
 					if (HasCollision(out var hit, LayerMasks.Floor))
 					{
-						Model.FloorSelection.Value = Interaction.Generic.Point(
+						Model.FloorSelection.Value = Interaction.GenericVector3.Point(
 							display.State,
 							hit.point
 						);
 					}
 					else
 					{
-						Model.FloorSelection.Value = Interaction.Generic.Point(
+						Model.FloorSelection.Value = Interaction.GenericVector3.Point(
 							Interaction.States.OutOfRange,
 							Vector3.zero
 						);
@@ -48,7 +48,7 @@ namespace Lunra.Hothouse.Presenters
 						Model.FloorSelection.Value.State != Interaction.States.Begin
 					) break;
 
-					if (HasCollision(out var hitPositionActive, new Plane(Vector3.up, Model.FloorSelection.Value.Position.Begin)))
+					if (HasCollision(out var hitPositionActive, new Plane(Vector3.up, Model.FloorSelection.Value.Value.Begin)))
 					{
 						Model.FloorSelection.Value = Model.FloorSelection.Value.NewEnd(
 							display.State,
@@ -61,7 +61,7 @@ namespace Lunra.Hothouse.Presenters
 				case Interaction.States.Cancel:
 					if (Model.FloorSelection.Value.State != Interaction.States.Active) break;
 					
-					if (HasCollision(out var hitPositionEndOrCancel, new Plane(Vector3.up, Model.FloorSelection.Value.Position.Begin)))
+					if (HasCollision(out var hitPositionEndOrCancel, new Plane(Vector3.up, Model.FloorSelection.Value.Value.Begin)))
 					{
 						Model.FloorSelection.Value = Model.FloorSelection.Value.NewEnd(
 							display.State,
