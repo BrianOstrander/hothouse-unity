@@ -14,6 +14,8 @@ namespace Lunra.Hothouse.Presenters
 		GameModel game;
 		BuildValidationModel buildValidation;
 
+		LightingResult lastLightValueCalculated;
+		
 		public BuildValidationPresenter(GameModel game)
 		{
 			this.game = game;
@@ -42,9 +44,6 @@ namespace Lunra.Hothouse.Presenters
 			View.Reset();
 
 			ShowView(instant: true);
-
-			// TODO: Make this actually follow the camera...
-			View.CameraPosition = game.WorldCamera.CameraInstance.Value.transform.position;
 		}
 
 		void Close()
@@ -56,7 +55,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void UpdateValidation(Interaction.GenericVector3 interaction)
 		{
-			var lightValue = game.CalculateMaximumLighting(
+			lastLightValueCalculated = game.CalculateMaximumLighting(
 				(
 					game.Rooms.AllActive.First().Id.Value,
 					interaction.Value.Begin,
@@ -65,7 +64,7 @@ namespace Lunra.Hothouse.Presenters
 			);
 			var placementLightRequirement = game.Toolbar.Building.Value.PlacementLightRequirement.Value;
 			
-			if (lightValue.OperatingMaximum < placementLightRequirement.Minimum)
+			if (lastLightValueCalculated.OperatingMaximum < placementLightRequirement.Minimum)
 			{
 				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
 					interaction,
@@ -74,7 +73,7 @@ namespace Lunra.Hothouse.Presenters
 				return;
 			}
 			
-			if (placementLightRequirement.Maximum < lightValue.OperatingMaximum)
+			if (placementLightRequirement.Maximum < lastLightValueCalculated.OperatingMaximum)
 			{
 				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
 					interaction,
@@ -83,7 +82,7 @@ namespace Lunra.Hothouse.Presenters
 				return;
 			}
 
-			if (placementLightRequirement.Maximum < lightValue.ConstructingMaximum)
+			if (placementLightRequirement.Maximum < lastLightValueCalculated.ConstructingMaximum)
 			{
 				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
 					interaction,
@@ -183,11 +182,14 @@ namespace Lunra.Hothouse.Presenters
 			}
 			
 			View.RootTransform.position = current.Interaction.Value.Begin;
+			View.CameraForward = game.WorldCamera.CameraInstance.Value.transform.forward;
 			
 			View.UpdateValidation(
 				current.State,
 				current.Message
 			);
+
+			View.LightLevel = lastLightValueCalculated.OperatingMaximum;
 		}
 		#endregion
 	}

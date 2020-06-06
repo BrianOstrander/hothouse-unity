@@ -119,6 +119,8 @@ namespace Lunra.Hothouse.Presenters
 						break;
 				}
 			}
+			
+			if (pan.HasValue || orbit.HasValue) OnDisplay(Model.Display.Value);
 		}
 
 		#region InputEvents

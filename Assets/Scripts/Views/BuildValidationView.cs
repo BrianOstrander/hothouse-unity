@@ -1,4 +1,5 @@
-﻿using Lunra.Hothouse.Models;
+﻿using Lunra.Core;
+using Lunra.Hothouse.Models;
 using Lunra.StyxMvp;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,9 @@ namespace Lunra.Hothouse.Views
 		[SerializeField] GameObject invalidWidget;
 		[SerializeField] GameObject validWidget;
 		[SerializeField] TextMeshPro messageLabel;
+		[SerializeField] Light light;
+		[SerializeField] FloatRange lightIntensityRange;
+		[SerializeField] AnimationCurve lightIntensityCurve;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
   
@@ -27,7 +31,17 @@ namespace Lunra.Hothouse.Views
 			messageLabel.text = message ?? string.Empty;
 		}
 
-		public Vector3 CameraPosition { set => messageLabel.transform.LookAt(-value); }
+		public Vector3 CameraForward { set => messageLabel.transform.forward = value; }
+
+		public float LightLevel
+		{
+			set
+			{
+				var intensity = lightIntensityRange.Evaluate(lightIntensityCurve.Evaluate(value));
+				light.intensity = intensity;
+				light.enabled = !Mathf.Approximately(0f, intensity);
+			}
+		}
 		#endregion
   
 		public override void Reset()
@@ -39,7 +53,9 @@ namespace Lunra.Hothouse.Views
 				string.Empty
 			);
 			
-			CameraPosition = Vector3.zero;
+			CameraForward = Vector3.forward;
+
+			LightLevel = 0f;
 		}
   
 		#region Events
