@@ -23,6 +23,7 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
+			Model.RadialBoundary.Radius.Value = View.NavigationColliderRadius;
 			Model.Light.IsLight.Value = View.IsLight;
 			
 			if (Model.Light.IsLight.Value)

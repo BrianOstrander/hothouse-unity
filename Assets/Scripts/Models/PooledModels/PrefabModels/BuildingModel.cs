@@ -8,7 +8,7 @@ using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {
-	public class BuildingModel : PrefabModel, ILightModel, ILightSensitiveModel, IEnterableModel
+	public class BuildingModel : PrefabModel, ILightModel, ILightSensitiveModel, IEnterableModel, IRadialBoundary
 	{
 		#region Serialized
 		[JsonProperty] Buildings type;
@@ -46,6 +46,7 @@ namespace Lunra.Hothouse.Models
 
 		public LightComponent Light { get; } = new LightComponent();
 		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
+		public RadialBoundaryComponent RadialBoundary { get; } = new RadialBoundaryComponent();
 		#endregion
 		
 		#region Non Serialized

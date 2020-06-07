@@ -1,10 +1,11 @@
-using System;
 using System.Linq;
 using Lunra.Core;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.Serialization;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Lunra.Hothouse.Views
 {
@@ -15,6 +16,7 @@ namespace Lunra.Hothouse.Views
 		// [SerializeField] NavMeshModifier[] navigationModifiers = new NavMeshModifier[0];
 		[FormerlySerializedAs("navigationModifierColliders"), SerializeField]
 		Collider[] navigationColliders = new Collider[0];
+		[SerializeField] float navigationCollidersRadius;
 		[SerializeField] Transform[] entrances = new Transform[0];
 		[SerializeField] LightEntry[] lights = new LightEntry[0];
 		[SerializeField] ParticleSystem[] lightParticles = new ParticleSystem[0];
@@ -51,6 +53,22 @@ namespace Lunra.Hothouse.Views
 		public bool IsLight => !Mathf.Approximately(0f, lightRange);
 		public float LightRange => lightRange;
 		public Vector3[] Entrances => entrances.Select(e => e.position).ToArray();
+
+		public Vector3 GetClosestNavigationColliderPoint(Vector3 position)
+		{
+			var result = RootTransform.position;
+			var distance = Vector3.Distance(result, position);
+			foreach (var collider in navigationColliders)
+			{
+				var closestPoint = collider.ClosestPoint(position);
+				var newDistance = Vector3.Distance(closestPoint, position);
+				if (newDistance < distance) result = closestPoint;
+			}
+
+			return result;
+		}
+
+		public float NavigationColliderRadius => navigationCollidersRadius;
 		#endregion
 
 		public override void Reset()
@@ -60,9 +78,37 @@ namespace Lunra.Hothouse.Views
 			IsNavigationModified = false;
 			LightFuelNormal = 0f;
 		}
+		
+		[ContextMenu("Calculate Collider Radius")]
+		void CalculateBoundingNavigationColliderRadius()
+		{
+#if UNITY_EDITOR
+			var result = 0f;
+			foreach (var collider in navigationColliders)
+			{
+				var radius = collider.bounds.extents.NewY(0f).magnitude;
+				if (result < radius) result = radius;
+			}
+
+			if (Mathf.Approximately(navigationCollidersRadius, result)) return;
+
+			Undo.RecordObject(this, "Calculate Bounding Navigation");
+			
+			navigationCollidersRadius = result;
+
+			// Notice that if the call to RecordPrefabInstancePropertyModifications is not present,
+			// all changes to scale will be lost when saving the Scene, and reopening the Scene
+			// would revert the scale back to its previous value.
+			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+
+			// Optional step in order to save the Scene changes permanently.
+			//EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+#endif
+		}
 
 		void OnDrawGizmosSelected()
 		{
+#if UNITY_EDITOR
 			Handles.color = Color.yellow;
 			Handles.DrawWireDisc(
 				transform.position,
@@ -79,6 +125,14 @@ namespace Lunra.Hothouse.Views
 				Vector3.up,
 				childLight.range
 			);
+			
+			Handles.color = Color.red;
+			Handles.DrawWireDisc(
+				transform.position,
+				Vector3.up,
+				navigationCollidersRadius
+			);
+#endif
 		}
 	}
 }

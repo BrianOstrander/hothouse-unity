@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Views
 		[SerializeField] GameObject invalidWidget;
 		[SerializeField] GameObject validWidget;
 		[SerializeField] TextMeshPro messageLabel;
-		[SerializeField] Light light;
+		[SerializeField] Light validationLight;
 		[SerializeField] FloatRange lightIntensityRange;
 		[SerializeField] AnimationCurve lightIntensityCurve;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
@@ -38,8 +38,8 @@ namespace Lunra.Hothouse.Views
 			set
 			{
 				var intensity = lightIntensityRange.Evaluate(lightIntensityCurve.Evaluate(value));
-				light.intensity = intensity;
-				light.enabled = !Mathf.Approximately(0f, intensity);
+				validationLight.intensity = intensity;
+				validationLight.enabled = !Mathf.Approximately(0f, intensity);
 			}
 		}
 		#endregion

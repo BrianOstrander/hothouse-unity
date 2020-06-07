@@ -259,7 +259,7 @@ MonoBehaviour:
   invalidWidget: {fileID: 9048593627179371256}
   validWidget: {fileID: 1226260625736782052}
   messageLabel: {fileID: 7997105836862357248}
-  light: {fileID: 7431372028927736368}
+  validationLight: {fileID: 7431372028927736368}
   lightIntensityRange:
     primary: 0
     secondary: 0.5
