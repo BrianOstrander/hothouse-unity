@@ -104,8 +104,6 @@ namespace Lunra.Hothouse.Presenters
 				// .Where(f => f.RoomTransform.Id.Value == game.Toolbar.Building.Value.RoomTransform.Id.Value)
 				.Any(f => game.Toolbar.Building.Value.BoundaryContains(f.Transform.Position.Value));
 
-			Debug.Log(game.Toolbar.Building.Value.RadialBoundary.Radius.Value);
-			
 			if (anyFloraBlocking)
 			{
 				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
