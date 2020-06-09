@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-    public class DoorPrefabModel : PrefabModel, ILightSensitiveModel, IObligationModel
+    public class DoorModel : PrefabModel, ILightSensitiveModel, IObligationModel
     {
         public class Connection
         {
@@ -36,7 +36,7 @@ namespace Lunra.Hothouse.Models
         [JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
         #endregion
         
-        public DoorPrefabModel()
+        public DoorModel()
         {
             IsOpen = new ListenerProperty<bool>(value => isOpen = value, () => isOpen);
             RoomConnection = new ListenerProperty<Connection>(value => roomConnection = value, () => roomConnection);

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class DoorPrefabView : PrefabView, IEnterableView
+	public class DoorView : PrefabView, IEnterableView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null

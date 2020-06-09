@@ -121,14 +121,6 @@ namespace Lunra.Hothouse.Services
 				initializeRoom
 			);
 
-			void initializeDoor(
-				DoorPrefabModel door,
-				DoorPrefabModel.Connection connection
-			)
-			{
-				door.RoomConnection.Value = connection;
-			}
-
 			game.Doors.Activate(
 				room0.Id.Value,
 				room1.Id.Value,

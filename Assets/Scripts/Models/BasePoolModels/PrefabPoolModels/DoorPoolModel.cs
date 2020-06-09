@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class DoorPoolModel : BasePrefabPoolModel<DoorPrefabModel>
+	public class DoorPoolModel : BasePrefabPoolModel<DoorModel>
 	{
 		static readonly string[] ValidPrefabIds = new[]
 		{
@@ -23,11 +23,11 @@ namespace Lunra.Hothouse.Models
 		{
 			this.game = game;
 			Initialize(
-				model => new DoorPrefabPresenter(game, model)	
+				model => new DoorPresenter(game, model)	
 			);
 		}
 
-		public DoorPrefabModel Activate(
+		public DoorModel Activate(
 			string roomId0,
 			string roomId1,
 			Vector3 position,
@@ -41,7 +41,7 @@ namespace Lunra.Hothouse.Models
 				rotation,
 				m =>
 				{
-					m.RoomConnection.Value = new DoorPrefabModel.Connection(roomId0, roomId1);
+					m.RoomConnection.Value = new DoorModel.Connection(roomId0, roomId1);
 				}
 			);
 		}
