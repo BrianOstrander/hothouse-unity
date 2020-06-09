@@ -17,6 +17,7 @@ namespace Lunra.Hothouse.Models
 		
 		struct BuildingInfo
 		{
+			public float HealthMaximum;
 			public Inventory Inventory;
 			public InventoryCapacity InventoryCapacity;
 			public InventoryPermission InventoryPermission;
@@ -30,6 +31,7 @@ namespace Lunra.Hothouse.Models
 			public string[] ValidPrefabIds;
 
 			public BuildingInfo(
+				float healthMaximum,
 				Inventory inventory,
 				InventoryCapacity inventoryCapacity,
 				InventoryPermission inventoryPermission,
@@ -43,6 +45,7 @@ namespace Lunra.Hothouse.Models
 				string[] validPrefabIds
 			)
 			{
+				HealthMaximum = healthMaximum;
 				Inventory = inventory;
 				InventoryCapacity = inventoryCapacity;
 				InventoryPermission = inventoryPermission;
@@ -115,6 +118,7 @@ namespace Lunra.Hothouse.Models
 			{
 				Buildings.StartingWagon,
 				new BuildingInfo(
+					100f,
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
@@ -172,6 +176,7 @@ namespace Lunra.Hothouse.Models
 			{
 				Buildings.Bonfire,
 				new BuildingInfo(
+					100f,
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
@@ -223,6 +228,7 @@ namespace Lunra.Hothouse.Models
 			{
 			Buildings.Bedroll,
 			new BuildingInfo(
+				100f,
 				Inventory.Empty, 
 				InventoryCapacity.None(),
 				InventoryPermission.NoneForAnyJob(),
@@ -301,6 +307,9 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			model.Type.Value = building;
+
+			model.Health.Current.Value = info.HealthMaximum;
+			model.Health.Maximum.Value = info.HealthMaximum;
 			model.Inventory.Value = info.Inventory;
 			model.InventoryCapacity.Value = info.InventoryCapacity;
 			model.InventoryPermission.Value = info.InventoryPermission;

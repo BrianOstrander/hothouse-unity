@@ -143,7 +143,7 @@ namespace Lunra.Hothouse.Presenters
 				
 				if (nearestFloraOfDifferentSpecies != null)
 				{
-					nearestFloraOfDifferentSpecies.Health.Current.Value = Mathf.Max(0f, nearestFloraOfDifferentSpecies.Health.Current.Value - Model.SpreadDamage.Value);
+					nearestFloraOfDifferentSpecies.Health.Damage(Model.SpreadDamage.Value); 
 					increaseReproductionFailures = false;
 				}
 				else
@@ -156,7 +156,8 @@ namespace Lunra.Hothouse.Presenters
 
 					if (nearestBuilding != null)
 					{
-						
+						nearestBuilding.Health.Damage(Model.SpreadDamage.Value);
+						increaseReproductionFailures = false;
 					}
 				}
 			}

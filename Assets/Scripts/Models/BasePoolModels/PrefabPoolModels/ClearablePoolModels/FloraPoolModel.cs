@@ -68,8 +68,7 @@ namespace Lunra.Hothouse.Models
 				FloraSpecies.Grass,
 				new SpeciesInfo(
 					new FloatRange(1f, 2f), 
-					// new FloatRange(4f, 8f),
-					new FloatRange(0.1f, 1f),
+					new FloatRange(4f, 8f),
 					new FloatRange(0.5f, 1f),
 					Defaults.ReproductionFailureLimit,
 					100f,

@@ -88,6 +88,12 @@ namespace Lunra.Hothouse.Editor
 						label += "\nState: " + model.BuildingState.Value;
 					}
 
+					if (model.Health.IsDamaged)
+					{
+						label += "\nHealth: " + model.Health.Current.Value + " / " + model.Health.Maximum.Value;
+						if (model.Health.IsDead) label += " - " + StringExtensions.Wrap("Dead", "<color=red>", "</color>");
+					}
+
 					if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 					{
 						label += "\nLight Level: " + model.LightSensitive.LightLevel.Value.ToString("N2");

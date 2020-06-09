@@ -49,6 +49,8 @@ namespace Lunra.Hothouse.Presenters
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
+			Model.Health.Current.Changed += OnBuildingHealthCurrent;
+			
 			Model.Operate += OnBuildingOperate;
 
 			base.Bind();
@@ -72,6 +74,8 @@ namespace Lunra.Hothouse.Presenters
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
+			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
+			
 			Model.Operate -= OnBuildingOperate;
 			
 			base.UnBind();
@@ -280,7 +284,7 @@ namespace Lunra.Hothouse.Presenters
 						Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(Model.Id.Value);
 					}
 
-					if (buildingState == BuildingStates.Operating && Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
+					if (buildingState != BuildingStates.Constructing && Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
 					{
 						Game.NavigationMesh.QueueCalculation();
 					}
@@ -301,6 +305,25 @@ namespace Lunra.Hothouse.Presenters
 		void OnBuildingLightLevel(float lightLevel)
 		{
 			Model.RecalculateEntrances();
+		}
+
+		void OnBuildingHealthCurrent(float current)
+		{
+			// TODO: Should use their own hurt particle, not plants...
+			Game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
+			
+			if (!Mathf.Approximately(0f, current)) return;
+
+			switch (Model.BuildingState.Value)
+			{
+				case BuildingStates.Constructing:
+				case BuildingStates.Operating:
+					Model.BuildingState.Value = BuildingStates.Salvaging;
+					break;
+				default:
+					Debug.LogError("Unrecognized BuildingState: "+Model.BuildingState.Value);
+					return;
+			}
 		}
 
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
