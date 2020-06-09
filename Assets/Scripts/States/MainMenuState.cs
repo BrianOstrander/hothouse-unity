@@ -112,12 +112,14 @@ namespace Lunra.Hothouse.Services
 				Quaternion.identity,
 				initializeRoom
 			);
+
+			room0.IsExplored.Value = true;
 			
 			var room1 = game.Rooms.Activate(
-				"rectangle",
+				"default_spawn",
 				"room_1",
-				new Vector3(0f, 3.01f, -18.74f),
-				Quaternion.identity,
+				new Vector3(0f, 0f, -15.74f * 2f),
+				Quaternion.AngleAxis(180f, Vector3.up),
 				initializeRoom
 			);
 

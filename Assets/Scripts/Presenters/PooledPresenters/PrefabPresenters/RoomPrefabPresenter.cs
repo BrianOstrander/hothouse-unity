@@ -13,6 +13,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationTime.Changed += OnGameSimulationTime;
 
+			Model.IsExplored.Changed += OnRoomIsExplored;
+			
 			Model.UpdateConnection += OnRoomUpdateConnection;
 
 			base.Bind();
@@ -22,10 +24,19 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationTime.Changed -= OnGameSimulationTime;
 			
+			Model.IsExplored.Changed -= OnRoomIsExplored;
+
 			Model.UpdateConnection -= OnRoomUpdateConnection;
 
 			base.UnBind();
 		}
+		
+		#region View Events
+		protected override void OnViewPrepare()
+		{
+			OnRoomIsExplored(Model.IsExplored.Value);
+		}
+		#endregion
 
 		#region Game Events
 		protected override void OnSimulationInitialized()
@@ -42,6 +53,13 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region RoomModel Events
+		void OnRoomIsExplored(bool isExplored)
+		{
+			if (View.NotVisible) return;
+			
+			View.IsExplored = Model.IsExplored.Value;
+		}
+		
 		void OnRoomUpdateConnection(string otherRoomId, bool isOpen)
 		{
 			if (!Model.AdjacentRoomIds.Value.TryGetValue(otherRoomId, out var oldIsOpen))
@@ -58,6 +76,10 @@ namespace Lunra.Hothouse.Presenters
 					kv => kv.Key,
 					kv => kv.Key == otherRoomId ? isOpen : kv.Value
 				);
+
+			if (Model.IsExplored.Value || !isOpen) return;
+
+			if (Game.Rooms.FirstActive(otherRoomId).IsExplored.Value) Model.IsExplored.Value = true;
 		}
 		#endregion
 	}

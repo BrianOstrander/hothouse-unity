@@ -8,6 +8,7 @@ namespace Lunra.Hothouse.Views
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		[SerializeField] Light[] lights;
 		[SerializeField] AnimationCurve lightIntensityByTimeOfDay;
+		[SerializeField] GameObject unexploredRoot;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
@@ -19,6 +20,8 @@ namespace Lunra.Hothouse.Views
 				foreach (var light in lights) light.intensity = lightIntensityByTimeOfDay.Evaluate(value);
 			}
 		}
+
+		public bool IsExplored { set => unexploredRoot.SetActive(!value); }
 		#endregion
 
 		public override void Reset()
@@ -26,6 +29,7 @@ namespace Lunra.Hothouse.Views
 			base.Reset();
 
 			TimeOfDay = 0f;
+			IsExplored = false;
 		}
 	}
 
