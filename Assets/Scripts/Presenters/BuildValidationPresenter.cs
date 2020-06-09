@@ -5,6 +5,7 @@ using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Assertions;
 
 namespace Lunra.Hothouse.Presenters
@@ -55,6 +56,22 @@ namespace Lunra.Hothouse.Presenters
 
 		void UpdateValidation(Interaction.GenericVector3 interaction)
 		{
+			var navMeshHitSuccess = NavMesh.SamplePosition(
+				game.Toolbar.Building.Value.Transform.Position.Value,
+				out var navMeshHit,
+				0.1f, // TODO: Don't hardcode this value...
+				NavMesh.AllAreas
+			);
+
+			if (!navMeshHitSuccess)
+			{
+				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
+					interaction,
+					"Cannot build here"
+				);
+				return;
+			}
+			
 			lastLightValueCalculated = game.CalculateMaximumLighting(
 				(
 					game.Rooms.AllActive.First().Id.Value,
@@ -100,11 +117,14 @@ namespace Lunra.Hothouse.Presenters
 				return;
 			}
 
-			var anyFloraBlocking = game.Flora.AllActive
-				// .Where(f => f.RoomTransform.Id.Value == game.Toolbar.Building.Value.RoomTransform.Id.Value)
-				.Any(f => game.Toolbar.Building.Value.BoundaryContains(f.Transform.Position.Value));
-
-			if (anyFloraBlocking)
+			bool IsFloraColliding(FloraModel flora)
+			{
+				// if (!game.Toolbar.Building.Value.BoundaryContains(flora.Transform.Position.Value)) return false;
+				
+				return game.Toolbar.Building.Value.RadialBoundary.Contains(flora.Transform.Position.Value);
+			}
+			
+			if (game.Flora.AllActive.Any(IsFloraColliding))
 			{
 				buildValidation.Current.Value = BuildValidationModel.Validation.Invalid(
 					interaction,
@@ -112,7 +132,7 @@ namespace Lunra.Hothouse.Presenters
 				);
 				return;
 			}
-			
+
 			buildValidation.Current.Value = BuildValidationModel.Validation.Valid(interaction);
 		}
 

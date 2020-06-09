@@ -54,18 +54,9 @@ namespace Lunra.Hothouse.Views
 		public float LightRange => lightRange;
 		public Vector3[] Entrances => entrances.Select(e => e.position).ToArray();
 
-		public Vector3 GetClosestNavigationColliderPoint(Vector3 position)
+		public bool NavigationCollisionContains(Vector3 position)
 		{
-			var result = RootTransform.position;
-			var distance = Vector3.Distance(result, position);
-			foreach (var collider in navigationColliders)
-			{
-				var closestPoint = collider.ClosestPoint(position);
-				var newDistance = Vector3.Distance(closestPoint, position);
-				if (newDistance < distance) result = closestPoint;
-			}
-
-			return result;
+			return Vector3.Distance(RootTransform.position, position) < navigationCollidersRadius;
 		}
 
 		public float NavigationColliderRadius => navigationCollidersRadius;

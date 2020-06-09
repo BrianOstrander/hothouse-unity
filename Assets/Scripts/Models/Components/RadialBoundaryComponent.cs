@@ -1,3 +1,4 @@
+using System;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
@@ -17,6 +18,10 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ListenerProperty<float> Radius { get; }
 		#endregion
 
+		#region Non Serialized
+		public Func<Vector3, bool> Contains;
+		#endregion
+		
 		public RadialBoundaryComponent()
 		{
 			Radius = new ListenerProperty<float>(value => radius = value, () => radius);

@@ -24,6 +24,7 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			Model.RadialBoundary.Radius.Value = View.NavigationColliderRadius;
+			Model.RadialBoundary.Contains = View.NavigationCollisionContains; 
 			Model.Light.IsLight.Value = View.IsLight;
 			
 			if (Model.Light.IsLight.Value)

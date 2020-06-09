@@ -6,12 +6,12 @@ NavMeshProjectSettings:
   serializedVersion: 2
   areas:
   - name: Walkable
-    cost: 2
+    cost: 1
   - name: Not Walkable
     cost: 1
   - name: Jump
     cost: 3
-  - name: Lit
+  - name: 
     cost: 1
   - name: 
     cost: 1
