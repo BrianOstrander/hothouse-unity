@@ -29,7 +29,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			Model.Transform.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
-			Model.Health.Changed += OnAgentHealth;
+			Model.Health.Current.Changed += OnAgentHealthCurrent;
 			
 			base.Bind();
 		}
@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			Model.Transform.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
-			Model.Health.Changed -= OnAgentHealth;
+			Model.Health.Current.Changed -= OnAgentHealthCurrent;
 			
 			base.UnBind();
 		}
@@ -92,7 +92,7 @@ namespace Lunra.Hothouse.Presenters
 			base.OnPooledState(pooledState);
 		}
 
-		protected virtual void OnAgentHealth(float health)
+		protected virtual void OnAgentHealthCurrent(float health)
 		{
 			if (!Mathf.Approximately(0f, health)) return;
 

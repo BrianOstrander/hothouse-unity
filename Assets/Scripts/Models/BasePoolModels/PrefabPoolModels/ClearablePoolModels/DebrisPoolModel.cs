@@ -50,8 +50,8 @@ namespace Lunra.Hothouse.Models
 		{
 			base.Reset(model);
 			
-			model.HealthMaximum.Value = 10f;
-			model.Health.Value = 10f;
+			model.Health.Maximum.Value = 10f;
+			model.Health.Current.Value = 10f;
 			model.ItemDrops.Value = new Inventory(
 				new Dictionary<Inventory.Types, int>
 				{

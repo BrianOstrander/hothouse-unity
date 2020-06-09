@@ -54,8 +54,8 @@ namespace Lunra.Hothouse.Models
 			model.MeleeRange.Value = 0.75f;
 			model.MeleeCooldown.Value = 0.5f;
 			model.MeleeDamage.Value = 60f;
-			model.HealthMaximum.Value = 100f;
-			model.Health.Value = model.HealthMaximum.Value;
+			model.Health.Maximum.Value = 100f;
+			model.Health.Current.Value = model.Health.Maximum.Value;
 
 			model.WithdrawalCooldown.Value = 0.5f;
 			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;

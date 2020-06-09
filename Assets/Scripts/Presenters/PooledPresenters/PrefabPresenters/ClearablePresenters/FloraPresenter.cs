@@ -19,7 +19,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
-			Model.Health.Changed += OnFloraHealth;
+			Model.Health.Current.Changed += OnFloraHealthCurrent;
 			Model.IsReproducing.Changed += OnFloraIsReproducing;
 		}
 
@@ -29,7 +29,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 
-			Model.Health.Changed -= OnFloraHealth;
+			Model.Health.Current.Changed -= OnFloraHealthCurrent;
 			Model.IsReproducing.Changed -= OnFloraIsReproducing;
 		}
 
@@ -80,7 +80,7 @@ namespace Lunra.Hothouse.Presenters
 			View.IsReproducing = isReproducing;
 		}
 
-		void OnFloraHealth(float health)
+		void OnFloraHealthCurrent(float health)
 		{
 			if (!Mathf.Approximately(0f, health))
 			{
@@ -120,7 +120,7 @@ namespace Lunra.Hothouse.Presenters
 
 							Game.Flora.ActivateChild(
 								Model.Species.Value,
-								Model.RoomTransform.Id.Value,
+								Model.RoomTransform.Id.Value, // TODO: Actually check what room we're spawning into!
 								hit.position
 							);
 						}
@@ -143,11 +143,12 @@ namespace Lunra.Hothouse.Presenters
 				
 				if (nearestFloraOfDifferentSpecies != null)
 				{
-					nearestFloraOfDifferentSpecies.Health.Value = Mathf.Max(0f, nearestFloraOfDifferentSpecies.Health.Value - Model.SpreadDamage.Value);
+					nearestFloraOfDifferentSpecies.Health.Current.Value = Mathf.Max(0f, nearestFloraOfDifferentSpecies.Health.Current.Value - Model.SpreadDamage.Value);
 					increaseReproductionFailures = false;
 				}
 				else
 				{
+					// TODO: Make a ray trace to see what's actually the building blocking us...
 					var room = Game.Rooms.FirstActive(Model.RoomTransform.Id.Value);
 					var nearestBuilding = Game.Buildings.AllActive
 						.Where(m => m.RoomTransform.Id.Value == Model.RoomTransform.Id.Value || (room.AdjacentRoomIds.Value.TryGetValue(m.RoomTransform.Id.Value, out var isOpen) && isOpen))

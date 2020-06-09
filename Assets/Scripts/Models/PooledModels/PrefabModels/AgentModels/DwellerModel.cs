@@ -60,7 +60,7 @@ namespace Lunra.Hothouse.Models.AgentModels
 		public bool GetDesireDamage(Desires desire, GameModel game, out float damage)
 		{
 			if (!DesireDamage.Value.TryGetValue(desire, out damage)) damage = 0f;
-			else damage *= HealthMaximum.Value * game.DesireDamageMultiplier.Value;
+			else damage *= Health.Maximum.Value * game.DesireDamageMultiplier.Value;
 
 			return !Mathf.Approximately(0f, damage);
 		}

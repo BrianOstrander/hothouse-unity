@@ -94,8 +94,8 @@ namespace Lunra.Hothouse.Ai
 				attackState.SetTarget(
 					new DwellerAttackState<DwellerClearerJobState>.Target(
 						() => target.Id.Value,
-						() => target.Health.Value,
-						health => target.Health.Value = health,
+						() => target.Health.Current.Value,
+						health => target.Health.Current.Value = health,
 						() =>
 						{
 							var hasOverflow = Agent.InventoryCapacity.Value.AddClamped(

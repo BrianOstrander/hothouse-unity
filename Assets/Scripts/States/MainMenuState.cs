@@ -75,7 +75,7 @@ namespace Lunra.Hothouse.Services
 		{
 			var game = App.M.Create<GameModel>(App.M.CreateUniqueId());
 
-			game.DesireDamageMultiplier.Value = 0f;
+			game.DesireDamageMultiplier.Value = 1f;
 			game.SimulationTimeConversion.Value = 1f / 10f;
 			
 			game.FloraEffects.IsEnabled.Value = true;
@@ -325,6 +325,8 @@ namespace Lunra.Hothouse.Services
 			};
 			
 			// DEBUGGING
+			
+			game.DesireDamageMultiplier.Value = 0f;
 			
 			game.Flora.ActivateAdult(
 				FloraSpecies.Grass,

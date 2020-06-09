@@ -189,7 +189,7 @@ namespace Lunra.Hothouse.Editor
 				{
 					var label = GetId(model);
 
-					if (!Mathf.Approximately(model.Health.Value, model.HealthMaximum.Value)) label += "\nHealth: " + model.Health.Value.ToString("N1") + " / " + model.HealthMaximum.Value.ToString("N1");
+					if (!Mathf.Approximately(model.Health.Current.Value, model.Health.Maximum.Value)) label += "\nHealth: " + model.Health.Current.Value.ToString("N1") + " / " + model.Health.Maximum.Value.ToString("N1");
 					
 					label += "\nState: " + model.Context.CurrentState;
 

@@ -183,8 +183,8 @@ namespace Lunra.Hothouse.Models
 			model.ReproductionFailures.Value = 0;
 			model.ReproductionFailureLimit.Value = info.ReproductionFailureLimit;
 			model.SpreadDamage.Value = info.SpreadDamage;
-			model.HealthMaximum.Value = info.HealthMaximum;
-			model.Health.Value = info.HealthMaximum;
+			model.Health.Maximum.Value = info.HealthMaximum;
+			model.Health.Current.Value = info.HealthMaximum;
 			model.ItemDrops.Value = info.GenerateDrops();
 		}
 	}

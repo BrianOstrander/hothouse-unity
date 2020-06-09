@@ -106,7 +106,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				if (Agent.GetDesireDamage(SourceState.Desire, World, out var damage))
 				{
-					Agent.Health.Value = Mathf.Max(0f, Agent.Health.Value - damage);
+					Agent.Health.Current.Value = Mathf.Max(0f, Agent.Health.Current.Value - damage);
 				}
 				
 				Agent.Desire.Value = Desires.None;

@@ -3,11 +3,9 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IClearableModel : IPrefabModel, ILightSensitiveModel
+	public interface IClearableModel : IPrefabModel, ILightSensitiveModel, IHealthModel
 	{
 		#region Serialized
-		ListenerProperty<float> Health { get; }
-		ListenerProperty<float> HealthMaximum { get; }
 		ListenerProperty<Inventory> ItemDrops { get; }
 		ListenerProperty<float> MeleeRangeBonus { get; }
 		ListenerProperty<int> PromisedClearerCount { get; }
@@ -25,12 +23,6 @@ namespace Lunra.Hothouse.Models
 	public class ClearableModel : PrefabModel, IClearableModel
 	{
 		#region Serialized
-		[JsonProperty] float health = -1f;
-		[JsonIgnore] public ListenerProperty<float> Health { get; }
-		
-		[JsonProperty] float healthMaximum;
-		[JsonIgnore] public ListenerProperty<float> HealthMaximum { get; }
-		
 		[JsonProperty] Inventory itemDrops = Inventory.Empty;
 		[JsonIgnore] public ListenerProperty<Inventory> ItemDrops { get; }
 		
@@ -53,6 +45,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ListenerProperty<SelectionStates> SelectionState { get; }
 		
 		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
+		public HealthComponent Health { get; } = new HealthComponent();
 		#endregion
 		
 		#region NonSerialized
@@ -62,8 +55,6 @@ namespace Lunra.Hothouse.Models
 		
 		public ClearableModel()
 		{
-			Health = new ListenerProperty<float>(value => health = value, () => health);
-			HealthMaximum = new ListenerProperty<float>(value => healthMaximum = value, () => healthMaximum);
 			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
 			MeleeRangeBonus = new ListenerProperty<float>(value => meleeRangeBonus = value, () => meleeRangeBonus);
 			PromisedClearerCount = new ListenerProperty<int>(value => promisedClearerCount = value, () => promisedClearerCount);

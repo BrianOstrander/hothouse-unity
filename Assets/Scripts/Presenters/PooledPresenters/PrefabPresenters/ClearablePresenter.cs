@@ -18,7 +18,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
 				
 			Model.SelectionState.Changed += OnClearableSelectionState;
-			Model.Health.Changed += OnClearableHealth;
+			Model.Health.Current.Changed += OnClearableHealthCurrent;
 			
 			base.Bind();
 		}
@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
 			
 			Model.SelectionState.Changed -= OnClearableSelectionState;
-			Model.Health.Changed -= OnClearableHealth;
+			Model.Health.Current.Changed -= OnClearableHealthCurrent;
 			
 			base.UnBind();
 		}
@@ -57,7 +57,7 @@ namespace Lunra.Hothouse.Presenters
 			}
 		}
 
-		void OnClearableHealth(float health)
+		void OnClearableHealthCurrent(float health)
 		{
 			if (IsNotActive) return;
 			if (Mathf.Approximately(0f, health)) Model.PooledState.Value = PooledStates.InActive;
