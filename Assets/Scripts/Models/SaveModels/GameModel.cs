@@ -22,9 +22,9 @@ namespace Lunra.Hothouse.Models
 		public HintsModel Hints { get; } = new HintsModel();
 		
 		public GenericPrefabPoolModel<RoomPrefabModel> Rooms { get; } = new GenericPrefabPoolModel<RoomPrefabModel>();
-		public GenericPrefabPoolModel<DoorPrefabModel> Doors { get; } = new GenericPrefabPoolModel<DoorPrefabModel>();
 		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
 		
+		public DoorPoolModel Doors { get; } = new DoorPoolModel();
 		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
 		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
 		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();

@@ -65,9 +65,9 @@ namespace Lunra.Hothouse.Services
 			new GlobalInventoryCounterPresenter(Payload.Game);
 
 			Payload.Game.Rooms.Initialize(m => new RoomPrefabPresenter(Payload.Game, m));
-			Payload.Game.Doors.Initialize(m => new DoorPrefabPresenter(Payload.Game, m));
 			Payload.Game.Buildings.Initialize(Payload.Game);
 			
+			Payload.Game.Doors.Initialize(Payload.Game);
 			Payload.Game.Debris.Initialize(Payload.Game);
 			Payload.Game.Flora.Initialize(Payload.Game);
 			Payload.Game.ItemDrops.Initialize(m => new ItemDropPresenter(Payload.Game, m));

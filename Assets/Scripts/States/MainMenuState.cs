@@ -130,14 +130,10 @@ namespace Lunra.Hothouse.Services
 			}
 
 			game.Doors.Activate(
-				"default",
 				room0.Id.Value,
+				room1.Id.Value,
 				new Vector3(0f, -0.02f, -15.74f),
-				Quaternion.identity,
-				door => initializeDoor(
-					door,
-					new DoorPrefabModel.Connection(room0.Id.Value, room1.Id.Value)
-				)
+				Quaternion.identity
 			);
 	
 			// FLORA
