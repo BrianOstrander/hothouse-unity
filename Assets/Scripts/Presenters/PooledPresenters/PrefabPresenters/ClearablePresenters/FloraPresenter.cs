@@ -146,7 +146,7 @@ namespace Lunra.Hothouse.Presenters
 					nearestFloraOfDifferentSpecies.Health.Damage(Model.SpreadDamage.Value); 
 					increaseReproductionFailures = false;
 				}
-				else
+				else if (Model.AttacksBuildings.Value)
 				{
 					// TODO: Make a ray trace to see what's actually the building blocking us...
 					var room = Game.Rooms.FirstActive(Model.RoomTransform.Id.Value);

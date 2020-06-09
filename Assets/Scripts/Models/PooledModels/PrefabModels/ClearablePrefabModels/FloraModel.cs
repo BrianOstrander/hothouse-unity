@@ -27,6 +27,9 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] float spreadDamage;
 		[JsonIgnore] public ListenerProperty<float> SpreadDamage { get; }
+		
+		[JsonProperty] bool attacksBuildings;
+		[JsonIgnore] public ListenerProperty<bool> AttacksBuildings { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -43,6 +46,7 @@ namespace Lunra.Hothouse.Models
 			ReproductionFailures = new ListenerProperty<int>(value => reproductionFailures = value, () => reproductionFailures);
 			ReproductionFailureLimit = new ListenerProperty<int>(value => reproductionFailureLimit = value, () => reproductionFailureLimit);
 			SpreadDamage = new ListenerProperty<float>(value => spreadDamage = value, () => spreadDamage);
+			AttacksBuildings = new ListenerProperty<bool>(value => attacksBuildings = value, () => attacksBuildings);
 			
 			IsReproducing = new DerivedProperty<bool, int, int>(
 				value => isReproducing = value,

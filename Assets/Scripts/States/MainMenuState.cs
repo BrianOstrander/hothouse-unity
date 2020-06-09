@@ -328,11 +328,11 @@ namespace Lunra.Hothouse.Services
 			
 			game.DesireDamageMultiplier.Value = 0f;
 			
-			// game.Flora.ActivateAdult(
-			// 	FloraSpecies.Grass,
-			// 	room0.Id.Value,
-			// 	new Vector3(-2f, -0.8386866f, 6f)
-			// );
+			game.Flora.ActivateAdult(
+				FloraSpecies.Grass,
+				room0.Id.Value,
+				new Vector3(-2f, -0.8386866f, 6f)
+			);
 			
 			// var wagon = game.Buildings.AllActive.First(b => b.Type.Value == Buildings.StartingWagon);
 			//

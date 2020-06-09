@@ -17,6 +17,7 @@ namespace Lunra.Hothouse.Models
 			public int ReproductionFailureLimit;
 			public float HealthMaximum;
 			public float SpreadDamage;
+			public bool AttacksBuildings;
 			public Func<Inventory> GenerateDrops;
 			public string[] ValidPrefabIds;
 
@@ -27,6 +28,7 @@ namespace Lunra.Hothouse.Models
 				int reproductionFailureLimit,
 				float healthMaximum,
 				float spreadDamage,
+				bool attacksBuildings,
 				Func<Inventory> generateDrops,
 				string[] validPrefabIds
 			)
@@ -37,6 +39,7 @@ namespace Lunra.Hothouse.Models
 				ReproductionFailureLimit = reproductionFailureLimit;
 				HealthMaximum = healthMaximum;
 				SpreadDamage = spreadDamage;
+				AttacksBuildings = attacksBuildings;
 				GenerateDrops = generateDrops;
 				ValidPrefabIds = validPrefabIds;
 			}
@@ -73,6 +76,7 @@ namespace Lunra.Hothouse.Models
 					Defaults.ReproductionFailureLimit,
 					100f,
 					50f,
+					false,
 					Defaults.GenerateDrops(Inventory.Types.Stalks),
 					new []
 					{
@@ -90,6 +94,7 @@ namespace Lunra.Hothouse.Models
 					Defaults.ReproductionFailureLimit,
 					100f,
 					50f,
+					true,
 					Defaults.GenerateDrops(Inventory.Types.Stalks),
 					new []
 					{
@@ -106,6 +111,7 @@ namespace Lunra.Hothouse.Models
 					Defaults.ReproductionFailureLimit,
 					100f,
 					0f,
+					false,
 					Defaults.GenerateDrops(Inventory.Types.Rations),
 					new []
 					{
@@ -182,6 +188,7 @@ namespace Lunra.Hothouse.Models
 			model.ReproductionFailures.Value = 0;
 			model.ReproductionFailureLimit.Value = info.ReproductionFailureLimit;
 			model.SpreadDamage.Value = info.SpreadDamage;
+			model.AttacksBuildings.Value = info.AttacksBuildings;
 			model.Health.Maximum.Value = info.HealthMaximum;
 			model.Health.Current.Value = info.HealthMaximum;
 			model.ItemDrops.Value = info.GenerateDrops();
