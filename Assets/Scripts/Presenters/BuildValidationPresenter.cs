@@ -117,10 +117,12 @@ namespace Lunra.Hothouse.Presenters
 				return;
 			}
 
+			var room = game.Rooms.FirstActive(m => m.Id.Value == game.Toolbar.Building.Value.RoomTransform.Id.Value);
+			
 			bool IsFloraColliding(FloraModel flora)
 			{
 				// if (!game.Toolbar.Building.Value.BoundaryContains(flora.Transform.Position.Value)) return false;
-				
+				if (room.Id.Value != flora.RoomTransform.Id.Value && !room.AdjacentRoomIds.Value.ContainsKey(flora.RoomTransform.Id.Value)) return false;
 				return game.Toolbar.Building.Value.RadialBoundary.Contains(flora.Transform.Position.Value);
 			}
 			

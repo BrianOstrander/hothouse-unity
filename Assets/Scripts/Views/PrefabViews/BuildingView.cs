@@ -56,7 +56,7 @@ namespace Lunra.Hothouse.Views
 
 		public bool NavigationCollisionContains(Vector3 position)
 		{
-			return Vector3.Distance(RootTransform.position, position) < navigationCollidersRadius;
+			return Vector3.Distance(RootTransform.position.NewY(0f), position.NewY(0f)) < navigationCollidersRadius;
 		}
 
 		public float NavigationColliderRadius => navigationCollidersRadius;
@@ -107,6 +107,13 @@ namespace Lunra.Hothouse.Views
 				lightRange
 			);
 
+			Handles.color = Color.red;
+			Handles.DrawWireDisc(
+				transform.position,
+				Vector3.up,
+				navigationCollidersRadius
+			);
+			
 			var childLight = GetComponentInChildren<Light>();
 			if (childLight == null) return;
 			
@@ -115,13 +122,6 @@ namespace Lunra.Hothouse.Views
 				childLight.transform.position.NewY(transform.position.y),
 				Vector3.up,
 				childLight.range
-			);
-			
-			Handles.color = Color.red;
-			Handles.DrawWireDisc(
-				transform.position,
-				Vector3.up,
-				navigationCollidersRadius
 			);
 #endif
 		}

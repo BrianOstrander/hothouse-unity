@@ -328,7 +328,7 @@ namespace Lunra.Hothouse.Services
 			
 			game.Flora.ActivateAdult(
 				FloraSpecies.Grass,
-				room1.Id.Value,
+				room0.Id.Value,
 				new Vector3(-2f, -0.8386866f, 6f)
 			);
 			
