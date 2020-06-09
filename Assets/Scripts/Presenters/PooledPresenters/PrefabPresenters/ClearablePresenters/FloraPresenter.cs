@@ -146,6 +146,16 @@ namespace Lunra.Hothouse.Presenters
 					nearestFloraOfDifferentSpecies.Health.Value = Mathf.Max(0f, nearestFloraOfDifferentSpecies.Health.Value - Model.SpreadDamage.Value);
 					increaseReproductionFailures = false;
 				}
+				else
+				{
+					// var nearestBuilding = Game.Buildings.AllActive
+					// 	.Where(
+					// 		m =>
+					// 		{
+					// 			
+					// 		}
+					// 	)
+				}
 			}
 			
 			if (increaseReproductionFailures) Model.ReproductionFailures.Value++;

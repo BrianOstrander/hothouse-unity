@@ -337,7 +337,13 @@ namespace Lunra.Hothouse.Services
 			};
 			
 			// DEBUGGING
-
+			
+			game.Flora.ActivateAdult(
+				FloraSpecies.Grass,
+				room1.Id.Value,
+				new Vector3(-2f, -0.8386866f, 6f)
+			);
+			
 			// var wagon = game.Buildings.AllActive.First(b => b.Type.Value == Buildings.StartingWagon);
 			//
 			// wagon.Inventory.Value += (Inventory.Types.Rations, 50);

@@ -91,7 +91,24 @@ namespace Lunra.Hothouse.Presenters
 			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(
 				Model.RoomConnection.Value.RoomId0,
 				Model.RoomConnection.Value.RoomId1	
-			); 
+			);
+
+			void triggerRoomUpdate(string roomId)
+			{
+				var room = Game.Rooms.FirstOrDefaultActive(roomId);
+				var otherRoomId = roomId == Model.RoomConnection.Value.RoomId0 ? Model.RoomConnection.Value.RoomId1 : Model.RoomConnection.Value.RoomId0; 
+				
+				if (room == null)
+				{
+					Debug.LogError("Unable to find a roomId matching: "+roomId);
+					return;
+				}
+
+				room.UpdateConnection(otherRoomId, Model.IsOpen.Value);
+			}
+
+			triggerRoomUpdate(Model.RoomConnection.Value.RoomId0);
+			triggerRoomUpdate(Model.RoomConnection.Value.RoomId1);
 			
 			if (View.NotVisible) return;
 

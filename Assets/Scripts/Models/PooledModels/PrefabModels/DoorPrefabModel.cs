@@ -42,6 +42,8 @@ namespace Lunra.Hothouse.Models
             RoomConnection = new ListenerProperty<Connection>(value => roomConnection = value, () => roomConnection);
         }
 
+        public bool IsConnnection(string roomId) => RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId;
+        
         public bool IsOpenTo(string roomId) => IsOpen.Value && (RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId);
 
         public bool IsOpenBetween(string roomId0, string roomId1)

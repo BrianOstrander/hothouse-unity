@@ -341,6 +341,40 @@ namespace Lunra.Hothouse.Editor
 					);
 				}
 			}
+
+			if (SceneInspectionSettings.IsInspectingRooms.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Rooms.AllActive)
+				{
+					// var label = GetId(model);
+					var label = model.Id.Value;
+
+					label += "\nConnections";
+
+					foreach (var kv in model.AdjacentRoomIds.Value)
+					{
+						// label += "\n  " + Model.ShortenId(kv.Key) + " : ";
+						label += "\n  " + kv.Key + " : ";
+
+						if (kv.Value) label += "<color=green>Open";
+						else label += "<color=red>Closed";
+
+						label += "</color>";
+					}
+
+					var labelColor = "<color=cyan>";
+					
+					Handles.Label(
+						model.Transform.Position.Value + (Vector3.up * 6f),
+						StringExtensions.Wrap(
+							label,
+							labelColor,
+							"</color>"
+						),
+						labelStyle
+					);
+				}
+			}
 		}
 
 		static string GetInventory(

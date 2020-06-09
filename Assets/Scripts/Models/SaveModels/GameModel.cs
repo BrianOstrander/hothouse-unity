@@ -165,6 +165,28 @@ namespace Lunra.Hothouse.Models
 		}
 		public void CalculateCache() => cacheListener.Value = cacheListener.Value.Calculate(this);
 
+		public Dictionary<string, bool> GetAdjacentRooms(string roomId)
+		{
+			var result = new Dictionary<string, bool>();
+
+			var allRoomIds = Doors.AllActive
+				.Where(d => d.IsConnnection(roomId))
+				.SelectMany(d => new[] {d.RoomConnection.Value.RoomId0, d.RoomConnection.Value.RoomId1})
+				.Distinct();
+
+			foreach (var currentRoomId in allRoomIds)
+			{
+				if (currentRoomId == roomId) continue;
+				
+				result.Add(
+					currentRoomId,
+					Doors.AllActive.Any(d => d.IsOpenBetween(roomId, currentRoomId))
+				);
+			}
+
+			return result;
+		}
+		
 		public IEnumerable<RoomPrefabModel> GetOpenAdjacentRooms(params string[] roomIds)
 		{
 			var results = Rooms.AllActive.Where(r => roomIds.Contains(r.RoomTransform.Id.Value)).ToList();

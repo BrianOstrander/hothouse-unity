@@ -158,6 +158,16 @@ namespace Lunra.Core
 			).ToReadonlyDictionary();
 		}
 		
+		public static Dictionary<TKey, TElement> ToDictionary<TKey, TElement>(
+			this ReadOnlyDictionary<TKey, TElement> source
+		)
+		{
+			return source.ToDictionary(
+				kv => kv.Key,
+				kv => source[kv.Key]
+			);
+		}
+		
 		public static IEnumerable<T> ToEnumerable<T>(this T element)
 		{
 			yield return element;
