@@ -196,7 +196,7 @@ namespace Lunra.Hothouse.Presenters
 			roomId = null;
 			if (!HasCollision(out hit, LayerMasks.Floor)) return false;
 
-			var result = hit.transform.GetAncestor<RoomPrefabView>();
+			var result = hit.transform.GetAncestor<IRoomIdView>();
 
 			if (result == null) return false;
 

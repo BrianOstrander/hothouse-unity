@@ -334,6 +334,14 @@ namespace Lunra.Hothouse.Services
 			room1.IsExplored.Value = true;
 
 			game.Buildings.FirstActive(m => m.Type.Value == Buildings.StartingWagon).Inventory.Value += (Inventory.Types.Stalks, 99999);
+
+			foreach (var flora in game.Flora.AllActive) flora.PooledState.Value = PooledStates.InActive;
+			
+			game.Flora.ActivateAdult(
+				FloraSpecies.Grass,
+				room0.Id.Value,
+				new Vector3(0f, 0f, -17f)
+			);
 			
 			// var wagon = game.Buildings.AllActive.First(b => b.Type.Value == Buildings.StartingWagon);
 			//

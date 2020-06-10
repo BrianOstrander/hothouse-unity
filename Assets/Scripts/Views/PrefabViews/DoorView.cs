@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class DoorView : PrefabView, IEnterableView
+	public class DoorView : PrefabView, IEnterableView, IRoomIdView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
@@ -15,7 +15,8 @@ namespace Lunra.Hothouse.Views
 		
 		#region Bindings
 		public bool IsOpen { set => door.SetActive(!value); }
-		
+		public string RoomId { get; set; }
+
 		public event Action<bool> Highlight;
 		public event Action Click;
 		#endregion
@@ -29,6 +30,7 @@ namespace Lunra.Hothouse.Views
 			base.Reset();
 
 			IsOpen = false;
+			RoomId = null;
 			
 			Highlight = null;
 			Click = null;

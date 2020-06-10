@@ -27,7 +27,7 @@ namespace Lunra.Core
 			return transform.GetChildren<Transform>(condition);
 		}
 
-		public static List<T> GetChildren<T>(this Transform transform, Func<T, bool> condition = null) where T : Component
+		public static List<T> GetChildren<T>(this Transform transform, Func<T, bool> condition = null) where T : class
 		{
 			var result = new List<T>();
 
@@ -45,7 +45,7 @@ namespace Lunra.Core
 			return transform.GetDescendants<Transform>(condition);
 		}
 
-		public static List<T> GetDescendants<T>(this Transform transform, Func<T, bool> condition = null) where T : Component
+		public static List<T> GetDescendants<T>(this Transform transform, Func<T, bool> condition = null) where T : class
 		{
 			var result = new List<T>();
 			var children = transform.GetChildren();
@@ -64,7 +64,7 @@ namespace Lunra.Core
 			return transform.GetFirstDescendantOrDefault<Transform>(condition);
 		}
 
-		public static T GetFirstDescendantOrDefault<T>(this Transform transform, Func<T, bool> condition = null) where T : Component
+		public static T GetFirstDescendantOrDefault<T>(this Transform transform, Func<T, bool> condition = null) where T : class
 		{
 			var children = transform.GetChildren();
 			foreach (var child in children) 
@@ -81,7 +81,7 @@ namespace Lunra.Core
 		/// <summary>
 		/// I haven't tested this...
 		/// </summary>
-		public static T GetAncestor<T>(this Transform transform, Func<T, bool> condition = null) where T : Component
+		public static T GetAncestor<T>(this Transform transform, Func<T, bool> condition = null) where T : class
 		{
 			if (transform.parent == null) return null;
 			var parentComponent = transform.parent.GetComponent<T>();

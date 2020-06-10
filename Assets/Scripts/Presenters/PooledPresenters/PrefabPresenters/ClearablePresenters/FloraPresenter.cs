@@ -116,13 +116,27 @@ namespace Lunra.Hothouse.Presenters
 					{
 						if (Game.Dwellers.AllActive.None(d => Vector3.Distance(d.Transform.Position.Value, hit.position) < Model.ReproductionRadius.Value.Minimum))
 						{
-							increaseReproductionFailures = false;
-
-							Game.Flora.ActivateChild(
-								Model.Species.Value,
-								Model.RoomTransform.Id.Value, // TODO: Actually check what room we're spawning into!
-								hit.position
+							var hasFloorHit = Physics.Raycast(
+								new Ray(hit.position + Vector3.up, Vector3.down),
+								out var floorHit,
+								3f, // TODO: Don't hardcode this
+								LayerMasks.Floor
 							);
+
+							if (hasFloorHit)
+							{
+								var roomView = floorHit.transform.GetAncestor<IRoomIdView>();
+								if (roomView != null)
+								{
+									increaseReproductionFailures = false;
+
+									Game.Flora.ActivateChild(
+										Model.Species.Value,
+										roomView.RoomId,
+										hit.position
+									);		
+								}
+							}
 						}
 					}
 				}

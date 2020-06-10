@@ -294,6 +294,16 @@ namespace Lunra.Hothouse.Editor
 			{
 				foreach (var model in gameState.Payload.Game.Flora.AllActive)
 				{
+					var label = GetId(model);
+
+					label += "\nRoomId: " + model.RoomTransform.Id.Value;
+					
+					Handles.Label(
+						model.Transform.Position.Value + (Vector3.up * 1f),
+						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
+						labelStyle
+					);
+					
 					if (model.IsReproducing.Value) continue;
 					Handles.color = Color.red;
 					Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
