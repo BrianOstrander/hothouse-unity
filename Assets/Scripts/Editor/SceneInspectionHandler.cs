@@ -87,6 +87,11 @@ namespace Lunra.Hothouse.Editor
 					{
 						label += "\nState: " + model.BuildingState.Value;
 					}
+					
+					if (SceneInspectionSettings.IsInspectingRooms.Value)
+					{
+						label += "\nRoomId: " + model.RoomTransform.Id.Value;
+					}
 
 					if (model.Health.IsDamaged)
 					{

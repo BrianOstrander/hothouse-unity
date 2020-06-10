@@ -65,7 +65,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		#region ToolbarModel Events
-		void OnToolbarClearanceTask(Interaction.GenericVector3 interaction)
+		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)
 		{
 			if (IsNotActive) return;
 			if (Model.IsMarkedForClearance.Value) return;

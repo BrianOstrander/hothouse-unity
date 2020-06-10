@@ -35,6 +35,7 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnViewPrepare()
 		{
 			OnRoomIsExplored(Model.IsExplored.Value);
+			View.RoomId = Model.Id.Value;
 		}
 		#endregion
 

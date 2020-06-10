@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region InteractionModel Events
-		void OnInteractionFloorSelection(Interaction.GenericVector3 interaction)
+		void OnInteractionFloorSelection(Interaction.RoomVector3 interaction)
 		{
 			switch (toolbar.Task.Value)
 			{

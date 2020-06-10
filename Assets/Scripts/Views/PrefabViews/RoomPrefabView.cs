@@ -22,6 +22,8 @@ namespace Lunra.Hothouse.Views
 		}
 
 		public bool IsExplored { set => unexploredRoot.SetActive(!value); }
+		
+		public string RoomId { get; set; }
 		#endregion
 
 		public override void Reset()
@@ -30,6 +32,7 @@ namespace Lunra.Hothouse.Views
 
 			TimeOfDay = 0f;
 			IsExplored = false;
+			RoomId = null;
 		}
 	}
 

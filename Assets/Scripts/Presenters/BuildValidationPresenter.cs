@@ -54,12 +54,12 @@ namespace Lunra.Hothouse.Presenters
 			CloseView(true);
 		}
 
-		void UpdateValidation(Interaction.GenericVector3 interaction)
+		void UpdateValidation(Interaction.RoomVector3 interaction)
 		{
 			var navMeshHitSuccess = NavMesh.SamplePosition(
 				game.Toolbar.Building.Value.Transform.Position.Value,
-				out var navMeshHit,
-				0.1f, // TODO: Don't hardcode this value...
+				out _,
+				0.25f, // TODO: Don't hardcode this value...
 				NavMesh.AllAreas
 			);
 
@@ -71,6 +71,8 @@ namespace Lunra.Hothouse.Presenters
 				);
 				return;
 			}
+
+			game.Toolbar.Building.Value.RoomTransform.Id.Value = interaction.RoomId;
 			
 			lastLightValueCalculated = game.CalculateMaximumLighting(
 				(
@@ -150,7 +152,7 @@ namespace Lunra.Hothouse.Presenters
 			OnToolbarTask(game.Toolbar.Task.Value);
 		}
 		
-		void OnToolbarConstructionTask(Interaction.GenericVector3 interaction)
+		void OnToolbarConstructionTask(Interaction.RoomVector3 interaction)
 		{
 			switch (interaction.State)
 			{

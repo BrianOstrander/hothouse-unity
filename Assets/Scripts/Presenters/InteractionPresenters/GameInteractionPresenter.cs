@@ -1,5 +1,7 @@
 using System;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -130,17 +132,19 @@ namespace Lunra.Hothouse.Presenters
 			{
 				case Interaction.States.Idle:
 				case Interaction.States.Begin:
-					if (HasCollision(out var hit, LayerMasks.Floor))
+					if (HasRoomCollision(out var hit, out var hitRoomId))
 					{
-						Model.FloorSelection.Value = Interaction.GenericVector3.Point(
+						Model.FloorSelection.Value = Interaction.RoomVector3.Point(
 							display.State,
+							hitRoomId,
 							hit.point
 						);
 					}
 					else
 					{
-						Model.FloorSelection.Value = Interaction.GenericVector3.Point(
+						Model.FloorSelection.Value = Interaction.RoomVector3.Point(
 							Interaction.States.OutOfRange,
+							null,
 							Vector3.zero
 						);
 					}
@@ -183,5 +187,21 @@ namespace Lunra.Hothouse.Presenters
 			}
 		}
 		#endregion
+
+		protected bool HasRoomCollision(
+			out RaycastHit hit,
+			out string roomId
+		)
+		{
+			roomId = null;
+			if (!HasCollision(out hit, LayerMasks.Floor)) return false;
+
+			var result = hit.transform.GetAncestor<RoomPrefabView>();
+
+			if (result == null) return false;
+
+			roomId = result.RoomId;
+			return true;
+		}
 	}
 }

@@ -6,8 +6,8 @@ namespace Lunra.Hothouse.Models
 {
 	public class GameInteractionModel : InteractionModel
 	{
-		Interaction.GenericVector3 floorSelection = Interaction.GenericVector3.Default();
-		[JsonIgnore] public ListenerProperty<Interaction.GenericVector3> FloorSelection { get; }
+		Interaction.RoomVector3 floorSelection = Interaction.RoomVector3.Default();
+		[JsonIgnore] public ListenerProperty<Interaction.RoomVector3> FloorSelection { get; }
 		
 		Interaction.GenericVector3 cameraPan = Interaction.GenericVector3.Default();
 		[JsonIgnore] public ListenerProperty<Interaction.GenericVector3> CameraPan { get; }
@@ -17,7 +17,7 @@ namespace Lunra.Hothouse.Models
 
 		public GameInteractionModel()
 		{
-			FloorSelection = new ListenerProperty<Interaction.GenericVector3>(value => floorSelection = value, () => floorSelection);
+			FloorSelection = new ListenerProperty<Interaction.RoomVector3>(value => floorSelection = value, () => floorSelection);
 			CameraPan = new ListenerProperty<Interaction.GenericVector3>(value => cameraPan = value, () => cameraPan);
 			CameraOrbit = new ListenerProperty<Interaction.GenericFloat>(value => cameraOrbit = value, () => cameraOrbit);
 		}

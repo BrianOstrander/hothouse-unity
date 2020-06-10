@@ -207,5 +207,52 @@ namespace Lunra.Hothouse.Models
 				return nameof(Interaction) + "." + nameof(GenericVector3) + ": "+State+"\n"+Value;
 			}
 		}
+		
+		public struct RoomVector3
+		{
+			public static RoomVector3 Default() => new RoomVector3(States.Idle, null, new DeltaVector3());
+			public static RoomVector3 Point(States state, string roomId, Vector3 value) => new RoomVector3(state, roomId, DeltaVector3.New(value));
+			
+			public States State { get; }
+			public string RoomId { get; }
+			public DeltaVector3 Value { get; }
+
+			public RoomVector3(
+				States state,
+				string roomId,
+				DeltaVector3 value
+			)
+			{
+				State = state;
+				RoomId = roomId;
+				Value = value;
+			}
+
+			public RoomVector3 NewState(States state)
+			{
+				return new RoomVector3(
+					state,
+					RoomId,
+					Value
+				);
+			}
+
+			public RoomVector3 NewEnd(
+				States state,
+				Vector3 valueEnd
+			)
+			{
+				return new RoomVector3(
+					state,
+					RoomId,
+					Value.NewEnd(valueEnd)
+				);
+			}
+
+			public override string ToString()
+			{
+				return nameof(Interaction) + "." + nameof(RoomId) + ": " + State + "\n" + RoomId + " , " + Value;
+			}
+		}
 	}
 }

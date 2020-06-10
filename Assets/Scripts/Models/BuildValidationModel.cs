@@ -15,17 +15,17 @@ namespace Lunra.Hothouse.Models
 		
 		public struct Validation
 		{
-			public static Validation None() => new Validation(ValidationStates.None, Models.Interaction.GenericVector3.Default());
-			public static Validation Valid(Interaction.GenericVector3 interaction, string message = null) => new Validation(ValidationStates.Valid, interaction, message);
-			public static Validation Invalid(Interaction.GenericVector3 interaction, string message = null) => new Validation(ValidationStates.Invalid, interaction, message);
+			public static Validation None() => new Validation(ValidationStates.None, Models.Interaction.RoomVector3.Default());
+			public static Validation Valid(Interaction.RoomVector3 interaction, string message = null) => new Validation(ValidationStates.Valid, interaction, message);
+			public static Validation Invalid(Interaction.RoomVector3 interaction, string message = null) => new Validation(ValidationStates.Invalid, interaction, message);
 			
 			public readonly ValidationStates State;
-			public readonly Interaction.GenericVector3 Interaction;
+			public readonly Interaction.RoomVector3 Interaction;
 			public readonly string Message;
 
 			Validation(
 				ValidationStates state,
-				Interaction.GenericVector3 interaction,
+				Interaction.RoomVector3 interaction,
 				string message = null
 			)
 			{

@@ -162,11 +162,11 @@ namespace Lunra.Hothouse.Services
 				new Vector3(-6f, 0f, -5f)
 			);
 
-			game.Flora.ActivateAdult(
-				FloraSpecies.Shroom,
-				room1.Id.Value,
-				new Vector3(0f, -0.02f, -20.74f)
-			);
+			// game.Flora.ActivateAdult(
+			// 	FloraSpecies.Shroom,
+			// 	room1.Id.Value,
+			// 	new Vector3(0f, -0.02f, -20.74f)
+			// );
 
 			// DEBRIS
 			
@@ -329,12 +329,11 @@ namespace Lunra.Hothouse.Services
 			// DEBUGGING
 			
 			game.DesireDamageMultiplier.Value = 0f;
-			
-			game.Flora.ActivateAdult(
-				FloraSpecies.Grass,
-				room0.Id.Value,
-				new Vector3(-2f, -0.8386866f, 6f)
-			);
+
+			game.Doors.FirstActive().IsOpen.Value = true;
+			room1.IsExplored.Value = true;
+
+			game.Buildings.FirstActive(m => m.Type.Value == Buildings.StartingWagon).Inventory.Value += (Inventory.Types.Stalks, 99999);
 			
 			// var wagon = game.Buildings.AllActive.First(b => b.Type.Value == Buildings.StartingWagon);
 			//

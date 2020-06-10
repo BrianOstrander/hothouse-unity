@@ -169,7 +169,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		#region InteractionModel Events
-		void OnToolbarConstruction(Interaction.GenericVector3 interaction)
+		void OnToolbarConstruction(Interaction.RoomVector3 interaction)
 		{
 			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Placing) return;
