@@ -39,9 +39,6 @@ namespace Lunra.Hothouse.Views
 			RoomId = null;
 		}
 
-		[ContextMenu("Link Door Anchors")]
-		void LinkDoorAnchors() => doorAnchors = transform.GetDescendants(c => c.name == "DoorAnchor").ToArray();
-
 		void OnDrawGizmosSelected()
 		{
 			if (doorAnchors == null) return;
@@ -52,6 +49,13 @@ namespace Lunra.Hothouse.Views
 				Gizmos.DrawRay(doorAnchor.position, doorAnchor.forward);
 			}
 		}
+
+#if UNITY_EDITOR
+		public void CalculateCachedData()
+		{
+			doorAnchors = transform.GetDescendants(c => c.name == "DoorAnchor").ToArray();	
+		}
+#endif
 	}
 
 }

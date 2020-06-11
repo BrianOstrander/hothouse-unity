@@ -15,22 +15,6 @@ namespace Lunra.Editor.Core
 		static class Constants
 		{
 			public const float LabelWidth = 145f;
-			
-			static GUIStyle richTextStyle;
-
-			public static GUIStyle RichTextStyle
-			{
-				get
-				{
-					if (richTextStyle == null)
-					{
-						richTextStyle = new GUIStyle(EditorStyles.label);
-						richTextStyle.richText = true;
-					}
-
-					return richTextStyle;
-				}
-			}
 		}
 
 		public static T HelpfulEnumPopupValidation<T>(
@@ -511,7 +495,7 @@ namespace Lunra.Editor.Core
 			return new Vector2(x, y);
 		}
 		
-		public static void RichTextLabel(string text) => GUILayout.Label(text, Constants.RichTextStyle);
+		public static void RichTextLabel(string text) => GUILayout.Label(text, EditorStylesExtensions.LabelRichText);
 
 		#region Shared
 		static bool EnumsEqual<T>(
