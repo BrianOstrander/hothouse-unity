@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-    public class RoomPrefabModel : PrefabModel
+    public class RoomModel : PrefabModel
     {
         #region Serialized
         [JsonProperty] bool isExplored;
@@ -22,7 +22,7 @@ namespace Lunra.Hothouse.Models
         #endregion
         
 
-        public RoomPrefabModel()
+        public RoomModel()
         {
             IsExplored = new ListenerProperty<bool>(value => isExplored = value, () => isExplored);
             

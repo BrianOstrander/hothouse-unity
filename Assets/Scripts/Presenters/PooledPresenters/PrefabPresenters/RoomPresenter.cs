@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class RoomPrefabPresenter : PrefabPresenter<RoomPrefabModel, RoomPrefabView>
+	public class RoomPresenter : PrefabPresenter<RoomModel, RoomView>
 	{
-		public RoomPrefabPresenter(GameModel game, RoomPrefabModel model) : base(game, model) { }
+		public RoomPresenter(GameModel game, RoomModel model) : base(game, model) { }
 
 		protected override void Bind()
 		{

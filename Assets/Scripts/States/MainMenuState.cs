@@ -100,7 +100,7 @@ namespace Lunra.Hothouse.Services
 				Vector3.up
 			);
 
-			void initializeRoom(RoomPrefabModel room)
+			void initializeRoom(RoomModel room)
 			{
 				room.Id.Value = room.RoomTransform.Id.Value;
 			}

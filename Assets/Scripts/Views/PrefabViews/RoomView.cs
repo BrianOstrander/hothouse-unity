@@ -2,7 +2,7 @@
 
 namespace Lunra.Hothouse.Views
 {
-	public class RoomPrefabView : PrefabView, IRoomIdView
+	public class RoomView : PrefabView, IRoomIdView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null

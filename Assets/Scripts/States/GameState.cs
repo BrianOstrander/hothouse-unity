@@ -64,7 +64,7 @@ namespace Lunra.Hothouse.Services
 			new BuildValidationPresenter(Payload.Game);
 			new GlobalInventoryCounterPresenter(Payload.Game);
 
-			Payload.Game.Rooms.Initialize(m => new RoomPrefabPresenter(Payload.Game, m));
+			Payload.Game.Rooms.Initialize(m => new RoomPresenter(Payload.Game, m));
 			Payload.Game.Buildings.Initialize(Payload.Game);
 			
 			Payload.Game.Doors.Initialize(Payload.Game);
@@ -197,7 +197,7 @@ namespace Lunra.Hothouse.Services
 			// been set stale, assume it's because a light was placed in there and calculate all sensitive objects in
 			// and around that room.
 			
-			Dictionary<string, List<RoomPrefabModel>> roomMap;
+			Dictionary<string, List<RoomModel>> roomMap;
 			IEnumerable<ILightSensitiveModel> lightSensitives;
 			
 			if (Payload.Game.LastLightUpdate.Value.SensitiveIds.Any())

@@ -21,7 +21,7 @@ namespace Lunra.Hothouse.Models
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		public HintsModel Hints { get; } = new HintsModel();
 		
-		public GenericPrefabPoolModel<RoomPrefabModel> Rooms { get; } = new GenericPrefabPoolModel<RoomPrefabModel>();
+		public GenericPrefabPoolModel<RoomModel> Rooms { get; } = new GenericPrefabPoolModel<RoomModel>();
 		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
 		
 		public DoorPoolModel Doors { get; } = new DoorPoolModel();
@@ -187,7 +187,7 @@ namespace Lunra.Hothouse.Models
 			return result;
 		}
 		
-		public IEnumerable<RoomPrefabModel> GetOpenAdjacentRooms(params string[] roomIds)
+		public IEnumerable<RoomModel> GetOpenAdjacentRooms(params string[] roomIds)
 		{
 			var results = Rooms.AllActive.Where(r => roomIds.Contains(r.RoomTransform.Id.Value)).ToList();
 
@@ -206,9 +206,9 @@ namespace Lunra.Hothouse.Models
 			return results;
 		}
 
-		public Dictionary<string, List<RoomPrefabModel>> GetOpenAdjacentRoomsMap(params string[] roomIds)
+		public Dictionary<string, List<RoomModel>> GetOpenAdjacentRoomsMap(params string[] roomIds)
 		{
-			var result = new Dictionary<string, List<RoomPrefabModel>>();
+			var result = new Dictionary<string, List<RoomModel>>();
 			foreach (var roomId in roomIds)
 			{
 				result.Add(
