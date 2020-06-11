@@ -78,9 +78,6 @@ namespace Lunra.Core
 			return null;
 		}
 
-		/// <summary>
-		/// I haven't tested this...
-		/// </summary>
 		public static T GetAncestor<T>(this Transform transform, Func<T, bool> condition = null) where T : class
 		{
 			if (transform.parent == null) return null;
