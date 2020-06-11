@@ -15,7 +15,7 @@ namespace Lunra.StyxMvp
 		Heartbeat heartbeat;
 		
 		List<IView> pool = new List<IView>();
-		List<GameObject> defaultViews = new List<GameObject>();
+		List<GameObject> prefabs = new List<GameObject>();
 		List<IView> views = new List<IView>();
 
 		public ViewMediator(
@@ -40,9 +40,9 @@ namespace Lunra.StyxMvp
 		{
 			pool = new List<IView>();
 			
-			defaultViews.AddRange(Resources.LoadAll<GameObject>("StyxDefaultViews"));
+			prefabs.AddRange(Resources.LoadAll<GameObject>("StyxDefaultViews"));
 
-			foreach (var prefab in defaultViews)
+			foreach (var prefab in prefabs)
 			{
 				var prefabView = prefab.GetComponent<IView>();
 				if (prefabView == null)
@@ -52,7 +52,7 @@ namespace Lunra.StyxMvp
 				}
 				for (var i = 0; i < Mathf.Max(prefabView.PoolSize, 1); i++)
 				{
-					Pool(Create(prefab));
+					Pool(CreateFromPrefab(prefab));
 				}
 			}
 			heartbeat.Update += Update;
@@ -114,40 +114,18 @@ namespace Lunra.StyxMvp
 				pool.Remove(existing);
 				return existing;
 			}
-			return Create(type, predicate);
+			return CreateFromViewType(type, predicate);
 		}
-
-		IView Create(Type type, Func<IView, bool> predicate = null)
+		
+		IView CreateFromViewType(Type type, Func<IView, bool> predicate = null)
 		{
-			GameObject prefab = null;
-			foreach (var view in defaultViews)
-			{
-				var component = view.GetComponent(type);
-				if (component == null) continue;
-				if (predicate != null)
-				{
-					try
-					{
-						if (!predicate(component as IView)) continue;
-					}
-					catch (Exception e)
-					{
-						Debug.LogException(e);
-						continue;
-					}
-				}
-				prefab = view;
-				break;
-			}
-			if (prefab == null)
-			{
-				Debug.LogError("No view prefab with a root component implementing " + type.FullName);
-				return null;
-			}
-			return Create(prefab);
+			if (GetPrefab(type, out var prefab, out _, predicate)) return CreateFromPrefab(prefab);
+			
+			Debug.LogError("No view prefab with a root component implementing " + type.FullName);
+			return null;
 		}
 
-		IView Create(GameObject prefab)
+		IView CreateFromPrefab(GameObject prefab)
 		{
 			var spawned = Object.Instantiate(prefab).GetComponent<IView>();
 			spawned.RootGameObject.SetActive(false);
@@ -156,6 +134,77 @@ namespace Lunra.StyxMvp
 			return spawned;
 		}
 
+		public (GameObject Prefab, V View)[] GetPrefabs<V>(Func<IView, bool> predicate = null)
+			where V : class, IView
+		{
+			var result = new List<(GameObject Prefab, V View)>();
+
+			foreach (var currentPrefab in prefabs)
+			{
+				if (!IsPrefabMatch(typeof(V), currentPrefab, out var view, predicate)) continue;
+				
+				result.Add(
+					(
+						currentPrefab,
+						view as V
+					)
+				);
+			}
+
+			return result.ToArray();
+		}
+		
+		public bool GetPrefab(
+			Type type,
+			out GameObject prefab,
+			out IView view,
+			Func<IView, bool> predicate = null
+		)
+		{
+			prefab = null;
+			view = null;
+			
+			foreach (var currentPrefab in prefabs)
+			{
+				if (!IsPrefabMatch(type, currentPrefab, out view, predicate)) continue;
+
+				prefab = currentPrefab;
+				return true;
+			}
+
+			return false;
+		}
+		
+		bool IsPrefabMatch(
+			Type type,
+			GameObject prefab,
+			out IView view,
+			Func<IView, bool> predicate = null
+		)
+		{
+			view = null;
+			
+			var component = prefab.GetComponent(type);
+			if (component == null) return false;
+
+			view = component as IView;
+				
+			if (predicate != null)
+			{
+				try
+				{
+					if (!predicate(view)) return false;
+				}
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+					return false;
+				}
+			}
+
+			return true;
+		}
+		
 		/// <summary>
 		/// Return a view to the pool of views available for assignment to new presenters.
 		/// </summary>

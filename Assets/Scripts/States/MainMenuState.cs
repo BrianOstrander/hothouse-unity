@@ -100,6 +100,9 @@ namespace Lunra.Hothouse.Services
 				Vector3.up
 			);
 
+			game.RoomResolver.RoomCountMinimum.Value = 4;
+			game.RoomResolver.RoomCountMaximum.Value = 8;
+			
 			void initializeRoom(RoomModel room)
 			{
 				room.Id.Value = room.RoomTransform.Id.Value;

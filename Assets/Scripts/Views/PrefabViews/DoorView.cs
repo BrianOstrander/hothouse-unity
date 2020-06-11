@@ -24,6 +24,7 @@ namespace Lunra.Hothouse.Views
 		
 		#region Reverse Bindings
 		public Vector3[] Entrances => entrances.Select(e => e.position).ToArray();
+		public (Vector3 Position, Vector3 Forward)[] DoorAnchors => doorAnchors.Select(d => (d.position, d.forward)).ToArray();
 		#endregion
 
 		public override void Reset()

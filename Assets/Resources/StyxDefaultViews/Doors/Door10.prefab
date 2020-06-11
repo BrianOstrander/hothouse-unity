@@ -609,8 +609,8 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: default
-  door: {fileID: 0}
+  prefabId: door10
+  door: {fileID: 8273133925146169382}
   entrances:
   - {fileID: 9011563900552223916}
   - {fileID: 1086851148692920424}

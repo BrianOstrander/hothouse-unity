@@ -419,7 +419,7 @@ namespace Lunra.StyxMvp.Services
 			string synchronizedId
 		)
 		{
-			if (action == null) throw new ArgumentNullException(nameof(action));
+			if (action == null) throw new ArgumentNullException(nameof(action), "Cannot provide a null action");
 			if (state == null) throw new ArgumentException("Cannot bind to null state");
 			if (stateEvent == Events.Unknown) throw new ArgumentException("Cannot bind to Events.Unknown");
 

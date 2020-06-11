@@ -30,6 +30,17 @@ namespace Lunra.Hothouse.Services
 		{
 			App.S.PushBlocking(OnBeginLoadScenes);
 			App.S.PushBlocking(OnBeginInstantiatePresenters);
+			
+			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
+			
+			// Add an if statement here to see if we actually need to generate...
+			App.S.PushBlocking(done => Payload.Game.RoomResolver.Generate(done));
+			
+			App.S.PushBlocking(done => {});
+			// App.S.PushBreak();
+			return;
+			
+			App.S.PushBlocking(OnBeginPopulatePresenters);
 			App.S.PushBlocking(OnBeginInitializeLighting);
 			App.S.PushBlocking(
 				OnBeginInitializeNavigationMesh,
@@ -64,6 +75,13 @@ namespace Lunra.Hothouse.Services
 			new BuildValidationPresenter(Payload.Game);
 			new GlobalInventoryCounterPresenter(Payload.Game);
 
+			new RoomResolverPresenter(Payload.Game);
+			
+			done();
+		}
+
+		void OnBeginPopulatePresenters(Action done)
+		{
 			Payload.Game.Rooms.Initialize(m => new RoomPresenter(Payload.Game, m));
 			Payload.Game.Buildings.Initialize(Payload.Game);
 			
@@ -73,8 +91,7 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.ItemDrops.Initialize(m => new ItemDropPresenter(Payload.Game, m));
 			Payload.Game.Dwellers.Initialize(Payload.Game);
 			Payload.Game.ObligationIndicators.Initialize(Payload.Game);
-			
-			
+
 			done();
 		}
 

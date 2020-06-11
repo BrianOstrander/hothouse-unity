@@ -30,6 +30,7 @@ namespace Lunra.Hothouse.Models
 		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
 		public FloraPoolModel Flora { get; } = new FloraPoolModel();
 		public ObligationIndicatorPoolModel ObligationIndicators { get; } = new ObligationIndicatorPoolModel();
+		public RoomResolverModel RoomResolver { get; } = new RoomResolverModel();
 
 		[JsonProperty] float desireDamageMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> DesireDamageMultiplier { get; }
