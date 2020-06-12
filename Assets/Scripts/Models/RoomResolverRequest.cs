@@ -8,19 +8,16 @@ namespace Lunra.Hothouse.Models
 		public int Seed;
 		public int RoomCountMinimum;
 		public int RoomCountMaximum;
-		public float Timeout;
 
 		public RoomResolverRequest(
 			int seed,
 			int roomCountMinimum,
-			int roomCountMaximum,
-			float timeout
+			int roomCountMaximum
 		)
 		{
 			Seed = seed;
 			RoomCountMinimum = roomCountMinimum;
 			RoomCountMaximum = roomCountMaximum;
-			Timeout = timeout;
 		}
 	}
 }

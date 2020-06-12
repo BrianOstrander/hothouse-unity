@@ -103,6 +103,7 @@ namespace Lunra.Hothouse.Services
 			game.RoomResolver.RoomCountMinimum.Value = 4;
 			game.RoomResolver.RoomCountMaximum.Value = 8;
 			
+			/*
 			void initializeRoom(RoomModel room)
 			{
 				room.Id.Value = room.RoomTransform.Id.Value;
@@ -219,6 +220,8 @@ namespace Lunra.Hothouse.Services
 				BuildingStates.Operating
 			);
 			
+			*/
+			
 			// HINTS			
 
 			game.Hints.HintCollections.Value = new[]
@@ -329,48 +332,6 @@ namespace Lunra.Hothouse.Services
 				),
 			};
 			
-			// DEBUGGING
-			
-			game.DesireDamageMultiplier.Value = 0f;
-
-			game.Doors.FirstActive().IsOpen.Value = true;
-			room1.IsExplored.Value = true;
-
-			game.Buildings.FirstActive(m => m.Type.Value == Buildings.StartingWagon).Inventory.Value += (Inventory.Types.Stalks, 99999);
-
-			foreach (var flora in game.Flora.AllActive) flora.PooledState.Value = PooledStates.InActive;
-			
-			game.Flora.ActivateAdult(
-				FloraSpecies.Grass,
-				room0.Id.Value,
-				new Vector3(0f, 0f, -17f)
-			);
-			
-			// var wagon = game.Buildings.AllActive.First(b => b.Type.Value == Buildings.StartingWagon);
-			//
-			// wagon.Inventory.Value += (Inventory.Types.Rations, 50);
-			
-			// game.Buildings.Activate(
-			// 	Buildings.Bonfire,
-			// 	room0.Id.Value,
-			// 	new Vector3(-2.68479f, 0.000807253062f, -5.512804f),
-			// 	Quaternion.identity,
-			// 	BuildingStates.Operating
-			// );
-
-			// var door0 = game.Doors.AllActive.First();
-			//
-			// game.ObligationIndicators.Register(
-			// 	Obligation.New(
-			// 		ObligationCategories.Door.Open,
-			// 		0,
-			// 		ObligationCategories.GetJobs(Jobs.Construction),
-			// 		Obligation.ConcentrationRequirements.Instant,
-			// 		Interval.Zero()
-			// 	),
-			// 	door0
-			// );
-
 			done(Result<GameModel>.Success(game));
 		}
 	}
