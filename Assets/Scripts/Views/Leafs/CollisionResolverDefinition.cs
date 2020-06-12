@@ -32,6 +32,7 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
+		public string PrefabId;
 		public string Id;
 		public Types Type;
 		public int RootDistance;
@@ -95,6 +96,7 @@ namespace Lunra.Hothouse.Views
 				rigidbody.constraints = RigidbodyConstraints.FreezeAll;
 			}
 
+			PrefabId = prefabId;
 			Type = type;
 			Size = new Vector2(
 				colliderMaximumX - colliderMinimumX,

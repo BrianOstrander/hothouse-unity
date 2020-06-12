@@ -1,6 +1,7 @@
 using System;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 
@@ -57,7 +58,22 @@ namespace Lunra.Hothouse.Presenters
 		
 		void OnRoomResolverGenerate(Action done)
 		{
-			View.Generate(done);
+			var request = new RoomResolverRequest(
+				DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
+				10,
+				20,
+				10f
+			);
+			
+			View.Generate(
+				request,
+				OnRoomResolverGenerateDone
+			);
+		}
+
+		void OnRoomResolverGenerateDone(RoomResolverResult result)
+		{
+			
 		}
 		#endregion
 	}

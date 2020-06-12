@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using UnityEngine;
 
@@ -11,9 +12,13 @@ namespace Lunra.Hothouse.Views
 {
 	public class RoomResolverView : View
 	{
-		struct GenerationData
+		struct WorkspaceCache
 		{
-			public int RoomCountMaximum;
+			public RoomResolverRequest Request;
+
+			public Demon Generator;
+			
+			public int RoomCountTarget;
 
 			public List<CollisionResolverDefinition> Rooms;
 			public List<CollisionResolverDefinition> Doors;
@@ -22,9 +27,13 @@ namespace Lunra.Hothouse.Views
 
 			public int RoomCount => Rooms.Count;
 			
-			public GenerationData(int roomCountMaximum)
+			public WorkspaceCache(RoomResolverRequest request)
 			{
-				RoomCountMaximum = roomCountMaximum;
+				Request = request;
+				
+				Generator = new Demon(request.Seed);
+				
+				RoomCountTarget = Generator.GetNextInteger(request.RoomCountMinimum, request.RoomCountMaximum);
 				
 				Rooms = new List<CollisionResolverDefinition>();
 				Doors = new List<CollisionResolverDefinition>();
@@ -40,10 +49,7 @@ namespace Lunra.Hothouse.Views
 		[SerializeField] Transform roomPrefabsRoot;
 		[SerializeField] Transform doorPrefabsRoot;
 		[SerializeField] Transform workspaceRoot;
-		//
-		// [SerializeField] string prefabId;
-		// public string PrefabId => prefabId;
-		//
+		
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
@@ -111,10 +117,12 @@ namespace Lunra.Hothouse.Views
 		}
 		#endregion
 
+		#region Local
 		List<CollisionResolverDefinition> roomDefinitions = new List<CollisionResolverDefinition>();
 		List<CollisionResolverDefinition> doorDefinitions = new List<CollisionResolverDefinition>();
 
-		GenerationData generationData;
+		WorkspaceCache workspaceCache;
+		#endregion
 		
 		public override void Reset()
 		{
@@ -138,14 +146,14 @@ namespace Lunra.Hothouse.Views
 			bool zeroSiblingIndex = false
 		)
 		{
-			var prefab = predicate == null ? pool.Random() : pool.Where(predicate).Random();
+			var prefab = predicate == null ? workspaceCache.Generator.GetNextFrom(pool) : workspaceCache.Generator.GetNextFrom(pool.Where(predicate));
 			
 			if (prefab == null)
 			{
 				Debug.LogError("No valid definition found");
 				return null;
 			}
-
+			
 			var result = workspaceRoot.gameObject.InstantiateChild(prefab);
 			result.Id = Guid.NewGuid().ToString();
 
@@ -157,22 +165,37 @@ namespace Lunra.Hothouse.Views
 		[ContextMenu("ReGenerate")]
 		void ReGenerate()
 		{
-			Generate(
-				() =>
-				{
-					Debug.Log("Done: " + generationData.RoomCount);
-					App.Heartbeat.Wait(ReGenerate, 5f);
-				}
-			);
+			Debug.LogWarning("Disabled");
+			// Generate(
+			// 	new RoomResolverRequest(
+			// 		1,
+			// 		10,
+			// 		20,
+			// 		10f
+			// 	),
+			// 	result =>
+			// 	{
+			// 		Debug.Log("Done:" + spawnHistory);
+			// 		App.Heartbeat.Wait(ReGenerate, 5f);
+			// 	}
+			// );
 		}
 		
-		public void Generate(Action done)
+		public void Generate(
+			RoomResolverRequest request,
+			Action<RoomResolverResult> done
+		)
 		{
 			workspaceRoot.ClearChildren();
+
+			workspaceCache = new WorkspaceCache(request);
 			
-			generationData = new GenerationData(1024);
-			
-			StartCoroutine(OnGenerate(done));
+			StartCoroutine(OnGenerate(() => OnGenerateDone(done)));
+		}
+
+		void OnGenerateDone(Action<RoomResolverResult> done)
+		{
+			done(default);
 		}
 		
 		IEnumerator OnGenerate(Action done)
@@ -182,21 +205,14 @@ namespace Lunra.Hothouse.Views
 				r => 4 <= r.DoorAnchors.Length
 			);
 
-			generationData.Rooms.Add(root);
-			generationData.AvailableDoors.AddRange(AppendDoors(root));
+			workspaceCache.Rooms.Add(root);
+			workspaceCache.AvailableDoors.AddRange(AppendDoors(root));
 
-			while (generationData.AvailableDoors.Any() && generationData.RoomCount < generationData.RoomCountMaximum)
+			while (workspaceCache.AvailableDoors.Any() && workspaceCache.RoomCount < workspaceCache.RoomCountTarget)
 			{
-				var door = generationData.AvailableDoors.Random();
+				var door = workspaceCache.Generator.GetNextFrom(workspaceCache.AvailableDoors);
 				yield return StartCoroutine(OnGenerate(door));
 			}
-
-			// var expectedDoorCount = generationData.Rooms.Sum(r => r.DoorAnchors.Length);
-			//
-			// if (expectedDoorCount != generationData.Doors.Count)
-			// {
-			// 	Debug.LogError("Expected " + expectedDoorCount + " doors, but generated " + generationData.Doors.Count);
-			// }
 			
 			done();
 		}
@@ -226,6 +242,7 @@ namespace Lunra.Hothouse.Views
 					for (var c = 0; c < possibleRoom.Colliders.Length * 2; c++)
 					{
 						yield return null;
+						if (possibleRoom.HasCollisions()) break;
 					}
 
 					if (!possibleRoom.HasCollisions())
@@ -240,18 +257,18 @@ namespace Lunra.Hothouse.Views
 
 				if (!possibleRoom.HasCollisions())
 				{
-					generationData.AvailableDoors.Remove(originDoor);
-					generationData.Doors.Add(originDoor);
+					workspaceCache.AvailableDoors.Remove(originDoor);
+					workspaceCache.Doors.Add(originDoor);
 					
 					originDoor.DoorAnchors[1].Id = possibleRoom.Id;
 
-					generationData.AvailableDoors.AddRange(
+					workspaceCache.AvailableDoors.AddRange(
 						AppendDoors(possibleRoom)	
 					);
 
 					yield return null;
 					
-					generationData.Rooms.Add(possibleRoom);
+					workspaceCache.Rooms.Add(possibleRoom);
 
 					generationSuccess = true;
 					break;
@@ -262,8 +279,8 @@ namespace Lunra.Hothouse.Views
 
 			if (!generationSuccess)
 			{
-				generationData.AvailableDoors.Remove(originDoor);
-				generationData.Doors.Add(originDoor);
+				workspaceCache.AvailableDoors.Remove(originDoor);
+				workspaceCache.Doors.Add(originDoor);
 			}
 		}
 
