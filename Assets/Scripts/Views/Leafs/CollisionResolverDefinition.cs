@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using UnityEngine;
 
@@ -8,6 +9,13 @@ namespace Lunra.Hothouse.Views
 {
 	public class CollisionResolverDefinition : MonoBehaviour
 	{
+		public enum Types
+		{
+			Unknown = 0,
+			Door = 10,
+			Room = 20
+		}
+
 		[Serializable]
 		public struct Connection
 		{
@@ -25,15 +33,17 @@ namespace Lunra.Hothouse.Views
 		}
 
 		public string Id;
+		public Types Type;
 		public int RootDistance;
 		
 		public Vector2 Size;
 		public Collider[] Colliders;
 		public Connection[] DoorAnchors;
-
+		
 		public int CollisionCount;
 		
 		public void Define(
+			Types type,
 			string prefabId,
 			RoomCollider[] colliders,
 			(Vector3 Position, Vector3 Forward)[] doorAnchors
@@ -85,6 +95,7 @@ namespace Lunra.Hothouse.Views
 				rigidbody.constraints = RigidbodyConstraints.FreezeAll;
 			}
 
+			Type = type;
 			Size = new Vector2(
 				colliderMaximumX - colliderMinimumX,
 				colliderMaximumZ - colliderMinimumZ
@@ -113,14 +124,21 @@ namespace Lunra.Hothouse.Views
 			Connection otherDoorAnchor
 		)
 		{
-			
 			transform.Rotate(Vector3.up, 180f - Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward));
 
+			if (!Mathf.Approximately(180f, Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)))
+			{
+				transform.Rotate(
+					Vector3.up,
+					Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)
+				);
+			}
+			
 			if (Mathf.Approximately(1f, Vector3.Dot(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)))
 			{
 				transform.Rotate(Vector3.up, 180f);
 			}
-
+			
 			transform.position = otherDoorAnchor.Anchor.position + (transform.position - doorAnchor.Anchor.position);
 		}
 
@@ -134,8 +152,11 @@ namespace Lunra.Hothouse.Views
 		
 		void OnDrawGizmosSelected()
 		{
+			if (Type != Types.Door) return;
 			if (DoorAnchors == null) return;
+			if (DoorAnchors.Any(d => string.IsNullOrEmpty(d.Id))) return;
 			
+			/*
 			Gizmos.color = Color.blue;
 			foreach (var doorAnchor in DoorAnchors)
 			{
@@ -143,6 +164,14 @@ namespace Lunra.Hothouse.Views
 				
 				Gizmos.DrawWireSphere(doorAnchor.Anchor.position, 0.1f);
 				Gizmos.DrawLine(doorAnchor.Anchor.position, doorAnchor.Anchor.position + doorAnchor.Anchor.forward);
+			}
+			*/
+			
+			foreach (var doorAnchor in DoorAnchors)
+			{
+				Gizmos.color = string.IsNullOrEmpty(doorAnchor.Id) ? Color.blue : Color.green;
+				
+				Gizmos.DrawLine(doorAnchor.Anchor.position, doorAnchor.Anchor.position - doorAnchor.Anchor.forward);
 			}
 		}
 	}

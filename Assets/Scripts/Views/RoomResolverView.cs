@@ -59,6 +59,7 @@ namespace Lunra.Hothouse.Views
 			roomDefinitions.Add(
 				InstantiateDefinition(
 					roomPrefabsRoot,
+					CollisionResolverDefinition.Types.Room,
 					prefabId,
 					roomColliders,
 					doorAnchors
@@ -74,6 +75,7 @@ namespace Lunra.Hothouse.Views
 			doorDefinitions.Add(
 				InstantiateDefinition(
 					doorPrefabsRoot,
+					CollisionResolverDefinition.Types.Door,
 					prefabId,
 					null,
 					doorAnchors
@@ -83,6 +85,7 @@ namespace Lunra.Hothouse.Views
 
 		CollisionResolverDefinition InstantiateDefinition(
 			Transform root,
+			CollisionResolverDefinition.Types type,
 			string prefabId,
 			RoomCollider[] roomColliders,
 			(Vector3 Position, Vector3 Forward)[] doorAnchors
@@ -98,6 +101,7 @@ namespace Lunra.Hothouse.Views
 			definition.name = prefabId;
 
 			definition.Define(
+				type,
 				prefabId,
 				roomColliders,
 				doorAnchors
@@ -153,14 +157,20 @@ namespace Lunra.Hothouse.Views
 		[ContextMenu("ReGenerate")]
 		void ReGenerate()
 		{
-			Generate(() => Debug.Log("Done: "+generationData.RoomCount));
+			Generate(
+				() =>
+				{
+					Debug.Log("Done: " + generationData.RoomCount);
+					App.Heartbeat.Wait(ReGenerate, 5f);
+				}
+			);
 		}
 		
 		public void Generate(Action done)
 		{
 			workspaceRoot.ClearChildren();
 			
-			generationData = new GenerationData(12);
+			generationData = new GenerationData(1024);
 			
 			StartCoroutine(OnGenerate(done));
 		}
@@ -202,6 +212,8 @@ namespace Lunra.Hothouse.Views
 					zeroSiblingIndex: true
 				);
 
+				yield return null;
+
 				for (var doorIndex = 0; doorIndex < possibleRoom.DoorAnchors.Length; doorIndex++)
 				{
 					var door = possibleRoom.DoorAnchors[doorIndex];
@@ -210,8 +222,11 @@ namespace Lunra.Hothouse.Views
 						door,
 						originDoor.DoorAnchors.Last()
 					);
-					
-					yield return null;
+
+					for (var c = 0; c < possibleRoom.Colliders.Length * 2; c++)
+					{
+						yield return null;
+					}
 
 					if (!possibleRoom.HasCollisions())
 					{
@@ -233,6 +248,8 @@ namespace Lunra.Hothouse.Views
 					generationData.AvailableDoors.AddRange(
 						AppendDoors(possibleRoom)	
 					);
+
+					yield return null;
 					
 					generationData.Rooms.Add(possibleRoom);
 
