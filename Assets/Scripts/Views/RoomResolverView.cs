@@ -130,7 +130,8 @@ namespace Lunra.Hothouse.Views
 
 		CollisionResolverDefinition WorkspaceInstantiate(
 			List<CollisionResolverDefinition> pool,
-			Func<CollisionResolverDefinition, bool> predicate = null
+			Func<CollisionResolverDefinition, bool> predicate = null,
+			bool zeroSiblingIndex = false
 		)
 		{
 			var prefab = predicate == null ? pool.Random() : pool.Where(predicate).Random();
@@ -141,7 +142,12 @@ namespace Lunra.Hothouse.Views
 				return null;
 			}
 
-			return workspaceRoot.gameObject.InstantiateChild(prefab);
+			var result = workspaceRoot.gameObject.InstantiateChild(prefab);
+			result.Id = Guid.NewGuid().ToString();
+
+			if (zeroSiblingIndex) result.transform.SetSiblingIndex(0);
+			
+			return result;
 		}
 
 		[ContextMenu("ReGenerate")]
@@ -154,7 +160,7 @@ namespace Lunra.Hothouse.Views
 		{
 			workspaceRoot.ClearChildren();
 			
-			generationData = new GenerationData(32);
+			generationData = new GenerationData(12);
 			
 			StartCoroutine(OnGenerate(done));
 		}
@@ -167,7 +173,7 @@ namespace Lunra.Hothouse.Views
 			);
 
 			generationData.Rooms.Add(root);
-			generationData.AvailableDoors.AddRange(AppendDoors(root, p => false));
+			generationData.AvailableDoors.AddRange(AppendDoors(root));
 
 			while (generationData.AvailableDoors.Any() && generationData.RoomCount < generationData.RoomCountMaximum)
 			{
@@ -175,6 +181,13 @@ namespace Lunra.Hothouse.Views
 				yield return StartCoroutine(OnGenerate(door));
 			}
 
+			// var expectedDoorCount = generationData.Rooms.Sum(r => r.DoorAnchors.Length);
+			//
+			// if (expectedDoorCount != generationData.Doors.Count)
+			// {
+			// 	Debug.LogError("Expected " + expectedDoorCount + " doors, but generated " + generationData.Doors.Count);
+			// }
+			
 			done();
 		}
 
@@ -184,10 +197,15 @@ namespace Lunra.Hothouse.Views
 			
 			for (var i = 0; i < RoomGenerationTimeouts; i++)
 			{
-				var possibleRoom = WorkspaceInstantiate(roomDefinitions);
+				var possibleRoom = WorkspaceInstantiate(
+					roomDefinitions,
+					zeroSiblingIndex: true
+				);
 
-				foreach (var door in possibleRoom.DoorAnchors)
+				for (var doorIndex = 0; doorIndex < possibleRoom.DoorAnchors.Length; doorIndex++)
 				{
+					var door = possibleRoom.DoorAnchors[doorIndex];
+					
 					possibleRoom.Dock(
 						door,
 						originDoor.DoorAnchors.Last()
@@ -195,7 +213,14 @@ namespace Lunra.Hothouse.Views
 					
 					yield return null;
 
-					if (!possibleRoom.HasCollisions()) break;
+					if (!possibleRoom.HasCollisions())
+					{
+						door.Id = possibleRoom.Id;
+
+						possibleRoom.DoorAnchors[doorIndex] = door;
+						
+						break;
+					}
 				}
 
 				if (!possibleRoom.HasCollisions())
@@ -203,11 +228,10 @@ namespace Lunra.Hothouse.Views
 					generationData.AvailableDoors.Remove(originDoor);
 					generationData.Doors.Add(originDoor);
 					
+					originDoor.DoorAnchors[1].Id = possibleRoom.Id;
+
 					generationData.AvailableDoors.AddRange(
-						AppendDoors(
-							possibleRoom,
-							p => Vector3.Distance(p, originDoor.DoorAnchors.Last().position) < 0.01f // TODO: Don't hardcode this
-						)	
+						AppendDoors(possibleRoom)	
 					);
 					
 					generationData.Rooms.Add(possibleRoom);
@@ -226,23 +250,27 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
-		CollisionResolverDefinition[] AppendDoors(
-			CollisionResolverDefinition room,
-			Func<Vector3, bool> ignoreDoor
-		)
+		CollisionResolverDefinition[] AppendDoors(CollisionResolverDefinition room)
 		{
 			var results = new List<CollisionResolverDefinition>();
 			
-			foreach (var doorAnchor in room.DoorAnchors)
+			for (var i = 0; i < room.DoorAnchors.Length; i++)
 			{
-				if (ignoreDoor(doorAnchor.position)) continue;
+				var roomDoorOpening = room.DoorAnchors[i];
+				
+				if (!string.IsNullOrEmpty(roomDoorOpening.Id)) continue;
 
 				var door = WorkspaceInstantiate(doorDefinitions);
-				
+
 				door.Dock(
 					door.DoorAnchors.First(),
-					doorAnchor
+					roomDoorOpening
 				);
+
+				door.DoorAnchors[0].Id = room.Id;
+				roomDoorOpening.Id = door.Id;
+
+				room.DoorAnchors[i] = roomDoorOpening;
 				
 				results.Add(door);
 			}

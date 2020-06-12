@@ -8,13 +8,30 @@ namespace Lunra.Hothouse.Views
 {
 	public class CollisionResolverDefinition : MonoBehaviour
 	{
-		public int RootDistance { get; set; }
+		[Serializable]
+		public struct Connection
+		{
+			public string Id;
+			public Transform Anchor;
+
+			public Connection(
+				string id,
+				Transform anchor
+			)
+			{
+				Id = id;
+				Anchor = anchor;
+			}
+		}
+
+		public string Id;
+		public int RootDistance;
 		
 		public Vector2 Size;
 		public Collider[] Colliders;
-		public Transform[] DoorAnchors;
+		public Connection[] DoorAnchors;
 
-		public int CollisionCount { get; private set; }
+		public int CollisionCount;
 		
 		public void Define(
 			string prefabId,
@@ -88,23 +105,23 @@ namespace Lunra.Hothouse.Views
 				doorAnchorList.Add(doorAnchor);
 			}
 
-			DoorAnchors = doorAnchorList.ToArray();
+			DoorAnchors = doorAnchorList.Select(d => new Connection(null, d)).ToArray();
 		}
 
 		public void Dock(
-			Transform doorAnchor,
-			Transform otherDoorAnchor
+			Connection doorAnchor,
+			Connection otherDoorAnchor
 		)
 		{
 			
-			transform.Rotate(Vector3.up, 180f - Vector3.Angle(doorAnchor.forward, otherDoorAnchor.forward));
+			transform.Rotate(Vector3.up, 180f - Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward));
 
-			if (Mathf.Approximately(1f, Vector3.Dot(doorAnchor.forward, otherDoorAnchor.forward)))
+			if (Mathf.Approximately(1f, Vector3.Dot(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)))
 			{
 				transform.Rotate(Vector3.up, 180f);
 			}
 
-			transform.position = otherDoorAnchor.position + (transform.position - doorAnchor.position);
+			transform.position = otherDoorAnchor.Anchor.position + (transform.position - doorAnchor.Anchor.position);
 		}
 
 		public bool HasCollisions() => 0 < CollisionCount;
@@ -122,10 +139,10 @@ namespace Lunra.Hothouse.Views
 			Gizmos.color = Color.blue;
 			foreach (var doorAnchor in DoorAnchors)
 			{
-				Gizmos.DrawWireSphere(doorAnchor.position, 0.1f);
-				Gizmos.DrawLine(doorAnchor.position, doorAnchor.position + doorAnchor.forward);
+				Gizmos.color = string.IsNullOrEmpty(doorAnchor.Id) ? Color.blue : Color.green;
 				
-				
+				Gizmos.DrawWireSphere(doorAnchor.Anchor.position, 0.1f);
+				Gizmos.DrawLine(doorAnchor.Anchor.position, doorAnchor.Anchor.position + doorAnchor.Anchor.forward);
 			}
 		}
 	}
