@@ -21,9 +21,9 @@ namespace Lunra.Hothouse.Models
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		public HintsModel Hints { get; } = new HintsModel();
 		
-		public GenericPrefabPoolModel<RoomModel> Rooms { get; } = new GenericPrefabPoolModel<RoomModel>();
 		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
 		
+		public RoomPoolModel Rooms { get; } = new RoomPoolModel();
 		public DoorPoolModel Doors { get; } = new DoorPoolModel();
 		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
 		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();

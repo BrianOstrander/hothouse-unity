@@ -3,46 +3,38 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class DoorPoolModel : BasePrefabPoolModel<DoorModel>
+	public class RoomPoolModel : BasePrefabPoolModel<RoomModel>
 	{
-		public delegate DoorModel ActivateDoor(
+		public delegate RoomModel ActivateRoom(
 			string id,
 			string prefabId,
-			string roomId0,
-			string roomId1,
 			Vector3 position,
 			Quaternion rotation
 		);
-
+		
 		GameModel game;
 		
 		public override void Initialize(GameModel game)
 		{
 			this.game = game;
 			Initialize(
-				model => new DoorPresenter(game, model)	
+				model => new RoomPresenter(game, model)	
 			);
 		}
 
-		public DoorModel Activate(
+		public RoomModel Activate(
 			string id,
 			string prefabId,
-			string roomId0,
-			string roomId1,
 			Vector3 position,
 			Quaternion rotation
 		)
 		{
 			return Activate(
 				prefabId,
-				roomId0,
+				id,
 				position,
 				rotation,
-				m =>
-				{
-					m.Id.Value = id;
-					m.RoomConnection.Value = new DoorModel.Connection(roomId0, roomId1);
-				}
+				m => m.Id.Value = id
 			);
 		}
 	}

@@ -168,7 +168,9 @@ namespace Lunra.Hothouse.Views
 				new RoomResolverRequest(
 					DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
 					10,
-					20
+					20,
+					null,
+					null
 				),
 				result =>
 				{
@@ -203,28 +205,25 @@ namespace Lunra.Hothouse.Views
 
 			foreach (var instance in workspaceCache.Rooms)
 			{
-				var model = new RoomModel();
-				model.Id.Value = instance.Id;
-				model.PrefabId.Value = instance.PrefabId;
-				model.Transform.Position.Value = instance.transform.position;
-				model.Transform.Rotation.Value = instance.transform.rotation;
-				model.RoomTransform.Id.Value = instance.Id;
+				var model = workspaceCache.Request.ActivateRoom(
+					instance.Id,
+					instance.PrefabId,
+					instance.transform.position,
+					instance.transform.rotation
+				);
 				
 				rooms.Add(model);
 			}
 			
 			foreach (var instance in workspaceCache.Doors)
 			{
-				var model = new DoorModel();
-				model.Id.Value = instance.Id;
-				model.PrefabId.Value = instance.PrefabId;
-				model.Transform.Position.Value = instance.transform.position;
-				model.Transform.Rotation.Value = instance.transform.rotation;
-				model.RoomTransform.Id.Value = instance.DoorAnchors.First().Id;
-				
-				model.RoomConnection.Value = new DoorModel.Connection(
+				var model = workspaceCache.Request.ActivateDoor(
+					instance.Id,
+					instance.PrefabId,
 					instance.DoorAnchors.First().Id,
-					instance.DoorAnchors.Last().Id
+					instance.DoorAnchors.Last().Id,
+					instance.transform.position,
+					instance.transform.rotation
 				);
 				
 				doors.Add(model);

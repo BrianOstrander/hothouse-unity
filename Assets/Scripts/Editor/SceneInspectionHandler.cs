@@ -315,7 +315,7 @@ namespace Lunra.Hothouse.Editor
 				Handles.color = Color.yellow.NewA(0.05f);
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
-					var yOffset = 0f;
+					var yOffset = 0.01f;
 					foreach (var model in gameState.Payload.Game.GetLightsActive().Where(l => l.Light.IsLightActive()))
 					{
 						Handles.DrawSolidDisc(
@@ -367,15 +367,13 @@ namespace Lunra.Hothouse.Editor
 			{
 				foreach (var model in gameState.Payload.Game.Rooms.AllActive)
 				{
-					// var label = GetId(model);
-					var label = model.Id.Value;
+					var label = GetId(model);
 
 					label += "\nConnections";
 
 					foreach (var kv in model.AdjacentRoomIds.Value)
 					{
-						// label += "\n  " + Model.ShortenId(kv.Key) + " : ";
-						label += "\n  " + kv.Key + " : ";
+						label += "\n  " + Model.ShortenId(kv.Key) + " : ";
 
 						if (kv.Value) label += "<color=green>Open";
 						else label += "<color=red>Closed";

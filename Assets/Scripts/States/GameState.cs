@@ -36,9 +36,9 @@ namespace Lunra.Hothouse.Services
 			// Add an if statement here to see if we actually need to generate...
 			App.S.PushBlocking(done => Payload.Game.RoomResolver.Generate(done));
 			
-			App.S.PushBlocking(done => {});
+			// App.S.PushBlocking(done => {});
 			// App.S.PushBreak();
-			return;
+			// return;
 			
 			App.S.PushBlocking(OnBeginPopulatePresenters);
 			App.S.PushBlocking(OnBeginInitializeLighting);
@@ -82,9 +82,9 @@ namespace Lunra.Hothouse.Services
 
 		void OnBeginPopulatePresenters(Action done)
 		{
-			Payload.Game.Rooms.Initialize(m => new RoomPresenter(Payload.Game, m));
 			Payload.Game.Buildings.Initialize(Payload.Game);
 			
+			Payload.Game.Rooms.Initialize(Payload.Game);
 			Payload.Game.Doors.Initialize(Payload.Game);
 			Payload.Game.Debris.Initialize(Payload.Game);
 			Payload.Game.Flora.Initialize(Payload.Game);

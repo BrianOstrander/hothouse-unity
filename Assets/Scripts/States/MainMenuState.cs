@@ -85,21 +85,6 @@ namespace Lunra.Hothouse.Services
 			game.WorldCamera.PanVelocity.Value = 12f;
 			game.WorldCamera.OrbitVelocity.Value = 64f;
 			
-			game.WorldCamera.Transform.Position.Value = new Vector3(
-				2.5f,
-				0f,
-				11f
-			);
-
-			game.WorldCamera.Transform.Rotation.Value = Quaternion.LookRotation(
-				new Vector3(
-					-1f,
-					0f,
-					-1f
-				).normalized,
-				Vector3.up
-			);
-
 			game.RoomResolver.RoomCountMinimum.Value = 4;
 			game.RoomResolver.RoomCountMaximum.Value = 8;
 			
@@ -331,6 +316,10 @@ namespace Lunra.Hothouse.Services
 					)
 				),
 			};
+			
+			// DEBUGGING
+			
+			game.DesireDamageMultiplier.Value = 0f;
 			
 			done(Result<GameModel>.Success(game));
 		}

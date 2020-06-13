@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.NumberDemon;
 using UnityEngine;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
@@ -59,28 +61,93 @@ namespace Lunra.Hothouse.Presenters
 		void OnRoomResolverGenerate(Action done)
 		{
 			var request = new RoomResolverRequest(
-				1,
-				//DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
+				DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
 				10,
-				20
+				20,
+				game.Rooms.Activate,
+				game.Doors.Activate
 			);
 			
 			View.Generate(
 				request,
-				result => OnRoomResolverGenerateDone(done, result)
+				result =>
+				{
+					Debug.Log(result);
+					if (game.Dwellers.AllActive.Any()) OnRoomResolverGenerateDone(done);
+					else OnRoomResolverGenerateDwellers(done);
+				}
 			);
 		}
 
-		void OnRoomResolverGenerateDone(
-			Action done,
-			RoomResolverResult result
-		)
+		void OnRoomResolverGenerateDwellers(Action done)
 		{
-			// game.Rooms.Activate(
-			// 	
-			// )
+			var startingRoom = game.Rooms.FirstActive();
+
+			startingRoom.IsExplored.Value = true;
 			
-			Debug.Log(result);
+			var dweller0 = game.Dwellers.Activate(
+				startingRoom.Id.Value,
+				startingRoom.Transform.Position.Value
+			);
+			dweller0.Id.Value = "0";
+			dweller0.Job.Value = Jobs.Clearer;
+			
+			var dweller1 = game.Dwellers.Activate(
+				startingRoom.Id.Value,
+				startingRoom.Transform.Position.Value + (Vector3.forward * 2f)
+			);
+			
+			dweller1.Id.Value = "1";
+			dweller1.Job.Value = Jobs.Construction;
+
+
+			for (var i = 0; i < 4; i++)
+			{
+				var dweller = game.Dwellers.Activate(
+					startingRoom.Id.Value,
+					startingRoom.Transform.Position.Value + (Vector3.forward * 2f)
+				);
+
+				dweller.Id.Value = (2 + i).ToString();
+				dweller.Job.Value = Jobs.Construction;	
+			}
+			
+			var bonfire = game.Buildings.Activate(
+				Buildings.Bonfire,
+				startingRoom.Id.Value,
+				startingRoom.Transform.Position.Value + (Vector3.right * 2f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
+			
+			var wagon = game.Buildings.Activate(
+				Buildings.StartingWagon,
+				startingRoom.Id.Value,
+				startingRoom.Transform.Position.Value + (Vector3.left * 2f),
+				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
+				BuildingStates.Operating
+			);
+
+			wagon.Inventory.Value += (Inventory.Types.Stalks, 999);
+			
+			game.WorldCamera.Transform.Position.Value = bonfire.Transform.Position.Value;
+
+			game.WorldCamera.Transform.Rotation.Value = Quaternion.LookRotation(
+				new Vector3(
+					-1f,
+					0f,
+					-1f
+				).normalized,
+				Vector3.up
+			);
+			
+			OnRoomResolverGenerateDone(done);
+		}
+
+		void OnRoomResolverGenerateDone(Action done)
+		{
+			CloseView(true);
+			done();
 		}
 		#endregion
 	}

@@ -88,7 +88,7 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 			GUIExtensions.PopEnabled();
-			
+
 			// if (GUILayout.Button(Content.OpenInspectorHandler)) InspectionHandler.OpenHandlerAsset();
 			// InspectionSettings.IsInspecting.Draw();
 			// InspectionSettings.IsInspectingBuildings.Draw();

@@ -9,15 +9,22 @@ namespace Lunra.Hothouse.Models
 		public int RoomCountMinimum;
 		public int RoomCountMaximum;
 
+		public RoomPoolModel.ActivateRoom ActivateRoom;
+		public DoorPoolModel.ActivateDoor ActivateDoor;
+
 		public RoomResolverRequest(
 			int seed,
 			int roomCountMinimum,
-			int roomCountMaximum
+			int roomCountMaximum,
+			RoomPoolModel.ActivateRoom activateRoom,
+			DoorPoolModel.ActivateDoor activateDoor
 		)
 		{
 			Seed = seed;
 			RoomCountMinimum = roomCountMinimum;
 			RoomCountMaximum = roomCountMaximum;
+			ActivateRoom = activateRoom;
+			ActivateDoor = activateDoor;
 		}
 	}
 }

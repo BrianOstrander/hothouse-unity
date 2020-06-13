@@ -76,7 +76,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			lastLightValueCalculated = game.CalculateMaximumLighting(
 				(
-					game.Rooms.AllActive.First().Id.Value,
+					interaction.RoomId,
 					interaction.Value.Begin,
 					new ILightModel[] { game.Toolbar.Building.Value }
 				)
