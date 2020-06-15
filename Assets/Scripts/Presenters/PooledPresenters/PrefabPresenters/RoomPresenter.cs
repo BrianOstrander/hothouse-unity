@@ -14,6 +14,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationTime.Changed += OnGameSimulationTime;
 
 			Model.IsRevealed.Changed += OnRoomIsRevealed;
+			Model.RevealDistance.Changed += OnRoomRevealDistance;
 			
 			Model.UpdateConnection += OnRoomUpdateConnection;
 
@@ -25,6 +26,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationTime.Changed -= OnGameSimulationTime;
 			
 			Model.IsRevealed.Changed -= OnRoomIsRevealed;
+			Model.RevealDistance.Changed -= OnRoomRevealDistance;
 
 			Model.UpdateConnection -= OnRoomUpdateConnection;
 
@@ -39,6 +41,10 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 
+		#region PooledModel Events
+		protected override bool CanShow() => Model.IsRevealed.Value;
+		#endregion
+		
 		#region Game Events
 		protected override void OnSimulationInitialized()
 		{
@@ -54,11 +60,32 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region RoomModel Events
-		void OnRoomIsRevealed(bool isExplored)
+		void OnRoomIsRevealed(bool isRevealed)
 		{
-			if (View.NotVisible) return;
+			if (!isRevealed) return;
+			
+			Model.RevealDistance.Value = 0;
+			
+			Show();
 			
 			View.IsRevealed = Model.IsRevealed.Value;
+		}
+
+		void OnRoomRevealDistance(int revealDistance)
+		{
+			foreach (var adjacentRoom in Model.AdjacentRoomIds.Value)
+			{
+				var room = Game.Rooms.FirstActive(adjacentRoom.Key);
+				
+				if (adjacentRoom.Value)
+				{
+					if (revealDistance == 0) room.IsRevealed.Value = true;
+					else room.RevealDistance.Value = revealDistance;
+					continue;
+				}
+
+				room.RevealDistance.Value = Mathf.Min(revealDistance + 1, room.RevealDistance.Value);
+			}
 		}
 		
 		void OnRoomUpdateConnection(string otherRoomId, bool isOpen)

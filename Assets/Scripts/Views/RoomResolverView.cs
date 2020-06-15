@@ -319,8 +319,8 @@ namespace Lunra.Hothouse.Views
 				// TODO: Handle this error
 			}
 
-			exit.IsExit.Value = true; 
-			
+			exit.IsExit.Value = true;
+
 			yield return null;
 			
 			OnGenerateDone();

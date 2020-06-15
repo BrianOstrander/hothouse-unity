@@ -18,6 +18,8 @@ namespace Lunra.Hothouse.Models
                 RoomId0 = roomId0;
                 RoomId1 = roomId1;
             }
+
+            public override string ToString() => "{ " + RoomId0 + " , " + RoomId1 + " } ";
         }
         
         #region Serialized
@@ -63,9 +65,6 @@ namespace Lunra.Hothouse.Models
             return true;
         }
 
-        public override string ToString()
-        {
-            return (IsOpen.Value ? "Open" : "Closed") + " { " + RoomConnection.Value.RoomId0 + " , " + RoomConnection.Value.RoomId1 + " } ";
-        }
+        public override string ToString() => (IsOpen.Value ? "Open" : "Closed") + " " + RoomConnection.Value;
     }
 }

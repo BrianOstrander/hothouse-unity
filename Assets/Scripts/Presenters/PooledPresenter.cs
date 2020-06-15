@@ -124,7 +124,7 @@ namespace Lunra.Hothouse.Presenters
 					Close();
 					break;
 				case PooledStates.Active:
-					Show();
+					if (CanShow()) Show();
 					break;
 				default:
 					Debug.LogError("Unrecognized state: " + pooledState);
@@ -136,6 +136,8 @@ namespace Lunra.Hothouse.Presenters
 				Game.NavigationMesh.QueueCalculation();
 			}
 		}
+
+		protected virtual bool CanShow() => true;
 		#endregion
 		
 		#region ITransform Events

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
-using Lunra.NumberDemon;
 using UnityEngine;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
