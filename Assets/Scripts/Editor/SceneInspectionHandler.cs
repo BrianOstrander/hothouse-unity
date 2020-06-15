@@ -400,6 +400,32 @@ namespace Lunra.Hothouse.Editor
 					);
 				}
 			}
+
+			if (SceneInspectionSettings.IsInspectingDoors.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Doors.AllActive)
+				{
+					var label = GetId(model);
+
+					label += "\nRoomId: " + model.RoomTransform.ShortId;
+					
+					label += "\nRoomId0: " + Model.ShortenId(model.RoomConnection.Value.RoomId0);
+					label += "\nRoomId1: " + Model.ShortenId(model.RoomConnection.Value.RoomId1);
+					label += "\nConnectedRoomId: " + Model.ShortenId(model.LightSensitive.ConnectedRoomId.Value);
+					
+					var labelColor = "<color=cyan>";
+					
+					Handles.Label(
+						model.Transform.Position.Value + (Vector3.up * 6f),
+						StringExtensions.Wrap(
+							label,
+							labelColor,
+							"</color>"
+						),
+						labelStyle
+					);
+				}
+			}
 		}
 
 		static string GetInventory(
