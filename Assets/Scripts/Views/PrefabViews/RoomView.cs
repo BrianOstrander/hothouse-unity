@@ -3,7 +3,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using UnityEngine;
-
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -16,7 +16,7 @@ namespace Lunra.Hothouse.Views
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		[SerializeField] Light[] lights;
 		[SerializeField] AnimationCurve lightIntensityByTimeOfDay;
-		[SerializeField] GameObject unexploredRoot;
+		[FormerlySerializedAs("unexploredRoot")] [SerializeField] GameObject notRevealedRoot;
 
 		[SerializeField] Transform[] doorAnchors = new Transform[0];
 		[SerializeField] RoomCollider[] roomColliders = new RoomCollider[0];
@@ -32,7 +32,7 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
-		public bool IsExplored { set => unexploredRoot.SetActive(!value); }
+		public bool IsRevealed { set => notRevealedRoot.SetActive(!value); }
 		
 		public string RoomId { get; set; }
 
@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Views
 			base.Reset();
 
 			TimeOfDay = 0f;
-			IsExplored = false;
+			IsRevealed = false;
 			RoomId = null;
 		}
 
@@ -68,7 +68,7 @@ namespace Lunra.Hothouse.Views
 			
 			doorAnchors = transform.GetDescendants(c => c.name == "DoorAnchor").ToArray();
 
-			if (unexploredRoot == null)
+			if (notRevealedRoot == null)
 			{
 				Debug.LogError("Unable to calculate room colliders because unexploredRoot is null");
 				
@@ -77,7 +77,7 @@ namespace Lunra.Hothouse.Views
 
 			var roomCollidersResult = new List<RoomCollider>();
 			
-			foreach (var collider in unexploredRoot.transform.GetDescendants<Collider>())
+			foreach (var collider in notRevealedRoot.transform.GetDescendants<Collider>())
 			{
 				var roomCollider = new RoomCollider();
 				roomCollider.Collider = collider;

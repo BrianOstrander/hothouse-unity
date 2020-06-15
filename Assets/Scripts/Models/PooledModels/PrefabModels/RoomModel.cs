@@ -10,8 +10,8 @@ namespace Lunra.Hothouse.Models
     public class RoomModel : PrefabModel
     {
         #region Serialized
-        [JsonProperty] bool isExplored;
-        [JsonIgnore] public ListenerProperty<bool> IsExplored { get; }
+        [JsonProperty] bool isRevealed;
+        [JsonIgnore] public ListenerProperty<bool> IsRevealed { get; }
         #endregion
         
         #region Non Serialized
@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Models
 
         public RoomModel()
         {
-            IsExplored = new ListenerProperty<bool>(value => isExplored = value, () => isExplored);
+            IsRevealed = new ListenerProperty<bool>(value => isRevealed = value, () => isRevealed);
             
             AdjacentRoomIds = new ListenerProperty<ReadOnlyDictionary<string, bool>>(value => adjacentRoomIds = value, () => adjacentRoomIds);
         }

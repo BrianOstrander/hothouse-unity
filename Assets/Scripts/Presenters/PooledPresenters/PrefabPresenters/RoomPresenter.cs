@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationTime.Changed += OnGameSimulationTime;
 
-			Model.IsExplored.Changed += OnRoomIsExplored;
+			Model.IsRevealed.Changed += OnRoomIsRevealed;
 			
 			Model.UpdateConnection += OnRoomUpdateConnection;
 
@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationTime.Changed -= OnGameSimulationTime;
 			
-			Model.IsExplored.Changed -= OnRoomIsExplored;
+			Model.IsRevealed.Changed -= OnRoomIsRevealed;
 
 			Model.UpdateConnection -= OnRoomUpdateConnection;
 
@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Presenters
 		#region View Events
 		protected override void OnViewPrepare()
 		{
-			OnRoomIsExplored(Model.IsExplored.Value);
+			OnRoomIsRevealed(Model.IsRevealed.Value);
 			View.RoomId = Model.Id.Value;
 		}
 		#endregion
@@ -54,11 +54,11 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region RoomModel Events
-		void OnRoomIsExplored(bool isExplored)
+		void OnRoomIsRevealed(bool isExplored)
 		{
 			if (View.NotVisible) return;
 			
-			View.IsExplored = Model.IsExplored.Value;
+			View.IsRevealed = Model.IsRevealed.Value;
 		}
 		
 		void OnRoomUpdateConnection(string otherRoomId, bool isOpen)
@@ -78,9 +78,9 @@ namespace Lunra.Hothouse.Presenters
 					kv => kv.Key == otherRoomId ? isOpen : kv.Value
 				);
 
-			if (Model.IsExplored.Value || !isOpen) return;
+			if (Model.IsRevealed.Value || !isOpen) return;
 
-			if (Game.Rooms.FirstActive(otherRoomId).IsExplored.Value) Model.IsExplored.Value = true;
+			if (Game.Rooms.FirstActive(otherRoomId).IsRevealed.Value) Model.IsRevealed.Value = true;
 		}
 		#endregion
 	}

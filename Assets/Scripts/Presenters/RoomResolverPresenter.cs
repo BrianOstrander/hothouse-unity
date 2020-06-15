@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			var startingRoom = game.Rooms.FirstActive();
 
-			startingRoom.IsExplored.Value = true;
+			startingRoom.IsRevealed.Value = true;
 			
 			var dweller0 = game.Dwellers.Activate(
 				startingRoom.Id.Value,
