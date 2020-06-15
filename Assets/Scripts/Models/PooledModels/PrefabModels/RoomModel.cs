@@ -12,6 +12,8 @@ namespace Lunra.Hothouse.Models
         #region Serialized
         [JsonProperty] bool isRevealed;
         [JsonIgnore] public ListenerProperty<bool> IsRevealed { get; }
+        [JsonProperty] int doorCount;
+        [JsonIgnore] public ListenerProperty<int> DoorCount { get; }
         [JsonProperty] bool isSpawn;
         [JsonIgnore] public ListenerProperty<bool> IsSpawn { get; }
         [JsonProperty] bool isExit;
@@ -29,6 +31,7 @@ namespace Lunra.Hothouse.Models
         public RoomModel()
         {
             IsRevealed = new ListenerProperty<bool>(value => isRevealed = value, () => isRevealed);
+            DoorCount = new ListenerProperty<int>(value => doorCount = value, () => doorCount);
             IsSpawn = new ListenerProperty<bool>(value => isSpawn = value, () => isSpawn);
             IsExit = new ListenerProperty<bool>(value => isExit = value, () => isExit);
             

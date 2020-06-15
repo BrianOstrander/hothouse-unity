@@ -171,7 +171,7 @@ namespace Lunra.Hothouse.Models
 			var result = new Dictionary<string, bool>();
 
 			var allRoomIds = Doors.AllActive
-				.Where(d => d.IsConnnection(roomId))
+				.Where(d => d.IsConnnecting(roomId))
 				.SelectMany(d => new[] {d.RoomConnection.Value.RoomId0, d.RoomConnection.Value.RoomId1})
 				.Distinct();
 

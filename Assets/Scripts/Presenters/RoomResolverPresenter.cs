@@ -60,10 +60,9 @@ namespace Lunra.Hothouse.Presenters
 		
 		void OnRoomResolverGenerate(Action done)
 		{
-			var request = new RoomResolverRequest(
-				DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
-				10,
-				20,
+			var request = RoomResolverRequest.Default(
+				1,
+				//DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
 				game.Rooms.Activate,
 				game.Doors.Activate,
 				result =>
@@ -79,7 +78,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnRoomResolverGenerateDwellers(Action done)
 		{
-			var startingRoom = game.Rooms.FirstActive();
+			var startingRoom = game.Rooms.FirstActive(m => m.IsSpawn.Value);
 
 			startingRoom.IsRevealed.Value = true;
 			

@@ -369,6 +369,8 @@ namespace Lunra.Hothouse.Editor
 				{
 					var label = GetId(model);
 
+					label += "\nDoor Count: " + model.DoorCount.Value;
+					
 					label += "\nConnections";
 
 					foreach (var kv in model.AdjacentRoomIds.Value)

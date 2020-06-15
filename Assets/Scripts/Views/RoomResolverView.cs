@@ -15,6 +15,7 @@ namespace Lunra.Hothouse.Views
 		struct WorkspaceCache
 		{
 			public RoomResolverRequest Request;
+			public RoomResolverResult Result;
 
 			public DateTime BeginTime;
 			public Demon Generator;
@@ -31,6 +32,10 @@ namespace Lunra.Hothouse.Views
 			public WorkspaceCache(RoomResolverRequest request)
 			{
 				Request = request;
+				Result = new RoomResolverResult();
+
+				Result.Request = request;
+				
 				BeginTime = DateTime.Now;
 
 				Generator = new Demon(request.Seed);
@@ -165,10 +170,8 @@ namespace Lunra.Hothouse.Views
 		{
 			// Debug.LogWarning("Disabled");
 			Generate(
-				new RoomResolverRequest(
+				RoomResolverRequest.Default(
 					DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
-					10,
-					20,
 					null,
 					null,
 					result =>
@@ -201,10 +204,11 @@ namespace Lunra.Hothouse.Views
 			if (root == null)
 			{
 				Debug.LogError("root is null, this should never happen");
+				// TODO: Handle this error
 			}
 
 			workspaceCache.Rooms.Add(root);
-			workspaceCache.AvailableDoors.AddRange(AppendDoors(root));
+			workspaceCache.AvailableDoors.AddRange(OnGenerateAppendDoors(root));
 
 			while (workspaceCache.AvailableDoors.Any() && workspaceCache.RoomCount < workspaceCache.RoomCountTarget)
 			{
@@ -212,12 +216,66 @@ namespace Lunra.Hothouse.Views
 				yield return StartCoroutine(OnGenerateRoom(door));
 			}
 
-			bool isDisconnectedDoor(CollisionResolverDefinition definition) => string.IsNullOrEmpty(definition.DoorAnchors.Last().Id);
+			workspaceCache.Doors.RemoveAll(d => string.IsNullOrEmpty(d.DoorAnchors.Last().Id));
 
-			// TODO: do something with these...
-			var unconnectedDoors = workspaceCache.Doors.Where(isDisconnectedDoor);
+			yield return OnGeneratePopulateResult();
+		}
 
-			workspaceCache.Doors.RemoveAll(isDisconnectedDoor);
+		IEnumerator OnGeneratePopulateResult()
+		{
+			var rooms = new List<RoomModel>();
+			var doors = new List<DoorModel>();
+
+			foreach (var instance in workspaceCache.Rooms)
+			{
+				var model = workspaceCache.Request.ActivateRoom(
+					instance.Id,
+					instance.PrefabId,
+					instance.transform.position,
+					instance.transform.rotation
+				);
+				
+				rooms.Add(model);
+			}
+			
+			foreach (var instance in workspaceCache.Doors)
+			{
+				var model = workspaceCache.Request.ActivateDoor(
+					instance.Id,
+					instance.PrefabId,
+					instance.DoorAnchors.First().Id,
+					instance.DoorAnchors.Last().Id,
+					instance.transform.position,
+					instance.transform.rotation
+				);
+
+				foreach (var room in rooms.Where(r => model.IsConnnecting(r.Id.Value))) room.DoorCount.Value++;
+
+				doors.Add(model);
+			}
+
+			workspaceCache.Result.Rooms = rooms.ToArray();
+			workspaceCache.Result.Doors = doors.ToArray();
+
+			yield return OnGenerateSpawn();
+		}
+
+		IEnumerator OnGenerateSpawn()
+		{
+			var spawnOptions = workspaceCache.Result.Rooms
+				.Where(r => workspaceCache.Request.SpawnDoorCountRequired <= r.DoorCount.Value);
+			
+			var spawn = workspaceCache.Generator.GetNextFrom(spawnOptions);
+
+			if (spawn == null)
+			{
+				Debug.LogError("spawn is null, this should never happen");
+				// TODO: Handle this error
+			}
+
+			spawn.IsSpawn.Value = true;
+			
+			yield return null;
 			
 			OnGenerateDone();
 		}
@@ -277,7 +335,7 @@ namespace Lunra.Hothouse.Views
 					originDoor.DoorAnchors[1].Id = possibleRoom.Id;
 
 					workspaceCache.AvailableDoors.AddRange(
-						AppendDoors(possibleRoom)	
+						OnGenerateAppendDoors(possibleRoom)	
 					);
 
 					yield return new WaitForFixedUpdate();
@@ -300,7 +358,7 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
-		CollisionResolverDefinition[] AppendDoors(CollisionResolverDefinition room)
+		CollisionResolverDefinition[] OnGenerateAppendDoors(CollisionResolverDefinition room)
 		{
 			var results = new List<CollisionResolverDefinition>();
 			
@@ -330,45 +388,9 @@ namespace Lunra.Hothouse.Views
 		
 		void OnGenerateDone()
 		{
-			var result = new RoomResolverResult();
-
-			result.Request = workspaceCache.Request;
-
-			result.GenerationElapsed = (float) (DateTime.Now - workspaceCache.BeginTime).TotalSeconds;
+			workspaceCache.Result.GenerationElapsed = DateTime.Now - workspaceCache.BeginTime;
 			
-			var rooms = new List<RoomModel>();
-			var doors = new List<DoorModel>();
-
-			foreach (var instance in workspaceCache.Rooms)
-			{
-				var model = workspaceCache.Request.ActivateRoom(
-					instance.Id,
-					instance.PrefabId,
-					instance.transform.position,
-					instance.transform.rotation
-				);
-				
-				rooms.Add(model);
-			}
-			
-			foreach (var instance in workspaceCache.Doors)
-			{
-				var model = workspaceCache.Request.ActivateDoor(
-					instance.Id,
-					instance.PrefabId,
-					instance.DoorAnchors.First().Id,
-					instance.DoorAnchors.Last().Id,
-					instance.transform.position,
-					instance.transform.rotation
-				);
-				
-				doors.Add(model);
-			}
-
-			result.Rooms = rooms.ToArray();
-			result.Doors = doors.ToArray();
-
-			workspaceCache.Request.Done(result);
+			workspaceCache.Request.Done(workspaceCache.Result);
 		}
 	}
 }
