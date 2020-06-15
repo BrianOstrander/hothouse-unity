@@ -65,11 +65,7 @@ namespace Lunra.Hothouse.Presenters
 				10,
 				20,
 				game.Rooms.Activate,
-				game.Doors.Activate
-			);
-			
-			View.Generate(
-				request,
+				game.Doors.Activate,
 				result =>
 				{
 					Debug.Log(result);
@@ -77,6 +73,8 @@ namespace Lunra.Hothouse.Presenters
 					else OnRoomResolverGenerateDwellers(done);
 				}
 			);
+			
+			View.Generate(request);
 		}
 
 		void OnRoomResolverGenerateDwellers(Action done)
