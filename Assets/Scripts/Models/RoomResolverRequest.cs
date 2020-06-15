@@ -16,6 +16,7 @@ namespace Lunra.Hothouse.Models
 				10,
 				20,
 				2,
+				3,
 				activateRoom,
 				activateDoor,
 				done
@@ -26,6 +27,7 @@ namespace Lunra.Hothouse.Models
 		public int RoomCountMinimum;
 		public int RoomCountMaximum;
 		public int SpawnDoorCountRequired;
+		public int ExitDistanceMinimum;
 
 		public RoomPoolModel.ActivateRoom ActivateRoom;
 		public DoorPoolModel.ActivateDoor ActivateDoor;
@@ -37,6 +39,7 @@ namespace Lunra.Hothouse.Models
 			int roomCountMinimum,
 			int roomCountMaximum,
 			int spawnDoorCountRequired,
+			int exitDistanceMinimum,
 			RoomPoolModel.ActivateRoom activateRoom,
 			DoorPoolModel.ActivateDoor activateDoor,
 			Action<RoomResolverResult> done
@@ -45,7 +48,8 @@ namespace Lunra.Hothouse.Models
 			Seed = seed;
 			RoomCountMinimum = roomCountMinimum;
 			RoomCountMaximum = roomCountMaximum;
-			SpawnDoorCountRequired = spawnDoorCountRequired; 
+			SpawnDoorCountRequired = spawnDoorCountRequired;
+			ExitDistanceMinimum = exitDistanceMinimum;
 			ActivateRoom = activateRoom;
 			ActivateDoor = activateDoor;
 			Done = done;

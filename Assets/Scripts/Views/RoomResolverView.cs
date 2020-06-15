@@ -249,7 +249,19 @@ namespace Lunra.Hothouse.Views
 					instance.transform.rotation
 				);
 
-				foreach (var room in rooms.Where(r => model.IsConnnecting(r.Id.Value))) room.DoorCount.Value++;
+				foreach (var room in rooms.Where(r => model.IsConnnecting(r.Id.Value)))
+				{
+					if (!model.GetConnection(room.Id.Value, out var toRoomId))
+					{
+						Debug.LogError("Invalid door connection: "+model);
+						continue;
+					}
+
+					room.AdjacentRoomIds.Value = room.AdjacentRoomIds.Value.Append(new KeyValuePair<string, bool>(toRoomId, false)).ToReadonlyDictionary(
+						kv => kv.Key,
+						kv => kv.Value
+					);
+				}
 
 				doors.Add(model);
 			}
@@ -263,7 +275,7 @@ namespace Lunra.Hothouse.Views
 		IEnumerator OnGenerateSpawn()
 		{
 			var spawnOptions = workspaceCache.Result.Rooms
-				.Where(r => workspaceCache.Request.SpawnDoorCountRequired <= r.DoorCount.Value);
+				.Where(r => workspaceCache.Request.SpawnDoorCountRequired <= r.AdjacentRoomIds.Value.Count);
 			
 			var spawn = workspaceCache.Generator.GetNextFrom(spawnOptions);
 
@@ -274,6 +286,40 @@ namespace Lunra.Hothouse.Views
 			}
 
 			spawn.IsSpawn.Value = true;
+			spawn.SpawnDistance.Value = 0;
+
+			var spawnDistanceMaximum = 0;
+			var remainingSpawnDistanceChecks = new List<RoomModel>(new[] {spawn});
+
+			while (remainingSpawnDistanceChecks.Any())
+			{
+				var next = remainingSpawnDistanceChecks[0];
+				remainingSpawnDistanceChecks.RemoveAt(0);
+
+				var neighboringRooms = workspaceCache.Result.Rooms.Where(r => next.AdjacentRoomIds.Value.Keys.Any(k => r.Id.Value == k));
+
+				foreach (var neighboringRoom in neighboringRooms)
+				{
+					if (neighboringRoom.SpawnDistance.Value == int.MaxValue) remainingSpawnDistanceChecks.Add(neighboringRoom);
+					neighboringRoom.SpawnDistance.Value = Mathf.Min(next.SpawnDistance.Value + 1, neighboringRoom.SpawnDistance.Value);
+					neighboringRoom.RevealDistance.Value = neighboringRoom.SpawnDistance.Value;
+				}
+
+				spawnDistanceMaximum = Mathf.Max(spawnDistanceMaximum, next.SpawnDistance.Value);
+			}
+
+			var endOptions = workspaceCache.Result.Rooms
+				.Where(r => Mathf.Min(spawnDistanceMaximum, workspaceCache.Request.ExitDistanceMinimum) <= r.SpawnDistance.Value);
+
+			var exit = workspaceCache.Generator.GetNextFrom(endOptions);
+
+			if (exit == null)
+			{
+				Debug.LogError("end is null, this should never happen");
+				// TODO: Handle this error
+			}
+
+			exit.IsExit.Value = true; 
 			
 			yield return null;
 			

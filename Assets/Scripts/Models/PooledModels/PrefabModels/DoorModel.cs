@@ -52,6 +52,17 @@ namespace Lunra.Hothouse.Models
             return (roomConnection.RoomId0 == roomId0 && roomConnection.RoomId1 == roomId1) || (roomConnection.RoomId0 == roomId1 && roomConnection.RoomId1 == roomId0);
         }
 
+        public bool GetConnection(
+            string fromRoomId,
+            out string toRoomId
+        )
+        {
+            toRoomId = null;
+            if (!IsConnnecting(fromRoomId)) return false;
+            toRoomId = fromRoomId == RoomConnection.Value.RoomId0 ? RoomConnection.Value.RoomId1 : RoomConnection.Value.RoomId0;
+            return true;
+        }
+
         public override string ToString()
         {
             return (IsOpen.Value ? "Open" : "Closed") + " { " + RoomConnection.Value.RoomId0 + " , " + RoomConnection.Value.RoomId1 + " } ";

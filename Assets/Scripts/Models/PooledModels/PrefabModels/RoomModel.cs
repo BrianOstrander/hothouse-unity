@@ -10,14 +10,17 @@ namespace Lunra.Hothouse.Models
     public class RoomModel : PrefabModel
     {
         #region Serialized
-        [JsonProperty] bool isRevealed;
-        [JsonIgnore] public ListenerProperty<bool> IsRevealed { get; }
-        [JsonProperty] int doorCount;
-        [JsonIgnore] public ListenerProperty<int> DoorCount { get; }
         [JsonProperty] bool isSpawn;
         [JsonIgnore] public ListenerProperty<bool> IsSpawn { get; }
         [JsonProperty] bool isExit;
         [JsonIgnore] public ListenerProperty<bool> IsExit { get; }
+        [JsonProperty] int spawnDistance = int.MaxValue;
+        [JsonIgnore] public ListenerProperty<int> SpawnDistance { get; }
+        
+        [JsonProperty] bool isRevealed;
+        [JsonIgnore] public ListenerProperty<bool> IsRevealed { get; }
+        [JsonProperty] int revealDistance = int.MaxValue;
+        [JsonIgnore] public ListenerProperty<int> RevealDistance { get; }
         #endregion
         
         #region Non Serialized
@@ -30,10 +33,12 @@ namespace Lunra.Hothouse.Models
 
         public RoomModel()
         {
-            IsRevealed = new ListenerProperty<bool>(value => isRevealed = value, () => isRevealed);
-            DoorCount = new ListenerProperty<int>(value => doorCount = value, () => doorCount);
             IsSpawn = new ListenerProperty<bool>(value => isSpawn = value, () => isSpawn);
             IsExit = new ListenerProperty<bool>(value => isExit = value, () => isExit);
+            SpawnDistance = new ListenerProperty<int>(value => spawnDistance = value, () => spawnDistance);
+            
+            IsRevealed = new ListenerProperty<bool>(value => isRevealed = value, () => isRevealed);
+            RevealDistance = new ListenerProperty<int>(value => revealDistance = value, () => revealDistance);
             
             AdjacentRoomIds = new ListenerProperty<ReadOnlyDictionary<string, bool>>(value => adjacentRoomIds = value, () => adjacentRoomIds);
         }

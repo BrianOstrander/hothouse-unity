@@ -369,7 +369,11 @@ namespace Lunra.Hothouse.Editor
 				{
 					var label = GetId(model);
 
-					label += "\nDoor Count: " + model.DoorCount.Value;
+					if (model.IsSpawn.Value) label += "\nIs Spawn: true";
+					if (model.IsExit.Value) label += "\nIs Exit: true";
+					
+					label += "\nSpawn Distance: " + model.SpawnDistance.Value;
+					label += "\nReveal Distance: " + model.RevealDistance.Value;
 					
 					label += "\nConnections";
 
