@@ -67,6 +67,7 @@ namespace Lunra.Hothouse.Presenters
 				result =>
 				{
 					Debug.Log(result);
+					CloseView(true);
 					if (game.Dwellers.AllActive.Any()) OnRoomResolverGenerateDone(done);
 					else OnRoomResolverGenerateDwellers(done);
 				}
@@ -142,7 +143,6 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnRoomResolverGenerateDone(Action done)
 		{
-			CloseView(true);
 			done();
 		}
 		#endregion
