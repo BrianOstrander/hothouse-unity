@@ -48,6 +48,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				done();
 				return;
 			}
+			
+			oldExit.IsExit.Value = false;
 
 			// HACK BEGIN
 			foreach (var dweller in payload.Game.Dwellers.AllActive)
