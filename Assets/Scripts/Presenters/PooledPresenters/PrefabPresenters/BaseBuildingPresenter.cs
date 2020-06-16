@@ -89,7 +89,6 @@ namespace Lunra.Hothouse.Presenters
 		#region LightSourceModel Events
 		protected virtual void OnLightSimulationUpdate()
 		{
-			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 			if (Model.Light.LightState.Value == LightStates.Extinguished) return;
 
@@ -133,7 +132,6 @@ namespace Lunra.Hothouse.Presenters
 		
 		protected virtual void OnLightState(LightStates lightState)
 		{
-			if (IsNotActive) return;
 			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomTransform.Id.Value);
 			
 			switch (lightState)
@@ -146,7 +144,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected virtual void OnLightBuildingInventory(Inventory inventory)
 		{
-			if (IsNotActive) return;
 			if (Model.Light.LightState.Value != LightStates.Extinguishing) return;
 			if (!Model.Inventory.Value.Contains(Model.Light.LightFuel.Value)) return;
 			
@@ -158,8 +155,6 @@ namespace Lunra.Hothouse.Presenters
 		
 		void OnLightBuildingState(BuildingStates buildingState)
 		{
-			if (IsNotActive) return;
-			
 			Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetRoomStale(Model.RoomTransform.Id.Value);
 			
 			if (View.NotVisible) return;
@@ -171,7 +166,6 @@ namespace Lunra.Hothouse.Presenters
 		#region InteractionModel Events
 		void OnToolbarConstruction(Interaction.RoomVector3 interaction)
 		{
-			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Placing) return;
 
 			switch (interaction.State)
@@ -196,7 +190,6 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnToolbarTask(ToolbarModel.Tasks task)
 		{
-			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Placing) return;
 			if (task == ToolbarModel.Tasks.Construction) return;
 
@@ -208,7 +201,6 @@ namespace Lunra.Hothouse.Presenters
 		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
 		{
 			if (calculationState != NavigationMeshModel.CalculationStates.Completed) return;
-			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 			
 			Model.RecalculateEntrances();
@@ -218,8 +210,6 @@ namespace Lunra.Hothouse.Presenters
 		#region BuildingModel Events
 		void OnBuildingInventory(Inventory inventory)
 		{
-			if (IsNotActive) return;
-			
 			var anyChanged = false;
 			var newDesireQuality = Model.DesireQualities.Value.Select(
 				d =>
@@ -235,7 +225,6 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingConstructionInventory(Inventory constructionInventory)
 		{
-			if (IsNotActive) return;
 			if (constructionInventory.IsEmpty || Model.ConstructionInventoryCapacity.Value.IsNotFull(constructionInventory)) return;
 
 			switch (Model.BuildingState.Value)
@@ -251,7 +240,6 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingSalvageInventory(Inventory salvageInventory)
 		{
-			if (IsNotActive) return;
 			if (Model.BuildingState.Value != BuildingStates.Salvaging || !salvageInventory.IsEmpty) return;
 
 			Model.PooledState.Value = PooledStates.InActive;
@@ -259,7 +247,6 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingState(BuildingStates buildingState)
 		{
-			if (IsNotActive) return;
 			if (View.NotVisible) return;
 
 			View.IsNavigationModified = buildingState == BuildingStates.Operating;
@@ -328,7 +315,6 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingOperate(DwellerModel dweller, Desires desire)
 		{
-			if (IsNotActive) return;
 			var quality = Model.DesireQualities.Value.FirstOrDefault(d => d.Desire == desire);
 
 			if (quality.Desire != desire)
@@ -352,13 +338,13 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnPosition(Vector3 position)
 		{
 			base.OnPosition(position);
-			if (IsActive && View.Visible) Model.RecalculateEntrances(View);
+			if (View.Visible) Model.RecalculateEntrances(View);
 		}
 
 		protected override void OnRotation(Quaternion rotation)
 		{
 			base.OnRotation(rotation);
-			if (IsActive && View.Visible) Model.RecalculateEntrances(View);
+			if (View.Visible) Model.RecalculateEntrances(View);
 		}
 		#endregion
 		

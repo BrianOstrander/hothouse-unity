@@ -120,11 +120,15 @@ namespace Lunra.Hothouse.Models
 		GameCache cache = GameCache.Default();
 		readonly ListenerProperty<GameCache> cacheListener;
 		[JsonIgnore] public ReadonlyProperty<GameCache> Cache { get; }
+		
+		bool isSimulating;
+		[JsonIgnore] public ListenerProperty<bool> IsSimulating { get; }
 		#endregion
 		
 		#region Events
 		public event Action SimulationInitialize = ActionExtensions.Empty;
 		[JsonIgnore] public Action SimulationUpdate = ActionExtensions.Empty;
+		[JsonIgnore] public Action GoToNextLevel = ActionExtensions.Empty;
 		#endregion
 
 		public GameModel()
@@ -143,6 +147,7 @@ namespace Lunra.Hothouse.Models
 				() => cache,
 				out cacheListener
 			);
+			IsSimulating = new ListenerProperty<bool>(value => isSimulating = value, () => isSimulating);
 		}
 
 		public void TriggerSimulationInitialize()
@@ -157,6 +162,8 @@ namespace Lunra.Hothouse.Models
 
 			SimulationInitialize();
 		}
+
+		public void ResetSimulationInitialized() => IsSimulationInitialized = false;
 
 		public void InitializeCache()
 		{

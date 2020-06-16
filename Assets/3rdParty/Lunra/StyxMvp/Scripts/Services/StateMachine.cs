@@ -369,7 +369,7 @@ namespace Lunra.StyxMvp.Services
 			void waiter(Action done)
 			{
 				action();
-				heartbeat.Wait(done, condition);
+				heartbeat.WaitForCondition(done, condition);
 			}
 
 			OnPushBlocking(

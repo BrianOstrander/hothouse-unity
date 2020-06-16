@@ -59,6 +59,8 @@ namespace Lunra.Hothouse.Presenters
 		
 		void OnRoomResolverGenerate(Action done)
 		{
+			ShowView(instant: true);
+			
 			var request = RoomResolverRequest.Default(
 				1,
 				//DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
@@ -109,10 +111,27 @@ namespace Lunra.Hothouse.Presenters
 				dweller.Job.Value = Jobs.Construction;	
 			}
 			
+			OnRoomResolverGenerateDone(done);
+		}
+
+		void OnRoomResolverGenerateDone(Action done)
+		{
+			var startingRoom = game.Rooms.FirstActive(m => m.IsSpawn.Value);
+			
 			var bonfire = game.Buildings.Activate(
 				Buildings.Bonfire,
 				startingRoom.Id.Value,
 				startingRoom.Transform.Position.Value + (Vector3.right * 2f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
+
+			var exitRoom = game.Rooms.FirstActive(m => m.IsExit.Value);
+			
+			game.Buildings.Activate(
+				Buildings.Bonfire,
+				exitRoom.Id.Value,
+				exitRoom.Transform.Position.Value,
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
@@ -138,11 +157,6 @@ namespace Lunra.Hothouse.Presenters
 				Vector3.up
 			);
 			
-			OnRoomResolverGenerateDone(done);
-		}
-
-		void OnRoomResolverGenerateDone(Action done)
-		{
 			done();
 		}
 		#endregion

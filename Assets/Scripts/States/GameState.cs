@@ -4,6 +4,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Presenters;
+using Lunra.Hothouse.Services.GameStateEvents;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
@@ -31,23 +32,15 @@ namespace Lunra.Hothouse.Services
 		{
 			App.S.PushBlocking(OnBeginLoadScenes);
 			App.S.PushBlocking(OnBeginInstantiatePresenters);
-			
-			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
-			
-			// Add an if statement here to see if we actually need to generate...
-			App.S.PushBlocking(done => Payload.Game.RoomResolver.Generate(done));
-			
-			// App.S.PushBlocking(done => {});
-			// App.S.PushBreak();
-			// return;
-			
-			App.S.PushBlocking(OnBeginPopulatePresenters);
-			App.S.PushBlocking(OnBeginInitializeLighting);
 			App.S.PushBlocking(
 				OnBeginInitializeNavigationMesh,
 				() => Payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
 			);
-			App.S.Push(Payload.Game.TriggerSimulationInitialize);
+			
+			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
+
+			if (Payload.Game.Rooms.AllActive.None()) OnGameGoToNextLevel();
+			
 			App.S.PushBlocking(OnBeginInitializeCache);
 		}
 
@@ -78,13 +71,7 @@ namespace Lunra.Hothouse.Services
 
 			new RoomResolverPresenter(Payload.Game);
 			
-			done();
-		}
-
-		void OnBeginPopulatePresenters(Action done)
-		{
 			Payload.Game.Buildings.Initialize(Payload.Game);
-			
 			Payload.Game.Rooms.Initialize(Payload.Game);
 			Payload.Game.Doors.Initialize(Payload.Game);
 			Payload.Game.Debris.Initialize(Payload.Game);
@@ -92,30 +79,12 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.ItemDrops.Initialize(m => new ItemDropPresenter(Payload.Game, m));
 			Payload.Game.Dwellers.Initialize(Payload.Game);
 			Payload.Game.ObligationIndicators.Initialize(Payload.Game);
-
-			done();
-		}
-
-		void OnBeginInitializeNavigationMesh() => Payload.Game.NavigationMesh.TriggerInitialize();
-
-		void OnBeginInitializeLighting(Action done)
-		{
-			switch (Payload.Game.LastLightUpdate.Value.State)
-			{
-				case LightDelta.States.Calculated:
-					done();
-					return;
-				case LightDelta.States.Unknown:
-					Payload.Game.LastLightUpdate.Value = Payload.Game.LastLightUpdate.Value.SetRoomStale(
-						Payload.Game.Rooms.AllActive.Select(r => r.Id.Value).ToArray()
-					);
-					break;
-			}
-			CalculateLighting();
-
+			
 			done();
 		}
 		
+		void OnBeginInitializeNavigationMesh() => Payload.Game.NavigationMesh.TriggerInitialize();
+
 		void OnBeginInitializeCache(Action done)
 		{
 			Payload.Game.InitializeCache(); 
@@ -131,9 +100,12 @@ namespace Lunra.Hothouse.Services
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 			App.Heartbeat.LateUpdate += OnHeartbeatLateUpdate;
+
+			Payload.Game.GoToNextLevel += OnGameGoToNextLevel;
 			
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
+			
 			// App.Heartbeat.Wait(
 			// 	() =>
 			// 	{
@@ -147,6 +119,8 @@ namespace Lunra.Hothouse.Services
 
 		void OnHeartbeatUpdate()
 		{
+			if (!Payload.Game.IsSimulating.Value) return;
+			
 			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
 			Payload.Game.SimulationUpdate();
 			
@@ -177,6 +151,8 @@ namespace Lunra.Hothouse.Services
 			App.Heartbeat.Update -= OnHeartbeatUpdate;
 			App.Heartbeat.LateUpdate -= OnHeartbeatLateUpdate;
 			
+			Payload.Game.GoToNextLevel -= OnGameGoToNextLevel;
+			
 			Payload.Game.CalculateMaximumLighting = null;
 			
 			App.S.RequestState(
@@ -206,10 +182,12 @@ namespace Lunra.Hothouse.Services
 		{
 			Time.timeScale = multiplier;
 		}
+
+		void OnGameGoToNextLevel() => new GameStateGenerateLevel(this).Push();
 		#endregion
 		
 		#region Utility
-		void CalculateLighting()
+		public void CalculateLighting()
 		{
 			// TODO: This seems messy, ideally we should calculate only things sensitive to light, and if a room has
 			// been set stale, assume it's because a light was placed in there and calculate all sensitive objects in

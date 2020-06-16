@@ -40,9 +40,8 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public new void InActivate(params M[] models)
-		{
-			base.InActivate(models);
-		}
+		public new void InActivate(params M[] models) => base.InActivate(models);
+
+		public new void InActivateAll() => base.InActivateAll();
 	}
 }

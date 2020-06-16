@@ -104,7 +104,6 @@ namespace Lunra.Hothouse.Presenters
 		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
 		{
 			if (calculationState != NavigationMeshModel.CalculationStates.Completed) return;
-			if (IsNotActive) return;
 			
 			Model.RecalculateEntrances();
 		}
@@ -151,7 +150,6 @@ namespace Lunra.Hothouse.Presenters
 		#region ObligationModel Events
 		void OnObligationObligations(Obligation[] obligations, object source)
 		{
-			if (IsNotActive) return;
 			if (source == this) return;
 
 			foreach (var obligation in obligations)
@@ -189,7 +187,6 @@ namespace Lunra.Hothouse.Presenters
 		#region EnterableModel Events
 		void OnEnterableEntrances(Entrance[] entrances)
 		{
-			if (IsNotActive) return;
 			RecalculateObligations();
 		}
 		#endregion

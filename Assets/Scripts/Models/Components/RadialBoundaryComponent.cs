@@ -19,7 +19,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region Non Serialized
-		public Func<Vector3, bool> Contains;
+		[JsonIgnore] public Func<Vector3, bool> Contains;
 		#endregion
 		
 		public RadialBoundaryComponent()

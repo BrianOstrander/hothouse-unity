@@ -41,7 +41,6 @@ namespace Lunra.Hothouse.Presenters
 		#region ClearableModel Events
 		void OnClearableSelectionState(SelectionStates selectionState)
 		{
-			if (IsNotActive) return;
 			if (View.NotVisible) return;
 			
 			switch (selectionState)
@@ -59,7 +58,6 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnClearableHealthCurrent(float health)
 		{
-			if (IsNotActive) return;
 			if (Mathf.Approximately(0f, health)) Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion
@@ -67,7 +65,6 @@ namespace Lunra.Hothouse.Presenters
 		#region ToolbarModel Events
 		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)
 		{
-			if (IsNotActive) return;
 			if (Model.IsMarkedForClearance.Value) return;
 			if (interaction.State == Interaction.States.OutOfRange) return;
 			

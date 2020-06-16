@@ -1,3 +1,4 @@
+using System.Linq;
 using Lunra.Hothouse.Presenters;
 using UnityEngine;
 
@@ -41,8 +42,12 @@ namespace Lunra.Hothouse.Models
 				m =>
 				{
 					m.Id.Value = id;
+					m.IsOpen.Value = false;
+					m.Obligations.All.Value = new Obligation[0];
 					m.RoomConnection.Value = new DoorModel.Connection(roomId0, roomId1);
 					m.LightSensitive.ConnectedRoomId.Value = roomId1;
+					
+					m.Enterable.Reset();
 				}
 			);
 		}

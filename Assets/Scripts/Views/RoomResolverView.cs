@@ -177,7 +177,7 @@ namespace Lunra.Hothouse.Views
 					result =>
 					{
 						Debug.Log(result);
-						App.Heartbeat.Wait(ReGenerate, 0.1f);
+						App.Heartbeat.WaitForSeconds(ReGenerate, 0.1f);
 					}
 				)
 			);

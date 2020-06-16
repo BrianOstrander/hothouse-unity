@@ -14,17 +14,17 @@ namespace Lunra.Hothouse.Models
         [JsonIgnore] public ListenerProperty<bool> IsSpawn { get; }
         [JsonProperty] bool isExit;
         [JsonIgnore] public ListenerProperty<bool> IsExit { get; }
-        [JsonProperty] int spawnDistance = int.MaxValue;
+        [JsonProperty] int spawnDistance;
         [JsonIgnore] public ListenerProperty<int> SpawnDistance { get; }
         
         [JsonProperty] bool isRevealed;
         [JsonIgnore] public ListenerProperty<bool> IsRevealed { get; }
-        [JsonProperty] int revealDistance = int.MaxValue;
+        [JsonProperty] int revealDistance;
         [JsonIgnore] public ListenerProperty<int> RevealDistance { get; }
         #endregion
         
         #region Non Serialized
-        ReadOnlyDictionary<string, bool> adjacentRoomIds = (new Dictionary<string, bool>()).ToReadonlyDictionary();
+        ReadOnlyDictionary<string, bool> adjacentRoomIds;
         [JsonIgnore] public ListenerProperty<ReadOnlyDictionary<string, bool>> AdjacentRoomIds { get; }
 
         [JsonIgnore] public Action<string, bool> UpdateConnection;

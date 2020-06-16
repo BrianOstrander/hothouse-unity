@@ -74,7 +74,7 @@ namespace Lunra.StyxMvp.Presenters
 					break;
 				default:
 					entry.CloseView(true);
-					heartbeat.Wait(() => OnUnRegisterClosed(done, entry), () => entry.GetState() == TransitionStates.Closed);
+					heartbeat.WaitForCondition(() => OnUnRegisterClosed(done, entry), () => entry.GetState() == TransitionStates.Closed);
 					break;
 			}
 		}
@@ -98,7 +98,7 @@ namespace Lunra.StyxMvp.Presenters
 				}
 			}
 
-			heartbeat.Wait(() => OnUnRegisterClosed(done, waitingToClose.ToArray()), () => waitingToClose.TrueForAll(e => e.GetState() == TransitionStates.Closed));
+			heartbeat.WaitForCondition(() => OnUnRegisterClosed(done, waitingToClose.ToArray()), () => waitingToClose.TrueForAll(e => e.GetState() == TransitionStates.Closed));
 		}
 
 		void OnUnRegisterClosed(Action done, params RegistrationEntry[] remaining)

@@ -25,7 +25,8 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent OpenDebugSettingsProvider = new GUIContent("Open Debug Settings Provider");
 			public static GUIContent OpenSaveLocation = new GUIContent("Open save location");
 			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard");
-			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation"); 
+			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
+			public static GUIContent GoToNextLevel = new GUIContent("Go To Next Level");
 		}
 		
 		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
@@ -40,7 +41,8 @@ namespace Lunra.Hothouse.Editor
 				Content.OpenDebugSettingsProvider.text,
 				Content.OpenSaveLocation.text,
 				Content.SaveAndCopySerializedGameToClipboard.text,
-				Content.QueueNavigationCalculation.text
+				Content.QueueNavigationCalculation.text,
+				Content.GoToNextLevel.text
 			};
 			
 			return provider;
@@ -57,6 +59,7 @@ namespace Lunra.Hothouse.Editor
 			{
 				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
 				if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
+				if (GUILayout.Button(Content.GoToNextLevel)) game.GoToNextLevel();
 				
 				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 

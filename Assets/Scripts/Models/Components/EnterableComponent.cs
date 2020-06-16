@@ -24,6 +24,8 @@ namespace Lunra.Hothouse.Models
 		{
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
 		}
+
+		public void Reset() => Entrances.Value = new Entrance[0];
 	}
 
 	public static class IEnterableExtensions
