@@ -62,13 +62,13 @@ namespace Lunra.Hothouse.Presenters
 		#region RoomModel Events
 		void OnRoomIsRevealed(bool isRevealed)
 		{
-			if (!isRevealed) return;
-			
-			Model.RevealDistance.Value = 0;
-			
-			Show();
-			
-			View.IsRevealed = Model.IsRevealed.Value;
+			if (isRevealed)
+			{
+				Model.RevealDistance.Value = 0;
+				Show();
+				View.IsRevealed = Model.IsRevealed.Value;
+			}
+			else Close();
 		}
 
 		void OnRoomRevealDistance(int revealDistance)

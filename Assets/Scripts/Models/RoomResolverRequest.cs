@@ -1,29 +1,28 @@
 using System;
+using Lunra.NumberDemon;
 
 namespace Lunra.Hothouse.Models
 {
 	public struct RoomResolverRequest
 	{
 		public static RoomResolverRequest Default(
-			int seed,
+			Demon generator,
 			RoomPoolModel.ActivateRoom activateRoom,
-			DoorPoolModel.ActivateDoor activateDoor,
-			Action<RoomResolverResult> done
+			DoorPoolModel.ActivateDoor activateDoor
 		)
 		{
 			return new RoomResolverRequest(
-				seed,
+				generator,
 				10,
 				20,
 				2,
 				3,
 				activateRoom,
-				activateDoor,
-				done
+				activateDoor
 			);
 		}
-		
-		public int Seed;
+
+		public Demon Generator;
 		public int RoomCountMinimum;
 		public int RoomCountMaximum;
 		public int SpawnDoorCountRequired;
@@ -31,28 +30,30 @@ namespace Lunra.Hothouse.Models
 
 		public RoomPoolModel.ActivateRoom ActivateRoom;
 		public DoorPoolModel.ActivateDoor ActivateDoor;
-
-		public Action<RoomResolverResult> Done;
 		
+		public DateTime BeginTime;
+		public int RoomCountTarget;
+
 		public RoomResolverRequest(
-			int seed,
+			Demon generator,
 			int roomCountMinimum,
 			int roomCountMaximum,
 			int spawnDoorCountRequired,
 			int exitDistanceMinimum,
 			RoomPoolModel.ActivateRoom activateRoom,
-			DoorPoolModel.ActivateDoor activateDoor,
-			Action<RoomResolverResult> done
+			DoorPoolModel.ActivateDoor activateDoor
 		)
 		{
-			Seed = seed;
+			Generator = generator;
 			RoomCountMinimum = roomCountMinimum;
 			RoomCountMaximum = roomCountMaximum;
 			SpawnDoorCountRequired = spawnDoorCountRequired;
 			ExitDistanceMinimum = exitDistanceMinimum;
 			ActivateRoom = activateRoom;
 			ActivateDoor = activateDoor;
-			Done = done;
+			
+			BeginTime = DateTime.Now;
+			RoomCountTarget = Generator.GetNextInteger(RoomCountMinimum, RoomCountMaximum);
 		}
 	}
 }

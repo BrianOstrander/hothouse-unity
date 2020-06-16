@@ -222,7 +222,7 @@ namespace Lunra.StyxMvp.Services
 			}
 		}
 
-		public bool Is(Type isState, Events isEvent) { return isState == CurrentState && isEvent == CurrentEvent; }
+		public bool Is(Type isState, params Events[] validEvents) { return isState == CurrentState && (validEvents.None() || validEvents.Contains(currentEvent)); }
 
 		public IState CurrentHandler => currentState;
 

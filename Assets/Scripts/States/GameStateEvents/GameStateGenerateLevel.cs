@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Presenters;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using UnityEngine;
 
@@ -11,44 +13,66 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 	{
 		GameState state;
 		GamePayload payload;
-
+		Demon generator;
+		RoomResolverRequest request;
+		
 		RoomModel oldExit;
+		bool isTransitioning;
 		
 		public GameStateGenerateLevel(GameState state)
 		{
 			this.state = state;
 			payload = state.Payload;
+			generator = new Demon(1);
+			request = RoomResolverRequest.Default(
+				generator,
+				payload.Game.Rooms.Activate,
+				payload.Game.Doors.Activate
+			);
 		}
 
 		public void Push()
 		{
-			payload.Game.IsSimulating.Value = false;
-			payload.Game.ResetSimulationInitialized();
+			oldExit = payload.Game.Rooms.AllActive.FirstOrDefault(r => r.IsExit.Value);
+			isTransitioning = oldExit != null;
 			
-			App.S.PushBlocking(OnCleanup);
+			App.S.Push(OnBegin);
+			
+			if (isTransitioning) App.S.PushBlocking(OnCleanup);
 			
 			App.S.PushBlocking(OnGenerateRooms);
-			App.S.PushBlocking(OnTransferRooms);
+			App.S.PushBlocking(OnGenerateSpawn);
+			
+			App.S.PushBlocking(OnGenerateFloraBegin);
+			App.S.PushBlocking(OnGenerateFloraSeed);
+			
+			if (isTransitioning) App.S.PushBlocking(OnTransferRooms);
+			else
+			{
+				App.S.PushBlocking(OnGenerateDwellers);
+				App.S.PushBlocking(OnGenerateStartingBuildings);
+			}
+			
+			App.S.PushBlocking(OnRevealRooms);
+			
 			App.S.PushBlocking(OnInitializeLighting);
-			App.S.PushBlocking(
-				() => payload.Game.NavigationMesh.QueueCalculation(),
-				() => payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
-			);
+			// App.S.PushBlocking(
+			// 	() => payload.Game.NavigationMesh.QueueCalculation(),
+			// 	() => payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
+			// );
 			
 			App.S.Push(() => payload.Game.IsSimulating.Value = true);
 			App.S.Push(payload.Game.TriggerSimulationInitialize);
 		}
 
+		void OnBegin()
+		{
+			payload.Game.IsSimulating.Value = false;
+			payload.Game.ResetSimulationInitialized();
+		}
+
 		void OnCleanup(Action done)
 		{
-			oldExit = payload.Game.Rooms.AllActive.FirstOrDefault(r => r.IsExit.Value);
-
-			if (oldExit == null)
-			{
-				done();
-				return;
-			}
-			
 			oldExit.IsExit.Value = false;
 
 			// HACK BEGIN
@@ -105,17 +129,195 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateRooms(Action done)
 		{
-			payload.Game.RoomResolver.Generate(done);
+			payload.Game.RoomResolver.Generate(
+				request,
+				result =>
+				{
+					done();
+				}
+			);
 		}
 
-		void OnTransferRooms(Action done)
+		void OnGenerateSpawn(Action done)
 		{
-			if (oldExit == null)
+			var spawnOptions = payload.Game.Rooms.AllActive
+				.Where(r => request.SpawnDoorCountRequired <= r.AdjacentRoomIds.Value.Count);
+			
+			var spawn = generator.GetNextFrom(spawnOptions);
+
+			if (spawn == null)
 			{
-				done();
-				return;
+				Debug.LogError("spawn is null, this should never happen");
+				// TODO: Handle this error
 			}
 
+			spawn.IsSpawn.Value = true;
+			spawn.SpawnDistance.Value = 0;
+
+			var spawnDistanceMaximum = 0;
+			var remainingSpawnDistanceChecks = new List<RoomModel>(new[] {spawn});
+
+			while (remainingSpawnDistanceChecks.Any())
+			{
+				var next = remainingSpawnDistanceChecks[0];
+				remainingSpawnDistanceChecks.RemoveAt(0);
+
+				var neighboringRooms = payload.Game.Rooms.AllActive
+					.Where(r => next.AdjacentRoomIds.Value.Keys.Any(k => r.Id.Value == k));
+
+				foreach (var neighboringRoom in neighboringRooms)
+				{
+					if (neighboringRoom.SpawnDistance.Value == int.MaxValue) remainingSpawnDistanceChecks.Add(neighboringRoom);
+					neighboringRoom.SpawnDistance.Value = Mathf.Min(next.SpawnDistance.Value + 1, neighboringRoom.SpawnDistance.Value);
+				}
+
+				spawnDistanceMaximum = Mathf.Max(spawnDistanceMaximum, next.SpawnDistance.Value);
+			}
+
+			var endOptions = payload.Game.Rooms.AllActive
+				.Where(r => Mathf.Min(spawnDistanceMaximum, request.ExitDistanceMinimum) <= r.SpawnDistance.Value);
+
+			var exit = generator.GetNextFrom(endOptions);
+
+			if (exit == null)
+			{
+				Debug.LogError("end is null, this should never happen");
+				// TODO: Handle this error
+			}
+
+			exit.IsExit.Value = true;
+
+			done();
+		}
+
+		#region Generate Flora
+		void OnGenerateFloraBegin(Action done)
+		{
+			foreach (var room in payload.Game.Rooms.AllActive) room.IsRevealed.Value = true;
+
+			payload.Game.NavigationMesh.QueueCalculation();
+
+			App.Heartbeat.WaitForCondition(
+				done,
+				() => payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
+			);
+		}
+
+		void OnGenerateFloraSeed(Action done)
+		{
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				if (room.RevealDistance.Value == 0) continue;
+				
+				Debug.DrawLine(
+					room.Transform.Position.Value,
+					room.Transform.Position.Value + (Vector3.up * 4f),
+					Color.green,
+					10f
+				);
+			}
+
+			done();
+			// Debug.Log("time to seed");	
+		}
+		#endregion
+
+		void OnRevealRooms(Action done)
+		{
+			var oldExitId = oldExit?.RoomTransform.Id.Value;
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				room.IsRevealed.Value = room.IsSpawn.Value || room.RoomTransform.Id.Value == oldExitId;
+				room.RevealDistance.Value = room.IsRevealed.Value ? 0 : room.SpawnDistance.Value;
+			}
+
+			done();
+		}
+
+		void OnGenerateDwellers(Action done)
+		{
+			var spawn = payload.Game.Rooms.FirstActive(r => r.IsSpawn.Value);
+
+			// spawn.IsRevealed.Value = true;
+		
+			var dweller0 = payload.Game.Dwellers.Activate(
+				spawn.Id.Value,
+				spawn.Transform.Position.Value
+			);
+			dweller0.Id.Value = "0";
+			dweller0.Job.Value = Jobs.Clearer;
+		
+			var dweller1 = payload.Game.Dwellers.Activate(
+				spawn.Id.Value,
+				spawn.Transform.Position.Value + (Vector3.forward * 2f)
+			);
+		
+			dweller1.Id.Value = "1";
+			dweller1.Job.Value = Jobs.Construction;
+
+
+			for (var i = 0; i < 4; i++)
+			{
+				var dweller = payload.Game.Dwellers.Activate(
+					spawn.Id.Value,
+					spawn.Transform.Position.Value + (Vector3.forward * 2f)
+				);
+
+				dweller.Id.Value = (2 + i).ToString();
+				dweller.Job.Value = Jobs.Construction;	
+			}
+
+			done();
+		}
+
+		void OnGenerateStartingBuildings(Action done)
+		{
+			var spawn = payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
+			
+			var bonfire = payload.Game.Buildings.Activate(
+				Buildings.Bonfire,
+				spawn.Id.Value,
+				spawn.Transform.Position.Value + (Vector3.right * 2f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
+
+			var exit = payload.Game.Rooms.FirstActive(m => m.IsExit.Value);
+			
+			payload.Game.Buildings.Activate(
+				Buildings.Bonfire,
+				exit.Id.Value,
+				exit.Transform.Position.Value,
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
+			
+			var wagon = payload.Game.Buildings.Activate(
+				Buildings.StartingWagon,
+				spawn.Id.Value,
+				spawn.Transform.Position.Value + (Vector3.left * 2f),
+				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
+				BuildingStates.Operating
+			);
+
+			wagon.Inventory.Value += (Inventory.Types.Stalks, 999);
+			
+			payload.Game.WorldCamera.Transform.Position.Value = bonfire.Transform.Position.Value;
+
+			payload.Game.WorldCamera.Transform.Rotation.Value = Quaternion.LookRotation(
+				new Vector3(
+					-1f,
+					0f,
+					-1f
+				).normalized,
+				Vector3.up
+			);
+			
+			done();
+		}
+		
+		void OnTransferRooms(Action done)
+		{
 			var spawn = payload.Game.Rooms.AllActive.First(r => r.IsSpawn.Value);
 
 			spawn.IsRevealed.Value = true;

@@ -16,7 +16,7 @@ namespace Lunra.Hothouse.Editor
 		{
 			gameState = null;
 			if (!Application.isPlaying || !App.HasInstance || App.S == null) return false;
-			if (!App.S.Is(typeof(GameState), StateMachine.Events.Idle)) return false;
+			if (!App.S.Is(typeof(GameState), StateMachine.Events.Begin, StateMachine.Events.Idle)) return false;
 
 			gameState = SettingsProviderCache.gameState ?? (SettingsProviderCache.gameState = App.S.CurrentHandler as GameState);
 			return true;

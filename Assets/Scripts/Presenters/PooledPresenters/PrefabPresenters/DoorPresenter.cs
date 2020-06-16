@@ -48,6 +48,11 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 		}
 
+		protected override void OnSimulationInitialized()
+		{
+			OnRoomIsRevealed(CanShow());
+		}
+
 		protected override void OnViewPrepare()
 		{
 			View.IsOpen = Model.IsOpen.Value;
@@ -97,6 +102,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnRoomIsRevealed(bool isRevealed)
 		{
 			if (isRevealed) Show();
+			else Close();
 		}
 		#endregion
 		

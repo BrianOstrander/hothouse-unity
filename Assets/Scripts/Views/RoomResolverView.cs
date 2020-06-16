@@ -15,12 +15,8 @@ namespace Lunra.Hothouse.Views
 		struct WorkspaceCache
 		{
 			public RoomResolverRequest Request;
+			public Action<RoomResolverResult> Done;
 			public RoomResolverResult Result;
-
-			public DateTime BeginTime;
-			public Demon Generator;
-			
-			public int RoomCountTarget;
 
 			public List<CollisionResolverDefinition> Rooms;
 			public List<CollisionResolverDefinition> Doors;
@@ -28,19 +24,18 @@ namespace Lunra.Hothouse.Views
 			public List<CollisionResolverDefinition> AvailableDoors;
 
 			public int RoomCount => Rooms.Count;
+			public Demon Generator => Request.Generator;
 			
-			public WorkspaceCache(RoomResolverRequest request)
+			public WorkspaceCache(
+				RoomResolverRequest request,
+				Action<RoomResolverResult> done
+			)
 			{
 				Request = request;
+				Done = done;
 				Result = new RoomResolverResult();
 
 				Result.Request = request;
-				
-				BeginTime = DateTime.Now;
-
-				Generator = new Demon(request.Seed);
-				
-				RoomCountTarget = Generator.GetNextInteger(request.RoomCountMinimum, request.RoomCountMaximum);
 				
 				Rooms = new List<CollisionResolverDefinition>();
 				Doors = new List<CollisionResolverDefinition>();
@@ -168,26 +163,32 @@ namespace Lunra.Hothouse.Views
 		[ContextMenu("ReGenerate")]
 		void ReGenerate()
 		{
-			// Debug.LogWarning("Disabled");
-			Generate(
-				RoomResolverRequest.Default(
-					DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
-					null,
-					null,
-					result =>
-					{
-						Debug.Log(result);
-						App.Heartbeat.WaitForSeconds(ReGenerate, 0.1f);
-					}
-				)
-			);
+			Debug.LogWarning("Disabled");
+			// Generate(
+			// 	RoomResolverRequest.Default(
+			// 		DemonUtility.GetNextInteger(int.MinValue, int.MaxValue),
+			// 		null,
+			// 		null,
+			// 		result =>
+			// 		{
+			// 			Debug.Log(result);
+			// 			App.Heartbeat.WaitForSeconds(ReGenerate, 0.1f);
+			// 		}
+			// 	)
+			// );
 		}
 		
-		public void Generate(RoomResolverRequest request)
+		public void Generate(
+			RoomResolverRequest request,
+			Action<RoomResolverResult> done
+		)
 		{
 			workspaceRoot.ClearChildren();
 
-			workspaceCache = new WorkspaceCache(request);
+			workspaceCache = new WorkspaceCache(
+				request,
+				done
+			);
 			
 			StartCoroutine(OnGenerate());
 		}
@@ -210,7 +211,7 @@ namespace Lunra.Hothouse.Views
 			workspaceCache.Rooms.Add(root);
 			workspaceCache.AvailableDoors.AddRange(OnGenerateAppendDoors(root));
 
-			while (workspaceCache.AvailableDoors.Any() && workspaceCache.RoomCount < workspaceCache.RoomCountTarget)
+			while (workspaceCache.AvailableDoors.Any() && workspaceCache.RoomCount < workspaceCache.Request.RoomCountTarget)
 			{
 				var door = workspaceCache.Generator.GetNextFrom(workspaceCache.AvailableDoors);
 				yield return StartCoroutine(OnGenerateRoom(door));
@@ -269,60 +270,8 @@ namespace Lunra.Hothouse.Views
 			workspaceCache.Result.Rooms = rooms.ToArray();
 			workspaceCache.Result.Doors = doors.ToArray();
 
-			yield return OnGenerateSpawn();
-		}
-
-		IEnumerator OnGenerateSpawn()
-		{
-			var spawnOptions = workspaceCache.Result.Rooms
-				.Where(r => workspaceCache.Request.SpawnDoorCountRequired <= r.AdjacentRoomIds.Value.Count);
-			
-			var spawn = workspaceCache.Generator.GetNextFrom(spawnOptions);
-
-			if (spawn == null)
-			{
-				Debug.LogError("spawn is null, this should never happen");
-				// TODO: Handle this error
-			}
-
-			spawn.IsSpawn.Value = true;
-			spawn.SpawnDistance.Value = 0;
-
-			var spawnDistanceMaximum = 0;
-			var remainingSpawnDistanceChecks = new List<RoomModel>(new[] {spawn});
-
-			while (remainingSpawnDistanceChecks.Any())
-			{
-				var next = remainingSpawnDistanceChecks[0];
-				remainingSpawnDistanceChecks.RemoveAt(0);
-
-				var neighboringRooms = workspaceCache.Result.Rooms.Where(r => next.AdjacentRoomIds.Value.Keys.Any(k => r.Id.Value == k));
-
-				foreach (var neighboringRoom in neighboringRooms)
-				{
-					if (neighboringRoom.SpawnDistance.Value == int.MaxValue) remainingSpawnDistanceChecks.Add(neighboringRoom);
-					neighboringRoom.SpawnDistance.Value = Mathf.Min(next.SpawnDistance.Value + 1, neighboringRoom.SpawnDistance.Value);
-					neighboringRoom.RevealDistance.Value = neighboringRoom.SpawnDistance.Value;
-				}
-
-				spawnDistanceMaximum = Mathf.Max(spawnDistanceMaximum, next.SpawnDistance.Value);
-			}
-
-			var endOptions = workspaceCache.Result.Rooms
-				.Where(r => Mathf.Min(spawnDistanceMaximum, workspaceCache.Request.ExitDistanceMinimum) <= r.SpawnDistance.Value);
-
-			var exit = workspaceCache.Generator.GetNextFrom(endOptions);
-
-			if (exit == null)
-			{
-				Debug.LogError("end is null, this should never happen");
-				// TODO: Handle this error
-			}
-
-			exit.IsExit.Value = true;
-
 			yield return null;
-			
+
 			OnGenerateDone();
 		}
 
@@ -434,9 +383,9 @@ namespace Lunra.Hothouse.Views
 		
 		void OnGenerateDone()
 		{
-			workspaceCache.Result.GenerationElapsed = DateTime.Now - workspaceCache.BeginTime;
+			workspaceCache.Result.GenerationElapsed = DateTime.Now - workspaceCache.Request.BeginTime;
 			
-			workspaceCache.Request.Done(workspaceCache.Result);
+			workspaceCache.Done(workspaceCache.Result);
 		}
 	}
 }

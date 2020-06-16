@@ -17,7 +17,7 @@ namespace Lunra.Hothouse.Models
 		
 		#region Non Serialized
 		[JsonIgnore] public Action<Action> Initialize;
-		[JsonIgnore] public Action<Action> Generate;
+		[JsonIgnore] public Action<RoomResolverRequest, Action<RoomResolverResult>> Generate;
 		#endregion
 
 		public RoomResolverModel()

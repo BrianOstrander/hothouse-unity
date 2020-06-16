@@ -14,7 +14,7 @@ namespace Lunra.Hothouse.Models
 		public override string ToString()
 		{
 			var result = "Generated in " + GenerationElapsed.TotalSeconds.ToString("N2") + " seconds";
-			result += "\n\tSeed: " + Request.Seed;
+			// result += "\n\tSeed: " + Request.Generator.see.Seed;
 			result += "\n\tRooms: " + Rooms.Length;
 			result += "\n\tDoors: " + Doors.Length;
 
