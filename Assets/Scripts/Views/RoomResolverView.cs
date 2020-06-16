@@ -60,7 +60,7 @@ namespace Lunra.Hothouse.Views
 
 		public void AddRoomDefinition(
 			string prefabId,
-			RoomCollider[] roomColliders,
+			ColliderCache[] roomColliders,
 			(Vector3 Position, Vector3 Forward)[] doorAnchors
 		)
 		{
@@ -95,7 +95,7 @@ namespace Lunra.Hothouse.Views
 			Transform root,
 			CollisionResolverDefinition.Types type,
 			string prefabId,
-			RoomCollider[] roomColliders,
+			ColliderCache[] roomColliders,
 			(Vector3 Position, Vector3 Forward)[] doorAnchors
 		)
 		{

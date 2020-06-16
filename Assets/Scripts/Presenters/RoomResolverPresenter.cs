@@ -41,7 +41,7 @@ namespace Lunra.Hothouse.Presenters
 			{
 				View.AddRoomDefinition(
 					room.View.PrefabId,
-					room.View.RoomColliders,
+					room.View.BoundaryColliders,
 					room.View.DoorAnchors
 				);
 			}

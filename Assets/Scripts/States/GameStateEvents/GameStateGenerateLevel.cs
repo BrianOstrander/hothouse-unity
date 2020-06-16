@@ -205,19 +205,21 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateFloraSeed(Action done)
 		{
+			return;
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
-				if (room.RevealDistance.Value == 0) continue;
-				
+				if (room.SpawnDistance.Value == 0) continue;
+
+				var testPosition = room.Transform.Position.Value + Vector3.up;
+
 				Debug.DrawLine(
-					room.Transform.Position.Value,
-					room.Transform.Position.Value + (Vector3.up * 4f),
-					Color.green,
+					testPosition,
+					testPosition + (Vector3.up * 4f),
+					room.RadialBoundary.Contains(testPosition) ? Color.green : Color.red,
 					10f
 				);
 			}
 
-			done();
 			// Debug.Log("time to seed");	
 		}
 		#endregion

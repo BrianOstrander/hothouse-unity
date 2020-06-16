@@ -10,7 +10,7 @@ using UnityEditor;
 
 namespace Lunra.Hothouse.Views
 {
-	public class RoomView : PrefabView, IRoomIdView
+	public class RoomView : PrefabView, IRoomIdView, IBoundaryView
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
@@ -18,8 +18,9 @@ namespace Lunra.Hothouse.Views
 		[SerializeField] AnimationCurve lightIntensityByTimeOfDay;
 		[FormerlySerializedAs("unexploredRoot")] [SerializeField] GameObject notRevealedRoot;
 
+		[SerializeField] GameObject boundaryColliderRoot;
 		[SerializeField] Transform[] doorAnchors = new Transform[0];
-		[SerializeField] RoomCollider[] roomColliders = new RoomCollider[0];
+		[SerializeField] ColliderCache[] boundaryColliders = new ColliderCache[0];
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
@@ -33,10 +34,11 @@ namespace Lunra.Hothouse.Views
 		}
 
 		public bool IsRevealed { set => notRevealedRoot.SetActive(!value); }
+		// public bool IsRevealed { set => notRevealedRoot.SetActive(true); }
 		
 		public string RoomId { get; set; }
 
-		public RoomCollider[] RoomColliders => roomColliders;
+		public ColliderCache[] BoundaryColliders => boundaryColliders;
 		public (Vector3 Position, Vector3 Forward)[] DoorAnchors => doorAnchors.Select(d => (d.position, d.forward)).ToArray();
 		#endregion
 
@@ -74,22 +76,62 @@ namespace Lunra.Hothouse.Views
 				
 				return;
 			}
-
-			var roomCollidersResult = new List<RoomCollider>();
 			
-			foreach (var collider in notRevealedRoot.transform.GetDescendants<Collider>())
+			if (boundaryColliderRoot != null) DestroyImmediate(boundaryColliderRoot);
+			
+			boundaryColliderRoot = new GameObject("BoundaryColliderRoot");
+			boundaryColliderRoot.transform.SetParent(RootTransform);
+
+			var roomCollidersResult = new List<ColliderCache>();
+			
+			foreach (var sourceCollider in notRevealedRoot.transform.GetDescendants<Collider>())
 			{
-				var roomCollider = new RoomCollider();
+				sourceCollider.isTrigger = true;
+				
+				var duplicateRoot = boundaryColliderRoot.InstantiateChildObject(
+					sourceCollider.gameObject,
+					sourceCollider.transform.localPosition,
+					sourceCollider.transform.localScale,
+					sourceCollider.transform.localRotation,
+					sourceCollider.gameObject.activeSelf
+				);
+
+				duplicateRoot.name = sourceCollider.name;
+				
+				foreach (var component in duplicateRoot.GetComponents<Component>())
+				{
+					if (component.GetType() == typeof(Transform)) continue;
+					if (component is Collider) continue;
+					
+					DestroyImmediate(component);
+				}
+				
+				duplicateRoot.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.RoomBoundary));
+
+				var collider = duplicateRoot.GetComponent<Collider>();
+				
+				var colliderCache = new ColliderCache();
+				colliderCache.Collider = collider;
+				colliderCache.Position = collider.transform.position;
+				colliderCache.Scale = collider.transform.lossyScale;
+				colliderCache.Rotation = collider.transform.rotation;
+				
+				roomCollidersResult.Add(colliderCache);
+				
+				// duplicateRoot.name = sourceCollider.name;
+
+				/*
+				var roomCollider = new ColliderCache();
 				roomCollider.Collider = collider;
 				roomCollider.Position = collider.transform.position;
 				roomCollider.Scale = collider.transform.lossyScale;
 				roomCollider.Rotation = collider.transform.rotation;
 				
 				roomCollidersResult.Add(roomCollider);
+				*/
 			}
 
-			roomColliders = roomCollidersResult.ToArray();
-			
+			boundaryColliders = roomCollidersResult.ToArray();
 		}
 #endif
 	}

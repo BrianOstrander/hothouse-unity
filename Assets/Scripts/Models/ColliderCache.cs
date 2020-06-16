@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Lunra.Hothouse.Models
 {
 	[Serializable]
-	public struct RoomCollider
+	public struct ColliderCache
 	{
 		public Collider Collider;
 		public Vector3 Position;

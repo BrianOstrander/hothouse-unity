@@ -24,8 +24,9 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			Model.RadialBoundary.Radius.Value = View.NavigationColliderRadius;
-			Model.RadialBoundary.Contains = View.NavigationCollisionContains; 
 			Model.Light.IsLight.Value = View.IsLight;
+			
+			Model.RadialBoundary.Contains = View.NavigationCollisionContains; 
 			
 			if (Model.Light.IsLight.Value)
 			{
@@ -58,6 +59,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
+			Model.RadialBoundary.Contains = null;
+
 			// ILightModel UnBindings
 			Game.SimulationUpdate -= OnLightSimulationUpdate;
 			Model.Light.LightState.Changed -= OnLightState;

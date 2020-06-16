@@ -476,6 +476,9 @@ namespace Lunra.StyxMvp.Services
 			Debug.Break();
 		}
 
+		public void PushWaitForUpdate() => PushBlocking(done => App.Heartbeat.WaitForUpdate(done));
+		public void PushWaitForFixedUpdate() => PushBlocking(done => App.Heartbeat.WaitForFixedUpdate(done));
+
 		public IEntryImmutable[] GetEntries() { return entries.Cast<IEntryImmutable>().ToArray(); }
 		
 		TraceData GetTraceData(

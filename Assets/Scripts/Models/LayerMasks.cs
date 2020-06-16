@@ -6,6 +6,7 @@ namespace Lunra.Hothouse.Models
 	{
 		public const string Floor = "Floor";
 		public const string Unexplored = "Unexplored";
+		public const string RoomBoundary = "RoomBoundary";
 	}
 
 	public static class LayerMasks

@@ -27,12 +27,4 @@ namespace Lunra.Hothouse.Models
 			Radius = new ListenerProperty<float>(value => radius = value, () => radius);
 		}
 	}
-	
-	public static class IRadialBoundaryExtensions
-	{
-		public static bool BoundaryContains(this IRadialBoundary model, Vector3 position)
-		{
-			return Vector3.Distance(model.Transform.Position.Value.NewY(0f), position.NewY(0f)) < model.RadialBoundary.Radius.Value;
-		}
-	}
 }

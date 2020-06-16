@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Views
 		public void Define(
 			Types type,
 			string prefabId,
-			RoomCollider[] colliders,
+			ColliderCache[] colliders,
 			(Vector3 Position, Vector3 Forward)[] doorAnchors
 		)
 		{

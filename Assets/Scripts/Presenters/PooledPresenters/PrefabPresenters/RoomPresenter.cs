@@ -13,6 +13,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationTime.Changed += OnGameSimulationTime;
 
+			Model.RadialBoundary.Contains = OnRoomBoundaryContains;  
+			
 			Model.IsRevealed.Changed += OnRoomIsRevealed;
 			Model.RevealDistance.Changed += OnRoomRevealDistance;
 			
@@ -24,6 +26,8 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Game.SimulationTime.Changed -= OnGameSimulationTime;
+
+			Model.RadialBoundary.Contains = null;
 			
 			Model.IsRevealed.Changed -= OnRoomIsRevealed;
 			Model.RevealDistance.Changed -= OnRoomRevealDistance;
@@ -111,6 +115,8 @@ namespace Lunra.Hothouse.Presenters
 
 			if (Game.Rooms.FirstActive(otherRoomId).IsRevealed.Value) Model.IsRevealed.Value = true;
 		}
+
+		bool OnRoomBoundaryContains(Vector3 position) => View.BoundaryContains(position);
 		#endregion
 	}
 }
