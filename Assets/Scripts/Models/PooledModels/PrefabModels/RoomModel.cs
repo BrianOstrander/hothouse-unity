@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-    public class RoomModel : PrefabModel, IRadialBoundary
+    public class RoomModel : PrefabModel, IBoundary
     {
         #region Serialized
         [JsonProperty] bool isSpawn;
@@ -22,7 +22,7 @@ namespace Lunra.Hothouse.Models
         [JsonProperty] int revealDistance;
         [JsonIgnore] public ListenerProperty<int> RevealDistance { get; }
         
-        public RadialBoundaryComponent RadialBoundary { get; } = new RadialBoundaryComponent();
+        public BoundaryComponent Boundary { get; } = new BoundaryComponent();
         #endregion
         
         #region Non Serialized

@@ -215,7 +215,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Debug.DrawLine(
 					testPosition,
 					testPosition + (Vector3.up * 4f),
-					room.RadialBoundary.Contains(testPosition) ? Color.green : Color.red,
+					room.Boundary.Contains(testPosition) ? Color.green : Color.red,
 					10f
 				);
 			}

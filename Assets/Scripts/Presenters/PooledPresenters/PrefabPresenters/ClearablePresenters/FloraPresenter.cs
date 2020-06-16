@@ -166,7 +166,7 @@ namespace Lunra.Hothouse.Presenters
 					var room = Game.Rooms.FirstActive(Model.RoomTransform.Id.Value);
 					var nearestBuilding = Game.Buildings.AllActive
 						.Where(m => m.RoomTransform.Id.Value == Model.RoomTransform.Id.Value || (room.AdjacentRoomIds.Value.TryGetValue(m.RoomTransform.Id.Value, out var isOpen) && isOpen))
-						.FirstOrDefault(m => m.RadialBoundary.Contains(randomPosition));
+						.FirstOrDefault(m => m.Boundary.Contains(randomPosition));
 
 					if (nearestBuilding != null)
 					{

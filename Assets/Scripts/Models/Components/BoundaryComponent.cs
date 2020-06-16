@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IRadialBoundary : IRoomTransform
+	public interface IBoundary : IRoomTransform
 	{
-		RadialBoundaryComponent RadialBoundary { get; }
+		BoundaryComponent Boundary { get; }
 	}
 
-	public class RadialBoundaryComponent : Model
+	public class BoundaryComponent : Model
 	{
 		#region Serialized
 		[JsonProperty] float radius;
@@ -22,7 +22,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public Func<Vector3, bool> Contains;
 		#endregion
 		
-		public RadialBoundaryComponent()
+		public BoundaryComponent()
 		{
 			Radius = new ListenerProperty<float>(value => radius = value, () => radius);
 		}

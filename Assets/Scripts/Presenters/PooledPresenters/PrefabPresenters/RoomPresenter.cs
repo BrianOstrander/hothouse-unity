@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationTime.Changed += OnGameSimulationTime;
 
-			Model.RadialBoundary.Contains = OnRoomBoundaryContains;  
+			Model.Boundary.Contains = OnRoomBoundaryContains;  
 			
 			Model.IsRevealed.Changed += OnRoomIsRevealed;
 			Model.RevealDistance.Changed += OnRoomRevealDistance;
@@ -27,7 +27,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationTime.Changed -= OnGameSimulationTime;
 
-			Model.RadialBoundary.Contains = null;
+			Model.Boundary.Contains = null;
 			
 			Model.IsRevealed.Changed -= OnRoomIsRevealed;
 			Model.RevealDistance.Changed -= OnRoomRevealDistance;
