@@ -1,6 +1,7 @@
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.NumberDemon;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -13,7 +14,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationTime.Changed += OnGameSimulationTime;
 
-			Model.Boundary.Contains = OnRoomBoundaryContains;  
+			Model.Boundary.Contains = OnRoomBoundaryContains;
+			Model.Boundary.RandomPoint = OnRoomBoundaryRandomPoint;
 			
 			Model.IsRevealed.Changed += OnRoomIsRevealed;
 			Model.RevealDistance.Changed += OnRoomRevealDistance;
@@ -28,6 +30,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationTime.Changed -= OnGameSimulationTime;
 
 			Model.Boundary.Contains = null;
+			Model.Boundary.RandomPoint = null;
 			
 			Model.IsRevealed.Changed -= OnRoomIsRevealed;
 			Model.RevealDistance.Changed -= OnRoomRevealDistance;
@@ -117,6 +120,12 @@ namespace Lunra.Hothouse.Presenters
 		}
 
 		bool OnRoomBoundaryContains(Vector3 position) => View.BoundaryContains(position);
+
+		Vector3? OnRoomBoundaryRandomPoint(Demon generator)
+		{
+			if (View.NotVisible) return null;
+			return View.BoundaryRandomPoint(generator);
+		}
 		#endregion
 	}
 }

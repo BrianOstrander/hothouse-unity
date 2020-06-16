@@ -51,9 +51,41 @@ namespace Lunra.Hothouse.Views.Editor
 
 				GUIExtensions.PushEnabled(Application.isPlaying);
 				{
+					if (GUILayout.Button("Test Random Point", GUILayout.ExpandWidth(false)))
+					{
+						var generator = new Demon();
+						
+						for (var i = 0; i < 1000; i++)
+						{
+							var testPosition = typedTarget.BoundaryRandomPoint(generator);
+
+							if (testPosition.HasValue)
+							{
+								if (typedTarget.BoundaryContains(testPosition.Value))
+								{
+									Debug.DrawLine(
+										testPosition.Value,
+										testPosition.Value + (Vector3.up * 0.1f),
+										Color.green,
+										3f
+									);
+								}
+								else
+								{
+									Debug.DrawLine(
+										testPosition.Value,
+										testPosition.Value + (Vector3.up * 0.1f),
+										Color.red,
+										3f
+									);
+								}
+							}
+						}
+					}
+					
 					if (GUILayout.Button("Test Collision", GUILayout.ExpandWidth(false)))
 					{
-						for (var i = 0; i < 1000f; i++)
+						for (var i = 0; i < 1000; i++)
 						{
 							var testPosition = typedTarget.transform.position + Vector3.up;
 							var testDir = new Vector3(

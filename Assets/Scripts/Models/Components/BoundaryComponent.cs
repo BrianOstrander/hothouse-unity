@@ -1,5 +1,6 @@
 using System;
 using Lunra.Core;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace Lunra.Hothouse.Models
 
 		#region Non Serialized
 		[JsonIgnore] public Func<Vector3, bool> Contains;
+		[JsonIgnore] public Func<Demon, Vector3?> RandomPoint;
 		#endregion
 		
 		public BoundaryComponent()

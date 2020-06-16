@@ -26,7 +26,12 @@ namespace Lunra.Hothouse.Presenters
 			Model.Boundary.Radius.Value = View.NavigationColliderRadius;
 			Model.Light.IsLight.Value = View.IsLight;
 			
-			Model.Boundary.Contains = View.NavigationCollisionContains; 
+			Model.Boundary.Contains = View.NavigationCollisionContains;
+			Model.Boundary.RandomPoint = generator =>
+			{
+				Debug.LogError("Not Implimented");
+				return null;
+			};
 			
 			if (Model.Light.IsLight.Value)
 			{
@@ -60,6 +65,7 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Model.Boundary.Contains = null;
+			Model.Boundary.RandomPoint = null;
 
 			// ILightModel UnBindings
 			Game.SimulationUpdate -= OnLightSimulationUpdate;
