@@ -192,7 +192,11 @@ namespace Lunra.Hothouse.Presenters
 				
 				if (nearestFloraOfDifferentSpecies != null)
 				{
-					nearestFloraOfDifferentSpecies.Health.Damage(Model.SpreadDamage.Value); 
+					Damage.ApplyGeneric(
+						Model.SpreadDamage.Value,
+						Model,
+						nearestFloraOfDifferentSpecies
+					);
 					increaseReproductionFailures = false;
 				}
 				else if (Model.AttacksBuildings.Value)
@@ -205,7 +209,11 @@ namespace Lunra.Hothouse.Presenters
 
 					if (nearestBuilding != null)
 					{
-						nearestBuilding.Health.Damage(Model.SpreadDamage.Value);
+						Damage.ApplyGeneric(
+							Model.SpreadDamage.Value,
+							Model,
+							nearestBuilding
+						);
 						increaseReproductionFailures = false;
 					}
 				}

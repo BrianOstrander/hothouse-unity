@@ -308,8 +308,7 @@ namespace Lunra.Hothouse.Models
 		{
 			model.Type.Value = building;
 
-			model.Health.Current.Value = info.HealthMaximum;
-			model.Health.Maximum.Value = info.HealthMaximum;
+			model.Health.ResetToMaximum(info.HealthMaximum);
 			model.Inventory.Value = info.Inventory;
 			model.InventoryCapacity.Value = info.InventoryCapacity;
 			model.InventoryPermission.Value = info.InventoryPermission;

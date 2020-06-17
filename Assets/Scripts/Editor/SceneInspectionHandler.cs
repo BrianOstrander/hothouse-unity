@@ -96,7 +96,7 @@ namespace Lunra.Hothouse.Editor
 					if (model.Health.IsDamaged)
 					{
 						label += "\nHealth: " + model.Health.Current.Value + " / " + model.Health.Maximum.Value;
-						if (model.Health.IsDead) label += " - " + StringExtensions.Wrap("Dead", "<color=red>", "</color>");
+						if (model.Health.IsDestroyed) label += " - " + StringExtensions.Wrap("Dead", "<color=red>", "</color>");
 					}
 
 					if (SceneInspectionSettings.IsInspectingLightLevels.Value)
