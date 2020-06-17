@@ -39,7 +39,7 @@ namespace Lunra.Hothouse.Views.Editor
 				{
 					Tools.visibleLayers ^= LayerMask.GetMask(LayerNames.Unexplored);
 				}
-				
+
 				GUIExtensions.PushEnabled(!Application.isPlaying);
 				{
 					if (GUILayout.Button("Recache", GUILayout.ExpandWidth(false)))

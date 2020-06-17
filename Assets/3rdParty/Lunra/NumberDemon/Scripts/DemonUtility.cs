@@ -143,6 +143,8 @@ namespace Lunra.NumberDemon
 
 		public static Color NextColor => new Color(NextFloat, NextFloat, NextFloat);
 
+		public static Vector3 NextNormal => generator.NextNormal;
+		
 		public static byte[] GetNextBytes(int count) => generator.GetNextBytes(count);
 
 		/// <summary>

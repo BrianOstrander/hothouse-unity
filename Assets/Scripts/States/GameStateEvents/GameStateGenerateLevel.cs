@@ -299,7 +299,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 				while (0 < reproductionBudgetRemaining && 0 < failureBudgetRemaining)
 				{
-					if (flora.TriggerReproduction()) reproductionBudgetRemaining--;
+					if (flora.TriggerReproduction(generator)) reproductionBudgetRemaining--;
 					else failureBudgetRemaining--;
 				}
 			}

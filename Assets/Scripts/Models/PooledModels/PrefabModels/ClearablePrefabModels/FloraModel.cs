@@ -1,5 +1,6 @@
 ﻿using System;
 using Lunra.Core;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -37,7 +38,7 @@ namespace Lunra.Hothouse.Models
 		bool isReproducing;
 		[JsonIgnore] public DerivedProperty<bool, int, int> IsReproducing { get; }
 
-		[JsonIgnore] public Func<bool> TriggerReproduction;
+		[JsonIgnore] public Func<Demon, bool> TriggerReproduction;
 		#endregion
 		
 		public FloraModel()

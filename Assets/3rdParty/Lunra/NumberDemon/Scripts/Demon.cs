@@ -28,6 +28,13 @@ namespace Lunra.NumberDemon
 		public float NextFloat => (float)generator.NextDouble();
 
 		public Color NextColor => new Color(NextFloat, NextFloat, NextFloat);
+
+		public Vector3 NextNormal =>
+			new Vector3(
+				GetNextFloat(-1f, 1f),
+				GetNextFloat(-1f, 1f),
+				GetNextFloat(-1f, 1f)
+			).normalized;
 		#endregion
 
 		#region Methods

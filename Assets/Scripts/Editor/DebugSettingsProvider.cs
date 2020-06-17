@@ -4,6 +4,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using UnityEditor;
@@ -91,6 +92,22 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 			GUIExtensions.PopEnabled();
+			
+			if (GUILayout.Button("Test surface point gen"))
+			{
+				var gen = new Demon();
+				for (var i = 0; i < 1000; i++)
+				{
+					var pos = gen.NextNormal;
+						
+					Debug.DrawLine(
+						pos + (Vector3.up * 6f),
+						(pos + (Vector3.up * 6f)) + (pos * 0.1f),
+						Color.red,
+						10f
+					);
+				}
+			}
 
 			// if (GUILayout.Button(Content.OpenInspectorHandler)) InspectionHandler.OpenHandlerAsset();
 			// InspectionSettings.IsInspecting.Draw();

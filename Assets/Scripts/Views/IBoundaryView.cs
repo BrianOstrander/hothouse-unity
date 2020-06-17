@@ -71,14 +71,8 @@ namespace Lunra.Hothouse.Views
 					Debug.LogError("Unrecognized type: "+collider.GetType());
 					break;
 			}
-			
-			var angle = generator.GetNextFloat(-1f, 1f);
-			
-			var direction = new Vector3(
-				Mathf.Cos(angle),
-				0f,
-				Mathf.Sin(angle)
-			);
+
+			var direction = generator.NextNormal.NewY(0f).normalized;
 			
 			var ray0 = new Ray(
 				center - (direction * MaximumHitDistance),

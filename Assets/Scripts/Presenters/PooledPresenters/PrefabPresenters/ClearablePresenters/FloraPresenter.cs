@@ -1,16 +1,18 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
 using UnityEngine;
 using UnityEngine.AI;
-using Random = UnityEngine.Random;
 
 namespace Lunra.Hothouse.Presenters
 {
 	public class FloraPresenter : ClearablePresenter<FloraModel, FloraView>
 	{
+		Demon generator = new Demon();
+		
 		public FloraPresenter(GameModel game, FloraModel model) : base(game, model) { }
 
 		protected override void Bind()
@@ -95,11 +97,12 @@ namespace Lunra.Hothouse.Presenters
 			if (View.Visible) Game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
 		}
 
-		bool OnFloraTriggerReproduction()
+		bool OnFloraTriggerReproduction(Demon generatorOverride)
 		{
 			return TryReproducing(
 				false,
-				false
+				false,
+				generatorOverride
 			);
 		}
 		#endregion
@@ -107,9 +110,12 @@ namespace Lunra.Hothouse.Presenters
 		#region Utility
 		bool TryReproducing(
 			bool reproduceChildren = true,
-			bool incrementFailures = true
+			bool incrementFailures = true,
+			Demon generatorOverride = null
 		)
 		{
+			var currentGenerator = generatorOverride ?? generator;
+								
 			var nearbyFlora = Game.Flora.AllActive.Where(
 				f =>
 				{
@@ -121,7 +127,7 @@ namespace Lunra.Hothouse.Presenters
 				}
 			);
 
-			var randomPosition = Model.Transform.Position.Value + (Random.insideUnitSphere.NewY(0f).normalized * Model.ReproductionRadius.Value.Evaluate(DemonUtility.NextFloat));
+			var randomPosition = Model.Transform.Position.Value + (currentGenerator.NextNormal * Model.ReproductionRadius.Value.Evaluate(currentGenerator.NextFloat));
 
 			var increaseReproductionFailures = true;
 			
