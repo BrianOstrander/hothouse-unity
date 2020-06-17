@@ -20,10 +20,10 @@ namespace Lunra.Hothouse.Models
 		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		public HintsModel Hints { get; } = new HintsModel();
+		public RoomResolverModel RoomResolver { get; } = new RoomResolverModel();
 		public EventLogModel EventLog { get; } = new EventLogModel();
 		
-		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
-		
+		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>()
 		public RoomPoolModel Rooms { get; } = new RoomPoolModel();
 		public DoorPoolModel Doors { get; } = new DoorPoolModel();
 		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
@@ -31,7 +31,7 @@ namespace Lunra.Hothouse.Models
 		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
 		public FloraPoolModel Flora { get; } = new FloraPoolModel();
 		public ObligationIndicatorPoolModel ObligationIndicators { get; } = new ObligationIndicatorPoolModel();
-		public RoomResolverModel RoomResolver { get; } = new RoomResolverModel();
+		public SeekerPoolModel Seekers { get; } = new SeekerPoolModel();
 
 		[JsonProperty] float desireDamageMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> DesireDamageMultiplier { get; }

@@ -1,12 +1,13 @@
 using Lunra.Hothouse.Ai.Dweller;
+using Lunra.Hothouse.Ai.Seeker;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class SeekerPresenter : AgentPresenter<DwellerModel, SeekerView, DwellerStateMachine>
+	public class SeekerPresenter : AgentPresenter<SeekerModel, SeekerView, SeekerStateMachine>
 	{
-		public SeekerPresenter(GameModel game, DwellerModel model) : base(game, model) { }
+		public SeekerPresenter(GameModel game, SeekerModel model) : base(game, model) { }
 
 		protected override void Bind()
 		{
