@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Presenters
 		RoomModel room1;
 
 		public DoorPresenter(GameModel game, DoorModel model) : base(game, model) { }
-
+		
 		protected override void Bind()
 		{
 			room0 = Game.Rooms.FirstActive(Model.RoomConnection.Value.RoomId0);
@@ -47,6 +47,8 @@ namespace Lunra.Hothouse.Presenters
 			
 			base.UnBind();
 		}
+
+		protected override bool AutoShowCloseOnRoomReveal => false;
 
 		protected override void OnSimulationInitialized()
 		{

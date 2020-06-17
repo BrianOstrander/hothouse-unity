@@ -9,20 +9,14 @@ namespace Lunra.Hothouse.Presenters
 		where M : IClearableModel
 		where V : class, IClearableView
 	{
-		protected RoomModel Room { get; private set; }
-		
 		public ClearablePresenter(GameModel game, M model) : base(game, model) { }
 
 		protected override void Bind()
-		{
-			Room = Game.Rooms.FirstActive(Model.RoomTransform.Id.Value);
-			
+		{			
 			Model.MeleeRangeBonus.Value = View.MeleeRangeBonus;
 
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
-
-			Room.IsRevealed.Changed += OnRoomIsRevealed;
-				
+	
 			Model.SelectionState.Changed += OnClearableSelectionState;
 			Model.Health.Current.Changed += OnClearableHealthCurrent;
 			
@@ -32,8 +26,6 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
-			
-			Room.IsRevealed.Changed -= OnRoomIsRevealed;
 			
 			Model.SelectionState.Changed -= OnClearableSelectionState;
 			Model.Health.Current.Changed -= OnClearableHealthCurrent;
@@ -72,14 +64,6 @@ namespace Lunra.Hothouse.Presenters
 		
 		#region PooledModel Events
 		protected override bool CanShow() => Room.IsRevealed.Value;
-		#endregion
-		
-		#region RoomModel Events
-		void OnRoomIsRevealed(bool isRevealed)
-		{
-			if (isRevealed) Show();
-			else Close();
-		}
 		#endregion
 
 		#region ToolbarModel Events

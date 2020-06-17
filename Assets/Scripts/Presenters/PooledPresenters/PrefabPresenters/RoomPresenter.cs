@@ -40,6 +40,8 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 		}
 		
+		protected override bool AutoShowCloseOnRoomReveal => false;
+		
 		#region View Events
 		protected override void OnViewPrepare()
 		{
