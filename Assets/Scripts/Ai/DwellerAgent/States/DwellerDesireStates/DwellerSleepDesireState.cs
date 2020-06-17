@@ -1,6 +1,6 @@
 using Lunra.Hothouse.Models;
 
-namespace Lunra.Hothouse.Ai
+namespace Lunra.Hothouse.Ai.Dweller
 {
 	public class DwellerSleepDesireState : DwellerDesireState<DwellerSleepDesireState>
 	{

@@ -7,7 +7,7 @@ using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Lunra.Hothouse.Ai
+namespace Lunra.Hothouse.Ai.Dweller
 {
 	public static class DwellerUtility
 	{

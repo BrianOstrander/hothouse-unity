@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 
-namespace Lunra.Hothouse.Ai
+namespace Lunra.Hothouse.Ai.Seeker
 {
 	public class SeekerStateMachine : AgentStateMachine<GameModel, SeekerModel>
 	{

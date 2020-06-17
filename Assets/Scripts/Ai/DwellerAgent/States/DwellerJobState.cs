@@ -5,7 +5,7 @@ using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 
-namespace Lunra.Hothouse.Ai
+namespace Lunra.Hothouse.Ai.Dweller
 {
 	public abstract class DwellerJobState<S> : AgentState<GameModel, DwellerModel>
 		where S : DwellerJobState<S>

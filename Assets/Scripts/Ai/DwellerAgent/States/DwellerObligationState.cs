@@ -6,7 +6,7 @@ using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Lunra.Hothouse.Ai
+namespace Lunra.Hothouse.Ai.Dweller
 {
 	public class DwellerObligationState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>

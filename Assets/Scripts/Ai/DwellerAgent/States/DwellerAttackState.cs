@@ -3,7 +3,7 @@ using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 
-namespace Lunra.Hothouse.Ai
+namespace Lunra.Hothouse.Ai.Dweller
 {
 	public class DwellerAttackState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>

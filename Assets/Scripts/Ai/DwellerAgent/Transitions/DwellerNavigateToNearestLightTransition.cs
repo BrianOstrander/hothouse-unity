@@ -4,7 +4,7 @@ using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Lunra.Hothouse.Ai
+namespace Lunra.Hothouse.Ai.Dweller
 {
 	public class DwellerNavigateToNearestLightTransition<S> : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>

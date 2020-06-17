@@ -1,7 +1,7 @@
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Models.AgentModels;
 
-namespace Lunra.Hothouse.Ai
+namespace Lunra.Hothouse.Ai.Dweller
 {
 	public class DwellerNavigationTransition<S> : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>

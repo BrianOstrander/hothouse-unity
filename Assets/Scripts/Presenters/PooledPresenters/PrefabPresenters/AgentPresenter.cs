@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
-using Lunra.Hothouse.Ai;
+﻿using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
-using Lunra.StyxMvp;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
