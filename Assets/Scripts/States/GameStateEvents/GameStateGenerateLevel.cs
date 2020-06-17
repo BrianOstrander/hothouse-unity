@@ -252,6 +252,26 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 						failureBudgetRemaining--;
 						continue;
 					}
+
+					var collided = false;
+					
+					foreach (var possibleCollision in payload.Game.Flora.AllActive)
+					{
+						if (possibleCollision.RoomTransform.Id.Value != room.RoomTransform.Id.Value) continue;
+						if (possibleCollision.ReproductionRadius.Value.Maximum < Vector3.Distance(possibleCollision.Transform.Position.Value, hit.position)) continue;
+
+						collided = true;
+						break;
+					}
+
+					if (collided)
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+					
+					// var collision = payload.Game.Flora.AllActive
+					// 	.Any(f => f.RoomTransform.Id.Value == room.RoomTransform.Id && Vector3.Distance(f.Transform.Position.Value, hit.position) < ())
 					
 					payload.Game.Flora.ActivateAdult(
 						currentFloraConstraint.Species,
