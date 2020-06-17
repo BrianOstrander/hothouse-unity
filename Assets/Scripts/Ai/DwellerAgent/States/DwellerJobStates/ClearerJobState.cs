@@ -76,7 +76,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				target = World.GetClearables().FirstOrDefault(
+				target = Game.GetClearables().FirstOrDefault(
 					clearable =>
 					{
 						if (!clearable.IsMarkedForClearance.Value) return false;
@@ -116,7 +116,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 							if (!hasOverflow) return attackResult;
 
-							World.ItemDrops.Activate(
+							Game.ItemDrops.Activate(
 								"default",
 								target.RoomTransform.Id.Value,
 								target.Transform.Position.Value,
@@ -173,7 +173,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				target = World.GetClearables()
+				target = Game.GetClearables()
 					.Where(t => t.IsMarkedForClearance.Value && t.LightSensitive.IsLit)
 					.OrderBy(t => Vector3.Distance(Agent.Transform.Position.Value, t.Transform.Position.Value))
 					.FirstOrDefault();

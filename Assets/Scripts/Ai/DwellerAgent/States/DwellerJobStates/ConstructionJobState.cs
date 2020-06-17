@@ -165,7 +165,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					return;
 			}
 			
-			var constructionSite = World.Buildings.AllActive.FirstOrDefault(b => b.Id.Value == Agent.InventoryPromise.Value.TargetId);
+			var constructionSite = Game.Buildings.AllActive.FirstOrDefault(b => b.Id.Value == Agent.InventoryPromise.Value.TargetId);
 			
 			if (constructionSite == null)
 			{
@@ -223,7 +223,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						itemsToLoad = salvageSite.SalvageInventory.Value;
 						return true;
 					},
-					World.Buildings.AllActive
+					Game.Buildings.AllActive
 				);
 
 				if (target == null) return false;
@@ -263,7 +263,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 
 				target = GetNearestItemSource(
-					World,
+					Game,
 					Agent,
 					out _,
 					out var entrancePosition,
@@ -277,7 +277,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				var constructionSite = World.Buildings.AllActive.First(b => b.Id.Value == promise.TargetId);
+				var constructionSite = Game.Buildings.AllActive.First(b => b.Id.Value == promise.TargetId);
 				
 				Agent.InventoryPromise.Value = promise;
 				constructionSite.ConstructionInventoryPromised.Value += promise.Inventory;
@@ -307,7 +307,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 
 				var target = GetNearestItemSource(
-					World,
+					Game,
 					Agent,
 					out path,
 					out _,
@@ -339,7 +339,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					return false;
 				}
 				
-				target = World.Buildings.AllActive.FirstOrDefault(
+				target = Game.Buildings.AllActive.FirstOrDefault(
 					m =>
 					{
 						if (m.Id.Value != Agent.InventoryPromise.Value.TargetId) return false;
@@ -389,7 +389,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						if (b.BuildingState.Value != BuildingStates.Constructing) return false;
 						return b.Id.Value == Agent.InventoryPromise.Value.TargetId;
 					},
-					World.Buildings.AllActive
+					Game.Buildings.AllActive
 				);
 
 				return target != null;
@@ -416,7 +416,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						if (salvageSite.BuildingState.Value != BuildingStates.Salvaging) return false;
 						return !salvageSite.SalvageInventory.Value.IsEmpty;
 					},
-					World.Buildings.AllActive
+					Game.Buildings.AllActive
 				);
 
 				return target != null;

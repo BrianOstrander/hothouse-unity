@@ -87,7 +87,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
 						return currentlyValidItems.Any(i => b.InventoryCapacity.Value.HasCapacityFor(b.Inventory.Value, i));
 					},
-					World.Buildings.AllActive
+					Game.Buildings.AllActive
 				);
 
 				if (target == null) return false;
@@ -137,7 +137,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
 						return currentlyValidItems.Any(i => b.InventoryCapacity.Value.HasCapacityFor(b.Inventory.Value, i));
 					},
-					World.Buildings.AllActive
+					Game.Buildings.AllActive
 				);
 
 				return target != null;
@@ -164,7 +164,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.CleanupWithdrawal) return false;
 
-				target = World.ItemDrops.FirstOrDefaultActive(Agent.InventoryPromise.Value.TargetId);
+				target = Game.ItemDrops.FirstOrDefaultActive(Agent.InventoryPromise.Value.TargetId);
 
 				if (target == null)
 				{
@@ -213,7 +213,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				return DwellerUtility.CalculateNearestCleanupWithdrawal(
 					Agent,
-					World,
+					Game,
 					SourceState.validItems,
 					SourceState.validJobs,
 					out targetPath,

@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public ToJobOnShiftBegin(S jobState) => this.jobState = jobState; 
 			
-			public override bool IsTriggered() => jobState.Job == Agent.Job.Value && Agent.JobShift.Value.Contains(World.SimulationTime.Value);
+			public override bool IsTriggered() => jobState.Job == Agent.Job.Value && Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
 		}
 		
 		protected class ToIdleOnJobUnassigned : AgentTransition<IdleState, GameModel, DwellerModel>
@@ -56,7 +56,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public ToIdleOnShiftEnd(S jobState) => this.jobState = jobState; 
 			
-			public override bool IsTriggered() => !Agent.JobShift.Value.Contains(World.SimulationTime.Value);
+			public override bool IsTriggered() => !Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
 
 			public override void Transition()
 			{
@@ -120,7 +120,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						break;
 					case InventoryTrigger.OnGreaterThanZeroAndShiftOver:
 						if (Agent.Inventory.Value.IsEmpty) return false;
-						if (Agent.JobShift.Value.Contains(World.SimulationTime.Value)) return false;
+						if (Agent.JobShift.Value.Contains(Game.SimulationTime.Value)) return false;
 						break;
 				}
 
@@ -170,7 +170,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					var itemEnumerable = new[] { item };
 					var isValid = DwellerUtility.CalculateNearestCleanupWithdrawal(
 						Agent,
-						World,
+						Game,
 						itemEnumerable,
 						validJobs,
 						out _,
@@ -227,7 +227,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 						return false;
 					},
-					World.Buildings.AllActive
+					Game.Buildings.AllActive
 				);
 
 				itemsAvailable = itemsWithBuildingInventoryCapacityResult;
@@ -268,7 +268,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				if (Agent.Obligation.Value.IsEnabled) return true;
-				target = World.GetObligationsAvailable()
+				target = Game.GetObligationsAvailable()
 					.GetIndividualObligations(o => o.State == Obligation.States.Available && o.IsValidJob(Agent.Job.Value))
 					.OrderBy(e => e.Obligation.Priority)
 					.FirstOrDefault();

@@ -3,29 +3,29 @@ using Lunra.Hothouse.Models;
 
 namespace Lunra.Hothouse.Ai
 {
-    public abstract class AgentState<W, A>
+    public abstract class AgentState<G, A>
         where A : AgentModel
     {
         public virtual string Name => GetType().Name;
         
-        public List<AgentState<W, A>> ChildStates { get; } = new List<AgentState<W, A>>();
+        public List<AgentState<G, A>> ChildStates { get; } = new List<AgentState<G, A>>();
         
-        public List<IAgentTransition<W, A>> Transitions { get; } = new List<IAgentTransition<W, A>>();
+        public List<IAgentTransition<G, A>> Transitions { get; } = new List<IAgentTransition<G, A>>();
         
-        public W World { get; private set; }
+        public G Game { get; private set; }
         public A Agent { get; private set; }
 
         public void Initialize(
-            W world,
+            G game,
             A agent
         )
         {
-            World = world;
+            Game = game;
             Agent = agent;
             
             OnInitialize();
             
-            foreach (var transition in Transitions) transition.Initialize(world, agent, this);
+            foreach (var transition in Transitions) transition.Initialize(game, agent, this);
         }
 
         public virtual void OnInitialize() { }
@@ -34,8 +34,8 @@ namespace Lunra.Hothouse.Ai
         public virtual void Idle() { }
         public virtual void End() { }
         
-        public void AddChildStates(params AgentState<W, A>[] childStates) => ChildStates.AddRange(childStates);
+        public void AddChildStates(params AgentState<G, A>[] childStates) => ChildStates.AddRange(childStates);
         
-        public void AddTransitions(params IAgentTransition<W, A>[] transitions) => Transitions.AddRange(transitions);
+        public void AddTransitions(params IAgentTransition<G, A>[] transitions) => Transitions.AddRange(transitions);
     }
 }

@@ -3,11 +3,11 @@ using Lunra.Hothouse.Models;
 
 namespace Lunra.Hothouse.Ai
 {
-	public interface IAgentTransition<W, A>
+	public interface IAgentTransition<G, A>
 		where A : AgentModel
 	{
 		string Name { get; }
-		W World { get; }
+		G Game { get; }
 		A Agent { get; }
 		Type TargetState { get; }
 		
@@ -15,17 +15,17 @@ namespace Lunra.Hothouse.Ai
 
 		void Transition();
 		
-		void Initialize(W world, A agent, AgentState<W, A> sourceState);
+		void Initialize(G game, A agent, AgentState<G, A> sourceState);
 	}
 	
-	public abstract class AgentTransition<S0, S1, W, A> : IAgentTransition<W, A>
-		where S0 : AgentState<W, A>
-		where S1 : AgentState<W, A>
+	public abstract class AgentTransition<S0, S1, G, A> : IAgentTransition<G, A>
+		where S0 : AgentState<G, A>
+		where S1 : AgentState<G, A>
 		where A : AgentModel
 	{
 		public virtual string Name => GetType().Name;
 		
-		public W World { get; private set; }
+		public G Game { get; private set; }
 		public A Agent { get; private set; }
 
 		public Type TargetState => typeof(S1);
@@ -36,19 +36,19 @@ namespace Lunra.Hothouse.Ai
 		public virtual void Transition() {}
 
 		public virtual void Initialize(
-			W world,
+			G game,
 			A agent,
-			AgentState<W, A> sourceState
+			AgentState<G, A> sourceState
 		)
 		{
-			World = world;
+			Game = game;
 			Agent = agent;
 			SourceState = sourceState as S0;
 		}
 	}
 	
-	public abstract class AgentTransition<S, W, A> : AgentTransition<AgentState<W, A>, S, W, A>
-		where S : AgentState<W, A>
+	public abstract class AgentTransition<S, G, A> : AgentTransition<AgentState<G, A>, S, G, A>
+		where S : AgentState<G, A>
 		where A : AgentModel
 	{ }
 }

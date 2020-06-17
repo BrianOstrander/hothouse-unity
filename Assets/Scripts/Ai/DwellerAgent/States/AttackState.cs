@@ -49,7 +49,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void Idle()
 		{
-			cooldownElapsed += World.SimulationDelta;
+			cooldownElapsed += Game.SimulationDelta;
 
 			if (cooldownElapsed < Agent.MeleeCooldown.Value) return;
 

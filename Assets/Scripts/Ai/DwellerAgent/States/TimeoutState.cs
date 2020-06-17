@@ -62,9 +62,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			Reset();
 			configuration.TimeoutType = Types.Time;
-			configuration.TimeoutBeginDayTime = World.SimulationTime.Value;
+			configuration.TimeoutBeginDayTime = Game.SimulationTime.Value;
 			configuration.TimeoutDayTime = new DayTime(
-				timeOfDay < World.SimulationTime.Value.Time ? World.SimulationTime.Value.Day + 1 : World.SimulationTime.Value.Day,
+				timeOfDay < Game.SimulationTime.Value.Time ? Game.SimulationTime.Value.Day + 1 : Game.SimulationTime.Value.Day,
 				timeOfDay
 			);
 
@@ -78,8 +78,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			Reset();
 			configuration.TimeoutType = Types.Time;
-			configuration.TimeoutBeginDayTime = World.SimulationTime.Value;
-			configuration.TimeoutDayTime = DayTime.Max(World.SimulationTime.Value, atDayTime);
+			configuration.TimeoutBeginDayTime = Game.SimulationTime.Value;
+			configuration.TimeoutDayTime = DayTime.Max(Game.SimulationTime.Value, atDayTime);
 
 			configuration.Updated = updated;
 		}
@@ -98,13 +98,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 			switch (configuration.TimeoutType)
 			{
 				case Types.Interval:
-					configuration.TimeoutInterval = configuration.TimeoutInterval.Update(World.SimulationDelta);
+					configuration.TimeoutInterval = configuration.TimeoutInterval.Update(Game.SimulationDelta);
 					progress = configuration.TimeoutInterval.Normalized;
 					break;
 				case Types.Time:
 					// TODO: Does this really return a negative ever? that's probably not great...
 					var total = Mathf.Abs((configuration.TimeoutDayTime - configuration.TimeoutBeginDayTime).TotalTime);
-					var remaining = Mathf.Abs((configuration.TimeoutDayTime - World.SimulationTime.Value).TotalTime);
+					var remaining = Mathf.Abs((configuration.TimeoutDayTime - Game.SimulationTime.Value).TotalTime);
 					// TODO: This isn't super tested...
 					progress = Mathf.Approximately(0f, total) ? 1f : Mathf.Min(remaining / total, 1f);
 					break;
@@ -132,7 +132,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		
 		class ToReturnOnTimeElapsed : AgentTransition<TimeoutState<S>, S, GameModel, DwellerModel>
 		{
-			public override bool IsTriggered() => SourceState.configuration.TimeoutType == Types.Time && SourceState.configuration.TimeoutDayTime <= World.SimulationTime.Value;
+			public override bool IsTriggered() => SourceState.configuration.TimeoutType == Types.Time && SourceState.configuration.TimeoutDayTime <= Game.SimulationTime.Value;
 		}
 		
 		class ToReturnOnInvalid : AgentTransition<TimeoutState<S>, S, GameModel, DwellerModel>

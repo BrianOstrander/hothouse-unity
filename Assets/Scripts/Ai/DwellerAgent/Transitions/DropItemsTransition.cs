@@ -22,7 +22,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void Transition()
 		{
-			World.ItemDrops.Activate(
+			Game.ItemDrops.Activate(
 				"default",
 				Agent.RoomTransform.Id.Value,
 				Agent.Transform.Position.Value,

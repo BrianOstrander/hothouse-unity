@@ -53,7 +53,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			);
 		}
 
-		bool CanEmoteMissedDesire => Agent.DesireMissedEmoteTimeout.Value < (World.SimulationPlaytimeElapsed.Value - lastEmotedMissedDesire).Seconds;
+		bool CanEmoteMissedDesire => Agent.DesireMissedEmoteTimeout.Value < (Game.SimulationPlaytimeElapsed.Value - lastEmotedMissedDesire).Seconds;
 
 		IEnterableModel CalculateNearestAvailableEntranceToEmoteMissedDesire(
 			out NavMeshPath path,
@@ -64,7 +64,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				Agent.Transform.Position.Value,
 				out path,
 				out entrancePosition,
-				World.Buildings.AllActive.Where(m => m.IsBuildingState(BuildingStates.Operating) && m.Light.IsLightActive()).ToArray()
+				Game.Buildings.AllActive.Where(m => m.IsBuildingState(BuildingStates.Operating) && m.Light.IsLightActive()).ToArray()
 			);
 		}
 		
@@ -85,7 +85,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						return false;
 				}
 				
-				return Agent.Desire.Value == desireState.Desire && !Agent.JobShift.Value.Contains(World.SimulationTime.Value);
+				return Agent.Desire.Value == desireState.Desire && !Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
 			}
 		}
 		
@@ -100,11 +100,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			public override string Name => base.Name + "<" + SourceState.Name + ">";
 
-			public override bool IsTriggered() => Agent.JobShift.Value.Contains(World.SimulationTime.Value);
+			public override bool IsTriggered() => Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
 
 			public override void Transition()
 			{
-				if (Agent.GetDesireDamage(SourceState.Desire, World, out var damage))
+				if (Agent.GetDesireDamage(SourceState.Desire, Game, out var damage))
 				{
 					if (Damage.GetDamageTypeFromDesire(SourceState.Desire, out var damageType))
 					{
@@ -127,7 +127,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override bool IsTriggered()
 			{
-				target = SourceState.GetNearestDesireBuilding(World, Agent, out _, out var entrancePosition);
+				target = SourceState.GetNearestDesireBuilding(Game, Agent, out _, out var entrancePosition);
 
 				if (target == null) return false;
 
@@ -150,7 +150,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override bool IsTriggered()
 			{
-				target = SourceState.GetNearestDesireBuilding(World, Agent, out targetPath, out _);
+				target = SourceState.GetNearestDesireBuilding(Game, Agent, out targetPath, out _);
 
 				return target != null;
 			}
@@ -181,7 +181,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					Agent.JobShift.Value.Begin,
 					delta =>
 					{
-						if (delta.IsDone) SourceState.lastEmotedMissedDesire = World.SimulationPlaytimeElapsed.Value; 	
+						if (delta.IsDone) SourceState.lastEmotedMissedDesire = Game.SimulationPlaytimeElapsed.Value; 	
 					}
 				);
 				Agent.DesireUpdated(Agent.Desire.Value, false);

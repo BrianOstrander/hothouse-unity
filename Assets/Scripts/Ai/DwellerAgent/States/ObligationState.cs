@@ -62,7 +62,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			if (string.IsNullOrEmpty(initialTargetId))
 			{
 				// First time coming in with a fresh obligation...
-				target = World.
+				target = Game.
 					GetObligations(
 						m =>
 						{

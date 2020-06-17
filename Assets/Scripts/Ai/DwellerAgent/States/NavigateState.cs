@@ -33,12 +33,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void Idle()
 		{
-			if (Agent.NavigationPlan.Value.Created < World.NavigationMesh.LastUpdated.Value && Agent.NavigationPlan.Value.State != NavigationPlan.States.NavigatingForced)
+			if (Agent.NavigationPlan.Value.Created < Game.NavigationMesh.LastUpdated.Value && Agent.NavigationPlan.Value.State != NavigationPlan.States.NavigatingForced)
 			{
 				if (!CalculatePath()) return;
 			}
 			
-			Agent.NavigationPlan.Value = Agent.NavigationPlan.Value.Next(Agent.NavigationVelocity.Value * World.SimulationDelta);
+			Agent.NavigationPlan.Value = Agent.NavigationPlan.Value.Next(Agent.NavigationVelocity.Value * Game.SimulationDelta);
 		}
 
 		bool CalculatePath()
