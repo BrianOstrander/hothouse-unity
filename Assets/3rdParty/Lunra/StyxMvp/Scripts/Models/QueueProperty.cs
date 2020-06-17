@@ -99,6 +99,7 @@ namespace Lunra.StyxMvp.Models
 		}
 
 		public T Peek() => queue.Peek();
+		public T[] PeekAll() => queue.ToArray();
 
 		public QueueProperty(
 			Queue<T> queue,

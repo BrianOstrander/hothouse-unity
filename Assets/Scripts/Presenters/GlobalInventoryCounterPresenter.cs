@@ -4,6 +4,7 @@ using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
@@ -68,6 +69,17 @@ namespace Lunra.Hothouse.Presenters
 				}
 				
 				result += StringExtensions.Wrap(type + ": " + count + " / " + maximum + "\n", "<color="+color+">", "</color>");
+			}
+
+			result += "\n";
+
+			var dwellerEvents = game.EventLog.DwellerEntries.PeekAll()
+				.Where(e => DayTime.Elapsed(game.SimulationTime.Value, e.SimulationTime).TotalTime < (DayTime.TimeInDay * 2f))
+				.ToList();
+			
+			for (var i = 0; i < Mathf.Min(10, dwellerEvents.Count); i++)
+			{
+				result += "\n - " + dwellerEvents[i];
 			}
 
 			View.Label = result;

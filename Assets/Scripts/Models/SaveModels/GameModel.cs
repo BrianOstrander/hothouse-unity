@@ -20,6 +20,7 @@ namespace Lunra.Hothouse.Models
 		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		public HintsModel Hints { get; } = new HintsModel();
+		public EventLogModel EventLog { get; } = new EventLogModel();
 		
 		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
 		
