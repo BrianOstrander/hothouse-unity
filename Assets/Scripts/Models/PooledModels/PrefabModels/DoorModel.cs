@@ -18,6 +18,8 @@ namespace Lunra.Hothouse.Models
                 RoomId0 = roomId0;
                 RoomId1 = roomId1;
             }
+
+            public override string ToString() => "{ " + RoomId0 + " , " + RoomId1 + " } ";
         }
         
         #region Serialized
@@ -42,7 +44,7 @@ namespace Lunra.Hothouse.Models
             RoomConnection = new ListenerProperty<Connection>(value => roomConnection = value, () => roomConnection);
         }
 
-        public bool IsConnnection(string roomId) => RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId;
+        public bool IsConnnecting(string roomId) => RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId;
         
         public bool IsOpenTo(string roomId) => IsOpen.Value && (RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId);
 
@@ -52,9 +54,17 @@ namespace Lunra.Hothouse.Models
             return (roomConnection.RoomId0 == roomId0 && roomConnection.RoomId1 == roomId1) || (roomConnection.RoomId0 == roomId1 && roomConnection.RoomId1 == roomId0);
         }
 
-        public override string ToString()
+        public bool GetConnection(
+            string fromRoomId,
+            out string toRoomId
+        )
         {
-            return (IsOpen.Value ? "Open" : "Closed") + " { " + RoomConnection.Value.RoomId0 + " , " + RoomConnection.Value.RoomId1 + " } ";
+            toRoomId = null;
+            if (!IsConnnecting(fromRoomId)) return false;
+            toRoomId = fromRoomId == RoomConnection.Value.RoomId0 ? RoomConnection.Value.RoomId1 : RoomConnection.Value.RoomId0;
+            return true;
         }
+
+        public override string ToString() => (IsOpen.Value ? "Open" : "Closed") + " " + RoomConnection.Value;
     }
 }

@@ -13,14 +13,28 @@ namespace Lunra.StyxMvp.Services
 	
 	public class Heartbeat
 	{
+		public ulong UpdateCount { get; private set; } = ulong.MinValue;
+		public ulong FixedUpdateCount { get; private set; } = ulong.MinValue;
+		
 		public event Action Update = ActionExtensions.Empty;
 		public event Action LateUpdate = ActionExtensions.Empty;
+		public event Action FixedUpdate = ActionExtensions.Empty;
 
 		public event Action<Action> DrawGizmos = ActionExtensions.GetEmpty<Action>();
 
-		public void TriggerUpdate() => Update();
+		public void TriggerUpdate()
+		{
+			Update();
+			UpdateCount++;
+		}
 
 		public void TriggerLateUpdate() => LateUpdate();
+		
+		public void TriggerFixedUpdate()
+		{
+			FixedUpdate();
+			FixedUpdateCount++;
+		}
 
 		public void TriggerDrawGizmos()
 		{
@@ -33,19 +47,36 @@ namespace Lunra.StyxMvp.Services
 			);	
 		}
 
-		public void Wait(
+		public void WaitForSeconds(
 			Action done,
 			float seconds,
 			bool checkInstantly = false
 		)
 		{
-			if (done == null) throw new ArgumentNullException(nameof(done));
 			if (seconds < 0f) throw new ArgumentOutOfRangeException(nameof(seconds), "Cannot be less than zero.");
 			var endtime = DateTime.Now.AddSeconds(seconds);
-			Wait(done, () => endtime < DateTime.Now, checkInstantly);
+			WaitForCondition(done, () => endtime < DateTime.Now, checkInstantly);
 		}
 
-		public void Wait(
+		public void WaitForUpdate(Action done)
+		{
+			var endCount = UpdateCount + 1;
+			WaitForCondition(
+				done,
+				() => endCount <= UpdateCount
+			);
+		}
+		
+		public void WaitForFixedUpdate(Action done)
+		{
+			var endCount = FixedUpdateCount + 1;
+			WaitForCondition(
+				done,
+				() => endCount<= FixedUpdateCount
+			);
+		}
+
+		public void WaitForCondition(
 			Action done,
 			Func<bool> condition,
 			bool checkInstantly = false
@@ -54,7 +85,7 @@ namespace Lunra.StyxMvp.Services
 			if (done == null) throw new ArgumentNullException(nameof(done));
 			if (condition == null) throw new ArgumentNullException(nameof(condition));
 
-			Wait(status => done(), condition, checkInstantly);
+			WaitForCondition(status => done(), condition, checkInstantly);
 		}
 
 		/// <summary>
@@ -63,7 +94,7 @@ namespace Lunra.StyxMvp.Services
 		/// <param name="done">Done.</param>
 		/// <param name="condition">Condition.</param>
 		/// <param name="checkInstantly">Runs the event this frame, instead of waiting a frame for the first time it's called.</param>
-		public Action Wait(
+		public Action WaitForCondition(
 			Action<WaitResults> done,
 			Func<bool> condition,
 			bool checkInstantly = false

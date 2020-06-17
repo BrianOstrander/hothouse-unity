@@ -66,6 +66,7 @@ namespace Lunra.Hothouse.Presenters
 		#region GameModel Events
 		void OnDwellersAll(GenericPrefabPoolModel<DwellerModel>.Reservoir all)
 		{
+			if (!game.IsSimulating.Value) return;
 			if (all.Active.Any()) return;
 
 			Show("All your dwellers died!");
@@ -73,6 +74,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnLastLightUpdate(LightDelta lightUpdate)
 		{
+			if (!game.IsSimulating.Value) return;
 			if (lightUpdate.State != LightDelta.States.Calculated) return;
 			if (game.GetLightsActive().Any(l => l.Light.IsLightActive())) return;
 			

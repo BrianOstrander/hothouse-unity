@@ -21,15 +21,16 @@ namespace Lunra.Hothouse.Models
 		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
 		public HintsModel Hints { get; } = new HintsModel();
 		
-		public GenericPrefabPoolModel<RoomPrefabModel> Rooms { get; } = new GenericPrefabPoolModel<RoomPrefabModel>();
 		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
 		
+		public RoomPoolModel Rooms { get; } = new RoomPoolModel();
 		public DoorPoolModel Doors { get; } = new DoorPoolModel();
 		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
 		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
 		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
 		public FloraPoolModel Flora { get; } = new FloraPoolModel();
 		public ObligationIndicatorPoolModel ObligationIndicators { get; } = new ObligationIndicatorPoolModel();
+		public RoomResolverModel RoomResolver { get; } = new RoomResolverModel();
 
 		[JsonProperty] float desireDamageMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> DesireDamageMultiplier { get; }
@@ -119,6 +120,9 @@ namespace Lunra.Hothouse.Models
 		GameCache cache = GameCache.Default();
 		readonly ListenerProperty<GameCache> cacheListener;
 		[JsonIgnore] public ReadonlyProperty<GameCache> Cache { get; }
+		
+		bool isSimulating;
+		[JsonIgnore] public ListenerProperty<bool> IsSimulating { get; }
 		#endregion
 		
 		#region Events
@@ -142,6 +146,7 @@ namespace Lunra.Hothouse.Models
 				() => cache,
 				out cacheListener
 			);
+			IsSimulating = new ListenerProperty<bool>(value => isSimulating = value, () => isSimulating);
 		}
 
 		public void TriggerSimulationInitialize()
@@ -157,6 +162,8 @@ namespace Lunra.Hothouse.Models
 			SimulationInitialize();
 		}
 
+		public void ResetSimulationInitialized() => IsSimulationInitialized = false;
+
 		public void InitializeCache()
 		{
 			// This is a little broken but ok...
@@ -170,7 +177,7 @@ namespace Lunra.Hothouse.Models
 			var result = new Dictionary<string, bool>();
 
 			var allRoomIds = Doors.AllActive
-				.Where(d => d.IsConnnection(roomId))
+				.Where(d => d.IsConnnecting(roomId))
 				.SelectMany(d => new[] {d.RoomConnection.Value.RoomId0, d.RoomConnection.Value.RoomId1})
 				.Distinct();
 
@@ -187,7 +194,7 @@ namespace Lunra.Hothouse.Models
 			return result;
 		}
 		
-		public IEnumerable<RoomPrefabModel> GetOpenAdjacentRooms(params string[] roomIds)
+		public IEnumerable<RoomModel> GetOpenAdjacentRooms(params string[] roomIds)
 		{
 			var results = Rooms.AllActive.Where(r => roomIds.Contains(r.RoomTransform.Id.Value)).ToList();
 
@@ -206,9 +213,9 @@ namespace Lunra.Hothouse.Models
 			return results;
 		}
 
-		public Dictionary<string, List<RoomPrefabModel>> GetOpenAdjacentRoomsMap(params string[] roomIds)
+		public Dictionary<string, List<RoomModel>> GetOpenAdjacentRoomsMap(params string[] roomIds)
 		{
-			var result = new Dictionary<string, List<RoomPrefabModel>>();
+			var result = new Dictionary<string, List<RoomModel>>();
 			foreach (var roomId in roomIds)
 			{
 				result.Add(

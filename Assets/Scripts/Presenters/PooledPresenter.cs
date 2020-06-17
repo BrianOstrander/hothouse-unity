@@ -36,14 +36,16 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.HasPresenter.Value = true;
 
-			if (string.IsNullOrEmpty(Model.Id.Value)) Model.Id.Value = Guid.NewGuid().ToString();
+			// I don't think I need this...
+			//if (string.IsNullOrEmpty(Model.Id.Value)) Model.Id.Value = Guid.NewGuid().ToString();
+		
+			Model.PooledState.Changed += OnPooledState;
 			
-			Bind();
+			OnPooledState(Model.PooledState.Value);
 		}
 
 		protected virtual void Bind()
 		{
-			Model.PooledState.Changed += OnPooledState;
 			Model.Transform.Position.Changed += OnPosition;
 			Model.Transform.Rotation.Changed += OnRotation;
 			
@@ -55,7 +57,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
-			Model.PooledState.Changed -= OnPooledState;
 			Model.Transform.Position.Changed -= OnPosition;
 			Model.Transform.Rotation.Changed -= OnRotation;
 			
@@ -64,7 +65,6 @@ namespace Lunra.Hothouse.Presenters
 		
 		void Initialize()
 		{
-			OnPooledState(Model.PooledState.Value);
 			OnInitialized();
 		}
 		
@@ -122,9 +122,11 @@ namespace Lunra.Hothouse.Presenters
 			{
 				case PooledStates.InActive:
 					Close();
+					UnBind();
 					break;
 				case PooledStates.Active:
-					Show();
+					Bind();
+					if (CanShow()) Show();
 					break;
 				default:
 					Debug.LogError("Unrecognized state: " + pooledState);
@@ -136,19 +138,21 @@ namespace Lunra.Hothouse.Presenters
 				Game.NavigationMesh.QueueCalculation();
 			}
 		}
+
+		protected virtual bool CanShow() => true;
 		#endregion
 		
 		#region ITransform Events
 		protected virtual void OnPosition(Vector3 position)
 		{
-			if (IsNotActive || View.NotVisible) return;
+			if (View.NotVisible) return;
 
 			View.RootTransform.position = position;
 		}
 		
 		protected virtual void OnRotation(Quaternion rotation)
 		{
-			if (IsNotActive || View.NotVisible) return;
+			if (View.NotVisible) return;
 			
 			View.RootTransform.rotation = rotation;
 		}
@@ -156,8 +160,6 @@ namespace Lunra.Hothouse.Presenters
 		
 		#region Utility
 		protected virtual bool QueueNavigationCalculation => false;
-		protected bool IsActive => Model.PooledState.Value == PooledStates.Active;
-		protected bool IsNotActive => !IsActive;
 		#endregion
 	}
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
@@ -7,11 +8,20 @@ namespace Lunra.Hothouse.Presenters
 {
 	public class DoorPresenter : PrefabPresenter<DoorModel, DoorView>
 	{
-		public DoorPresenter(GameModel game, DoorModel model) : base(game, model) { }
+		RoomModel room0;
+		RoomModel room1;
 
+		public DoorPresenter(GameModel game, DoorModel model) : base(game, model) { }
+		
 		protected override void Bind()
 		{
+			room0 = Game.Rooms.FirstActive(Model.RoomConnection.Value.RoomId0);
+			room1 = Game.Rooms.FirstActive(Model.RoomConnection.Value.RoomId1);
+			
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
+
+			room0.IsRevealed.Changed += OnRoomIsRevealed;
+			room1.IsRevealed.Changed += OnRoomIsRevealed;
 			
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
 			Model.LightSensitive.LightLevel.Changed += OnLightLevel;
@@ -26,6 +36,9 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
+			room0.IsRevealed.Changed -= OnRoomIsRevealed;
+			room1.IsRevealed.Changed -= OnRoomIsRevealed;
+			
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
 			Model.LightSensitive.LightLevel.Changed -= OnLightLevel;
 			
@@ -33,6 +46,13 @@ namespace Lunra.Hothouse.Presenters
 			Model.Enterable.Entrances.Changed -= OnEnterableEntrances;
 			
 			base.UnBind();
+		}
+
+		protected override bool AutoShowCloseOnRoomReveal => false;
+
+		protected override void OnSimulationInitialized()
+		{
+			OnRoomIsRevealed(CanShow());
 		}
 
 		protected override void OnViewPrepare()
@@ -76,11 +96,22 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 		
+		#region PooledModel Events
+		protected override bool CanShow() => room0.IsRevealed.Value || room1.IsRevealed.Value;
+		#endregion
+		
+		#region RoomModel Events
+		void OnRoomIsRevealed(bool isRevealed)
+		{
+			if (isRevealed) Show();
+			else Close();
+		}
+		#endregion
+		
 		#region NavigationMeshModel Events
 		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
 		{
 			if (calculationState != NavigationMeshModel.CalculationStates.Completed) return;
-			if (IsNotActive) return;
 			
 			Model.RecalculateEntrances();
 		}
@@ -127,7 +158,6 @@ namespace Lunra.Hothouse.Presenters
 		#region ObligationModel Events
 		void OnObligationObligations(Obligation[] obligations, object source)
 		{
-			if (IsNotActive) return;
 			if (source == this) return;
 
 			foreach (var obligation in obligations)
@@ -165,7 +195,6 @@ namespace Lunra.Hothouse.Presenters
 		#region EnterableModel Events
 		void OnEnterableEntrances(Entrance[] entrances)
 		{
-			if (IsNotActive) return;
 			RecalculateObligations();
 		}
 		#endregion

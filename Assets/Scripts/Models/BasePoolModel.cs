@@ -122,9 +122,8 @@ namespace Lunra.Hothouse.Models
 			foreach (var model in models) model.PooledState.SetValue(PooledStates.InActive, this);
 		}
 
-		// protected virtual void CheckActivationValid(M model) { }
-		// Assert.IsFalse(string.IsNullOrEmpty(result.RoomId.Value), "Cannot have a null or empty RoomId");
-		
+		protected void InActivateAll() => InActivate(AllActive);
+
 		#region Events
 		void OnPooledState(
 			M model,

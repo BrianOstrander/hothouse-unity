@@ -315,7 +315,7 @@ namespace Lunra.Hothouse.Editor
 				Handles.color = Color.yellow.NewA(0.05f);
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
-					var yOffset = 0f;
+					var yOffset = 0.01f;
 					foreach (var model in gameState.Payload.Game.GetLightsActive().Where(l => l.Light.IsLightActive()))
 					{
 						Handles.DrawSolidDisc(
@@ -363,19 +363,29 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 
+			var inspectedRooms = new List<string>();
+
 			if (SceneInspectionSettings.IsInspectingRooms.Value)
 			{
 				foreach (var model in gameState.Payload.Game.Rooms.AllActive)
 				{
-					// var label = GetId(model);
-					var label = model.Id.Value;
+					if (1 < model.RevealDistance.Value) continue;
+					
+					inspectedRooms.Add(model.RoomTransform.Id.Value);
+					
+					var label = GetId(model);
 
+					if (model.IsSpawn.Value) label += "\nIs Spawn: true";
+					if (model.IsExit.Value) label += "\nIs Exit: true";
+					
+					label += "\nSpawn Distance: " + model.SpawnDistance.Value;
+					label += "\nReveal Distance: " + model.RevealDistance.Value;
+					
 					label += "\nConnections";
 
 					foreach (var kv in model.AdjacentRoomIds.Value)
 					{
-						// label += "\n  " + Model.ShortenId(kv.Key) + " : ";
-						label += "\n  " + kv.Key + " : ";
+						label += "\n  " + Model.ShortenId(kv.Key) + " : ";
 
 						if (kv.Value) label += "<color=green>Open";
 						else label += "<color=red>Closed";
@@ -383,6 +393,34 @@ namespace Lunra.Hothouse.Editor
 						label += "</color>";
 					}
 
+					var labelColor = "<color=cyan>";
+					
+					Handles.Label(
+						model.Transform.Position.Value + (Vector3.up * 6f),
+						StringExtensions.Wrap(
+							label,
+							labelColor,
+							"</color>"
+						),
+						labelStyle
+					);
+				}
+			}
+
+			if (SceneInspectionSettings.IsInspectingDoors.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Doors.AllActive)
+				{
+					if (!inspectedRooms.Contains(model.RoomTransform.Id.Value)) continue;
+					
+					var label = GetId(model);
+
+					label += "\nRoomId: " + model.RoomTransform.ShortId;
+					
+					label += "\nRoomId0: " + Model.ShortenId(model.RoomConnection.Value.RoomId0);
+					label += "\nRoomId1: " + Model.ShortenId(model.RoomConnection.Value.RoomId1);
+					label += "\nConnectedRoomId: " + Model.ShortenId(model.LightSensitive.ConnectedRoomId.Value);
+					
 					var labelColor = "<color=cyan>";
 					
 					Handles.Label(

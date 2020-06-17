@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
@@ -142,7 +143,9 @@ namespace Lunra.NumberDemon
 
 		public static Color NextColor => new Color(NextFloat, NextFloat, NextFloat);
 
-		public static byte[] GetNextBytes(int count) { return generator.GetNextBytes(count); }
+		public static Vector3 NextNormal => generator.NextNormal;
+		
+		public static byte[] GetNextBytes(int count) => generator.GetNextBytes(count);
 
 		/// <summary>
 		/// Gets the next integer between the inclusive minimum and exclusive maximum.
@@ -150,7 +153,7 @@ namespace Lunra.NumberDemon
 		/// <returns>The next integer.</returns>
 		/// <param name="min">Min, included.</param>
 		/// <param name="max">Max, excluded.</param>
-		public static int GetNextInteger(int min = 0, int max = int.MaxValue) { return generator.GetNextInteger(min, max); }
+		public static int GetNextInteger(int min = 0, int max = int.MaxValue) => generator.GetNextInteger(min, max);
 
 		/// <summary>
 		/// Gets the next float between the inclusive minimum and exclusive maximum.
@@ -158,6 +161,8 @@ namespace Lunra.NumberDemon
 		/// <returns>The next float.</returns>
 		/// <param name="min">Min, included.</param>
 		/// <param name="max">Max, excluded.</param>
-		public static float GetNextFloat(float min = 0f, float max = float.MaxValue) { return generator.GetNextFloat(min, max); }
+		public static float GetNextFloat(float min = 0f, float max = float.MaxValue) => generator.GetNextFloat(min, max);
+
+		public static T GetNextFrom<T>(IEnumerable<T> entries, T fallback = default) => generator.GetNextFrom(entries, fallback);
 	}
 }

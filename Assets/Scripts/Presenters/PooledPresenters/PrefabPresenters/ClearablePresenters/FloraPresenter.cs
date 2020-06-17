@@ -1,16 +1,18 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
 using UnityEngine;
 using UnityEngine.AI;
-using Random = UnityEngine.Random;
 
 namespace Lunra.Hothouse.Presenters
 {
 	public class FloraPresenter : ClearablePresenter<FloraModel, FloraView>
 	{
+		Demon generator = new Demon();
+		
 		public FloraPresenter(GameModel game, FloraModel model) : base(game, model) { }
 
 		protected override void Bind()
@@ -18,6 +20,8 @@ namespace Lunra.Hothouse.Presenters
 			base.Bind();
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
+
+			Model.TriggerReproduction = OnFloraTriggerReproduction;
 
 			Model.Health.Current.Changed += OnFloraHealthCurrent;
 			Model.IsReproducing.Changed += OnFloraIsReproducing;
@@ -28,6 +32,8 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
+			
+			Model.TriggerReproduction = null;
 
 			Model.Health.Current.Changed -= OnFloraHealthCurrent;
 			Model.IsReproducing.Changed -= OnFloraIsReproducing;
@@ -90,20 +96,38 @@ namespace Lunra.Hothouse.Presenters
 			
 			if (View.Visible) Game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
 		}
+
+		bool OnFloraTriggerReproduction(Demon generatorOverride)
+		{
+			return TryReproducing(
+				false,
+				false,
+				generatorOverride
+			);
+		}
 		#endregion
 		
 		#region Utility
-		void TryReproducing()
+		bool TryReproducing(
+			bool reproduceChildren = true,
+			bool incrementFailures = true,
+			Demon generatorOverride = null
+		)
 		{
+			var currentGenerator = generatorOverride ?? generator;
+								
 			var nearbyFlora = Game.Flora.AllActive.Where(
 				f =>
 				{
-					if (f.RoomTransform.Id.Value != Model.RoomTransform.Id.Value) return false;
+					if (f.RoomTransform.Id.Value != Model.RoomTransform.Id.Value)
+					{
+						if (!Room.AdjacentRoomIds.Value.TryGetValue(f.RoomTransform.Id.Value, out var openTo) || !openTo) return false;
+					}
 					return Vector3.Distance(f.Transform.Position.Value, Model.Transform.Position.Value) < (f.ReproductionRadius.Value.Maximum + Model.ReproductionRadius.Value.Maximum);
 				}
 			);
 
-			var randomPosition = Model.Transform.Position.Value + (Random.insideUnitSphere.NewY(0f).normalized * Model.ReproductionRadius.Value.Evaluate(DemonUtility.NextFloat));
+			var randomPosition = Model.Transform.Position.Value + (currentGenerator.NextNormal * Model.ReproductionRadius.Value.Evaluate(currentGenerator.NextFloat));
 
 			var increaseReproductionFailures = true;
 			
@@ -130,11 +154,22 @@ namespace Lunra.Hothouse.Presenters
 								{
 									increaseReproductionFailures = false;
 
-									Game.Flora.ActivateChild(
-										Model.Species.Value,
-										roomView.RoomId,
-										hit.position
-									);		
+									if (reproduceChildren)
+									{
+										Game.Flora.ActivateChild(
+											Model.Species.Value,
+											roomView.RoomId,
+											hit.position
+										);
+									}
+									else
+									{
+										Game.Flora.ActivateAdult(
+											Model.Species.Value,
+											roomView.RoomId,
+											hit.position
+										);
+									}
 								}
 							}
 						}
@@ -166,7 +201,7 @@ namespace Lunra.Hothouse.Presenters
 					var room = Game.Rooms.FirstActive(Model.RoomTransform.Id.Value);
 					var nearestBuilding = Game.Buildings.AllActive
 						.Where(m => m.RoomTransform.Id.Value == Model.RoomTransform.Id.Value || (room.AdjacentRoomIds.Value.TryGetValue(m.RoomTransform.Id.Value, out var isOpen) && isOpen))
-						.FirstOrDefault(m => m.RadialBoundary.Contains(randomPosition));
+						.FirstOrDefault(m => m.Boundary.Contains(randomPosition));
 
 					if (nearestBuilding != null)
 					{
@@ -176,9 +211,11 @@ namespace Lunra.Hothouse.Presenters
 				}
 			}
 			
-			if (increaseReproductionFailures) Model.ReproductionFailures.Value++;
+			if (increaseReproductionFailures && incrementFailures) Model.ReproductionFailures.Value++;
 			
 			Model.ReproductionElapsed.Value = Interval.WithMaximum(Model.ReproductionElapsed.Value.Maximum);
+
+			return !increaseReproductionFailures;
 		}
 		#endregion
 	}

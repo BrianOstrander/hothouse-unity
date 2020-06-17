@@ -4,7 +4,9 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Presenters;
+using Lunra.Hothouse.Services.GameStateEvents;
 using Lunra.StyxMvp;
+using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
 using UnityEngine;
 
@@ -30,12 +32,15 @@ namespace Lunra.Hothouse.Services
 		{
 			App.S.PushBlocking(OnBeginLoadScenes);
 			App.S.PushBlocking(OnBeginInstantiatePresenters);
-			App.S.PushBlocking(OnBeginInitializeLighting);
 			App.S.PushBlocking(
 				OnBeginInitializeNavigationMesh,
 				() => Payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
 			);
-			App.S.Push(Payload.Game.TriggerSimulationInitialize);
+			
+			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
+
+			if (Payload.Game.Rooms.AllActive.None()) new GameStateGenerateLevel(this).Push();
+			
 			App.S.PushBlocking(OnBeginInitializeCache);
 		}
 
@@ -64,9 +69,10 @@ namespace Lunra.Hothouse.Services
 			new BuildValidationPresenter(Payload.Game);
 			new GlobalInventoryCounterPresenter(Payload.Game);
 
-			Payload.Game.Rooms.Initialize(m => new RoomPrefabPresenter(Payload.Game, m));
-			Payload.Game.Buildings.Initialize(Payload.Game);
+			new RoomResolverPresenter(Payload.Game);
 			
+			Payload.Game.Buildings.Initialize(Payload.Game);
+			Payload.Game.Rooms.Initialize(Payload.Game);
 			Payload.Game.Doors.Initialize(Payload.Game);
 			Payload.Game.Debris.Initialize(Payload.Game);
 			Payload.Game.Flora.Initialize(Payload.Game);
@@ -74,30 +80,11 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.Dwellers.Initialize(Payload.Game);
 			Payload.Game.ObligationIndicators.Initialize(Payload.Game);
 			
-			
-			done();
-		}
-
-		void OnBeginInitializeNavigationMesh() => Payload.Game.NavigationMesh.TriggerInitialize();
-
-		void OnBeginInitializeLighting(Action done)
-		{
-			switch (Payload.Game.LastLightUpdate.Value.State)
-			{
-				case LightDelta.States.Calculated:
-					done();
-					return;
-				case LightDelta.States.Unknown:
-					Payload.Game.LastLightUpdate.Value = Payload.Game.LastLightUpdate.Value.SetRoomStale(
-						Payload.Game.Rooms.AllActive.Select(r => r.Id.Value).ToArray()
-					);
-					break;
-			}
-			CalculateLighting();
-
 			done();
 		}
 		
+		void OnBeginInitializeNavigationMesh() => Payload.Game.NavigationMesh.TriggerInitialize();
+
 		void OnBeginInitializeCache(Action done)
 		{
 			Payload.Game.InitializeCache(); 
@@ -113,9 +100,10 @@ namespace Lunra.Hothouse.Services
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 			App.Heartbeat.LateUpdate += OnHeartbeatLateUpdate;
-			
+
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
+			
 			// App.Heartbeat.Wait(
 			// 	() =>
 			// 	{
@@ -129,6 +117,8 @@ namespace Lunra.Hothouse.Services
 
 		void OnHeartbeatUpdate()
 		{
+			if (!Payload.Game.IsSimulating.Value) return;
+			
 			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
 			Payload.Game.SimulationUpdate();
 			
@@ -158,7 +148,7 @@ namespace Lunra.Hothouse.Services
 			
 			App.Heartbeat.Update -= OnHeartbeatUpdate;
 			App.Heartbeat.LateUpdate -= OnHeartbeatLateUpdate;
-			
+
 			Payload.Game.CalculateMaximumLighting = null;
 			
 			App.S.RequestState(
@@ -188,48 +178,53 @@ namespace Lunra.Hothouse.Services
 		{
 			Time.timeScale = multiplier;
 		}
+		
 		#endregion
 		
 		#region Utility
-		void CalculateLighting()
+		public void CalculateLighting()
 		{
 			// TODO: This seems messy, ideally we should calculate only things sensitive to light, and if a room has
 			// been set stale, assume it's because a light was placed in there and calculate all sensitive objects in
 			// and around that room.
 			
-			Dictionary<string, List<RoomPrefabModel>> roomMap;
+			IEnumerable<RoomModel> rooms;
 			IEnumerable<ILightSensitiveModel> lightSensitives;
-			
-			if (Payload.Game.LastLightUpdate.Value.SensitiveIds.Any())
-			{
-				lightSensitives = Payload.Game.GetLightSensitives().Where(l => Payload.Game.LastLightUpdate.Value.SensitiveIds.Contains(l.Id.Value));
-				roomMap = Payload.Game.GetOpenAdjacentRoomsMap(
-					Payload.Game.LastLightUpdate.Value.RoomIds
-						.Union(lightSensitives.Select(l => l.RoomTransform.Id.Value))
-						.ToArray()
-				);
 
-				if (Payload.Game.LastLightUpdate.Value.RoomIds.Any()) lightSensitives = Payload.Game.GetLightSensitives();
+			rooms = Payload.Game.Rooms.AllActive.Where(room => room.IsRevealed.Value);
+
+			if (Payload.Game.LastLightUpdate.Value.RoomIds.None() && Payload.Game.LastLightUpdate.Value.SensitiveIds.Any())
+			{
+				lightSensitives = Payload.Game.GetLightSensitives()
+					.Where(lightSensitive => Payload.Game.LastLightUpdate.Value.SensitiveIds.Contains(lightSensitive.Id.Value));
 			}
 			else
 			{
-				roomMap = Payload.Game.GetOpenAdjacentRoomsMap(Payload.Game.LastLightUpdate.Value.RoomIds);
-				lightSensitives = Payload.Game.GetLightSensitives();
-			}
-
-			var allRooms = roomMap.Values.SelectMany(v => v).Distinct();
-			var allLights = Payload.Game.GetLightsActive().Where(l => allRooms.Any(r => r.RoomTransform.Id.Value == l.RoomTransform.Id.Value)).ToList();
-
-			foreach (var lightSensitive in lightSensitives)
-			{
-				if (!roomMap.TryGetValue(lightSensitive.RoomTransform.Id.Value, out var rooms)) continue;
-
-				lightSensitive.LightSensitive.LightLevel.Value = OnCalculateMaximumLighting(
-					lightSensitive.Transform.Position.Value,
-					allLights.Where(l => rooms.Any(r => r.RoomTransform.Id.Value == l.RoomTransform.Id.Value))
-				);
+				lightSensitives = Payload.Game.GetLightSensitives()
+					.Where(
+						lightSensitive => rooms.Any(
+							r =>
+							{
+								if (lightSensitive.RoomTransform.Id.Value == r.RoomTransform.Id.Value) return true;
+								if (!lightSensitive.LightSensitive.HasConnectedRoomId) return false;
+								return lightSensitive.LightSensitive.ConnectedRoomId.Value == r.RoomTransform.Id.Value;
+							}
+						)
+					);	
 			}
 			
+			var allLights = Payload.Game.GetLightsActive()
+				.Where(light => rooms.Any(room => room.RoomTransform.Id.Value == light.RoomTransform.Id.Value))
+				.ToList();
+			
+			foreach (var lightSensitive in lightSensitives)
+			{
+				lightSensitive.LightSensitive.LightLevel.Value = OnCalculateMaximumLighting(
+					lightSensitive.Transform.Position.Value,
+					allLights
+				);
+			}
+
 			Payload.Game.LastLightUpdate.Value = LightDelta.Calculated();
 		}
 
@@ -243,8 +238,8 @@ namespace Lunra.Hothouse.Services
 		)
 		{
 			var result = new LightingResult();
-			
-			var rooms = Payload.Game.GetOpenAdjacentRooms(request.RoomId);
+
+			var rooms = Payload.Game.Rooms.AllActive.Where(r => r.IsRevealed.Value);
 
 			bool isLightNotExceptedAndInRoom(ILightModel light)
 			{

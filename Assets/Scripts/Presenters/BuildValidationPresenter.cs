@@ -76,7 +76,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			lastLightValueCalculated = game.CalculateMaximumLighting(
 				(
-					game.Rooms.AllActive.First().Id.Value,
+					interaction.RoomId,
 					interaction.Value.Begin,
 					new ILightModel[] { game.Toolbar.Building.Value }
 				)
@@ -125,7 +125,7 @@ namespace Lunra.Hothouse.Presenters
 			{
 				// if (!game.Toolbar.Building.Value.BoundaryContains(flora.Transform.Position.Value)) return false;
 				if (room.Id.Value != flora.RoomTransform.Id.Value && !room.AdjacentRoomIds.Value.ContainsKey(flora.RoomTransform.Id.Value)) return false;
-				return game.Toolbar.Building.Value.RadialBoundary.Contains(flora.Transform.Position.Value);
+				return game.Toolbar.Building.Value.Boundary.Contains(flora.Transform.Position.Value);
 			}
 			
 			if (game.Flora.AllActive.Any(IsFloraColliding))

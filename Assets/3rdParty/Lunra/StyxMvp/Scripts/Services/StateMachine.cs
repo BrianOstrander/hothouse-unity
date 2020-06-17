@@ -222,7 +222,7 @@ namespace Lunra.StyxMvp.Services
 			}
 		}
 
-		public bool Is(Type isState, Events isEvent) { return isState == CurrentState && isEvent == CurrentEvent; }
+		public bool Is(Type isState, params Events[] validEvents) { return isState == CurrentState && (validEvents.None() || validEvents.Contains(currentEvent)); }
 
 		public IState CurrentHandler => currentState;
 
@@ -369,7 +369,7 @@ namespace Lunra.StyxMvp.Services
 			void waiter(Action done)
 			{
 				action();
-				heartbeat.Wait(done, condition);
+				heartbeat.WaitForCondition(done, condition);
 			}
 
 			OnPushBlocking(
@@ -419,7 +419,7 @@ namespace Lunra.StyxMvp.Services
 			string synchronizedId
 		)
 		{
-			if (action == null) throw new ArgumentNullException(nameof(action));
+			if (action == null) throw new ArgumentNullException(nameof(action), "Cannot provide a null action");
 			if (state == null) throw new ArgumentException("Cannot bind to null state");
 			if (stateEvent == Events.Unknown) throw new ArgumentException("Cannot bind to Events.Unknown");
 
@@ -475,6 +475,9 @@ namespace Lunra.StyxMvp.Services
 			Debug.LogWarning("Break Pushed");
 			Debug.Break();
 		}
+
+		public void PushWaitForUpdate() => PushBlocking(done => App.Heartbeat.WaitForUpdate(done));
+		public void PushWaitForFixedUpdate() => PushBlocking(done => App.Heartbeat.WaitForFixedUpdate(done));
 
 		public IEntryImmutable[] GetEntries() { return entries.Cast<IEntryImmutable>().ToArray(); }
 		

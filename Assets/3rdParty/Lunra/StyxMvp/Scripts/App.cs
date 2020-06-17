@@ -106,7 +106,7 @@ namespace Lunra.StyxMvp
 
 		public void LateUpdate() => heartbeat.TriggerLateUpdate();
 
-		public void FixedUpdate() { }
+		public void FixedUpdate() => heartbeat.TriggerFixedUpdate();
 
 		public void OnApplicationPause(bool paused) { }
 

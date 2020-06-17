@@ -30,7 +30,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnObligationIndicatorTargetInstance(IObligationModel targetInstance)
 		{
 			Assert.IsFalse(
-				targetInstance == lastTargetInstance,
+				!(targetInstance == null && targetInstance == null) && targetInstance == lastTargetInstance,
 				"It should not be possible for this event to fire if the current and last instances match: "+targetInstance+" and "+lastTargetInstance
 			);
 			

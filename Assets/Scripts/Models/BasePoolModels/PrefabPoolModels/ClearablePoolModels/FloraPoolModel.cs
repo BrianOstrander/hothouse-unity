@@ -70,10 +70,8 @@ namespace Lunra.Hothouse.Models
 			{
 				FloraSpecies.Grass,
 				new SpeciesInfo(
-					// new FloatRange(0.1f, 1f), 
-					// new FloatRange(0.1f, 0.25f),
-					new FloatRange(1f, 2f), 
-					new FloatRange(4f, 8f),
+					new FloatRange(30f, 60f), 
+					new FloatRange(30f, 60f),
 					new FloatRange(0.5f, 1f),
 					Defaults.ReproductionFailureLimit,
 					100f,
@@ -90,8 +88,8 @@ namespace Lunra.Hothouse.Models
 			{
 				FloraSpecies.Shroom,
 				new SpeciesInfo(
-					new FloatRange(1f, 2f), 
-					new FloatRange(1f, 2f), 
+					new FloatRange(4f, 16f), 
+					new FloatRange(10f, 20f), 
 					new FloatRange(0.75f, 1.25f),
 					Defaults.ReproductionFailureLimit,
 					100f,
@@ -108,7 +106,7 @@ namespace Lunra.Hothouse.Models
 				FloraSpecies.Wheat,
 				new SpeciesInfo(
 					new FloatRange(10f, 20f), 
-					new FloatRange(8f, 16f), 
+					new FloatRange(120f, 200f), 
 					new FloatRange(0.5f, 1f),
 					Defaults.ReproductionFailureLimit,
 					100f,

@@ -6,6 +6,38 @@ namespace Lunra.Editor.Core
 {
     public static class EditorStylesExtensions
     {
+        static GUIStyle labelRichText;
+
+        public static GUIStyle LabelRichText
+        {
+            get
+            {
+                if (labelRichText == null)
+                {
+                    labelRichText = new GUIStyle(EditorStyles.label);
+                    labelRichText.richText = true;
+                }
+
+                return labelRichText;
+            }
+        }
+        
+        static GUIStyle buttonRichText;
+
+        public static GUIStyle ButtonRichText
+        {
+            get
+            {
+                if (buttonRichText == null)
+                {
+                    buttonRichText = new GUIStyle(EditorStyles.miniButton);
+                    buttonRichText.richText = true;
+                }
+
+                return buttonRichText;
+            }
+        }
+        
         static Stack<bool> textAreaWordWrapStack = new Stack<bool>();
         static Stack<TextAnchor> buttonTextAnchorStack = new Stack<TextAnchor>();
         

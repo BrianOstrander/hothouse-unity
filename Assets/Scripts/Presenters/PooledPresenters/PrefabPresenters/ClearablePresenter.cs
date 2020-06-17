@@ -12,11 +12,11 @@ namespace Lunra.Hothouse.Presenters
 		public ClearablePresenter(GameModel game, M model) : base(game, model) { }
 
 		protected override void Bind()
-		{
+		{			
 			Model.MeleeRangeBonus.Value = View.MeleeRangeBonus;
 
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
-				
+	
 			Model.SelectionState.Changed += OnClearableSelectionState;
 			Model.Health.Current.Changed += OnClearableHealthCurrent;
 			
@@ -41,7 +41,6 @@ namespace Lunra.Hothouse.Presenters
 		#region ClearableModel Events
 		void OnClearableSelectionState(SelectionStates selectionState)
 		{
-			if (IsNotActive) return;
 			if (View.NotVisible) return;
 			
 			switch (selectionState)
@@ -59,15 +58,17 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnClearableHealthCurrent(float health)
 		{
-			if (IsNotActive) return;
 			if (Mathf.Approximately(0f, health)) Model.PooledState.Value = PooledStates.InActive;
 		}
+		#endregion
+		
+		#region PooledModel Events
+		protected override bool CanShow() => Room.IsRevealed.Value;
 		#endregion
 
 		#region ToolbarModel Events
 		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)
 		{
-			if (IsNotActive) return;
 			if (Model.IsMarkedForClearance.Value) return;
 			if (interaction.State == Interaction.States.OutOfRange) return;
 			

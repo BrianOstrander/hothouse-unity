@@ -4,6 +4,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using UnityEditor;
@@ -25,7 +26,8 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent OpenDebugSettingsProvider = new GUIContent("Open Debug Settings Provider");
 			public static GUIContent OpenSaveLocation = new GUIContent("Open save location");
 			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard");
-			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation"); 
+			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
+			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
 		}
 		
 		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
@@ -40,7 +42,8 @@ namespace Lunra.Hothouse.Editor
 				Content.OpenDebugSettingsProvider.text,
 				Content.OpenSaveLocation.text,
 				Content.SaveAndCopySerializedGameToClipboard.text,
-				Content.QueueNavigationCalculation.text
+				Content.QueueNavigationCalculation.text,
+				Content.RevealAllRooms.text
 			};
 			
 			return provider;
@@ -57,6 +60,10 @@ namespace Lunra.Hothouse.Editor
 			{
 				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
 				if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
+				if (GUILayout.Button(Content.RevealAllRooms))
+				{
+					foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
+				}
 				
 				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 
@@ -89,6 +96,22 @@ namespace Lunra.Hothouse.Editor
 			}
 			GUIExtensions.PopEnabled();
 			
+			if (GUILayout.Button("Test surface point gen"))
+			{
+				var gen = new Demon();
+				for (var i = 0; i < 1000; i++)
+				{
+					var pos = gen.NextNormal;
+						
+					Debug.DrawLine(
+						pos + (Vector3.up * 6f),
+						(pos + (Vector3.up * 6f)) + (pos * 0.1f),
+						Color.red,
+						10f
+					);
+				}
+			}
+
 			// if (GUILayout.Button(Content.OpenInspectorHandler)) InspectionHandler.OpenHandlerAsset();
 			// InspectionSettings.IsInspecting.Draw();
 			// InspectionSettings.IsInspectingBuildings.Draw();

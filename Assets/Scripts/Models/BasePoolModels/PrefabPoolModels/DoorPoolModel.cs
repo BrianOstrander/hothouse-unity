@@ -1,21 +1,19 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Lunra.Core;
-using Lunra.Hothouse.Models.AgentModels;
 using Lunra.Hothouse.Presenters;
-using Lunra.Hothouse.Views;
-using Lunra.NumberDemon;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
 	public class DoorPoolModel : BasePrefabPoolModel<DoorModel>
 	{
-		static readonly string[] ValidPrefabIds = new[]
-		{
-			"default"
-		};
+		public delegate DoorModel ActivateDoor(
+			string id,
+			string prefabId,
+			string roomId0,
+			string roomId1,
+			Vector3 position,
+			Quaternion rotation
+		);
 
 		GameModel game;
 		
@@ -28,6 +26,8 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public DoorModel Activate(
+			string id,
+			string prefabId,
 			string roomId0,
 			string roomId1,
 			Vector3 position,
@@ -35,13 +35,19 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			return Activate(
-				ValidPrefabIds.Random(),
+				prefabId,
 				roomId0,
 				position,
 				rotation,
 				m =>
 				{
+					m.Id.Value = id;
+					m.IsOpen.Value = false;
+					m.Obligations.All.Value = new Obligation[0];
 					m.RoomConnection.Value = new DoorModel.Connection(roomId0, roomId1);
+					m.LightSensitive.ConnectedRoomId.Value = roomId1;
+					
+					m.Enterable.Reset();
 				}
 			);
 		}
