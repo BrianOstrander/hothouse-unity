@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Ai.Seeker
 		{
 			return new List<AgentState<GameModel, SeekerModel>>
 			{
-				// (DefaultState = new DwellerIdleState())
+				(DefaultState = new IdleState())
 			};
 		}
 	}

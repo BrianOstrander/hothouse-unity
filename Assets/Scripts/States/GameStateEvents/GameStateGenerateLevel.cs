@@ -18,6 +18,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		RoomResolverRequest request;
 		
 		DateTime beginTime;
+
+		RoomModel spawn;
 		
 		public GameStateGenerateLevel(GameState state)
 		{
@@ -80,7 +82,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var spawnOptions = payload.Game.Rooms.AllActive
 				.Where(r => request.SpawnDoorCountRequired <= r.AdjacentRoomIds.Value.Count);
 			
-			var spawn = generator.GetNextFrom(spawnOptions);
+			spawn = generator.GetNextFrom(spawnOptions);
 
 			if (spawn == null)
 			{
@@ -256,10 +258,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateDwellers(Action done)
 		{
-			var spawn = payload.Game.Rooms.FirstActive(r => r.IsSpawn.Value);
-
-			// spawn.IsRevealed.Value = true;
-		
 			var dweller0 = payload.Game.Dwellers.Activate(
 				spawn.Id.Value,
 				spawn.Transform.Position.Value
@@ -291,9 +289,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		}
 
 		void OnGenerateStartingBuildings(Action done)
-		{
-			var spawn = payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
-			
+		{	
 			var bonfire = payload.Game.Buildings.Activate(
 				Buildings.Bonfire,
 				spawn.Id.Value,
@@ -349,6 +345,11 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		
 		void OnEnd()
 		{
+			payload.Game.Seekers.Activate(
+				spawn.RoomTransform.Id.Value,
+				spawn.Transform.Position.Value + (Vector3.right * 4f)
+			);
+			
 			var elapsedTime = DateTime.Now - beginTime;
 			
 			Debug.Log("Generated "+payload.Game.Rooms.AllActive.Length+" rooms in "+elapsedTime.TotalSeconds.ToString("N2")+" seconds for seed "+generator.Seed);

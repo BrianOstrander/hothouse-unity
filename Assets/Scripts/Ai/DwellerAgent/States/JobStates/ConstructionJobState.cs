@@ -30,7 +30,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				)
 				.ToDictionary(b => b, b => false);
 
-			var itemSourceResult = DwellerUtility.CalculateNearestAvailableOperatingEntrance(
+			var itemSourceResult = AgentUtility.CalculateNearestAvailableOperatingEntrance(
 				agent.Transform.Position.Value,
 				out path,
 				out entrancePosition,
@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						var kv = validConstructionSites.ElementAt(index);
 						if (!kv.Value)
 						{
-							var navigationValid = DwellerUtility.CalculateNearestEntrance(
+							var navigationValid = AgentUtility.CalculateNearestEntrance(
 								agent.Transform.Position.Value,
 								out _,
 								out _,
@@ -210,7 +210,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 				
-				target = DwellerUtility.CalculateNearestAvailableEntrance(
+				target = AgentUtility.CalculateNearestAvailableEntrance(
 					Agent.Transform.Position.Value,
 					out _,
 					out var entrancePosition,
@@ -378,7 +378,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
 
-				var target = DwellerUtility.CalculateNearestAvailableEntrance(
+				var target = AgentUtility.CalculateNearestAvailableEntrance(
 					Agent.Transform.Position.Value,
 					out path,
 					out _,
@@ -405,7 +405,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 
-				var target = DwellerUtility.CalculateNearestAvailableEntrance(
+				var target = AgentUtility.CalculateNearestAvailableEntrance(
 					Agent.Transform.Position.Value,
 					out path,
 					out _,

@@ -53,6 +53,62 @@ namespace Lunra.Hothouse.Editor
 			var obligationIdsHandled = new List<string>();
 
 			string GetId(IModel model) => "Id: " + model.ShortId;
+
+			void AppendAgentState(ref string label, AgentModel model)
+			{
+				if (!Mathf.Approximately(model.Health.Current.Value, model.Health.Maximum.Value)) label += "\nHealth: " + model.Health.Current.Value.ToString("N1") + " / " + model.Health.Maximum.Value.ToString("N1");
+				
+				label += "\nState: " + model.Context.CurrentState;
+				
+				if (SceneInspectionSettings.IsInspectingObligations.Value)
+				{
+					label += "\nObligationPromise: ";
+
+					if (model.Obligation.Value.IsEnabled)
+					{
+						var obligation = gameState.Payload.Game.GetObligations()
+							.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.PromiseId == model.Obligation.Value.ObligationPromiseId)
+							.FirstOrDefault();
+
+						if (obligation.Model == null)
+						{
+							label += "Missing ObligationId \"" + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + "\" or TargetId \"" + Model.ShortenId(model.Obligation.Value.TargetId) + "\"";
+						}
+						else
+						{
+							label += Model.ShortenId(model.Obligation.Value.TargetId) + "[ " + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
+						}
+					}
+					else label += "None";
+				}
+				
+				label += GetInventory(
+					"Inventory",
+					model.Inventory.Value,
+					model.InventoryCapacity.Value,
+					InventoryVisibilities.IfMaximumGreaterThanZero
+					
+				);
+
+				if (model.InventoryPromise.Value.Operation != InventoryPromise.Operations.None)
+				{
+					label += GetInventory(
+						model.InventoryPromise.Value.Operation+"Promise",
+						model.InventoryPromise.Value.Inventory
+					);
+				}
+
+				switch (model.NavigationPlan.Value.State)
+				{
+					case NavigationPlan.States.Navigating:
+						var nodes = model.NavigationPlan.Value.Nodes;
+						for (var i = 1; i < nodes.Length; i++) Debug.DrawLine(nodes[i - 1], nodes[i], Color.green);
+						break;
+					case NavigationPlan.States.Invalid:
+						Debug.DrawLine(model.NavigationPlan.Value.Position, model.NavigationPlan.Value.EndPosition, Color.red);
+						break;
+				}
+			}
 			
 			bool AppendObligations(ref string label, IObligationModel model)
 			{
@@ -75,7 +131,6 @@ namespace Lunra.Hothouse.Editor
 
 				return true;
 			}
-			
 
 			if (SceneInspectionSettings.IsInspectingBuildings.Value)
 			{
@@ -200,67 +255,38 @@ namespace Lunra.Hothouse.Editor
 				{
 					var label = GetId(model);
 
-					if (!Mathf.Approximately(model.Health.Current.Value, model.Health.Maximum.Value)) label += "\nHealth: " + model.Health.Current.Value.ToString("N1") + " / " + model.Health.Maximum.Value.ToString("N1");
-					
-					label += "\nState: " + model.Context.CurrentState;
-
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
 					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;
 
-					if (SceneInspectionSettings.IsInspectingObligations.Value)
-					{
-						label += "\nObligationPromise: ";
-
-						if (model.Obligation.Value.IsEnabled)
-						{
-							var obligation = gameState.Payload.Game.GetObligations()
-								.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.PromiseId == model.Obligation.Value.ObligationPromiseId)
-								.FirstOrDefault();
-
-							if (obligation.Model == null)
-							{
-								label += "Missing ObligationId \"" + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + "\" or TargetId \"" + Model.ShortenId(model.Obligation.Value.TargetId) + "\"";
-							}
-							else
-							{
-								label += Model.ShortenId(model.Obligation.Value.TargetId) + "[ " + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
-							}
-						}
-						else label += "None";
-					}
-					
-					label += GetInventory(
-						"Inventory",
-						model.Inventory.Value,
-						model.InventoryCapacity.Value,
-						InventoryVisibilities.IfMaximumGreaterThanZero
-						
+					AppendAgentState(
+						ref label,
+						model
 					);
-
-					if (model.InventoryPromise.Value.Operation != InventoryPromise.Operations.None)
-					{
-						label += GetInventory(
-							model.InventoryPromise.Value.Operation+"Promise",
-							model.InventoryPromise.Value.Inventory
-						);
-					}
-
+					
 					Handles.Label(
 						model.Transform.Position.Value + (Vector3.up * 3f),
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
+				}
+			}
+			
+			if (SceneInspectionSettings.IsInspectingOtherAgents.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Seekers.AllActive)
+				{
+					var label = GetId(model);
+
+					AppendAgentState(
+						ref label,
+						model
+					);
 					
-					switch (model.NavigationPlan.Value.State)
-					{
-						case NavigationPlan.States.Navigating:
-							var nodes = model.NavigationPlan.Value.Nodes;
-							for (var i = 1; i < nodes.Length; i++) Debug.DrawLine(nodes[i - 1], nodes[i], Color.green);
-							break;
-						case NavigationPlan.States.Invalid:
-							Debug.DrawLine(model.NavigationPlan.Value.Position, model.NavigationPlan.Value.EndPosition, Color.red);
-							break;
-					}
+					Handles.Label(
+						model.Transform.Position.Value + (Vector3.up * 3f),
+						StringExtensions.Wrap(label, "<color=yellow>", "</color>"),
+						labelStyle
+					);
 				}
 			}
 			

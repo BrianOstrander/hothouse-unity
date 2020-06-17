@@ -226,7 +226,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				var target = DwellerUtility.CalculateNearestAvailableEntrance(
+				var target = AgentUtility.CalculateNearestAvailableEntrance(
 					Agent.Transform.Position.Value,
 					out path,
 					out _,

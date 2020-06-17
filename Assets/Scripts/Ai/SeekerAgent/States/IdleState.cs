@@ -8,14 +8,14 @@ namespace Lunra.Hothouse.Ai.Seeker
 
 		public override void OnInitialize()
 		{
-			var timeoutState = new TimeoutState<IdleState>();
-			
 			AddChildStates(
-				timeoutState	
+				new TimeoutState<IdleState>(),
+				new HuntState()
 			);
-			// AddTransitions(
-			// 	new DropItemsTransition<IdleState>(timeoutState)
-			// );
+			
+			AddTransitions(
+				new AgentTransitionFallthrough<HuntState, GameModel, SeekerModel>("Hunt")
+			);
 		}
 
 	}

@@ -6,9 +6,9 @@ using Lunra.Hothouse.Models;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Lunra.Hothouse.Ai.Dweller
+namespace Lunra.Hothouse.Ai
 {
-	public static class DwellerUtility
+	public static class AgentUtility
 	{
 		public static M CalculateNearestAvailableOperatingEntrance<M>(
 			Vector3 beginPosition,
@@ -101,6 +101,35 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (hasPath)
 				{
 					entrancePosition = entrance.Position;
+					return true;
+				}
+			}
+
+			return false;
+		}
+		
+		public static bool CalculateNearestPosition(
+			Vector3 beginPosition,
+			out NavMeshPath path,
+			out Vector3 endPosition,
+			params Vector3[] positions
+		)
+		{
+			path = new NavMeshPath();
+			endPosition = Vector3.zero;
+
+			foreach (var position in positions.OrderBy(p => Vector3.Distance(p, beginPosition)))
+			{
+				var hasPath = NavMesh.CalculatePath(
+					beginPosition,
+					position,
+					NavMesh.AllAreas,
+					path
+				);
+
+				if (hasPath)
+				{
+					endPosition = position;
 					return true;
 				}
 			}

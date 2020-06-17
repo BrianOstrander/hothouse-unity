@@ -33,6 +33,8 @@ namespace Lunra.Hothouse.Models
 					return Types.Room;
 				case DoorModel _:
 					return Types.Door;
+				case SeekerModel _:
+					return Types.Seeker;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -47,7 +49,8 @@ namespace Lunra.Hothouse.Models
 			Flora = 30,
 			Building = 40,
 			Room = 50,
-			Door = 60
+			Door = 60,
+			Seeker = 70
 		}
 
 		public Types Type { get; }
@@ -122,6 +125,9 @@ namespace Lunra.Hothouse.Models
 					break;
 				case Types.Door:
 					cachedInstance = game.Doors.FirstOrDefaultActive(Id);
+					break;
+				case Types.Seeker:
+					cachedInstance = game.Seekers.FirstOrDefaultActive(Id);
 					break;
 				default:
 					Debug.LogError("Unrecognized type: " + Type);

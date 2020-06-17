@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Ai
 
 			if (DefaultState == null)
 			{
-				Debug.LogError("No "+nameof(DefaultState)+" specified");
+				Debug.LogError("No "+nameof(DefaultState)+" specified for "+GetType().Name);
 				return;
 			}
 
