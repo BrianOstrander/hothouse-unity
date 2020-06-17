@@ -94,6 +94,46 @@ namespace Lunra.Hothouse.Ai
 				attackState.SetTarget(
 					new DwellerAttackState<DwellerClearerJobState>.Target(
 						() => target.Id.Value,
+						() => target.Health.IsDestroyed,
+						() =>
+						{
+							var attackResult = Damage.ApplyGeneric(
+								Agent.MeleeDamage.Value,
+								Agent,
+								target
+							);
+
+							if (!attackResult.IsTargetDestroyed) return attackResult;
+							
+							var hasOverflow = Agent.InventoryCapacity.Value.AddClamped(
+								Agent.Inventory.Value,
+								itemDrops,
+								out var clamped,
+								out var overflow
+							);
+
+							Agent.Inventory.Value = clamped;
+
+							if (!hasOverflow) return attackResult;
+
+							World.ItemDrops.Activate(
+								"default",
+								target.RoomTransform.Id.Value,
+								target.Transform.Position.Value,
+								Quaternion.identity,
+								itemDrop =>
+								{
+									itemDrop.Inventory.Value = overflow;
+									itemDrop.Job.Value = Jobs.Clearer;
+								}
+							);
+
+							return attackResult;
+						}
+					)
+					/*
+					new DwellerAttackState<DwellerClearerJobState>.Target(
+						() => target.Id.Value,
 						() => target.Health.Current.Value,
 						health => target.Health.Current.Value = health,
 						() =>
@@ -122,6 +162,7 @@ namespace Lunra.Hothouse.Ai
 							);
 						}
 					)
+					*/
 				);
 			}
 		}

@@ -13,21 +13,18 @@ namespace Lunra.Hothouse.Ai
 		public struct Target
 		{
 			public readonly Func<string> GetId;
-			public readonly Func<float> GetHealth;
-			public readonly Action<float> SetHealth;
-			public readonly Action Killed;
+			public readonly Func<bool> IsTargetDestroyed;
+			public readonly Func<Damage.Result> Attack;
 
 			public Target(
 				Func<string> getId,
-				Func<float> getHealth,
-				Action<float> setHealth,
-				Action killed
+				Func<bool> isTargetDestroyed,
+				Func<Damage.Result> attack
 			)
 			{
 				GetId = getId;
-				GetHealth = getHealth;
-				SetHealth = setHealth;
-				Killed = killed;
+				IsTargetDestroyed = isTargetDestroyed;
+				Attack = attack;
 			}
 		}
 
@@ -40,7 +37,7 @@ namespace Lunra.Hothouse.Ai
 		{
 			AddTransitions(
 				new ToReturnOnTargetIdMismatch(),
-				new ToReturnOnTargetKilled()
+				new ToReturnOnTargetDestroyed()
 			);
 		}
 		
@@ -58,15 +55,7 @@ namespace Lunra.Hothouse.Ai
 
 			cooldownElapsed = cooldownElapsed % Agent.MeleeCooldown.Value;
 
-			var oldHealth = target.GetHealth();
-
-			if (Mathf.Approximately(0f, oldHealth)) return;
-			
-			var newHealth = Mathf.Max(0f, oldHealth - Agent.MeleeDamage.Value);
-			
-			target.SetHealth(newHealth);
-
-			if (Mathf.Approximately(0f, newHealth)) target.Killed();
+			target.Attack();
 		}
 
 		public override void End()
@@ -81,9 +70,9 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered() => SourceState.initialTargetId != SourceState.target.GetId();
 		}
 		
-		class ToReturnOnTargetKilled : AgentTransition<DwellerAttackState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnTargetDestroyed : AgentTransition<DwellerAttackState<S>, S, GameModel, DwellerModel>
 		{
-			public override bool IsTriggered() => Mathf.Approximately(0f, SourceState.target.GetHealth());
+			public override bool IsTriggered() => SourceState.target.IsTargetDestroyed();
 		}
 	}
 }

@@ -106,7 +106,15 @@ namespace Lunra.Hothouse.Ai
 			{
 				if (Agent.GetDesireDamage(SourceState.Desire, World, out var damage))
 				{
-					Agent.Health.Current.Value = Mathf.Max(0f, Agent.Health.Current.Value - damage);
+					if (Damage.GetDamageTypeFromDesire(SourceState.Desire, out var damageType))
+					{
+						Damage.Apply(
+							damageType,
+							damage,
+							Agent
+						);
+					}
+					else Debug.Log("Unable to find a damage type for desire: "+SourceState.Desire);
 				}
 				
 				Agent.Desire.Value = Desires.None;

@@ -119,12 +119,7 @@ namespace Lunra.Hothouse.Models
 				Buildings.StartingWagon,
 				new BuildingInfo(
 					100f,
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
-						}
-					), 
+					Inventory.Empty,
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
@@ -226,40 +221,40 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-			Buildings.Bedroll,
-			new BuildingInfo(
-				100f,
-				Inventory.Empty, 
-				InventoryCapacity.None(),
-				InventoryPermission.NoneForAnyJob(),
-				Constants.DefaultPlacementLightRequirement,
-				InventoryCapacity.ByIndividualWeight(
+				Buildings.Bedroll,
+				new BuildingInfo(
+					100f,
+					Inventory.Empty, 
+					InventoryCapacity.None(),
+					InventoryPermission.NoneForAnyJob(),
+					Constants.DefaultPlacementLightRequirement,
+					InventoryCapacity.ByIndividualWeight(
+						new Inventory(
+							new Dictionary<Inventory.Types, int>
+							{
+								{ Inventory.Types.Stalks , 2 }
+							}
+						)	
+					),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 2 }
+							{ Inventory.Types.Stalks , 1 }
 						}
-					)	
-				),
-				new Inventory(
-					new Dictionary<Inventory.Types, int>
+					), 
+					Inventory.Empty, 
+					Interval.Zero(),
+					LightStates.Unknown,
+					new []
 					{
-						{ Inventory.Types.Stalks , 1 }
+						DesireQuality.New(Desires.Sleep, 1f) 
+					},
+					new []
+					{
+						"bed_bedroll"
 					}
-				), 
-				Inventory.Empty, 
-				Interval.Zero(),
-				LightStates.Unknown,
-				new []
-				{
-					DesireQuality.New(Desires.Sleep, 1f) 
-				},
-				new []
-				{
-					"bed_bedroll"
-				}
-			)
-		}
+				)
+			}
 		};
 
 		GameModel game;
@@ -308,8 +303,7 @@ namespace Lunra.Hothouse.Models
 		{
 			model.Type.Value = building;
 
-			model.Health.Current.Value = info.HealthMaximum;
-			model.Health.Maximum.Value = info.HealthMaximum;
+			model.Health.ResetToMaximum(info.HealthMaximum);
 			model.Inventory.Value = info.Inventory;
 			model.InventoryCapacity.Value = info.InventoryCapacity;
 			model.InventoryPermission.Value = info.InventoryPermission;
