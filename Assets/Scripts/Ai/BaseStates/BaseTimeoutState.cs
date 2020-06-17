@@ -2,7 +2,7 @@ using System;
 using Lunra.Hothouse.Models;
 using UnityEngine;
 
-namespace Lunra.Hothouse.Ai.Dweller
+namespace Lunra.Hothouse.Ai
 {
 	public class BaseTimeoutState<S, A> : AgentState<GameModel, A>
 		where S : AgentState<GameModel, A>
