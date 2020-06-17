@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerNavigationForcedTransition<S> : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
+	public class NavigationForcedTransition<S> : AgentTransition<NavigateState<S>, GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		Vector3 nearestValidPosition;

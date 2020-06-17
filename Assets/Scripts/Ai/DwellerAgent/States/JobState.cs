@@ -7,8 +7,8 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public abstract class DwellerJobState<S> : AgentState<GameModel, DwellerModel>
-		where S : DwellerJobState<S>
+	public abstract class JobState<S> : AgentState<GameModel, DwellerModel>
+		where S : JobState<S>
 	{
 		public override string Name => Job + "Job";
 
@@ -37,7 +37,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered() => jobState.Job == Agent.Job.Value && Agent.JobShift.Value.Contains(World.SimulationTime.Value);
 		}
 		
-		protected class ToIdleOnJobUnassigned : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnJobUnassigned : AgentTransition<IdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + jobState.Name + ">";
 			
@@ -48,7 +48,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered() => jobState.Job != Agent.Job.Value;
 		}
 		
-		protected class ToIdleOnShiftEnd : AgentTransition<DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnShiftEnd : AgentTransition<IdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + jobState.Name + ">";
 			
@@ -70,7 +70,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 
-		protected class ToItemCleanupOnValidInventory : AgentTransition<DwellerItemCleanupState<S>, GameModel, DwellerModel>
+		protected class ToItemCleanupOnValidInventory : AgentTransition<ItemCleanupState<S>, GameModel, DwellerModel>
 		{
 			public enum InventoryTrigger
 			{
@@ -84,14 +84,14 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override string Name => base.Name + "." + inventoryTrigger;
 
-			DwellerItemCleanupState<S> cleanupState;
+			ItemCleanupState<S> cleanupState;
 			InventoryTrigger inventoryTrigger;
 			Jobs[] validJobs;
 			Inventory.Types[] validItems;
 			Inventory.Types[] validItemsToCleanup;
 
 			public ToItemCleanupOnValidInventory(
-				DwellerItemCleanupState<S> cleanupState,
+				ItemCleanupState<S> cleanupState,
 				InventoryTrigger inventoryTrigger,
 				Jobs[] validJobs,
 				Inventory.Types[] validItems
@@ -261,7 +261,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 
-		protected class ToObligationOnObligationAvailable : AgentTransition<DwellerObligationState<S>, GameModel, DwellerModel>
+		protected class ToObligationOnObligationAvailable : AgentTransition<ObligationState<S>, GameModel, DwellerModel>
 		{
 			(IObligationModel Model, Obligation Obligation) target;
 			

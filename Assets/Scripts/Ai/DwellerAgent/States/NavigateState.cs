@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerNavigateState<S> : AgentState<GameModel, DwellerModel>
+	public class NavigateState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		public override string Name => "Navigate";

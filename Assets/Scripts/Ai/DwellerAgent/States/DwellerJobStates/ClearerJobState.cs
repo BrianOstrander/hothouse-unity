@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerClearerJobState : DwellerJobState<DwellerClearerJobState>
+	public class ClearerJobState : JobState<ClearerJobState>
 	{
 		public override Jobs Job => Jobs.Clearer;
 
@@ -14,17 +14,17 @@ namespace Lunra.Hothouse.Ai.Dweller
 			var validJobs = new[] { Jobs.Clearer, Jobs.None };
 			var validCleanupItems = Inventory.ValidTypes;
 			
-			var attackState = new DwellerAttackState<DwellerClearerJobState>();
-			var cleanupState = new DwellerItemCleanupState<DwellerClearerJobState>(
+			var attackState = new AttackState<ClearerJobState>();
+			var cleanupState = new ItemCleanupState<ClearerJobState>(
 				validJobs
 			);
-			var timeoutState = new DwellerTimeoutState<DwellerClearerJobState>();
+			var timeoutState = new TimeoutState<ClearerJobState>();
 			
 			AddChildStates(
 				attackState,
 				cleanupState,	
 				timeoutState,
-				new DwellerNavigateState<DwellerClearerJobState>()
+				new NavigateState<ClearerJobState>()
 			);
 			
 			AddTransitions(
@@ -62,17 +62,17 @@ namespace Lunra.Hothouse.Ai.Dweller
 					validJobs,
 					validCleanupItems
 				),
-				new DwellerDropItemsTransition<DwellerClearerJobState>(timeoutState),
-				new DwellerNavigateToNearestLightTransition<DwellerClearerJobState>()
+				new DropItemsTransition<ClearerJobState>(timeoutState),
+				new NavigateToNearestLightTransition<ClearerJobState>()
 			);
 		}
 
-		class ToAttackNearestClearable : AgentTransition<DwellerAttackState<DwellerClearerJobState>, GameModel, DwellerModel>
+		class ToAttackNearestClearable : AgentTransition<AttackState<ClearerJobState>, GameModel, DwellerModel>
 		{
-			DwellerAttackState<DwellerClearerJobState> attackState;
+			AttackState<ClearerJobState> attackState;
 			IClearableModel target;
 
-			public ToAttackNearestClearable(DwellerAttackState<DwellerClearerJobState> attackState) => this.attackState = attackState;
+			public ToAttackNearestClearable(AttackState<ClearerJobState> attackState) => this.attackState = attackState;
 			
 			public override bool IsTriggered()
 			{
@@ -92,7 +92,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				var itemDrops = target.ItemDrops.Value;
 				attackState.SetTarget(
-					new DwellerAttackState<DwellerClearerJobState>.Target(
+					new AttackState<ClearerJobState>.Target(
 						() => target.Id.Value,
 						() => target.Health.IsDestroyed,
 						() =>
@@ -167,7 +167,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		class ToNavigateToNearestClearable : AgentTransition<DwellerNavigateState<DwellerClearerJobState>, GameModel, DwellerModel>
+		class ToNavigateToNearestClearable : AgentTransition<NavigateState<ClearerJobState>, GameModel, DwellerModel>
 		{
 			IClearableModel target;
 			

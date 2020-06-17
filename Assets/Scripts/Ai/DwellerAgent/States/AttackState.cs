@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerAttackState<S> : AgentState<GameModel, DwellerModel>
+	public class AttackState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		public override string Name => "Attack";
@@ -65,12 +65,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 			cooldownElapsed = 0f;
 		}
 
-		class ToReturnOnTargetIdMismatch : AgentTransition<DwellerAttackState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnTargetIdMismatch : AgentTransition<AttackState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.initialTargetId != SourceState.target.GetId();
 		}
 		
-		class ToReturnOnTargetDestroyed : AgentTransition<DwellerAttackState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnTargetDestroyed : AgentTransition<AttackState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.target.IsTargetDestroyed();
 		}

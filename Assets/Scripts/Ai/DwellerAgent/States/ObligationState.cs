@@ -8,12 +8,12 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerObligationState<S> : AgentState<GameModel, DwellerModel>
+	public class ObligationState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		public override string Name => "Obligation";
 
-		DwellerTimeoutState<DwellerObligationState<S>> timeoutState;
+		TimeoutState<ObligationState<S>> timeoutState;
 			
 		string initialTargetId;
 		IObligationModel target;
@@ -22,8 +22,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		public override void OnInitialize()
 		{
 			AddChildStates(
-				new DwellerNavigateState<DwellerObligationState<S>>(),
-				timeoutState = new DwellerTimeoutState<DwellerObligationState<S>>()
+				new NavigateState<ObligationState<S>>(),
+				timeoutState = new TimeoutState<ObligationState<S>>()
 			);
 			
 			AddTransitions(
@@ -89,7 +89,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			Cache();
 		}
 
-		class ToReturnOnTargetNull : AgentTransition<DwellerObligationState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnTargetNull : AgentTransition<ObligationState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.target == null;
 
@@ -100,7 +100,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		class ToReturnOnTargetIdMismatch : AgentTransition<DwellerObligationState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnTargetIdMismatch : AgentTransition<ObligationState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.initialTargetId != SourceState.target.Id.Value;
 
@@ -111,7 +111,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		class ToReturnOnObligationMissingFromTarget : AgentTransition<DwellerObligationState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnObligationMissingFromTarget : AgentTransition<ObligationState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => string.IsNullOrEmpty(SourceState.obligation.PromiseId);
 
@@ -122,7 +122,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		class ToReturnOnObligationComplete : AgentTransition<DwellerObligationState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnObligationComplete : AgentTransition<ObligationState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.obligation.State == Obligation.States.Complete;
 
@@ -133,7 +133,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		protected class ToTimeoutForObligation : AgentTransition<DwellerObligationState<S>, DwellerTimeoutState<DwellerObligationState<S>>, GameModel, DwellerModel>
+		protected class ToTimeoutForObligation : AgentTransition<ObligationState<S>, TimeoutState<ObligationState<S>>, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered()
 			{
@@ -221,7 +221,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		class ToNavigateToObligation : AgentTransition<DwellerObligationState<S>, DwellerNavigateState<DwellerObligationState<S>>, GameModel, DwellerModel>
+		class ToNavigateToObligation : AgentTransition<ObligationState<S>, NavigateState<ObligationState<S>>, GameModel, DwellerModel>
 		{
 			NavMeshPath path;
 			

@@ -8,8 +8,8 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public abstract class DwellerDesireState<S> : AgentState<GameModel, DwellerModel>
-		where S : DwellerDesireState<S>
+	public abstract class DesireState<S> : AgentState<GameModel, DwellerModel>
+		where S : DesireState<S>
 	{
 		protected BuildingModel GetNearestDesireBuilding(
 			GameModel world,
@@ -31,15 +31,15 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public abstract Desires Desire { get; }
 
-		DwellerTimeoutState<S> timeoutState;
+		TimeoutState<S> timeoutState;
 		TimeSpan lastEmotedMissedDesire = TimeSpan.FromSeconds(-9999.0);
 
 		public override void OnInitialize()
 		{
 			
 			AddChildStates(
-				timeoutState = new DwellerTimeoutState<S>(),
-				new DwellerNavigateState<S>()
+				timeoutState = new TimeoutState<S>(),
+				new NavigateState<S>()
 			);
 			
 			AddTransitions(
@@ -72,9 +72,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			public override string Name => base.Name + "<" + desireState.Name + ">";
 
-			DwellerDesireState<S> desireState;
+			DesireState<S> desireState;
 
-			public ToDesireOnShiftEnd(DwellerDesireState<S> desireState) => this.desireState = desireState; 
+			public ToDesireOnShiftEnd(DesireState<S> desireState) => this.desireState = desireState; 
 			
 			public override bool IsTriggered()
 			{
@@ -89,14 +89,14 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		protected class ToIdleOnDesireChanged : AgentTransition<DwellerDesireState<S>, DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnDesireChanged : AgentTransition<DesireState<S>, IdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + SourceState.Name + ">";
 
 			public override bool IsTriggered() => SourceState.Desire != Agent.Desire.Value;
 		}
 		
-		protected class ToIdleOnShiftBegin : AgentTransition<DwellerDesireState<S>, DwellerIdleState, GameModel, DwellerModel>
+		protected class ToIdleOnShiftBegin : AgentTransition<DesireState<S>, IdleState, GameModel, DwellerModel>
 		{
 			public override string Name => base.Name + "<" + SourceState.Name + ">";
 
@@ -121,7 +121,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		protected class ToTimeoutForDesire : AgentTransition<DwellerDesireState<S>, DwellerTimeoutState<S>, GameModel, DwellerModel>
+		protected class ToTimeoutForDesire : AgentTransition<DesireState<S>, TimeoutState<S>, GameModel, DwellerModel>
 		{
 			BuildingModel target;
 
@@ -143,7 +143,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		protected class ToNavigateToNearestDesireBuilding : AgentTransition<DwellerDesireState<S>, DwellerNavigateState<S>, GameModel, DwellerModel>
+		protected class ToNavigateToNearestDesireBuilding : AgentTransition<DesireState<S>, NavigateState<S>, GameModel, DwellerModel>
 		{
 			BuildingModel target;
 			NavMeshPath targetPath = new NavMeshPath();
@@ -161,7 +161,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		protected class ToTimeoutForDesireMissed : AgentTransition<DwellerDesireState<S>, DwellerTimeoutState<S>, GameModel, DwellerModel>
+		protected class ToTimeoutForDesireMissed : AgentTransition<DesireState<S>, TimeoutState<S>, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered()
 			{
@@ -188,7 +188,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		protected class ToNavigateToNearestLightSourceOnDesireMissed : AgentTransition<DwellerDesireState<S>, DwellerNavigateState<S>, GameModel, DwellerModel>
+		protected class ToNavigateToNearestLightSourceOnDesireMissed : AgentTransition<DesireState<S>, NavigateState<S>, GameModel, DwellerModel>
 		{
 			NavMeshPath targetPath = new NavMeshPath();
 

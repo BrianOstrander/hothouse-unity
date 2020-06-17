@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerNavigateToNearestLightTransition<S> : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
+	public class NavigateToNearestLightTransition<S> : AgentTransition<NavigateState<S>, GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		DateTime lastLightUpdateChecked;

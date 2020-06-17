@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerTransferItemsState<S> : AgentState<GameModel, DwellerModel>
+	public class TransferItemsState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		public override string Name => "TransferItems";
@@ -117,12 +117,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 			cooldownElapsed = 0f;
 		}
 
-		class ToReturnOnAllItemsTransferred : AgentTransition<DwellerTransferItemsState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnAllItemsTransferred : AgentTransition<TransferItemsState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.target.ItemsToTransfer.IsEmpty;
 		}
 		
-		class ToReturnOnDestinationAtCapacity : AgentTransition<DwellerTransferItemsState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnDestinationAtCapacity : AgentTransition<TransferItemsState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered()
 			{

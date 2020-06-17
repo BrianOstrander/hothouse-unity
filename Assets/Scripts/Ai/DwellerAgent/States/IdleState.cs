@@ -7,29 +7,29 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerIdleState : AgentState<GameModel, DwellerModel>
+	public class IdleState : AgentState<GameModel, DwellerModel>
 	{
 		public override string Name => "Idle";
 
 		public override void OnInitialize()
 		{
-			var timeoutState = new DwellerTimeoutState<DwellerIdleState>();
+			var timeoutState = new TimeoutState<IdleState>();
 			
 			AddChildStates(
 				timeoutState	
 			);
 			AddTransitions(
-				new DwellerDropItemsTransition<DwellerIdleState>(timeoutState)
+				new DropItemsTransition<IdleState>(timeoutState)
 			);
 			
-			InstantiateJob<DwellerClearerJobState>();
-			InstantiateJob<DwellerConstructionJobState>();
-			InstantiateDesire<DwellerSleepDesireState>();
-			InstantiateDesire<DwellerEatDesireState>();
+			InstantiateJob<ClearerJobState>();
+			InstantiateJob<ConstructionJobState>();
+			InstantiateDesire<SleepDesireState>();
+			InstantiateDesire<EatDesireState>();
 		}
 
 		void InstantiateJob<S>()
-			where S : DwellerJobState<S>, new()
+			where S : JobState<S>, new()
 		{
 			var state = new S();
 			AddChildStates(state);
@@ -37,11 +37,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 		}
 		
 		void InstantiateDesire<S>()
-			where S : DwellerDesireState<S>, new()
+			where S : DesireState<S>, new()
 		{
 			var state = new S();
 			AddChildStates(state);
-			AddTransitions(new DwellerDesireState<S>.ToDesireOnShiftEnd(state));
+			AddTransitions(new DesireState<S>.ToDesireOnShiftEnd(state));
 		}
 	}
 }

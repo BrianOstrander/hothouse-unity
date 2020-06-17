@@ -3,7 +3,7 @@ using Lunra.Hothouse.Models.AgentModels;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerNavigationTransition<S> : AgentTransition<DwellerNavigateState<S>, GameModel, DwellerModel>
+	public class NavigationTransition<S> : AgentTransition<NavigateState<S>, GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		public override bool IsTriggered()

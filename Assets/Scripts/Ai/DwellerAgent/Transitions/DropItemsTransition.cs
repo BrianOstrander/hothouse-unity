@@ -4,15 +4,15 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerDropItemsTransition<S> : AgentTransition<DwellerTimeoutState<S>, GameModel, DwellerModel>
+	public class DropItemsTransition<S> : AgentTransition<TimeoutState<S>, GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		public override string Name => "DropItems";
 
-		DwellerTimeoutState<S> timeoutState;
+		TimeoutState<S> timeoutState;
 
-		public DwellerDropItemsTransition(
-			DwellerTimeoutState<S> timeoutState
+		public DropItemsTransition(
+			TimeoutState<S> timeoutState
 		)
 		{
 			this.timeoutState = timeoutState;

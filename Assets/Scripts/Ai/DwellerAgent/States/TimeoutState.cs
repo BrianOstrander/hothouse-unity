@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DwellerTimeoutState<S> : AgentState<GameModel, DwellerModel>
+	public class TimeoutState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		public enum Types
@@ -125,17 +125,17 @@ namespace Lunra.Hothouse.Ai.Dweller
 			finalUpdated?.Invoke((1f, true));
 		}
 
-		class ToReturnOnIntervalElapsed : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnIntervalElapsed : AgentTransition<TimeoutState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.configuration.TimeoutType == Types.Interval && SourceState.configuration.TimeoutInterval.IsDone;
 		}
 		
-		class ToReturnOnTimeElapsed : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnTimeElapsed : AgentTransition<TimeoutState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.configuration.TimeoutType == Types.Time && SourceState.configuration.TimeoutDayTime <= World.SimulationTime.Value;
 		}
 		
-		class ToReturnOnInvalid : AgentTransition<DwellerTimeoutState<S>, S, GameModel, DwellerModel>
+		class ToReturnOnInvalid : AgentTransition<TimeoutState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => SourceState.configuration.TimeoutType == Types.Unknown;
 		}

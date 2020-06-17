@@ -10,7 +10,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			return new List<AgentState<GameModel, DwellerModel>>
 			{
-				(DefaultState = new DwellerIdleState())
+				(DefaultState = new IdleState())
 			};
 		}
 	}
