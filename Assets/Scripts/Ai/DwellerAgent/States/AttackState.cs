@@ -1,7 +1,5 @@
 using System;
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Models.AgentModels;
-using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {

@@ -1,10 +1,6 @@
 using System.Linq;
-using Lunra.Core;
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Models.AgentModels;
-using Lunra.Hothouse.Services;
 using Lunra.Hothouse.Views;
-using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 
 namespace Lunra.Hothouse.Presenters

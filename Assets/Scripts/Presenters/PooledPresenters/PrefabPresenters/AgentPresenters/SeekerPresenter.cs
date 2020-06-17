@@ -1,6 +1,5 @@
 using Lunra.Hothouse.Ai.Dweller;
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Models.AgentModels;
 using Lunra.Hothouse.Views;
 
 namespace Lunra.Hothouse.Presenters

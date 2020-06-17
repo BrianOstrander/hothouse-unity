@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
-using Lunra.Hothouse.Models.AgentModels;
 
 namespace Lunra.Hothouse.Models
 {

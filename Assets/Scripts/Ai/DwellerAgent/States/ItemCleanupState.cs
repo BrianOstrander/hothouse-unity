@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Models.AgentModels;
 using UnityEngine;
 using UnityEngine.AI;
 

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Models.AgentModels;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
-using UnityEngine;
 
 namespace Lunra.Hothouse.Services
 {

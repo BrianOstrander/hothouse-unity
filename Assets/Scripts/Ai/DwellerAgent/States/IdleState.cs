@@ -1,9 +1,4 @@
-using System.Linq;
-using Lunra.Core;
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Models.AgentModels;
-using UnityEngine;
-using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {

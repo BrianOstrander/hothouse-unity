@@ -1,5 +1,4 @@
 using System;
-using Lunra.Hothouse.Models.AgentModels;
 using Lunra.Hothouse.Models;
 using UnityEngine;
 

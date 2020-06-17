@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
 using Lunra.Core;
-using Lunra.Hothouse.Models.AgentModels;
 using Lunra.Hothouse.Presenters;
-using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
 using UnityEngine;
 

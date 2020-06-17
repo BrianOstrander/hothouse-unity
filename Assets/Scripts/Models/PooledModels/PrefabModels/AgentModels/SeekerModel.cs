@@ -1,7 +1,7 @@
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
-namespace Lunra.Hothouse.Models.AgentModels
+namespace Lunra.Hothouse.Models
 {
 	public class SeekerModel : AgentModel
 	{
