@@ -383,8 +383,6 @@ namespace Lunra.Hothouse.Views
 		
 		void OnGenerateDone()
 		{
-			workspaceCache.Result.GenerationElapsed = DateTime.Now - workspaceCache.Request.BeginTime;
-			
 			workspaceCache.Done(workspaceCache.Result);
 		}
 	}

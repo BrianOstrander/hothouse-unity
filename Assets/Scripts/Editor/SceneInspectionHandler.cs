@@ -363,10 +363,16 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 
+			var inspectedRooms = new List<string>();
+
 			if (SceneInspectionSettings.IsInspectingRooms.Value)
 			{
 				foreach (var model in gameState.Payload.Game.Rooms.AllActive)
 				{
+					if (1 < model.RevealDistance.Value) continue;
+					
+					inspectedRooms.Add(model.RoomTransform.Id.Value);
+					
 					var label = GetId(model);
 
 					if (model.IsSpawn.Value) label += "\nIs Spawn: true";
@@ -405,6 +411,8 @@ namespace Lunra.Hothouse.Editor
 			{
 				foreach (var model in gameState.Payload.Game.Doors.AllActive)
 				{
+					if (!inspectedRooms.Contains(model.RoomTransform.Id.Value)) continue;
+					
 					var label = GetId(model);
 
 					label += "\nRoomId: " + model.RoomTransform.ShortId;

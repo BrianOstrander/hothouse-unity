@@ -17,8 +17,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		Demon generator;
 		RoomResolverRequest request;
 		
-		RoomModel oldExit;
-		bool isTransitioning;
+		DateTime beginTime;
 		
 		public GameStateGenerateLevel(GameState state)
 		{
@@ -34,25 +33,16 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		public void Push()
 		{
-			oldExit = payload.Game.Rooms.AllActive.FirstOrDefault(r => r.IsExit.Value);
-			isTransitioning = oldExit != null;
-			
 			App.S.Push(OnBegin);
-			
-			if (isTransitioning) App.S.PushBlocking(OnCleanup);
-			
+
 			App.S.PushBlocking(OnGenerateRooms);
 			App.S.PushBlocking(OnGenerateSpawn);
 			
 			App.S.PushBlocking(OnGenerateFloraBegin);
 			App.S.PushBlocking(OnGenerateFloraSeed);
 			
-			if (isTransitioning) App.S.PushBlocking(OnTransferRooms);
-			else
-			{
-				App.S.PushBlocking(OnGenerateDwellers);
-				App.S.PushBlocking(OnGenerateStartingBuildings);
-			}
+			App.S.PushBlocking(OnGenerateDwellers);
+			App.S.PushBlocking(OnGenerateStartingBuildings);
 			
 			App.S.PushBlocking(OnRevealRooms);
 			
@@ -64,68 +54,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			App.S.Push(() => payload.Game.IsSimulating.Value = true);
 			App.S.Push(payload.Game.TriggerSimulationInitialize);
+			App.S.Push(OnEnd);
 		}
 
 		void OnBegin()
 		{
+			beginTime = DateTime.Now;
 			payload.Game.IsSimulating.Value = false;
 			payload.Game.ResetSimulationInitialized();
-		}
-
-		void OnCleanup(Action done)
-		{
-			oldExit.IsExit.Value = false;
-
-			// HACK BEGIN
-			foreach (var dweller in payload.Game.Dwellers.AllActive)
-			{
-				dweller.RoomTransform.Id.Value = oldExit.RoomTransform.Id.Value;
-				dweller.Transform.Position.Value = oldExit.Transform.Position.Value;
-			}
-
-			oldExit.IsRevealed.Value = true;
-			// HACK END
-			
-			var offset = Vector3.up * 100f;
-
-			oldExit.Transform.Position.Value += offset;
-			
-			foreach (var dweller in payload.Game.Dwellers.AllActive)
-			{
-				if (dweller.RoomTransform.Id.Value != oldExit.RoomTransform.Id.Value)
-				{
-					dweller.PooledState.Value = PooledStates.InActive;
-					continue;
-				}
-
-				dweller.Transform.Position.Value += offset;
-			}
-			
-			foreach (var building in payload.Game.Buildings.AllActive)
-			{
-				if (building.RoomTransform.Id.Value != oldExit.RoomTransform.Id.Value)
-				{
-					building.PooledState.Value = PooledStates.InActive;
-					continue;
-				}
-
-				building.Transform.Position.Value += offset;
-			}
-
-			payload.Game.WorldCamera.Transform.Position.Value = oldExit.Transform.Position.Value;
-			
-			payload.Game.ItemDrops.InActivateAll();
-			payload.Game.Doors.InActivateAll();
-			payload.Game.Debris.InActivateAll();
-			payload.Game.Flora.InActivateAll();
-			payload.Game.ObligationIndicators.InActivateAll();
-
-			payload.Game.Rooms.InActivate(
-				payload.Game.Rooms.AllActive.Where(r => r.Id.Value != oldExit.Id.Value).ToArray()
-			);
-
-			App.Heartbeat.WaitForSeconds(done, 5f);
-			// App.Heartbeat.WaitForFixedUpdate(done);
 		}
 
 		void OnGenerateRooms(Action done)
@@ -309,10 +245,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnRevealRooms(Action done)
 		{
-			var oldExitId = oldExit?.RoomTransform.Id.Value;
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
-				room.IsRevealed.Value = room.IsSpawn.Value || room.RoomTransform.Id.Value == oldExitId;
+				room.IsRevealed.Value = room.IsSpawn.Value;
 				room.RevealDistance.Value = room.IsRevealed.Value ? 0 : room.SpawnDistance.Value;
 			}
 
@@ -400,23 +335,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			done();
 		}
-		
-		void OnTransferRooms(Action done)
-		{
-			var spawn = payload.Game.Rooms.AllActive.First(r => r.IsSpawn.Value);
-
-			spawn.IsRevealed.Value = true;
-			
-			foreach (var dweller in payload.Game.Dwellers.AllActive)
-			{
-				dweller.RoomTransform.Id.Value = spawn.RoomTransform.Id.Value;
-				dweller.Transform.Position.Value = spawn.Transform.Position.Value;
-			}
-
-			oldExit.PooledState.Value = PooledStates.InActive;
-
-			done();
-		}
 
 		void OnInitializeLighting(Action done)
 		{
@@ -426,6 +344,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			state.CalculateLighting();
 			
 			done();
+		}
+		
+		void OnEnd()
+		{
+			var elapsedTime = DateTime.Now - beginTime;
+			
+			Debug.Log("Generated "+payload.Game.Rooms.AllActive.Length+" rooms in "+elapsedTime.TotalSeconds.ToString("N2")+" seconds for seed "+generator.Seed);
 		}
 	}
 }

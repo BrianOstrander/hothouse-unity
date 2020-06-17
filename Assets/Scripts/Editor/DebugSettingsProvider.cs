@@ -27,7 +27,7 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent OpenSaveLocation = new GUIContent("Open save location");
 			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard");
 			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
-			public static GUIContent GoToNextLevel = new GUIContent("Go To Next Level");
+			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
 		}
 		
 		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
@@ -43,7 +43,7 @@ namespace Lunra.Hothouse.Editor
 				Content.OpenSaveLocation.text,
 				Content.SaveAndCopySerializedGameToClipboard.text,
 				Content.QueueNavigationCalculation.text,
-				Content.GoToNextLevel.text
+				Content.RevealAllRooms.text
 			};
 			
 			return provider;
@@ -60,7 +60,10 @@ namespace Lunra.Hothouse.Editor
 			{
 				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
 				if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
-				if (GUILayout.Button(Content.GoToNextLevel)) game.GoToNextLevel();
+				if (GUILayout.Button(Content.RevealAllRooms))
+				{
+					foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
+				}
 				
 				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 

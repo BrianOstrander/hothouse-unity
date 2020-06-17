@@ -128,7 +128,6 @@ namespace Lunra.Hothouse.Models
 		#region Events
 		public event Action SimulationInitialize = ActionExtensions.Empty;
 		[JsonIgnore] public Action SimulationUpdate = ActionExtensions.Empty;
-		[JsonIgnore] public Action GoToNextLevel = ActionExtensions.Empty;
 		#endregion
 
 		public GameModel()

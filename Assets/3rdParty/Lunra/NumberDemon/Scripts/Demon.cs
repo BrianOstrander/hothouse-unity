@@ -11,10 +11,16 @@ namespace Lunra.NumberDemon
 	public class Demon 
 	{
 		static Random seedGenerator = new Random();
+		
 		Random generator;
+		public int Seed { get; private set; }
 
 		public Demon() : this(seedGenerator.Next()) {}
-		public Demon(int seed) => generator = new Random(seed);
+		public Demon(int seed)
+		{
+			Seed = seed;
+			generator = new Random(seed);
+		}
 
 		#region Properties
 		public bool NextBool => generator.Next(2) == 0;

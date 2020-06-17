@@ -39,7 +39,7 @@ namespace Lunra.Hothouse.Services
 			
 			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
 
-			if (Payload.Game.Rooms.AllActive.None()) OnGameGoToNextLevel();
+			if (Payload.Game.Rooms.AllActive.None()) new GameStateGenerateLevel(this).Push();
 			
 			App.S.PushBlocking(OnBeginInitializeCache);
 		}
@@ -101,8 +101,6 @@ namespace Lunra.Hothouse.Services
 			App.Heartbeat.Update += OnHeartbeatUpdate;
 			App.Heartbeat.LateUpdate += OnHeartbeatLateUpdate;
 
-			Payload.Game.GoToNextLevel += OnGameGoToNextLevel;
-			
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 			
@@ -150,9 +148,7 @@ namespace Lunra.Hothouse.Services
 			
 			App.Heartbeat.Update -= OnHeartbeatUpdate;
 			App.Heartbeat.LateUpdate -= OnHeartbeatLateUpdate;
-			
-			Payload.Game.GoToNextLevel -= OnGameGoToNextLevel;
-			
+
 			Payload.Game.CalculateMaximumLighting = null;
 			
 			App.S.RequestState(
@@ -182,8 +178,7 @@ namespace Lunra.Hothouse.Services
 		{
 			Time.timeScale = multiplier;
 		}
-
-		void OnGameGoToNextLevel() => new GameStateGenerateLevel(this).Push();
+		
 		#endregion
 		
 		#region Utility

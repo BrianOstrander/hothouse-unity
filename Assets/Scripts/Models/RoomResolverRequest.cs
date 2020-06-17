@@ -91,7 +91,6 @@ namespace Lunra.Hothouse.Models
 		public RoomPoolModel.ActivateRoom ActivateRoom;
 		public DoorPoolModel.ActivateDoor ActivateDoor;
 		
-		public DateTime BeginTime;
 		public int RoomCountTarget;
 
 		public RoomResolverRequest(
@@ -114,7 +113,6 @@ namespace Lunra.Hothouse.Models
 			ActivateRoom = activateRoom;
 			ActivateDoor = activateDoor;
 			
-			BeginTime = DateTime.Now;
 			RoomCountTarget = Generator.GetNextInteger(RoomCountMinimum, RoomCountMaximum);
 		}
 	}
