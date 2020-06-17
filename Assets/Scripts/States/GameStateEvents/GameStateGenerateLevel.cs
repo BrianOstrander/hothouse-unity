@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Presenters;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Services.GameStateEvents
 {
@@ -205,25 +207,84 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateFloraSeed(Action done)
 		{
+			var maximumSpawnDistance = (float)payload.Game.Rooms.AllActive.Max(r => r.SpawnDistance.Value);
+			
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
 				if (room.SpawnDistance.Value == 0) continue;
 
-				var position = room.Boundary.RandomPoint(generator);
+				var spawnDistanceNormalized = room.SpawnDistance.Value / maximumSpawnDistance;
 
-				// var testPosition = room.Transform.Position.Value + Vector3.up;
-				//
-				// Debug.DrawLine(
-				// 	testPosition,
-				// 	testPosition + (Vector3.up * 4f),
-				// 	room.Boundary.Contains(testPosition) ? Color.green : Color.red,
-				// 	10f
-				// );
+				var availableFloraConstraints = request.FloraConstraints.Where(c => c.SpawnDistanceNormalizedMinimum <= spawnDistanceNormalized);
+				
+				if (availableFloraConstraints.None()) continue;
+				
+				var currentFloraConstraint = generator.GetNextFrom(availableFloraConstraints);
+
+				var currentCount = 0;
+
+				if (currentFloraConstraint.CountPerRoomMinimum == currentFloraConstraint.CountPerRoomMaximum) currentCount = currentFloraConstraint.CountPerRoomMinimum;
+				else currentCount = generator.GetNextInteger(currentFloraConstraint.CountPerRoomMinimum, currentFloraConstraint.CountPerRoomMaximum + 1);
+				
+				if (currentCount == 0) continue;
+
+				var floraBudgetRemaining = currentCount;
+				var failureBudgetRemaining = floraBudgetRemaining * 2; // TODO: Don't hardcode this...
+
+				while (0 < floraBudgetRemaining && 0 < failureBudgetRemaining)
+				{
+					var position = room.Boundary.RandomPoint(generator);
+					if (!position.HasValue)
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+
+					var sampleSuccess = NavMesh.SamplePosition(
+						position.Value,
+						out var hit,
+						Mathf.Abs(position.Value.y) + 0.1f,
+						NavMesh.AllAreas
+					);
+
+					if (!sampleSuccess || !room.Boundary.Contains(hit.position))
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+					
+					payload.Game.Flora.ActivateAdult(
+						currentFloraConstraint.Species,
+						room.RoomTransform.Id.Value,
+						hit.position
+					);
+
+					floraBudgetRemaining--;
+				}
 			}
 
-			// done();
+			foreach (var flora in payload.Game.Flora.AllActive)
+			{
+				var constraint = request.FloraConstraints.First(c => c.Species == flora.Species.Value);
 
-			// Debug.Log("time to seed");	
+				var clusterCount = 1;
+
+				if (constraint.CountPerClusterMinimum == constraint.CountPerClusterMaximum) clusterCount = constraint.CountPerClusterMinimum;
+				else clusterCount = generator.GetNextInteger(constraint.CountPerClusterMinimum, constraint.CountPerClusterMaximum + 1);
+				
+				if (clusterCount <= 1) continue;
+
+				var reproductionBudgetRemaining = clusterCount - 1;
+				var failureBudgetRemaining = reproductionBudgetRemaining * 2;
+
+				while (0 < reproductionBudgetRemaining && 0 < failureBudgetRemaining)
+				{
+					if (flora.TriggerReproduction()) reproductionBudgetRemaining--;
+					else failureBudgetRemaining--;
+				}
+			}
+			
+			done();	
 		}
 		#endregion
 

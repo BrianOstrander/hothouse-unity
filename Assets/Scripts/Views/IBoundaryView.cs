@@ -89,14 +89,7 @@ namespace Lunra.Hothouse.Views
 				center + (direction * MaximumHitDistance),
 				-direction
 			);
-			
-			// Debug.DrawLine(
-			// 	center + (ray0.direction * 10f),
-			// 	center + (ray1.direction * 10f),
-			// 	Color.yellow,
-			// 	2f
-			// );
-			
+
 			if (collider.Raycast(ray0, out var hit0, MaximumHitDistance))
 			{
 				if (collider.Raycast(ray1, out var hit1, MaximumHitDistance))
@@ -104,32 +97,6 @@ namespace Lunra.Hothouse.Views
 					return Vector3.Lerp(hit0.point, hit1.point, generator.NextFloat);
 				}
 			}
-			
-			/*
-			var collider = generator.GetNextFrom(view.BoundaryColliders).Collider;
-
-			
-			switch (collider)
-			{
-				case BoxCollider box:
-					var bounds = box.bounds;
-
-					var boxMinimum = box.ClosestPoint(bounds.min);
-					var boxMaximum = box.ClosestPoint(bounds.max);
-					
-					result = new Vector3(
-						generator.GetNextFloat(boxMinimum.x, boxMaximum.x),
-						boxMinimum.y + ((boxMaximum.y - boxMinimum.y) * 0.5f),
-						generator.GetNextFloat(boxMinimum.z, boxMaximum.z)
-					);
-
-					// result += box.transform.position;
-					break;
-				default:
-					Debug.LogError("Unrecognized type: "+collider.GetType());
-					break;
-			}
-			*/
 
 			return result;
 		}

@@ -19,6 +19,8 @@ namespace Lunra.Hothouse.Presenters
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
+			Model.TriggerReproduction = OnFloraTriggerReproduction;
+
 			Model.Health.Current.Changed += OnFloraHealthCurrent;
 			Model.IsReproducing.Changed += OnFloraIsReproducing;
 		}
@@ -28,6 +30,8 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
+			
+			Model.TriggerReproduction = null;
 
 			Model.Health.Current.Changed -= OnFloraHealthCurrent;
 			Model.IsReproducing.Changed -= OnFloraIsReproducing;
@@ -90,10 +94,21 @@ namespace Lunra.Hothouse.Presenters
 			
 			if (View.Visible) Game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
 		}
+
+		bool OnFloraTriggerReproduction()
+		{
+			return TryReproducing(
+				false,
+				false
+			);
+		}
 		#endregion
 		
 		#region Utility
-		void TryReproducing()
+		bool TryReproducing(
+			bool reproduceChildren = true,
+			bool incrementFailures = true
+		)
 		{
 			var nearbyFlora = Game.Flora.AllActive.Where(
 				f =>
@@ -130,11 +145,22 @@ namespace Lunra.Hothouse.Presenters
 								{
 									increaseReproductionFailures = false;
 
-									Game.Flora.ActivateChild(
-										Model.Species.Value,
-										roomView.RoomId,
-										hit.position
-									);		
+									if (reproduceChildren)
+									{
+										Game.Flora.ActivateChild(
+											Model.Species.Value,
+											roomView.RoomId,
+											hit.position
+										);
+									}
+									else
+									{
+										Game.Flora.ActivateAdult(
+											Model.Species.Value,
+											roomView.RoomId,
+											hit.position
+										);
+									}
 								}
 							}
 						}
@@ -176,9 +202,11 @@ namespace Lunra.Hothouse.Presenters
 				}
 			}
 			
-			if (increaseReproductionFailures) Model.ReproductionFailures.Value++;
+			if (increaseReproductionFailures && incrementFailures) Model.ReproductionFailures.Value++;
 			
 			Model.ReproductionElapsed.Value = Interval.WithMaximum(Model.ReproductionElapsed.Value.Maximum);
+
+			return !increaseReproductionFailures;
 		}
 		#endregion
 	}

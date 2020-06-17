@@ -1,4 +1,5 @@
-﻿using Lunra.Core;
+﻿using System;
+using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -35,6 +36,8 @@ namespace Lunra.Hothouse.Models
 		#region Non Serialized
 		bool isReproducing;
 		[JsonIgnore] public DerivedProperty<bool, int, int> IsReproducing { get; }
+
+		[JsonIgnore] public Func<bool> TriggerReproduction;
 		#endregion
 		
 		public FloraModel()
