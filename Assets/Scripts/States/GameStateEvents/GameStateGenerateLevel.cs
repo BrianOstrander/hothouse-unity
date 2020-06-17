@@ -320,7 +320,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
-			wagon.Inventory.Value += (Inventory.Types.Stalks, 999);
+			wagon.Inventory.Value += (Inventory.Types.Stalks, 100);
+			wagon.Inventory.Value += (Inventory.Types.Rations, 100);
 			
 			payload.Game.WorldCamera.Transform.Position.Value = bonfire.Transform.Position.Value;
 
