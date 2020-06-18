@@ -52,6 +52,7 @@ MonoBehaviour:
     CloseDuration: 0
   animations: []
   prefabId: default_seeker
+  deathEffectId: seeker_generic_death
 --- !u!1 &5435744940431852248
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
@@ -46,7 +45,7 @@ namespace Lunra.Hothouse.Presenters
 			View.Age = Model.Age.Value.Normalized;
 			View.IsReproducing = Model.IsReproducing.Value;
 			
-			if (Mathf.Approximately(0f, Model.Age.Value.Current)) Game.FloraEffects.SpawnQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
+			if (Mathf.Approximately(0f, Model.Age.Value.Current)) Game.Effects.Queued.Enqueue(new EffectsModel.Request(Model.Transform.Position.Value, View.SpawnEffectId));
 		}
 
 		#region GameModel Events
@@ -90,11 +89,11 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (!Mathf.Approximately(0f, health))
 			{
-				if (View.Visible) Game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
+				if (View.Visible) Game.Effects.Queued.Enqueue(new EffectsModel.Request(Model.Transform.Position.Value, View.HurtEffectId));
 				return;
 			}
 			
-			if (View.Visible) Game.FloraEffects.DeathQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
+			if (View.Visible) Game.Effects.Queued.Enqueue(new EffectsModel.Request(Model.Transform.Position.Value, View.DeathEffectId));
 		}
 
 		bool OnFloraTriggerReproduction(Demon generatorOverride)

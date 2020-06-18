@@ -11,23 +11,16 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			Model.Health.Damaged += OnSeekerHealthDamage;
+			
 			
 			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			Model.Health.Damaged -= OnSeekerHealthDamage;
+			
 			
 			base.UnBind();
 		}
-		
-		#region SeekerModel Events
-		void OnSeekerHealthDamage(Damage.Result result)
-		{
-			
-		}
-		#endregion
 	}
 }

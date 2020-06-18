@@ -74,7 +74,7 @@ namespace Lunra.Hothouse.Services
 			game.DesireDamageMultiplier.Value = 1f;
 			game.SimulationTimeConversion.Value = 1f / 10f;
 			
-			game.FloraEffects.IsEnabled.Value = true;
+			game.Effects.IsEnabled.Value = true;
 			game.Toolbar.IsEnabled.Value = true;
 			
 			game.WorldCamera.IsEnabled.Value = true;

@@ -27,6 +27,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.Transform.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 			Model.Health.Current.Changed += OnAgentHealthCurrent;
+			Model.Health.Damaged += OnAgentHealthDamaged;
 			
 			base.Bind();
 		}
@@ -38,6 +39,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.Transform.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 			Model.Health.Current.Changed -= OnAgentHealthCurrent;
+			Model.Health.Damaged -= OnAgentHealthDamaged;
 			
 			base.UnBind();
 		}
@@ -135,6 +137,22 @@ namespace Lunra.Hothouse.Presenters
 			Debug.LogWarning("Handle unfulfilled obligation promises here!");
 			
 			Model.PooledState.Value = PooledStates.InActive;
+		}
+
+		public virtual void OnAgentHealthDamaged(Damage.Result result)
+		{
+			if (result.IsTargetDestroyed)
+			{
+				if (!string.IsNullOrEmpty(View.DeathEffectId))
+				{
+					Game.Effects.Queued.Enqueue(
+						new EffectsModel.Request(
+							Model.Transform.Position.Value,
+							View.DeathEffectId
+						)
+					);
+				}
+			}
 		}
 		#endregion
 	}

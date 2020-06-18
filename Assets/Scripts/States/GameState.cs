@@ -63,7 +63,7 @@ namespace Lunra.Hothouse.Services
 			
 			new WorldCameraPresenter(Payload.Game);
 			new ToolbarPresenter(Payload.Game);
-			new FloraEffectsPresenter(Payload.Game);
+			new EffectsPresenter(Payload.Game);
 
 			new HintsPresenter(Payload.Game);
 			new BuildValidationPresenter(Payload.Game);

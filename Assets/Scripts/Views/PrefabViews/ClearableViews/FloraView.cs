@@ -12,6 +12,10 @@ namespace Lunra.Hothouse.Views
 		
 		[SerializeField] float maximumHeight;
 		[SerializeField] Transform heightRoot;
+
+		[SerializeField] string spawnEffectId;
+		[SerializeField] string hurtEffectId;
+		[SerializeField] string deathEffectId;
 		
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
@@ -30,6 +34,9 @@ namespace Lunra.Hothouse.Views
 		#endregion
 		
 		#region Reverse Bindings
+		public string SpawnEffectId => spawnEffectId;
+		public string HurtEffectId => hurtEffectId;
+		public string DeathEffectId => deathEffectId;
 		#endregion
 
 		public override void Reset()

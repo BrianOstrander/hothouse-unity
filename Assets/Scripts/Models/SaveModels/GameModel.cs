@@ -18,7 +18,7 @@ namespace Lunra.Hothouse.Models
 		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
 		public ToolbarModel Toolbar { get; } = new ToolbarModel();
 		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();
-		public FloraEffectsModel FloraEffects { get; } = new FloraEffectsModel();
+		public EffectsModel Effects { get; } = new EffectsModel();
 		public HintsModel Hints { get; } = new HintsModel();
 		public RoomResolverModel RoomResolver { get; } = new RoomResolverModel();
 		public EventLogModel EventLog { get; } = new EventLogModel();

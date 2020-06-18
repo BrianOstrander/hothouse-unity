@@ -305,7 +305,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnBuildingHealthCurrent(float current)
 		{
 			// TODO: Should use their own hurt particle, not plants...
-			Game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
+			// Game.Effects.HurtQueue.Enqueue(new EffectsModel.Request(Model.Transform.Position.Value));
 			
 			if (!Mathf.Approximately(0f, current)) return;
 

@@ -1,28 +1,28 @@
-using System;
+using System.Collections.Generic;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
-using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Presenters;
-using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class FloraEffectsPresenter : Presenter<FloraEffectsView>
+	public class EffectsPresenter : Presenter<EffectsView>
 	{
 		GameModel game;
-		FloraEffectsModel floraEffects;
-		
-		public FloraEffectsPresenter(
+		EffectsModel effects;
+
+		List<string> effectIdsPlayedThisFrame = new List<string>();
+
+		public EffectsPresenter(
 			GameModel game
 		)
 		{
 			this.game = game;
-			floraEffects = game.FloraEffects;
+			effects = game.Effects;
 			
 			game.SimulationInitialize += OnGameSimulationInitialize;
 			game.SimulationUpdate += OnGameSimulationUpdate;
 
-			floraEffects.IsEnabled.Changed += OnFloraEffectsIsEnabled;
+			effects.IsEnabled.Changed += OnFloraEffectsIsEnabled;
 		}
 
 		protected override void UnBind()
@@ -30,7 +30,7 @@ namespace Lunra.Hothouse.Presenters
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			game.SimulationUpdate -= OnGameSimulationUpdate;
 			
-			floraEffects.IsEnabled.Changed -= OnFloraEffectsIsEnabled;
+			effects.IsEnabled.Changed -= OnFloraEffectsIsEnabled;
 		}
 		
 		void Show()
@@ -52,16 +52,29 @@ namespace Lunra.Hothouse.Presenters
 		#region GameModel Events
 		void OnGameSimulationInitialize()
 		{
-			OnFloraEffectsIsEnabled(floraEffects.IsEnabled.Value);
+			OnFloraEffectsIsEnabled(effects.IsEnabled.Value);
 		}
 		
 		void OnGameSimulationUpdate()
 		{
 			if (View.NotVisible) return;
 
-			DequeueEffect(floraEffects.SpawnQueue, View.PlaySpawn);
-			DequeueEffect(floraEffects.HurtQueue, View.PlayHurt);
-			DequeueEffect(floraEffects.DeathQueue, View.PlayDeath);
+			effectIdsPlayedThisFrame.Clear();
+			
+			int budgetRemaining = 10;
+
+			while (0 < budgetRemaining)
+			{
+				if (!effects.Queued.TryPeek(out var peekResult)) break;
+				
+				if (effectIdsPlayedThisFrame.Contains(peekResult.Id)) continue;
+
+				var request = effects.Queued.Dequeue();
+				
+				effectIdsPlayedThisFrame.Add(request.Id);
+				View.PlayEffect(request.Position, request.Id);
+				budgetRemaining--;
+			}
 		}
 		#endregion
 		
@@ -70,13 +83,6 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (isEnabled) Show();
 			else Close();
-		}
-		#endregion
-		
-		#region Utility
-		void DequeueEffect(QueueProperty<FloraEffectsModel.Request> queue, Action<Vector3> play)
-		{
-			if (queue.TryDequeue(out var request)) play(request.Position);
 		}
 		#endregion
 	}
