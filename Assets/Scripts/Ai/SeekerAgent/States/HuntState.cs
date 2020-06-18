@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.StyxMvp.Models;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -129,16 +130,26 @@ namespace Lunra.Hothouse.Ai.Seeker
 			
 			public override bool IsTriggered()
 			{
-				var targets = SourceState.CurrentCache.Targets.Select(m => m.Transform.Position.Value).ToArray();
-
-				if (targets.None()) return false;
+				if (SourceState.CurrentCache.Targets.None()) return false;
 				
-				return AgentUtility.CalculateNearestPosition(
+				var foundTarget = NavigationUtility.CalculateNearest(
 					Agent.Transform.Position.Value,
-					out path,
-					out _,
-					targets
+					out var result,
+					SourceState.CurrentCache.Targets
+						.Select(
+							m =>
+							{
+								if (m is IBoundaryModel mBoundary) return Navigation.QueryInRadius(mBoundary);
+								return Navigation.QueryOrigin(m);
+							}
+						)
+						.ToArray()
 				);
+
+				if (!foundTarget) return false;
+
+				path = result.Path;
+				return true;
 			}
 
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);

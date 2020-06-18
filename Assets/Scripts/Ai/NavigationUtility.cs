@@ -8,8 +8,58 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai
 {
-	public static class AgentUtility
+	public static class NavigationUtility
 	{
+		public static bool CalculateNearest<M>(
+			Vector3 beginPosition,
+			out Navigation.Result<M> result,
+			params Navigation.Query<M>[] queries
+		)
+		{
+			result = default;
+			Navigation.Result<M> resultCached = default;
+			
+			var path = new NavMeshPath();
+
+			var sortedQueries = queries
+				.OrderBy(q => q.GetMinimumTargetDistance(beginPosition));
+			
+			foreach (var query in sortedQueries)
+			{
+				Navigation.Result<M> validate(Navigation.Validation<M> validation)
+				{
+					if (query.Validate == null)
+					{
+						return DefaultCalculatePathValidation(validation.Path) ? validation.GetValid() : validation.GetInValid();
+					}
+
+					return query.Validate(validation);
+				}
+				
+				foreach (var position in query.GetTargets(beginPosition))
+				{
+					var hasPath = CalculatePath(
+						beginPosition,
+						position,
+						path,
+						pathForValidation =>
+						{
+							resultCached = validate(query.GetValidation(position, pathForValidation));
+							return resultCached.IsValid;
+						}
+					);
+
+					if (hasPath)
+					{
+						result = resultCached;
+						return true;
+					}	
+				}
+			}
+
+			return false;
+		}
+		
 		public static M CalculateNearestAvailableOperatingEntrance<M>(
 			Vector3 beginPosition,
 			out NavMeshPath path,
@@ -91,45 +141,15 @@ namespace Lunra.Hothouse.Ai
 			{
 				if (entrance.State != Entrance.States.Available) continue;
 
-				var hasPath = NavMesh.CalculatePath(
+				var hasPath = CalculatePath(
 					beginPosition,
 					entrance.Position,
-					NavMesh.AllAreas,
 					path
 				);
 
 				if (hasPath)
 				{
 					entrancePosition = entrance.Position;
-					return true;
-				}
-			}
-
-			return false;
-		}
-		
-		public static bool CalculateNearestPosition(
-			Vector3 beginPosition,
-			out NavMeshPath path,
-			out Vector3 endPosition,
-			params Vector3[] positions
-		)
-		{
-			path = new NavMeshPath();
-			endPosition = Vector3.zero;
-
-			foreach (var position in positions.OrderBy(p => Vector3.Distance(p, beginPosition)))
-			{
-				var hasPath = NavMesh.CalculatePath(
-					beginPosition,
-					position,
-					NavMesh.AllAreas,
-					path
-				);
-
-				if (hasPath)
-				{
-					endPosition = position;
 					return true;
 				}
 			}
@@ -173,10 +193,9 @@ namespace Lunra.Hothouse.Ai
 				)
 				.OrderBy(t => Vector3.Distance(agent.Transform.Position.Value, t.Transform.Position.Value))
 				.FirstOrDefault(
-					t =>  NavMesh.CalculatePath(
+					t => CalculatePath(
 						agent.Transform.Position.Value,
 						t.Transform.Position.Value,
-						NavMesh.AllAreas,
 						pathResult
 					)
 				);
@@ -199,5 +218,24 @@ namespace Lunra.Hothouse.Ai
 			
 			return true;	
 		}
+
+		static bool CalculatePath(
+			Vector3 beginPosition,
+			Vector3 endPosition,
+			NavMeshPath path,
+			Func<NavMeshPath, bool> validation = null
+		)
+		{
+			var foundPath = NavMesh.CalculatePath(
+				beginPosition,
+				endPosition,
+				NavMesh.AllAreas,
+				path
+			);
+
+			return foundPath && (validation ?? DefaultCalculatePathValidation)(path);
+		}
+
+		static bool DefaultCalculatePathValidation(NavMeshPath path) => path.status == NavMeshPathStatus.PathComplete;
 	}
 }

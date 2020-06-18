@@ -167,7 +167,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				foreach (var item in items)
 				{
 					var itemEnumerable = new[] { item };
-					var isValid = AgentUtility.CalculateNearestCleanupWithdrawal(
+					var isValid = NavigationUtility.CalculateNearestCleanupWithdrawal(
 						Agent,
 						Game,
 						itemEnumerable,
@@ -208,7 +208,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				Inventory.Types[] itemsWithBuildingInventoryCapacityResult = null;
 				
-				var target = AgentUtility.CalculateNearestAvailableOperatingEntrance(
+				var target = NavigationUtility.CalculateNearestAvailableOperatingEntrance(
 					Agent.Transform.Position.Value,
 					out _,
 					out _,
@@ -274,7 +274,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				if (target.Model == null) return false;
 
-				var result = AgentUtility.CalculateNearestAvailableEntrance(
+				var result = NavigationUtility.CalculateNearestAvailableEntrance(
 					Agent.Transform.Position.Value,
 					out _,
 					out _,

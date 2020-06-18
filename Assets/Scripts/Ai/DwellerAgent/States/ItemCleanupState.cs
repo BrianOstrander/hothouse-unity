@@ -77,7 +77,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				target = AgentUtility.CalculateNearestAvailableOperatingEntrance(
+				target = NavigationUtility.CalculateNearestAvailableOperatingEntrance(
 					Agent.Transform.Position.Value,
 					out _,
 					out var entrancePosition,
@@ -127,7 +127,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
-				target = AgentUtility.CalculateNearestAvailableOperatingEntrance(
+				target = NavigationUtility.CalculateNearestAvailableOperatingEntrance(
 					Agent.Transform.Position.Value,
 					out targetPath,
 					out _,
@@ -210,7 +210,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 
-				return AgentUtility.CalculateNearestCleanupWithdrawal(
+				return NavigationUtility.CalculateNearestCleanupWithdrawal(
 					Agent,
 					Game,
 					SourceState.validItems,
