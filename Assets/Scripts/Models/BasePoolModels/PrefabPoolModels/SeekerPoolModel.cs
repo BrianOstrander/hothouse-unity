@@ -42,15 +42,15 @@ namespace Lunra.Hothouse.Models
 		{
 			// Agent Properties
 			// TODO: NavigationPlan and others may need to be reset...
-			model.NavigationVelocity.Value = 4f;
+			model.NavigationVelocity.Value = 2f;
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
-			model.Health.ResetToMaximum(100f);
+			model.Health.ResetToMaximum(10f);
 			model.InventoryCapacity.Value = InventoryCapacity.None();
 
 			// Seeker Properties
 			model.DamageRange.Value = 1f;
-			model.DamageAmount.Value = 400f;
+			model.DamageAmount.Value = 10f;
 			model.DamageType.Value = Damage.Types.Generic;
 			model.ValidTargets.Value = new[]
 			{
@@ -58,7 +58,7 @@ namespace Lunra.Hothouse.Models
 				InstanceId.Types.Building
 			}; 
 
-			model.IsDebugging = true;
+			// model.IsDebugging = true;
 		}
 	}
 }
