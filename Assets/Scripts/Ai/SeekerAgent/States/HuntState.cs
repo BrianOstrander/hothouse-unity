@@ -43,7 +43,11 @@ namespace Lunra.Hothouse.Ai.Seeker
 			
 			AddTransitions(
 				new ToTimeoutOnAttack(),
-				new ToNavigateToTarget()
+				new ToNavigateToTarget(),
+				new AgentTransitionFallthrough<TimeoutState<HuntState>, GameModel, SeekerModel>(
+					"NoTargetTimeout",
+					transition: () => timeoutState.ConfigureForInterval(Interval.WithRandomMaximum(3, 6f))
+				)
 			);
 		}
 

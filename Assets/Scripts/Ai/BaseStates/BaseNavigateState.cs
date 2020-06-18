@@ -38,6 +38,7 @@ namespace Lunra.Hothouse.Ai
 				if (!CalculatePath()) return;
 			}
 			
+			// TODO: This really should be handled in the presenter's update loop...
 			Agent.NavigationPlan.Value = Agent.NavigationPlan.Value.Next(Agent.NavigationVelocity.Value * Game.SimulationDelta);
 		}
 

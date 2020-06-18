@@ -66,11 +66,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnGameSimulationUpdate()
 		{
-			switch (Model.PooledState.Value)
-			{
-				case PooledStates.InActive:
-					return;
-			}
+			if (View.NotVisible) return;
 			
 			StateMachine.Update();
 		}
@@ -79,12 +75,6 @@ namespace Lunra.Hothouse.Presenters
 		#region AgentModel Events
 		protected virtual void OnAgentPosition(Vector3 position)
 		{
-			switch (Model.PooledState.Value)
-			{
-				case PooledStates.InActive:
-					return;
-			}
-
 			View.RootTransform.position = position;
 		}
 
