@@ -315,7 +315,7 @@ namespace Lunra.Hothouse.Services
 			
 			// DEBUGGING
 			
-			game.DesireDamageMultiplier.Value = 1f;
+			// game.DesireDamageMultiplier.Value = 1f;
 			
 			done(Result<GameModel>.Success(game));
 		}
