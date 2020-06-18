@@ -24,6 +24,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnViewPrepare()
 		{
+			base.OnViewPrepare();
+
 			var item = Model.Inventory.Value.Entries.OrderByDescending(i => i.Weight).FirstOrDefault();
 			View.SetEntry(item.Weight, item.Type);
 		}

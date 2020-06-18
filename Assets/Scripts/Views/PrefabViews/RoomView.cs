@@ -34,9 +34,6 @@ namespace Lunra.Hothouse.Views
 		}
 
 		public bool IsRevealed { set => notRevealedRoot.SetActive(!value); }
-		// public bool IsRevealed { set => notRevealedRoot.SetActive(true); }
-		
-		public string RoomId { get; set; }
 
 		public ColliderCache[] BoundaryColliders => boundaryColliders;
 		public (Vector3 Position, Vector3 Forward)[] DoorAnchors => doorAnchors.Select(d => (d.position, d.forward)).ToArray();
@@ -48,7 +45,6 @@ namespace Lunra.Hothouse.Views
 
 			TimeOfDay = 0f;
 			IsRevealed = false;
-			RoomId = null;
 		}
 
 		void OnDrawGizmosSelected()

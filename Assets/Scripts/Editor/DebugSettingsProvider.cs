@@ -4,6 +4,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Services.Editor;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
@@ -55,7 +56,7 @@ namespace Lunra.Hothouse.Editor
 			if (GUILayout.Button(Content.OpenSaveLocation)) EditorUtility.RevealInFinder(Application.persistentDataPath);
 			
 			GUIExtensions.PushEnabled(
-				SettingsProviderCache.GetGame(out var game)	
+				GameStateEditorUtility.GetGame(out var game)	
 			);
 			{
 				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
@@ -137,7 +138,7 @@ namespace Lunra.Hothouse.Editor
 			
 			try
 			{
-				SettingsProviderCache.GetGame(out var game);
+				GameStateEditorUtility.GetGame(out var game);
 				EditorGUIUtility.systemCopyBuffer = File.ReadAllText(game.Path);
 				Debug.Log("Serialized game copied to clipboard");
 			}

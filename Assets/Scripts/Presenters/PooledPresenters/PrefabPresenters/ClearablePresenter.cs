@@ -35,6 +35,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnViewPrepare()
 		{
+			base.OnViewPrepare();
+			
 			View.Shown += () => OnClearableSelectionState(Model.SelectionState.Value);
 		}
 

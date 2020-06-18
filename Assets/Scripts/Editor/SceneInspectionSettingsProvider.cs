@@ -1,4 +1,5 @@
 using Lunra.Editor.Core;
+using Lunra.Hothouse.Services.Editor;
 using UnityEditor;
 using UnityEngine;
 
@@ -52,7 +53,7 @@ namespace Lunra.Hothouse.Editor
 		void OnDwellersGui()
 		{
 			if (!SceneInspectionSettings.IsInspectingDwellers.Value) return;
-			if (!SettingsProviderCache.GetGameState(out var gameState)) return;
+			if (!GameStateEditorUtility.GetGameState(out var gameState)) return;
 			
 			EditorGUIExtensions.PushIndent();
 			{

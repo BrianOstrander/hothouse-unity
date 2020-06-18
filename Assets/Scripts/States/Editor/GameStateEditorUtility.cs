@@ -1,32 +1,31 @@
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Services;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
 using UnityEditor;
 using UnityEngine;
 
-namespace Lunra.Hothouse.Editor
+namespace Lunra.Hothouse.Services.Editor
 {
 	[InitializeOnLoad]
-	public static class SettingsProviderCache
+	public static class GameStateEditorUtility
 	{
-		static GameState gameState;
+		static GameState cachedState;
 		
-		public static bool GetGameState(out GameState gameState)
+		public static bool GetGameState(out GameState state)
 		{
-			gameState = null;
+			state = null;
 			if (!Application.isPlaying || !App.HasInstance || App.S == null) return false;
 			if (!App.S.Is(typeof(GameState), StateMachine.Events.Begin, StateMachine.Events.Idle)) return false;
 
-			gameState = SettingsProviderCache.gameState ?? (SettingsProviderCache.gameState = App.S.CurrentHandler as GameState);
+			state = cachedState ?? (cachedState = App.S.CurrentHandler as GameState);
 			return true;
 		}
 
 		public static bool GetGame(out GameModel game)
 		{
-			if (GetGameState(out var gameState))
+			if (GetGameState(out var state))
 			{
-				game = gameState.Payload.Game;
+				game = state.Payload.Game;
 				return true;
 			}
 
@@ -34,7 +33,7 @@ namespace Lunra.Hothouse.Editor
 			return false;
 		}
 		
-		static SettingsProviderCache()
+		static GameStateEditorUtility()
 		{
 			EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 		}
@@ -45,7 +44,7 @@ namespace Lunra.Hothouse.Editor
 			{
 				case PlayModeStateChange.ExitingEditMode:
 				case PlayModeStateChange.ExitingPlayMode:
-					gameState = null;
+					cachedState = null;
 					break;
 			}
 		}

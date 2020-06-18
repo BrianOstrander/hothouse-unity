@@ -68,7 +68,12 @@ namespace Lunra.Hothouse.Presenters
 
 		#region View Events
 		
-		protected override void OnViewPrepare() => UpdateObligation();
+		protected override void OnViewPrepare()
+		{
+			base.OnViewPrepare();
+
+			UpdateObligation();
+		}
 		#endregion
 
 		#region Utility

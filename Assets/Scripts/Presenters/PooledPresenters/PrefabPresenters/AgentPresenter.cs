@@ -47,6 +47,8 @@ namespace Lunra.Hothouse.Presenters
 		#region ViewEvents
 		protected override void OnViewPrepare()
 		{
+			base.OnViewPrepare();
+			
 			View.RoomChanged += OnViewRoomChanged;
 		}
 

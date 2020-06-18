@@ -57,6 +57,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnViewPrepare()
 		{
+			base.OnViewPrepare();
+			
 			View.IsOpen = Model.IsOpen.Value;
 			View.RoomId = Model.RoomTransform.Id.Value;
 
