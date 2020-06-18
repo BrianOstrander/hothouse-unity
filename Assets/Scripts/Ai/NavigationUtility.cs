@@ -10,14 +10,14 @@ namespace Lunra.Hothouse.Ai
 {
 	public static class NavigationUtility
 	{
-		public static bool CalculateNearest<M>(
+		public static bool CalculateNearest(
 			Vector3 beginPosition,
-			out Navigation.Result<M> result,
-			params Navigation.Query<M>[] queries
+			out Navigation.Result result,
+			params Navigation.Query[] queries
 		)
 		{
 			result = default;
-			Navigation.Result<M> resultCached = default;
+			Navigation.Result resultCached = default;
 			
 			var path = new NavMeshPath();
 
@@ -26,7 +26,7 @@ namespace Lunra.Hothouse.Ai
 			
 			foreach (var query in sortedQueries)
 			{
-				Navigation.Result<M> validate(Navigation.Validation<M> validation)
+				Navigation.Result validate(Navigation.Validation validation)
 				{
 					if (query.Validate == null)
 					{
