@@ -2,7 +2,7 @@ using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IRoomTransform : ITransform
+	public interface IRoomTransformModel : ITransformModel
 	{
 		RoomTransformComponent RoomTransform { get; }
 	}

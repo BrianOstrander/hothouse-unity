@@ -43,6 +43,18 @@ namespace Lunra.Hothouse.Presenters
 			
 			base.UnBind();
 		}
+
+		#region ViewEvents
+		protected override void OnViewPrepare()
+		{
+			View.RoomChanged += OnViewRoomChanged;
+		}
+
+		protected virtual void OnViewRoomChanged(string roomId)
+		{
+			Model.RoomTransform.Id.Value = roomId;
+		}
+		#endregion
 		
 		#region GameModel Events
 		protected override void OnSimulationInitialized()

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IHealthModel : IModel, IRoomTransform
+	public interface IHealthModel : IModel, IRoomTransformModel
 	{
 		HealthComponent Health { get; }
 	}

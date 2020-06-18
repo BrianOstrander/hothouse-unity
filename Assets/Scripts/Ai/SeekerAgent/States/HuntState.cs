@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using UnityEngine;
 using UnityEngine.AI;
@@ -71,7 +72,11 @@ namespace Lunra.Hothouse.Ai.Seeker
 					.Where(
 						m =>
 						{
-							if (Agent.DamageRange.Value < Vector3.Distance(m.Transform.Position.Value, Agent.Transform.Position.Value)) return false;
+							var range = Agent.DamageRange.Value;
+
+							if (m is IBoundaryModel b) range += b.Boundary.Radius.Value;
+							
+							if (range < Vector3.Distance(m.Transform.Position.Value, Agent.Transform.Position.Value)) return false;
 							if (Agent.RoomTransform.Id.Value == m.RoomTransform.Id.Value) return true;
 							return cache.AdjacentRoomIds.Any(roomId => roomId == m.RoomTransform.Id.Value);
 						}
@@ -124,11 +129,15 @@ namespace Lunra.Hothouse.Ai.Seeker
 			
 			public override bool IsTriggered()
 			{
+				var targets = SourceState.CurrentCache.Targets.Select(m => m.Transform.Position.Value).ToArray();
+
+				if (targets.None()) return false;
+				
 				return AgentUtility.CalculateNearestPosition(
 					Agent.Transform.Position.Value,
 					out path,
 					out _,
-					SourceState.CurrentCache.Targets.Select(m => m.Transform.Position.Value).ToArray()
+					targets
 				);
 			}
 

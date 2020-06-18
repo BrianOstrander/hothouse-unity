@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class WorldCameraModel : Model, ITransform
+	public class WorldCameraModel : Model, ITransformModel
 	{
 		#region Serialized
 		[JsonProperty] bool isEnabled;

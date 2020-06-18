@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-    public class RoomModel : PrefabModel, IBoundary
+    public class RoomModel : PrefabModel, IBoundaryModel
     {
         #region Serialized
         [JsonProperty] bool isSpawn;

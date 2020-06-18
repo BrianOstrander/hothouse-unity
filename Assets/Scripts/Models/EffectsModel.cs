@@ -19,7 +19,6 @@ namespace Lunra.Hothouse.Models
 				string id
 			)
 			{
-				Debug.Log("uh: " + id);
 				Position = position;
 				Id = id;
 			}

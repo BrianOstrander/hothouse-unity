@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface ILightSensitiveModel : IModel, IRoomTransform
+	public interface ILightSensitiveModel : IModel, IRoomTransformModel
 	{
 		LightSensitiveComponent LightSensitive { get; }
 	}

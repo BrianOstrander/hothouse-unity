@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IBoundary : IRoomTransform
+	public interface IBoundaryModel : IRoomTransformModel
 	{
 		BoundaryComponent Boundary { get; }
 	}

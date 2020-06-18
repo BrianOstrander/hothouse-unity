@@ -43,6 +43,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			App.S.PushBlocking(OnGenerateFloraBegin);
 			App.S.PushBlocking(OnGenerateFloraSeed);
 			
+			App.S.PushBlocking(OnGenerateHostiles);
+			
 			App.S.PushBlocking(OnGenerateDwellers);
 			App.S.PushBlocking(OnGenerateStartingBuildings);
 			
@@ -245,6 +247,50 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		}
 		#endregion
 
+		void OnGenerateHostiles(Action done)
+		{
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				// TODO: Abstract this into a shared method...
+				if (room.SpawnDistance.Value == 0) continue;
+				
+				var hostileBudgetRemaining = generator.GetNextInteger(0, 4);
+				var failureBudgetRemaining = hostileBudgetRemaining * 2; // TODO: Don't hardcode this...
+
+				while (0 < hostileBudgetRemaining && 0 < failureBudgetRemaining)
+				{
+					var position = room.Boundary.RandomPoint(generator);
+					if (!position.HasValue)
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+
+					var sampleSuccess = NavMesh.SamplePosition(
+						position.Value,
+						out var hit,
+						Mathf.Abs(position.Value.y) + 0.1f,
+						NavMesh.AllAreas
+					);
+
+					if (!sampleSuccess || !room.Boundary.Contains(hit.position))
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+					
+					payload.Game.Seekers.Activate(
+						room.RoomTransform.Id.Value,
+						hit.position
+					);
+
+					hostileBudgetRemaining--;
+				}
+			}
+			
+			done();
+		}
+
 		void OnRevealRooms(Action done)
 		{
 			foreach (var room in payload.Game.Rooms.AllActive)
@@ -345,11 +391,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		
 		void OnEnd()
 		{
-			payload.Game.Seekers.Activate(
-				spawn.RoomTransform.Id.Value,
-				spawn.Transform.Position.Value + (Vector3.right * 4f)
-			);
-			
 			var elapsedTime = DateTime.Now - beginTime;
 			
 			Debug.Log("Generated "+payload.Game.Rooms.AllActive.Length+" rooms in "+elapsedTime.TotalSeconds.ToString("N2")+" seconds for seed "+generator.Seed);

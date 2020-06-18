@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IPrefabModel : IPooledModel, IRoomTransform
+	public interface IPrefabModel : IPooledModel, IRoomTransformModel
 	{
 		#region Serialized
 		ListenerProperty<string> PrefabId { get; }

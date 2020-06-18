@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface ITransform
+	public interface ITransformModel
 	{
 		TransformComponent Transform { get; }
 	}

@@ -58,7 +58,7 @@ namespace Lunra.Hothouse.Models
 				InstanceId.Types.Building
 			}; 
 
-			// model.IsDebugging = true;
+			model.IsDebugging = true;
 		}
 	}
 }

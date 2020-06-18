@@ -66,8 +66,7 @@ namespace Lunra.Hothouse.Presenters
 			while (0 < budgetRemaining)
 			{
 				if (!effects.Queued.TryPeek(out var peekResult)) break;
-				
-				if (effectIdsPlayedThisFrame.Contains(peekResult.Id)) continue;
+				if (effectIdsPlayedThisFrame.Contains(peekResult.Id)) break;
 
 				var request = effects.Queued.Dequeue();
 				

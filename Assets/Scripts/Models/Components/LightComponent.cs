@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Models
 		Extinguished = 30
 	}
 	
-	public interface ILightModel : IModel, IRoomTransform
+	public interface ILightModel : IModel, IRoomTransformModel
 	{
 		LightComponent Light { get; }
 	}

@@ -1,6 +1,6 @@
 ﻿using System;
 using Lunra.Core;
-using Lunra.StyxMvp;
+using Lunra.Hothouse.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Views
@@ -14,11 +14,29 @@ namespace Lunra.Hothouse.Views
 		#endregion
 
 		#region Bindings
+		public event Action<string> RoomChanged;
 		#endregion
 		
 		#region Reverse Bindings
 		public string DeathEffectId => deathEffectId;
 		#endregion
+
+		int roomBoundaryLayer;
+		
+		public override void Reset()
+		{
+			roomBoundaryLayer = LayerMask.NameToLayer(LayerNames.RoomBoundary);
+			RoomChanged = ActionExtensions.GetEmpty<string>();
+			
+			base.Reset();
+		}
+
+		void OnTriggerEnter(Collider other)
+		{
+			if (other.gameObject.layer != roomBoundaryLayer) return;
+			
+			RoomChanged(other.transform.GetAncestor<RoomView>().RoomId);
+		}
 	}
 
 }
