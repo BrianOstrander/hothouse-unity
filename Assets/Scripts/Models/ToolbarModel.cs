@@ -29,8 +29,10 @@ namespace Lunra.Hothouse.Models
 		Interaction.RoomVector3 clearanceTask;
 		[JsonIgnore] public ListenerProperty<Interaction.RoomVector3> ClearanceTask { get; }
 		
-		Interaction.RoomVector3 constructionTask;
-		[JsonIgnore] public ListenerProperty<Interaction.RoomVector3> ConstructionTask { get; }
+		Interaction.RoomVector3 constructionTranslation;
+		[JsonIgnore] public ListenerProperty<Interaction.RoomVector3> ConstructionTranslation { get; }
+		Interaction.GenericFloat constructionRotation;
+		[JsonIgnore] public ListenerProperty<Interaction.GenericFloat> ConstructionRotation { get; }
 		#endregion
 
 		public ToolbarModel()
@@ -40,7 +42,8 @@ namespace Lunra.Hothouse.Models
 			Task = new ListenerProperty<Tasks>(value => task = value, () => task);
 			Building = new ListenerProperty<BuildingModel>(value => building = value, () => building);
 			ClearanceTask = new ListenerProperty<Interaction.RoomVector3>(value => clearanceTask = value, () => clearanceTask);
-			ConstructionTask = new ListenerProperty<Interaction.RoomVector3>(value => constructionTask = value, () => constructionTask);
+			ConstructionTranslation = new ListenerProperty<Interaction.RoomVector3>(value => constructionTranslation = value, () => constructionTranslation);
+			ConstructionRotation = new ListenerProperty<Interaction.GenericFloat>(value => constructionRotation = value, () => constructionRotation);
 		}
 	}
 }

@@ -48,6 +48,8 @@ namespace Lunra.Hothouse.Models
 			{
 				return "[ " + Begin + " , " + End + " ] ";
 			}
+
+			public Quaternion GetRotation(Vector3 axis) => Quaternion.AngleAxis(End, axis);
 		}
 		
 		public struct DeltaVector3

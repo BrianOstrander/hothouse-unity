@@ -3,6 +3,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 using UnityEngine;
 using UnityEngine.AI;
@@ -15,8 +16,9 @@ namespace Lunra.Hothouse.Presenters
 		GameModel game;
 		BuildValidationModel buildValidation;
 
+		ulong lastUpdateCount;
 		LightingResult lastLightValueCalculated;
-		
+
 		public BuildValidationPresenter(GameModel game)
 		{
 			this.game = game;
@@ -24,7 +26,8 @@ namespace Lunra.Hothouse.Presenters
 
 			game.Toolbar.Task.Changed += OnToolbarTask;
 			game.Toolbar.IsEnabled.Changed += OnToolbarIsEnabled;
-			game.Toolbar.ConstructionTask.Changed += OnToolbarConstructionTask;
+			game.Toolbar.ConstructionTranslation.Changed += OnToolbarConstructionTranslation;
+			game.Toolbar.ConstructionRotation.Changed += OnToolbarConstructionRotation;
 
 			buildValidation.Current.Changed += OnBuildValidationCurrent;
 		}
@@ -33,7 +36,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			game.Toolbar.Task.Changed -= OnToolbarTask;
 			game.Toolbar.IsEnabled.Changed -= OnToolbarIsEnabled;
-			game.Toolbar.ConstructionTask.Changed -= OnToolbarConstructionTask;
+			game.Toolbar.ConstructionTranslation.Changed -= OnToolbarConstructionTranslation;
+			game.Toolbar.ConstructionRotation.Changed -= OnToolbarConstructionRotation;
 			
 			buildValidation.Current.Changed -= OnBuildValidationCurrent;
 		}
@@ -56,6 +60,10 @@ namespace Lunra.Hothouse.Presenters
 
 		void UpdateValidation(Interaction.RoomVector3 interaction)
 		{
+			if (lastUpdateCount == App.Heartbeat.UpdateCount) return;
+
+			lastUpdateCount = App.Heartbeat.UpdateCount;
+			
 			var navMeshHitSuccess = NavMesh.SamplePosition(
 				game.Toolbar.Building.Value.Transform.Position.Value,
 				out _,
@@ -152,7 +160,7 @@ namespace Lunra.Hothouse.Presenters
 			OnToolbarTask(game.Toolbar.Task.Value);
 		}
 		
-		void OnToolbarConstructionTask(Interaction.RoomVector3 interaction)
+		void OnToolbarConstructionTranslation(Interaction.RoomVector3 interaction)
 		{
 			switch (interaction.State)
 			{
@@ -195,6 +203,11 @@ namespace Lunra.Hothouse.Presenters
 			}
 			
 			UpdateValidation(interaction);
+		}
+
+		void OnToolbarConstructionRotation(Interaction.GenericFloat interaction)
+		{
+			if (View.Visible) UpdateValidation(game.Toolbar.ConstructionTranslation.Value);
 		}
 		#endregion
 		
