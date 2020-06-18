@@ -327,7 +327,6 @@ namespace Lunra.Hothouse.Editor
 					var label = GetIdLabel(model);
 
 					if (model.IsSpawn.Value) label += "\nIs Spawn: true";
-					if (model.IsExit.Value) label += "\nIs Exit: true";
 					
 					label += "\nSpawn Distance: " + model.SpawnDistance.Value;
 					label += "\nReveal Distance: " + model.RevealDistance.Value;
@@ -526,14 +525,18 @@ namespace Lunra.Hothouse.Editor
 		static void DrawSelectionButton(IPrefabModel model, Vector3? offset = null)
 		{
 			offset = offset ?? Vector3.zero;
+
+			var guiPoint = HandleUtility.WorldToGUIPointWithDepth(model.Transform.Position.Value + offset.Value);
+
+			if (guiPoint.z < 0f) return;
 			
 			Handles.BeginGUI();
 			{
 				var rect = new Rect(
-					HandleUtility.WorldToGUIPoint(model.Transform.Position.Value + offset.Value),
+					guiPoint,
 					new Vector2(24, 24)
 				);
-				// HandleUtility.WorldToGUIPoint(model.Transform.Position.Value)
+				
 				if (GUI.Button(rect, Texture2D.whiteTexture))
 				{
 					var view = GameObject.FindObjectsOfType<PrefabView>()

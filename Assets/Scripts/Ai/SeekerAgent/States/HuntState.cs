@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
-using Lunra.StyxMvp.Models;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -26,7 +25,10 @@ namespace Lunra.Hothouse.Ai.Seeker
 					.Select(kv => kv.Key);
 
 				Targets = game.Dwellers.AllActive
-					.Concat<IHealthModel>(game.Buildings.AllActive);
+					.Concat<IHealthModel>(
+						game.Buildings.AllActive
+							.Where(m => m.IsBuildingState(BuildingStates.Operating))
+					);
 			}
 		}
 		

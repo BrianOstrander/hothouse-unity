@@ -48,6 +48,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			App.S.PushBlocking(OnGenerateDwellers);
 			App.S.PushBlocking(OnGenerateStartingBuildings);
 			
+			// App.S.PushHalt();
+
 			App.S.PushBlocking(OnRevealRooms);
 			
 			App.S.PushBlocking(OnInitializeLighting);
@@ -114,20 +116,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 				spawnDistanceMaximum = Mathf.Max(spawnDistanceMaximum, next.SpawnDistance.Value);
 			}
-
-			var endOptions = payload.Game.Rooms.AllActive
-				.Where(r => Mathf.Min(spawnDistanceMaximum, request.ExitDistanceMinimum) <= r.SpawnDistance.Value);
-
-			var exit = generator.GetNextFrom(endOptions);
-
-			if (exit == null)
-			{
-				Debug.LogError("end is null, this should never happen");
-				// TODO: Handle this error
-			}
-
-			exit.IsExit.Value = true;
-
+			
 			done();
 		}
 
@@ -249,6 +238,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateHostiles(Action done)
 		{
+			/*
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
 				// TODO: Abstract this into a shared method...
@@ -287,6 +277,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 					hostileBudgetRemaining--;
 				}
 			}
+			*/
 			
 			done();
 		}
@@ -340,16 +331,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Buildings.Bonfire,
 				spawn.Id.Value,
 				spawn.Transform.Position.Value + (Vector3.right * 2f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-
-			var exit = payload.Game.Rooms.FirstActive(m => m.IsExit.Value);
-			
-			payload.Game.Buildings.Activate(
-				Buildings.Bonfire,
-				exit.Id.Value,
-				exit.Transform.Position.Value,
 				Quaternion.identity,
 				BuildingStates.Operating
 			);

@@ -5,6 +5,7 @@ namespace Lunra.Hothouse.Models
 		Unknown = 0,
 		Grass = 10,
 		Wheat = 20,
-		Shroom = 30
+		Shroom = 30,
+		SeekerSpawner = 40
 	}
 }

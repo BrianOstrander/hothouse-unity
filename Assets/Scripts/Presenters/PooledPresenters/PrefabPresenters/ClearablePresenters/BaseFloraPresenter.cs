@@ -8,11 +8,23 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class FloraPresenter : ClearablePresenter<FloraModel, FloraView>
+	public class BaseFloraPresenter<V> : ClearablePresenter<FloraModel, V>
+		where V : FloraView
 	{
+		public enum ReproductionEvents
+		{
+			Unknown = 0,
+			Default = 10,
+			ReproduceChild = 20,
+			ReproduceAdult = 30,
+			Custom = 40
+		}
+
+		protected virtual ReproductionEvents DefaultReproductionEvent => ReproductionEvents.ReproduceChild; 
+		
 		Demon generator = new Demon();
 		
-		public FloraPresenter(GameModel game, FloraModel model) : base(game, model) { }
+		public BaseFloraPresenter(GameModel game, FloraModel model) : base(game, model) { }
 
 		protected override void Bind()
 		{
@@ -99,7 +111,7 @@ namespace Lunra.Hothouse.Presenters
 		bool OnFloraTriggerReproduction(Demon generatorOverride)
 		{
 			return TryReproducing(
-				false,
+				ReproductionEvents.ReproduceAdult,
 				false,
 				generatorOverride
 			);
@@ -108,11 +120,13 @@ namespace Lunra.Hothouse.Presenters
 		
 		#region Utility
 		bool TryReproducing(
-			bool reproduceChildren = true,
+			ReproductionEvents reproductionEvent = ReproductionEvents.Default,
 			bool incrementFailures = true,
 			Demon generatorOverride = null
 		)
 		{
+			if (reproductionEvent == ReproductionEvents.Default) reproductionEvent = DefaultReproductionEvent;
+			
 			var currentGenerator = generatorOverride ?? generator;
 								
 			var nearbyFlora = Game.Flora.AllActive.Where(
@@ -153,21 +167,31 @@ namespace Lunra.Hothouse.Presenters
 								{
 									increaseReproductionFailures = false;
 
-									if (reproduceChildren)
+									switch (reproductionEvent)
 									{
-										Game.Flora.ActivateChild(
-											Model.Species.Value,
-											roomView.RoomId,
-											hit.position
-										);
-									}
-									else
-									{
-										Game.Flora.ActivateAdult(
-											Model.Species.Value,
-											roomView.RoomId,
-											hit.position
-										);
+										case ReproductionEvents.ReproduceChild:
+											Game.Flora.ActivateChild(
+												Model.Species.Value,
+												roomView.RoomId,
+												hit.position
+											);
+											break;
+										case ReproductionEvents.ReproduceAdult:
+											Game.Flora.ActivateAdult(
+												Model.Species.Value,
+												roomView.RoomId,
+												hit.position
+											);
+											break;
+										case ReproductionEvents.Custom:
+											OnReproductionCustom(
+												roomView.RoomId,
+												hit.position
+											);
+											break;
+										default:
+											Debug.LogError("Unrecognized ReproductionEvent: "+reproductionEvent);
+											break;
 									}
 								}
 							}
@@ -224,6 +248,8 @@ namespace Lunra.Hothouse.Presenters
 
 			return !increaseReproductionFailures;
 		}
+
+		protected virtual void OnReproductionCustom(string roomId, Vector3 position) => Debug.LogWarning("This presenter has not specified a custom reproduction event");
 		#endregion
 	}
 }

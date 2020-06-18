@@ -41,7 +41,6 @@ namespace Lunra.Hothouse.Models
 					m.Id.Value = id;
 					
 					m.IsSpawn.Value = false;
-					m.IsExit.Value = false;
 					m.SpawnDistance.Value = int.MaxValue;
 					m.IsRevealed.Value = false;
 					m.RevealDistance.Value = int.MaxValue;
