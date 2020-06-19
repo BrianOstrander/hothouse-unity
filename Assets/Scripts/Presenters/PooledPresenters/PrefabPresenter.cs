@@ -43,6 +43,13 @@ namespace Lunra.Hothouse.Presenters
 
 		protected virtual bool AutoShowCloseOnRoomReveal => true;
 		
+		#region View Events
+		protected override void OnViewPrepare()
+		{
+			View.RoomId = Model.RoomTransform.Id.Value;
+			View.ModelId = Model.Id.Value;
+		}
+		#endregion
 		
 		#region RoomModel Events
 		void OnRoomIsRevealed(bool isRevealed)

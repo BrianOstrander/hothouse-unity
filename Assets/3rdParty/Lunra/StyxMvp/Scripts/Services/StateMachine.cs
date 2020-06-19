@@ -465,6 +465,8 @@ namespace Lunra.StyxMvp.Services
 
 
 		#region Utility
+		public void PushHalt() => PushBlocking(done => { });
+		
 		public void PushBreak()
 		{
 			Push(OnBreak);

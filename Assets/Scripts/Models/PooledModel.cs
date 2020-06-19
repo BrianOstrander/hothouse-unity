@@ -11,7 +11,7 @@ namespace Lunra.Hothouse.Models
 		Active = 20
 	}
 
-	public interface IPooledModel : IModel, ITransform
+	public interface IPooledModel : IModel, ITransformModel
 	{
 		#region Serialized
 		ListenerProperty<PooledStates> PooledState { get; }

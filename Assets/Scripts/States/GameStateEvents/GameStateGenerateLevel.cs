@@ -18,6 +18,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		RoomResolverRequest request;
 		
 		DateTime beginTime;
+
+		RoomModel spawn;
 		
 		public GameStateGenerateLevel(GameState state)
 		{
@@ -41,9 +43,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			App.S.PushBlocking(OnGenerateFloraBegin);
 			App.S.PushBlocking(OnGenerateFloraSeed);
 			
+			App.S.PushBlocking(OnGenerateHostiles);
+			
 			App.S.PushBlocking(OnGenerateDwellers);
 			App.S.PushBlocking(OnGenerateStartingBuildings);
 			
+			// App.S.PushHalt();
+
 			App.S.PushBlocking(OnRevealRooms);
 			
 			App.S.PushBlocking(OnInitializeLighting);
@@ -80,7 +86,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var spawnOptions = payload.Game.Rooms.AllActive
 				.Where(r => request.SpawnDoorCountRequired <= r.AdjacentRoomIds.Value.Count);
 			
-			var spawn = generator.GetNextFrom(spawnOptions);
+			spawn = generator.GetNextFrom(spawnOptions);
 
 			if (spawn == null)
 			{
@@ -110,20 +116,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 				spawnDistanceMaximum = Mathf.Max(spawnDistanceMaximum, next.SpawnDistance.Value);
 			}
-
-			var endOptions = payload.Game.Rooms.AllActive
-				.Where(r => Mathf.Min(spawnDistanceMaximum, request.ExitDistanceMinimum) <= r.SpawnDistance.Value);
-
-			var exit = generator.GetNextFrom(endOptions);
-
-			if (exit == null)
-			{
-				Debug.LogError("end is null, this should never happen");
-				// TODO: Handle this error
-			}
-
-			exit.IsExit.Value = true;
-
+			
 			done();
 		}
 
@@ -243,6 +236,52 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		}
 		#endregion
 
+		void OnGenerateHostiles(Action done)
+		{
+			/*
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				// TODO: Abstract this into a shared method...
+				if (room.SpawnDistance.Value == 0) continue;
+				
+				var hostileBudgetRemaining = generator.GetNextInteger(0, 4);
+				var failureBudgetRemaining = hostileBudgetRemaining * 2; // TODO: Don't hardcode this...
+
+				while (0 < hostileBudgetRemaining && 0 < failureBudgetRemaining)
+				{
+					var position = room.Boundary.RandomPoint(generator);
+					if (!position.HasValue)
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+
+					var sampleSuccess = NavMesh.SamplePosition(
+						position.Value,
+						out var hit,
+						Mathf.Abs(position.Value.y) + 0.1f,
+						NavMesh.AllAreas
+					);
+
+					if (!sampleSuccess || !room.Boundary.Contains(hit.position))
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+					
+					payload.Game.Seekers.Activate(
+						room.RoomTransform.Id.Value,
+						hit.position
+					);
+
+					hostileBudgetRemaining--;
+				}
+			}
+			*/
+			
+			done();
+		}
+
 		void OnRevealRooms(Action done)
 		{
 			foreach (var room in payload.Game.Rooms.AllActive)
@@ -256,10 +295,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateDwellers(Action done)
 		{
-			var spawn = payload.Game.Rooms.FirstActive(r => r.IsSpawn.Value);
-
-			// spawn.IsRevealed.Value = true;
-		
 			var dweller0 = payload.Game.Dwellers.Activate(
 				spawn.Id.Value,
 				spawn.Transform.Position.Value
@@ -291,23 +326,11 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		}
 
 		void OnGenerateStartingBuildings(Action done)
-		{
-			var spawn = payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
-			
+		{	
 			var bonfire = payload.Game.Buildings.Activate(
 				Buildings.Bonfire,
 				spawn.Id.Value,
 				spawn.Transform.Position.Value + (Vector3.right * 2f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-
-			var exit = payload.Game.Rooms.FirstActive(m => m.IsExit.Value);
-			
-			payload.Game.Buildings.Activate(
-				Buildings.Bonfire,
-				exit.Id.Value,
-				exit.Transform.Position.Value,
 				Quaternion.identity,
 				BuildingStates.Operating
 			);

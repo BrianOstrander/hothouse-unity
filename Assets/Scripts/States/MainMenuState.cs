@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Models.AgentModels;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
-using UnityEngine;
 
 namespace Lunra.Hothouse.Services
 {
@@ -78,7 +74,7 @@ namespace Lunra.Hothouse.Services
 			game.DesireDamageMultiplier.Value = 1f;
 			game.SimulationTimeConversion.Value = 1f / 10f;
 			
-			game.FloraEffects.IsEnabled.Value = true;
+			game.Effects.IsEnabled.Value = true;
 			game.Toolbar.IsEnabled.Value = true;
 			
 			game.WorldCamera.IsEnabled.Value = true;
@@ -319,7 +315,7 @@ namespace Lunra.Hothouse.Services
 			
 			// DEBUGGING
 			
-			game.DesireDamageMultiplier.Value = 1f;
+			// game.DesireDamageMultiplier.Value = 1f;
 			
 			done(Result<GameModel>.Success(game));
 		}

@@ -1,4 +1,5 @@
 using Lunra.Editor.Core;
+using Lunra.Hothouse.Services.Editor;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace Lunra.Hothouse.Editor
 		public static EditorPrefsBool IsInspectingBuildings = new EditorPrefsBool(KeyPrefix + "IsInspectingBuildings");
 		public static EditorPrefsBool IsInspectingEntrances = new EditorPrefsBool(KeyPrefix + "IsInspectingEntrances");
 		public static EditorPrefsBool IsInspectingDwellers = new EditorPrefsBool(KeyPrefix + "IsInspectingDwellers");
+		public static EditorPrefsBool IsInspectingOtherAgents = new EditorPrefsBool(KeyPrefix + "IsInspectingOtherAgents");
 		public static EditorPrefsBool IsInspectingFlora = new EditorPrefsBool(KeyPrefix + "IsInspectingFlora");
 		public static EditorPrefsBool IsInspectingItemDrops = new EditorPrefsBool(KeyPrefix + "IsInspectingItemDrops");
 		public static EditorPrefsBool IsInspectingLightLevels = new EditorPrefsBool(KeyPrefix + "IsInspectingLightLevels");
@@ -38,6 +40,7 @@ namespace Lunra.Hothouse.Editor
 			
 			SceneInspectionSettings.IsInspectingDwellers.Draw();
 			OnDwellersGui();
+			SceneInspectionSettings.IsInspectingOtherAgents.Draw();
 			
 			SceneInspectionSettings.IsInspectingFlora.Draw();
 			SceneInspectionSettings.IsInspectingItemDrops.Draw();
@@ -50,7 +53,7 @@ namespace Lunra.Hothouse.Editor
 		void OnDwellersGui()
 		{
 			if (!SceneInspectionSettings.IsInspectingDwellers.Value) return;
-			if (!SettingsProviderCache.GetGameState(out var gameState)) return;
+			if (!GameStateEditorUtility.GetGameState(out var gameState)) return;
 			
 			EditorGUIExtensions.PushIndent();
 			{
@@ -80,6 +83,7 @@ namespace Lunra.Hothouse.Editor
 				SceneInspectionSettings.IsInspectingBuildings.LabelName,
 				SceneInspectionSettings.IsInspectingEntrances.LabelName,
 				SceneInspectionSettings.IsInspectingDwellers.LabelName,
+				SceneInspectionSettings.IsInspectingOtherAgents.LabelName,
 				SceneInspectionSettings.IsInspectingFlora.LabelName,
 				SceneInspectionSettings.IsInspectingItemDrops.LabelName,
 				SceneInspectionSettings.IsInspectingLightLevels.LabelName,

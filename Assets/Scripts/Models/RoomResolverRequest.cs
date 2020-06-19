@@ -59,6 +59,14 @@ namespace Lunra.Hothouse.Models
 				0.5f,
 				1,
 				2
+			),
+			new FloraConstraint(
+				FloraSpecies.SeekerSpawner,
+				1,
+				1,
+				0f,
+				1,
+				2
 			)
 		};
 		

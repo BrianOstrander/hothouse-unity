@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
 using Lunra.NumberDemon;
@@ -8,29 +7,13 @@ using UnityEngine;
 namespace Lunra.Hothouse.Views.Editor
 {
 	[CustomEditor(typeof(RoomView))]
-	public class DrawLineEditor : UnityEditor.Editor
+	public class RoomViewEditor : UnityEditor.Editor
 	{
-		int lastFocusId;
-		bool isRefocusing;
-		// string last
-		List<string> issues = new List<string>();
-		
 		void OnSceneGUI()
 		{
 			var typedTarget = target as RoomView;
-			if (typedTarget == null)
-			{
-				isRefocusing = true;
-				return;
-			}
+			if (typedTarget == null) return;
 
-			if (isRefocusing)
-			{
-				isRefocusing = false;
-				if (lastFocusId != typedTarget.gameObject.GetInstanceID()) CalculateIssues();
-				lastFocusId = typedTarget.gameObject.GetInstanceID();
-			}
-			
 			Handles.BeginGUI();
 			{
 				var isUnexploredLayerVisible = ToolsExtensions.IsLayerVisible(LayerNames.Unexplored);
@@ -122,20 +105,6 @@ namespace Lunra.Hothouse.Views.Editor
 				GUIExtensions.PopEnabled();
 			}
 			Handles.EndGUI();
-		}
-
-		void CalculateIssues()
-		{
-			issues.Clear();
-			
-			
-		}
-
-		void OnValidateGui()
-		{
-			
-			
-			
 		}
 	}
 }

@@ -118,7 +118,25 @@ namespace Lunra.Hothouse.Models
 						"wheat0"
 					}
 				)
-			}
+			},
+			{
+				FloraSpecies.SeekerSpawner,
+				new SpeciesInfo(
+					new FloatRange(4f, 16f), 
+					// new FloatRange(10f, 20f),
+					new FloatRange(1f, 2f),
+					new FloatRange(0.75f, 1.25f),
+					Defaults.ReproductionFailureLimit,
+					100f,
+					50f,
+					true,
+					Defaults.GenerateDrops(Inventory.Types.Stalks),
+					new []
+					{
+						"seeker_spawner_0"
+					}
+				)
+			},
 		};
 
 		GameModel game;
@@ -126,9 +144,25 @@ namespace Lunra.Hothouse.Models
 		public override void Initialize(GameModel game)
 		{
 			this.game = game;
-			Initialize(
-				model => new FloraPresenter(game, model)	
-			);
+			Initialize(OnInitializePresenter);
+		}
+
+		void OnInitializePresenter(FloraModel model)
+		{
+			switch (model.Species.Value)
+			{
+				case FloraSpecies.Grass:
+				case FloraSpecies.Wheat:
+				case FloraSpecies.Shroom:
+					new FloraPresenter(game, model);
+					break;
+				case FloraSpecies.SeekerSpawner:
+					new SeekerSpawnerFloraPresenter(game, model);
+					break;
+				default:
+					Debug.LogError("Unrecognized Species: "+model.Species.Value);
+					break;
+			}
 		}
 
 		public FloraModel ActivateChild(

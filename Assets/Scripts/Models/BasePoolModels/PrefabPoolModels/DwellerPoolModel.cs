@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
 using Lunra.Core;
-using Lunra.Hothouse.Models.AgentModels;
 using Lunra.Hothouse.Presenters;
-using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
 using UnityEngine;
 
@@ -45,21 +42,25 @@ namespace Lunra.Hothouse.Models
 
 		void Reset(DwellerModel model)
 		{
+			// Agent Properties
+			// TODO: NavigationPlan and others may need to be reset...
 			model.NavigationVelocity.Value = 4f;
+			model.IsDebugging = false;
+			model.NavigationForceDistanceMaximum.Value = 4f;
+			model.Health.ResetToMaximum(100f);
+			model.InventoryCapacity.Value = InventoryCapacity.ByTotalWeight(2);
+			
+			// Dweller Properties
 			model.Job.Value = Jobs.None;
 			model.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
 			model.Desire.Value = Desires.None;
-			model.IsDebugging = false;
-			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.MeleeRange.Value = 0.75f;
 			model.MeleeCooldown.Value = 0.5f;
 			model.MeleeDamage.Value = 60f;
-			model.Health.ResetToMaximum(100f);
 
 			model.WithdrawalCooldown.Value = 0.5f;
 			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;
 			model.TransferDistance.Value = 0.75f;
-			model.InventoryCapacity.Value = InventoryCapacity.ByTotalWeight(2);
 			
 			model.DesireDamage.Value = new Dictionary<Desires, float>
 			{

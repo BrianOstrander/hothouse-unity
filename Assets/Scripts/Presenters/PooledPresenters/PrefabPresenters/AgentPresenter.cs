@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
-using Lunra.Hothouse.Ai;
+﻿using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
-using Lunra.StyxMvp;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -30,6 +27,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.Transform.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 			Model.Health.Current.Changed += OnAgentHealthCurrent;
+			Model.Health.Damaged += OnAgentHealthDamaged;
 			
 			base.Bind();
 		}
@@ -41,9 +39,24 @@ namespace Lunra.Hothouse.Presenters
 			Model.Transform.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 			Model.Health.Current.Changed -= OnAgentHealthCurrent;
+			Model.Health.Damaged -= OnAgentHealthDamaged;
 			
 			base.UnBind();
 		}
+
+		#region ViewEvents
+		protected override void OnViewPrepare()
+		{
+			base.OnViewPrepare();
+			
+			View.RoomChanged += OnViewRoomChanged;
+		}
+
+		protected virtual void OnViewRoomChanged(string roomId)
+		{
+			Model.RoomTransform.Id.Value = roomId;
+		}
+		#endregion
 		
 		#region GameModel Events
 		protected override void OnSimulationInitialized()
@@ -53,11 +66,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnGameSimulationUpdate()
 		{
-			switch (Model.PooledState.Value)
-			{
-				case PooledStates.InActive:
-					return;
-			}
+			if (View.NotVisible) return;
 			
 			StateMachine.Update();
 		}
@@ -66,12 +75,6 @@ namespace Lunra.Hothouse.Presenters
 		#region AgentModel Events
 		protected virtual void OnAgentPosition(Vector3 position)
 		{
-			switch (Model.PooledState.Value)
-			{
-				case PooledStates.InActive:
-					return;
-			}
-
 			View.RootTransform.position = position;
 		}
 
@@ -138,6 +141,22 @@ namespace Lunra.Hothouse.Presenters
 			Debug.LogWarning("Handle unfulfilled obligation promises here!");
 			
 			Model.PooledState.Value = PooledStates.InActive;
+		}
+
+		public virtual void OnAgentHealthDamaged(Damage.Result result)
+		{
+			if (result.IsTargetDestroyed)
+			{
+				if (!string.IsNullOrEmpty(View.DeathEffectId))
+				{
+					Game.Effects.Queued.Enqueue(
+						new EffectsModel.Request(
+							Model.Transform.Position.Value,
+							View.DeathEffectId
+						)
+					);
+				}
+			}
 		}
 		#endregion
 	}

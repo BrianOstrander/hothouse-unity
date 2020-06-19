@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
-using Lunra.Hothouse.Models.AgentModels;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {
-	public class BuildingModel : PrefabModel, ILightModel, IEnterableModel, IBoundary, IHealthModel
+	public class BuildingModel : PrefabModel, ILightModel, IEnterableModel, IBoundaryModel, IHealthModel
 	{
 		#region Serialized
 		[JsonProperty] Buildings type;

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
-using Lunra.Hothouse.Models.AgentModels;
 using Lunra.Hothouse.Views;
 using UnityEngine;
 
@@ -46,7 +45,8 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			// Misc Bindings
-			Game.Toolbar.ConstructionTask.Changed += OnToolbarConstruction;
+			Game.Toolbar.ConstructionTranslation.Changed += OnToolbarConstructionTranslation;
+			Game.Toolbar.ConstructionRotation.Changed += OnToolbarConstructionRotation;
 			Game.Toolbar.Task.Changed += OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
@@ -74,7 +74,8 @@ namespace Lunra.Hothouse.Presenters
 			Model.BuildingState.Changed -= OnLightBuildingState;
 			
 			// Misc UnBindings
-			Game.Toolbar.ConstructionTask.Changed -= OnToolbarConstruction;
+			Game.Toolbar.ConstructionTranslation.Changed -= OnToolbarConstructionTranslation;
+			Game.Toolbar.ConstructionRotation.Changed -= OnToolbarConstructionRotation;
 			Game.Toolbar.Task.Changed -= OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
@@ -173,7 +174,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		#region InteractionModel Events
-		void OnToolbarConstruction(Interaction.RoomVector3 interaction)
+		void OnToolbarConstructionTranslation(Interaction.RoomVector3 interaction)
 		{
 			if (Model.BuildingState.Value != BuildingStates.Placing) return;
 
@@ -193,6 +194,21 @@ namespace Lunra.Hothouse.Presenters
 					break;
 				default:
 					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
+					break;
+			}
+		}
+
+		void OnToolbarConstructionRotation(Interaction.GenericFloat interaction)
+		{
+			if (Model.BuildingState.Value != BuildingStates.Placing) return;
+			if (View.NotVisible) return;
+			
+			switch (interaction.State)
+			{
+				case Interaction.States.Idle:
+				case Interaction.States.Begin:
+				case Interaction.States.Active:
+					Model.Transform.Rotation.Value *= interaction.Value.GetRotation(Vector3.up);
 					break;
 			}
 		}
@@ -306,7 +322,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnBuildingHealthCurrent(float current)
 		{
 			// TODO: Should use their own hurt particle, not plants...
-			Game.FloraEffects.HurtQueue.Enqueue(new FloraEffectsModel.Request(Model.Transform.Position.Value));
+			// Game.Effects.HurtQueue.Enqueue(new EffectsModel.Request(Model.Transform.Position.Value));
 			
 			if (!Mathf.Approximately(0f, current)) return;
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 
 namespace Lunra.StyxMvp.Models
@@ -98,6 +99,19 @@ namespace Lunra.StyxMvp.Models
 			return result;
 		}
 
+		public bool TryPeek(out T element)
+		{
+			element = default;
+			
+			if (queue.Any())
+			{
+				element = queue.Peek();
+				return true;
+			}
+
+			return false;
+		}
+		
 		public T Peek() => queue.Peek();
 		public T[] PeekAll() => queue.ToArray();
 

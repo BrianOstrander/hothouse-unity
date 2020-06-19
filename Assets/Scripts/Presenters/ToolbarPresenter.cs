@@ -22,6 +22,7 @@ namespace Lunra.Hothouse.Presenters
 			game.SimulationInitialize += OnGameSimulationInitialize;
 
 			game.Interaction.FloorSelection.Changed += OnInteractionFloorSelection;
+			game.Interaction.Scroll.Changed += OnInteractionScroll;
 
 			toolbar.IsEnabled.Changed += OnToolbarIsEnabled;
 			toolbar.Task.Changed += OnToolbarTask;
@@ -37,6 +38,7 @@ namespace Lunra.Hothouse.Presenters
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			
 			game.Interaction.FloorSelection.Changed -= OnInteractionFloorSelection;
+			game.Interaction.Scroll.Changed -= OnInteractionScroll;
 			
 			toolbar.IsEnabled.Changed -= OnToolbarIsEnabled;
 			toolbar.Task.Changed -= OnToolbarTask;
@@ -51,6 +53,7 @@ namespace Lunra.Hothouse.Presenters
 			View.ClearanceClick += OnClearanceClick;
 			View.ConstructFireClick += OnConstructFireClick;
 			View.ConstructBedClick += OnConstructBedClick;
+			View.ConstructWallClick += OnConstructWallClick;
 			
 			ShowView(instant: true);
 		}
@@ -91,7 +94,29 @@ namespace Lunra.Hothouse.Presenters
 					toolbar.ClearanceTask.Value = interaction;
 					break;
 				case ToolbarModel.Tasks.Construction:
-					toolbar.ConstructionTask.Value = interaction;
+					toolbar.ConstructionTranslation.Value = interaction;
+					break;
+				case ToolbarModel.Tasks.None: break;
+				default:
+					Debug.LogError("Unrecognized Task: "+toolbar.Task.Value);
+					break;
+			}
+		}
+
+		void OnInteractionScroll(Interaction.GenericVector3 interaction)
+		{
+			switch (toolbar.Task.Value)
+			{
+				case ToolbarModel.Tasks.Clearance:
+					break;
+				case ToolbarModel.Tasks.Construction:
+					toolbar.ConstructionRotation.Value = new Interaction.GenericFloat(
+						interaction.State,
+						new Interaction.DeltaFloat(
+							interaction.Value.Begin.y * 4f, // TODO: Don't hardcode these sensitivity values..
+							interaction.Value.End.y * 4f
+						)
+					);
 					break;
 				case ToolbarModel.Tasks.None: break;
 				default:
@@ -121,6 +146,14 @@ namespace Lunra.Hothouse.Presenters
 			View.ConstructBedSelected = ToggleTask(
 				ToolbarModel.Tasks.Construction,
 				Buildings.Bedroll
+			);
+		}
+		
+		void OnConstructWallClick()
+		{
+			View.ConstructWallSelected = ToggleTask(
+				ToolbarModel.Tasks.Construction,
+				Buildings.WallSmall
 			);
 		}
 		#endregion
@@ -177,6 +210,7 @@ namespace Lunra.Hothouse.Presenters
 			View.ClearanceSelected = false;
 			View.ConstructFireSelected = false;
 			View.ConstructBedSelected = false;
+			View.ConstructWallSelected = false;
 		}
 		#endregion
 	}

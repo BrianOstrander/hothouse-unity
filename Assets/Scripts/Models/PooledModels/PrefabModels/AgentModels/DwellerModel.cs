@@ -5,7 +5,7 @@ using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Lunra.Hothouse.Models.AgentModels
+namespace Lunra.Hothouse.Models
 {
 	public class DwellerModel : AgentModel
 	{

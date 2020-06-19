@@ -63,7 +63,7 @@ namespace Lunra.Hothouse.Services
 			
 			new WorldCameraPresenter(Payload.Game);
 			new ToolbarPresenter(Payload.Game);
-			new FloraEffectsPresenter(Payload.Game);
+			new EffectsPresenter(Payload.Game);
 
 			new HintsPresenter(Payload.Game);
 			new BuildValidationPresenter(Payload.Game);
@@ -79,6 +79,7 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.ItemDrops.Initialize(m => new ItemDropPresenter(Payload.Game, m));
 			Payload.Game.Dwellers.Initialize(Payload.Game);
 			Payload.Game.ObligationIndicators.Initialize(Payload.Game);
+			Payload.Game.Seekers.Initialize(Payload.Game);
 			
 			done();
 		}

@@ -1,3 +1,4 @@
+using System;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
@@ -43,6 +44,60 @@ namespace Lunra.Hothouse.Presenters
 						Model.Camera.Value.ScreenToViewportPoint(Input.mousePosition)	
 					);
 				}
+			}
+
+			var mouseScrollDelta = new Vector3(
+				Input.mouseScrollDelta.x,
+				Input.mouseScrollDelta.y,
+				0f
+			);
+			
+			var scrollIsZero = Mathf.Approximately(0f, mouseScrollDelta.sqrMagnitude);
+
+			switch (Model.Scroll.Value.State)
+			{
+				case Interaction.States.Idle:
+				case Interaction.States.End:
+				case Interaction.States.Cancel:
+					if (!scrollIsZero)
+					{
+						Model.Scroll.Value = new Interaction.GenericVector3(
+							Interaction.States.Begin,
+							Interaction.DeltaVector3.New(
+								mouseScrollDelta	
+							)
+						);
+					}
+					else
+					{
+						Model.Scroll.Value = new Interaction.GenericVector3(
+							Interaction.States.Idle,
+							Interaction.DeltaVector3.New(
+								mouseScrollDelta	
+							)
+						);
+					}
+					break;
+				case Interaction.States.Begin:
+				case Interaction.States.Active:
+					if (!scrollIsZero)
+					{
+						Model.Scroll.Value = Model.Scroll.Value.NewEnd(
+							Interaction.States.Active,
+							mouseScrollDelta
+						);
+					}
+					else
+					{
+						Model.Scroll.Value = Model.Scroll.Value.NewEnd(
+							Interaction.States.End,
+							mouseScrollDelta
+						);
+					}
+					break;
+				default:
+					Debug.LogError("Unrecognized Interaction.State: "+Model.Display.Value.State);
+					break;
 			}
 
 			switch (Model.Display.Value.State)

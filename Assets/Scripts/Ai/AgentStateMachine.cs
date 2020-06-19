@@ -6,27 +6,27 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai
 {
-	public abstract class AgentStateMachine<W, A>
+	public abstract class AgentStateMachine<G, A>
 		where A : AgentModel
 	{
 		public string Name => (string.IsNullOrEmpty(Agent.Id.Value) ? "null_or_empty_id" : Agent.Id.Value) + "<" + GetType().Name + ">";
 		
-		public List<AgentState<W, A>> States { get; } = new List<AgentState<W, A>>();
+		public List<AgentState<G, A>> States { get; } = new List<AgentState<G, A>>();
 		
-		public AgentState<W, A> DefaultState { get; protected set; }
-		public AgentState<W, A> CurrentState { get; private set; }
+		public AgentState<G, A> DefaultState { get; protected set; }
+		public AgentState<G, A> CurrentState { get; private set; }
 		
-		public W World { get; private set; }
+		public G Game { get; private set; }
 		public A Agent { get; private set; }
 		
 		public bool IsOutOfState { get; private set; }
 
 		public void Initialize(
-			W world,
+			G game,
 			A agent
 		)
 		{
-			World = world;
+			Game = game;
 			Agent = agent;
 
 			var statesRemainingToInitialize = GetStates();
@@ -38,14 +38,14 @@ namespace Lunra.Hothouse.Ai
 				
 				States.Add(state);
 				
-				state.Initialize(World, Agent);
+				state.Initialize(Game, Agent);
 				
 				statesRemainingToInitialize.AddRange(state.ChildStates);
 			}
 
 			if (DefaultState == null)
 			{
-				Debug.LogError("No "+nameof(DefaultState)+" specified");
+				Debug.LogError("No "+nameof(DefaultState)+" specified for "+GetType().Name);
 				return;
 			}
 
@@ -58,7 +58,7 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		protected abstract List<AgentState<W, A>> GetStates();
+		protected abstract List<AgentState<G, A>> GetStates();
 		
 		public void Update()
 		{
@@ -125,14 +125,14 @@ namespace Lunra.Hothouse.Ai
 				possibleChild => States.None(s => s.ChildStates.Contains(possibleChild))
 			).ToList();
 			
-			var stateNameMap = new Dictionary<AgentState<W, A>, string>();
+			var stateNameMap = new Dictionary<AgentState<G, A>, string>();
 			
 			foreach (var state in rootStates)
 			{
 				states.Add(state.Name);
 				stateNameMap.Add(state, state.Name);
 
-				List<string> getChildStateNames(string path, List<AgentState<W, A>> childStates)
+				List<string> getChildStateNames(string path, List<AgentState<G, A>> childStates)
 				{
 					var childResults = new List<string>();
 

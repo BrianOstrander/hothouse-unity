@@ -3,8 +3,8 @@ using Lunra.Hothouse.Models;
 
 namespace Lunra.Hothouse.Ai
 {
-	public class AgentTransitionFallthrough<S, W, A> : AgentTransition<S, W, A>
-		where S : AgentState<W, A>
+	public class AgentTransitionFallthrough<S, G, A> : AgentTransition<S, G, A>
+		where S : AgentState<G, A>
 		where A : AgentModel
 	{
 		public override string Name => name;

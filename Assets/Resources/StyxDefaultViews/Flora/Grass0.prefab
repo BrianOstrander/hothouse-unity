@@ -246,6 +246,9 @@ MonoBehaviour:
   meleeRangeBonus: 0
   maximumHeight: 3
   heightRoot: {fileID: 466282901779698963}
+  spawnEffectId: flora_generic_spawn
+  hurtEffectId: flora_generic_hurt
+  deathEffectId: flora_generic_death
 --- !u!1 &8589697350366588450
 GameObject:
   m_ObjectHideFlags: 0
