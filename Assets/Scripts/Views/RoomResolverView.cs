@@ -7,6 +7,7 @@ using Lunra.Hothouse.Models;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Lunra.Hothouse.Views
 {
@@ -18,10 +19,10 @@ namespace Lunra.Hothouse.Views
 			public Action<RoomResolverResult> Done;
 			public RoomResolverResult Result;
 
-			public List<CollisionResolverDefinition> Rooms;
-			public List<CollisionResolverDefinition> Doors;
+			public List<CollisionResolverDefinitionLeaf> Rooms;
+			public List<CollisionResolverDefinitionLeaf> Doors;
 			
-			public List<CollisionResolverDefinition> AvailableDoors;
+			public List<CollisionResolverDefinitionLeaf> AvailableDoors;
 
 			public int RoomCount => Rooms.Count;
 			public Demon Generator => Request.Generator;
@@ -37,17 +38,17 @@ namespace Lunra.Hothouse.Views
 
 				Result.Request = request;
 				
-				Rooms = new List<CollisionResolverDefinition>();
-				Doors = new List<CollisionResolverDefinition>();
+				Rooms = new List<CollisionResolverDefinitionLeaf>();
+				Doors = new List<CollisionResolverDefinitionLeaf>();
 
-				AvailableDoors = new List<CollisionResolverDefinition>();
+				AvailableDoors = new List<CollisionResolverDefinitionLeaf>();
 			}
 		}
 		
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 
-		[SerializeField] CollisionResolverDefinition definitionPrefab;
+		[FormerlySerializedAs("definitionPrefab")] [SerializeField] CollisionResolverDefinitionLeaf definitionLeafPrefab;
 		[SerializeField] Transform roomPrefabsRoot;
 		[SerializeField] Transform doorPrefabsRoot;
 		[SerializeField] Transform workspaceRoot;
@@ -67,7 +68,7 @@ namespace Lunra.Hothouse.Views
 			roomDefinitions.Add(
 				InstantiateDefinition(
 					roomPrefabsRoot,
-					CollisionResolverDefinition.Types.Room,
+					CollisionResolverDefinitionLeaf.Types.Room,
 					prefabId,
 					roomColliders,
 					doorAnchors
@@ -83,7 +84,7 @@ namespace Lunra.Hothouse.Views
 			doorDefinitions.Add(
 				InstantiateDefinition(
 					doorPrefabsRoot,
-					CollisionResolverDefinition.Types.Door,
+					CollisionResolverDefinitionLeaf.Types.Door,
 					prefabId,
 					null,
 					doorAnchors
@@ -91,16 +92,16 @@ namespace Lunra.Hothouse.Views
 			);
 		}
 
-		CollisionResolverDefinition InstantiateDefinition(
+		CollisionResolverDefinitionLeaf InstantiateDefinition(
 			Transform root,
-			CollisionResolverDefinition.Types type,
+			CollisionResolverDefinitionLeaf.Types type,
 			string prefabId,
 			ColliderCache[] roomColliders,
 			(Vector3 Position, Vector3 Forward)[] doorAnchors
 		)
 		{
 			var definition = RootGameObject.InstantiateChild(
-				definitionPrefab,
+				definitionLeafPrefab,
 				setActive: true
 			);
 			
@@ -120,8 +121,8 @@ namespace Lunra.Hothouse.Views
 		#endregion
 
 		#region Local
-		List<CollisionResolverDefinition> roomDefinitions = new List<CollisionResolverDefinition>();
-		List<CollisionResolverDefinition> doorDefinitions = new List<CollisionResolverDefinition>();
+		List<CollisionResolverDefinitionLeaf> roomDefinitions = new List<CollisionResolverDefinitionLeaf>();
+		List<CollisionResolverDefinitionLeaf> doorDefinitions = new List<CollisionResolverDefinitionLeaf>();
 
 		WorkspaceCache workspaceCache;
 		#endregion
@@ -130,7 +131,7 @@ namespace Lunra.Hothouse.Views
 		{
 			base.Reset();
 			
-			definitionPrefab.gameObject.SetActive(false);
+			definitionLeafPrefab.gameObject.SetActive(false);
 			roomPrefabsRoot.gameObject.SetActive(false);
 			doorPrefabsRoot.gameObject.SetActive(false);
 
@@ -142,9 +143,9 @@ namespace Lunra.Hothouse.Views
 			roomDefinitions.Clear();
 		}
 
-		CollisionResolverDefinition WorkspaceInstantiate(
-			List<CollisionResolverDefinition> pool,
-			Func<CollisionResolverDefinition, bool> predicate = null,
+		CollisionResolverDefinitionLeaf WorkspaceInstantiate(
+			List<CollisionResolverDefinitionLeaf> pool,
+			Func<CollisionResolverDefinitionLeaf, bool> predicate = null,
 			bool zeroSiblingIndex = false
 		)
 		{
@@ -275,7 +276,7 @@ namespace Lunra.Hothouse.Views
 			OnGenerateDone();
 		}
 
-		IEnumerator OnGenerateRoom(CollisionResolverDefinition originDoor)
+		IEnumerator OnGenerateRoom(CollisionResolverDefinitionLeaf originDoor)
 		{
 			var generationSuccess = false;
 
@@ -353,9 +354,9 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
-		CollisionResolverDefinition[] OnGenerateAppendDoors(CollisionResolverDefinition room)
+		CollisionResolverDefinitionLeaf[] OnGenerateAppendDoors(CollisionResolverDefinitionLeaf room)
 		{
-			var results = new List<CollisionResolverDefinition>();
+			var results = new List<CollisionResolverDefinitionLeaf>();
 			
 			for (var i = 0; i < room.DoorAnchors.Length; i++)
 			{

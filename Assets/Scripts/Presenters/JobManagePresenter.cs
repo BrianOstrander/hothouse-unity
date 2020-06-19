@@ -7,10 +7,12 @@ namespace Lunra.Hothouse.Presenters
 	public class JobManagePresenter : Presenter<JobManageView>
 	{
 		GameModel game;
+		JobManageModel jobManage;
 
 		public JobManagePresenter(GameModel game)
 		{
 			this.game = game;
+			jobManage = game.JobManage;
 			
 			Show();
 		}
@@ -30,6 +32,12 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region GameModel Events
+		void OnGameSimulationUpdate()
+		{
+			
+		}
 		#endregion
+		
+		// void Update
 	}
 }

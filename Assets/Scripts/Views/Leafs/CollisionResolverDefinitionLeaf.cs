@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class CollisionResolverDefinition : MonoBehaviour
+	public class CollisionResolverDefinitionLeaf : MonoBehaviour
 	{
 		public enum Types
 		{
