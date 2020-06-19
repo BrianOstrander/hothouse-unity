@@ -1,6 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
@@ -13,13 +17,15 @@ namespace Lunra.Hothouse.Presenters
 		{
 			this.game = game;
 			jobManage = game.JobManage;
+
+			game.Dwellers.All.Changed += OnGameDwellersAll;
 			
 			Show();
 		}
 
 		protected override void UnBind()
 		{
-			
+			game.Dwellers.All.Changed -= OnGameDwellersAll;
 		}
 
 		void Show()
@@ -28,16 +34,43 @@ namespace Lunra.Hothouse.Presenters
 			
 			View.Reset();
 
+			View.Prepare += UpdateControls;
+
 			ShowView(instant: true);
 		}
 		
 		#region GameModel Events
-		void OnGameSimulationUpdate()
-		{
-			
-		}
+		void OnGameDwellersAll(DwellerPoolModel.Reservoir all) => UpdateControls();
 		#endregion
-		
-		// void Update
+
+		void UpdateControls()
+		{
+			if (View.NotVisible) return;
+
+			var jobCounts = EnumExtensions.GetValues(Jobs.Unknown)
+				.ToDictionary(
+					k => k,
+					k => 0
+				);
+
+			foreach (var dweller in game.Dwellers.AllActive)
+			{
+				if (dweller.Job.Value == Jobs.Unknown)
+				{
+					Debug.LogError("Unrecognized Job: " + dweller.Job.Value);
+					continue;
+				}
+
+				jobCounts[dweller.Job.Value]++;
+			}
+
+			var res = string.Empty;
+			foreach (var kv in jobCounts)
+			{
+				res += "\n" + kv.Key + ": " + kv.Value;
+			}
+			
+			Debug.Log(res);
+		}
 	}
 }
