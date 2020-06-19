@@ -191,5 +191,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26dbef8eee0c44f37bde2e2dad6ae9e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PrefabId: 
+  Id: 
+  Type: 0
+  RootDistance: 0
+  Size: {x: 0, y: 0}
   Colliders: []
   DoorAnchors: []
+  CollisionCount: 0

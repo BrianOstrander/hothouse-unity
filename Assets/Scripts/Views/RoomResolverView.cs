@@ -48,7 +48,7 @@ namespace Lunra.Hothouse.Views
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 
-		[FormerlySerializedAs("definitionPrefab")] [SerializeField] CollisionResolverDefinitionLeaf definitionLeafPrefab;
+		[SerializeField] CollisionResolverDefinitionLeaf definitionPrefab;
 		[SerializeField] Transform roomPrefabsRoot;
 		[SerializeField] Transform doorPrefabsRoot;
 		[SerializeField] Transform workspaceRoot;
@@ -101,7 +101,7 @@ namespace Lunra.Hothouse.Views
 		)
 		{
 			var definition = RootGameObject.InstantiateChild(
-				definitionLeafPrefab,
+				definitionPrefab,
 				setActive: true
 			);
 			
@@ -131,7 +131,7 @@ namespace Lunra.Hothouse.Views
 		{
 			base.Reset();
 			
-			definitionLeafPrefab.gameObject.SetActive(false);
+			definitionPrefab.gameObject.SetActive(false);
 			roomPrefabsRoot.gameObject.SetActive(false);
 			doorPrefabsRoot.gameObject.SetActive(false);
 
