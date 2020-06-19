@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Presenters
 
 			game.Toolbar.IsEnabled.Value = false;
 			
-			View.Reset();
+			View.Cleanup();
 
 			View.Description = reason;
 			View.ButtonDescription = "Restart";

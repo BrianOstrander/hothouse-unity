@@ -31,9 +31,9 @@ namespace Lunra.Hothouse.Views
 		public event Action Click;
 		#endregion
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			Description = string.Empty;
 			ButtonDescription = string.Empty;

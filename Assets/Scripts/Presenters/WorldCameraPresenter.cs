@@ -58,7 +58,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.Visible) return;
 			
-			View.Reset();
+			View.Cleanup();
 
 			View.Prepare += () => UpdateAndCalculateTransform(true);
 			

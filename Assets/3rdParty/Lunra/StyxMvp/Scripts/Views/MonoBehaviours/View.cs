@@ -92,7 +92,7 @@ namespace Lunra.StyxMvp
 		/// </summary>
 		Action LateConstant { get; set; }
 
-		void Reset();
+		void Cleanup();
 
 		string InstanceName { get; set; }
 
@@ -293,7 +293,7 @@ namespace Lunra.StyxMvp
 			CheckOpacityStack();
 		}
 
-		public virtual void Reset() 
+		public virtual void Cleanup() 
 		{
 			Prepare = OnPrepare;
 			Shown = OnShown;

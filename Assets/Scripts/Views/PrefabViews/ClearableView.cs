@@ -32,9 +32,9 @@ namespace Lunra.Hothouse.Views
 		public float MeleeRangeBonus => meleeRangeBonus;
 		#endregion
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			Deselect();
 		}

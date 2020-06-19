@@ -12,9 +12,9 @@
   	    #region Bindings
   	    #endregion
   
-  	    public override void Reset()
+  	    public override void Cleanup()
   	    {
-  		    base.Reset();
+  		    base.Cleanup();
   	    }
   
   	    #region Events

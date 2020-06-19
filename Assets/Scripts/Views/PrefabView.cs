@@ -24,9 +24,9 @@ namespace Lunra.Hothouse.Views
 		public string RoomId { get; set; }
 		public string ModelId { get; set; }
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			RoomId = null;
 			ModelId = null;

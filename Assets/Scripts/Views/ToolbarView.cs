@@ -31,9 +31,9 @@ namespace Lunra.Hothouse.Views
 		public bool ConstructWallSelected { set => constructWallGraphic.color = value ? selectedColor : notSelectedColor; }
 		#endregion
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			ClearanceClick = null;
 			ConstructFireClick = null;

@@ -45,9 +45,9 @@ namespace Lunra.Hothouse.Views
 		
 		#endregion
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 			
 			OnSetAction();
 		}

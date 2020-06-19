@@ -39,9 +39,9 @@ namespace Lunra.Hothouse.Views
 		public (Vector3 Position, Vector3 Forward)[] DoorAnchors => doorAnchors.Select(d => (d.position, d.forward)).ToArray();
 		#endregion
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			TimeOfDay = 0f;
 			IsRevealed = false;

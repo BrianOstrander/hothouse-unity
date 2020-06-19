@@ -48,7 +48,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.Visible) return;
 			
-			View.Reset();
+			View.Cleanup();
 
 			View.ClearanceClick += OnClearanceClick;
 			View.ConstructFireClick += OnConstructFireClick;

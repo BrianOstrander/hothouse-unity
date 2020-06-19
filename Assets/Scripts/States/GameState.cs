@@ -68,7 +68,7 @@ namespace Lunra.Hothouse.Services
 			new HintsPresenter(Payload.Game);
 			new BuildValidationPresenter(Payload.Game);
 			new GlobalInventoryCounterPresenter(Payload.Game);
-			new JobManagePresenter(Payload.Game);
+			// new JobManagePresenter(Payload.Game);
 
 			new RoomResolverPresenter(Payload.Game);
 			

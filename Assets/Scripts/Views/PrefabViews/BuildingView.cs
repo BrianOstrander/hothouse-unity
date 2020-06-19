@@ -62,9 +62,9 @@ namespace Lunra.Hothouse.Views
 		public float NavigationColliderRadius => navigationCollidersRadius;
 		#endregion
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			IsNavigationModified = false;
 			LightFuelNormal = 0f;

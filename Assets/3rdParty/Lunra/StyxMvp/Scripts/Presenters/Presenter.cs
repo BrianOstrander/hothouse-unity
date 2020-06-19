@@ -51,7 +51,7 @@ namespace Lunra.StyxMvp.Presenters
 			}
 			
 			View = view;
-			View.Reset();
+			View.Cleanup();
 		}
 
 		protected virtual Transform DefaultAnchor => null;

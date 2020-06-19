@@ -20,9 +20,9 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			Text = string.Empty;
 		}

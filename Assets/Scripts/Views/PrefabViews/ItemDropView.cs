@@ -38,9 +38,9 @@ namespace Lunra.Hothouse.Views
 			meshRenderer.material = entry.Material;
 		}
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 			
 			SetEntry(0, Inventory.Types.Unknown);
 		}

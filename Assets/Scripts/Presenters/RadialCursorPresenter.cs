@@ -36,7 +36,7 @@ namespace Lunra.Hothouse.Presenters
 				case Interaction.States.OutOfRange:
 					break;
 				case Interaction.States.Begin:
-					View.Reset();
+					View.Cleanup();
 					View.Interaction(interaction.State, interaction.Value);
 					ShowView(instant: true);
 					break;

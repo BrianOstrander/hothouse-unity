@@ -39,9 +39,9 @@ namespace Lunra.Hothouse.Views
 		public string DeathEffectId => deathEffectId;
 		#endregion
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			Age = 0f;
 			IsReproducing = false;

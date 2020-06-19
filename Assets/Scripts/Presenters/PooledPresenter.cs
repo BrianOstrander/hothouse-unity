@@ -77,7 +77,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.Visible) return;
 			
-			View.Reset();
+			View.Cleanup();
 
 			View.Prepare += ViewSetTransform;
 			View.Prepare += OnViewPrepare;

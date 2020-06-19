@@ -14,7 +14,7 @@ namespace Lunra.StyxMvp.Presenters
 		{
 			if (View.Visible) return;
 
-			View.Reset();
+			View.Cleanup();
 
 			ShowView(parent, instant);
 		}

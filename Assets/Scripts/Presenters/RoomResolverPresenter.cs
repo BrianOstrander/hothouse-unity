@@ -31,7 +31,7 @@ namespace Lunra.Hothouse.Presenters
 		#region RoomResolverModel Events
 		void OnRoomResolverInitialize(Action done)
 		{
-			View.Reset();
+			View.Cleanup();
 			
 			ShowView(instant: true);
 			

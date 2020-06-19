@@ -16,9 +16,9 @@ namespace Lunra.Hothouse.Views
 		public string Label { set => label.text = value ?? string.Empty; }
 		#endregion
 
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 
 			Label = string.Empty;
 		}

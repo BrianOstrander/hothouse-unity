@@ -23,12 +23,12 @@ namespace Lunra.Hothouse.Views
 
 		int roomBoundaryLayer;
 		
-		public override void Reset()
+		public override void Cleanup()
 		{
 			roomBoundaryLayer = LayerMask.NameToLayer(LayerNames.RoomBoundary);
 			RoomChanged = ActionExtensions.GetEmpty<string>();
 			
-			base.Reset();
+			base.Cleanup();
 		}
 
 		void OnTriggerEnter(Collider other)

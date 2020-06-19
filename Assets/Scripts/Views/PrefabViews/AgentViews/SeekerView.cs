@@ -10,9 +10,9 @@ namespace Lunra.Hothouse.Views
 		#region Bindings
 		#endregion
 		
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 		}
 	}
 }

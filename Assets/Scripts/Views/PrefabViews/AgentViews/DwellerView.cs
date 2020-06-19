@@ -49,9 +49,9 @@ namespace Lunra.Hothouse.Views
 		}
 		#endregion
 		
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 			
 			foreach (var desire in desires) desire.Stop();
 		}

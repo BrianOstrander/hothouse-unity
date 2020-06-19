@@ -127,9 +127,9 @@ namespace Lunra.Hothouse.Views
 		WorkspaceCache workspaceCache;
 		#endregion
 		
-		public override void Reset()
+		public override void Cleanup()
 		{
-			base.Reset();
+			base.Cleanup();
 			
 			definitionPrefab.gameObject.SetActive(false);
 			roomPrefabsRoot.gameObject.SetActive(false);
