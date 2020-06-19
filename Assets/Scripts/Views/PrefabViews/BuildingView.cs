@@ -81,6 +81,8 @@ namespace Lunra.Hothouse.Views
 				if (result < radius) result = radius;
 			}
 
+			result += 1f;
+
 			if (Mathf.Approximately(navigationCollidersRadius, result)) return;
 
 			Undo.RecordObject(this, "Calculate Bounding Navigation");

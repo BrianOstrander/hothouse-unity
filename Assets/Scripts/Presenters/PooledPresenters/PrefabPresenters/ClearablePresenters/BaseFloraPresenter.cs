@@ -63,11 +63,7 @@ namespace Lunra.Hothouse.Presenters
 		#region GameModel Events
 		void OnGameSimulationUpdate()
 		{
-			switch (Model.PooledState.Value)
-			{
-				case PooledStates.InActive:
-					return;
-			}
+			if (View.NotVisible) return;
 
 			if (!Model.Age.Value.IsDone)
 			{
@@ -241,8 +237,12 @@ namespace Lunra.Hothouse.Presenters
 					}
 				}
 			}
-			
-			if (increaseReproductionFailures && incrementFailures) Model.ReproductionFailures.Value++;
+
+			if (increaseReproductionFailures)
+			{
+				if (incrementFailures) Model.ReproductionFailures.Value++;
+			}
+			else Model.ReproductionFailures.Value = 0;
 			
 			Model.ReproductionElapsed.Value = Interval.WithMaximum(Model.ReproductionElapsed.Value.Maximum);
 

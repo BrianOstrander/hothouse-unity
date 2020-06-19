@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return new Query(
 				model.Transform.Position.Value,
-				() => model.Enterable.Entrances.Value
+				getTargets: () => model.Enterable.Entrances.Value
 					.Where(e => entranceValidation?.Invoke(e) ?? (e.IsNavigable && e.State == Entrance.States.Available))
 					.Select(e => e.Position)
 			);
@@ -37,6 +37,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return new Query(
 				model.Transform.Position.Value,
+				model.Boundary.Radius.Value + radiusBonus,
 				validate: validation =>
 				{
 					switch (validation.Path.status)
@@ -60,16 +61,19 @@ namespace Lunra.Hothouse.Models
 		public struct Query
 		{
 			public Vector3 Origin { get; }
+			public float MaximumRadius { get; }
 			public Func<Vector3, IEnumerable<Vector3>> GetTargets { get; }
 			public Func<Validation, Result> Validate { get; }
 
 			public Query(
 				Vector3 origin,
+				float maximumRadius = 0f,
 				Func<IEnumerable<Vector3>> getTargets = null,
 				Func<Validation, Result> validate = null
 			)
 			{
 				Origin = origin;
+				MaximumRadius = maximumRadius;
 
 				if (getTargets == null)
 				{

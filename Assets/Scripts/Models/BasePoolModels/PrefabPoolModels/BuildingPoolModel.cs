@@ -254,6 +254,41 @@ namespace Lunra.Hothouse.Models
 						"bed_bedroll"
 					}
 				)
+			},
+			{
+				Buildings.WallSmall,
+				new BuildingInfo(
+					100f,
+					Inventory.Empty, 
+					InventoryCapacity.None(),
+					InventoryPermission.NoneForAnyJob(),
+					Constants.DefaultPlacementLightRequirement,
+					InventoryCapacity.ByIndividualWeight(
+						new Inventory(
+							new Dictionary<Inventory.Types, int>
+							{
+								{ Inventory.Types.Stalks , 4 }
+							}
+						)	
+					),
+					new Inventory(
+						new Dictionary<Inventory.Types, int>
+						{
+							{ Inventory.Types.Stalks , 1 }
+						}
+					), 
+					Inventory.Empty, 
+					Interval.Zero(),
+					LightStates.Unknown,
+					new DesireQuality[]
+					{
+						// DesireQuality.New(Desires.Sleep, 1f) 
+					},
+					new []
+					{
+						"wall_small_0"
+					}
+				)
 			}
 		};
 

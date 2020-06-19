@@ -243,7 +243,7 @@ MonoBehaviour:
   prefabId: fire_bonfire
   navigationColliders:
   - {fileID: 1311359037803919897}
-  navigationCollidersRadius: 0.72638464
+  navigationCollidersRadius: 1.7263846
   entrances:
   - {fileID: 6558807796252768482}
   - {fileID: 7726990765462570418}

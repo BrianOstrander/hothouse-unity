@@ -28,7 +28,8 @@ namespace Lunra.Hothouse.Ai.Seeker
 					.Concat<IHealthModel>(
 						game.Buildings.AllActive
 							.Where(m => m.IsBuildingState(BuildingStates.Operating))
-					);
+					)
+					.ToArray();
 			}
 		}
 		
@@ -53,6 +54,7 @@ namespace Lunra.Hothouse.Ai.Seeker
 			);
 		}
 
+		// public override void Begin() => ResetCache();
 		public override void Idle() => ResetCache();
 		public override void End() => ResetCache();
 
@@ -145,7 +147,7 @@ namespace Lunra.Hothouse.Ai.Seeker
 						.Select(
 							m =>
 							{
-								if (m is IBoundaryModel mBoundary) return Navigation.QueryInRadius(mBoundary);
+								if (m is IBoundaryModel mBoundary) return Navigation.QueryInRadius(mBoundary, Agent.DamageRange.Value);
 								return Navigation.QueryOrigin(m);
 							}
 						)

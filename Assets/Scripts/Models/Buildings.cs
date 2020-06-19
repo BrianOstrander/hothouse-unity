@@ -5,6 +5,7 @@ namespace Lunra.Hothouse.Models
 		Unknown = 0,
 		StartingWagon = 10,
 		Bonfire = 20,
-		Bedroll = 30
+		Bedroll = 30,
+		WallSmall = 40
 	}
 }

@@ -53,6 +53,7 @@ namespace Lunra.Hothouse.Presenters
 			View.ClearanceClick += OnClearanceClick;
 			View.ConstructFireClick += OnConstructFireClick;
 			View.ConstructBedClick += OnConstructBedClick;
+			View.ConstructWallClick += OnConstructWallClick;
 			
 			ShowView(instant: true);
 		}
@@ -147,6 +148,14 @@ namespace Lunra.Hothouse.Presenters
 				Buildings.Bedroll
 			);
 		}
+		
+		void OnConstructWallClick()
+		{
+			View.ConstructWallSelected = ToggleTask(
+				ToolbarModel.Tasks.Construction,
+				Buildings.WallSmall
+			);
+		}
 		#endregion
 		
 		#region Utility
@@ -201,6 +210,7 @@ namespace Lunra.Hothouse.Presenters
 			View.ClearanceSelected = false;
 			View.ConstructFireSelected = false;
 			View.ConstructBedSelected = false;
+			View.ConstructWallSelected = false;
 		}
 		#endregion
 	}

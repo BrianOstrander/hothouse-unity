@@ -35,25 +35,43 @@ namespace Lunra.Hothouse.Ai
 
 					return query.Validate(validation);
 				}
-				
+
+				var sampleInRadius = !Mathf.Approximately(0f, query.MaximumRadius);
+
 				foreach (var position in query.GetTargets(beginPosition))
 				{
+					var currentPosition = position;
+
+					if (sampleInRadius)
+					{
+						var isOnNavigationMesh = NavMesh.SamplePosition(
+							currentPosition,
+							out var navMeshHit,
+							query.MaximumRadius,
+							NavMesh.AllAreas // TODO: This should probably be fed in
+						);
+						
+						if (!isOnNavigationMesh) continue;
+
+						currentPosition = navMeshHit.position;
+					}
+					
 					var hasPath = CalculatePath(
 						beginPosition,
-						position,
+						currentPosition,
 						path,
 						pathForValidation =>
 						{
-							resultCached = validate(query.GetValidation(position, pathForValidation));
+							resultCached = validate(query.GetValidation(currentPosition, pathForValidation));
 							return resultCached.IsValid;
 						}
 					);
-
+					
 					if (hasPath)
 					{
 						result = resultCached;
 						return true;
-					}	
+					}
 				}
 			}
 
@@ -229,11 +247,14 @@ namespace Lunra.Hothouse.Ai
 			var foundPath = NavMesh.CalculatePath(
 				beginPosition,
 				endPosition,
-				NavMesh.AllAreas,
+				NavMesh.AllAreas, // TODO: This should probably be fed in
 				path
 			);
 
-			return foundPath && (validation ?? DefaultCalculatePathValidation)(path);
+			if (!foundPath) return false;
+
+			if (validation == null) return DefaultCalculatePathValidation(path);
+			return validation(path);
 		}
 
 		static bool DefaultCalculatePathValidation(NavMeshPath path) => path.status == NavMeshPathStatus.PathComplete;
