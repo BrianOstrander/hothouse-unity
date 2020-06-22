@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IClearableModel : IPrefabModel, IHealthModel, ILightSensitiveModel
+	public interface IClearableModel : IPrefabModel, IHealthModel, IObligationModel
 	{
 		ClearableComponent Clearable { get; }
 	}

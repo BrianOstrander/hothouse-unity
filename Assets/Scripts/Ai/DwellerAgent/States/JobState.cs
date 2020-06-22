@@ -293,7 +293,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					.ToArray();
 				
 				Agent.Obligation.Value = ObligationPromise.New(
-					target.Model.Id.Value,
+					target.Model,
 					newObligation.PromiseId
 				);
 			}

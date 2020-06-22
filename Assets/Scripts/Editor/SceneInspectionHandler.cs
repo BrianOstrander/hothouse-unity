@@ -459,6 +459,7 @@ namespace Lunra.Hothouse.Editor
 
 				if (model.Obligation.Value.IsEnabled)
 				{
+					/*
 					var obligation = gameState.Payload.Game.GetObligations()
 						.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.PromiseId == model.Obligation.Value.ObligationPromiseId)
 						.FirstOrDefault();
@@ -471,6 +472,8 @@ namespace Lunra.Hothouse.Editor
 					{
 						label += Model.ShortenId(model.Obligation.Value.TargetId) + "[ " + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
 					}
+					*/
+					label += "TODO THIS";
 				}
 				else label += "None";
 			}

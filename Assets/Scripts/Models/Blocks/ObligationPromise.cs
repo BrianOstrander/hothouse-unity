@@ -1,33 +1,35 @@
+using Lunra.StyxMvp.Models;
+
 namespace Lunra.Hothouse.Models
 {
-	public struct ObligationPromise
+	public class ObligationPromise
 	{
 		public static ObligationPromise Default() => new ObligationPromise(false, null, null);
 
 		public static ObligationPromise New(
-			string targetId,
+			IModel target,
 			string obligationPromiseId
 		)
 		{
 			return new ObligationPromise(
 				true,
-				targetId,
+				target,
 				obligationPromiseId
 			);
 		}
 		
-		public readonly bool IsEnabled;
-		public readonly string TargetId;
-		public readonly string ObligationPromiseId;
+		public bool IsEnabled { get; }
+		public InstanceId TargetId { get; }
+		public string ObligationPromiseId { get; }
 
 		ObligationPromise(
 			bool isEnabled,
-			string targetId,
+			IModel target,
 			string obligationPromiseId
 		)
 		{
 			IsEnabled = isEnabled;
-			TargetId = targetId;
+			TargetId = target == null ? InstanceId.Null() : InstanceId.New(target);
 			ObligationPromiseId = obligationPromiseId;
 		}
 	}

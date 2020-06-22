@@ -65,7 +65,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					GetObligations(
 						m =>
 						{
-							if (m.Id.Value != Agent.Obligation.Value.TargetId) return false;
+							if (m.Id.Value != Agent.Obligation.Value.TargetId.Id) return false;
 							return m.Obligations.All.Value.Any(o => o.PromiseId == Agent.Obligation.Value.ObligationPromiseId);
 						}
 					)
