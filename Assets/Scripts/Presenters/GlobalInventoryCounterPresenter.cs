@@ -48,6 +48,8 @@ namespace Lunra.Hothouse.Presenters
 
 			var result = string.Empty;
 
+			result += "Population: " + cache.Population + "\n";
+
 			foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
 			{
 				var color = "white";

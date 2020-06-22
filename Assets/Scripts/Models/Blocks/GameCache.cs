@@ -14,6 +14,7 @@ namespace Lunra.Hothouse.Models
 			var result = new GameCache();
 			
 			result.LastUpdated = TimeSpan.Zero;
+			result.Population = 0;
 			result.GlobalInventory = Inventory.Empty;
 			result.GlobalInventoryCapacity = InventoryCapacity.None();
 			result.LowRationThreshold = 0;
@@ -23,6 +24,7 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		public TimeSpan LastUpdated { get; private set; }
+		public int Population { get; private set; }
 		public Inventory GlobalInventory { get; private set; }
 		public InventoryCapacity GlobalInventoryCapacity { get; private set; }
 		public int LowRationThreshold { get; private set; }
@@ -33,6 +35,8 @@ namespace Lunra.Hothouse.Models
 			var result = new GameCache();
 
 			result.LastUpdated = game.PlaytimeElapsed.Value;
+
+			result.Population = game.Dwellers.AllActive.Length;
 
 			var globalInventory = Inventory.Empty;
 			var globalInventoryMaximumByIndividualWeight = Inventory.Empty;
