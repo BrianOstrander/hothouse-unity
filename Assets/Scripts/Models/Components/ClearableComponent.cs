@@ -31,11 +31,6 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] SelectionStates selectionState = SelectionStates.NotSelected;
 		[JsonIgnore] public ListenerProperty<SelectionStates> SelectionState { get; }
-		
-		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
-		public HealthComponent Health { get; } = new HealthComponent();
-		public ObligationComponent Obligations { get; } = new ObligationComponent();
-		public EnterableComponent Enterable { get; } = new EnterableComponent();
 		#endregion
 		
 		#region NonSerialized
