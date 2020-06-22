@@ -20,20 +20,20 @@ namespace Lunra.Hothouse.Models
 			public static ObligationType Open => New(Actions.Open);
 		}
 
-		public static class Clearable
-		{
-			const string Category = "clearable";
-			
-			public static bool Contains(ObligationType obligation) => obligation.Category == Category;
-			
-			static ObligationType New(string action) => new ObligationType(Category, action);
-
-			public static class Actions
-			{
-				public const string Clear = "clear";
-			}
-			
-			public static ObligationType Clear => New(Actions.Clear);
-		}
+		// public static class Clearable
+		// {
+		// 	const string Category = "clearable";
+		// 	
+		// 	public static bool Contains(ObligationType obligation) => obligation.Category == Category;
+		// 	
+		// 	static ObligationType New(string action) => new ObligationType(Category, action);
+		//
+		// 	public static class Actions
+		// 	{
+		// 		public const string Clear = "clear";
+		// 	}
+		// 	
+		// 	public static ObligationType Clear => New(Actions.Clear);
+		// }
 	}
 }
