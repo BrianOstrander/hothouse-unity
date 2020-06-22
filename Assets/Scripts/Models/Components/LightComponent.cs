@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -93,5 +96,24 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public bool IsLightNotActive() => !IsLightActive();
+	}
+
+	public static class LightGameModelExtensions
+	{
+		public static IEnumerable<ILightModel> GetLightsActive(
+			this GameModel game	
+		)
+		{
+			return game.GetLights(m => m.Light.IsLightActive());
+		}
+		
+		public static IEnumerable<ILightModel> GetLights(
+			this GameModel game,
+			Func<ILightModel, bool> predicate = null
+		)
+		{
+			predicate = predicate ?? (m => true);
+			return game.Buildings.AllActive.Where(m => m.Light.IsLight.Value && predicate(m));	
+		}
 	}
 }

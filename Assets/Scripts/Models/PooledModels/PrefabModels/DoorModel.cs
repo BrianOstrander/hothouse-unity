@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-    public class DoorModel : PrefabModel, ILightSensitiveModel, IObligationModel
+    public class DoorModel : PrefabModel, IObligationModel
     {
         public class Connection
         {

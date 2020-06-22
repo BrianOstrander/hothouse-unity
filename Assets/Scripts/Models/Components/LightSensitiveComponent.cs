@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -30,5 +32,18 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonIgnore] public bool IsLit => 0f < LightLevel.Value;
 		[JsonIgnore] public bool IsNotLit => !IsLit;
+	}
+	
+	public static class LightSensitiveGameModelExtensions
+	{
+		public static IEnumerable<ILightSensitiveModel> GetLightSensitives(
+			this GameModel game	
+		)
+		{
+			return game.Buildings.AllActive
+				.Concat<ILightSensitiveModel>(game.ItemDrops.AllActive)
+				.Concat(game.Doors.AllActive)
+				.Concat(game.GetClearables());
+		}
 	}
 }

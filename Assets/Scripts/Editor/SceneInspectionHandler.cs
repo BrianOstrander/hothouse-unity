@@ -142,7 +142,10 @@ namespace Lunra.Hothouse.Editor
 			{
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
-					foreach (var model in gameState.Payload.Game.GetEnterables())
+					var enterableModelsForInspection = gameState.Payload.Game.Buildings.AllActive
+						.Concat<IEnterableModel>(gameState.Payload.Game.Doors.AllActive);
+					
+					foreach (var model in enterableModelsForInspection)
 					{
 						foreach (var entrance in model.Enterable.Entrances.Value)
 						{

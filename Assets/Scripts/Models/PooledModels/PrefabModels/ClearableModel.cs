@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 	}
 	
-	public class ClearableModel : PrefabModel, IClearableModel
+	public class ClearableModel : PrefabModel, IClearableModel, IObligationModel
 	{
 		#region Serialized
 		[JsonProperty] Inventory itemDrops = Inventory.Empty;
@@ -46,6 +46,8 @@ namespace Lunra.Hothouse.Models
 		
 		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
 		public HealthComponent Health { get; } = new HealthComponent();
+		public ObligationComponent Obligations { get; } = new ObligationComponent();
+		public EnterableComponent Enterable { get; } = new EnterableComponent();
 		#endregion
 		
 		#region NonSerialized

@@ -33,7 +33,7 @@ namespace Lunra.Hothouse.Models
 		}
 	}
 
-	public static class IObligationModelExtensions
+	public static class ObligationModelInterfaceExtensions
 	{
 		public static IEnumerable<(IObligationModel Model, Obligation Obligation)> GetIndividualObligations(
 			this IEnumerable<IObligationModel> elements
@@ -73,6 +73,27 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			return elements.SelectMany(e => e.Obligations.All.Value.Select(o => (e, o))).Where(predicate);
+		}
+	}
+	
+	public static class ObligationGameModelExtensions
+	{
+		public static IEnumerable<IObligationModel> GetObligationsAvailable(
+			this GameModel game
+		)
+		{
+			return game.GetObligations(
+				m => m.Obligations.All.Value.Any(o => o.State == Obligation.States.Available)
+			);
+		}
+		
+		public static IEnumerable<IObligationModel> GetObligations(
+			this GameModel game,
+			Func<IObligationModel, bool> predicate = null
+		)
+		{
+			predicate = predicate ?? (m => true);
+			return game.Doors.AllActive.Where(predicate);
 		}
 	}
 }

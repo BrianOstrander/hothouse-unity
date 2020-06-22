@@ -74,49 +74,6 @@ namespace Lunra.Hothouse.Models
 				.Concat(Flora.AllActive);
 		}
 
-		public IEnumerable<ILightModel> GetLightsActive()
-		{
-			return GetLights(m => m.Light.IsLightActive());
-		}
-		
-		public IEnumerable<ILightModel> GetLights(Func<ILightModel, bool> predicate = null)
-		{
-			predicate = predicate ?? (m => true);
-			return Buildings.AllActive.Where(m => m.Light.IsLight.Value && predicate(m));	
-		}
-
-		public IEnumerable<IEnterableModel> GetEnterablesAvailable()
-		{
-			return GetEnterables(m => m.Enterable.Entrances.Value.Any(e => e.State == Entrance.States.Available));
-		}
-		
-		public IEnumerable<IEnterableModel> GetEnterables(Func<IEnterableModel, bool> predicate = null)
-		{
-			predicate = predicate ?? (m => true);
-			
-			return Buildings.AllActive.Where(predicate)
-				.Concat(Doors.AllActive.Where(predicate));
-		}
-
-		public IEnumerable<IObligationModel> GetObligationsAvailable()
-		{
-			return GetObligations(m => m.Obligations.All.Value.Any(o => o.State == Obligation.States.Available));
-		}
-		
-		public IEnumerable<IObligationModel> GetObligations(Func<IObligationModel, bool> predicate = null)
-		{
-			predicate = predicate ?? (m => true);
-			return Doors.AllActive.Where(predicate);
-		}
-
-		public IEnumerable<ILightSensitiveModel> GetLightSensitives()
-		{
-			return Buildings.AllActive
-				.Concat<ILightSensitiveModel>(ItemDrops.AllActive)
-				.Concat(Doors.AllActive)
-				.Concat(GetClearables());
-		}
-
 		[JsonIgnore] public Func<(string RoomId, Vector3 Position, ILightModel[] Except), LightingResult> CalculateMaximumLighting;
 
 		GameCache cache = GameCache.Default();
