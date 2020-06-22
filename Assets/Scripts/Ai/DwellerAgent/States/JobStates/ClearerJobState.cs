@@ -78,9 +78,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				target = Game.GetClearables().FirstOrDefault(
 					clearable =>
 					{
-						if (!clearable.IsMarkedForClearance.Value) return false;
+						if (!clearable.Clearable.IsMarkedForClearance.Value) return false;
 						if (clearable.LightSensitive.IsNotLit) return false;
-						return Vector3.Distance(Agent.Transform.Position.Value, clearable.Transform.Position.Value) <= (Agent.MeleeRange.Value + clearable.MeleeRangeBonus.Value);
+						return Vector3.Distance(Agent.Transform.Position.Value, clearable.Transform.Position.Value) <= (Agent.MeleeRange.Value + clearable.Clearable.MeleeRangeBonus.Value);
 					}
 				);
 
@@ -89,7 +89,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				var itemDrops = target.ItemDrops.Value;
+				var itemDrops = target.Clearable.ItemDrops.Value;
 				attackState.SetTarget(
 					new AttackState<ClearerJobState>.Target(
 						() => target.Id.Value,
@@ -173,7 +173,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				target = Game.GetClearables()
-					.Where(t => t.IsMarkedForClearance.Value && t.LightSensitive.IsLit)
+					.Where(t => t.Clearable.IsMarkedForClearance.Value && t.LightSensitive.IsLit)
 					.OrderBy(t => Vector3.Distance(Agent.Transform.Position.Value, t.Transform.Position.Value))
 					.FirstOrDefault();
 
@@ -185,7 +185,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				Agent.NavigationPlan.Value = NavigationPlan.Calculating(
 					Agent.Transform.Position.Value,
 					target.Transform.Position.Value,
-					Agent.MeleeRange.Value + target.MeleeRangeBonus.Value
+					Agent.MeleeRange.Value + target.Clearable.MeleeRangeBonus.Value
 				);
 			}
 		}

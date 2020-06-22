@@ -224,7 +224,7 @@ namespace Lunra.Hothouse.Models
 			model.SpreadDamage.Value = info.SpreadDamage;
 			model.AttacksBuildings.Value = info.AttacksBuildings;
 			model.Health.ResetToMaximum(info.HealthMaximum);
-			model.ItemDrops.Value = info.GenerateDrops();
+			model.Clearable.ItemDrops.Value = info.GenerateDrops();
 		}
 	}
 }

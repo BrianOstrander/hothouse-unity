@@ -3,24 +3,12 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IClearableModel : IPrefabModel, ILightSensitiveModel, IHealthModel
+	public interface IClearableModel : IPrefabModel, IHealthModel, ILightSensitiveModel
 	{
-		#region Serialized
-		ListenerProperty<Inventory> ItemDrops { get; }
-		ListenerProperty<float> MeleeRangeBonus { get; }
-		ListenerProperty<int> PromisedClearerCount { get; }
-		ListenerProperty<int> PromisedClearerMaximum { get; }
-		ListenerProperty<bool> PromisedClearersAtCapacity { get; }
-		ListenerProperty<int?> ClearancePriority { get; }
-		ListenerProperty<SelectionStates> SelectionState { get; }
-		#endregion
-		
-		#region NonSerialized
-		DerivedProperty<bool, int?> IsMarkedForClearance { get; }
-		#endregion
+		ClearableComponent Clearable { get; }
 	}
-	
-	public class ClearableModel : PrefabModel, IClearableModel, IObligationModel
+
+	public class ClearableComponent : Model
 	{
 		#region Serialized
 		[JsonProperty] Inventory itemDrops = Inventory.Empty;
@@ -55,7 +43,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public DerivedProperty<bool, int?> IsMarkedForClearance { get; }
 		#endregion
 		
-		public ClearableModel()
+		public ClearableComponent()
 		{
 			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
 			MeleeRangeBonus = new ListenerProperty<float>(value => meleeRangeBonus = value, () => meleeRangeBonus);

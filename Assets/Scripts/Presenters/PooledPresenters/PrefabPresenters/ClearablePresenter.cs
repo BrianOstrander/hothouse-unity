@@ -13,11 +13,11 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{			
-			Model.MeleeRangeBonus.Value = View.MeleeRangeBonus;
+			Model.Clearable.MeleeRangeBonus.Value = View.MeleeRangeBonus;
 
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
 	
-			Model.SelectionState.Changed += OnClearableSelectionState;
+			Model.Clearable.SelectionState.Changed += OnClearableSelectionState;
 			Model.Health.Current.Changed += OnClearableHealthCurrent;
 			
 			base.Bind();
@@ -27,7 +27,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
 			
-			Model.SelectionState.Changed -= OnClearableSelectionState;
+			Model.Clearable.SelectionState.Changed -= OnClearableSelectionState;
 			Model.Health.Current.Changed -= OnClearableHealthCurrent;
 			
 			base.UnBind();
@@ -37,7 +37,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			base.OnViewPrepare();
 			
-			View.Shown += () => OnClearableSelectionState(Model.SelectionState.Value);
+			View.Shown += () => OnClearableSelectionState(Model.Clearable.SelectionState.Value);
 		}
 
 		#region ClearableModel Events
@@ -48,12 +48,12 @@ namespace Lunra.Hothouse.Presenters
 			switch (selectionState)
 			{
 				case SelectionStates.NotSelected:
-					if (!Model.IsMarkedForClearance.Value) View.Deselect();
+					if (!Model.Clearable.IsMarkedForClearance.Value) View.Deselect();
 					break;
 				case SelectionStates.Highlighted: View.Highlight(); break;
 				case SelectionStates.Selected:
 					View.Select();
-					Model.ClearancePriority.Value = 0;
+					Model.Clearable.ClearancePriority.Value = 0;
 					break;
 			}
 		}
@@ -71,7 +71,7 @@ namespace Lunra.Hothouse.Presenters
 		#region ToolbarModel Events
 		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)
 		{
-			if (Model.IsMarkedForClearance.Value) return;
+			if (Model.Clearable.IsMarkedForClearance.Value) return;
 			if (interaction.State == Interaction.States.OutOfRange) return;
 			
 			var radiusContains = interaction.Value.RadiusContains(Model.Transform.Position.Value);
@@ -82,13 +82,13 @@ namespace Lunra.Hothouse.Presenters
 					break;
 				case Interaction.States.Begin:
 				case Interaction.States.Active:
-					Model.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
+					Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.End:
-					Model.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
+					Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.Cancel:
-					Model.SelectionState.Value = SelectionStates.NotSelected;
+					Model.Clearable.SelectionState.Value = SelectionStates.NotSelected;
 					break;
 				default:
 					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
@@ -98,7 +98,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region Utility
-		protected override bool QueueNavigationCalculation => 0 < Model.MeleeRangeBonus.Value;
+		protected override bool QueueNavigationCalculation => 0 < Model.Clearable.MeleeRangeBonus.Value;
 		#endregion
 	}
 }

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public class FloraModel : ClearableModel
+	public class FloraModel : ClearableModel_old
 	{
 		#region Serialized
 		[JsonProperty] FloraSpecies species;
