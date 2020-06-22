@@ -135,6 +135,9 @@ namespace Lunra.Hothouse.Models
 			}
 
 			instance = cachedInstance as T;
+
+			if (instance == null) Debug.LogError("Successfully found a "+Type+" but was unable to convert it to "+typeof(T));
+			
 			return instance != null;
 		}
 	}

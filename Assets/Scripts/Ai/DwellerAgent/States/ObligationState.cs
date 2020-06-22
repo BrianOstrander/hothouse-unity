@@ -61,22 +61,19 @@ namespace Lunra.Hothouse.Ai.Dweller
 			if (string.IsNullOrEmpty(initialTargetId))
 			{
 				// First time coming in with a fresh obligation...
-				target = Game.
-					GetObligations(
-						m =>
-						{
-							if (m.Id.Value != Agent.Obligation.Value.TargetId.Id) return false;
-							return m.Obligations.All.Value.Any(o => o.PromiseId == Agent.Obligation.Value.ObligationPromiseId);
-						}
-					)
-					.FirstOrDefault();
-
-				if (target == null)
+				if (!Agent.Obligation.Value.TargetId.TryGetInstance(Game, out target))
 				{
-					Debug.LogWarning("Arrived in obligation state without being able to find a matching obligation, this should probably not happen");
-					return;
+					Debug.LogWarning("Arrived in obligation state without being able to find a matching model with obligation, this should probably not happen");
+					return;	
 				}
 
+				if (target.Obligations.All.Value.None(o => o.PromiseId == Agent.Obligation.Value.ObligationPromiseId))
+				{
+					Debug.LogWarning("Arrived in obligation state without being able to find a matching promise id on the target model, this should probably not happen");
+					target = null;
+					return;
+				}
+				
 				initialTargetId = target.Id.Value;
 			}
 			
