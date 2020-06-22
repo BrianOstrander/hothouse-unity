@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
@@ -9,9 +12,76 @@ namespace Lunra.Hothouse.Presenters
 {
 	public class ToolbarPresenter : Presenter<ToolbarView>
 	{
+		static string GetGenericTaskId(ToolbarModel.Tasks task) => task.ToString();
+		static string GetConstructionTaskId(Buildings building) => GetGenericTaskId(ToolbarModel.Tasks.Construction) + "_" + building;
+
+		Dictionary<string, string> taskLabels;
+		Dictionary<string, string> TaskLabels
+		{
+			get
+			{
+				if (taskLabels != null) return taskLabels;
+				
+				taskLabels = new Dictionary<string, string>();
+
+				taskLabels.Add(
+					GetGenericTaskId(ToolbarModel.Tasks.Clearance),
+					"Gather"
+				);
+
+				foreach (var building in EnumExtensions.GetValues(Buildings.Unknown))
+				{
+					taskLabels.Add(
+						GetConstructionTaskId(building),
+						"Build " + building
+					);
+				}
+
+				return taskLabels;
+			}
+		}
+
+		Dictionary<string, Action> taskActions;
+		Dictionary<string, Action> TaskActions
+		{
+			get
+			{
+				if (taskActions != null) return taskActions;
+				
+				taskActions = new Dictionary<string, Action>();
+				
+				foreach (var task in EnumExtensions.GetValues(ToolbarModel.Tasks.Unknown, ToolbarModel.Tasks.None))
+				{
+					switch (task)
+					{
+						case ToolbarModel.Tasks.Clearance:
+							taskActions.Add(
+								GetGenericTaskId(task),
+								() => OnGenericSelectionClick(task)
+							);
+							break;
+						case ToolbarModel.Tasks.Construction:
+							foreach (var building in EnumExtensions.GetValues(Buildings.Unknown))
+							{
+								taskActions.Add(
+									GetConstructionTaskId(building),
+									() => OnConstructSelectionClick(building)
+								);
+							}
+							break;
+						default:
+							Debug.LogError("Unrecognized task: " + task);
+							break;
+					}
+				}
+
+				return taskActions;
+			}
+		}
+
 		GameModel game;
 		ToolbarModel toolbar;
-		
+
 		public ToolbarPresenter(
 			GameModel game
 		)
@@ -49,11 +119,19 @@ namespace Lunra.Hothouse.Presenters
 			if (View.Visible) return;
 			
 			View.Cleanup();
-
-			View.ClearanceClick += OnClearanceClick;
-			View.ConstructFireClick += OnConstructFireClick;
-			View.ConstructBedClick += OnConstructBedClick;
-			View.ConstructWallClick += OnConstructWallClick;
+			
+			View.Selection += OnViewSelection;
+			
+			View.InitializeControls(
+				TaskLabels.Select(
+					kv => new ToolbarView.Control
+					{
+						Id = kv.Key,
+						Label = kv.Value
+					}
+				)
+				.ToArray()
+			);
 			
 			ShowView(instant: true);
 		}
@@ -127,34 +205,31 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region View Events
-		void OnClearanceClick()
+		void OnViewSelection(string id)
 		{
-			View.ClearanceSelected = ToggleTask(ToolbarModel.Tasks.Clearance);
-		}
+			if (!TaskActions.TryGetValue(id, out var callback))
+			{
+				Debug.LogError("No callback registered for id: " + id);
+				return;
+			}
 
-		void OnConstructFireClick()
-		{
-			View.ConstructFireSelected = ToggleTask(
-				ToolbarModel.Tasks.Construction,
-				Buildings.Bonfire
-			);
+			if (callback == null)
+			{
+				Debug.LogError("Callback with id \"" + id + "\" is null");
+				return;
+			}
 			
+			callback();
 		}
 		
-		void OnConstructBedClick()
+		void OnGenericSelectionClick(ToolbarModel.Tasks task)
 		{
-			View.ConstructBedSelected = ToggleTask(
-				ToolbarModel.Tasks.Construction,
-				Buildings.Bedroll
-			);
+			if (ToggleTask(task)) View.SetSelection(GetGenericTaskId(task));
 		}
 		
-		void OnConstructWallClick()
+		void OnConstructSelectionClick(Buildings building)
 		{
-			View.ConstructWallSelected = ToggleTask(
-				ToolbarModel.Tasks.Construction,
-				Buildings.WallSmall
-			);
+			if (ToggleTask(ToolbarModel.Tasks.Construction, building)) View.SetSelection(GetConstructionTaskId(building));
 		}
 		#endregion
 		
@@ -207,10 +282,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.NotVisible) return;
 			
-			View.ClearanceSelected = false;
-			View.ConstructFireSelected = false;
-			View.ConstructBedSelected = false;
-			View.ConstructWallSelected = false;
+			View.SetSelection();
 		}
 		#endregion
 	}
