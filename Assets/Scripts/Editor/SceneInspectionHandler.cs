@@ -181,7 +181,7 @@ namespace Lunra.Hothouse.Editor
 			{
 				foreach (var model in gameState.Payload.Game.Dwellers.AllActive)
 				{
-					var label = GetIdLabel(model);
+					var label = GetIdLabel(model) + " - " + model.Name.Value;
 
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
 					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;

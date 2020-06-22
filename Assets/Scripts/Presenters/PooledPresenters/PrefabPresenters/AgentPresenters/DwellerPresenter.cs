@@ -42,7 +42,7 @@ namespace Lunra.Hothouse.Presenters
 				Game.EventLog.DwellerEntries.Enqueue(
 					new EventLogModel.Entry(
 						StringExtensions.Wrap(
-							"Died from " + result.Type,
+							Model.Name.Value + " died from " + result.Type,
 							"<color=red>",
 							"</color>"
 						),
@@ -56,7 +56,7 @@ namespace Lunra.Hothouse.Presenters
 				Game.EventLog.DwellerEntries.Enqueue(
 					new EventLogModel.Entry(
 						StringExtensions.Wrap(
-							"Is suffering from " + result.Type,
+							Model.Name.Value + " is suffering from " + result.Type,
 							"<color=yellow>",
 							"</color>"
 						),

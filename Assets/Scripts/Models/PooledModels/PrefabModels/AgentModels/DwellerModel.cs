@@ -10,6 +10,8 @@ namespace Lunra.Hothouse.Models
 	public class DwellerModel : AgentModel
 	{
 		#region Serialized
+		[JsonProperty] string name;
+		[JsonIgnore] public ListenerProperty<string> Name { get; }
 		[JsonProperty] Jobs job;
 		[JsonIgnore] public ListenerProperty<Jobs> Job { get; }
 
@@ -67,6 +69,7 @@ namespace Lunra.Hothouse.Models
 		
 		public DwellerModel()
 		{
+			Name = new ListenerProperty<string>(value => name = value, () => name);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
 			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);

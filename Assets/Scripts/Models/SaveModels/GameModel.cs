@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
+using Lunra.Hothouse.Services;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
@@ -62,6 +63,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region NonSerialized
+		[JsonIgnore] public NameGenerator DwellerNames { get; } = new NameGenerator();
 		[JsonIgnore] public GameInteractionModel Interaction { get; } = new GameInteractionModel();
 		[JsonIgnore] public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;

@@ -295,21 +295,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateDwellers(Action done)
 		{
-			var dweller0 = payload.Game.Dwellers.Activate(
-				spawn.Id.Value,
-				spawn.Transform.Position.Value
-			);
-			dweller0.Id.Value = "0";
-			dweller0.Job.Value = Jobs.Clearer;
-		
-			var dweller1 = payload.Game.Dwellers.Activate(
-				spawn.Id.Value,
-				spawn.Transform.Position.Value + (Vector3.forward * 2f)
-			);
-		
-			dweller1.Id.Value = "1";
-			dweller1.Job.Value = Jobs.Construction;
-
+			var randomJobPool = EnumExtensions.GetValues(Jobs.Unknown, Jobs.None, Jobs.Stoker);
+			
+			var requiredJobs = new Jobs[]
+			{
+				Jobs.Construction,
+				Jobs.Clearer
+			};
 
 			for (var i = 0; i < 4; i++)
 			{
@@ -318,8 +310,10 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 					spawn.Transform.Position.Value + (Vector3.forward * 2f)
 				);
 
-				dweller.Id.Value = (2 + i).ToString();
-				dweller.Job.Value = Jobs.Construction;	
+				if (i < requiredJobs.Length) dweller.Job.Value = requiredJobs[i];
+				else dweller.Job.Value = generator.GetNextFrom(randomJobPool);
+
+				dweller.Name.Value = payload.Game.DwellerNames.GetName(generator);
 			}
 
 			done();

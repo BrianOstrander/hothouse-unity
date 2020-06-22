@@ -37,6 +37,7 @@ namespace Lunra.Hothouse.Services
 				() => Payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
 			);
 			
+			App.S.PushBlocking(Payload.Game.DwellerNames.Initialize);
 			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
 
 			if (Payload.Game.Rooms.AllActive.None()) new GameStateGenerateLevel(this).Push();
