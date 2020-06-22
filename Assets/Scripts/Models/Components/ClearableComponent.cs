@@ -60,5 +60,11 @@ namespace Lunra.Hothouse.Models
 				ClearancePriority
 			);
 		}
+
+		public void Reset()
+		{
+			SelectionState.Value = SelectionStates.NotSelected;
+			ClearancePriority.Value = null;
+		}
 	}
 }
