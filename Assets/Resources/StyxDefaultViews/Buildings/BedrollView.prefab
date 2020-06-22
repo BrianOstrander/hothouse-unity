@@ -109,6 +109,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -462,9 +463,9 @@ MonoBehaviour:
     CloseDuration: 0
   animations: []
   prefabId: bed_bedroll
-  navigationModifiers: []
   navigationColliders:
   - {fileID: 8348105340903504755}
+  navigationCollidersRadius: 2.4142137
   entrances:
   - {fileID: 2217704237645697402}
   lights: []

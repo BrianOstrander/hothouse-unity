@@ -132,6 +132,8 @@ namespace Lunra.Hothouse.Presenters
 				)
 				.ToArray()
 			);
+
+			View.SetSelection();
 			
 			ShowView(instant: true);
 		}

@@ -289,7 +289,60 @@ namespace Lunra.Hothouse.Models
 						"wall_small_0"
 					}
 				)
-			}
+			},
+			{
+				Buildings.DepotSmall,
+				new BuildingInfo(
+					100f,
+					Inventory.Empty,
+					InventoryCapacity.ByIndividualWeight(
+						new Inventory(
+							new Dictionary<Inventory.Types, int>
+							{
+								{ Inventory.Types.Rations , 25 },
+								{ Inventory.Types.Stalks , 25 },
+								{ Inventory.Types.Scrap , 25 }
+							}
+						)	
+					),
+					InventoryPermission.AllForAnyJob(),
+					Constants.DefaultPlacementLightRequirement,
+					InventoryCapacity.ByIndividualWeight(
+						new Inventory(
+							new Dictionary<Inventory.Types, int>
+							{
+								{ Inventory.Types.Stalks , 10 }
+							}
+						)	
+					),
+					new Inventory(
+						new Dictionary<Inventory.Types, int>
+						{
+							{ Inventory.Types.Stalks , 4 }
+						}
+					), 
+					Inventory.Empty, 
+					Interval.Zero(),
+					LightStates.Unknown,
+					new []
+					{
+						DesireQuality.New(
+							Desires.Eat,
+							1f,
+							new Inventory(
+								new Dictionary<Inventory.Types, int>
+								{
+									{ Inventory.Types.Rations , 1 }
+								}
+							)
+						)
+					},
+					new []
+					{
+						"debug_building"
+					}
+				)
+			},
 		};
 
 		GameModel game;

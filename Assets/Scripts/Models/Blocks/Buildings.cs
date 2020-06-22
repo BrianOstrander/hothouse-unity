@@ -6,6 +6,7 @@ namespace Lunra.Hothouse.Models
 		StartingWagon = 10,
 		Bonfire = 20,
 		Bedroll = 30,
-		WallSmall = 40
+		WallSmall = 40,
+		DepotSmall = 50
 	}
 }

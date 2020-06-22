@@ -57,7 +57,7 @@ MonoBehaviour:
   prefabId: starting_wagon
   navigationColliders:
   - {fileID: 9059322732609579966}
-  navigationCollidersRadius: 2.5367105
+  navigationCollidersRadius: 3.5367105
   entrances:
   - {fileID: 6558807796252768482}
   - {fileID: 7726990765462570418}
