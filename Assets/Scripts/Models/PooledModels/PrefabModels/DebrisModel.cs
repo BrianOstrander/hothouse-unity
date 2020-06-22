@@ -1,9 +1,6 @@
-using Lunra.StyxMvp.Models;
-using Newtonsoft.Json;
-
 namespace Lunra.Hothouse.Models
 {
-	public class ClearableModel_old : PrefabModel, IClearableModel
+	public class DebrisModel : PrefabModel, IClearableModel
 	{
 		#region Serialized
 		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
@@ -14,8 +11,6 @@ namespace Lunra.Hothouse.Models
 		#region NonSerialized
 		#endregion
 		
-		public ClearableModel_old()
-		{
-		}
+		public DebrisModel() { }
 	}
 }

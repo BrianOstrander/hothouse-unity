@@ -68,12 +68,6 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
 
-		public IEnumerable<IClearableModel> GetClearables()
-		{
-			return Debris.AllActive
-				.Concat(Flora.AllActive);
-		}
-
 		[JsonIgnore] public Func<(string RoomId, Vector3 Position, ILightModel[] Except), LightingResult> CalculateMaximumLighting;
 
 		GameCache cache = GameCache.Default();

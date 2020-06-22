@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public class FloraModel : ClearableModel_old
+	public class FloraModel : PrefabModel, IClearableModel
 	{
 		#region Serialized
 		[JsonProperty] FloraSpecies species;
@@ -32,6 +32,10 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] bool attacksBuildings;
 		[JsonIgnore] public ListenerProperty<bool> AttacksBuildings { get; }
+		
+		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
+		public HealthComponent Health { get; } = new HealthComponent();
+		public ClearableComponent Clearable { get; } = new ClearableComponent();
 		#endregion
 		
 		#region Non Serialized

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -60,6 +62,17 @@ namespace Lunra.Hothouse.Models
 		{
 			SelectionState.Value = SelectionStates.NotSelected;
 			ClearancePriority.Value = null;
+		}
+	}
+
+	public static class ClearableGameModelExtensions
+	{
+		public static IEnumerable<IClearableModel> GetClearables(
+			this GameModel game	
+		)
+		{
+			return game.Debris.AllActive
+				.Concat<IClearableModel>(game.Flora.AllActive);
 		}
 	}
 }
