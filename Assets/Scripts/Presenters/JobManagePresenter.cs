@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
@@ -10,6 +9,10 @@ namespace Lunra.Hothouse.Presenters
 {
 	public class JobManagePresenter : Presenter<JobManageView>
 	{
+		static readonly Jobs[] ValidJobs = EnumExtensions.GetValues(Jobs.Unknown, Jobs.Stoker, Jobs.None)
+			.Append(Jobs.None)
+			.ToArray();
+		
 		GameModel game;
 		JobManageModel jobManage;
 
@@ -18,6 +21,8 @@ namespace Lunra.Hothouse.Presenters
 			this.game = game;
 			jobManage = game.JobManage;
 
+			game.SimulationInitialize += OnGameSimulationInitialized;
+			
 			game.Dwellers.All.Changed += OnGameDwellersAll;
 			
 			Show();
@@ -25,6 +30,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
+			game.SimulationInitialize -= OnGameSimulationInitialized;
+			
 			game.Dwellers.All.Changed -= OnGameDwellersAll;
 		}
 
@@ -34,43 +41,75 @@ namespace Lunra.Hothouse.Presenters
 			
 			View.Cleanup();
 
-			View.Prepare += UpdateControls;
+			View.IncreaseClick += OnViewIncreaseClick;
+			View.DecreaseClick += OnViewDecreaseClick;
+			
+			View.InitializeJobs(ValidJobs);
 
+			View.Prepare += UpdateJobs;
+			
 			ShowView(instant: true);
 		}
 		
-		#region GameModel Events
-		void OnGameDwellersAll(DwellerPoolModel.Reservoir all) => UpdateControls();
-		#endregion
+		#region View Events
+		void OnViewIncreaseClick(Jobs job)
+		{
+			var target = game.Dwellers
+				.FirstOrDefaultActive(m => m.Job.Value == Jobs.None);
+			
+			if (target == null)
+			{
+				Debug.LogError("Tried to increase number of dwellers assigned to "+job+" but no unassigned dwellers were found");
+				return;
+			}
 
-		void UpdateControls()
+			target.Job.Value = job;
+			
+			UpdateJobs();
+		}
+		
+		void OnViewDecreaseClick(Jobs job)
+		{
+			var target = game.Dwellers
+				.FirstOrDefaultActive(m => m.Job.Value == job);
+			
+			if (target == null)
+			{
+				Debug.LogError("Tried to decrease number of dwellers assigned to "+job+" but no existing assignees were found");
+				return;
+			}
+
+			target.Job.Value = Jobs.None;
+			
+			UpdateJobs();
+		}
+		#endregion
+		
+		#region GameModel Events
+		void OnGameSimulationInitialized() => UpdateJobs();
+		void OnGameDwellersAll(DwellerPoolModel.Reservoir all) => UpdateJobs();
+		#endregion
+		
+		#region Utility
+		void UpdateJobs()
 		{
 			if (View.NotVisible) return;
 
-			var jobCounts = EnumExtensions.GetValues(Jobs.Unknown)
-				.ToDictionary(
-					k => k,
-					k => 0
-				);
-
-			foreach (var dweller in game.Dwellers.AllActive)
-			{
-				if (dweller.Job.Value == Jobs.Unknown)
-				{
-					Debug.LogError("Unrecognized Job: " + dweller.Job.Value);
-					continue;
-				}
-
-				jobCounts[dweller.Job.Value]++;
-			}
-
-			var res = string.Empty;
-			foreach (var kv in jobCounts)
-			{
-				res += "\n" + kv.Key + ": " + kv.Value;
-			}
+			var unassignedCount = game.Dwellers.AllActive.Count(m => m.Job.Value == Jobs.None);
+			var increaseEnabled = 0 < unassignedCount;
 			
-			Debug.Log(res);
+			foreach (var job in ValidJobs)
+			{
+				var count = game.Dwellers.AllActive.Count(m => m.Job.Value == job);
+				View.UpdateJob(
+					job,
+					job.ToString(),
+					count,
+					job != Jobs.None && increaseEnabled,
+					job != Jobs.None && 0 < count
+				);
+			}
 		}
+		#endregion
 	}
 }
