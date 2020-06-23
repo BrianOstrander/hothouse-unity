@@ -14,17 +14,25 @@ namespace Lunra.Hothouse.Ai.Dweller
 			GameModel world,
 			DwellerModel agent,
 			out NavMeshPath path,
-			out Vector3 entrancePosition
+			out Vector3 entrancePosition,
+			Func<BuildingModel, bool> predicate
 		)
 		{
 			return NavigationUtility.CalculateNearestAvailableOperatingEntrance(
 				agent.Transform.Position.Value,
 				out path,
 				out entrancePosition,
-				b => 0f < b.DesireQualities.Value.FirstAvailableQualityOrDefault(Desire),
+				b =>
+				{
+					if (!b.IsBuildingState(BuildingStates.Operating)) return false;
+					if (Mathf.Approximately(0f, b.DesireQualities.Value.FirstAvailableQualityOrDefault(Desire))) return false;
+					return predicate(b);
+				},
 				world.Buildings.AllActive
 			);
 		}
+
+		protected virtual bool ValidateDesireBuilding(BuildingModel building) => true;
 		
 		public override string Name => Desire + "Desire";
 
@@ -126,7 +134,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override bool IsTriggered()
 			{
-				target = SourceState.GetNearestDesireBuilding(Game, Agent, out _, out var entrancePosition);
+				target = SourceState.GetNearestDesireBuilding(
+					Game,
+					Agent,
+					out _,
+					out var entrancePosition,
+					SourceState.ValidateDesireBuilding
+				);
 
 				if (target == null) return false;
 
@@ -149,7 +163,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override bool IsTriggered()
 			{
-				target = SourceState.GetNearestDesireBuilding(Game, Agent, out targetPath, out _);
+				target = SourceState.GetNearestDesireBuilding(
+					Game,
+					Agent,
+					out targetPath,
+					out _,
+					SourceState.ValidateDesireBuilding
+				);
 
 				return target != null;
 			}

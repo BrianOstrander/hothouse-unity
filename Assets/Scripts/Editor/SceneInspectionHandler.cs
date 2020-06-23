@@ -73,6 +73,13 @@ namespace Lunra.Hothouse.Editor
 						label += "\nRoomId: " + model.RoomTransform.Id.Value;
 					}
 
+					if (0 < model.Ownership.MaximumClaimers.Value)
+					{
+						label += "\nOwners [ " + model.Ownership.Claimers.Value.Length + " / " + model.Ownership.MaximumClaimers.Value + " ]:";
+
+						foreach (var claimer in model.Ownership.Claimers.Value) label += "\n - " + Model.ShortenId(claimer.Id);
+					}
+
 					if (model.Health.IsDamaged)
 					{
 						label += "\nHealth: " + model.Health.Current.Value + " / " + model.Health.Maximum.Value;

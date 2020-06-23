@@ -28,6 +28,7 @@ namespace Lunra.Hothouse.Models
 			public Interval LightFuelInterval;
 			public LightStates LightStateDefault;
 			public DesireQuality[] DesireQualities;
+			public int MaximumOwners;
 			public string[] ValidPrefabIds;
 
 			public BuildingInfo(
@@ -42,6 +43,7 @@ namespace Lunra.Hothouse.Models
 				Interval lightFuelInterval,
 				LightStates lightStateDefault,
 				DesireQuality[] desireQualities,
+				int maximumOwners,
 				string[] validPrefabIds
 			)
 			{
@@ -56,6 +58,7 @@ namespace Lunra.Hothouse.Models
 				LightFuelInterval = lightFuelInterval;
 				LightStateDefault = lightStateDefault;
 				DesireQualities = desireQualities;
+				MaximumOwners = maximumOwners;
 				ValidPrefabIds = validPrefabIds;
 			}
 		}
@@ -162,6 +165,7 @@ namespace Lunra.Hothouse.Models
 							)
 						) 
 					},
+					0,
 					new []
 					{
 						"starting_wagon"
@@ -214,6 +218,7 @@ namespace Lunra.Hothouse.Models
 					{
 						// DesireQuality.New(Desires.Warmup, 1f) 
 					},
+					0,
 					new []
 					{
 						"fire_bonfire"
@@ -249,6 +254,7 @@ namespace Lunra.Hothouse.Models
 					{
 						DesireQuality.New(Desires.Sleep, 1f) 
 					},
+					1,
 					new []
 					{
 						"bed_bedroll"
@@ -284,6 +290,7 @@ namespace Lunra.Hothouse.Models
 					{
 						// DesireQuality.New(Desires.Sleep, 1f) 
 					},
+					0,
 					new []
 					{
 						"wall_small_0"
@@ -337,6 +344,7 @@ namespace Lunra.Hothouse.Models
 							)
 						)
 					},
+					0,
 					new []
 					{
 						"debug_building"
@@ -407,6 +415,9 @@ namespace Lunra.Hothouse.Models
 			
 			model.Light.IsLightRefueling.Value = true;
 			model.LightSensitive.LightLevel.Value = 0f;
+			
+			model.Ownership.Reset();
+			model.Ownership.MaximumClaimers.Value = info.MaximumOwners;
 		}
 	}
 }

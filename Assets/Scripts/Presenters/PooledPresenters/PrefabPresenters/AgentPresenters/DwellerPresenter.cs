@@ -2,6 +2,7 @@ using Lunra.Core;
 using Lunra.Hothouse.Ai.Dweller;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
@@ -23,6 +24,8 @@ namespace Lunra.Hothouse.Presenters
 			Model.DesireUpdated -= OnDwellerDesireUpdated;
 			
 			Model.Health.Damaged -= OnDwellerHealthDamage;
+			
+			if (Model.Bed.Value.TryGetInstance<BuildingModel>(Game, out var bed)) bed.Ownership.Remove(Model);
 			
 			base.UnBind();
 		}

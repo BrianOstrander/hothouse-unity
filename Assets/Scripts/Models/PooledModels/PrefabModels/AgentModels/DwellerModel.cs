@@ -52,10 +52,12 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] int lowRationThreshold;
 		[JsonIgnore] public ListenerProperty<int> LowRationThreshold { get; }
+
+		[JsonProperty] InstanceId bed = InstanceId.Null();
+		[JsonIgnore] public  ListenerProperty<InstanceId> Bed { get; }
 		#endregion
 		
 		#region Non Serialized
-
 		[JsonIgnore] public Action<Desires, bool> DesireUpdated = ActionExtensions.GetEmpty<Desires, bool>();
 		#endregion
 
@@ -84,6 +86,7 @@ namespace Lunra.Hothouse.Models
 			ObligationMinimumConcentrationDuration = new ListenerProperty<float>(value => obligationMinimumConcentrationDuration = value, () => obligationMinimumConcentrationDuration);
 			TransferDistance = new ListenerProperty<float>(value => transferDistance = value, () => transferDistance);
 			LowRationThreshold = new ListenerProperty<int>(value => lowRationThreshold = value, () => lowRationThreshold);
+			Bed = new ListenerProperty<InstanceId>(value => bed = value, () => bed);
 		}
 	}
 }

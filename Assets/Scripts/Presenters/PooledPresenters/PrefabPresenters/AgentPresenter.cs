@@ -137,7 +137,7 @@ namespace Lunra.Hothouse.Presenters
 					Debug.LogError("Unrecognized operation: " + Model.InventoryPromise.Value.Operation);
 					break;
 			}
-			
+
 			Debug.LogWarning("Handle unfulfilled obligation promises here!");
 			
 			Model.PooledState.Value = PooledStates.InActive;

@@ -30,6 +30,8 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
 			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
 			public static GUIContent OpenAllDoors = new GUIContent("Open All Doors");
+			public static GUIContent SimulationSpeedIncrease = new GUIContent("Increase ->");
+			public static GUIContent SimulationSpeedDecrease = new GUIContent("<- Decrease");
 		}
 		
 		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
@@ -46,7 +48,9 @@ namespace Lunra.Hothouse.Editor
 				Content.SaveAndCopySerializedGameToClipboard.text,
 				Content.QueueNavigationCalculation.text,
 				Content.RevealAllRooms.text,
-				Content.OpenAllDoors.text
+				Content.OpenAllDoors.text,
+				Content.SimulationSpeedIncrease.text,
+				Content.SimulationSpeedDecrease.text
 			};
 			
 			return provider;
@@ -73,8 +77,24 @@ namespace Lunra.Hothouse.Editor
 					foreach (var door in game.Doors.AllActive) door.IsOpen.Value = true;
 				}
 				
+				GUILayout.BeginHorizontal();
+				{
+					GUILayout.Label("Simulation Speed", GUILayout.ExpandWidth(false));
+					if (GUILayout.Button(Content.SimulationSpeedDecrease)) game.SimulationMultiplier.Value = Mathf.Max(0f, game.SimulationMultiplier.Value - 1f);
+					if (GUILayout.Button(Content.SimulationSpeedIncrease)) game.SimulationMultiplier.Value++;
+				}
+				GUILayout.EndHorizontal();
+
 				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 
+				if (GUILayout.Button("kill any dwellers with a bed"))
+				{
+					foreach (var dweller in game.Dwellers.AllActive.Where(m => !string.IsNullOrEmpty(m.Bed.Value.Id)))
+					{
+						Damage.ApplyGeneric(1000f, dweller);
+					}
+				}
+				
 				if (GUILayout.Button("reset promiseId of first door's obligations"))
 				{
 					var door = game.Doors.FirstActive();
