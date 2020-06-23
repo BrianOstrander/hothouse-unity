@@ -12,8 +12,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			Game.SimulationTime.Changed += OnGameSimulationTime;
-
 			Model.Boundary.Contains = OnRoomBoundaryContains;
 			Model.Boundary.RandomPoint = OnRoomBoundaryRandomPoint;
 			
@@ -27,8 +25,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
-			Game.SimulationTime.Changed -= OnGameSimulationTime;
-
 			Model.Boundary.Contains = null;
 			Model.Boundary.RandomPoint = null;
 			
@@ -48,6 +44,7 @@ namespace Lunra.Hothouse.Presenters
 			base.OnViewPrepare();
 
 			OnRoomIsRevealed(Model.IsRevealed.Value);
+			View.UnPlugDoors(Model.UnPluggedDoors.Value);
 		}
 		#endregion
 
@@ -59,13 +56,6 @@ namespace Lunra.Hothouse.Presenters
 		protected override void OnSimulationInitialized()
 		{
 			Model.AdjacentRoomIds.Value = Game.GetAdjacentRooms(Model.Id.Value).ToReadonlyDictionary();
-		}
-
-		void OnGameSimulationTime(DayTime dayTime)
-		{
-			if (View.NotVisible) return;
-
-			View.TimeOfDay = dayTime.Time;
 		}
 		#endregion
 		

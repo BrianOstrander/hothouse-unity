@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Lunra.Hothouse.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Views
@@ -10,7 +11,7 @@ namespace Lunra.Hothouse.Views
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		[SerializeField] GameObject door;
 		[SerializeField] Transform[] entrances = new Transform[0];
-		[SerializeField] Transform[] doorAnchors = new Transform[0];
+		[SerializeField] DoorCache[] doorAnchors = new DoorCache[0];
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
@@ -22,7 +23,7 @@ namespace Lunra.Hothouse.Views
 		
 		#region Reverse Bindings
 		public Vector3[] Entrances => entrances.Select(e => e.position).ToArray();
-		public (Vector3 Position, Vector3 Forward)[] DoorAnchors => doorAnchors.Select(d => (d.position, d.forward)).ToArray();
+		public DoorCache[] DoorAnchors => doorAnchors;
 		#endregion
 
 		public override void Cleanup()
@@ -48,7 +49,7 @@ namespace Lunra.Hothouse.Views
 			Gizmos.color = Color.blue;
 			foreach (var doorAnchor in doorAnchors)
 			{
-				Gizmos.DrawRay(doorAnchor.position, doorAnchor.forward);
+				Gizmos.DrawRay(doorAnchor.Anchor.position, doorAnchor.Anchor.forward);
 			}
 		}
 	}

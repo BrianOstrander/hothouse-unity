@@ -19,6 +19,8 @@ namespace Lunra.Hothouse.Models
         [JsonIgnore] public ListenerProperty<bool> IsRevealed { get; }
         [JsonProperty] int revealDistance;
         [JsonIgnore] public ListenerProperty<int> RevealDistance { get; }
+        [JsonProperty] int[] unpluggedDoors = new int[0];
+        [JsonIgnore] public ListenerProperty<int[]> UnPluggedDoors { get; }
         
         public BoundaryComponent Boundary { get; } = new BoundaryComponent();
         #endregion
@@ -38,6 +40,7 @@ namespace Lunra.Hothouse.Models
             
             IsRevealed = new ListenerProperty<bool>(value => isRevealed = value, () => isRevealed);
             RevealDistance = new ListenerProperty<int>(value => revealDistance = value, () => revealDistance);
+            UnPluggedDoors = new ListenerProperty<int[]>(value => unpluggedDoors = value, () => unpluggedDoors);
             
             AdjacentRoomIds = new ListenerProperty<ReadOnlyDictionary<string, bool>>(value => adjacentRoomIds = value, () => adjacentRoomIds);
         }

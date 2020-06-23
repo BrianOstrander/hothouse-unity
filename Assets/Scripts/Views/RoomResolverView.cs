@@ -62,7 +62,7 @@ namespace Lunra.Hothouse.Views
 		public void AddRoomDefinition(
 			string prefabId,
 			ColliderCache[] roomColliders,
-			(Vector3 Position, Vector3 Forward)[] doorAnchors
+			DoorCache[] doorAnchors
 		)
 		{
 			roomDefinitions.Add(
@@ -78,7 +78,7 @@ namespace Lunra.Hothouse.Views
 		
 		public void AddDoorDefinition(
 			string prefabId,
-			(Vector3 Position, Vector3 Forward)[] doorAnchors
+			DoorCache[] doorAnchors
 		)
 		{
 			doorDefinitions.Add(
@@ -97,7 +97,7 @@ namespace Lunra.Hothouse.Views
 			CollisionResolverDefinitionLeaf.Types type,
 			string prefabId,
 			ColliderCache[] roomColliders,
-			(Vector3 Position, Vector3 Forward)[] doorAnchors
+			DoorCache[] doorAnchors
 		)
 		{
 			var definition = RootGameObject.InstantiateChild(
@@ -263,8 +263,24 @@ namespace Lunra.Hothouse.Views
 						kv => kv.Key,
 						kv => kv.Value
 					);
-				}
 
+					try
+					{
+						var roomReference = workspaceCache.Rooms.First(m => m.Id == room.RoomTransform.Id.Value);
+						var closestIndex = roomReference.DoorAnchors
+							.OrderBy(
+								d => Mathf.Min(
+									Vector3.Distance(d.Anchor.position, instance.DoorAnchors.First().Anchor.position),
+									Vector3.Distance(d.Anchor.position, instance.DoorAnchors.Last().Anchor.position)
+								)
+							)
+							.First();
+
+						room.UnPluggedDoors.Value = room.UnPluggedDoors.Value.Append(closestIndex.Index).ToArray();
+					}
+					catch (Exception e) { Debug.LogException(e); }
+				}
+				
 				doors.Add(model);
 			}
 

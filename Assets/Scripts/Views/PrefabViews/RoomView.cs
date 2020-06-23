@@ -3,7 +3,6 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using UnityEngine;
-using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -12,67 +11,160 @@ namespace Lunra.Hothouse.Views
 {
 	public class RoomView : PrefabView, IRoomIdView, IBoundaryView
 	{
+		static class Constants
+		{
+			public const string DoorAnchorPrefix = "door_anchor_";
+			public const string DoorAnchorSizeTerminator = "m";
+			public const string DoorPlugPrefix = "door_plug";
+		}
+
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
-		[SerializeField] Light[] lights;
-		[SerializeField] AnimationCurve lightIntensityByTimeOfDay;
-		[FormerlySerializedAs("unexploredRoot")] [SerializeField] GameObject notRevealedRoot;
+		[SerializeField] Transform unexploredRoot;
 
 		[SerializeField] GameObject boundaryColliderRoot;
-		[SerializeField] Transform[] doorAnchors = new Transform[0];
+		[SerializeField] DoorCache[] doorDefinitions = new DoorCache[0];
 		[SerializeField] ColliderCache[] boundaryColliders = new ColliderCache[0];
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
 		#region Bindings
-		public float TimeOfDay
+		public bool IsRevealed { set => unexploredRoot.gameObject.SetActive(!value); }
+
+		public void UnPlugDoors(params int[] plugIds)
 		{
-			set
+			foreach (var door in doorDefinitions)
 			{
-				foreach (var light in lights) light.intensity = lightIntensityByTimeOfDay.Evaluate(value);
+				door.Plug.SetActive(!plugIds.Contains(door.Index));
 			}
 		}
 
-		public bool IsRevealed { set => notRevealedRoot.SetActive(!value); }
-
 		public ColliderCache[] BoundaryColliders => boundaryColliders;
-		public (Vector3 Position, Vector3 Forward)[] DoorAnchors => doorAnchors.Select(d => (d.position, d.forward)).ToArray();
+		public DoorCache[] DoorDefinitions => doorDefinitions;
 		#endregion
 
 		public override void Cleanup()
 		{
 			base.Cleanup();
 
-			TimeOfDay = 0f;
 			IsRevealed = false;
-		}
-
-		void OnDrawGizmosSelected()
-		{
-			if (doorAnchors == null) return;
-
-			Gizmos.color = Color.blue;
-			foreach (var doorAnchor in doorAnchors)
-			{
-				if (doorAnchor == null) continue;
-				Gizmos.DrawRay(doorAnchor.position, doorAnchor.forward);
-			}
+			UnPlugDoors();
 		}
 
 #if UNITY_EDITOR
+		void OnDrawGizmosSelected()
+		{
+			if (doorDefinitions == null) return;
+
+			Handles.color = Color.yellow.NewA(0.5f);
+
+			foreach (var door in doorDefinitions)
+			{
+				if (door.Anchor == null) continue;
+
+				var anchor = door.Anchor.position;
+				var edge0 = door.Anchor.position + (door.Anchor.right * (door.Size * 0.5f));
+				var edge1 = door.Anchor.position + (door.Anchor.right * (door.Size * -0.5f));
+				var edgeForward = door.Anchor.position + door.Anchor.forward * 2f;
+				var edgeUp = door.Anchor.position + door.Anchor.up;
+				
+				var offset = door.Anchor.forward * 0.1f;
+
+				anchor += offset;
+				edge0 += offset;
+				edge1 += offset;
+				edgeForward += offset;
+				edgeUp += offset;
+				
+				
+				Gizmos.color = Color.yellow;
+				
+				Gizmos.DrawLine(edge0, edge1);
+				Gizmos.DrawLine(edge0, edgeForward);
+				Gizmos.DrawLine(edge1, edgeForward);
+				
+				// Gizmos.DrawLine(anchor, edgeForward);
+				Gizmos.DrawLine(edge0, edge0 + (Vector3.up * 4f));
+				Gizmos.DrawLine(edge1, edge1 + (Vector3.up * 4f));
+				
+				Handles.DrawWireDisc(edge0, Vector3.up, 0.2f);
+			}
+		}
+		
 		public void CalculateCachedData()
 		{
 			Undo.RecordObject(this, "Calculate Cached Data");
 			
-			doorAnchors = transform.GetDescendants(c => c.name == "DoorAnchor").ToArray();
+			var doorDefinitionsList = new List<DoorCache>();
 
-			if (notRevealedRoot == null)
+			int doorId = 0;
+			foreach (var doorAnchor in transform.GetDescendants(c => !string.IsNullOrEmpty(c.name) && c.name.Contains(Constants.DoorAnchorPrefix)))
 			{
-				Debug.LogError("Unable to calculate room colliders because unexploredRoot is null");
+				var doorAnchorSizeSerialized = doorAnchor.name.Substring(Constants.DoorAnchorPrefix.Length, doorAnchor.name.Length - Constants.DoorAnchorPrefix.Length);
+				if (string.IsNullOrEmpty(doorAnchorSizeSerialized) || !doorAnchorSizeSerialized.Contains(Constants.DoorAnchorSizeTerminator))
+				{
+					Debug.LogError("Unable to parse door anchor size, no terminator detected: "+doorAnchor.name, doorAnchor);
+					continue;
+				}
+
+				doorAnchorSizeSerialized = doorAnchorSizeSerialized.Split('m').FirstOrDefault();
+
+				if (string.IsNullOrEmpty(doorAnchorSizeSerialized))
+				{
+					Debug.LogError("Unable to parse door anchor size, null or empty result: "+doorAnchor.name, doorAnchor);
+					continue;
+				}
+
+				if (!int.TryParse(doorAnchorSizeSerialized, out var doorAnchorSize))
+				{
+					Debug.LogError("Unable to parse door anchor size, could not deserialize: "+doorAnchor.name, doorAnchor);
+					continue;
+				}
+
+				var doorPlug = doorAnchor.parent.GetFirstDescendantOrDefault(d => !string.IsNullOrEmpty(d.name) && d.name == Constants.DoorPlugPrefix);
+
+				if (doorPlug == null)
+				{
+					Debug.LogError("Unable to find a plug for door: "+doorAnchor.name, doorAnchor);
+					continue;
+				}
 				
+				doorDefinitionsList.Add(
+					new DoorCache
+					{
+						Index = doorId,
+						Anchor = doorAnchor,
+						Plug = doorPlug.gameObject,
+						Size = doorAnchorSize
+					}
+				);
+
+				doorId++;
+			}
+
+			doorDefinitions = doorDefinitionsList.ToArray();
+
+			unexploredRoot = unexploredRoot == null ? transform.GetFirstDescendantOrDefault(d => d.name == "UnexploredRoot") : unexploredRoot;
+			
+			if (unexploredRoot == null)
+			{
+				Debug.LogError("Unable to calculate room colliders, no UnexploredRoot found");
 				return;
 			}
 			
+			unexploredRoot.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Unexplored));
+
+			var unexploredMaterial = Resources.Load<Material>("Materials/Unexplored");
+			
+			if (unexploredMaterial == null) Debug.LogError("Unable to find Unexplored material");
+			else
+			{
+				foreach (var meshRender in unexploredRoot.GetDescendants<MeshRenderer>())
+				{
+					meshRender.sharedMaterial = unexploredMaterial;
+				}
+			}
+
 			if (boundaryColliderRoot != null) DestroyImmediate(boundaryColliderRoot);
 			
 			boundaryColliderRoot = new GameObject("BoundaryColliderRoot");
@@ -80,8 +172,9 @@ namespace Lunra.Hothouse.Views
 
 			var roomCollidersResult = new List<ColliderCache>();
 			
-			foreach (var sourceCollider in notRevealedRoot.transform.GetDescendants<Collider>())
+			foreach (var sourceCollider in unexploredRoot.transform.GetDescendants<Collider>())
 			{
+				if (sourceCollider is MeshCollider meshCollider) meshCollider.convex = true;
 				sourceCollider.isTrigger = true;
 				
 				var duplicateRoot = boundaryColliderRoot.InstantiateChildObject(
@@ -113,18 +206,6 @@ namespace Lunra.Hothouse.Views
 				colliderCache.Rotation = collider.transform.rotation;
 				
 				roomCollidersResult.Add(colliderCache);
-				
-				// duplicateRoot.name = sourceCollider.name;
-
-				/*
-				var roomCollider = new ColliderCache();
-				roomCollider.Collider = collider;
-				roomCollider.Position = collider.transform.position;
-				roomCollider.Scale = collider.transform.lossyScale;
-				roomCollider.Rotation = collider.transform.rotation;
-				
-				roomCollidersResult.Add(roomCollider);
-				*/
 			}
 
 			boundaryColliders = roomCollidersResult.ToArray();

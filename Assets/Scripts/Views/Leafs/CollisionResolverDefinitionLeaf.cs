@@ -20,14 +20,17 @@ namespace Lunra.Hothouse.Views
 		public struct Connection
 		{
 			public string Id;
+			public int Index;
 			public Transform Anchor;
 
 			public Connection(
 				string id,
+				int index,
 				Transform anchor
 			)
 			{
 				Id = id;
+				Index = index;
 				Anchor = anchor;
 			}
 		}
@@ -47,7 +50,7 @@ namespace Lunra.Hothouse.Views
 			Types type,
 			string prefabId,
 			ColliderCache[] colliders,
-			(Vector3 Position, Vector3 Forward)[] doorAnchors
+			DoorCache[] doorAnchors
 		)
 		{
 			var colliderList = new List<Collider>();
@@ -71,10 +74,16 @@ namespace Lunra.Hothouse.Views
 
 					switch (collider.Collider)
 					{
-						case BoxCollider boxRef:
+						case BoxCollider boxReference:
 							var box = child.AddComponent<BoxCollider>();
-							box.center = boxRef.center;
-							box.size = boxRef.size;
+							box.center = boxReference.center;
+							box.size = boxReference.size;
+							break;
+						case MeshCollider meshReference:
+							var mesh = child.AddComponent<MeshCollider>();
+							mesh.convex = meshReference.convex;
+							mesh.cookingOptions = meshReference.cookingOptions;
+							mesh.sharedMesh = meshReference.sharedMesh;
 							break;
 						default:
 							Debug.LogError("Unrecognized collider of type: " + collider.Collider.GetType().Name);
@@ -105,20 +114,26 @@ namespace Lunra.Hothouse.Views
 
 			Colliders = colliderList.ToArray();
 
-			var doorAnchorList = new List<Transform>();
+			var doorAnchorsList = new List<Connection>();
 			
-			foreach (var doorAnchorRef in doorAnchors)
+			foreach (var doorAnchorReference in doorAnchors)
 			{
-				var doorAnchor = new GameObject("DoorAnchor_"+doorAnchorList.Count).transform;
+				var doorAnchor = new GameObject("DoorAnchor_"+doorAnchorsList.Count).transform;
 				doorAnchor.SetParent(transform);
+
+				doorAnchor.localPosition = doorAnchorReference.Anchor.position;
+				doorAnchor.forward = doorAnchorReference.Anchor.forward;
 				
-				doorAnchor.localPosition = doorAnchorRef.Position;
-				doorAnchor.forward = doorAnchorRef.Forward;
-				
-				doorAnchorList.Add(doorAnchor);
+				doorAnchorsList.Add(
+					new Connection(
+						null,
+						doorAnchorReference.Index,
+						doorAnchor
+					)	
+				);
 			}
 
-			DoorAnchors = doorAnchorList.Select(d => new Connection(null, d)).ToArray();
+			DoorAnchors = doorAnchorsList.ToArray();
 		}
 
 		public void Dock(

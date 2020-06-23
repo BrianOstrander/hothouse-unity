@@ -615,5 +615,11 @@ MonoBehaviour:
   - {fileID: 9011563900552223916}
   - {fileID: 1086851148692920424}
   doorAnchors:
-  - {fileID: 7997092175553596822}
-  - {fileID: 7978043564859197210}
+  - Id: 0
+    Anchor: {fileID: 7997092175553596822}
+    Plug: {fileID: 0}
+    Size: 10
+  - Id: 1
+    Anchor: {fileID: 7978043564859197210}
+    Plug: {fileID: 0}
+    Size: 10
