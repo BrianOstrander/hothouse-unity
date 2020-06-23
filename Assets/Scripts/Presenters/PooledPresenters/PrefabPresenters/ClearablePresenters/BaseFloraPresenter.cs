@@ -3,6 +3,7 @@ using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
+using Lunra.StyxMvp;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -158,8 +159,7 @@ namespace Lunra.Hothouse.Presenters
 
 							if (hasFloorHit)
 							{
-								var roomView = floorHit.transform.GetAncestor<IRoomIdView>();
-								if (roomView != null)
+								if (floorHit.transform.GetAncestor<View>(v => v is IRoomIdView) is IRoomIdView roomView)
 								{
 									increaseReproductionFailures = false;
 

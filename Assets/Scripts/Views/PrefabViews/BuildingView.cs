@@ -74,6 +74,10 @@ namespace Lunra.Hothouse.Views
 		void CalculateBoundingNavigationColliderRadius()
 		{
 #if UNITY_EDITOR
+			Undo.RecordObject(this, "Calculate Bounding Navigation");
+
+			navigationColliders = transform.GetDescendants<Collider>().ToArray();
+			
 			var result = 0f;
 			foreach (var collider in navigationColliders)
 			{
@@ -83,15 +87,10 @@ namespace Lunra.Hothouse.Views
 
 			result += 1f;
 
-			if (Mathf.Approximately(navigationCollidersRadius, result)) return;
-
-			Undo.RecordObject(this, "Calculate Bounding Navigation");
-			
 			navigationCollidersRadius = result;
 
-			// Notice that if the call to RecordPrefabInstancePropertyModifications is not present,
-			// all changes to scale will be lost when saving the Scene, and reopening the Scene
-			// would revert the scale back to its previous value.
+			entrances = transform.GetDescendants(d => d.name.ToLower().Contains("entrance")).ToArray();
+
 			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 
 			// Optional step in order to save the Scene changes permanently.
