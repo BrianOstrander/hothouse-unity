@@ -23,11 +23,12 @@ namespace Lunra.Hothouse.Presenters
 			Model.NavigationPlan.Value = NavigationPlan.Done(Model.Transform.Position.Value);
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
-			
+
 			Model.Transform.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 			Model.Health.Current.Changed += OnAgentHealthCurrent;
 			Model.Health.Damaged += OnAgentHealthDamaged;
+			Model.ObligationComplete += OnAgentObligationComplete;
 			
 			base.Bind();
 		}
@@ -40,6 +41,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 			Model.Health.Current.Changed -= OnAgentHealthCurrent;
 			Model.Health.Damaged -= OnAgentHealthDamaged;
+			Model.ObligationComplete -= OnAgentObligationComplete;
 			
 			base.UnBind();
 		}
@@ -158,6 +160,8 @@ namespace Lunra.Hothouse.Presenters
 				}
 			}
 		}
+
+		public virtual void OnAgentObligationComplete(Obligation obligation) { }
 		#endregion
 	}
 }

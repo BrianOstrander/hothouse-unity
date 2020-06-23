@@ -1,3 +1,4 @@
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Ai.Dweller;
 using Lunra.Hothouse.Models;
@@ -13,9 +14,9 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{
 			Model.DesireUpdated += OnDwellerDesireUpdated;
-
-			Model.Health.Damaged += OnDwellerHealthDamage;
 			
+			Model.Health.Damaged += OnDwellerHealthDamage;
+
 			base.Bind();
 		}
 
@@ -70,5 +71,25 @@ namespace Lunra.Hothouse.Presenters
 			}
 		}
 		#endregion
+
+		public override void OnAgentObligationComplete(Obligation obligation)
+		{
+			Debug.Log("uhhh: "+obligation);
+			if (View.NotVisible) return;
+			if (!obligation.Type.Equals(ObligationCategories.Door.Open)) return;
+
+			var nearestDoor = Game.Doors.AllActive
+				.Where(m => m.IsOpen.Value)
+				.OrderBy(m => Vector3.Distance(m.Transform.Position.Value, Model.Transform.Position.Value))
+				.FirstOrDefault();
+
+			if (nearestDoor == null)
+			{
+				Debug.LogError("Door was opened, but no valid target found");
+				return;
+			}
+
+			View.LaunchGlowstick((nearestDoor.Transform.Position.Value - Model.Transform.Position.Value).normalized);
+		}
 	}
 }

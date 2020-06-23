@@ -150,6 +150,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 					SourceState.target.Obligations.All.Value = SourceState.target.Obligations.All.Value
 						.Select(o => o.PromiseId == newObligation.PromiseId ? newObligation : o)
 						.ToArray();
+					
+					if (newObligation.State == Obligation.States.Complete) Agent.ObligationComplete(newObligation);
 				}
 				
 				var obligation = get();

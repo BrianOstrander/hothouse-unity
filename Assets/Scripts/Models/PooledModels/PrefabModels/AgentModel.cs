@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Lunra.Core;
+using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
@@ -32,7 +34,8 @@ namespace Lunra.Hothouse.Models
 		
 		#region Non Serialized
 		[JsonIgnore] public bool IsDebugging { get; set; }
-		[JsonIgnore] public AgentContext Context { get; set; } 
+		[JsonIgnore] public AgentContext Context { get; set; }
+		[JsonIgnore] public Action<Obligation> ObligationComplete { get; set; } = ActionExtensions.GetEmpty<Obligation>();
 		#endregion
 		
 		public AgentModel()
