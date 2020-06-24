@@ -21,16 +21,19 @@ namespace Lunra.Hothouse.Views
 		{
 			public string Id;
 			public int Index;
+			public int Size;
 			public Transform Anchor;
 
 			public Connection(
 				string id,
 				int index,
+				int size,
 				Transform anchor
 			)
 			{
 				Id = id;
 				Index = index;
+				Size = size;
 				Anchor = anchor;
 			}
 		}
@@ -43,6 +46,7 @@ namespace Lunra.Hothouse.Views
 		public Vector2 Size;
 		public Collider[] Colliders;
 		public Connection[] DoorAnchors;
+		public int DoorAnchorSizeMaximum;
 		
 		public int CollisionCount;
 		
@@ -128,12 +132,14 @@ namespace Lunra.Hothouse.Views
 					new Connection(
 						null,
 						doorAnchorReference.Index,
+						doorAnchorReference.Size,
 						doorAnchor
 					)	
 				);
 			}
 
 			DoorAnchors = doorAnchorsList.ToArray();
+			DoorAnchorSizeMaximum = doorAnchorsList.Max(d => d.Size);
 		}
 
 		public void Dock(

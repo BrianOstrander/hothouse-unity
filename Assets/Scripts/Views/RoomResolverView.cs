@@ -380,7 +380,16 @@ namespace Lunra.Hothouse.Views
 				
 				if (!string.IsNullOrEmpty(roomDoorOpening.Id)) continue;
 
-				var door = WorkspaceInstantiate(doorDefinitions);
+				var door = WorkspaceInstantiate(
+					doorDefinitions,
+					d => roomDoorOpening.Size == d.DoorAnchorSizeMaximum
+				);
+
+				if (door == null)
+				{
+					Debug.LogError("Unable to find a door that is " + roomDoorOpening.Size + " meters wide");
+					continue;
+				}
 
 				door.Dock(
 					door.DoorAnchors.First(),
