@@ -61,6 +61,8 @@ namespace Lunra.Hothouse.Editor
 			{
 				foreach (var model in gameState.Payload.Game.Buildings.AllActive)
 				{
+					DrawEntranceInspection(model);
+					
 					var label = GetIdLabel(model);
 
 					if (model.BuildingState.Value != BuildingStates.Operating)
@@ -143,45 +145,6 @@ namespace Lunra.Hothouse.Editor
 						Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
 					}
 				}
-			}
-
-			if (SceneInspectionSettings.IsInspectingEntrances.Value)
-			{
-				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
-				{
-					var enterableModelsForInspection = gameState.Payload.Game.Buildings.AllActive
-						.Concat<IEnterableModel>(gameState.Payload.Game.Doors.AllActive);
-					
-					foreach (var model in enterableModelsForInspection)
-					{
-						foreach (var entrance in model.Enterable.Entrances.Value)
-						{
-							var color = Color.grey;
-
-							switch (entrance.State)
-							{
-								case Entrance.States.Available:
-									color = Color.green;
-									break;
-								case Entrance.States.NotAvailable:
-									color = entrance.IsNavigable ? Color.yellow : Color.red;
-									break;
-							}
-
-							Handles.color = color;
-							Handles.DrawDottedLine(
-								model.Transform.Position.Value,
-								entrance.Position,
-								4f
-							);
-							Handles.DrawWireCube(
-								entrance.Position,
-								Vector3.one * 0.1f
-							);
-						}
-					}
-				}
-				HandlesExtensions.EndDepthCheck();
 			}
 
 			if (SceneInspectionSettings.IsInspectingDwellers.Value)
@@ -381,6 +344,8 @@ namespace Lunra.Hothouse.Editor
 				{
 					if (!inspectedRooms.Contains(model.RoomTransform.Id.Value)) continue;
 					
+					DrawEntranceInspection(model);
+					
 					var label = GetIdLabel(model);
 
 					label += "\nRoomId: " + model.RoomTransform.ShortId;
@@ -533,6 +498,41 @@ namespace Lunra.Hothouse.Editor
 			}
 
 			return true;
+		}
+
+		static void DrawEntranceInspection(IEnterableModel model)
+		{
+			if (!SceneInspectionSettings.IsInspectingEntrances.Value) return;
+			
+			HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
+			{
+				foreach (var entrance in model.Enterable.Entrances.Value)
+				{
+					var color = Color.grey;
+
+					switch (entrance.State)
+					{
+						case Entrance.States.Available:
+							color = Color.green;
+							break;
+						case Entrance.States.NotAvailable:
+							color = entrance.IsNavigable ? Color.yellow : Color.red;
+							break;
+					}
+
+					Handles.color = color;
+					Handles.DrawDottedLine(
+						model.Transform.Position.Value,
+						entrance.Position,
+						4f
+					);
+					Handles.DrawWireCube(
+						entrance.Position,
+						Vector3.one * 0.1f
+					);
+				}
+			}
+			HandlesExtensions.EndDepthCheck();
 		}
 
 		static void DrawSelectionButton(IPrefabModel model, Vector3? offset = null)

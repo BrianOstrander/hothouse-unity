@@ -37,6 +37,7 @@ namespace Lunra.StyxMvp
 		float OpacityStack { get; }
 
 		bool Interactable { get; set; }
+		bool Ignore { get; }
 		int PoolSize { get; }
 
 		TransitionStates TransitionState { get; }
@@ -193,10 +194,17 @@ namespace Lunra.StyxMvp
 
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		public virtual bool Interactable { get; set; } = true;
+		
+		[SerializeField]
+		bool ignore;
+		public bool Ignore => ignore;
+		
 		[SerializeField, Tooltip("Size of initial pool, entering \"0\" uses ViewMediator defaults.")]
 		int poolSize;
 		public virtual int PoolSize => poolSize;
+		
 		public ShowCloseDurationBlock ShowCloseDuration;
+		
 		[SerializeField]
 		ViewAnimation[] animations;
 		public virtual ViewAnimation[] ViewAnimations => animations;

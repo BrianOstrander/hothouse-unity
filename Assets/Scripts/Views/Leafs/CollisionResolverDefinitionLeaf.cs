@@ -164,28 +164,6 @@ namespace Lunra.Hothouse.Views
 			}
 
 			obj_root_1.position = obj_door_0.position + (obj_root_1.position - obj_door_1.position);
-			
-			// var dot = Vector3.Dot(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward);
-			//
-			// Quaternion.LookRotation()
-			/*
-			transform.Rotate(Vector3.up, 180f - Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward));
-
-			if (!Mathf.Approximately(180f, Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)))
-			{
-				transform.Rotate(
-					Vector3.up,
-					Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)
-				);
-			}
-			
-			if (Mathf.Approximately(1f, Vector3.Dot(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)))
-			{
-				transform.Rotate(Vector3.up, 180f);
-			}
-			
-			transform.position = otherDoorAnchor.Anchor.position + (transform.position - doorAnchor.Anchor.position);
-			*/
 		}
 
 		public bool HasCollisions() => 0 < CollisionCount;

@@ -302,7 +302,11 @@ namespace Lunra.Hothouse.Views
 			{
 				var possibleRoom = WorkspaceInstantiate(
 					roomDefinitions,
-					r => !invalidRoomIds.Contains(r.PrefabId),
+					r =>
+					{
+						if (invalidRoomIds.Contains(r.PrefabId)) return false;
+						return r.DoorAnchors.Any(d => d.Size == originDoor.DoorAnchorSizeMaximum);
+					},
 					true
 				);
 
@@ -310,24 +314,22 @@ namespace Lunra.Hothouse.Views
 				
 				invalidRoomIds.Add(possibleRoom.PrefabId);
 
-				yield return new WaitForFixedUpdate();
+				// yield return new WaitForFixedUpdate();
 
 				for (var doorIndex = 0; doorIndex < possibleRoom.DoorAnchors.Length; doorIndex++)
 				{
 					var door = possibleRoom.DoorAnchors[doorIndex];
+
+					if (door.Size != originDoor.DoorAnchorSizeMaximum) continue;
 					
 					possibleRoom.Dock(
 						door,
 						originDoor.DoorAnchors.Last()
 					);
-
-					yield return new WaitForFixedUpdate();
 					
-					// for (var c = 0; c < possibleRoom.Colliders.Length * 2; c++)
-					// {
-					// 	yield return new WaitForFixedUpdate();
-					// 	if (possibleRoom.HasCollisions()) break;
-					// }
+					// Investigate speeding up map generation by using translate instead of waiting for a fixed update.
+					// door.Anchor.Translate(Vector3.zero);
+					yield return new WaitForFixedUpdate();
 
 					if (!possibleRoom.HasCollisions())
 					{

@@ -843,6 +843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8afe2f27605bd4a0d823f26be310ea23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignore: 0
   poolSize: 0
   ShowCloseDuration:
     OverrideShow: 0

@@ -38,11 +38,7 @@ namespace Lunra.StyxMvp
 
 		public void Initialize(Action<Result> done)
 		{
-			pool = new List<IView>();
-			
-			prefabs.AddRange(Resources.LoadAll<GameObject>("StyxDefaultViews"));
-
-			foreach (var prefab in prefabs)
+			foreach (var prefab in Resources.LoadAll<GameObject>("StyxDefaultViews"))
 			{
 				var prefabView = prefab.GetComponent<IView>();
 				if (prefabView == null)
@@ -50,6 +46,9 @@ namespace Lunra.StyxMvp
 					Debug.LogError("View prefab \"" + prefab.name + "\" has no root IView component.");
 					continue;
 				}
+				if (prefabView.Ignore) continue;
+				prefabs.Add(prefab);
+				
 				for (var i = 0; i < Mathf.Max(prefabView.PoolSize, 1); i++)
 				{
 					Pool(CreateFromPrefab(prefab));

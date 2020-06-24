@@ -25,8 +25,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		{
 			this.state = state;
 			payload = state.Payload;
-			// generator = new Demon(1246486179);
-			generator = new Demon();
+			generator = new Demon(1);
+			// generator = new Demon();
 			request = RoomResolverRequest.Default(
 				generator,
 				payload.Game.Rooms.Activate,
