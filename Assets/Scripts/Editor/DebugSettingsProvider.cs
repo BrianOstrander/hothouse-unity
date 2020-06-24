@@ -4,6 +4,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Services;
 using Lunra.Hothouse.Services.Editor;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp;
@@ -27,11 +28,12 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent OpenDebugSettingsProvider = new GUIContent("Open Debug Settings Provider");
 			public static GUIContent OpenSaveLocation = new GUIContent("Open save location");
 			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard");
+			public static GUIContent StartNewGame = new GUIContent("Start New Game");
 			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
 			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
 			public static GUIContent OpenAllDoors = new GUIContent("Open All Doors");
-			public static GUIContent SimulationSpeedIncrease = new GUIContent("Increase ->");
-			public static GUIContent SimulationSpeedDecrease = new GUIContent("<- Decrease");
+			public static GUIContent SimulationSpeedIncrease = new GUIContent("->", "Increase");
+			public static GUIContent SimulationSpeedDecrease = new GUIContent("<-", "Decrease");
 		}
 		
 		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
@@ -46,6 +48,7 @@ namespace Lunra.Hothouse.Editor
 				Content.OpenDebugSettingsProvider.text,
 				Content.OpenSaveLocation.text,
 				Content.SaveAndCopySerializedGameToClipboard.text,
+				Content.StartNewGame.text,
 				Content.QueueNavigationCalculation.text,
 				Content.RevealAllRooms.text,
 				Content.OpenAllDoors.text,
@@ -62,21 +65,36 @@ namespace Lunra.Hothouse.Editor
 			if (GUILayout.Button(Content.OpenSaveLocation)) EditorUtility.RevealInFinder(Application.persistentDataPath);
 			
 			GUIExtensions.PushEnabled(
-				GameStateEditorUtility.GetGame(out var game)	
+				GameStateEditorUtility.GetGame(out var game, out var state)	
 			);
 			{
 				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
 				if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
-				if (GUILayout.Button(Content.RevealAllRooms))
+				if (GUILayout.Button(Content.StartNewGame))
 				{
-					foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
-				}
-				if (GUILayout.Button(Content.OpenAllDoors))
-				{
-					foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
-					foreach (var door in game.Doors.AllActive) door.IsOpen.Value = true;
+					App.S.RequestState(
+						new MainMenuPayload
+						{
+							Preferences = state.Payload.Preferences
+						}
+					);
 				}
 				
+				GUILayout.BeginHorizontal();
+				{
+					if (GUILayout.Button(Content.RevealAllRooms))
+					{
+						foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
+					}
+
+					if (GUILayout.Button(Content.OpenAllDoors))
+					{
+						foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
+						foreach (var door in game.Doors.AllActive) door.IsOpen.Value = true;
+					}
+				}
+				GUILayout.EndHorizontal();
+
 				GUILayout.BeginHorizontal();
 				{
 					GUILayout.Label("Simulation Speed", GUILayout.ExpandWidth(false));
@@ -165,7 +183,7 @@ namespace Lunra.Hothouse.Editor
 			
 			try
 			{
-				GameStateEditorUtility.GetGame(out var game);
+				GameStateEditorUtility.GetGame(out var game, out _);
 				EditorGUIUtility.systemCopyBuffer = File.ReadAllText(game.Path);
 				Debug.Log("Serialized game copied to clipboard");
 			}

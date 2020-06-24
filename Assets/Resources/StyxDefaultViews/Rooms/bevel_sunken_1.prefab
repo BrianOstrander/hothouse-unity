@@ -809,7 +809,7 @@ GameObject:
   - component: {fileID: 8842694491682298114}
   m_Layer: 0
   m_Name: bevel_sunken_1
-  m_TagString: Untagged
+  m_TagString: IgnoredView
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

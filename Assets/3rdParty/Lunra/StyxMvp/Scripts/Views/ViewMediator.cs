@@ -40,6 +40,8 @@ namespace Lunra.StyxMvp
 		{
 			foreach (var prefab in Resources.LoadAll<GameObject>("StyxDefaultViews"))
 			{
+				if (prefab.CompareTag("IgnoredView")) continue;
+				
 				var prefabView = prefab.GetComponent<IView>();
 				if (prefabView == null)
 				{

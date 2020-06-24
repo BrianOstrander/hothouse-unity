@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Views.Editor
 			var typedTarget = target as DoorView;
 			if (typedTarget == null) return;
 
-			var isGamePlaying = GameStateEditorUtility.GetGame(out var game);
+			var isGamePlaying = GameStateEditorUtility.GetGame(out var game, out _);
 
 			var modelIdNullOrEmpty = string.IsNullOrEmpty(typedTarget.ModelId);
 			var model = modelIdNullOrEmpty ? null : game?.Doors.FirstOrDefaultActive(typedTarget.ModelId);

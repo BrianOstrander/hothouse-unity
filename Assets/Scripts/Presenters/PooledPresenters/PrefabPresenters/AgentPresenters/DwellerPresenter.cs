@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Ai.Dweller;
@@ -74,22 +75,35 @@ namespace Lunra.Hothouse.Presenters
 
 		public override void OnAgentObligationComplete(Obligation obligation)
 		{
-			Debug.Log("uhhh: "+obligation);
 			if (View.NotVisible) return;
-			if (!obligation.Type.Equals(ObligationCategories.Door.Open)) return;
 
-			var nearestDoor = Game.Doors.AllActive
-				.Where(m => m.IsOpen.Value)
-				.OrderBy(m => Vector3.Distance(m.Transform.Position.Value, Model.Transform.Position.Value))
-				.FirstOrDefault();
+			if (obligation.Type.Equals(ObligationCategories.Door.Open)) OnAgentObligationOpenDoor();
+		}
 
-			if (nearestDoor == null)
+		void OnAgentObligationOpenDoor()
+		{
+			try
 			{
-				Debug.LogError("Door was opened, but no valid target found");
-				return;
+				var nearestDoorEntrance = Game.Doors.AllActive
+					.Where(m => m.IsOpen.Value)
+					.Where(m => m.IsConnnecting(Model.RoomTransform.Id.Value))
+					.SelectMany(m => m.Enterable.Entrances.Value)
+					.OrderBy(m => Vector3.Distance(m.Position, Model.Transform.Position.Value))
+					.First();
+				
+				View.LaunchGlowstick(-nearestDoorEntrance.Forward);
 			}
+			catch (Exception e) { Debug.LogException(e); }
+			
 
-			View.LaunchGlowstick((nearestDoor.Transform.Position.Value - Model.Transform.Position.Value).normalized);
+			// if (nearestDoor == null)
+			// {
+			// 	Debug.LogError("Door was opened, but no valid target found");
+			// 	return;
+			// }
+
+			// var angleToDoorOrigin = (nearestDoor.Transform.Position.Value - Model.Transform.Position.Value).normalized;
+			// View.LaunchGlowstick();
 		}
 	}
 }

@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b5f3fce319e4dc3a2ae86d6dc703e7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignore: 0
   poolSize: 0
   ShowCloseDuration:
     OverrideShow: 0
@@ -323,7 +324,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 16
+      scalar: 45
       minScalar: 5
       maxCurve:
         serializedVersion: 2

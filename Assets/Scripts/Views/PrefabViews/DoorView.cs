@@ -41,7 +41,7 @@ namespace Lunra.Hothouse.Views
 		#endregion
 		
 		#region Reverse Bindings
-		public Vector3[] Entrances => entrances.Select(e => e.position).ToArray();
+		public Transform[] Entrances => entrances;
 		public DoorCache[] DoorDefinitions => doorDefinitions;
 		#endregion
 

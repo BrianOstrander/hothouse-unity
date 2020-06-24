@@ -52,7 +52,7 @@ namespace Lunra.Hothouse.Views
 		#region Reverse Bindings
 		public bool IsLight => !Mathf.Approximately(0f, lightRange);
 		public float LightRange => lightRange;
-		public Vector3[] Entrances => entrances.Select(e => e.position).ToArray();
+		public Transform[] Entrances => entrances;
 
 		public bool NavigationCollisionContains(Vector3 position)
 		{

@@ -32,29 +32,30 @@ namespace Lunra.Hothouse.Models
 	{
 		public static void RecalculateEntrances(this IEnterableModel model)
 		{
-			model.RecalculateEntrances(model.Enterable.Entrances.Value.Select(e => e.Position));
+			model.RecalculateEntrances(model.Enterable.Entrances.Value.Select(e => (e.Position, e.Forward)));
 		}
 		
 		public static void RecalculateEntrances(this IEnterableModel model, IEnterableView view)
 		{
-			if (view.Visible) model.RecalculateEntrances(view.Entrances);
+			if (view.Visible) model.RecalculateEntrances(view.Entrances.Select(e => (e.position, e.forward)));
 		}
 
-		static void RecalculateEntrances(this IEnterableModel model, IEnumerable<Vector3> entrances)
+		static void RecalculateEntrances(this IEnterableModel model, IEnumerable<(Vector3 Position, Vector3 Forward)> entrances)
 		{
 			model.Enterable.Entrances.Value = entrances
 				.Select(
 					e =>
 					{
 						var isNavigable = NavMesh.SamplePosition(
-							e,
+							e.Position,
 							out _,
 							Entrance.RangeMaximum,
 							Entrance.DefaultMask
 						);
 						
 						return new Entrance(
-							e,
+							e.Position,
+							e.Forward,
 							isNavigable,
 							isNavigable && model.LightSensitive.IsLit ? Entrance.States.Available : Entrance.States.NotAvailable
 						);

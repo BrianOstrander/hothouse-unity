@@ -137,7 +137,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.46619305, b: 0, a: 1}
   m_Intensity: 10
-  m_Range: 10.75024
+  m_Range: 18
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -196,7 +196,7 @@ GameObject:
   - component: {fileID: 2081618020461291662}
   - component: {fileID: 6870393366402354332}
   m_Layer: 0
-  m_Name: BonfireView
+  m_Name: fire_bonfire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -233,6 +233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 777e8c5323064eaea52e73fee14ef296, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignore: 0
   poolSize: 0
   ShowCloseDuration:
     OverrideShow: 0
@@ -343,7 +344,7 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
   lightParticles:
   - {fileID: 6713742523325709184}
-  lightRange: 12.52
+  lightRange: 14
 --- !u!1 &6598605821536865864
 GameObject:
   m_ObjectHideFlags: 0

@@ -17,16 +17,19 @@ namespace Lunra.Hothouse.Models
 		}
 			
 		public readonly Vector3 Position;
+		public readonly Vector3 Forward;
 		public readonly bool IsNavigable;
 		public readonly States State;
 
 		public Entrance(
 			Vector3 position,
+			Vector3 forward,
 			bool isNavigable,
 			States state
 		)
 		{
 			Position = position;
+			Forward = forward;
 			IsNavigable = isNavigable;
 			State = state;
 		}

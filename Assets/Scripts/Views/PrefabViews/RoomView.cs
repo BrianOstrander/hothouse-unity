@@ -15,6 +15,7 @@ namespace Lunra.Hothouse.Views
 		{
 			
 			public const string FloorRoot = "floor_root";
+			public const string GeometryRoot = "geometry_root";
 			public const string UnexploredRoot = "unexplored_root";
 			public const string BoundaryColliderRoot = "boundary_collider_root";
 			
@@ -130,6 +131,8 @@ namespace Lunra.Hothouse.Views
 			}
 			
 			unexploredRoot.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Unexplored));
+			
+			NormalizeMeshColliders(unexploredRoot);
 
 			var unexploredMaterial = Resources.Load<Material>(Constants.UnexploredMaterialPath);
 			
@@ -145,18 +148,12 @@ namespace Lunra.Hothouse.Views
 			var floorRoot = transform.GetFirstDescendantOrDefault(d => d.name == Constants.FloorRoot);
 
 			if (floorRoot == null) Debug.LogError("Unable to set floor layers, could not find: "+Constants.FloorRoot);
-			else
-			{
-				floorRoot.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Floor));
-				foreach (var floorMesh in floorRoot.GetDescendants<MeshFilter>())
-				{
-					var floorMeshCollider = floorMesh.GetComponent<MeshCollider>();
-					if (floorMeshCollider == null) continue;
-					if (floorMeshCollider.sharedMesh != null && floorMeshCollider.sharedMesh == floorMesh.sharedMesh) continue;
-					
-					floorMeshCollider.sharedMesh = floorMesh.sharedMesh;
-				}
-			}
+			else floorRoot.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Floor));
+			
+			var geometryRoot = transform.GetFirstDescendantOrDefault(d => d.name == Constants.GeometryRoot);
+			
+			if (geometryRoot == null) Debug.LogError("Unable to find: "+Constants.GeometryRoot);
+			else NormalizeMeshColliders(geometryRoot);
 
 			if (boundaryColliderRoot != null) DestroyImmediate(boundaryColliderRoot);
 			
@@ -204,6 +201,18 @@ namespace Lunra.Hothouse.Views
 			boundaryColliders = roomCollidersResult.ToArray();
 			
 			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+		}
+
+		void NormalizeMeshColliders(Transform root)
+		{
+			foreach (var mesh in root.GetDescendants<MeshFilter>())
+			{
+				var meshCollider = mesh.GetComponent<MeshCollider>();
+				if (meshCollider == null) continue;
+				if (meshCollider.sharedMesh != null && meshCollider.sharedMesh == mesh.sharedMesh) continue;
+					
+				meshCollider.sharedMesh = mesh.sharedMesh;
+			}
 		}
 #endif
 	}
