@@ -13,9 +13,16 @@ namespace Lunra.Hothouse.Views
 	{
 		static class Constants
 		{
+			
+			public const string FloorRoot = "floor_root";
+			public const string UnexploredRoot = "unexplored_root";
+			public const string BoundaryColliderRoot = "boundary_collider_root";
+			
 			public const string DoorAnchorPrefix = "door_anchor_";
-			public const string DoorAnchorSizeTerminator = "m";
+			public const char DoorAnchorSizeTerminator = 'm';
 			public const string DoorPlugPrefix = "door_plug";
+			
+			public const string UnexploredMaterialPath = "Materials/Unexplored";
 		}
 
 		#region Serialized
@@ -62,28 +69,22 @@ namespace Lunra.Hothouse.Views
 			{
 				if (door.Anchor == null) continue;
 
-				var anchor = door.Anchor.position;
 				var edge0 = door.Anchor.position + (door.Anchor.right * (door.Size * 0.5f));
 				var edge1 = door.Anchor.position + (door.Anchor.right * (door.Size * -0.5f));
 				var edgeForward = door.Anchor.position + door.Anchor.forward * 2f;
-				var edgeUp = door.Anchor.position + door.Anchor.up;
 				
 				var offset = door.Anchor.forward * 0.1f;
 
-				anchor += offset;
 				edge0 += offset;
 				edge1 += offset;
 				edgeForward += offset;
-				edgeUp += offset;
-				
-				
+
 				Gizmos.color = Color.yellow;
 				
 				Gizmos.DrawLine(edge0, edge1);
 				Gizmos.DrawLine(edge0, edgeForward);
 				Gizmos.DrawLine(edge1, edgeForward);
 				
-				// Gizmos.DrawLine(anchor, edgeForward);
 				Gizmos.DrawLine(edge0, edge0 + (Vector3.up * 4f));
 				Gizmos.DrawLine(edge1, edge1 + (Vector3.up * 4f));
 				
@@ -94,38 +95,42 @@ namespace Lunra.Hothouse.Views
 		public void CalculateCachedData()
 		{
 			Undo.RecordObject(this, "Calculate Cached Data");
-			
+
+			PrefabId = gameObject.name;
+
 			var doorDefinitionsList = new List<DoorCache>();
 
-			int doorId = 0;
-			foreach (var doorAnchor in transform.GetDescendants(c => !string.IsNullOrEmpty(c.name) && c.name.Contains(Constants.DoorAnchorPrefix)))
+			var doorId = 0;
+			foreach (var door in transform.GetDescendants(c => !string.IsNullOrEmpty(c.name) && c.name.StartsWith(Constants.DoorAnchorPrefix)))
 			{
-				var doorAnchorSizeSerialized = doorAnchor.name.Substring(Constants.DoorAnchorPrefix.Length, doorAnchor.name.Length - Constants.DoorAnchorPrefix.Length);
+				if (!door.gameObject.activeInHierarchy) continue;
+				
+				var doorAnchorSizeSerialized = door.name.Substring(Constants.DoorAnchorPrefix.Length, door.name.Length - Constants.DoorAnchorPrefix.Length);
 				if (string.IsNullOrEmpty(doorAnchorSizeSerialized) || !doorAnchorSizeSerialized.Contains(Constants.DoorAnchorSizeTerminator))
 				{
-					Debug.LogError("Unable to parse door anchor size, no terminator detected: "+doorAnchor.name, doorAnchor);
+					Debug.LogError("Unable to parse door anchor size, no terminator detected: "+door.name, door);
 					continue;
 				}
 
-				doorAnchorSizeSerialized = doorAnchorSizeSerialized.Split('m').FirstOrDefault();
+				doorAnchorSizeSerialized = doorAnchorSizeSerialized.Split(Constants.DoorAnchorSizeTerminator).FirstOrDefault();
 
 				if (string.IsNullOrEmpty(doorAnchorSizeSerialized))
 				{
-					Debug.LogError("Unable to parse door anchor size, null or empty result: "+doorAnchor.name, doorAnchor);
+					Debug.LogError("Unable to parse door anchor size, null or empty result: "+door.name, door);
 					continue;
 				}
 
 				if (!int.TryParse(doorAnchorSizeSerialized, out var doorAnchorSize))
 				{
-					Debug.LogError("Unable to parse door anchor size, could not deserialize: "+doorAnchor.name, doorAnchor);
+					Debug.LogError("Unable to parse door anchor size, could not deserialize: "+door.name, door);
 					continue;
 				}
 
-				var doorPlug = doorAnchor.parent.GetFirstDescendantOrDefault(d => !string.IsNullOrEmpty(d.name) && d.name == Constants.DoorPlugPrefix);
+				var doorPlug = door.parent.GetFirstDescendantOrDefault(d => !string.IsNullOrEmpty(d.name) && d.name == Constants.DoorPlugPrefix);
 
 				if (doorPlug == null)
 				{
-					Debug.LogError("Unable to find a plug for door: "+doorAnchor.name, doorAnchor);
+					Debug.LogError("Unable to find a plug for door: "+door.name, door);
 					continue;
 				}
 				
@@ -133,7 +138,7 @@ namespace Lunra.Hothouse.Views
 					new DoorCache
 					{
 						Index = doorId,
-						Anchor = doorAnchor,
+						Anchor = door,
 						Plug = doorPlug.gameObject,
 						Size = doorAnchorSize
 					}
@@ -144,19 +149,19 @@ namespace Lunra.Hothouse.Views
 
 			doorDefinitions = doorDefinitionsList.ToArray();
 
-			unexploredRoot = unexploredRoot == null ? transform.GetFirstDescendantOrDefault(d => d.name == "UnexploredRoot") : unexploredRoot;
+			unexploredRoot = unexploredRoot == null ? transform.GetFirstDescendantOrDefault(d => d.name == Constants.UnexploredRoot) : unexploredRoot;
 			
 			if (unexploredRoot == null)
 			{
-				Debug.LogError("Unable to calculate room colliders, no UnexploredRoot found");
+				Debug.LogError("Unable to calculate room colliders, could not find: "+Constants.UnexploredRoot);
 				return;
 			}
 			
 			unexploredRoot.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Unexplored));
 
-			var unexploredMaterial = Resources.Load<Material>("Materials/Unexplored");
+			var unexploredMaterial = Resources.Load<Material>(Constants.UnexploredMaterialPath);
 			
-			if (unexploredMaterial == null) Debug.LogError("Unable to find Unexplored material");
+			if (unexploredMaterial == null) Debug.LogError("Unable to find unexplored material at resources path: "+Constants.UnexploredMaterialPath);
 			else
 			{
 				foreach (var meshRender in unexploredRoot.GetDescendants<MeshRenderer>())
@@ -165,9 +170,25 @@ namespace Lunra.Hothouse.Views
 				}
 			}
 
+			var floorRoot = transform.GetFirstDescendantOrDefault(d => d.name == Constants.FloorRoot);
+
+			if (floorRoot == null) Debug.LogError("Unable to set floor layers, could not find: "+Constants.FloorRoot);
+			else
+			{
+				floorRoot.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Floor));
+				foreach (var floorMesh in floorRoot.GetDescendants<MeshFilter>())
+				{
+					var floorMeshCollider = floorMesh.GetComponent<MeshCollider>();
+					if (floorMeshCollider == null) continue;
+					if (floorMeshCollider.sharedMesh != null && floorMeshCollider.sharedMesh == floorMesh.sharedMesh) continue;
+					
+					floorMeshCollider.sharedMesh = floorMesh.sharedMesh;
+				}
+			}
+
 			if (boundaryColliderRoot != null) DestroyImmediate(boundaryColliderRoot);
 			
-			boundaryColliderRoot = new GameObject("BoundaryColliderRoot");
+			boundaryColliderRoot = new GameObject(Constants.BoundaryColliderRoot);
 			boundaryColliderRoot.transform.SetParent(RootTransform);
 
 			var roomCollidersResult = new List<ColliderCache>();
@@ -209,6 +230,8 @@ namespace Lunra.Hothouse.Views
 			}
 
 			boundaryColliders = roomCollidersResult.ToArray();
+			
+			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 		}
 #endif
 	}

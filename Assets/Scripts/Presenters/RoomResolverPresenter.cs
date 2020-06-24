@@ -50,7 +50,7 @@ namespace Lunra.Hothouse.Presenters
 			{
 				View.AddDoorDefinition(
 					room.View.PrefabId,
-					room.View.DoorAnchors
+					room.View.DoorDefinitions
 				);
 			}
 			

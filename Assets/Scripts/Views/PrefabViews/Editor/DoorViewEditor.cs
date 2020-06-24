@@ -22,6 +22,15 @@ namespace Lunra.Hothouse.Views.Editor
 			
 			Handles.BeginGUI();
 			{
+				GUIExtensions.PushEnabled(!Application.isPlaying);
+				{
+					if (GUILayout.Button("Recache", GUILayout.ExpandWidth(false)))
+					{
+						typedTarget.CalculateCachedData();
+					}
+				}
+				GUIExtensions.PopEnabled();
+				
 				if (isGamePlaying && model == null)
 				{
 					GUIExtensions.PushColor(Color.red);
@@ -32,7 +41,7 @@ namespace Lunra.Hothouse.Views.Editor
 					}
 					GUIExtensions.PopColor();
 				}
-				
+
 				GUIExtensions.PushEnabled(isGamePlaying && model != null);
 				{
 					if (GUILayout.Button("Open Door", GUILayout.ExpandWidth(false)))

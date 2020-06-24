@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		{
 			this.state = state;
 			payload = state.Payload;
-			// generator = new Demon(1);
+			// generator = new Demon(1246486179);
 			generator = new Demon();
 			request = RoomResolverRequest.Default(
 				generator,
@@ -306,9 +306,16 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 			for (var i = 0; i < 4; i++)
 			{
+				var position = spawn.Transform.Position.Value + (Vector3.forward * 2f);
+
+				if (Physics.Raycast(new Ray(position, Vector3.down), out var hit, 40f, LayerMasks.Floor))
+				{
+					position = hit.point;
+				}
+				
 				var dweller = payload.Game.Dwellers.Activate(
 					spawn.Id.Value,
-					spawn.Transform.Position.Value + (Vector3.forward * 2f)
+					position
 				);
 
 				if (i < requiredJobs.Length) dweller.Job.Value = requiredJobs[i];
@@ -321,11 +328,18 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		}
 
 		void OnGenerateStartingBuildings(Action done)
-		{	
+		{
+			var position = spawn.Transform.Position.Value;
+
+			if (Physics.Raycast(new Ray(position, Vector3.down), out var hit, 40f, LayerMasks.Floor))
+			{
+				position = hit.point;
+			}
+		
 			var bonfire = payload.Game.Buildings.Activate(
 				Buildings.Bonfire,
 				spawn.Id.Value,
-				spawn.Transform.Position.Value + (Vector3.right * 2f),
+				position + (Vector3.right * 2f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
@@ -333,7 +347,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var wagon = payload.Game.Buildings.Activate(
 				Buildings.StartingWagon,
 				spawn.Id.Value,
-				spawn.Transform.Position.Value + (Vector3.left * 2f),
+				position + (Vector3.left * 2f),
 				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
 				BuildingStates.Operating
 			);
