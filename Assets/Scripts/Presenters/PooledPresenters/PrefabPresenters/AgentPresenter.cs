@@ -18,7 +18,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			StateMachine = new S();
 			
-			View.InstanceName = typeof(V).Name + "_" + (string.IsNullOrEmpty(Model.Id.Value) ? "null_or_empty_id" : Model.Id.Value);
+			View.Name = typeof(V).Name + "_" + (string.IsNullOrEmpty(Model.Id.Value) ? "null_or_empty_id" : Model.Id.Value);
 
 			Model.NavigationPlan.Value = NavigationPlan.Done(Model.Transform.Position.Value);
 			

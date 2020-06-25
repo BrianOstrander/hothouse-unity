@@ -95,7 +95,8 @@ namespace Lunra.StyxMvp
 
 		void Cleanup();
 
-		string InstanceName { get; set; }
+		string Name { get; set; }
+		string Tag { get; set; }
 
 		void SetLayer(string layer);
 	}
@@ -210,11 +211,19 @@ namespace Lunra.StyxMvp
 		public virtual ViewAnimation[] ViewAnimations => animations;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 
-		public string InstanceName 
+		public string Name 
 		{
 			get => gameObject.name;
 			set => gameObject.name = value;
 		}
+
+		public string Tag
+		{
+			get => gameObject.tag;
+			set => gameObject.tag = value;
+		}
+
+		public bool CompareInstanceTag(string tag) => gameObject.CompareTag(tag);
 
 		public Action Prepare { get; set; }
 		public Action<float> Showing { get; set; }

@@ -28,6 +28,8 @@ namespace Lunra.Hothouse.Presenters
 				Room.IsRevealed.Changed += OnRoomIsRevealed;
 			}
 
+			Model.Tag.Value = View.Tag;
+
 			base.Bind();
 		}
 

@@ -8,6 +8,7 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		ListenerProperty<string> PrefabId { get; }
+		ListenerProperty<string> Tag { get; }
 		#endregion
 	}
 	
@@ -15,12 +16,15 @@ namespace Lunra.Hothouse.Models
 	{
 		[JsonProperty] string prefabId;
 		[JsonIgnore] public ListenerProperty<string> PrefabId { get; }
+		[JsonProperty] string tag;
+		[JsonIgnore] public ListenerProperty<string> Tag { get; }
 		
 		public RoomTransformComponent RoomTransform { get; } = new RoomTransformComponent();
 
 		public PrefabModel()
 		{
 			PrefabId = new ListenerProperty<string>(value => prefabId = value, () => prefabId);
+			Tag = new ListenerProperty<string>(value => tag = value, () => tag);
 		}
 	}
 }

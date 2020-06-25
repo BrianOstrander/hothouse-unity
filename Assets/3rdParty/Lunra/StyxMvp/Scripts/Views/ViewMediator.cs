@@ -282,7 +282,7 @@ namespace Lunra.StyxMvp
 				else if (unmodifiedView.TransitionState == TransitionStates.Closing) Closing(unmodifiedView);
 				else
 				{
-					var error = "The view " + unmodifiedView.InstanceName + " with state " + unmodifiedView.TransitionState + " is still on the waldo, this should not be possible";
+					var error = "The view " + unmodifiedView.Name + " with state " + unmodifiedView.TransitionState + " is still on the waldo, this should not be possible";
 					Debug.LogError(error);
 					views.Remove(unmodifiedView);
 				}
