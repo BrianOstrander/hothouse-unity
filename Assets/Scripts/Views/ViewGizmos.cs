@@ -33,8 +33,8 @@ namespace Lunra.Hothouse.Views
 				Gizmos.DrawLine(edge0, edgeForward);
 				Gizmos.DrawLine(edge1, edgeForward);
 				
-				Gizmos.DrawLine(edge0, edge0 + (Vector3.up * 4f));
-				Gizmos.DrawLine(edge1, edge1 + (Vector3.up * 4f));
+				Gizmos.DrawLine(edge0, edge0 + (door.Anchor.up * 4f));
+				Gizmos.DrawLine(edge1, edge1 + (door.Anchor.up * 4f));
 				
 				Handles.DrawWireDisc(edge0, Vector3.up, 0.2f);
 			}

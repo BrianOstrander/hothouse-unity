@@ -28,7 +28,7 @@ namespace Lunra.Editor.Core
 		
 		public GUIContent Label => new GUIContent(LabelName);
 
-		public abstract void Draw();
+		public abstract void Draw(params GUILayoutOption[] options);
 	}
 
 	public class EditorPrefsString : EditorPrefsKv<string>
@@ -41,7 +41,7 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsString(string key, string defaultValue = null) : base(key, defaultValue) {}
 
-		public override void Draw() => Value = EditorGUILayout.TextField(Label, Value);
+		public override void Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.TextField(Label, Value, options);
 	}
 
 	public class EditorPrefsBool : EditorPrefsKv<bool>
@@ -54,7 +54,7 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsBool(string key, bool defaultValue = false) : base(key, defaultValue) {}
 
-		public override void Draw() => Value = EditorGUILayout.Toggle(Label, Value);
+		public override void Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.Toggle(Label, Value, options);
 	}
 
 	public class EditorPrefsFloat : EditorPrefsKv<float>
@@ -79,7 +79,7 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsFloat(string key, float defaultValue = 0f) : base(key, defaultValue) {}
 
-		public override void Draw() => Value = EditorGUILayout.FloatField(Label, Value);
+		public override void Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.FloatField(Label, Value, options);
 	}
 
 	public class EditorPrefsInt : EditorPrefsKv<int>
@@ -92,7 +92,7 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsInt(string key, int defaultValue = 0) : base(key, defaultValue) {}
 
-		public override void Draw() => Value = EditorGUILayout.IntField(Label, Value);
+		public override void Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.IntField(Label, Value, options);
 	}
 
 	public class EditorPrefsEnum<T> : EditorPrefsKv<T> where T : Enum
@@ -112,6 +112,6 @@ namespace Lunra.Editor.Core
 			if (!typeof(T).IsEnum) Debug.LogError(typeof(T).FullName + " is not an enum.");
 		}
 
-		public override void Draw() => Value = (T)EditorGUILayout.EnumPopup(Label, Value);
+		public override void Draw(params GUILayoutOption[] options) => Value = (T)EditorGUILayout.EnumPopup(Label, Value, options);
 	}
 }

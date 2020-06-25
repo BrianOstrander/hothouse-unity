@@ -9,6 +9,7 @@ using Lunra.Hothouse.Services.Editor;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
+using Lunra.StyxMvp.Services;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace Lunra.Hothouse.Editor
 	{
 		const string KeyPrefix = SettingsProviderStrings.ProjectKeyPrefix + "DebugSettings.";
 
-		// public static EditorPrefsBool IsInspecting = new EditorPrefsBool(KeyPrefix + "IsInspecting");
+		public static EditorPrefsBool AutoRevealRooms = new EditorPrefsBool(KeyPrefix + "AutoRevealRooms");
 	}
 	
 	public class DebugSettingsProvider : SettingsProvider
@@ -31,12 +32,19 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent StartNewGame = new GUIContent("Start New Game");
 			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
 			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
+			public static GUIContent AutoRevealRooms = new GUIContent("Auto Reveal");
 			public static GUIContent OpenAllDoors = new GUIContent("Open All Doors");
 			public static GUIContent SimulationSpeedIncrease = new GUIContent("->", "Increase");
 			public static GUIContent SimulationSpeedDecrease = new GUIContent("<-", "Decrease");
 		}
-		
-		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope) { }
+
+		string lastAutoRevealedRoomsForGameId;
+
+		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope)
+		{
+			EditorApplication.update -= OnUpdate;
+			EditorApplication.update += OnUpdate;
+		}
 		
 		[SettingsProvider]
 		public static SettingsProvider CreateSettingsProvider()
@@ -51,6 +59,7 @@ namespace Lunra.Hothouse.Editor
 				Content.StartNewGame.text,
 				Content.QueueNavigationCalculation.text,
 				Content.RevealAllRooms.text,
+				Content.AutoRevealRooms.text,
 				Content.OpenAllDoors.text,
 				Content.SimulationSpeedIncrease.text,
 				Content.SimulationSpeedDecrease.text
@@ -63,10 +72,10 @@ namespace Lunra.Hothouse.Editor
 		{
 			if (GUILayout.Button(Content.OpenDebugSettingsProvider)) OpenSettingsProviderAsset();
 			if (GUILayout.Button(Content.OpenSaveLocation)) EditorUtility.RevealInFinder(Application.persistentDataPath);
+
+			var isInGame = GameStateEditorUtility.GetGame(out var game, out var state);
 			
-			GUIExtensions.PushEnabled(
-				GameStateEditorUtility.GetGame(out var game, out var state)	
-			);
+			GUIExtensions.PushEnabled(isInGame);
 			{
 				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
 				if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
@@ -82,10 +91,13 @@ namespace Lunra.Hothouse.Editor
 				
 				GUILayout.BeginHorizontal();
 				{
-					if (GUILayout.Button(Content.RevealAllRooms))
+					GUIExtensions.PushEnabled(true, true);
 					{
-						foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
+						DebugSettings.AutoRevealRooms.Draw(GUILayout.ExpandWidth(false));
 					}
+					GUIExtensions.PopEnabled();
+
+					if (GUILayout.Button(Content.RevealAllRooms)) RevealAllRooms(game);
 
 					if (GUILayout.Button(Content.OpenAllDoors))
 					{
@@ -102,7 +114,7 @@ namespace Lunra.Hothouse.Editor
 					if (GUILayout.Button(Content.SimulationSpeedIncrease)) game.SimulationMultiplier.Value++;
 				}
 				GUILayout.EndHorizontal();
-
+				
 				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 
 				if (GUILayout.Button("kill any dwellers with a bed"))
@@ -157,18 +169,10 @@ namespace Lunra.Hothouse.Editor
 					);
 				}
 			}
-
-			// if (GUILayout.Button(Content.OpenInspectorHandler)) InspectionHandler.OpenHandlerAsset();
-			// InspectionSettings.IsInspecting.Draw();
-			// InspectionSettings.IsInspectingBuildings.Draw();
-			// InspectionSettings.IsInspectingDwellers.Draw();
-			// InspectionSettings.IsInspectingFlora.Draw();
-			// InspectionSettings.IsInspectingItemDrops.Draw();
-			// InspectionSettings.IsInspectingLightLevels.Draw();
 		}
 		
 		#region Events
-		public static void OpenSettingsProviderAsset()
+		void OpenSettingsProviderAsset()
 		{
 			AssetDatabase.OpenAsset(
 				AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/Scripts/Editor/" + nameof(DebugSettingsProvider) + ".cs"),
@@ -176,7 +180,7 @@ namespace Lunra.Hothouse.Editor
 			);
 		}
 		
-		static void OnSaveAndCopySerializedGameToClipboard(ModelResult<GameModel> result)
+		void OnSaveAndCopySerializedGameToClipboard(ModelResult<GameModel> result)
 		{
 			result.LogIfNotSuccess();
 			if (result.IsNotSuccess()) return;
@@ -191,6 +195,26 @@ namespace Lunra.Hothouse.Editor
 			{
 				Debug.LogException(e);
 			}
+		}
+		
+		void OnUpdate()
+		{
+			if (GameStateEditorUtility.GetGame(out var game, out var state) && DebugSettings.AutoRevealRooms.Value && App.S.CurrentEvent == StateMachine.Events.Idle)
+			{
+				if (string.IsNullOrEmpty(lastAutoRevealedRoomsForGameId) || lastAutoRevealedRoomsForGameId != game.Id.Value)
+				{
+					RevealAllRooms(game);
+				}
+			}
+		}
+		
+		void RevealAllRooms(GameModel game)
+		{
+			if (game.Id.Value == lastAutoRevealedRoomsForGameId) return;
+			lastAutoRevealedRoomsForGameId = game.Id.Value;
+			foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
+			
+			Debug.Log("Revealed rooms for game: "+lastAutoRevealedRoomsForGameId);
 		}
 		#endregion
 	}

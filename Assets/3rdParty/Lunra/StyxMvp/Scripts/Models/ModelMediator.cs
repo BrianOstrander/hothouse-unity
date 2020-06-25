@@ -206,6 +206,7 @@ namespace Lunra.StyxMvp.Models
 		public M Create<M>(string id) where M : SaveModel, new()
 		{
 			var result = new M();
+			result.Id.Value = id;
 			result.SupportedVersion.Value = true;
 			result.Version.Value = CurrentVersion;
 			result.AbsolutePath.Value = GetUniquePath(typeof(M), id);

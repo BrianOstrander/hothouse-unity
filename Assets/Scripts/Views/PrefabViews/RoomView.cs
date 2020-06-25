@@ -14,7 +14,7 @@ namespace Lunra.Hothouse.Views
 		static class Constants
 		{
 			
-			public const string FloorRoot = "floor_root";
+			public const string FloorKeyword = "floor";
 			public const string GeometryRoot = "geometry_root";
 			public const string UnexploredRoot = "unexplored_root";
 			public const string BoundaryColliderRoot = "boundary_collider_root";
@@ -33,17 +33,23 @@ namespace Lunra.Hothouse.Views
 		[SerializeField] GameObject boundaryColliderRoot;
 		[SerializeField] DoorCache[] doorDefinitions = new DoorCache[0];
 		[SerializeField] ColliderCache[] boundaryColliders = new ColliderCache[0];
+		[SerializeField] RoomVisibilityLeaf[] visibilityLeaves = new RoomVisibilityLeaf[0];
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
 		#region Bindings
 		public bool IsRevealed { set => unexploredRoot.gameObject.SetActive(!value); }
 
-		public void UnPlugDoors(params int[] plugIds)
+		public void UnPlugDoors(params int[] activeDoorIndices)
 		{
 			foreach (var door in doorDefinitions)
 			{
-				door.Plug.SetActive(!plugIds.Contains(door.Index));
+				door.Plug.SetActive(!activeDoorIndices.Contains(door.Index));
+			}
+
+			foreach (var visibilityLeaf in visibilityLeaves)
+			{
+				visibilityLeaf.gameObject.SetActive(visibilityLeaf.CalculateVisibility(activeDoorIndices));
 			}
 		}
 
@@ -145,10 +151,10 @@ namespace Lunra.Hothouse.Views
 				}
 			}
 
-			var floorRoot = transform.GetFirstDescendantOrDefault(d => d.name == Constants.FloorRoot);
-
-			if (floorRoot == null) Debug.LogError("Unable to set floor layers, could not find: "+Constants.FloorRoot);
-			else floorRoot.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Floor));
+			foreach (var floorElement in transform.GetDescendants(d => !string.IsNullOrEmpty(d.name) && d.name.Contains(Constants.FloorKeyword)))
+			{
+				floorElement.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Floor));	
+			}
 			
 			var geometryRoot = transform.GetFirstDescendantOrDefault(d => d.name == Constants.GeometryRoot);
 			
@@ -199,6 +205,8 @@ namespace Lunra.Hothouse.Views
 			}
 
 			boundaryColliders = roomCollidersResult.ToArray();
+
+			visibilityLeaves = transform.GetDescendants<RoomVisibilityLeaf>().ToArray();
 			
 			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 		}
