@@ -35,6 +35,8 @@ namespace Lunra.Hothouse.Models
 					return Types.Door;
 				case SeekerModel _:
 					return Types.Seeker;
+				case DebrisModel _:
+					return Types.Debris;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -50,7 +52,8 @@ namespace Lunra.Hothouse.Models
 			Building = 40,
 			Room = 50,
 			Door = 60,
-			Seeker = 70
+			Seeker = 70,
+			Debris = 80
 		}
 
 		public Types Type { get; }

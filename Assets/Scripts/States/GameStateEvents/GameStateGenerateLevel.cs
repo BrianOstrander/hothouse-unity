@@ -137,7 +137,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		{
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
-				
+				GenerateDebrisInRoom(
+					room
+				);
 			}
 
 			done();
@@ -370,6 +372,24 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			RoomModel room
 		)
 		{
+			foreach (var debrisId in payload.Game.Debris.ValidPrefabIds)
+			{
+				TryGenerating(
+					room,
+					10,
+					position =>
+					{
+						// TODO: Calculate collisions with other debris...
+						payload.Game.Debris.Activate(
+							debrisId,
+							room.RoomTransform.Id.Value,
+							position
+						);
+
+						return true;
+					}
+				);
+			}
 			
 		}
 		

@@ -10,7 +10,7 @@ namespace Lunra.Hothouse.Models
 {
 	public class DebrisPoolModel : BasePrefabPoolModel<DebrisModel>
 	{
-		static readonly string[] ValidPrefabIds = new[]
+		public readonly string[] ValidPrefabIds =
 		{
 			"debris_small",
 			"debris_large"
@@ -27,6 +27,7 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public DebrisModel Activate(
+			string prefabId,
 			string roomId,
 			Vector3 position
 		)
