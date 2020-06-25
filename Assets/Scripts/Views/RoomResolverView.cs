@@ -62,7 +62,8 @@ namespace Lunra.Hothouse.Views
 		public void AddRoomDefinition(
 			string prefabId,
 			ColliderCache[] roomColliders,
-			DoorCache[] doorAnchors
+			DoorCache[] doorAnchors,
+			string[] prefabTags
 		)
 		{
 			roomDefinitions.Add(
@@ -71,14 +72,16 @@ namespace Lunra.Hothouse.Views
 					CollisionResolverDefinitionLeaf.Types.Room,
 					prefabId,
 					roomColliders,
-					doorAnchors
+					doorAnchors,
+					prefabTags
 				)	
 			);
 		}
 		
 		public void AddDoorDefinition(
 			string prefabId,
-			DoorCache[] doorAnchors
+			DoorCache[] doorAnchors,
+			string[] prefabTags
 		)
 		{
 			doorDefinitions.Add(
@@ -87,7 +90,8 @@ namespace Lunra.Hothouse.Views
 					CollisionResolverDefinitionLeaf.Types.Door,
 					prefabId,
 					null,
-					doorAnchors
+					doorAnchors,
+					prefabTags
 				)	
 			);
 		}
@@ -97,7 +101,8 @@ namespace Lunra.Hothouse.Views
 			CollisionResolverDefinitionLeaf.Types type,
 			string prefabId,
 			ColliderCache[] roomColliders,
-			DoorCache[] doorAnchors
+			DoorCache[] doorAnchors,
+			string[] prefabTags
 		)
 		{
 			var definition = RootGameObject.InstantiateChild(
@@ -113,7 +118,8 @@ namespace Lunra.Hothouse.Views
 				type,
 				prefabId,
 				roomColliders,
-				doorAnchors
+				doorAnchors,
+				prefabTags
 			);
 
 			return definition;
@@ -200,7 +206,7 @@ namespace Lunra.Hothouse.Views
 			
 			var root = WorkspaceInstantiate(
 				roomDefinitions,
-				r => 4 <= r.DoorAnchors.Length
+				r => r.PrefabTags.Contains(PrefabTagCategories.Room.Spawn)
 			);
 
 			if (root == null)
@@ -236,6 +242,8 @@ namespace Lunra.Hothouse.Views
 					instance.transform.position,
 					instance.transform.rotation
 				);
+
+				model.PrefabTags.Value = instance.PrefabTags;
 				
 				rooms.Add(model);
 			}
@@ -250,6 +258,8 @@ namespace Lunra.Hothouse.Views
 					instance.transform.position,
 					instance.transform.rotation
 				);
+				
+				model.PrefabTags.Value = instance.PrefabTags;
 
 				foreach (var room in rooms.Where(r => model.IsConnnecting(r.Id.Value)))
 				{

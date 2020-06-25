@@ -17,8 +17,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		Demon generator;
 		RoomResolverRequest request;
 		
-		DateTime beginTime;
-
 		RoomModel spawn;
 		
 		public GameStateGenerateLevel(GameState state)
@@ -27,7 +25,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			payload = state.Payload;
 			// generator = new Demon(999796993);
 			generator = new Demon();
-			request = RoomResolverRequest.DefaultLarge(
+			request = RoomResolverRequest.Defaults.Medium(
 				generator,
 				payload.Game.Rooms.Activate,
 				payload.Game.Doors.Activate
@@ -66,17 +64,19 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnBegin()
 		{
-			beginTime = DateTime.Now;
+			payload.Game.GenerationLog.Append(GenerationEvents.Begin);
 			payload.Game.IsSimulating.Value = false;
 			payload.Game.ResetSimulationInitialized();
 		}
 
 		void OnGenerateRooms(Action done)
 		{
+			payload.Game.GenerationLog.Append(GenerationEvents.RoomGenerationBegin);
 			payload.Game.RoomResolver.Generate(
 				request,
 				result =>
 				{
+					payload.Game.GenerationLog.Append(GenerationEvents.RoomGenerationEnd);
 					done();
 				}
 			);
@@ -85,9 +85,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		void OnGenerateSpawn(Action done)
 		{
 			var spawnOptions = payload.Game.Rooms.AllActive
-				.Where(r => request.SpawnDoorCountRequired <= r.AdjacentRoomIds.Value.Count);
+				.Where(r => r.PrefabTags.Value.Contains(PrefabTagCategories.Room.Spawn));
 			
-			spawn = generator.GetNextFrom(spawnOptions);
+			var spawnOptionsPreferred = spawnOptions
+				.Where(r => request.SpawnDoorCountRequired <= r.AdjacentRoomIds.Value.Count);
+
+			spawn = generator.GetNextFrom(spawnOptionsPreferred.Any() ? spawnOptionsPreferred : spawnOptions);
 
 			if (spawn == null)
 			{
@@ -117,7 +120,10 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 				spawnDistanceMaximum = Mathf.Max(spawnDistanceMaximum, next.SpawnDistance.Value);
 			}
+
+			foreach (var room in payload.Game.Rooms.AllActive) room.SpawnDistanceNormalized.Value = room.SpawnDistance.Value / (float)spawnDistanceMaximum;
 			
+			payload.Game.GenerationLog.Append(GenerationEvents.SpawnChosen);
 			done();
 		}
 
@@ -126,25 +132,26 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		{
 			foreach (var room in payload.Game.Rooms.AllActive) room.IsRevealed.Value = true;
 
+			payload.Game.GenerationLog.Append(GenerationEvents.CalculateNavigationBegin);
 			payload.Game.NavigationMesh.QueueCalculation();
 
 			App.Heartbeat.WaitForCondition(
-				done,
+				() =>
+				{
+					payload.Game.GenerationLog.Append(GenerationEvents.CalculateNavigationEnd);
+					done();	
+				},
 				() => payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
 			);
 		}
 
 		void OnGenerateFloraSeed(Action done)
 		{
-			var maximumSpawnDistance = (float)payload.Game.Rooms.AllActive.Max(r => r.SpawnDistance.Value);
-			
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
 				if (room.SpawnDistance.Value == 0) continue;
 
-				var spawnDistanceNormalized = room.SpawnDistance.Value / maximumSpawnDistance;
-
-				var availableFloraConstraints = request.FloraConstraints.Where(c => c.SpawnDistanceNormalizedMinimum <= spawnDistanceNormalized);
+				var availableFloraConstraints = payload.Game.Flora.GetValidSpeciesData(room);
 				
 				if (availableFloraConstraints.None()) continue;
 				
@@ -199,22 +206,26 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 						continue;
 					}
 					
-					// var collision = payload.Game.Flora.AllActive
-					// 	.Any(f => f.RoomTransform.Id.Value == room.RoomTransform.Id && Vector3.Distance(f.Transform.Position.Value, hit.position) < ())
-					
 					payload.Game.Flora.ActivateAdult(
 						currentFloraConstraint.Species,
 						room.RoomTransform.Id.Value,
 						hit.position
 					);
+					
+					payload.Game.GenerationLog.Append(GenerationEvents.FloraSeedAppend);
 
 					floraBudgetRemaining--;
 				}
 			}
 
+			var parentPool = new List<FloraModel>();
+
 			foreach (var flora in payload.Game.Flora.AllActive)
 			{
-				var constraint = request.FloraConstraints.First(c => c.Species == flora.Species.Value);
+				parentPool.Clear();
+				parentPool.Add(flora);
+				
+				var constraint = payload.Game.Flora.GetSpeciesData(flora.Species.Value);
 
 				var clusterCount = 1;
 
@@ -228,8 +239,16 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 				while (0 < reproductionBudgetRemaining && 0 < failureBudgetRemaining)
 				{
-					if (flora.TriggerReproduction(generator)) reproductionBudgetRemaining--;
-					else failureBudgetRemaining--;
+					var offspring = generator.GetNextFrom(parentPool).TriggerReproduction(generator);
+					
+					if (offspring == null) failureBudgetRemaining--;
+					else
+					{
+						parentPool.Add(offspring);
+						reproductionBudgetRemaining--;
+						
+						payload.Game.GenerationLog.Append(GenerationEvents.FloraClusterAppend);
+					}
 				}
 			}
 			
@@ -381,9 +400,25 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		
 		void OnEnd()
 		{
-			var elapsedTime = DateTime.Now - beginTime;
+			payload.Game.GenerationLog.Append(GenerationEvents.End);
+
+			var total = payload.Game.GenerationLog.TotalTime;
+			var roomTotal = payload.Game.GenerationLog.GetTimeBetween(
+				GenerationEvents.RoomGenerationBegin,
+				GenerationEvents.RoomGenerationEnd
+			);
+			var floraTotal = payload.Game.GenerationLog.GetTimeBetween(
+				GenerationEvents.FloraSeedAppend,
+				GenerationEvents.FloraClusterAppend
+			);
+
+			var result = "Generated " + payload.Game.Rooms.AllActive.Length + " rooms in " + total.TotalSeconds.ToString("N2") + " seconds for seed " + generator.Seed;
+
+			result += "\n - Elapsed Generation Time -";
+			result += "\n   - Room: " + roomTotal.TotalSeconds.ToString("N2");
+			result += "\n   - Flora: " + floraTotal.TotalSeconds.ToString("N2");
 			
-			Debug.Log("Generated "+payload.Game.Rooms.AllActive.Length+" rooms in "+elapsedTime.TotalSeconds.ToString("N2")+" seconds for seed "+generator.Seed);
+			Debug.Log(result);
 		}
 	}
 }

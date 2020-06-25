@@ -1006,6 +1006,8 @@ MonoBehaviour:
     CloseDuration: 0
   animations: []
   prefabId: bevel_junction_0
+  prefabTags:
+  - room_spawn
   unexploredRoot: {fileID: 4591837766444162533}
   boundaryColliderRoot: {fileID: 920954061887980069}
   doorDefinitions:

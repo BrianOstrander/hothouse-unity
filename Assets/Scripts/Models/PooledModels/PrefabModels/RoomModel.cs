@@ -14,6 +14,8 @@ namespace Lunra.Hothouse.Models
         [JsonIgnore] public ListenerProperty<bool> IsSpawn { get; }
         [JsonProperty] int spawnDistance;
         [JsonIgnore] public ListenerProperty<int> SpawnDistance { get; }
+        [JsonProperty] float spawnDistanceNormalized;
+        [JsonIgnore] public ListenerProperty<float> SpawnDistanceNormalized { get; }
         
         [JsonProperty] bool isRevealed;
         [JsonIgnore] public ListenerProperty<bool> IsRevealed { get; }
@@ -37,6 +39,7 @@ namespace Lunra.Hothouse.Models
         {
             IsSpawn = new ListenerProperty<bool>(value => isSpawn = value, () => isSpawn);
             SpawnDistance = new ListenerProperty<int>(value => spawnDistance = value, () => spawnDistance);
+            SpawnDistanceNormalized = new ListenerProperty<float>(value => spawnDistanceNormalized = value, () => spawnDistanceNormalized);
             
             IsRevealed = new ListenerProperty<bool>(value => isRevealed = value, () => isRevealed);
             RevealDistance = new ListenerProperty<int>(value => revealDistance = value, () => revealDistance);

@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Presenters
 				return;
 			}
 			
-			TryReproducing();
+			TryReproducing(out _);
 		}
 		#endregion
 
@@ -105,23 +105,29 @@ namespace Lunra.Hothouse.Presenters
 			if (View.Visible) Game.Effects.Queued.Enqueue(new EffectsModel.Request(Model.Transform.Position.Value, View.DeathEffectId));
 		}
 
-		bool OnFloraTriggerReproduction(Demon generatorOverride)
+		FloraModel OnFloraTriggerReproduction(Demon generatorOverride)
 		{
-			return TryReproducing(
+			TryReproducing(
+				out var offspring,
 				ReproductionEvents.ReproduceAdult,
 				false,
 				generatorOverride
 			);
+
+			return offspring;
 		}
 		#endregion
 		
 		#region Utility
 		bool TryReproducing(
+			out FloraModel offspring,
 			ReproductionEvents reproductionEvent = ReproductionEvents.Default,
 			bool incrementFailures = true,
 			Demon generatorOverride = null
 		)
 		{
+			offspring = null;
+			
 			if (reproductionEvent == ReproductionEvents.Default) reproductionEvent = DefaultReproductionEvent;
 			
 			var currentGenerator = generatorOverride ?? generator;
@@ -166,14 +172,14 @@ namespace Lunra.Hothouse.Presenters
 									switch (reproductionEvent)
 									{
 										case ReproductionEvents.ReproduceChild:
-											Game.Flora.ActivateChild(
+											offspring = Game.Flora.ActivateChild(
 												Model.Species.Value,
 												roomView.RoomId,
 												hit.position
 											);
 											break;
 										case ReproductionEvents.ReproduceAdult:
-											Game.Flora.ActivateAdult(
+											offspring = Game.Flora.ActivateAdult(
 												Model.Species.Value,
 												roomView.RoomId,
 												hit.position

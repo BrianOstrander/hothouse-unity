@@ -215,6 +215,14 @@ namespace Lunra.Hothouse.Editor
 			foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
 			
 			Debug.Log("Revealed rooms for game: "+lastAutoRevealedRoomsForGameId);
+			
+			var spawnRoom = game.Rooms.AllActive.First(m => m.IsSpawn.Value);
+			Debug.DrawLine(
+				spawnRoom.Transform.Position.Value,
+				spawnRoom.Transform.Position.Value + (Vector3.up * 30f),
+				Color.green,
+				20f
+			);
 		}
 		#endregion
 	}

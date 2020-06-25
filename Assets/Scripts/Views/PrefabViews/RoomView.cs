@@ -53,7 +53,9 @@ namespace Lunra.Hothouse.Views
 				visibilityLeaf.gameObject.SetActive(visibilityLeaf.CalculateVisibility(activeDoorIndices));
 			}
 		}
+		#endregion
 
+		#region Reverse Bindings
 		public ColliderCache[] BoundaryColliders => boundaryColliders;
 		public DoorCache[] DoorDefinitions => doorDefinitions;
 		#endregion
@@ -240,6 +242,16 @@ namespace Lunra.Hothouse.Views
 					
 				meshCollider.sharedMesh = mesh.sharedMesh;
 			}
+		}
+
+		public void ToggleSpawnTag()
+		{
+			Undo.RecordObject(this, "Toggle Spawn Tag");
+			
+			if (PrefabTags.Contains(PrefabTagCategories.Room.Spawn)) PrefabTags = PrefabTags.ExceptOne(PrefabTagCategories.Room.Spawn).ToArray();
+			else PrefabTags = PrefabTags.Append(PrefabTagCategories.Room.Spawn).ToArray();
+			
+			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 		}
 #endif
 	}

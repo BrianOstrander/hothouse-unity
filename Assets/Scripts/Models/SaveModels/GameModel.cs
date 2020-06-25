@@ -16,6 +16,7 @@ namespace Lunra.Hothouse.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
+		public TimestampModel GenerationLog { get; } = new TimestampModel();
 		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
 		public ToolbarModel Toolbar { get; } = new ToolbarModel();
 		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();

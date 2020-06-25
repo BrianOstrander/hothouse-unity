@@ -39,6 +39,7 @@ namespace Lunra.Hothouse.Views
 		}
 
 		public string PrefabId;
+		public string[] PrefabTags;
 		public string Id;
 		public Types Type;
 		public int RootDistance;
@@ -54,7 +55,8 @@ namespace Lunra.Hothouse.Views
 			Types type,
 			string prefabId,
 			ColliderCache[] colliders,
-			DoorCache[] doorAnchors
+			DoorCache[] doorAnchors,
+			string[] prefabTags
 		)
 		{
 			var colliderList = new List<Collider>();
@@ -110,6 +112,7 @@ namespace Lunra.Hothouse.Views
 			}
 
 			PrefabId = prefabId;
+			PrefabTags = prefabTags;
 			Type = type;
 			Size = new Vector2(
 				colliderMaximumX - colliderMinimumX,

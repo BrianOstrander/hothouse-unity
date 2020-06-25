@@ -1,8 +1,6 @@
 using System;
-using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
-using UnityEngine;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Presenters;
 
@@ -34,23 +32,23 @@ namespace Lunra.Hothouse.Presenters
 			View.Cleanup();
 			
 			ShowView(instant: true);
-			
-			// var doorPrefabs = App.V.GetPrefabs<DoorView>();
 
-			foreach (var room in App.V.GetPrefabs<RoomView>())
+			foreach (var entry in App.V.GetPrefabs<RoomView>())
 			{
 				View.AddRoomDefinition(
-					room.View.PrefabId,
-					room.View.BoundaryColliders,
-					room.View.DoorDefinitions
+					entry.View.PrefabId,
+					entry.View.BoundaryColliders,
+					entry.View.DoorDefinitions,
+					entry.View.PrefabTags
 				);
 			}
 			
-			foreach (var room in App.V.GetPrefabs<DoorView>())
+			foreach (var entry in App.V.GetPrefabs<DoorView>())
 			{
 				View.AddDoorDefinition(
-					room.View.PrefabId,
-					room.View.DoorDefinitions
+					entry.View.PrefabId,
+					entry.View.DoorDefinitions,
+					entry.View.PrefabTags
 				);
 			}
 			
