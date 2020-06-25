@@ -23,7 +23,8 @@ namespace Lunra.Hothouse.Views
 			public const char DoorAnchorSizeTerminator = 'm';
 			public const string DoorPlugPrefix = "door_plug";
 			
-			public const string UnexploredMaterialPath = "Materials/Unexplored";
+			public const string UnexploredMaterialPath = "Materials/unexplored";
+			public const string DefaultFloorMaterialPath = "Materials/default_floors";
 		}
 
 		#region Serialized
@@ -209,6 +210,24 @@ namespace Lunra.Hothouse.Views
 			visibilityLeaves = transform.GetDescendants<RoomVisibilityLeaf>().ToArray();
 			
 			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+		}
+
+		public void ApplyDefaultMaterials()
+		{
+			
+			var defaultFloorMaterial = Resources.Load<Material>(Constants.DefaultFloorMaterialPath);
+			
+			if (defaultFloorMaterial == null) Debug.LogError("Unable to find material at resources path: "+Constants.DefaultFloorMaterialPath);
+			else
+			{
+				foreach (var floorElement in transform.GetDescendants<MeshRenderer>(d => !string.IsNullOrEmpty(d.name) && d.name.Contains(Constants.FloorKeyword)))
+				{
+					if (floorElement.sharedMaterial == defaultFloorMaterial) continue;
+					Undo.RecordObject(floorElement, "Apply Default Materials");
+					floorElement.sharedMaterial = defaultFloorMaterial;
+				}
+			}
+			PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject);
 		}
 
 		void NormalizeMeshColliders(Transform root)

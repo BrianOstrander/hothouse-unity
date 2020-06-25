@@ -81,7 +81,23 @@ namespace Lunra.Hothouse.Models
 				10,
 				20,
 				2,
-				3,
+				DefaultFloraConstraints,
+				activateRoom,
+				activateDoor
+			);
+		}
+		
+		public static RoomResolverRequest DefaultLarge(
+			Demon generator,
+			RoomPoolModel.ActivateRoom activateRoom,
+			DoorPoolModel.ActivateDoor activateDoor
+		)
+		{
+			return new RoomResolverRequest(
+				generator,
+				100,
+				200,
+				2,
 				DefaultFloraConstraints,
 				activateRoom,
 				activateDoor
@@ -92,7 +108,6 @@ namespace Lunra.Hothouse.Models
 		public int RoomCountMinimum;
 		public int RoomCountMaximum;
 		public int SpawnDoorCountRequired;
-		public int ExitDistanceMinimum;
 
 		public FloraConstraint[] FloraConstraints;
 
@@ -106,7 +121,6 @@ namespace Lunra.Hothouse.Models
 			int roomCountMinimum,
 			int roomCountMaximum,
 			int spawnDoorCountRequired,
-			int exitDistanceMinimum,
 			FloraConstraint[] floraConstraints,
 			RoomPoolModel.ActivateRoom activateRoom,
 			DoorPoolModel.ActivateDoor activateDoor
@@ -116,7 +130,6 @@ namespace Lunra.Hothouse.Models
 			RoomCountMinimum = roomCountMinimum;
 			RoomCountMaximum = roomCountMaximum;
 			SpawnDoorCountRequired = spawnDoorCountRequired;
-			ExitDistanceMinimum = exitDistanceMinimum;
 			FloraConstraints = floraConstraints;
 			ActivateRoom = activateRoom;
 			ActivateDoor = activateDoor;

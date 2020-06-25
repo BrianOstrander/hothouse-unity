@@ -29,6 +29,10 @@ namespace Lunra.Hothouse.Views.Editor
 					{
 						typedTarget.CalculateCachedData();
 					}
+					if (GUILayout.Button("Default Materials", GUILayout.ExpandWidth(false)))
+					{
+						typedTarget.ApplyDefaultMaterials();
+					}
 				}
 				GUIExtensions.PopEnabled();
 
