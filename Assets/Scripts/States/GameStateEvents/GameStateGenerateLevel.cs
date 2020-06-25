@@ -406,10 +406,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 							return false;
 						}
 
-						return true;
-					},
-					position =>
-					{
 						parentPool.Add(
 							payload.Game.Flora.ActivateAdult(
 								currentSpecies.Species,
@@ -419,6 +415,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 						);
 						
 						payload.Game.GenerationLog.Append(GenerationEvents.FloraSeedAppend);
+						return true;
 					}
 				);
 			}
@@ -440,30 +437,28 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				
 				if (currentSpeciesParentPool.None()) continue;
 				
-				var reproductionBudgetRemaining = clusterCount - 1;
-				var failureBudgetRemaining = reproductionBudgetRemaining * 2;
-
-				while (0 < reproductionBudgetRemaining && 0 < failureBudgetRemaining)
-				{
-					var offspring = generator.GetNextFrom(currentSpeciesParentPool).TriggerReproduction(generator);
-					
-					if (offspring == null) failureBudgetRemaining--;
-					else
+				TryGenerating(
+					room,
+					clusterCount - 1,
+					position =>
 					{
-						currentSpeciesParentPool.Add(offspring);
-						reproductionBudgetRemaining--;
+						var offspring = generator.GetNextFrom(currentSpeciesParentPool).TriggerReproduction(generator);
+
+						if (offspring == null) return false;
 						
+						currentSpeciesParentPool.Add(offspring);
 						payload.Game.GenerationLog.Append(GenerationEvents.FloraClusterAppend);
+						
+						return true;
 					}
-				}
+				);
 			}
 		}
 
 		void TryGenerating(
 			RoomModel room,
 			int count,
-			Func<Vector3, bool> validation,
-			Action<Vector3> generate
+			Func<Vector3, bool> generate
 		)
 		{
 			var budgetRemaining = count;
@@ -491,15 +486,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 					continue;
 				}
 
-				if (validation(hit.position))
-				{
-					generate(hit.position);
-					budgetRemaining--;
-				}
-				else
-				{
-					failureBudgetRemaining--;
-				}
+				if (generate(hit.position)) budgetRemaining--;
+				else failureBudgetRemaining--;
 			}
 		}
 		#endregion
