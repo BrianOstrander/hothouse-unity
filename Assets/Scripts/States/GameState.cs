@@ -117,13 +117,13 @@ namespace Lunra.Hothouse.Services
 			// 	6f
 			// );
 
-			var spawnRoom = Payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
-			
-			var flora = Payload.Game.Flora.ActivateAdult(
-				FloraSpecies.Wheat,
-				spawnRoom.RoomTransform.Id.Value,
-				spawnRoom.Transform.Position.Value + Vector3.right * 4f
-			);
+			// var spawnRoom = Payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
+			//
+			// var flora = Payload.Game.Flora.ActivateAdult(
+			// 	FloraSpecies.Wheat,
+			// 	spawnRoom.RoomTransform.Id.Value,
+			// 	spawnRoom.Transform.Position.Value + Vector3.right * 4f
+			// );
 
 			// Payload.Game.ObligationIndicators.Register(
 			// 	Obligation.New(

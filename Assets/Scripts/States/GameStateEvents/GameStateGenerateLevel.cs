@@ -46,6 +46,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			App.S.PushBlocking(OnGenerateDwellers);
 			App.S.PushBlocking(OnGenerateStartingBuildings);
+			App.S.PushBlocking(OnCleanupSpawn);
 			
 			// App.S.PushHalt();
 
@@ -147,6 +148,16 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateFloraSeed(Action done)
 		{
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				GenerateFloraInRoom(
+					room,
+					payload.Game.Flora.GetValidSpeciesData(room)	
+				);
+			}
+			
+			done();
+			/*
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
 				if (room.SpawnDistance.Value == 0) continue;
@@ -253,6 +264,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			}
 			
 			done();	
+			*/
 		}
 		#endregion
 
@@ -388,6 +400,31 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			done();
 		}
 
+		void OnCleanupSpawn(Action done)
+		{
+			var avoid = new Dictionary<IRoomTransformModel, float>();
+
+			bool isInSpawn(IRoomTransformModel model) => model.RoomTransform.Id.Value == spawn.RoomTransform.Id.Value; 
+			
+			foreach (var model in payload.Game.Dwellers.AllActive) avoid.Add(model, 1f);
+			foreach (var model in payload.Game.Buildings.AllActive.Where(isInSpawn)) avoid.Add(model, model.Boundary.Radius.Value);
+
+			bool hasCollision(IRoomTransformModel model)
+			{
+				return avoid.Any(
+					kv =>
+					{
+						return Vector3.Distance(kv.Key.Transform.Position.Value, model.Transform.Position.Value) < kv.Value;
+					}
+				);
+			}
+
+			foreach (var model in payload.Game.Flora.AllActive.Where(hasCollision)) model.PooledState.Value = PooledStates.InActive;
+			foreach (var model in payload.Game.Debris.AllActive.Where(hasCollision)) model.PooledState.Value = PooledStates.InActive;
+			
+			done();
+		}
+
 		void OnInitializeLighting(Action done)
 		{
 			payload.Game.LastLightUpdate.Value = payload.Game.LastLightUpdate.Value.SetRoomStale(
@@ -420,5 +457,152 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			Debug.Log(result);
 		}
+		
+		#region Utility
+		void GenerateFloraInRoom(
+			RoomModel room,
+			FloraPoolModel.SpeciesData[] species
+		)
+		{
+			if (species.None()) return;
+			
+			var parentPool = new List<FloraModel>();
+
+			foreach (var currentSpecies in species)
+			{
+				var currentCount = 0;
+
+				if (currentSpecies.CountPerRoomMinimum == currentSpecies.CountPerRoomMaximum) currentCount = currentSpecies.CountPerRoomMinimum;
+				else currentCount = generator.GetNextInteger(currentSpecies.CountPerRoomMinimum, currentSpecies.CountPerRoomMaximum + 1);
+
+				if (room.IsSpawn.Value && currentSpecies.RequiredInSpawn) currentCount = Mathf.Max(currentCount, 1);
+				
+				if (currentCount == 0) continue;
+
+				var floraBudgetRemaining = currentCount;
+				var failureBudgetRemaining = floraBudgetRemaining * 2; // TODO: Don't hardcode this...
+
+				while (0 < floraBudgetRemaining && 0 < failureBudgetRemaining)
+				{
+					var position = room.Boundary.RandomPoint(generator);
+					if (!position.HasValue)
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+
+					var sampleSuccess = NavMesh.SamplePosition(
+						position.Value,
+						out var hit,
+						Mathf.Abs(position.Value.y) + 0.1f,
+						NavMesh.AllAreas
+					);
+
+					if (!sampleSuccess || !room.Boundary.Contains(hit.position))
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+
+					var collided = false;
+
+					foreach (var possibleCollision in payload.Game.Flora.AllActive)
+					{
+						if (possibleCollision.RoomTransform.Id.Value != room.RoomTransform.Id.Value) continue;
+						if (possibleCollision.ReproductionRadius.Value.Maximum < Vector3.Distance(possibleCollision.Transform.Position.Value, hit.position)) continue;
+
+						collided = true;
+						break;
+					}
+
+					if (collided)
+					{
+						failureBudgetRemaining--;
+						continue;
+					}
+
+					parentPool.Add(
+						payload.Game.Flora.ActivateAdult(
+							currentSpecies.Species,
+							room.RoomTransform.Id.Value,
+							hit.position
+						)
+					);
+
+					payload.Game.GenerationLog.Append(GenerationEvents.FloraSeedAppend);
+
+					floraBudgetRemaining--;
+				}
+			}
+
+			foreach (var currentSpecies in species)
+			{
+				int clusterCount;
+
+				if (currentSpecies.CountPerClusterMinimum == currentSpecies.CountPerClusterMaximum) clusterCount = currentSpecies.CountPerClusterMinimum;
+				else clusterCount = generator.GetNextInteger(currentSpecies.CountPerClusterMinimum, currentSpecies.CountPerClusterMaximum + 1);
+				
+				if (clusterCount <= 1) continue;
+
+				clusterCount = currentSpecies.CountPerClusterMaximum;
+				
+				var currentSpeciesParentPool = parentPool
+					.Where(m => m.Species.Value == currentSpecies.Species)
+					.ToList();
+				
+				if (currentSpeciesParentPool.None()) continue;
+				
+				var reproductionBudgetRemaining = clusterCount - 1;
+				var failureBudgetRemaining = reproductionBudgetRemaining * 2;
+
+				while (0 < reproductionBudgetRemaining && 0 < failureBudgetRemaining)
+				{
+					var offspring = generator.GetNextFrom(currentSpeciesParentPool).TriggerReproduction(generator);
+					
+					if (offspring == null) failureBudgetRemaining--;
+					else
+					{
+						currentSpeciesParentPool.Add(offspring);
+						reproductionBudgetRemaining--;
+						
+						payload.Game.GenerationLog.Append(GenerationEvents.FloraClusterAppend);
+					}
+				}
+			}
+/*
+			foreach (var flora in payload.Game.Flora.AllActive)
+			{
+				parentPool.Clear();
+				parentPool.Add(flora);
+				
+				var constraint = payload.Game.Flora.GetSpeciesData(flora.Species.Value);
+
+				var clusterCount = 1;
+
+				if (constraint.CountPerClusterMinimum == constraint.CountPerClusterMaximum) clusterCount = constraint.CountPerClusterMinimum;
+				else clusterCount = generator.GetNextInteger(constraint.CountPerClusterMinimum, constraint.CountPerClusterMaximum + 1);
+				
+				if (clusterCount <= 1) continue;
+
+				var reproductionBudgetRemaining = clusterCount - 1;
+				var failureBudgetRemaining = reproductionBudgetRemaining * 2;
+
+				while (0 < reproductionBudgetRemaining && 0 < failureBudgetRemaining)
+				{
+					var offspring = generator.GetNextFrom(parentPool).TriggerReproduction(generator);
+					
+					if (offspring == null) failureBudgetRemaining--;
+					else
+					{
+						parentPool.Add(offspring);
+						reproductionBudgetRemaining--;
+						
+						payload.Game.GenerationLog.Append(GenerationEvents.FloraClusterAppend);
+					}
+				}
+			}
+			*/		
+		}
+		#endregion
 	}
 }

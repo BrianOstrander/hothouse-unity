@@ -111,6 +111,7 @@ namespace Lunra.Hothouse.Presenters
 				out var offspring,
 				ReproductionEvents.ReproduceAdult,
 				false,
+				false,
 				generatorOverride
 			);
 
@@ -123,6 +124,7 @@ namespace Lunra.Hothouse.Presenters
 			out FloraModel offspring,
 			ReproductionEvents reproductionEvent = ReproductionEvents.Default,
 			bool incrementFailures = true,
+			bool spreadDamageEnabled = true,
 			Demon generatorOverride = null
 		)
 		{
@@ -201,8 +203,8 @@ namespace Lunra.Hothouse.Presenters
 					}
 				}
 			}
-
-			if (increaseReproductionFailures && 0f < Model.SpreadDamage.Value)
+			
+			if (spreadDamageEnabled && increaseReproductionFailures && 0f < Model.SpreadDamage.Value)
 			{
 				var nearestFloraOfDifferentSpecies = Game.Flora.AllActive
 					.Where(

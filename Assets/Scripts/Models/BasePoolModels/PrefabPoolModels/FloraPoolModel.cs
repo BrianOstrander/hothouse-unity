@@ -26,6 +26,8 @@ namespace Lunra.Hothouse.Models
 			public float SpawnDistanceNormalizedMinimum;
 			public int CountPerClusterMinimum;
 			public int CountPerClusterMaximum;
+			public bool RequiredInSpawn;
+			public bool AllowedInSpawn;
 			public string[] ValidPrefabIds;
 
 			public SpeciesData(
@@ -43,6 +45,8 @@ namespace Lunra.Hothouse.Models
 				float spawnDistanceNormalizedMinimum,
 				int countPerClusterMinimum,
 				int countPerClusterMaximum,
+				bool requiredInSpawn,
+				bool allowedInSpawn,
 				string[] validPrefabIds
 			)
 			{
@@ -60,6 +64,8 @@ namespace Lunra.Hothouse.Models
 				SpawnDistanceNormalizedMinimum = spawnDistanceNormalizedMinimum;
 				CountPerClusterMinimum = countPerClusterMinimum;
 				CountPerClusterMaximum = countPerClusterMaximum;
+				RequiredInSpawn = requiredInSpawn;
+				AllowedInSpawn = allowedInSpawn;
 				ValidPrefabIds = validPrefabIds;
 			}
 		}
@@ -97,10 +103,12 @@ namespace Lunra.Hothouse.Models
 				false,
 				Defaults.GenerateDrops(Inventory.Types.Stalks),
 				0,
-				3,
+				4,
 				0f,
-				10,
 				40,
+				60,
+				true,
+				true,
 				new []
 				{
 					"grass0",
@@ -122,6 +130,8 @@ namespace Lunra.Hothouse.Models
 				0.5f,
 				1,
 				2,
+				false,
+				false,
 				new []
 				{
 					"shroom0"
@@ -140,8 +150,10 @@ namespace Lunra.Hothouse.Models
 				0,
 				6,
 				0f,
-				10,
 				30,
+				40,
+				true,
+				true,
 				new []
 				{
 					"wheat0"
@@ -163,6 +175,8 @@ namespace Lunra.Hothouse.Models
 				0f,
 				1,
 				2,
+				false,
+				false,
 				new []
 				{
 					"seeker_spawner_0"
@@ -238,6 +252,13 @@ namespace Lunra.Hothouse.Models
 
 		public SpeciesData[] GetValidSpeciesData(RoomModel room)
 		{
+			if (room.IsSpawn.Value)
+			{
+				return data
+					.Where(d => d.RequiredInSpawn || d.AllowedInSpawn)
+					.ToArray();
+			}
+
 			return data
 				.Where(d => d.SpawnDistanceNormalizedMinimum <= room.SpawnDistanceNormalized.Value)
 				.ToArray();

@@ -81,6 +81,7 @@ namespace Lunra.Hothouse.Models
 			RoomCountMinimum = roomCountMinimum;
 			RoomCountMaximum = roomCountMaximum;
 			SpawnDoorCountRequired = spawnDoorCountRequired;
+			
 			ActivateRoom = activateRoom;
 			ActivateDoor = activateDoor;
 			
