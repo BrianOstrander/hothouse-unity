@@ -231,7 +231,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				// Jobs.Clearer
 			};
 
-			for (var i = 0; i < 1; i++)
+			for (var i = 0; i < 2; i++)
 			{
 				var position = spawn.Transform.Position.Value + (Vector3.forward * (4f + i));
 
@@ -295,10 +295,21 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			var test = payload.Game.Buildings.Activate(
+			
+			wagon.Inventory.Value = Inventory.FromEntry(Inventory.Types.Stalks, 2);
+			
+			payload.Game.Buildings.Activate(
 				Buildings.Bedroll,
 				spawn.Id.Value,
 				position + (Vector3.back * 4f),
+				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
+				BuildingStates.Constructing
+			);
+			
+			payload.Game.Buildings.Activate(
+				Buildings.Bedroll,
+				spawn.Id.Value,
+				position + (Vector3.back * 4f) + (Vector3.right * 4f),
 				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
 				BuildingStates.Constructing
 			);

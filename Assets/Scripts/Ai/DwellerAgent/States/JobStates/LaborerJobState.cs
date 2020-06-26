@@ -311,13 +311,14 @@ namespace Lunra.Hothouse.Ai.Dweller
 		class ToNavigateToWithdrawalItemsFromCache : AgentTransition<NavigateState<LaborerJobState>, GameModel, DwellerModel>
 		{
 			NavMeshPath path;
+			IInventoryModel source;
 			InventoryPromise promise;
 			
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
 
-				var target = GetNearestItemSource(
+				source = GetNearestItemSource(
 					Game,
 					Agent,
 					out path,
@@ -325,16 +326,14 @@ namespace Lunra.Hothouse.Ai.Dweller
 					out promise
 				);
 
-				return target != null;
+				return source != null;
 			}
 
 			public override void Transition()
 			{
-				Debug.Break();
-				
 				promise.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite);
-				
-				Debug.Log("Forbid items here");
+			
+				// source.Inventory
 				constructionSite.ConstructionInventoryzzz.AddReserved(promise.Inventory);
 
 				Agent.InventoryPromise.Value = promise;

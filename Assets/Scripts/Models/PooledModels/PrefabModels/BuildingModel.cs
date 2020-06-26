@@ -12,8 +12,8 @@ namespace Lunra.Hothouse.Models
 		IBoundaryModel,
 		IHealthModel,
 		IClaimOwnershipModel,
-		IConstructionModel//,
-		// IInventoryModel
+		IConstructionModel,
+		IInventoryModel
 	{
 		#region Serialized
 		[JsonProperty] Buildings type;
