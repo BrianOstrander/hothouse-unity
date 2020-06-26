@@ -229,6 +229,7 @@ namespace Lunra.Hothouse.Ai
 				);
 
 			promise = new InventoryPromise(
+				null, // TODO THIS WILL CAUSE ERRORS BUT OH WELL
 				InstanceId.New(target),
 				InventoryPromise.Operations.CleanupWithdrawal,
 				inventoryToWithdrawal

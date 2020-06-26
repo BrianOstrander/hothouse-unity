@@ -5,7 +5,8 @@ namespace Lunra.Hothouse.Models
 	public struct InventoryPromise
 	{
 		public static InventoryPromise Default() => new InventoryPromise(
-			InstanceId.Null(), 
+			InstanceId.Null(),
+			InstanceId.Null(),
 			Operations.None,
 			Inventory.Empty
 		);
@@ -18,16 +19,19 @@ namespace Lunra.Hothouse.Models
 			CleanupWithdrawal = 30
 		}
 		
+		public readonly InstanceId Source;
 		public readonly InstanceId Target;
 		public readonly Operations Operation;
 		public readonly Inventory Inventory;
 
 		public InventoryPromise(
+			InstanceId source,
 			InstanceId target,
 			Operations operation,
 			Inventory inventory
 		)
 		{
+			Source = source;
 			Target = target;
 			Operation = operation;
 			Inventory = inventory;
@@ -36,12 +40,13 @@ namespace Lunra.Hothouse.Models
 		public InventoryPromise NewInventory(Inventory inventory)
 		{
 			return new InventoryPromise(
+				Source,
 				Target,
 				Operation,
 				inventory
 			);
 		}
 
-		public override string ToString() => Target + "\nOperation: " + Operation + "\nInventory " + Inventory;
+		public override string ToString() => Source + " -> " + Target + "\nOperation: " + Operation + "\nInventory " + Inventory;
 	}
 }

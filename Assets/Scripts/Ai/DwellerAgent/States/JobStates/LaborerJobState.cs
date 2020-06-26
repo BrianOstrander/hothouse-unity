@@ -76,6 +76,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 							);
 							
 							promiseResult = new InventoryPromise(
+								InstanceId.New(possibleItemSource), 
 								InstanceId.New(kv.Key),
 								InventoryPromise.Operations.ConstructionDeposit,
 								promisedInventory
@@ -252,7 +253,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		class ToWithdrawalItemsFromCache : AgentTransition<LaborerJobState, TransferItemsState<LaborerJobState>, GameModel, DwellerModel>
 		{
 			TransferItemsState<LaborerJobState> transferState;
-			BuildingModel target;
+			BuildingModel source;
 
 			public ToWithdrawalItemsFromCache(TransferItemsState<LaborerJobState> transferState)
 			{
@@ -262,15 +263,16 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation == InventoryPromise.Operations.None) return false;
+				if (Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
 
-				if (!Agent.InventoryPromise.Value.Target.TryGetInstance(Game, out target))
+				if (!Agent.InventoryPromise.Value.Source.TryGetInstance(Game, out source))
 				{
-					// Target must have been destroyed...
+					// Source must have been destroyed...
 					Debug.LogError("Target for inventory promise was destroyed, but the inventory promise was not reset? This should not occur\n"+Agent.InventoryPromise.Value);
 					return false;
 				}
 
-				return target.Enterable.Entrances.Value
+				return source.Enterable.Entrances.Value
 					.Any(e => e.State == Entrance.States.Available && Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
 				
 				// target = GetNearestItemSource(
@@ -295,8 +297,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 						i => Agent.Inventory.Value += i,
 						() => Agent.Inventory.Value,
 						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
-						i => target.Inventory.Value -= i,
-						() => target.Inventory.Value,
+						i => source.Inventory.Value -= i,
+						() => source.Inventory.Value,
 						Agent.InventoryPromise.Value.Inventory,
 						Agent.WithdrawalCooldown.Value
 					)
