@@ -18,17 +18,17 @@ namespace Lunra.Hothouse.Models
 			CleanupWithdrawal = 30
 		}
 		
-		public readonly string TargetId;
+		public readonly InstanceId Target;
 		public readonly Operations Operation;
 		public readonly Inventory Inventory;
 
 		public InventoryPromise(
-			string targetId,
+			InstanceId target,
 			Operations operation,
 			Inventory inventory
 		)
 		{
-			TargetId = targetId;
+			Target = target;
 			Operation = operation;
 			Inventory = inventory;
 		}
@@ -36,7 +36,7 @@ namespace Lunra.Hothouse.Models
 		public InventoryPromise NewInventory(Inventory inventory)
 		{
 			return new InventoryPromise(
-				TargetId,
+				Target,
 				Operation,
 				inventory
 			);

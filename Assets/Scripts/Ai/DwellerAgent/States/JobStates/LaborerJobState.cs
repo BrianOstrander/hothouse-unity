@@ -80,7 +80,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 							);
 							
 							promiseResult = new InventoryPromise(
-								kv.Key.Id.Value,
+								InstanceId.New(kv.Key),
 								InventoryPromise.Operations.ConstructionDeposit,
 								promisedInventory
 							);
@@ -165,20 +165,19 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void Begin()
 		{
+			Debug.Break();
 			switch (step)
 			{
 				case Steps.Unknown:
 					return;
 			}
 			
-			var constructionSite = Game.Buildings.AllActive.FirstOrDefault(b => b.Id.Value == Agent.InventoryPromise.Value.TargetId);
-			
-			if (constructionSite == null)
+			if (!Agent.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite))
 			{
 				// Building must have been destroyed...
 				Agent.InventoryPromise.Value = InventoryPromise.Default();
 				step = Steps.Unknown;
-				return;
+				return;	
 			}
 			
 			switch (step)
@@ -284,7 +283,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				var constructionSite = Game.Buildings.AllActive.First(b => b.Id.Value == promise.TargetId);
+				promise.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite);
 				
 				Agent.InventoryPromise.Value = promise;
 				// constructionSite.ConstructionInventoryPromised.Value += promise.Inventory;
@@ -309,6 +308,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		class ToNavigateToWithdrawalItemsFromCache : AgentTransition<NavigateState<LaborerJobState>, GameModel, DwellerModel>
 		{
 			NavMeshPath path;
+			InventoryPromise promise;
 			
 			public override bool IsTriggered()
 			{
@@ -319,13 +319,18 @@ namespace Lunra.Hothouse.Ai.Dweller
 					Agent,
 					out path,
 					out _,
-					out _
+					out promise
 				);
 
 				return target != null;
 			}
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
+			public override void Transition()
+			{
+				// promise.
+				
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
+			}
 		}
 
 		class ToDepositToNearestConstructionSite : AgentTransition<TransferItemsState<LaborerJobState>, GameModel, DwellerModel>
@@ -346,17 +351,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 					Debug.LogError("This should not be able to happen!");
 					return false;
 				}
-				
-				target = Game.Buildings.AllActive.FirstOrDefault(
-					m =>
-					{
-						if (m.Id.Value != Agent.InventoryPromise.Value.TargetId) return false;
-						
-						return m.Enterable.Entrances.Value.Any(e => Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
-					}
-				);
 
-				return target != null;
+				if (Agent.InventoryPromise.Value.Target.TryGetInstance(Game, out target))
+				{
+					return target.Enterable.Entrances.Value.Any(e => Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
+				}
+
+				return false;
 			}
 
 			public override void Transition()
@@ -402,19 +403,18 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
 
-				var target = NavigationUtility.CalculateNearestAvailableEntrance(
+				if (!Agent.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var target)) return false;
+
+				var found = NavigationUtility.CalculateNearest(
 					Agent.Transform.Position.Value,
-					out path,
-					out _,
-					b =>
-					{
-						if (b.BuildingState.Value != BuildingStates.Constructing) return false;
-						return b.Id.Value == Agent.InventoryPromise.Value.TargetId;
-					},
-					Game.Buildings.AllActive
+					out var result,
+					Navigation.QueryEntrances(target)
 				);
 
-				return target != null;
+				if (!found) return false;
+
+				path = result.Path;
+				return true;
 			}
 
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);

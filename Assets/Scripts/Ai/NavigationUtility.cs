@@ -229,7 +229,7 @@ namespace Lunra.Hothouse.Ai
 				);
 
 			promise = new InventoryPromise(
-				target.Id.Value,
+				InstanceId.New(target),
 				InventoryPromise.Operations.CleanupWithdrawal,
 				inventoryToWithdrawal
 			);

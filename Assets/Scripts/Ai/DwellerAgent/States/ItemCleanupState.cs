@@ -163,15 +163,14 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.CleanupWithdrawal) return false;
 
-				target = Game.ItemDrops.FirstOrDefaultActive(Agent.InventoryPromise.Value.TargetId);
-
-				if (target == null)
+				if (Agent.InventoryPromise.Value.Target.TryGetInstance<ItemDropModel>(Game, out target))
 				{
-					Debug.LogError("Unable to find an active model of type \""+nameof(ItemDropModel)+"\" with id \""+Agent.InventoryPromise.Value.TargetId+"\", this should never happen");
-					return false;
+					return Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), target.Transform.Position.Value.NewY(0f)));
 				}
-
-				return Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), target.Transform.Position.Value.NewY(0f)));
+				
+				// It might happen if the item drop is destroyed...
+				Debug.LogError("Unable to find an active model of type \""+nameof(ItemDropModel)+"\" with id \""+Agent.InventoryPromise.Value.Target.Id+"\", this should never happen");
+				return false;
 			}
 
 			public override void Transition()

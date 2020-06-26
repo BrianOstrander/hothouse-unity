@@ -298,7 +298,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var test = payload.Game.Buildings.Activate(
 				Buildings.Bedroll,
 				spawn.Id.Value,
-				position + (Vector3.back * 2f),
+				position + (Vector3.back * 4f),
 				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
 				BuildingStates.Constructing
 			);

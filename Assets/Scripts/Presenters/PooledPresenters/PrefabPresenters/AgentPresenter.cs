@@ -1,4 +1,5 @@
-﻿using Lunra.Hothouse.Ai;
+﻿using System;
+using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
@@ -122,21 +123,17 @@ namespace Lunra.Hothouse.Presenters
 			{
 				case InventoryPromise.Operations.None: break;
 				case InventoryPromise.Operations.ConstructionDeposit:
-					var building = Game.Buildings.FirstOrDefaultActive(Model.InventoryPromise.Value.TargetId);
-				
-					if (building == null) Debug.LogError("Cannot find an active building with id \"" + Model.InventoryPromise.Value.TargetId + "\" to cancel out promise operation: " + Model.InventoryPromise.Value.Operation+", this should never happen");
-					else
+					if (Model.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var constructionDepositTarget))
 					{
-						building.ConstructionInventoryzzz.RemoveReserved(Model.InventoryPromise.Value.Inventory);
+						constructionDepositTarget.ConstructionInventoryzzz.RemoveReserved(Model.InventoryPromise.Value.Inventory);
 					}
-					
 					break;
 				case InventoryPromise.Operations.CleanupWithdrawal:
-					var itemDrop = Game.ItemDrops.FirstOrDefaultActive(Model.InventoryPromise.Value.TargetId);
 
-					if (itemDrop == null) Debug.LogError("Cannot find an active itemDrop with id \"" + Model.InventoryPromise.Value.TargetId + "\" to cancel out operation: " + Model.InventoryPromise.Value.Operation + ", this should never happen");
-					else itemDrop.WithdrawalInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory;
-					
+					if (Model.InventoryPromise.Value.Target.TryGetInstance<ItemDropModel>(Game, out var cleanupWithdrawalTarget))
+					{
+						cleanupWithdrawalTarget.WithdrawalInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory; 
+					}
 					break;
 				default:
 					Debug.LogError("Unrecognized operation: " + Model.InventoryPromise.Value.Operation);

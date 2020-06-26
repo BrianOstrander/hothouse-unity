@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	// public interface IHealthModel : IRoomTransformModel
-	// {
-	// 	HealthComponent Health { get; }
-	// }
+	public interface IConstructionModel : IEnterableModel
+	{
+		InventoryComponent ConstructionInventoryzzz { get; }
+	}
 
 	public class InventoryComponent : Model
 	{
