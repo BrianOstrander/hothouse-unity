@@ -190,7 +190,7 @@ namespace Lunra.Hothouse.Models
 							}
 						)	
 					),
-					InventoryPermission.DepositForJobs(Jobs.Stoker),
+					InventoryPermission.DepositForJobs(Jobs.Laborer),
 					Constants.LightSourcePlacementLightRequirement,
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
@@ -212,7 +212,7 @@ namespace Lunra.Hothouse.Models
 							{ Inventory.Types.Stalks , 1 }
 						}
 					), 
-					Interval.WithMaximum(99999f),
+					Interval.WithMaximum(30f),
 					LightStates.Fueled,
 					new DesireQuality[]
 					{

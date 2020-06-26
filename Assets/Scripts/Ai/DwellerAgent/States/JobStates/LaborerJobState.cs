@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class ConstructionJobState : JobState<ConstructionJobState>
+	public class LaborerJobState : JobState<LaborerJobState>
 	{
 		static BuildingModel GetNearestItemSource(
 			GameModel world,
@@ -99,19 +99,19 @@ namespace Lunra.Hothouse.Ai.Dweller
 			WithdrawingItemsFromCache = 10
 		}
 		
-		public override Jobs Job => Jobs.Construction;
+		public override Jobs Job => Jobs.Laborer;
 
 		Steps step;
 		
 		public override void OnInitialize()
 		{
-			var validJobs = new[] { Jobs.Construction, Jobs.None };
+			var validJobs = new[] { Jobs.Laborer, Jobs.None };
 			var validCleanupItems = Inventory.ValidTypes;
 			
-			var transferItemsState = new TransferItemsState<ConstructionJobState>();
-			var timeoutState = new TimeoutState<ConstructionJobState>();
+			var transferItemsState = new TransferItemsState<LaborerJobState>();
+			var timeoutState = new TimeoutState<LaborerJobState>();
 			
-			var cleanupState = new ItemCleanupState<ConstructionJobState>(
+			var cleanupState = new ItemCleanupState<LaborerJobState>(
 				validJobs
 			);
 			
@@ -119,8 +119,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				transferItemsState,
 				timeoutState,
 				cleanupState,
-				new NavigateState<ConstructionJobState>(),
-				new ObligationState<ConstructionJobState>()
+				new NavigateState<LaborerJobState>(),
+				new ObligationState<LaborerJobState>()
 			);
 			
 			AddTransitions(
@@ -150,8 +150,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 					validJobs,
 					validCleanupItems
 				),
-				new DropItemsTransition<ConstructionJobState>(timeoutState),
-				new NavigateToNearestLightTransition<ConstructionJobState>()
+				new DropItemsTransition<LaborerJobState>(timeoutState),
+				new NavigateToNearestLightTransition<LaborerJobState>()
 			);
 		}
 
@@ -194,13 +194,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 			step = Steps.Unknown;
 		}
 		
-		class ToWithdrawalItemsFromSalvageSite : AgentTransition<TransferItemsState<ConstructionJobState>, GameModel, DwellerModel>
+		class ToWithdrawalItemsFromSalvageSite : AgentTransition<TransferItemsState<LaborerJobState>, GameModel, DwellerModel>
 		{
-			TransferItemsState<ConstructionJobState> transferState;
+			TransferItemsState<LaborerJobState> transferState;
 			BuildingModel target;
 			Inventory itemsToLoad;
 			
-			public ToWithdrawalItemsFromSalvageSite(TransferItemsState<ConstructionJobState> transferState)
+			public ToWithdrawalItemsFromSalvageSite(TransferItemsState<LaborerJobState> transferState)
 			{
 				this.transferState = transferState;
 			}
@@ -232,7 +232,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override void Transition()
 			{
 				transferState.SetTarget(
-					new TransferItemsState<ConstructionJobState>.Target(
+					new TransferItemsState<LaborerJobState>.Target(
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
 						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
@@ -245,13 +245,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 
-		class ToWithdrawalItemsFromCache : AgentTransition<ConstructionJobState, TransferItemsState<ConstructionJobState>, GameModel, DwellerModel>
+		class ToWithdrawalItemsFromCache : AgentTransition<LaborerJobState, TransferItemsState<LaborerJobState>, GameModel, DwellerModel>
 		{
-			TransferItemsState<ConstructionJobState> transferState;
+			TransferItemsState<LaborerJobState> transferState;
 			BuildingModel target;
 			InventoryPromise promise;
 
-			public ToWithdrawalItemsFromCache(TransferItemsState<ConstructionJobState> transferState)
+			public ToWithdrawalItemsFromCache(TransferItemsState<LaborerJobState> transferState)
 			{
 				this.transferState = transferState;
 			}
@@ -281,7 +281,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				constructionSite.ConstructionInventoryPromised.Value += promise.Inventory;
 
 				transferState.SetTarget(
-					new TransferItemsState<ConstructionJobState>.Target(
+					new TransferItemsState<LaborerJobState>.Target(
 						i => Agent.Inventory.Value = i,
 						() => Agent.Inventory.Value,
 						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
@@ -296,7 +296,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 
-		class ToNavigateToWithdrawalItemsFromCache : AgentTransition<NavigateState<ConstructionJobState>, GameModel, DwellerModel>
+		class ToNavigateToWithdrawalItemsFromCache : AgentTransition<NavigateState<LaborerJobState>, GameModel, DwellerModel>
 		{
 			NavMeshPath path;
 			
@@ -318,12 +318,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
 		}
 
-		class ToDepositToNearestConstructionSite : AgentTransition<TransferItemsState<ConstructionJobState>, GameModel, DwellerModel>
+		class ToDepositToNearestConstructionSite : AgentTransition<TransferItemsState<LaborerJobState>, GameModel, DwellerModel>
 		{
-			TransferItemsState<ConstructionJobState> transferState;
+			TransferItemsState<LaborerJobState> transferState;
 			BuildingModel target;
 
-			public ToDepositToNearestConstructionSite(TransferItemsState<ConstructionJobState> transferState)
+			public ToDepositToNearestConstructionSite(TransferItemsState<LaborerJobState> transferState)
 			{
 				this.transferState = transferState;
 			}
@@ -352,7 +352,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override void Transition()
 			{
 				transferState.SetTarget(
-					new TransferItemsState<ConstructionJobState>.Target(
+					new TransferItemsState<LaborerJobState>.Target(
 						i => target.ConstructionInventory.Value = i,
 						() => target.ConstructionInventory.Value,
 						i => target.ConstructionInventoryCapacity.Value.GetCapacityFor(target.ConstructionInventory.Value, i),
@@ -370,7 +370,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 
-		class ToNavigateToConstructionSite : AgentTransition<NavigateState<ConstructionJobState>, GameModel, DwellerModel>
+		class ToNavigateToConstructionSite : AgentTransition<NavigateState<LaborerJobState>, GameModel, DwellerModel>
 		{
 			NavMeshPath path;
 			
@@ -396,7 +396,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
 		}
 		
-		class ToNavigateToSalvageSite : AgentTransition<NavigateState<ConstructionJobState>, GameModel, DwellerModel>
+		class ToNavigateToSalvageSite : AgentTransition<NavigateState<LaborerJobState>, GameModel, DwellerModel>
 		{
 			NavMeshPath path;
 			

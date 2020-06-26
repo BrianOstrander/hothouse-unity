@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Presenters
 					Obligation.New(
 						ObligationCategories.Door.Open,
 						0,
-						ObligationCategories.GetJobs(Jobs.Construction),
+						ObligationCategories.GetJobs(Jobs.Laborer),
 						Obligation.ConcentrationRequirements.Instant,
 						Interval.Zero()
 					),

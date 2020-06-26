@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			payload = state.Payload;
 			// generator = new Demon(999796993);
 			generator = new Demon();
-			request = RoomResolverRequest.Defaults.Small(
+			request = RoomResolverRequest.Defaults.Tiny(
 				generator,
 				payload.Game.Rooms.Activate,
 				payload.Game.Doors.Activate
@@ -219,11 +219,11 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateDwellers(Action done)
 		{
-			var randomJobPool = EnumExtensions.GetValues(Jobs.Unknown, Jobs.None, Jobs.Stoker);
+			var randomJobPool = EnumExtensions.GetValues(Jobs.Unknown, Jobs.None);
 			
 			var requiredJobs = new Jobs[]
 			{
-				Jobs.Construction,
+				Jobs.Laborer,
 				Jobs.Clearer
 			};
 
@@ -376,7 +376,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				TryGenerating(
 					room,
-					10,
+					4,
 					position =>
 					{
 						// TODO: Calculate collisions with other debris...

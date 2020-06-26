@@ -9,6 +9,22 @@ namespace Lunra.Hothouse.Models
 	{
 		public static class Defaults
 		{
+			public static RoomResolverRequest Tiny(
+				Demon generator,
+				RoomPoolModel.ActivateRoom activateRoom,
+				DoorPoolModel.ActivateDoor activateDoor
+			)
+			{
+				return new RoomResolverRequest(
+					generator,
+					4,
+					5,
+					2,
+					activateRoom,
+					activateDoor
+				);
+			}
+			
 			public static RoomResolverRequest Small(
 				Demon generator,
 				RoomPoolModel.ActivateRoom activateRoom,

@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Presenters
 {
 	public class JobManagePresenter : Presenter<JobManageView>
 	{
-		static readonly Jobs[] ValidJobs = EnumExtensions.GetValues(Jobs.Unknown, Jobs.Stoker, Jobs.None)
+		static readonly Jobs[] ValidJobs = EnumExtensions.GetValues(Jobs.Unknown, Jobs.None)
 			.Append(Jobs.None)
 			.ToArray();
 		

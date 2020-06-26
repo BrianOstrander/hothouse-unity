@@ -18,7 +18,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			);
 			
 			InstantiateJob<ClearerJobState>();
-			InstantiateJob<ConstructionJobState>();
+			InstantiateJob<LaborerJobState>();
 			InstantiateDesire<SleepDesireState>();
 			InstantiateDesire<EatDesireState>();
 		}
