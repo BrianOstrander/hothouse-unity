@@ -23,8 +23,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		{
 			this.state = state;
 			payload = state.Payload;
-			// generator = new Demon(999796993);
-			generator = new Demon();
+			generator = new Demon(1);
+			// generator = new Demon();
 			request = RoomResolverRequest.Defaults.Tiny(
 				generator,
 				payload.Game.Rooms.Activate,
@@ -224,10 +224,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var requiredJobs = new Jobs[]
 			{
 				Jobs.Laborer,
-				Jobs.Clearer
+				Jobs.Laborer,
+				Jobs.Laborer,
+				Jobs.Laborer,
+				Jobs.Laborer,
+				// Jobs.Clearer
 			};
 
-			for (var i = 0; i < 4; i++)
+			for (var i = 0; i < 1; i++)
 			{
 				var position = spawn.Transform.Position.Value + (Vector3.forward * 2f);
 

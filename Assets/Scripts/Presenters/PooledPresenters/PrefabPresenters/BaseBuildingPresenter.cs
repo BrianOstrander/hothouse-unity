@@ -51,7 +51,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
 			Model.Inventory.Changed += OnBuildingInventory;
-			Model.ConstructionInventory.Changed += OnBuildingConstructionInventory;
+			Model.ConstructionInventoryzzz.All.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
@@ -80,7 +80,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
 			Model.Inventory.Changed -= OnBuildingInventory;
-			Model.ConstructionInventory.Changed -= OnBuildingConstructionInventory;
+			Model.ConstructionInventoryzzz.All.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
@@ -250,7 +250,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingConstructionInventory(Inventory constructionInventory)
 		{
-			if (constructionInventory.IsEmpty || Model.ConstructionInventoryCapacity.Value.IsNotFull(constructionInventory)) return;
+			if (constructionInventory.IsEmpty || Model.ConstructionInventoryzzz.AllCapacity.Value.IsNotFull(constructionInventory)) return;
 
 			switch (Model.BuildingState.Value)
 			{

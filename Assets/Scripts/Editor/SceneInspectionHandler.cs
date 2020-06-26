@@ -104,17 +104,7 @@ namespace Lunra.Hothouse.Editor
 					switch (model.BuildingState.Value)
 					{
 						case BuildingStates.Constructing:
-							label += GetInventory(
-								"Construction",
-								model.ConstructionInventory.Value,
-								model.ConstructionInventoryCapacity.Value,
-								InventoryVisibilities.IfNotFull
-							);
-							
-							label += GetInventory(
-								"Construction Promised",
-								model.ConstructionInventoryPromised.Value
-							);
+							label += "\nConstruction " + model.ConstructionInventoryzzz;
 							break;
 						case BuildingStates.Salvaging:
 							label += GetInventory(

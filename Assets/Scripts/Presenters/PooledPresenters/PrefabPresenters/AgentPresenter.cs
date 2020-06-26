@@ -125,7 +125,10 @@ namespace Lunra.Hothouse.Presenters
 					var building = Game.Buildings.FirstOrDefaultActive(Model.InventoryPromise.Value.TargetId);
 				
 					if (building == null) Debug.LogError("Cannot find an active building with id \"" + Model.InventoryPromise.Value.TargetId + "\" to cancel out promise operation: " + Model.InventoryPromise.Value.Operation+", this should never happen");
-					else building.ConstructionInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory;
+					else
+					{
+						building.ConstructionInventoryzzz.RemoveReserved(Model.InventoryPromise.Value.Inventory);
+					}
 					
 					break;
 				case InventoryPromise.Operations.CleanupWithdrawal:

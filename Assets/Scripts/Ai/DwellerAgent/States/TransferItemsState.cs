@@ -12,11 +12,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public struct Target
 		{
-			public readonly Action<Inventory> SetDestination;
+			public readonly Action<Inventory> AddToDestination;
 			public readonly Func<Inventory> GetDestination;
 			public readonly Func<Inventory.Types, int> GetDestinationCapacity;
 			
-			public readonly Action<Inventory> SetSource;
+			public readonly Action<Inventory> RemoveFromSource;
 			public readonly Func<Inventory> GetSource;
 			
 			public readonly Inventory ItemsToTransfer;
@@ -25,20 +25,20 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public readonly Action Done;
 
 			public Target(
-				Action<Inventory> setDestination,
+				Action<Inventory> addToDestination,
 				Func<Inventory> getDestination,
 				Func<Inventory.Types, int> getDestinationCapacity,
-				Action<Inventory> setSource,
+				Action<Inventory> removeFromSource,
 				Func<Inventory> getSource,
 				Inventory itemsToTransfer,
 				float transferCooldown,
 				Action done = null
 			)
 			{
-				SetDestination = setDestination;
+				AddToDestination = addToDestination;
 				GetDestination = getDestination;
 				GetDestinationCapacity = getDestinationCapacity;
-				SetSource = setSource;
+				RemoveFromSource = removeFromSource;
 				GetSource = getSource;
 				ItemsToTransfer = itemsToTransfer;
 				TransferCooldown = transferCooldown;
@@ -48,10 +48,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public Target NewItemsToUnload(Inventory itemsToUnload)
 			{
 				return new Target(
-					SetDestination,
+					AddToDestination,
 					GetDestination,
 					GetDestinationCapacity,
-					SetSource,
+					RemoveFromSource,
 					GetSource,
 					itemsToUnload,
 					TransferCooldown,
@@ -101,8 +101,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 			// TODO: The amount transfered at a time should probably be defined somewhere and not hardcoded...
 			itemToUnload.Weight = 1;
 
-			target.SetDestination(target.GetDestination() + itemToUnload);
-			target.SetSource(target.GetSource() - itemToUnload);
+			target.AddToDestination(itemToUnload.ToInventory());
+			target.RemoveFromSource(itemToUnload.ToInventory());
 			
 			target = target.NewItemsToUnload(target.ItemsToTransfer - itemToUnload);
 		}

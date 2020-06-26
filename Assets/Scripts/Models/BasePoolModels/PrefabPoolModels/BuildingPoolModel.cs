@@ -404,7 +404,7 @@ namespace Lunra.Hothouse.Models
 			model.InventoryCapacity.Value = info.InventoryCapacity;
 			model.InventoryPermission.Value = info.InventoryPermission;
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
-			model.ConstructionInventoryCapacity.Value = info.ConstructionInventoryCapacity;
+			model.ConstructionInventoryzzz.Reset(info.ConstructionInventoryCapacity);
 			model.SalvageInventory.Value = info.SalvageInventory;
 			model.Light.IsLightCalculationsEnabled.Value = false;
 			model.Light.LightFuel.Value = info.LightFuel;
