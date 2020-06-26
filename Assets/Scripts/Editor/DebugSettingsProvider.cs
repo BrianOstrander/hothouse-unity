@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lunra.Core;
@@ -168,6 +169,67 @@ namespace Lunra.Hothouse.Editor
 						10f
 					);
 				}
+			}
+			
+			if (GUILayout.Button("Test inventory component"))
+			{
+				var testInventory = new InventoryComponent();
+				
+				testInventory.Reset(
+					InventoryCapacity.ByIndividualWeight(
+						new Inventory(
+							new Dictionary<Inventory.Types, int>
+							{
+								{ Inventory.Types.Rations, 10 },
+								{ Inventory.Types.Scrap, 10 },
+								{ Inventory.Types.Stalks, 10 }
+							}
+						)	
+					)
+				);
+				
+				Debug.Log(testInventory);
+
+				testInventory.Add((Inventory.Types.Rations, 10).ToInventory());
+
+				Debug.Log("Added 10 Rations - " + testInventory);
+				
+				testInventory.Add((Inventory.Types.Rations, 10).ToInventory());
+				
+				Debug.Log("Added 10 Rations - " + testInventory);
+				
+				testInventory.Add((Inventory.Types.Scrap, 5).ToInventory());
+				
+				Debug.Log("Added 5 Scrap - " + testInventory);
+				
+				// testInventory.Add((Inventory.Types.Scrap, 5).ToInventory());
+				//
+				// Debug.Log("Added 5 Scrap - " + testInventory);
+				
+				testInventory.AddForbidden((Inventory.Types.Scrap, 5).ToInventory());
+				
+				Debug.Log("AddForbidden 5 Scrap - " + testInventory);
+				
+				testInventory.AddReserved((Inventory.Types.Scrap, 5).ToInventory());
+				
+				Debug.Log("AddReserved 5 Scrap - " + testInventory);
+
+				testInventory.RemoveForbidden((Inventory.Types.Scrap, 5).ToInventory());
+				
+				Debug.Log("RemoveForbidden 5 Scrap - " + testInventory);
+				
+				testInventory.RemoveReserved((Inventory.Types.Scrap, 5).ToInventory());
+				
+				Debug.Log("RemoveReserved 5 Scrap - " + testInventory);
+
+				// var gen = new Demon();
+				// for (var i = 0; i < 10; i++)
+				// {
+				// 	
+				// 	
+				// }
+				
+				Debug.Log("------");
 			}
 		}
 		

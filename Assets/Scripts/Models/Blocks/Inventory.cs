@@ -31,6 +31,18 @@ namespace Lunra.Hothouse.Models
 			)	
 		);
 		
+		public static Inventory FromDictionary(Dictionary<Types, int> entries) => new Inventory(entries);
+		public static Inventory FromEntry(Types type, int weight) => FromEntries((type, weight));
+		public static Inventory FromEntries(params (Types Type, int Weight)[] entries)
+		{
+			return FromDictionary(
+				entries.ToDictionary(
+					entry => entry.Type,
+					entry => entry.Weight
+				)
+			);
+		}
+		
 		public static Types[] ValidTypes = EnumExtensions.GetValues(Types.Unknown);
 		
 		[JsonProperty] readonly ReadOnlyDictionary<Types, int> entries;
@@ -52,7 +64,9 @@ namespace Lunra.Hothouse.Models
 		public Inventory(Dictionary<Types, int> entries)
 		{
 			this.entries = new ReadOnlyDictionary<Types, int>(entries);
-			TotalWeight = entries.Select(kv => kv.Value).Sum();
+
+			try { TotalWeight = entries.Select(kv => kv.Value).Sum(); }
+			catch (OverflowException) { TotalWeight = int.MaxValue; }
 			
 			Assert.IsTrue(
 				entries.None(e => e.Value < 0),
@@ -246,5 +260,7 @@ namespace Lunra.Hothouse.Models
 			foreach (var entry in entries) result += entry;
 			return result;
 		}
+
+		public static Inventory ToInventory(this (Inventory.Types Type, int Weight) entry) => Inventory.FromEntry(entry.Type, entry.Weight);
 	}
 }
