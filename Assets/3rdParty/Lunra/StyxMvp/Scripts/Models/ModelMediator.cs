@@ -488,7 +488,7 @@ namespace Lunra.StyxMvp.Models
 			}
 		}
 
-		public string CreateUniqueId() { return Guid.NewGuid().ToString().Replace("-", "_"); }
+		public string CreateUniqueId() => Guid.NewGuid().ToString();
 
 		protected abstract void OnRead(string path, Action<ReadWriteRequest> done);
 	}

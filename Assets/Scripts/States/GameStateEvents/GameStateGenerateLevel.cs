@@ -221,7 +221,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		{
 			var randomJobPool = EnumExtensions.GetValues(Jobs.Unknown, Jobs.None);
 			
-			var requiredJobs = new Jobs[]
+			var requiredJobs = new []
 			{
 				Jobs.Laborer,
 				Jobs.Laborer,
@@ -249,6 +249,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				else dweller.Job.Value = generator.GetNextFrom(randomJobPool);
 
 				dweller.Name.Value = payload.Game.DwellerNames.GetName(generator);
+				dweller.IsDebugging = true;
 			}
 
 			done();
@@ -292,6 +293,16 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				).normalized,
 				Vector3.up
 			);
+			
+			// Debugging Begin
+			var test = payload.Game.Buildings.Activate(
+				Buildings.Bedroll,
+				spawn.Id.Value,
+				position + (Vector3.back * 2f),
+				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
+				BuildingStates.Constructing
+			);
+			// Debugging End
 			
 			done();
 		}
@@ -387,7 +398,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 						payload.Game.Debris.Activate(
 							debrisId,
 							room.RoomTransform.Id.Value,
-							position
+							position,
+							generator.GetNextRotation()
 						);
 
 						return true;

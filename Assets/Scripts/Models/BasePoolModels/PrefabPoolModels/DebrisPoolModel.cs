@@ -29,22 +29,21 @@ namespace Lunra.Hothouse.Models
 		public DebrisModel Activate(
 			string prefabId,
 			string roomId,
-			Vector3 position
+			Vector3 position,
+			Quaternion rotation
 		)
 		{
 			var result = Activate(
-				ValidPrefabIds.Random(),
+				prefabId,
 				roomId,
 				position,
-				RandomRotation,
+				rotation,
 				model => Reset(model)
 			);
 			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 		
-		Quaternion RandomRotation => Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
-
 		void Reset(
 			DebrisModel model
 		)

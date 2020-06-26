@@ -81,6 +81,8 @@ namespace Lunra.NumberDemon
 			if (entries == null || entries.None()) return fallback;
 			return entries.ElementAt(GetNextInteger(0, entries.Count()));
 		}
+		
+		public Quaternion GetNextRotation() => Quaternion.AngleAxis(GetNextFloat(0f, 360f), Vector3.up);
 		#endregion
 
 	}
