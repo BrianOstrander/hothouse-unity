@@ -8,7 +8,12 @@ using Lunra.StyxMvp.Models;
 namespace Lunra.Hothouse.Models
 {
 	public class BuildingModel : PrefabModel,
-		ILightModel, IEnterableModel, IBoundaryModel, IHealthModel, IClaimOwnershipModel, IConstructionModel
+		ILightModel,
+		IBoundaryModel,
+		IHealthModel,
+		IClaimOwnershipModel,
+		IConstructionModel//,
+		// IInventoryModel
 	{
 		#region Serialized
 		[JsonProperty] Buildings type;

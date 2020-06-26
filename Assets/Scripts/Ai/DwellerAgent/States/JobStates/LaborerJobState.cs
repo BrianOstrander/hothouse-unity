@@ -64,14 +64,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 							}
 						}
 
-						// var nonPromisedInventory = kv.Key.ConstructionInventoryCapacity.Value.GetCapacityFor(
-						// 	kv.Key.ConstructionInventory.Value + kv.Key.ConstructionInventoryPromised.Value
-						// );
-						
 						var nonPromisedInventory = kv.Key.ConstructionInventoryzzz.AvailableCapacity.Value.GetCapacityFor(
 							kv.Key.ConstructionInventoryzzz.All.Value + kv.Key.ConstructionInventoryzzz.ReservedCapacity.Value.GetMaximum()
 						);
-
+						
 						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Value, out var intersection))
 						{
 							agent.InventoryCapacity.Value.GetClamped(
@@ -165,7 +161,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void Begin()
 		{
-			Debug.Break();
 			switch (step)
 			{
 				case Steps.Unknown:
@@ -177,6 +172,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				// Building must have been destroyed...
 				Agent.InventoryPromise.Value = InventoryPromise.Default();
 				step = Steps.Unknown;
+				Debug.LogError("Need to check that we're not on the way to navigating to the item cache! must unforbid anything!");
 				return;	
 			}
 			
@@ -241,10 +237,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				transferState.SetTarget(
 					new TransferItemsState<LaborerJobState>.Target(
-						i => Agent.Inventory.Value = i,
+						i => Agent.Inventory.Value += i,
 						() => Agent.Inventory.Value,
 						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
-						i => target.SalvageInventory.Value = i,
+						i => target.SalvageInventory.Value -= i,
 						() => target.SalvageInventory.Value,
 						itemsToLoad,
 						Agent.WithdrawalCooldown.Value
@@ -257,7 +253,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			TransferItemsState<LaborerJobState> transferState;
 			BuildingModel target;
-			InventoryPromise promise;
 
 			public ToWithdrawalItemsFromCache(TransferItemsState<LaborerJobState> transferState)
 			{
@@ -266,37 +261,43 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
+				if (Agent.InventoryPromise.Value.Operation == InventoryPromise.Operations.None) return false;
 
-				target = GetNearestItemSource(
-					Game,
-					Agent,
-					out _,
-					out var entrancePosition,
-					out promise
-				);
+				if (!Agent.InventoryPromise.Value.Target.TryGetInstance(Game, out target))
+				{
+					// Target must have been destroyed...
+					Debug.LogError("Target for inventory promise was destroyed, but the inventory promise was not reset? This should not occur\n"+Agent.InventoryPromise.Value);
+					return false;
+				}
 
-				if (target == null) return false;
+				return target.Enterable.Entrances.Value
+					.Any(e => e.State == Entrance.States.Available && Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
 				
-				return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
+				// target = GetNearestItemSource(
+				// 	Game,
+				// 	Agent,
+				// 	out _,
+				// 	out var entrancePosition,
+				// 	out promise
+				// );
+				//
+				// if (target == null) return false;
+				//
+				// return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
 			{
-				promise.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite);
-				
-				Agent.InventoryPromise.Value = promise;
-				// constructionSite.ConstructionInventoryPromised.Value += promise.Inventory;
-				constructionSite.ConstructionInventoryzzz.AddReserved(promise.Inventory);
+				Debug.Log("Unforbid items here");
 
 				transferState.SetTarget(
 					new TransferItemsState<LaborerJobState>.Target(
-						i => Agent.Inventory.Value = i,
+						i => Agent.Inventory.Value += i,
 						() => Agent.Inventory.Value,
 						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
-						i => target.Inventory.Value = i,
+						i => target.Inventory.Value -= i,
 						() => target.Inventory.Value,
-						promise.Inventory,
+						Agent.InventoryPromise.Value.Inventory,
 						Agent.WithdrawalCooldown.Value
 					)
 				);
@@ -327,8 +328,14 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				// promise.
+				Debug.Break();
 				
+				promise.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite);
+				
+				Debug.Log("Forbid items here");
+				constructionSite.ConstructionInventoryzzz.AddReserved(promise.Inventory);
+
+				Agent.InventoryPromise.Value = promise;
 				Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
 			}
 		}
@@ -346,11 +353,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
-				if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory))
-				{
-					Debug.LogError("This should not be able to happen!");
-					return false;
-				}
+				if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
 
 				if (Agent.InventoryPromise.Value.Target.TryGetInstance(Game, out target))
 				{
@@ -380,8 +383,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 					new TransferItemsState<LaborerJobState>.Target(
 						i => target.ConstructionInventoryzzz.RemoveReserved(i).Add(i),
 						() => target.ConstructionInventoryzzz.All.Value,
-						i => target.ConstructionInventoryzzz.AvailableCapacity.Value.GetCapacityFor(target.ConstructionInventoryzzz.Available.Value, i),
-						i => Agent.Inventory.Value = i,
+						i => target.ConstructionInventoryzzz.AllCapacity.Value.GetCapacityFor(target.ConstructionInventoryzzz.All.Value, i),
+						i => Agent.Inventory.Value -= i,
 						() => Agent.Inventory.Value,
 						Agent.InventoryPromise.Value.Inventory,
 						Agent.DepositCooldown.Value,

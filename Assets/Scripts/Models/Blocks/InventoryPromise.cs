@@ -5,7 +5,7 @@ namespace Lunra.Hothouse.Models
 	public struct InventoryPromise
 	{
 		public static InventoryPromise Default() => new InventoryPromise(
-			null,
+			InstanceId.Null(), 
 			Operations.None,
 			Inventory.Empty
 		);
@@ -41,5 +41,7 @@ namespace Lunra.Hothouse.Models
 				inventory
 			);
 		}
+
+		public override string ToString() => Target + "\nOperation: " + Operation + "\nInventory " + Inventory;
 	}
 }

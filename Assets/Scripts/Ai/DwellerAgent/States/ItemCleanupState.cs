@@ -102,10 +102,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				transferState.SetTarget(
 					new TransferItemsState<ItemCleanupState<S>>.Target(
-						i => target.Inventory.Value = i,
+						i => target.Inventory.Value += i,
 						() => target.Inventory.Value,
 						i => target.InventoryCapacity.Value.GetCapacityFor(target.Inventory.Value, i),
-						i => Agent.Inventory.Value = i,
+						i => Agent.Inventory.Value -= i,
 						() => Agent.Inventory.Value,
 						new Inventory(itemsToTransfer),
 						Agent.DepositCooldown.Value
@@ -181,10 +181,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				transferState.SetTarget(
 					new TransferItemsState<ItemCleanupState<S>>.Target(
-						i => Agent.Inventory.Value = i,
+						i => Agent.Inventory.Value += i,
 						() => Agent.Inventory.Value,
 						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
-						i => target.Inventory.Value = i,
+						i => target.Inventory.Value -= i,
 						() => target.Inventory.Value,
 						new Inventory(itemsToTransfer),
 						Agent.WithdrawalCooldown.Value,

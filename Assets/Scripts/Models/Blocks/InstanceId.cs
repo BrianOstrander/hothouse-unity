@@ -143,6 +143,8 @@ namespace Lunra.Hothouse.Models
 			
 			return instance != null;
 		}
+
+		public override string ToString() => Model.ShortenId(Id) + " : " + Type + " [ " + (cachedInstance == null ? "not cached" : "cached") + " ]";
 	}
 
 	public static class InstanceIdExtensions

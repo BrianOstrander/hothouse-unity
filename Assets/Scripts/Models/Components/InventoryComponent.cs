@@ -9,6 +9,11 @@ namespace Lunra.Hothouse.Models
 	{
 		InventoryComponent ConstructionInventoryzzz { get; }
 	}
+	
+	// public interface IInventoryModel : IEnterableModel
+	// {
+	// 	ListenerProperty<Inventory> Inventory { get; }
+	// }
 
 	public class InventoryComponent : Model
 	{

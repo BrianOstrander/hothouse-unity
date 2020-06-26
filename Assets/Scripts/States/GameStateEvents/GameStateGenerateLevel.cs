@@ -233,7 +233,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 			for (var i = 0; i < 1; i++)
 			{
-				var position = spawn.Transform.Position.Value + (Vector3.forward * 2f);
+				var position = spawn.Transform.Position.Value + (Vector3.forward * (4f + i));
 
 				if (Physics.Raycast(new Ray(position, Vector3.down), out var hit, 40f, LayerMasks.Floor))
 				{
@@ -249,7 +249,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				else dweller.Job.Value = generator.GetNextFrom(randomJobPool);
 
 				dweller.Name.Value = payload.Game.DwellerNames.GetName(generator);
-				dweller.IsDebugging = true;
+				dweller.IsDebugging = i == 0;
 			}
 
 			done();
