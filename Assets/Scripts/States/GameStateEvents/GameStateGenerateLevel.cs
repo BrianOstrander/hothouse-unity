@@ -300,7 +300,39 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			// Debugging Begin
 			
-			wagon.Inventory.Add(Inventory.FromEntry(Inventory.Types.Stalks, 2));
+			// wagon.Inventory.Add(Inventory.FromEntry(Inventory.Types.Stalks, 2));
+
+			payload.Game.ItemDrops.Activate(
+				"default",
+				spawn.Id.Value,
+				position,
+				Quaternion.identity,
+				m =>
+				{
+					m.Inventory.Reset(
+						InventoryPermission.WithdrawalForJobs(Jobs.Laborer),
+						InventoryCapacity.Unlimited()
+					);
+					m.Inventory.Add(Inventory.FromEntry(Inventory.Types.Stalks, 1));
+					m.Job.Value = Jobs.Laborer;
+				}
+			);
+			
+			payload.Game.ItemDrops.Activate(
+				"default",
+				spawn.Id.Value,
+				position,
+				Quaternion.identity,
+				m =>
+				{
+					m.Inventory.Reset(
+						InventoryPermission.WithdrawalForJobs(Jobs.Laborer),
+						InventoryCapacity.Unlimited()
+					);
+					m.Inventory.Add(Inventory.FromEntry(Inventory.Types.Stalks, 2));
+					m.Job.Value = Jobs.Laborer;
+				}
+			);
 			
 			payload.Game.Buildings.Activate(
 				Buildings.Bedroll,

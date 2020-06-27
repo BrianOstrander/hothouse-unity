@@ -151,7 +151,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		class ToWithdrawalItemsFromNearestItemDrop : AgentTransition<ItemCleanupState<S>, TransferItemsState<ItemCleanupState<S>>, GameModel, DwellerModel>
 		{
 			TransferItemsState<ItemCleanupState<S>> transferState;
-			ItemDropModel target;
+			IInventoryModel source;
 
 			public ToWithdrawalItemsFromNearestItemDrop(TransferItemsState<ItemCleanupState<S>> transferState)
 			{
@@ -163,9 +163,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.CleanupWithdrawal) return false;
 
-				if (Agent.InventoryPromise.Value.Target.TryGetInstance<ItemDropModel>(Game, out target))
+				if (Agent.InventoryPromise.Value.Source.TryGetInstance(Game, out source))
 				{
-					return Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), target.Transform.Position.Value.NewY(0f)));
+					return Mathf.Approximately(0f, Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), source.Transform.Position.Value.NewY(0f)));
 				}
 				
 				// It might happen if the item drop is destroyed...
@@ -175,25 +175,24 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				var itemsToTransfer = new Dictionary<Inventory.Types, int>();
-				
-				foreach (var validItem in SourceState.validItems) itemsToTransfer.Add(validItem, target.Inventory.Value[validItem]);
-				
 				transferState.SetTarget(
 					new TransferItemsState<ItemCleanupState<S>>.Target(
 						i => Agent.Inventory.Value += i,
 						() => Agent.Inventory.Value,
 						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
-						i => target.Inventory.Value -= i,
-						() => target.Inventory.Value,
-						new Inventory(itemsToTransfer),
+						i =>
+						{
+							source.Inventory.RemoveForbidden(i);
+							source.Inventory.Remove(i);	
+						},
+						() => source.Inventory.All.Value,
+						Agent.InventoryPromise.Value.Inventory,
 						Agent.WithdrawalCooldown.Value,
 						() =>
 						{
-							target.WithdrawalInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory;
+							Debug.Log("don???");
 							Agent.InventoryPromise.Value = InventoryPromise.Default();
-						}
-					)
+						})
 				);
 			}
 		}
@@ -203,7 +202,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			NavMeshPath targetPath = new NavMeshPath();
 			InventoryPromise promise;
 			Inventory inventoryToWithdrawal;
-			ItemDropModel target;
+			ItemDropModel source;
 
 			public override bool IsTriggered()
 			{
@@ -217,13 +216,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 					out targetPath,
 					out promise,
 					out inventoryToWithdrawal,
-					out target
+					out source
 				);
 			}
 
 			public override void Transition()
 			{
-				target.WithdrawalInventoryPromised.Value += inventoryToWithdrawal;
+				source.Inventory.AddForbidden(inventoryToWithdrawal);
 
 				Agent.InventoryPromise.Value = promise;
 				

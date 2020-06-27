@@ -179,7 +179,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					);
 					if (isValid)
 					{
-						itemsAvailable = target.Inventory.Value.Entries
+						itemsAvailable = target.Inventory.Available.Value.Entries
 							.Where(i => 0 < i.Weight && items.Contains(i.Type))
 							.Select(i => i.Type)
 							.ToArray();

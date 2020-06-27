@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
@@ -167,36 +168,50 @@ namespace Lunra.Hothouse.Ai.Dweller
 				case Steps.Unknown:
 					return;
 			}
-			
-			if (!Agent.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite))
-			{
-				// Building must have been destroyed...
-				Agent.InventoryPromise.Value = InventoryPromise.Default();
-				step = Steps.Unknown;
-				Debug.LogError("Need to check that we're not on the way to navigating to the item cache! must unforbid anything!");
-				return;	
-			}
-			
-			switch (step)
-			{
-				case Steps.WithdrawingItemsFromCache:
-					if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory))
-					{
-						// The dweller was unable to pull all the resources it wanted to, so we're going to correct the
-						// amount we promised
-						Agent.InventoryPromise.Value.Inventory.Intersects(
-							Agent.Inventory.Value,
-							out var newPromise
-						);
-						// constructionSite.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory - newPromise;
-						constructionSite.ConstructionInventory.RemoveReserved(Agent.InventoryPromise.Value.Inventory - newPromise);
 
-						Agent.InventoryPromise.Value = Agent.InventoryPromise.Value.NewInventory(newPromise);
+			switch (Agent.InventoryPromise.Value.Operation)
+			{
+				case InventoryPromise.Operations.None:
+					break;
+				case InventoryPromise.Operations.ConstructionDeposit:
+					if (!Agent.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite))
+					{
+						// Building must have been destroyed...
+						Agent.InventoryPromise.Value = InventoryPromise.Default();
+						step = Steps.Unknown;
+						Debug.LogError("Need to check that we're not on the way to navigating to the item cache! must unforbid anything!");
+						return;	
 					}
+					
+					switch (step)
+					{
+						case Steps.WithdrawingItemsFromCache:
+							if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory))
+							{
+								// The dweller was unable to pull all the resources it wanted to, so we're going to correct the
+								// amount we promised
+								Agent.InventoryPromise.Value.Inventory.Intersects(
+									Agent.Inventory.Value,
+									out var newPromise
+								);
+								// constructionSite.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory - newPromise;
+								constructionSite.ConstructionInventory.RemoveReserved(Agent.InventoryPromise.Value.Inventory - newPromise);
+
+								Agent.InventoryPromise.Value = Agent.InventoryPromise.Value.NewInventory(newPromise);
+							}
+							break;
+					}
+			
+					step = Steps.Unknown;
+					
+					break;
+				case InventoryPromise.Operations.CleanupWithdrawal:
+					Agent.InventoryPromise.Value = InventoryPromise.Default();
+					break;
+				default:
+					Debug.LogError("Unrecognized InventoryPromise.Operation: "+Agent.InventoryPromise.Value.Operation);
 					break;
 			}
-			
-			step = Steps.Unknown;
 		}
 		
 		class ToWithdrawalItemsFromSalvageSite : AgentTransition<TransferItemsState<LaborerJobState>, GameModel, DwellerModel>
@@ -253,7 +268,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		class ToWithdrawalItemsFromCache : AgentTransition<LaborerJobState, TransferItemsState<LaborerJobState>, GameModel, DwellerModel>
 		{
 			TransferItemsState<LaborerJobState> transferState;
-			BuildingModel source;
+			IInventoryModel source;
 
 			public ToWithdrawalItemsFromCache(TransferItemsState<LaborerJobState> transferState)
 			{

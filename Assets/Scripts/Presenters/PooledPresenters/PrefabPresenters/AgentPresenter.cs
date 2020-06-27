@@ -111,7 +111,7 @@ namespace Lunra.Hothouse.Presenters
 					Quaternion.identity,
 					m =>
 					{
-						m.Inventory.Value = Model.Inventory.Value;
+						m.Inventory.Add(Model.Inventory.Value);
 						m.Job.Value = Jobs.None;
 						m.Transform.Position.Value = Model.Transform.Position.Value;
 						m.Transform.Rotation.Value = Quaternion.identity;
@@ -138,10 +138,14 @@ namespace Lunra.Hothouse.Presenters
 					}
 					break;
 				case InventoryPromise.Operations.CleanupWithdrawal:
-
-					if (Model.InventoryPromise.Value.Target.TryGetInstance<ItemDropModel>(Game, out var cleanupWithdrawalTarget))
+					if (Model.InventoryPromise.Value.Target.TryGetInstance<IInventoryModel>(Game, out var cleanupNextTarget))
 					{
-						cleanupWithdrawalTarget.WithdrawalInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory; 
+						cleanupNextTarget.Inventory.RemoveReserved(Model.InventoryPromise.Value.Inventory); 
+					}
+					
+					if (Model.InventoryPromise.Value.Source.TryGetInstance<IInventoryModel>(Game, out var cleanupNextSource))
+					{
+						cleanupNextSource.Inventory.RemoveForbidden(Model.InventoryPromise.Value.Inventory); 
 					}
 					break;
 				default:

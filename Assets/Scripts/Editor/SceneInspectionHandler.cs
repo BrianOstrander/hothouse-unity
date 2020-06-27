@@ -184,19 +184,23 @@ namespace Lunra.Hothouse.Editor
 			{
 				foreach (var model in gameState.Payload.Game.ItemDrops.AllActive)
 				{
+					DrawEntranceInspection(model);
+				
 					var label = GetIdLabel(model);
 					
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
+
+					label += "\n" + model.Inventory;
 					
-					label += GetInventory(
-						"Inventory",
-						model.Inventory.Value
-					);
+					// label += GetInventory(
+					// 	"Inventory",
+					// 	model.Inventory.All.Value
+					// );
 					
-					label += GetInventory(
-						"Cleanup Promised",
-						model.WithdrawalInventoryPromised.Value
-					);
+					// label += GetInventory(
+					// 	"Cleanup Promised",
+					// 	model.WithdrawalInventoryPromised.Value
+					// );
 
 					Handles.Label(
 						model.Transform.Position.Value + (Vector3.up * 1f),

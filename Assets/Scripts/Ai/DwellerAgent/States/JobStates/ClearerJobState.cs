@@ -122,7 +122,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 								Quaternion.identity,
 								itemDrop =>
 								{
-									itemDrop.Inventory.Value = overflow;
+									itemDrop.Inventory.Add(overflow);
 									itemDrop.Job.Value = Jobs.Clearer;
 								}
 							);

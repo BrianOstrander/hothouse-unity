@@ -204,9 +204,8 @@ namespace Lunra.Hothouse.Ai
 					possibleItemDrop =>
 					{
 						if (!validJobs.Contains(possibleItemDrop.Job.Value)) return false;
-						var nonPromisedInventory = possibleItemDrop.Inventory.Value - possibleItemDrop.WithdrawalInventoryPromised.Value;
-						if (nonPromisedInventory.IsEmpty) return false;
-						return itemsWithCapacity.Any(i => 0 < nonPromisedInventory[i]);
+						if (possibleItemDrop.Inventory.Available.Value.IsEmpty) return false;
+						return itemsWithCapacity.Any(i => 0 < possibleItemDrop.Inventory.Available.Value[i]);
 					}
 				)
 				.OrderBy(t => Vector3.Distance(agent.Transform.Position.Value, t.Transform.Position.Value))
@@ -224,13 +223,13 @@ namespace Lunra.Hothouse.Ai
 			
 			agent.InventoryCapacity.Value.GetCapacityFor(agent.Inventory.Value)
 				.Intersects(
-					target.Inventory.Value - target.WithdrawalInventoryPromised.Value,
+					target.Inventory.Available.Value,
 					out inventoryToWithdrawal
 				);
 
 			promise = new InventoryPromise(
-				null, // TODO THIS WILL CAUSE ERRORS BUT OH WELL
 				InstanceId.New(target),
+				InstanceId.Null(), // THIS MAY CAUSE AN ERROR
 				InventoryPromise.Operations.CleanupWithdrawal,
 				inventoryToWithdrawal
 			);

@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				Quaternion.identity,
 				itemDrop =>
 				{
-					itemDrop.Inventory.Value = Agent.Inventory.Value;
+					itemDrop.Inventory.Add(Agent.Inventory.Value);
 					itemDrop.Job.Value = Agent.Job.Value;
 				}
 			);
