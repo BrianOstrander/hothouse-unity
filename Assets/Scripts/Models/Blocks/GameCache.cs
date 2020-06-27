@@ -43,8 +43,8 @@ namespace Lunra.Hothouse.Models
 			
 			foreach (var building in game.Buildings.AllActive.Where(b => b.IsBuildingState(BuildingStates.Operating) && !b.Light.IsLight.Value))
 			{
-				globalInventory += building.Inventory.Value;
-				globalInventoryMaximumByIndividualWeight += building.InventoryCapacity.Value.GetMaximum();
+				globalInventory += building.Inventory.All.Value;
+				globalInventoryMaximumByIndividualWeight += building.Inventory.AllCapacity.Value.GetMaximum();
 			}
 
 			result.GlobalInventory = globalInventory;

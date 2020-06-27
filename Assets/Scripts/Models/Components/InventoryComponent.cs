@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Models
 	
 	public interface IInventoryModel : IEnterableModel
 	{
-		ListenerProperty<Inventory> Inventory { get; }
+		InventoryComponent Inventory { get; }
 	}
 
 	public class InventoryComponent : Model
@@ -218,6 +218,9 @@ namespace Lunra.Hothouse.Models
 
 			switch (capacity.Clamping)
 			{
+				case InventoryCapacity.Clamps.None:
+					reservedCapacityListener.Value = InventoryCapacity.None();
+					break;
 				case InventoryCapacity.Clamps.Unlimited:
 					reservedCapacityListener.Value = InventoryCapacity.Unlimited();		
 					break;

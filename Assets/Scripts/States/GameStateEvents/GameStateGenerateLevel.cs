@@ -280,8 +280,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
-			wagon.Inventory.Value += (Inventory.Types.Stalks, 100);
-			wagon.Inventory.Value += (Inventory.Types.Rations, 100);
+			// wagon.Inventory.Add(
+			// 	Inventory.FromEntries(
+			// 		(Inventory.Types.Stalks, 100),
+			// 		(Inventory.Types.Rations, 100)
+			// 	)
+			// );
 			
 			payload.Game.WorldCamera.Transform.Position.Value = bonfire.Transform.Position.Value;
 
@@ -296,7 +300,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			// Debugging Begin
 			
-			wagon.Inventory.Value = Inventory.FromEntry(Inventory.Types.Stalks, 2);
+			wagon.Inventory.Add(Inventory.FromEntry(Inventory.Types.Stalks, 2));
 			
 			payload.Game.Buildings.Activate(
 				Buildings.Bedroll,

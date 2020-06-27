@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Presenters
 				// ILightModel Bindings
 				Game.SimulationUpdate += OnLightSimulationUpdate;
 				Model.Light.LightState.Changed += OnLightState;
-				Model.Inventory.Changed += OnLightBuildingInventory;
+				Model.Inventory.All.Changed += OnLightBuildingInventory;
 				Model.BuildingState.Changed += OnLightBuildingState;
 			}
 
@@ -50,7 +50,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed += OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
-			Model.Inventory.Changed += OnBuildingInventory;
+			Model.Inventory.All.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
 			Model.BuildingState.Changed += OnBuildingState;
@@ -70,7 +70,7 @@ namespace Lunra.Hothouse.Presenters
 			// ILightModel UnBindings
 			Game.SimulationUpdate -= OnLightSimulationUpdate;
 			Model.Light.LightState.Changed -= OnLightState;
-			Model.Inventory.Changed -= OnLightBuildingInventory;
+			Model.Inventory.All.Changed -= OnLightBuildingInventory;
 			Model.BuildingState.Changed -= OnLightBuildingState;
 			
 			// Misc UnBindings
@@ -79,7 +79,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed -= OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			Model.Inventory.Changed -= OnBuildingInventory;
+			Model.Inventory.All.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
@@ -93,7 +93,7 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnSimulationInitialized()
 		{
-			OnBuildingInventory(Model.Inventory.Value);
+			OnBuildingInventory(Model.Inventory.All.Value);
 		}
 		
 		#region LightSourceModel Events
@@ -106,11 +106,11 @@ namespace Lunra.Hothouse.Presenters
 
 			if (Model.Light.LightFuelInterval.Value.IsDone)
 			{
-				var canRefuel = Model.Inventory.Value.Contains(Model.Light.LightFuel.Value);
+				var canRefuel = Model.Inventory.Available.Value.Contains(Model.Light.LightFuel.Value);
 
 				if (canRefuel)
 				{
-					Model.Inventory.Value -= Model.Light.LightFuel.Value;
+					Model.Inventory.Remove(Model.Light.LightFuel.Value);
 					Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Restarted();
 					if (View.Visible) View.LightFuelNormal = 1f;
 					return;
@@ -155,9 +155,9 @@ namespace Lunra.Hothouse.Presenters
 		protected virtual void OnLightBuildingInventory(Inventory inventory)
 		{
 			if (Model.Light.LightState.Value != LightStates.Extinguishing) return;
-			if (!Model.Inventory.Value.Contains(Model.Light.LightFuel.Value)) return;
+			if (!Model.Inventory.Available.Value.Contains(Model.Light.LightFuel.Value)) return;
 			
-			Model.Inventory.Value -= Model.Light.LightFuel.Value;
+			Model.Inventory.Remove(Model.Light.LightFuel.Value);
 			Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Restarted();
 			if (View.Visible) View.LightFuelNormal = 1f;
 			Model.Light.LightState.Value = LightStates.Fueled;
@@ -355,7 +355,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (quality.Cost.IsEmpty) return;
 
-			Model.Inventory.Value -= quality.Cost;
+			Model.Inventory.Remove(quality.Cost);
 		}
 		#endregion
 		

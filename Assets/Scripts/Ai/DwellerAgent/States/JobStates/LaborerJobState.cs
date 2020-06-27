@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				out entrancePosition,
 				possibleItemSource =>
 				{
-					if (possibleItemSource.Inventory.Value.IsEmpty) return false;
+					if (possibleItemSource.Inventory.Available.Value.IsEmpty) return false;
 					if (!possibleItemSource.InventoryPermission.Value.CanWithdrawal(agent.Job.Value)) return false;
 
 					var index = 0;
@@ -68,7 +68,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 							kv.Key.ConstructionInventory.All.Value + kv.Key.ConstructionInventory.ReservedCapacity.Value.GetMaximum()
 						);
 						
-						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Value, out var intersection))
+						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Available.Value, out var intersection))
 						{
 							agent.InventoryCapacity.Value.GetClamped(
 								intersection,
@@ -290,15 +290,17 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				Debug.Log("Unforbid items here");
-
 				transferState.SetTarget(
 					new TransferItemsState<LaborerJobState>.Target(
 						i => Agent.Inventory.Value += i,
 						() => Agent.Inventory.Value,
 						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
-						i => source.Inventory.Value -= i,
-						() => source.Inventory.Value,
+						i =>
+						{
+							source.Inventory.RemoveForbidden(i);
+							source.Inventory.Remove(i);
+						},
+						() => source.Inventory.All.Value,
 						Agent.InventoryPromise.Value.Inventory,
 						Agent.WithdrawalCooldown.Value
 					)
@@ -333,7 +335,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				promise.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite);
 			
-				// source.Inventory
+				source.Inventory.AddForbidden(promise.Inventory);
 				constructionSite.ConstructionInventory.AddReserved(promise.Inventory);
 
 				Agent.InventoryPromise.Value = promise;

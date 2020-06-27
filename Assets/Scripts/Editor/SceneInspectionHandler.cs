@@ -94,12 +94,14 @@ namespace Lunra.Hothouse.Editor
 						if (model.Light.IsLight.Value) label += "\nLight State: " + model.Light.LightState.Value;
 					}
 
-					label += GetInventory(
-						"Inventory",
-						model.Inventory.Value,
-						model.InventoryCapacity.Value,
-						InventoryVisibilities.IfMaximumGreaterThanZero
-					);
+					// label += GetInventory(
+					// 	"Inventory",
+					// 	model.Inventory.All.Value,
+					// 	model.Inventory.AllCapacity.Value,
+					// 	InventoryVisibilities.IfMaximumGreaterThanZero
+					// );
+
+					label += "\nInventory " + model.Inventory;
 
 					switch (model.BuildingState.Value)
 					{

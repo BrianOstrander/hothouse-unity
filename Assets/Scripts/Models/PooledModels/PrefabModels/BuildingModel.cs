@@ -21,13 +21,7 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] BuildingStates buildingState;
 		[JsonIgnore] public ListenerProperty<BuildingStates> BuildingState { get; }
-		
-		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
-		[JsonIgnore] public ListenerProperty<Inventory> Inventory { get; }
-		
-		[JsonProperty] InventoryCapacity inventoryCapacity = Models.InventoryCapacity.None();
-		[JsonIgnore] public ListenerProperty<InventoryCapacity> InventoryCapacity { get; }
-		
+
 		[JsonProperty] InventoryPermission inventoryPermission = Models.InventoryPermission.AllForAnyJob();
 		[JsonIgnore] public ListenerProperty<InventoryPermission> InventoryPermission { get; }
 
@@ -46,6 +40,7 @@ namespace Lunra.Hothouse.Models
 		public HealthComponent Health { get; } = new HealthComponent();
 		public ClaimComponent Ownership { get; } = new ClaimComponent();
 		public InventoryComponent ConstructionInventory { get; } = new InventoryComponent();
+		public InventoryComponent Inventory { get; } = new InventoryComponent();
 		#endregion
 		
 		#region Non Serialized
@@ -61,8 +56,6 @@ namespace Lunra.Hothouse.Models
 		{
 			Type = new ListenerProperty<Buildings>(value => type = value, () => type);
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
-			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
-			InventoryCapacity = new ListenerProperty<InventoryCapacity>(value => inventoryCapacity = value, () => inventoryCapacity);
 			InventoryPermission = new ListenerProperty<InventoryPermission>(value => inventoryPermission = value, () => inventoryPermission);
 			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
 			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);

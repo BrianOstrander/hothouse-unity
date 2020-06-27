@@ -84,7 +84,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
-						return currentlyValidItems.Any(i => b.InventoryCapacity.Value.HasCapacityFor(b.Inventory.Value, i));
+						return currentlyValidItems.Any(i => b.Inventory.AvailableCapacity.Value.HasCapacityFor(b.Inventory.Available.Value, i));
 					},
 					Game.Buildings.AllActive
 				);
@@ -102,9 +102,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				transferState.SetTarget(
 					new TransferItemsState<ItemCleanupState<S>>.Target(
-						i => target.Inventory.Value += i,
-						() => target.Inventory.Value,
-						i => target.InventoryCapacity.Value.GetCapacityFor(target.Inventory.Value, i),
+						i => target.Inventory.Add(i),
+						() => target.Inventory.Available.Value,
+						i => target.Inventory.AvailableCapacity.Value.GetCapacityFor(target.Inventory.Available.Value, i),
 						i => Agent.Inventory.Value -= i,
 						() => Agent.Inventory.Value,
 						new Inventory(itemsToTransfer),
@@ -134,7 +134,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					b =>
 					{
 						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
-						return currentlyValidItems.Any(i => b.InventoryCapacity.Value.HasCapacityFor(b.Inventory.Value, i));
+						return currentlyValidItems.Any(i => b.Inventory.AvailableCapacity.Value.HasCapacityFor(b.Inventory.Available.Value, i));
 					},
 					Game.Buildings.AllActive
 				);
