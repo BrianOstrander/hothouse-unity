@@ -127,6 +127,15 @@ namespace Lunra.Hothouse.Presenters
 					{
 						constructionDepositTarget.ConstructionInventory.RemoveReserved(Model.InventoryPromise.Value.Inventory);
 					}
+					
+					var constructionInventory = Model.InventoryPromise.Value.Inventory - Model.Inventory.Value;
+					if (!constructionInventory.IsEmpty)
+					{
+						if (Model.InventoryPromise.Value.Source.TryGetInstance<IInventoryModel>(Game, out var constructionDepositSource))
+						{
+							constructionDepositSource.Inventory.RemoveForbidden(constructionInventory);
+						}
+					}
 					break;
 				case InventoryPromise.Operations.CleanupWithdrawal:
 

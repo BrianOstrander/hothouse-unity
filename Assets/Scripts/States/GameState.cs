@@ -107,15 +107,30 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 			
-			// App.Heartbeat.Wait(
+			App.Heartbeat.WaitForSeconds(
+				() =>
+				{
+					Debug.Log("Recalculating...");
+					var dweller0 = Payload.Game.Dwellers.AllActive
+						.First(d => d.InventoryPromise.Value.Operation != InventoryPromise.Operations.None);
+					
+					var dweller1 = Payload.Game.Dwellers.AllActive
+						.Last();
+
+					Damage.ApplyGeneric(999f, dweller0);
+
+					dweller1.IsDebugging = true;
+				},
+				2f
+			);
+			
+			// App.Heartbeat.WaitForCondition(
 			// 	() =>
 			// 	{
-			// 		Debug.Log("Recalculating...");
-			// 		Payload.Game.Doors.FirstActive().IsOpen.Value = true;
-			// 		// Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
+			// 		
 			// 	},
-			// 	6f
-			// );
+			// 	() => 
+			// )
 
 			// var spawnRoom = Payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
 			//

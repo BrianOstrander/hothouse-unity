@@ -214,7 +214,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					out _,
 					b =>
 					{
-						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
+						if (!b.Inventory.Permission.Value.CanDeposit(Agent.Job.Value)) return false;
 						
 						var itemsWithCapacity = items.Where(i => 0 < b.Inventory.AvailableCapacity.Value.GetCapacityFor(b.Inventory.Available.Value, i)).ToArray();
 						

@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					out var entrancePosition,
 					b =>
 					{
-						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
+						if (!b.Inventory.Permission.Value.CanDeposit(Agent.Job.Value)) return false;
 						return currentlyValidItems.Any(i => b.Inventory.AvailableCapacity.Value.HasCapacityFor(b.Inventory.Available.Value, i));
 					},
 					Game.Buildings.AllActive
@@ -133,7 +133,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					out _,
 					b =>
 					{
-						if (!b.InventoryPermission.Value.CanDeposit(Agent.Job.Value)) return false;
+						if (!b.Inventory.Permission.Value.CanDeposit(Agent.Job.Value)) return false;
 						return currentlyValidItems.Any(i => b.Inventory.AvailableCapacity.Value.HasCapacityFor(b.Inventory.Available.Value, i));
 					},
 					Game.Buildings.AllActive

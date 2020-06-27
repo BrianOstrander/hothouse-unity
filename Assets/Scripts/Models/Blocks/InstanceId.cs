@@ -37,6 +37,8 @@ namespace Lunra.Hothouse.Models
 					return Types.Seeker;
 				case DebrisModel _:
 					return Types.Debris;
+				case ItemDropModel _:
+					return Types.ItemDrop;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -53,7 +55,8 @@ namespace Lunra.Hothouse.Models
 			Room = 50,
 			Door = 60,
 			Seeker = 70,
-			Debris = 80
+			Debris = 80,
+			ItemDrop = 90
 		}
 
 		public Types Type { get; }
@@ -131,6 +134,12 @@ namespace Lunra.Hothouse.Models
 					break;
 				case Types.Seeker:
 					cachedInstance = game.Seekers.FirstOrDefaultActive(Id);
+					break;
+				case Types.Debris:
+					cachedInstance = game.Debris.FirstOrDefaultActive(Id);
+					break;
+				case Types.ItemDrop:
+					cachedInstance = game.ItemDrops.FirstOrDefaultActive(Id);
 					break;
 				default:
 					Debug.LogError("Unrecognized type: " + Type);

@@ -404,7 +404,6 @@ namespace Lunra.Hothouse.Models
 				info.InventoryPermission,
 				info.InventoryCapacity
 			);
-			model.InventoryPermission.Value = info.InventoryPermission;
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
 			model.ConstructionInventory.Reset(
 				InventoryPermission.DepositForJobs(Jobs.Laborer), 

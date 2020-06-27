@@ -159,7 +159,6 @@ namespace Lunra.Hothouse.Models
 		public void AddReserved(Inventory inventory)
 		{
 			if (inventory.IsEmpty) return;
-			// if (!AvailableCapacity.Value.GetMaximum().Contains(inventory)) Debug.LogError("Must reserve available capacity");
 			if (!AvailableCapacity.Value.GetCapacityFor(Available.Value).Contains(inventory)) Debug.LogError("Must reserve available capacity");
 
 			switch (ReservedCapacity.Value.Clamping)

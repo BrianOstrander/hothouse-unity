@@ -41,7 +41,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				possibleItemSource =>
 				{
 					if (possibleItemSource.Inventory.Available.Value.IsEmpty) return false;
-					if (!possibleItemSource.InventoryPermission.Value.CanWithdrawal(agent.Job.Value)) return false;
+					if (!possibleItemSource.Inventory.Permission.Value.CanWithdrawal(agent.Job.Value)) return false;
 
 					var index = 0;
 					while (index < validConstructionSites.Count)
@@ -274,18 +274,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				return source.Enterable.Entrances.Value
 					.Any(e => e.State == Entrance.States.Available && Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), e.Position.NewY(0f)) < Agent.TransferDistance.Value);
-				
-				// target = GetNearestItemSource(
-				// 	Game,
-				// 	Agent,
-				// 	out _,
-				// 	out var entrancePosition,
-				// 	out promise
-				// );
-				//
-				// if (target == null) return false;
-				//
-				// return Vector3.Distance(Agent.Transform.Position.Value.NewY(0f), entrancePosition.NewY(0f)) < Agent.TransferDistance.Value;
 			}
 
 			public override void Transition()
