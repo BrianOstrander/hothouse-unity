@@ -25,11 +25,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 						if (!possibleConstructionSite.IsBuildingState(BuildingStates.Constructing)) return false;
 						if (possibleConstructionSite.LightSensitive.IsNotLit) return false;
 
-						var nonReserved = possibleConstructionSite.ConstructionInventoryzzz.AllCapacity.Value.GetMaximum() - possibleConstructionSite.ConstructionInventoryzzz.ReservedCapacity.Value.GetMaximum();
+						var nonReserved = possibleConstructionSite.ConstructionInventory.AllCapacity.Value.GetMaximum() - possibleConstructionSite.ConstructionInventory.ReservedCapacity.Value.GetMaximum();
 						
 						if (nonReserved.IsEmpty) return false;
 
-						return !(nonReserved - possibleConstructionSite.ConstructionInventoryzzz.All.Value).IsEmpty;
+						return !(nonReserved - possibleConstructionSite.ConstructionInventory.All.Value).IsEmpty;
 					}
 				)
 				.ToDictionary(b => b, b => false);
@@ -64,8 +64,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 							}
 						}
 
-						var nonPromisedInventory = kv.Key.ConstructionInventoryzzz.AvailableCapacity.Value.GetCapacityFor(
-							kv.Key.ConstructionInventoryzzz.All.Value + kv.Key.ConstructionInventoryzzz.ReservedCapacity.Value.GetMaximum()
+						var nonPromisedInventory = kv.Key.ConstructionInventory.AvailableCapacity.Value.GetCapacityFor(
+							kv.Key.ConstructionInventory.All.Value + kv.Key.ConstructionInventory.ReservedCapacity.Value.GetMaximum()
 						);
 						
 						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Value, out var intersection))
@@ -189,7 +189,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 							out var newPromise
 						);
 						// constructionSite.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory - newPromise;
-						constructionSite.ConstructionInventoryzzz.RemoveReserved(Agent.InventoryPromise.Value.Inventory - newPromise);
+						constructionSite.ConstructionInventory.RemoveReserved(Agent.InventoryPromise.Value.Inventory - newPromise);
 
 						Agent.InventoryPromise.Value = Agent.InventoryPromise.Value.NewInventory(newPromise);
 					}
@@ -334,7 +334,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				promise.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite);
 			
 				// source.Inventory
-				constructionSite.ConstructionInventoryzzz.AddReserved(promise.Inventory);
+				constructionSite.ConstructionInventory.AddReserved(promise.Inventory);
 
 				Agent.InventoryPromise.Value = promise;
 				Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
@@ -382,9 +382,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 					// 	}
 					// )
 					new TransferItemsState<LaborerJobState>.Target(
-						i => target.ConstructionInventoryzzz.RemoveReserved(i).Add(i),
-						() => target.ConstructionInventoryzzz.All.Value,
-						i => target.ConstructionInventoryzzz.AllCapacity.Value.GetCapacityFor(target.ConstructionInventoryzzz.All.Value, i),
+						i => target.ConstructionInventory.RemoveReserved(i).Add(i),
+						() => target.ConstructionInventory.All.Value,
+						i => target.ConstructionInventory.AllCapacity.Value.GetCapacityFor(target.ConstructionInventory.All.Value, i),
 						i => Agent.Inventory.Value -= i,
 						() => Agent.Inventory.Value,
 						Agent.InventoryPromise.Value.Inventory,

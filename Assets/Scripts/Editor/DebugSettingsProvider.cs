@@ -176,6 +176,7 @@ namespace Lunra.Hothouse.Editor
 				var testInventory = new InventoryComponent();
 				
 				testInventory.Reset(
+					InventoryPermission.AllForAnyJob(), 
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>

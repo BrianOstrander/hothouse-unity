@@ -125,7 +125,7 @@ namespace Lunra.Hothouse.Presenters
 				case InventoryPromise.Operations.ConstructionDeposit:
 					if (Model.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var constructionDepositTarget))
 					{
-						constructionDepositTarget.ConstructionInventoryzzz.RemoveReserved(Model.InventoryPromise.Value.Inventory);
+						constructionDepositTarget.ConstructionInventory.RemoveReserved(Model.InventoryPromise.Value.Inventory);
 					}
 					break;
 				case InventoryPromise.Operations.CleanupWithdrawal:

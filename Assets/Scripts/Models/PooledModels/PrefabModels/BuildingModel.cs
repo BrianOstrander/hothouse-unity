@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Models
 		public BoundaryComponent Boundary { get; } = new BoundaryComponent();
 		public HealthComponent Health { get; } = new HealthComponent();
 		public ClaimComponent Ownership { get; } = new ClaimComponent();
-		public InventoryComponent ConstructionInventoryzzz { get; } = new InventoryComponent();
+		public InventoryComponent ConstructionInventory { get; } = new InventoryComponent();
 		#endregion
 		
 		#region Non Serialized

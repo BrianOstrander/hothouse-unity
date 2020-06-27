@@ -7,7 +7,7 @@ namespace Lunra.Hothouse.Models
 {
 	public interface IConstructionModel : IEnterableModel
 	{
-		InventoryComponent ConstructionInventoryzzz { get; }
+		InventoryComponent ConstructionInventory { get; }
 	}
 	
 	public interface IInventoryModel : IEnterableModel
@@ -17,15 +17,10 @@ namespace Lunra.Hothouse.Models
 
 	public class InventoryComponent : Model
 	{
-		// **InventoryComponent**
-		// - Inventory All *total resources in inventory*
-		// - Inventory Available *amount any dweller can do whatever with*
-		// - Inventory Forbidden *amount that a dweller has claimed*
-		// - Inventory Reserved *amount of empty space reserved*
-		// - InventoryCapacity AllCapacity *the maximum amount that can be stored here*
-		// - InventoryCapacity AvailableCapacity *equal to InventoryCapacity( AllCapacity.GetMaximum() - Reserved)*
-		
 		#region Serialized
+		[JsonProperty] InventoryPermission permission = InventoryPermission.AllForAnyJob();
+		[JsonProperty] public ListenerProperty<InventoryPermission> Permission { get; }
+		
 		[JsonProperty] Inventory all = Inventory.Empty;
 		readonly ListenerProperty<Inventory> allListener;
 		[JsonIgnore] public ReadonlyProperty<Inventory> All { get; }
@@ -56,6 +51,8 @@ namespace Lunra.Hothouse.Models
 
 		public InventoryComponent()
 		{
+			Permission = new ListenerProperty<InventoryPermission>(value => permission = value, () => permission);
+			
 			All = new ReadonlyProperty<Inventory>(
 				value => all = value,
 				() => all,
@@ -205,11 +202,14 @@ namespace Lunra.Hothouse.Models
 			
 			return this;
 		}
-
-		public void Reset() => Reset(AllCapacity.Value);
 		
-		public void Reset(InventoryCapacity capacity)
+		public void Reset(
+			InventoryPermission permission,
+			InventoryCapacity capacity
+		)
 		{
+			Permission.Value = permission;
+			
 			allListener.Value = Inventory.Empty;
 			availableListener.Value = Inventory.Empty;
 			forbiddenListener.Value = Inventory.Empty;
