@@ -36,14 +36,15 @@ namespace Lunra.Hothouse.Models
 		public BoundaryComponent Boundary { get; } = new BoundaryComponent();
 		public HealthComponent Health { get; } = new HealthComponent();
 		public ClaimComponent Ownership { get; } = new ClaimComponent();
-		public InventoryComponent ConstructionInventory { get; } = new InventoryComponent();
 		public InventoryComponent Inventory { get; } = new InventoryComponent();
+		public InventoryComponent ConstructionInventory { get; } = new InventoryComponent();
 		#endregion
 		
 		#region Non Serialized
 		[JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
 		
 		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
+		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
 		#endregion
 
 		public bool IsBuildingState(BuildingStates buildingState) => BuildingState.Value == buildingState;
@@ -56,6 +57,11 @@ namespace Lunra.Hothouse.Models
 			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
 			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
 			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
+			Inventories = new []
+			{
+				Inventory,
+				ConstructionInventory
+			};
 		}
 	}
 }

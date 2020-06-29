@@ -26,14 +26,14 @@ namespace Lunra.Hothouse.Models
 			overflow = Inventory.Empty;
 			if (inventory.IsEmpty) return false;
 			
-			var hasOverflow = Capacity.Value.AddClamped(
+			var hasOverflow = AllCapacity.Value.AddClamped(
 				All.Value,
 				inventory,
 				out var allReplacement,
 				out overflow
 			);
 
-			allListener.Value = allReplacement;
+			AllListener.Value = allReplacement;
 
 			return hasOverflow;
 		}
@@ -61,15 +61,15 @@ namespace Lunra.Hothouse.Models
 
 			overflow = inventory - maximumAvailableForRemoval;
 
-			allListener.Value -= maximumAvailableForRemoval;
+			AllListener.Value -= maximumAvailableForRemoval;
 
 			return !overflow.IsEmpty;
 		}
 		
 		public void Reset(InventoryCapacity capacity)
 		{
-			allListener.Value = Inventory.Empty;
-			capacityListener.Value = capacity;
+			AllListener.Value = Inventory.Empty;
+			AllCapacityListener.Value = capacity;
 		}
 
 		public override string ToString()
@@ -79,7 +79,7 @@ namespace Lunra.Hothouse.Models
 			{
 				result += "\n - " + itemType;
 				result += "\n\tStored: \t" + All.Value[itemType];
-				result += "\n\tCapacity: \t" + Capacity.Value.GetMaximumFor(itemType);
+				result += "\n\tCapacity: \t" + AllCapacity.Value.GetMaximumFor(itemType);
 				result += "\n";
 			}
 

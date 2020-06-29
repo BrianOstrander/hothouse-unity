@@ -5,26 +5,22 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IConstructionModel : IEnterableModel
-	{
-		InventoryComponent ConstructionInventory { get; }
-	}
-	
-	public interface IInventoryModel : IEnterableModel
+	public interface IInventoryModel : IBaseInventoryModel, IEnterableModel
 	{
 		InventoryComponent Inventory { get; }
 	}
+	
+	public interface IConstructionModel : IBaseInventoryModel, IEnterableModel
+	{
+		InventoryComponent ConstructionInventory { get; }
+	}
 
-	public class InventoryComponent : Model
+	public class InventoryComponent : BaseInventoryComponent
 	{
 		#region Serialized
 		[JsonProperty] InventoryPermission permission = InventoryPermission.AllForAnyJob();
 		[JsonProperty] public ListenerProperty<InventoryPermission> Permission { get; }
-		
-		[JsonProperty] Inventory all = Inventory.Empty;
-		readonly ListenerProperty<Inventory> allListener;
-		[JsonIgnore] public ReadonlyProperty<Inventory> All { get; }
-		
+
 		[JsonProperty] Inventory available = Inventory.Empty;
 		readonly ListenerProperty<Inventory> availableListener;
 		[JsonIgnore] public ReadonlyProperty<Inventory> Available { get; }
@@ -36,10 +32,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] InventoryCapacity reservedCapacity = InventoryCapacity.None();
 		readonly ListenerProperty<InventoryCapacity> reservedCapacityListener;
 		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> ReservedCapacity { get; }
-
-		[JsonProperty] InventoryCapacity allCapacity = InventoryCapacity.None();
-		readonly ListenerProperty<InventoryCapacity> allCapacityListener;
-		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
 
 		[JsonProperty] InventoryCapacity availableCapacity = InventoryCapacity.None();
 		readonly ListenerProperty<InventoryCapacity> availableCapacityListener;
@@ -53,11 +45,6 @@ namespace Lunra.Hothouse.Models
 		{
 			Permission = new ListenerProperty<InventoryPermission>(value => permission = value, () => permission);
 			
-			All = new ReadonlyProperty<Inventory>(
-				value => all = value,
-				() => all,
-				out allListener
-			);
 			Available = new ReadonlyProperty<Inventory>(
 				value => available = value,
 				() => available,
@@ -73,11 +60,6 @@ namespace Lunra.Hothouse.Models
 				() => reservedCapacity,
 				out reservedCapacityListener
 			);
-			AllCapacity = new ReadonlyProperty<InventoryCapacity>(
-				value => allCapacity = value,
-				() => allCapacity,
-				out allCapacityListener
-			);
 			AvailableCapacity = new ReadonlyProperty<InventoryCapacity>(
 				value => availableCapacity = value,
 				() => availableCapacity,
@@ -85,9 +67,9 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public bool Add(Inventory inventory) => Add(inventory, out _);
+		public override bool Add(Inventory inventory) => Add(inventory, out _);
 
-		public bool Add(
+		public override bool Add(
 			Inventory inventory,
 			out Inventory overflow
 		)
@@ -102,15 +84,15 @@ namespace Lunra.Hothouse.Models
 				out overflow
 			);
 
-			allListener.Value = allReplacement;
+			AllListener.Value = allReplacement;
 			Recalculate();
 
 			return hasOverflow;
 		}
 
-		public bool Remove(Inventory inventory) => Remove(inventory, out _);
+		public override bool Remove(Inventory inventory) => Remove(inventory, out _);
 		
-		public bool Remove(
+		public override bool Remove(
 			Inventory inventory,
 			out Inventory overflow
 		)
@@ -131,7 +113,7 @@ namespace Lunra.Hothouse.Models
 
 			overflow = inventory - maximumAvailableForRemoval;
 
-			allListener.Value -= maximumAvailableForRemoval;
+			AllListener.Value -= maximumAvailableForRemoval;
 			Recalculate();
 
 			return !overflow.IsEmpty;
@@ -209,10 +191,10 @@ namespace Lunra.Hothouse.Models
 		{
 			Permission.Value = permission;
 			
-			allListener.Value = Inventory.Empty;
+			AllListener.Value = Inventory.Empty;
 			availableListener.Value = Inventory.Empty;
 			forbiddenListener.Value = Inventory.Empty;
-			allCapacityListener.Value = capacity;
+			AllCapacityListener.Value = capacity;
 			availableCapacityListener.Value = capacity;
 
 			switch (capacity.Clamping)

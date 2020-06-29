@@ -6,7 +6,7 @@ namespace Lunra.Hothouse.Models
 	public interface IBaseInventoryComponent
 	{
 		ReadonlyProperty<Inventory> All { get; }
-		ReadonlyProperty<InventoryCapacity> Capacity { get; }
+		ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
 		
 		bool Add(Inventory inventory, out Inventory overflow);
 		bool Remove(Inventory inventory);
@@ -26,12 +26,12 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		[JsonProperty] Inventory all = Inventory.Empty;
-		protected readonly ListenerProperty<Inventory> allListener;
+		protected readonly ListenerProperty<Inventory> AllListener;
 		[JsonIgnore] public ReadonlyProperty<Inventory> All { get; }
 		
-		[JsonProperty] InventoryCapacity capacity = InventoryCapacity.None();
-		protected readonly ListenerProperty<InventoryCapacity> capacityListener;
-		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> Capacity { get; }
+		[JsonProperty] InventoryCapacity allCapacity = InventoryCapacity.None();
+		protected readonly ListenerProperty<InventoryCapacity> AllCapacityListener;
+		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -42,16 +42,16 @@ namespace Lunra.Hothouse.Models
 			All = new ReadonlyProperty<Inventory>(
 				value => all = value,
 				() => all,
-				out allListener
+				out AllListener
 			);
-			Capacity = new ReadonlyProperty<InventoryCapacity>(
-				value => capacity = value,
-				() => capacity,
-				out capacityListener
+			AllCapacity = new ReadonlyProperty<InventoryCapacity>(
+				value => allCapacity = value,
+				() => allCapacity,
+				out AllCapacityListener
 			);
 		}
 
-		public bool IsFull() => Capacity.Value.IsFull(All.Value);
+		public bool IsFull() => AllCapacity.Value.IsFull(All.Value);
 		public bool IsNotFull() => !IsFull();
 
 		public abstract bool Add(Inventory inventory);

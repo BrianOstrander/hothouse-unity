@@ -449,7 +449,7 @@ namespace Lunra.Hothouse.Editor
 			label += GetInventory(
 				"Inventory",
 				model.Inventory.All.Value,
-				model.Inventory.Capacity.Value,
+				model.Inventory.AllCapacity.Value,
 				InventoryVisibilities.IfMaximumGreaterThanZero
 				
 			);

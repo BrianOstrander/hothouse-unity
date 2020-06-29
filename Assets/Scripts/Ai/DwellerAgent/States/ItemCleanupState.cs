@@ -179,7 +179,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					new TransferItemsState<ItemCleanupState<S>>.Target(
 						i => Agent.Inventory.Add(i),
 						() => Agent.Inventory.All.Value,
-						i => Agent.Inventory.Capacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
+						i => Agent.Inventory.AllCapacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
 						i =>
 						{
 							source.Inventory.RemoveForbidden(i);

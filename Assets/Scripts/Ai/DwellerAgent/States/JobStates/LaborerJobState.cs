@@ -71,7 +71,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						
 						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Available.Value, out var intersection))
 						{
-							agent.Inventory.Capacity.Value.GetClamped(
+							agent.Inventory.AllCapacity.Value.GetClamped(
 								intersection,
 								out var promisedInventory
 							);
@@ -255,7 +255,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					new TransferItemsState<LaborerJobState>.Target(
 						i => Agent.Inventory.Add(i),
 						() => Agent.Inventory.All.Value,
-						i => Agent.Inventory.Capacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
+						i => Agent.Inventory.AllCapacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
 						i => target.SalvageInventory.Value -= i,
 						() => target.SalvageInventory.Value,
 						itemsToLoad,
@@ -297,7 +297,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					new TransferItemsState<LaborerJobState>.Target(
 						i => Agent.Inventory.Add(i),
 						() => Agent.Inventory.All.Value,
-						i => Agent.Inventory.Capacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
+						i => Agent.Inventory.AllCapacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
 						i =>
 						{
 							source.Inventory.RemoveForbidden(i);

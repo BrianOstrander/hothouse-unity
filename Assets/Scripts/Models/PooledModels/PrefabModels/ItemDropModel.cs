@@ -14,10 +14,18 @@ namespace Lunra.Hothouse.Models
 		public EnterableComponent Enterable { get; } = new EnterableComponent();
 		public InventoryComponent Inventory { get; } = new InventoryComponent();
 		#endregion
+		
+		#region Non Serialized
+		public IBaseInventoryComponent[] Inventories { get; }
+		#endregion
 
 		public ItemDropModel()
 		{
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
+			Inventories = new []
+			{
+				Inventory	
+			};
 		}
 	}
 }
