@@ -71,7 +71,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						
 						if (nonPromisedInventory.Intersects(possibleItemSource.Inventory.Available.Value, out var intersection))
 						{
-							agent.InventoryCapacity.Value.GetClamped(
+							agent.Inventory.Capacity.Value.GetClamped(
 								intersection,
 								out var promisedInventory
 							);
@@ -186,12 +186,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 					switch (step)
 					{
 						case Steps.WithdrawingItemsFromCache:
-							if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory))
+							if (!Agent.Inventory.All.Value.Contains(Agent.InventoryPromise.Value.Inventory))
 							{
 								// The dweller was unable to pull all the resources it wanted to, so we're going to correct the
 								// amount we promised
 								Agent.InventoryPromise.Value.Inventory.Intersects(
-									Agent.Inventory.Value,
+									Agent.Inventory.All.Value,
 									out var newPromise
 								);
 								// constructionSite.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory - newPromise;
@@ -228,7 +228,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
-				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
+				if (Agent.Inventory.IsFull()) return false;
 				
 				target = NavigationUtility.CalculateNearestAvailableEntrance(
 					Agent.Transform.Position.Value,
@@ -253,9 +253,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				transferState.SetTarget(
 					new TransferItemsState<LaborerJobState>.Target(
-						i => Agent.Inventory.Value += i,
-						() => Agent.Inventory.Value,
-						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
+						i => Agent.Inventory.Add(i),
+						() => Agent.Inventory.All.Value,
+						i => Agent.Inventory.Capacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
 						i => target.SalvageInventory.Value -= i,
 						() => target.SalvageInventory.Value,
 						itemsToLoad,
@@ -278,7 +278,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation == InventoryPromise.Operations.None) return false;
-				if (Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
+				if (Agent.Inventory.All.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
 
 				if (!Agent.InventoryPromise.Value.Source.TryGetInstance(Game, out source))
 				{
@@ -295,9 +295,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				transferState.SetTarget(
 					new TransferItemsState<LaborerJobState>.Target(
-						i => Agent.Inventory.Value += i,
-						() => Agent.Inventory.Value,
-						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
+						i => Agent.Inventory.Add(i),
+						() => Agent.Inventory.All.Value,
+						i => Agent.Inventory.Capacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
 						i =>
 						{
 							source.Inventory.RemoveForbidden(i);
@@ -359,7 +359,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
-				if (!Agent.Inventory.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
+				if (!Agent.Inventory.All.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
 
 				if (Agent.InventoryPromise.Value.Target.TryGetInstance(Game, out target))
 				{
@@ -390,8 +390,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 						i => target.ConstructionInventory.RemoveReserved(i).Add(i),
 						() => target.ConstructionInventory.All.Value,
 						i => target.ConstructionInventory.AllCapacity.Value.GetCapacityFor(target.ConstructionInventory.All.Value, i),
-						i => Agent.Inventory.Value -= i,
-						() => Agent.Inventory.Value,
+						i => Agent.Inventory.Remove(i),
+						() => Agent.Inventory.All.Value,
 						Agent.InventoryPromise.Value.Inventory,
 						Agent.DepositCooldown.Value,
 						() =>
@@ -436,7 +436,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
-				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
+				if (Agent.Inventory.IsFull()) return false;
 
 				var target = NavigationUtility.CalculateNearestAvailableEntrance(
 					Agent.Transform.Position.Value,

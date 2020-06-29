@@ -17,7 +17,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			this.timeoutState = timeoutState;
 		}
 
-		public override bool IsTriggered() => !Agent.Inventory.Value.IsEmpty;
+		public override bool IsTriggered() => !Agent.Inventory.All.Value.IsEmpty;
 
 		public override void Transition()
 		{
@@ -28,12 +28,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 				Quaternion.identity,
 				itemDrop =>
 				{
-					itemDrop.Inventory.Add(Agent.Inventory.Value);
+					itemDrop.Inventory.Add(Agent.Inventory.All.Value);
 					itemDrop.Job.Value = Agent.Job.Value;
 				}
 			);
-				
-			Agent.Inventory.Value = Inventory.Empty;
+
+			Agent.Inventory.Remove(Agent.Inventory.All.Value);
 				
 			timeoutState.ConfigureForInterval(Interval.WithMaximum(Agent.DepositCooldown.Value));
 		}

@@ -73,7 +73,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override bool IsTriggered()
 			{
-				var currentlyValidItems = SourceState.validItems.Where(i => 0 < Agent.Inventory.Value[i]);
+				var currentlyValidItems = SourceState.validItems.Where(i => 0 < Agent.Inventory.All.Value[i]);
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
@@ -98,15 +98,15 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				var itemsToTransfer = new Dictionary<Inventory.Types, int>();
 				
-				foreach (var validItem in SourceState.validItems) itemsToTransfer.Add(validItem, Agent.Inventory.Value[validItem]);
+				foreach (var validItem in SourceState.validItems) itemsToTransfer.Add(validItem, Agent.Inventory.All.Value[validItem]);
 				
 				transferState.SetTarget(
 					new TransferItemsState<ItemCleanupState<S>>.Target(
 						i => target.Inventory.Add(i),
 						() => target.Inventory.Available.Value,
 						i => target.Inventory.AvailableCapacity.Value.GetCapacityFor(target.Inventory.Available.Value, i),
-						i => Agent.Inventory.Value -= i,
-						() => Agent.Inventory.Value,
+						i => Agent.Inventory.Remove(i),
+						() => Agent.Inventory.All.Value,
 						new Inventory(itemsToTransfer),
 						Agent.DepositCooldown.Value
 					)
@@ -123,7 +123,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				var currentlyValidItems = SourceState.validItems.Where(i => 0 < Agent.Inventory.Value[i]);
+				var currentlyValidItems = SourceState.validItems.Where(i => 0 < Agent.Inventory.All.Value[i]);
 
 				if (currentlyValidItems.None()) return false; // There are zero of any valid items...
 				
@@ -160,7 +160,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
+				if (Agent.Inventory.IsFull()) return false;
 				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.CleanupWithdrawal) return false;
 
 				if (Agent.InventoryPromise.Value.Source.TryGetInstance(Game, out source))
@@ -177,9 +177,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				transferState.SetTarget(
 					new TransferItemsState<ItemCleanupState<S>>.Target(
-						i => Agent.Inventory.Value += i,
-						() => Agent.Inventory.Value,
-						i => Agent.InventoryCapacity.Value.GetCapacityFor(Agent.Inventory.Value, i),
+						i => Agent.Inventory.Add(i),
+						() => Agent.Inventory.All.Value,
+						i => Agent.Inventory.Capacity.Value.GetCapacityFor(Agent.Inventory.All.Value, i),
 						i =>
 						{
 							source.Inventory.RemoveForbidden(i);
@@ -206,7 +206,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryCapacity.Value.IsFull(Agent.Inventory.Value)) return false;
+				if (Agent.Inventory.IsFull()) return false;
 
 				return NavigationUtility.CalculateNearestCleanupWithdrawal(
 					Agent,

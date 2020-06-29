@@ -104,15 +104,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 							if (!attackResult.IsTargetDestroyed) return attackResult;
 							
-							var hasOverflow = Agent.InventoryCapacity.Value.AddClamped(
-								Agent.Inventory.Value,
+							var hasOverflow = Agent.Inventory.Add(
 								itemDrops,
-								out var clamped,
 								out var overflow
 							);
-
-							Agent.Inventory.Value = clamped;
-
+							
 							if (!hasOverflow) return attackResult;
 
 							Game.ItemDrops.Activate(

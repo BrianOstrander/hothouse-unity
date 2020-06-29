@@ -102,7 +102,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (!Mathf.Approximately(0f, health)) return;
 
-			if (!Model.Inventory.Value.IsEmpty)
+			if (!Model.Inventory.All.Value.IsEmpty)
 			{
 				Game.ItemDrops.Activate(
 					"default",
@@ -111,7 +111,7 @@ namespace Lunra.Hothouse.Presenters
 					Quaternion.identity,
 					m =>
 					{
-						m.Inventory.Add(Model.Inventory.Value);
+						m.Inventory.Add(Model.Inventory.All.Value);
 						m.Job.Value = Jobs.None;
 						m.Transform.Position.Value = Model.Transform.Position.Value;
 						m.Transform.Rotation.Value = Quaternion.identity;
@@ -128,7 +128,7 @@ namespace Lunra.Hothouse.Presenters
 						constructionDepositTarget.ConstructionInventory.RemoveReserved(Model.InventoryPromise.Value.Inventory);
 					}
 					
-					var constructionInventory = Model.InventoryPromise.Value.Inventory - Model.Inventory.Value;
+					var constructionInventory = Model.InventoryPromise.Value.Inventory - Model.Inventory.All.Value;
 					if (!constructionInventory.IsEmpty)
 					{
 						if (Model.InventoryPromise.Value.Source.TryGetInstance<IInventoryModel>(Game, out var constructionDepositSource))

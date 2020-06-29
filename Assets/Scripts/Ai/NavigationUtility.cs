@@ -191,7 +191,7 @@ namespace Lunra.Hothouse.Ai
 			inventoryToWithdrawal = default;
 			target = default;
 			
-			var itemsWithCapacity = validItems.Where(i => agent.InventoryCapacity.Value.HasCapacityFor(agent.Inventory.Value, i));
+			var itemsWithCapacity = validItems.Where(i => agent.Inventory.Capacity.Value.HasCapacityFor(agent.Inventory.All.Value, i));
 			if (itemsWithCapacity.None())
 			{
 				return false;
@@ -221,7 +221,7 @@ namespace Lunra.Hothouse.Ai
 
 			path = pathResult;
 			
-			agent.InventoryCapacity.Value.GetCapacityFor(agent.Inventory.Value)
+			agent.Inventory.Capacity.Value.GetCapacityFor(agent.Inventory.All.Value)
 				.Intersects(
 					target.Inventory.Available.Value,
 					out inventoryToWithdrawal

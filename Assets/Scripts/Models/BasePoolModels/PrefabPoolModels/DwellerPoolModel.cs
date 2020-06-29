@@ -48,7 +48,7 @@ namespace Lunra.Hothouse.Models
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(100f);
-			model.InventoryCapacity.Value = InventoryCapacity.ByTotalWeight(2);
+			model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
 			
 			// Dweller Properties
 			model.Job.Value = Jobs.None;

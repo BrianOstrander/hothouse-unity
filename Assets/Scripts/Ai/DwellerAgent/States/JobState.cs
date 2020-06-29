@@ -109,16 +109,16 @@ namespace Lunra.Hothouse.Ai.Dweller
 				switch (inventoryTrigger)
 				{
 					case InventoryTrigger.OnEmpty:
-						if (!Agent.Inventory.Value.IsEmpty) return false;
+						if (!Agent.Inventory.All.Value.IsEmpty) return false;
 						break;
 					case InventoryTrigger.OnFull:
-						if (Agent.InventoryCapacity.Value.IsNotFull(Agent.Inventory.Value)) return false;
+						if (Agent.Inventory.IsNotFull()) return false;
 						break;
 					case InventoryTrigger.OnGreaterThanZero:
-						if (Agent.Inventory.Value.IsEmpty) return false;
+						if (Agent.Inventory.All.Value.IsEmpty) return false;
 						break;
 					case InventoryTrigger.OnGreaterThanZeroAndShiftOver:
-						if (Agent.Inventory.Value.IsEmpty) return false;
+						if (Agent.Inventory.All.Value.IsEmpty) return false;
 						if (Agent.JobShift.Value.Contains(Game.SimulationTime.Value)) return false;
 						break;
 				}
@@ -247,7 +247,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			bool IsAnyBuildingMatchingCurrentInventoryReachable(out Inventory.Types[] itemsAvailable)
 			{
 				return IsAnyBuildingWithInventoryReachable(
-					Agent.Inventory.Value.Entries
+					Agent.Inventory.All.Value.Entries
 						.Where(e => 0 < e.Weight)
 						.Select(e => e.Type),
 					out itemsAvailable

@@ -46,7 +46,7 @@ namespace Lunra.Hothouse.Models
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(10f);
-			model.InventoryCapacity.Value = InventoryCapacity.None();
+			model.Inventory.Reset(InventoryCapacity.None());
 
 			// Seeker Properties
 			model.DamageRange.Value = 1f;
