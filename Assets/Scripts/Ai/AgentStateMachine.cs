@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Ai
 	public abstract class AgentStateMachine<G, A>
 		where A : AgentModel
 	{
-		public string Name => (string.IsNullOrEmpty(Agent.Id.Value) ? "null_or_empty_id" : Agent.Id.Value) + "<" + GetType().Name + ">";
+		public string Name => Agent.ShortId + "<" + GetType().Name + ">";
 		
 		public List<AgentState<G, A>> States { get; } = new List<AgentState<G, A>>();
 		

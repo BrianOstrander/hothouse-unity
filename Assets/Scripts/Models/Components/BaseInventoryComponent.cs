@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IBaseInventoryComponent
+	public interface IBaseInventoryComponent : IModel
 	{
 		ReadonlyProperty<Inventory> All { get; }
 		ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
@@ -68,7 +68,7 @@ namespace Lunra.Hothouse.Models
 	public static class BaseInventoryGameModelExtensions
 	{
 		public static IEnumerable<IBaseInventoryComponent> GetInventories(
-			GameModel game
+			this GameModel game
 		)
 		{
 			return game.Dwellers.AllActive

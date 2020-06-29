@@ -263,14 +263,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				position = hit.point;
 			}
-		
-			var bonfire = payload.Game.Buildings.Activate(
-				Buildings.Bonfire,
-				spawn.Id.Value,
-				position + (Vector3.right * 2f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
 			
 			var wagon = payload.Game.Buildings.Activate(
 				Buildings.StartingWagon,
@@ -279,13 +271,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
 				BuildingStates.Operating
 			);
-
-			// wagon.Inventory.Add(
-			// 	Inventory.FromEntries(
-			// 		(Inventory.Types.Stalks, 100),
-			// 		(Inventory.Types.Rations, 100)
-			// 	)
-			// );
+		
+			var bonfire = payload.Game.Buildings.Activate(
+				Buildings.Bonfire,
+				spawn.Id.Value,
+				position + (Vector3.right * 6f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
 			
 			payload.Game.WorldCamera.Transform.Position.Value = bonfire.Transform.Position.Value;
 
@@ -299,56 +292,47 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			
-			// wagon.Inventory.Add(Inventory.FromEntry(Inventory.Types.Stalks, 2));
 
-			payload.Game.ItemDrops.Activate(
-				"default",
+			wagon.PooledState.Value = PooledStates.InActive;
+			
+			foreach (var m in payload.Game.Dwellers.AllActive) m.PooledState.Value = PooledStates.InActive;
+			foreach (var m in payload.Game.Debris.AllActive) m.PooledState.Value = PooledStates.InActive;
+			foreach (var m in payload.Game.Flora.AllActive) m.PooledState.Value = PooledStates.InActive;
+			
+			var dweller = payload.Game.Dwellers.Activate(
 				spawn.Id.Value,
-				position,
+				position + (Vector3.left * 6f)
+			);
+			
+			dweller.Job.Value = Jobs.Laborer;
+			dweller.Name.Value = "Buddy";
+			dweller.IsDebugging = true;
+
+			var depot0 = payload.Game.Buildings.Activate(
+				Buildings.DepotSmall,
+				spawn.Id.Value,
+				position + (Vector3.forward * 6f),
 				Quaternion.identity,
-				m =>
-				{
-					m.Inventory.Reset(
-						InventoryPermission.WithdrawalForJobs(Jobs.Laborer),
-						InventoryCapacity.Unlimited()
-					);
-					m.Inventory.Add(Inventory.FromEntry(Inventory.Types.Stalks, 1));
-					m.Job.Value = Jobs.Laborer;
-				}
+				BuildingStates.Operating
 			);
 			
-			payload.Game.ItemDrops.Activate(
-				"default",
+			var depot1 = payload.Game.Buildings.Activate(
+				Buildings.DepotSmall,
 				spawn.Id.Value,
-				position,
+				position + (Vector3.back * 6f),
 				Quaternion.identity,
-				m =>
-				{
-					m.Inventory.Reset(
-						InventoryPermission.WithdrawalForJobs(Jobs.Laborer),
-						InventoryCapacity.Unlimited()
-					);
-					m.Inventory.Add(Inventory.FromEntry(Inventory.Types.Stalks, 2));
-					m.Job.Value = Jobs.Laborer;
-				}
+				BuildingStates.Operating
+			);
+
+			var items = Inventory.FromEntry(Inventory.Types.Rations, 1);
+			dweller.Inventory.Add(items);
+			dweller.InventoryPromises.Transactions.Push(
+				InventoryTransaction.RequestDeliver(
+					depot0.Inventory,
+					items
+				)
 			);
 			
-			payload.Game.Buildings.Activate(
-				Buildings.Bedroll,
-				spawn.Id.Value,
-				position + (Vector3.back * 4f),
-				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
-				BuildingStates.Constructing
-			);
-			
-			payload.Game.Buildings.Activate(
-				Buildings.Bedroll,
-				spawn.Id.Value,
-				position + (Vector3.back * 4f) + (Vector3.right * 4f),
-				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
-				BuildingStates.Constructing
-			);
 			// Debugging End
 			
 			done();

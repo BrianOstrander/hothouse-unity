@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -5,12 +6,14 @@ namespace Lunra.Hothouse.Models
 {
 	public interface IInventoryPromiseModel : IRoomTransformModel
 	{
-		AgentInventoryComponent Inventory { get; }
+		InventoryPromiseComponent InventoryPromises { get; }
 	}
 
 	public class InventoryPromiseComponent : Model
 	{
 		#region Serialized
+		[JsonProperty] Stack<InventoryTransaction> transactions = new Stack<InventoryTransaction>();
+		[JsonIgnore] public StackProperty<InventoryTransaction> Transactions { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -18,19 +21,12 @@ namespace Lunra.Hothouse.Models
 
 		public InventoryPromiseComponent()
 		{
-			
+			Transactions = new StackProperty<InventoryTransaction>(transactions);
 		}
 
-		public void Promise(
-			
-		)
-		{
-			
-		}
-		
 		public void Reset()
 		{
-			
+			Transactions.Clear();
 		}
 	}
 }

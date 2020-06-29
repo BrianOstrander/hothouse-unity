@@ -7,7 +7,8 @@ namespace Lunra.Hothouse.Models
 {
 	public abstract class AgentModel : PrefabModel,
 		IHealthModel,
-		IAgentInventoryModel
+		IAgentInventoryModel,
+		IInventoryPromiseModel
 	{
 		#region Serialized
 		[JsonProperty] float navigationVelocity;
@@ -27,6 +28,7 @@ namespace Lunra.Hothouse.Models
 		
 		public HealthComponent Health { get; } = new HealthComponent();
 		public AgentInventoryComponent Inventory { get; } = new AgentInventoryComponent();
+		public InventoryPromiseComponent InventoryPromises { get; } = new InventoryPromiseComponent();
 		#endregion
 		
 		#region Non Serialized

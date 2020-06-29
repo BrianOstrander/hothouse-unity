@@ -11,32 +11,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 			var timeoutState = new TimeoutState<IdleState>();
 			
 			AddChildStates(
-				timeoutState	
+				timeoutState,
+				new InventoryRequestState<IdleState, DwellerModel>()
 			);
 			AddTransitions(
-				new DropItemsTransition<IdleState>(timeoutState)
+				new InventoryRequestState<IdleState, DwellerModel>.ToInventoryRequestOnPromises()
 			);
-			
-			InstantiateJob<ClearerJobState>();
-			InstantiateJob<LaborerJobState>();
-			InstantiateDesire<SleepDesireState>();
-			InstantiateDesire<EatDesireState>();
-		}
-
-		void InstantiateJob<S>()
-			where S : JobState<S>, new()
-		{
-			var state = new S();
-			AddChildStates(state);
-			AddTransitions(state.GetToJobOnShiftBegin);
-		}
-		
-		void InstantiateDesire<S>()
-			where S : DesireState<S>, new()
-		{
-			var state = new S();
-			AddChildStates(state);
-			AddTransitions(new DesireState<S>.ToDesireOnShiftEnd(state));
 		}
 	}
 }

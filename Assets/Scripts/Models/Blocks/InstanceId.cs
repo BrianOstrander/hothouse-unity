@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -39,6 +41,8 @@ namespace Lunra.Hothouse.Models
 					return Types.Debris;
 				case ItemDropModel _:
 					return Types.ItemDrop;
+				case BaseInventoryComponent _:
+					return Types.Inventory;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -56,7 +60,8 @@ namespace Lunra.Hothouse.Models
 			Door = 60,
 			Seeker = 70,
 			Debris = 80,
-			ItemDrop = 90
+			ItemDrop = 90,
+			Inventory = 100
 		}
 
 		public Types Type { get; }
@@ -141,6 +146,9 @@ namespace Lunra.Hothouse.Models
 				case Types.ItemDrop:
 					cachedInstance = game.ItemDrops.FirstOrDefaultActive(Id);
 					break;
+				case Types.Inventory:
+					cachedInstance = GetFirstOrDefault(game.GetInventories(), Id);
+					break;
 				default:
 					Debug.LogError("Unrecognized type: " + Type);
 					return false;
@@ -156,6 +164,8 @@ namespace Lunra.Hothouse.Models
 			
 			return instance != null;
 		}
+
+		IModel GetFirstOrDefault(IEnumerable<IModel> models, string id) => models.FirstOrDefault(m => m.Id.Value == id);
 
 		public override string ToString() => Model.ShortenId(Id) + " : " + Type + " [ " + (cachedInstance == null ? "not cached" : "cached") + " ]";
 	}
