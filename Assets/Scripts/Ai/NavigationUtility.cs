@@ -181,7 +181,7 @@ namespace Lunra.Hothouse.Ai
 			Inventory.Types[] validItems,
 			Jobs[] validJobs,
 			out NavMeshPath path,
-			out InventoryPromise promise,
+			out InventoryPromiseOld promise,
 			out Inventory inventoryToWithdrawal,
 			out ItemDropModel target
 		)
@@ -227,10 +227,10 @@ namespace Lunra.Hothouse.Ai
 					out inventoryToWithdrawal
 				);
 
-			promise = new InventoryPromise(
+			promise = new InventoryPromiseOld(
 				InstanceId.New(target),
 				InstanceId.Null(), // THIS MAY CAUSE AN ERROR
-				InventoryPromise.Operations.CleanupWithdrawal,
+				InventoryPromiseOld.Operations.CleanupWithdrawal,
 				inventoryToWithdrawal
 			);
 			

@@ -3,46 +3,22 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IAgentInventoryModel : IRoomTransformModel
+	public interface IAgentInventoryModel : IBaseInventoryModel
 	{
 		AgentInventoryComponent Inventory { get; }
 	}
 
-	public class AgentInventoryComponent : Model
+	public class AgentInventoryComponent : BaseInventoryComponent
 	{
 		#region Serialized
-		[JsonProperty] Inventory all = Inventory.Empty;
-		readonly ListenerProperty<Inventory> allListener;
-		[JsonIgnore] public ReadonlyProperty<Inventory> All { get; }
-		
-		[JsonProperty] InventoryCapacity capacity = InventoryCapacity.None();
-		readonly ListenerProperty<InventoryCapacity> capacityListener;
-		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> Capacity { get; }
 		#endregion
 		
 		#region Non Serialized
 		#endregion
 
-		public AgentInventoryComponent()
-		{
-			All = new ReadonlyProperty<Inventory>(
-				value => all = value,
-				() => all,
-				out allListener
-			);
-			Capacity = new ReadonlyProperty<InventoryCapacity>(
-				value => capacity = value,
-				() => capacity,
-				out capacityListener
-			);
-		}
+		public override bool Add(Inventory inventory) => Add(inventory, out _);
 
-		public bool IsFull() => Capacity.Value.IsFull(All.Value);
-		public bool IsNotFull() => !IsFull();
-
-		public bool Add(Inventory inventory) => Add(inventory, out _);
-
-		public bool Add(
+		public override bool Add(
 			Inventory inventory,
 			out Inventory overflow
 		)
@@ -62,9 +38,9 @@ namespace Lunra.Hothouse.Models
 			return hasOverflow;
 		}
 
-		public bool Remove(Inventory inventory) => Remove(inventory, out _);
+		public override bool Remove(Inventory inventory) => Remove(inventory, out _);
 		
-		public bool Remove(
+		public override bool Remove(
 			Inventory inventory,
 			out Inventory overflow
 		)

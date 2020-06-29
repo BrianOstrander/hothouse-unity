@@ -121,8 +121,8 @@ namespace Lunra.Hothouse.Presenters
 
 			switch (Model.InventoryPromise.Value.Operation)
 			{
-				case InventoryPromise.Operations.None: break;
-				case InventoryPromise.Operations.ConstructionDeposit:
+				case InventoryPromiseOld.Operations.None: break;
+				case InventoryPromiseOld.Operations.ConstructionDeposit:
 					if (Model.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var constructionDepositTarget))
 					{
 						constructionDepositTarget.ConstructionInventory.RemoveReserved(Model.InventoryPromise.Value.Inventory);
@@ -137,7 +137,7 @@ namespace Lunra.Hothouse.Presenters
 						}
 					}
 					break;
-				case InventoryPromise.Operations.CleanupWithdrawal:
+				case InventoryPromiseOld.Operations.CleanupWithdrawal:
 					if (Model.InventoryPromise.Value.Target.TryGetInstance<IInventoryModel>(Game, out var cleanupNextTarget))
 					{
 						cleanupNextTarget.Inventory.RemoveReserved(Model.InventoryPromise.Value.Inventory); 

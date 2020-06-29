@@ -14,10 +14,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 			DwellerModel agent,
 			out NavMeshPath path,
 			out Vector3 entrancePosition,
-			out InventoryPromise promise 
+			out InventoryPromiseOld promise 
 		)
 		{
-			var promiseResult = InventoryPromise.Default();
+			var promiseResult = InventoryPromiseOld.Default();
 			
 			var validConstructionSites = world.Buildings.AllActive
 				.Where(
@@ -76,10 +76,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 								out var promisedInventory
 							);
 							
-							promiseResult = new InventoryPromise(
+							promiseResult = new InventoryPromiseOld(
 								InstanceId.New(possibleItemSource), 
 								InstanceId.New(kv.Key),
-								InventoryPromise.Operations.ConstructionDeposit,
+								InventoryPromiseOld.Operations.ConstructionDeposit,
 								promisedInventory
 							);
 							
@@ -171,13 +171,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			switch (Agent.InventoryPromise.Value.Operation)
 			{
-				case InventoryPromise.Operations.None:
+				case InventoryPromiseOld.Operations.None:
 					break;
-				case InventoryPromise.Operations.ConstructionDeposit:
+				case InventoryPromiseOld.Operations.ConstructionDeposit:
 					if (!Agent.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var constructionSite))
 					{
 						// Building must have been destroyed...
-						Agent.InventoryPromise.Value = InventoryPromise.Default();
+						Agent.InventoryPromise.Value = InventoryPromiseOld.Default();
 						step = Steps.Unknown;
 						Debug.LogError("Need to check that we're not on the way to navigating to the item cache! must unforbid anything!");
 						return;	
@@ -205,8 +205,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 					step = Steps.Unknown;
 					
 					break;
-				case InventoryPromise.Operations.CleanupWithdrawal:
-					Agent.InventoryPromise.Value = InventoryPromise.Default();
+				case InventoryPromiseOld.Operations.CleanupWithdrawal:
+					Agent.InventoryPromise.Value = InventoryPromiseOld.Default();
 					break;
 				default:
 					Debug.LogError("Unrecognized InventoryPromise.Operation: "+Agent.InventoryPromise.Value.Operation);
@@ -227,7 +227,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.None) return false;
 				if (Agent.Inventory.IsFull()) return false;
 				
 				target = NavigationUtility.CalculateNearestAvailableEntrance(
@@ -277,7 +277,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation == InventoryPromise.Operations.None) return false;
+				if (Agent.InventoryPromise.Value.Operation == InventoryPromiseOld.Operations.None) return false;
 				if (Agent.Inventory.All.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
 
 				if (!Agent.InventoryPromise.Value.Source.TryGetInstance(Game, out source))
@@ -317,11 +317,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			NavMeshPath path;
 			IInventoryModel source;
-			InventoryPromise promise;
+			InventoryPromiseOld promise;
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.None) return false;
 
 				source = GetNearestItemSource(
 					Game,
@@ -358,7 +358,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.ConstructionDeposit) return false;
 				if (!Agent.Inventory.All.Value.Contains(Agent.InventoryPromise.Value.Inventory)) return false;
 
 				if (Agent.InventoryPromise.Value.Target.TryGetInstance(Game, out target))
@@ -397,7 +397,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						() =>
 						{
 							// target.ConstructionInventoryPromised.Value -= Agent.InventoryPromise.Value.Inventory;
-							Agent.InventoryPromise.Value = InventoryPromise.Default();
+							Agent.InventoryPromise.Value = InventoryPromiseOld.Default();
 						}
 					)
 				);
@@ -410,7 +410,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.ConstructionDeposit) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.ConstructionDeposit) return false;
 
 				if (!Agent.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var target)) return false;
 
@@ -435,7 +435,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.None) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.None) return false;
 				if (Agent.Inventory.IsFull()) return false;
 
 				var target = NavigationUtility.CalculateNearestAvailableEntrance(

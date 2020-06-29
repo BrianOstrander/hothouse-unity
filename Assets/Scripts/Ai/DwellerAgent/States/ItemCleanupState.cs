@@ -161,7 +161,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				if (Agent.Inventory.IsFull()) return false;
-				if (Agent.InventoryPromise.Value.Operation != InventoryPromise.Operations.CleanupWithdrawal) return false;
+				if (Agent.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.CleanupWithdrawal) return false;
 
 				if (Agent.InventoryPromise.Value.Source.TryGetInstance(Game, out source))
 				{
@@ -191,7 +191,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						() =>
 						{
 							Debug.Log("don???");
-							Agent.InventoryPromise.Value = InventoryPromise.Default();
+							Agent.InventoryPromise.Value = InventoryPromiseOld.Default();
 						})
 				);
 			}
@@ -200,7 +200,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		class ToNavigateToNearestItemDrop : AgentTransition<ItemCleanupState<S>, NavigateState<ItemCleanupState<S>>, GameModel, DwellerModel>
 		{
 			NavMeshPath targetPath = new NavMeshPath();
-			InventoryPromise promise;
+			InventoryPromiseOld promise;
 			Inventory inventoryToWithdrawal;
 			ItemDropModel source;
 

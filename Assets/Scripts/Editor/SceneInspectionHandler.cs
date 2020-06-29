@@ -454,7 +454,7 @@ namespace Lunra.Hothouse.Editor
 				
 			);
 
-			if (model.InventoryPromise.Value.Operation != InventoryPromise.Operations.None)
+			if (model.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.None)
 			{
 				label += GetInventory(
 					model.InventoryPromise.Value.Operation+"Promise",

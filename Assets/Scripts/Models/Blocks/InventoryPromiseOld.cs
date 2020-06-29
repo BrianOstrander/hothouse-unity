@@ -2,9 +2,9 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public struct InventoryPromise
+	public struct InventoryPromiseOld
 	{
-		public static InventoryPromise Default() => new InventoryPromise(
+		public static InventoryPromiseOld Default() => new InventoryPromiseOld(
 			InstanceId.Null(),
 			InstanceId.Null(),
 			Operations.None,
@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Models
 		public readonly Operations Operation;
 		public readonly Inventory Inventory;
 
-		public InventoryPromise(
+		public InventoryPromiseOld(
 			InstanceId source,
 			InstanceId target,
 			Operations operation,
@@ -37,9 +37,9 @@ namespace Lunra.Hothouse.Models
 			Inventory = inventory;
 		}
 
-		public InventoryPromise NewInventory(Inventory inventory)
+		public InventoryPromiseOld NewInventory(Inventory inventory)
 		{
-			return new InventoryPromise(
+			return new InventoryPromiseOld(
 				Source,
 				Target,
 				Operation,
