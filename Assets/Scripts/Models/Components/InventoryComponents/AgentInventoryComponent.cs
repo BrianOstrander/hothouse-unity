@@ -68,6 +68,8 @@ namespace Lunra.Hothouse.Models
 		
 		public void Reset(InventoryCapacity capacity)
 		{
+			ResetId();
+			
 			AllListener.Value = Inventory.Empty;
 			AllCapacityListener.Value = capacity;
 		}

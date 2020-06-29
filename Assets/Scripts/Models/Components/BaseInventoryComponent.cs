@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -58,5 +61,20 @@ namespace Lunra.Hothouse.Models
 		public abstract bool Add(Inventory inventory, out Inventory overflow);
 		public abstract bool Remove(Inventory inventory);
 		public abstract bool Remove(Inventory inventory, out Inventory overflow);
+
+		protected void ResetId() => Id.Value = App.M.CreateUniqueId();
+	}
+	
+	public static class BaseInventoryGameModelExtensions
+	{
+		public static IEnumerable<IBaseInventoryComponent> GetInventories(
+			GameModel game
+		)
+		{
+			return game.Dwellers.AllActive
+				.Concat<IBaseInventoryModel>(game.Buildings.AllActive)
+				.Concat(game.ItemDrops.AllActive)
+				.SelectMany(m => m.Inventories);
+		}
 	}
 }

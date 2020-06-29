@@ -189,6 +189,8 @@ namespace Lunra.Hothouse.Models
 			InventoryCapacity capacity
 		)
 		{
+			ResetId();
+			
 			Permission.Value = permission;
 			
 			AllListener.Value = Inventory.Empty;
