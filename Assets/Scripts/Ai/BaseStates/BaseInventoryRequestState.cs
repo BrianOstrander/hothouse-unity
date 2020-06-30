@@ -14,18 +14,18 @@ namespace Lunra.Hothouse.Ai
 			public static Cache Default()
 			{
 				var result = new Cache();
-				result.isTargetNull = true;
+				result.IsTargetNull = true;
 				return result;
 			}
 		
-			public InventoryTransaction transaction;
-			public BaseInventoryComponent target;
+			public InventoryTransaction Transaction;
+			public BaseInventoryComponent Target;
 
-			public bool isTargetNull;
-			public IModel targetParent;
-			public Navigation.Result navigationResult;
-			public bool isNavigable;
-			public float navigationRadiusMaximum;
+			public bool IsTargetNull;
+			public IModel TargetParent;
+			public Navigation.Result NavigationResult;
+			public bool IsNavigable;
+			public float NavigationRadiusMaximum;
 		}
 	
 		public override string Name => "InventoryRequest";
@@ -63,32 +63,32 @@ namespace Lunra.Hothouse.Ai
 		{
 			cache = Cache.Default();
 			
-			if (Agent.InventoryPromises.Transactions.TryPeek(out cache.transaction))
+			if (Agent.InventoryPromises.Transactions.TryPeek(out cache.Transaction))
 			{
-				cache.transaction.Target.TryGetInstance(
+				cache.Transaction.Target.TryGetInstance(
 					Game,
-					out cache.target
+					out cache.Target
 				);
-				cache.isTargetNull = cache.target == null;
+				cache.IsTargetNull = cache.Target == null;
 
-				if (!cache.isTargetNull)
+				if (!cache.IsTargetNull)
 				{
-					cache.targetParent = Game.GetInventoryParent(cache.target.Id.Value);
+					cache.TargetParent = Game.GetInventoryParent(cache.Target.Id.Value);
 
-					switch (cache.targetParent)
+					switch (cache.TargetParent)
 					{
 						case IEnterableModel targetParentEnterable:
-							cache.isNavigable = NavigationUtility.CalculateNearest(
+							cache.IsNavigable = NavigationUtility.CalculateNearest(
 								Agent.Transform.Position.Value,
-								out cache.navigationResult,
+								out cache.NavigationResult,
 								Navigation.QueryEntrances(targetParentEnterable)
 							);
-							cache.navigationRadiusMaximum = 0.1f; // TODO: Don't hardcode this
+							cache.NavigationRadiusMaximum = 0.1f; // TODO: Don't hardcode this
 							
 
 							break;
 						default:
-							Debug.LogError("Unrecognized target parent type: "+cache.target.GetType().Name);
+							Debug.LogError("Unrecognized target parent type: "+cache.Target.GetType().Name);
 							break;
 					}
 				}
@@ -105,17 +105,17 @@ namespace Lunra.Hothouse.Ai
 		
 		class ToReturnOnMissingTransaction : AgentTransition<S1, S0, GameModel, A>
 		{
-			public override bool IsTriggered() => SourceState.cache.isTargetNull;
+			public override bool IsTriggered() => SourceState.cache.IsTargetNull;
 		}
 		
 		class ToTimeoutOnDeliverTarget : AgentTransition<S1, BaseTimeoutState<S1, A>, GameModel, A>
 		{
 			public override bool IsTriggered()
 			{
-				if (!SourceState.cache.isNavigable) return false;
-				if (SourceState.cache.transaction.Type != InventoryTransaction.Types.Deliver) return false;
+				if (!SourceState.cache.IsNavigable) return false;
+				if (SourceState.cache.Transaction.Type != InventoryTransaction.Types.Deliver) return false;
 
-				return Vector3.Distance(Agent.Transform.Position.Value, SourceState.cache.navigationResult.Target) < SourceState.cache.navigationRadiusMaximum;
+				return Vector3.Distance(Agent.Transform.Position.Value, SourceState.cache.NavigationResult.Target) < SourceState.cache.NavigationRadiusMaximum;
 			}
 
 			public override void Transition()
@@ -128,12 +128,12 @@ namespace Lunra.Hothouse.Ai
 		{
 			public override bool IsTriggered()
 			{
-				if (SourceState.cache.transaction.Type != InventoryTransaction.Types.Deliver) return false;
-				Debug.Log("uh: "+SourceState.cache.isNavigable);
-				return SourceState.cache.isNavigable;
+				if (SourceState.cache.Transaction.Type != InventoryTransaction.Types.Deliver) return false;
+				Debug.Log("uh: "+SourceState.cache.IsNavigable);
+				return SourceState.cache.IsNavigable;
 			}
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(SourceState.cache.navigationResult.Path);
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(SourceState.cache.NavigationResult.Path);
 		}
 
 		class ToReturnOnTimeout : AgentTransition<S1, S0, GameModel, A>
@@ -144,24 +144,24 @@ namespace Lunra.Hothouse.Ai
 			{
 				Agent.InventoryPromises.Transactions.Pop();
 				
-				switch (SourceState.cache.target)
+				switch (SourceState.cache.Target)
 				{
 					case InventoryComponent inventory:
-						switch (SourceState.cache.transaction.Type)
+						switch (SourceState.cache.Transaction.Type)
 						{
 							case InventoryTransaction.Types.Deliver:
-								inventory.RemoveReserved(SourceState.cache.transaction.Items);
+								inventory.RemoveReserved(SourceState.cache.Transaction.Items);
 								break;
 							case InventoryTransaction.Types.Distribute:
-								inventory.RemoveForbidden(SourceState.cache.transaction.Items);
+								inventory.RemoveForbidden(SourceState.cache.Transaction.Items);
 								break;
 							default:
-								Debug.LogError("Unrecognized Type: "+SourceState.cache.transaction.Type);
+								Debug.LogError("Unrecognized Type: "+SourceState.cache.Transaction.Type);
 								break;
 						}
 						break;
 					default:
-						Debug.LogError("Unrecognized inventory type: "+SourceState.cache.target.GetType().Name);
+						Debug.LogError("Unrecognized inventory type: "+SourceState.cache.Target.GetType().Name);
 						break;
 				}
 			}
