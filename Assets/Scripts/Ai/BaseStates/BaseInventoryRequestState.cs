@@ -110,16 +110,31 @@ namespace Lunra.Hothouse.Ai
 		
 		class ToTimeoutOnDeliverTarget : AgentTransition<S1, BaseTimeoutState<S1, A>, GameModel, A>
 		{
+			
+			
 			public override bool IsTriggered()
 			{
 				if (!SourceState.cache.IsNavigable) return false;
 				if (SourceState.cache.Transaction.Type != InventoryTransaction.Types.Deliver) return false;
-
+				
 				return Vector3.Distance(Agent.Transform.Position.Value, SourceState.cache.NavigationResult.Target) < SourceState.cache.NavigationRadiusMaximum;
 			}
 
 			public override void Transition()
 			{
+				var transaction = Agent.InventoryPromises.Transactions.Pop();
+				Agent.Inventory.Remove(transaction.Items);
+				
+				switch (SourceState.cache.Target)
+				{
+					case InventoryComponent targetInventory:
+						targetInventory.CompleteDeliver(transaction);
+						break;
+					default:
+						Debug.LogError("Unrecognized inventory type: " + SourceState.cache.Target.GetType().Name);
+						break;
+				}
+				
 				SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(1f));
 			}
 		}
@@ -129,7 +144,6 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered()
 			{
 				if (SourceState.cache.Transaction.Type != InventoryTransaction.Types.Deliver) return false;
-				Debug.Log("uh: "+SourceState.cache.IsNavigable);
 				return SourceState.cache.IsNavigable;
 			}
 

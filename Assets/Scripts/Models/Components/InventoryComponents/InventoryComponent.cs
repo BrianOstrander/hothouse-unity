@@ -213,6 +213,14 @@ namespace Lunra.Hothouse.Models
 
 			return true;
 		}
+
+		public void CompleteDeliver(
+			InventoryTransaction transaction
+		)
+		{
+			RemoveReserved(transaction.Items);
+			Add(transaction.Items);
+		}
 		#endregion
 		
 		public void Reset(
