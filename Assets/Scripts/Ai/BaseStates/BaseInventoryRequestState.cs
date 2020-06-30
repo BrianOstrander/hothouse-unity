@@ -389,6 +389,7 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
+				SourceState.timeouts = 0;
 				Agent.InventoryPromises.Transactions.Pop();
 				
 				switch (SourceState.cache.Target)
@@ -413,7 +414,5 @@ namespace Lunra.Hothouse.Ai
 				}
 			}
 		}
-		
-		
 	}
 }

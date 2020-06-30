@@ -180,8 +180,6 @@ namespace Lunra.Hothouse.Editor
 					DrawEntranceInspection(model);
 				
 					var label = GetIdLabel(model);
-					
-					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
 
 					label += "\n" + model.Inventory;
 					

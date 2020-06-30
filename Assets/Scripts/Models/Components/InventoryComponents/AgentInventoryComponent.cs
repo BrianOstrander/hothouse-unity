@@ -1,3 +1,4 @@
+using System;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -79,7 +80,17 @@ namespace Lunra.Hothouse.Models
 			var result = "Inventory Component [ " + ShortId + " ]:\n";
 			foreach (var itemType in Inventory.ValidTypes)
 			{
-				result += "\n - " + itemType + "\t\t"+All.Value[itemType]+" / "+AllCapacity.Value.GetMaximumFor(itemType);
+				result += "\n - " + itemType + "\t";
+
+				switch (itemType)
+				{
+					case Inventory.Types.Scrap:
+					case Inventory.Types.Stalks:
+						result += "\t";
+						break;
+				}
+				
+				result += All.Value[itemType]+" / "+AllCapacity.Value.GetMaximumFor(itemType);
 			}
 
 			return result;

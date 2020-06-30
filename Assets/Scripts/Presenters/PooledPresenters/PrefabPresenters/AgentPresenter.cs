@@ -112,7 +112,6 @@ namespace Lunra.Hothouse.Presenters
 					m =>
 					{
 						m.Inventory.Add(Model.Inventory.All.Value);
-						m.Job.Value = Jobs.None;
 						m.Transform.Position.Value = Model.Transform.Position.Value;
 						m.Transform.Rotation.Value = Quaternion.identity;
 					}
