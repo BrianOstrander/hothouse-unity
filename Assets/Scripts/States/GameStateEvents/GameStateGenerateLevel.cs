@@ -325,16 +325,29 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 
 			var items = Inventory.FromEntry(Inventory.Types.Stalks, 1);
-			dweller.Inventory.Add(items);
-
-			var validDelivery = depot0.Inventory.RequestDeliver(
+			
+			// Delivery
+			// dweller.Inventory.Add(items);
+			//
+			// var isDeliveryValid = depot0.Inventory.RequestDeliver(
+			// 	items,
+			// 	out var transaction,
+			// 	out _
+			// );
+			//
+			// if (isDeliveryValid) dweller.InventoryPromises.Transactions.Push(transaction);
+			// else Debug.LogError("Invalid delivery");
+			
+			// Distribution
+			depot0.Inventory.Add(items);
+			var isDistributionValid = depot0.Inventory.RequestDistribution(
 				items,
 				out var transaction,
 				out _
 			);
 			
-			if (validDelivery) dweller.InventoryPromises.Transactions.Push(transaction);
-			else Debug.LogError("Invalid delivory");
+			if (isDistributionValid) dweller.InventoryPromises.Transactions.Push(transaction);
+			else Debug.LogError("Invalid distribution");
 			
 			// Debugging End
 			

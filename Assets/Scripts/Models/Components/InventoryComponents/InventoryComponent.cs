@@ -191,7 +191,7 @@ namespace Lunra.Hothouse.Models
 			out Inventory overflow
 		)
 		{
-			transaction = null;
+			transaction = default;
 			AvailableCapacity.Value.AddClamped(
 				All.Value,
 				inventory,
@@ -199,16 +199,16 @@ namespace Lunra.Hothouse.Models
 				out overflow
 			);
 			
-			var inventoryForDelivery = inventory - overflow;
+			inventory -= overflow;
 
-			if (inventoryForDelivery.IsEmpty) return false;
+			if (inventory.IsEmpty) return false;
 			
-			AddReserved(inventoryForDelivery);
+			AddReserved(inventory);
 			
 			transaction = InventoryTransaction.New(
 				InventoryTransaction.Types.Deliver,
 				this,
-				inventoryForDelivery
+				inventory
 			);
 
 			return true;
@@ -220,6 +220,36 @@ namespace Lunra.Hothouse.Models
 		{
 			RemoveReserved(transaction.Items);
 			Add(transaction.Items);
+		}
+
+		public bool RequestDistribution(
+			Inventory inventory,
+			out InventoryTransaction transaction,
+			out Inventory overflow
+		)
+		{
+			transaction = default;
+
+			var isIntersecting = Available.Value.Intersects(
+				inventory,
+				out var intersection
+			);
+
+			overflow = inventory - intersection;
+
+			if (!isIntersecting) return false;
+
+			inventory -= overflow;
+			
+			AddForbidden(inventory);
+			
+			transaction = InventoryTransaction.New(
+				InventoryTransaction.Types.Distribute,
+				this,
+				inventory
+			);
+			
+			return true;
 		}
 		#endregion
 		

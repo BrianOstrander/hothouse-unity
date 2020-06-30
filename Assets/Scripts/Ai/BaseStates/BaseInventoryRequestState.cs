@@ -122,13 +122,13 @@ namespace Lunra.Hothouse.Ai
 
 			public override void Transition()
 			{
-				var transaction = Agent.InventoryPromises.Transactions.Pop();
-				Agent.Inventory.Remove(transaction.Items);
+				Agent.InventoryPromises.Transactions.Pop();
+				Agent.Inventory.Remove(SourceState.cache.Transaction.Items);
 				
 				switch (SourceState.cache.Target)
 				{
 					case InventoryComponent targetInventory:
-						targetInventory.CompleteDeliver(transaction);
+						targetInventory.CompleteDeliver(SourceState.cache.Transaction);
 						break;
 					default:
 						Debug.LogError("Unrecognized inventory type: " + SourceState.cache.Target.GetType().Name);
