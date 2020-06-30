@@ -26,7 +26,7 @@ namespace Lunra.Hothouse.Models
 		public EventLogModel EventLog { get; } = new EventLogModel();
 		public JobManageModel JobManage { get; } = new JobManageModel();
 
-		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
+		public ItemDropPoolModel ItemDrops { get; } = new ItemDropPoolModel();
 		public RoomPoolModel Rooms { get; } = new RoomPoolModel();
 		public DoorPoolModel Doors { get; } = new DoorPoolModel();
 		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();

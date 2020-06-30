@@ -105,16 +105,10 @@ namespace Lunra.Hothouse.Presenters
 			if (!Model.Inventory.All.Value.IsEmpty)
 			{
 				Game.ItemDrops.Activate(
-					"default",
 					Model.RoomTransform.Id.Value,
 					Model.Transform.Position.Value,
 					Quaternion.identity,
-					m =>
-					{
-						m.Inventory.Add(Model.Inventory.All.Value);
-						m.Transform.Position.Value = Model.Transform.Position.Value;
-						m.Transform.Rotation.Value = Quaternion.identity;
-					}
+					Model.Inventory.All.Value
 				);
 			}
 

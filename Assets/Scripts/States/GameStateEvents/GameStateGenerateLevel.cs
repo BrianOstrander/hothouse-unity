@@ -352,7 +352,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			}
 			*/
 
-			if (true)
+			if (false)
 			{
 				// ---- Delivery
 				dweller.Inventory.Add(items);
