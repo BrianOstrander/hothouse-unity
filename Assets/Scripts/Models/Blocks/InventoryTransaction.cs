@@ -1,9 +1,21 @@
 using System;
+using Lunra.Core;
+using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {
 	public class InventoryTransaction
 	{
+		/// <summary>
+		/// Creates a new transaction
+		/// </summary>
+		/// <remarks>
+		/// This should only be used by inventory components, so proper registration happens.
+		/// </remarks>
+		/// <param name="type"></param>
+		/// <param name="target"></param>
+		/// <param name="items"></param>
+		/// <returns></returns>
 		public static InventoryTransaction New(
 			Types type,
 			IBaseInventoryComponent target,
@@ -53,6 +65,13 @@ namespace Lunra.Hothouse.Models
 				target ?? Target,
 				items ?? Items
 			);
+		}
+
+		public override string ToString()
+		{
+			var result = Type + " to " + Model.ShortenId(Target?.Id);
+			result += "\n" + Items;
+			return result;
 		}
 	}
 }

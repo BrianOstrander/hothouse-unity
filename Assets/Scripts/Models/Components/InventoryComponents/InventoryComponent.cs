@@ -127,15 +127,13 @@ namespace Lunra.Hothouse.Models
 			Recalculate();
 		}
 		
-		public InventoryComponent RemoveForbidden(Inventory inventory)
+		public void RemoveForbidden(Inventory inventory)
 		{
-			if (inventory.IsEmpty) return this;
+			if (inventory.IsEmpty) return;
 			if (!Forbidden.Value.Contains(inventory)) Debug.LogError("Must make available already forbidden items");
 				
 			forbiddenListener.Value -= inventory;
 			Recalculate();
-			
-			return this;
 		}
 
 		public void AddReserved(Inventory inventory)
@@ -161,15 +159,15 @@ namespace Lunra.Hothouse.Models
 			Recalculate();
 		}
 
-		public InventoryComponent RemoveReserved(Inventory inventory)
+		public void RemoveReserved(Inventory inventory)
 		{
-			if (inventory.IsEmpty) return this;
+			if (inventory.IsEmpty) return;
 			if (!ReservedCapacity.Value.GetMaximum().Contains(inventory)) Debug.LogError("Must remove already reserved capacity");
 
 			switch (ReservedCapacity.Value.Clamping)
 			{
 				case InventoryCapacity.Clamps.Unlimited:
-					return this;
+					return;
 				case InventoryCapacity.Clamps.TotalWeight:
 					reservedCapacityListener.Value = InventoryCapacity.ByTotalWeight(ReservedCapacity.Value.GetMaximum().TotalWeight - inventory.TotalWeight);
 					break;
@@ -180,8 +178,6 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			Recalculate();
-			
-			return this;
 		}
 		
 		#region Transactions
@@ -214,12 +210,23 @@ namespace Lunra.Hothouse.Models
 			return true;
 		}
 
-		public void CompleteDeliver(
-			InventoryTransaction transaction
+		public bool CompleteDeliver(
+			InventoryTransaction transaction,
+			out Inventory overflow
 		)
 		{
-			RemoveReserved(transaction.Items);
-			Add(transaction.Items);
+			var isIntersecting = ReservedCapacity.Value.GetMaximum().Intersects(
+				transaction.Items,
+				out var intersection
+			);
+
+			overflow = transaction.Items - intersection;
+
+			if (!isIntersecting) return false;
+			
+			RemoveReserved(intersection);
+			Add(intersection);
+			return true;
 		}
 
 		public bool RequestDistribution(
@@ -249,6 +256,25 @@ namespace Lunra.Hothouse.Models
 				inventory
 			);
 			
+			return true;
+		}
+		
+		public bool CompleteDistribution(
+			InventoryTransaction transaction,
+			out Inventory overflow
+		)
+		{
+			var isIntersecting = Forbidden.Value.Intersects(
+				transaction.Items,
+				out var intersection
+			);
+
+			overflow = transaction.Items - intersection;
+
+			if (!isIntersecting) return false;
+			
+			RemoveForbidden(intersection);
+			Remove(intersection);
 			return true;
 		}
 		#endregion
@@ -292,7 +318,7 @@ namespace Lunra.Hothouse.Models
 
 		public override string ToString()
 		{
-			var result = "Inventory Component:\n";
+			var result = "Inventory Component [ " + ShortId + " ]:\n";
 			foreach (var itemType in Inventory.ValidTypes)
 			{
 				result += "\n - " + itemType;

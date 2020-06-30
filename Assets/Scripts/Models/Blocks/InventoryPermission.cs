@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -45,14 +46,21 @@ namespace Lunra.Hothouse.Models
 			Entries = entries ?? new ReadOnlyDictionary<Jobs, Types>(new Dictionary<Jobs, Types>());
 		}
 
-		public Types GetPermission(Jobs job)
+		public Types GetPermission(AgentModel model)
 		{
-			return Entries.TryGetValue(job, out var result) ? result : Default;
+			switch (model)
+			{
+				case DwellerModel modelDweller:
+					return Entries.TryGetValue(modelDweller.Job.Value, out var result) ? result : Default;
+				default:
+					Debug.LogError("Unrecognized agent type: " + model.GetType());
+					return Default;
+			}
 		}
 
-		public bool HasPermission(Jobs job, Types type) => (GetPermission(job) & type) == type;
+		public bool HasPermission(AgentModel model, Types type) => (GetPermission(model) & type) == type;
 
-		public bool CanWithdrawal(Jobs job) => HasPermission(job, Types.Withdrawal);
-		public bool CanDeposit(Jobs job) => HasPermission(job, Types.Deposit);
+		public bool CanWithdrawal(AgentModel model) => HasPermission(model, Types.Withdrawal);
+		public bool CanDeposit(AgentModel model) => HasPermission(model, Types.Deposit);
 	}
 }

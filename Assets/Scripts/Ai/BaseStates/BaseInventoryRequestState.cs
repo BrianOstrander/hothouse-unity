@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.StyxMvp.Models;
@@ -34,6 +37,7 @@ namespace Lunra.Hothouse.Ai
 		BaseTimeoutState<S1, A> timeoutState;
 		
 		Cache cache = Cache.Default();
+		
 		int timeouts;
 		int timeoutsLimit = 1;
 
@@ -57,9 +61,12 @@ namespace Lunra.Hothouse.Ai
 				);
 			}
 			
-			AddTransitions(
-				new ToTimeoutOnDeliverTarget()
-			);
+			foreach (var transactionType in validTransactionTypes)
+			{
+				AddTransitions(
+					new ToTimeoutOnTarget(transactionType)	
+				);
+			}
 			
 			foreach (var transactionType in validTransactionTypes)
 			{
@@ -102,8 +109,6 @@ namespace Lunra.Hothouse.Ai
 								Navigation.QueryEntrances(targetParentEnterable)
 							);
 							cache.NavigationRadiusMaximum = 0.1f; // TODO: Don't hardcode this
-							
-
 							break;
 						default:
 							Debug.LogError("Unrecognized target parent type: "+cache.Target.GetType().Name);
@@ -126,32 +131,232 @@ namespace Lunra.Hothouse.Ai
 			public override bool IsTriggered() => SourceState.cache.IsTargetNull;
 		}
 		
-		class ToTimeoutOnDeliverTarget : AgentTransition<S1, BaseTimeoutState<S1, A>, GameModel, A>
+		class ToTimeoutOnTarget : AgentTransition<S1, BaseTimeoutState<S1, A>, GameModel, A>
 		{
+			public override string Name => "ToTimeoutOn" + transactionType + "Target";
+			
+			InventoryTransaction.Types transactionType;
+
+			InventoryTransaction nextTransaction;
+			
+			public ToTimeoutOnTarget(InventoryTransaction.Types transactionType) => this.transactionType = transactionType;
+			
 			public override bool IsTriggered()
 			{
 				if (!SourceState.cache.IsNavigable) return false;
-				if (SourceState.cache.Transaction.Type != InventoryTransaction.Types.Deliver) return false;
+				if (transactionType != SourceState.cache.Transaction.Type) return false;
+				if (SourceState.cache.NavigationRadiusMaximum < Vector3.Distance(Agent.Transform.Position.Value, SourceState.cache.NavigationResult.Target)) return false;
+
+				nextTransaction = null;
 				
-				return Vector3.Distance(Agent.Transform.Position.Value, SourceState.cache.NavigationResult.Target) < SourceState.cache.NavigationRadiusMaximum;
+				switch (transactionType)
+				{
+					case InventoryTransaction.Types.Deliver:
+						break;
+					case InventoryTransaction.Types.Distribute:
+						var isNextTargetNavigable = NavigationUtility.CalculateNearest(
+							Agent.Transform.Position.Value,
+							out var nextTargetNavigationResult,
+							GetNavigationQueries(
+								ValidateParentForDelivery,
+								ValidateInventoryForDelivery
+							)
+						);
+
+						if (isNextTargetNavigable)
+						{
+							GetBestInventoryForDelivery(
+								nextTargetNavigationResult.TargetModel as IBaseInventoryModel, 
+								out nextTransaction
+							);
+						}
+						break;
+					default:
+						Debug.LogError("Unrecognized Transaction.Type: " + SourceState.cache.Transaction.Type);
+						break;
+				}
+				
+				return true;
 			}
 
 			public override void Transition()
 			{
 				Agent.InventoryPromises.Transactions.Pop();
-				Agent.Inventory.Remove(SourceState.cache.Transaction.Items);
+
+				bool? completionSuccessful = null;
+				var overflow = Inventory.Empty;
 				
 				switch (SourceState.cache.Target)
 				{
-					case InventoryComponent targetInventory:
-						targetInventory.CompleteDeliver(SourceState.cache.Transaction);
+					case InventoryComponent inventory:
+						switch (SourceState.cache.Transaction.Type)
+						{
+							case InventoryTransaction.Types.Deliver:
+								completionSuccessful = inventory.CompleteDeliver(
+									SourceState.cache.Transaction,
+									out overflow
+								);
+								Agent.Inventory.Remove(
+									SourceState.cache.Transaction.Items - overflow
+								);
+								break;
+							case InventoryTransaction.Types.Distribute:
+								completionSuccessful = inventory.CompleteDistribution(
+									SourceState.cache.Transaction,
+									out overflow
+								);
+
+								if (!nextTransaction.Items.Contains(SourceState.cache.Transaction.Items))
+								{
+									Debug.LogError("TODO: Handle what happens when we can't distribute everything...");
+								}
+								
+								Agent.Inventory.Add(nextTransaction.Items);
+								Agent.InventoryPromises.Transactions.Push(nextTransaction);
+								break;
+							default:
+								Debug.LogError("Unrecognized Transaction.Type: "+SourceState.cache.Transaction.Type);
+								break;
+						}
 						break;
 					default:
-						Debug.LogError("Unrecognized inventory type: " + SourceState.cache.Target.GetType().Name);
+						Debug.LogError("Unrecognized Target: "+SourceState.cache.Target.GetType().Name);
 						break;
 				}
+
+				if (completionSuccessful.HasValue)
+				{
+					if (completionSuccessful.Value)
+					{
+						if (!overflow.IsEmpty) Debug.LogWarning("Unable to " + transactionType + " all resources, this probably is ok, but maybe not?\n" + overflow);
+						SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(1f)); // TODO: Don't hardcode this...	
+					}
+					else
+					{
+						Debug.LogWarning("Not able to " + transactionType + " any resources, this probably is ok, but maybe not?");
+						SourceState.timeoutState.ConfigureForInterval(Interval.Zero());
+					}
+				}
+			}
+
+			Navigation.Query[] GetNavigationQueries(
+				Func<IBaseInventoryModel, bool> parentValidation = null,
+				Func<IBaseInventoryComponent, bool> validation = null
+			)
+			{
+				var results = new List<Navigation.Query>();
 				
-				SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(1f));
+				foreach (var model in Game.GetInventoryParents())
+				{
+					if (!(parentValidation?.Invoke(model) ?? true)) continue; 
+						
+					foreach (var inventory in model.Inventories)
+					{
+						if (!(validation?.Invoke(inventory) ?? true)) continue;
+
+						if (Navigation.TryQuery(model, out var query))
+						{
+							results.Add(query);
+							break;
+						}
+					}
+				}
+
+				return results.ToArray();
+			}
+
+			bool ValidateParentForDelivery(IBaseInventoryModel parent)
+			{
+				return parent.Id.Value != Agent.Id.Value && parent.Id.Value != SourceState.cache.TargetParent.Id.Value;
+			}
+			
+			bool ValidateInventoryForDelivery(IBaseInventoryComponent model)
+			{
+				if (model.Id.Value == SourceState.cache.Target.Id.Value) return false;
+				
+				// TODO: Check if this inventory is accepting deliveries... or should everything be reserved if it's not?
+
+				bool hasCapacityFor(InventoryCapacity targetCapacity, Inventory targetInventory)
+				{
+					return targetCapacity.HasCapacityFor(targetInventory, SourceState.cache.Transaction.Items);
+				}
+				
+				switch (model)
+				{
+					case InventoryComponent inventory:
+						if (!inventory.Permission.Value.CanDeposit(Agent)) return false;
+						return hasCapacityFor(inventory.AvailableCapacity.Value, inventory.Available.Value);
+					case AgentInventoryComponent agentInventory:
+						return hasCapacityFor(agentInventory.AllCapacity.Value, agentInventory.All.Value);
+					default:
+						Debug.LogError("Unrecognized type: "+model.GetType());
+						return false;
+				}
+			}
+			
+			bool GetBestInventoryForDelivery(
+				IBaseInventoryModel parent,
+				out InventoryTransaction transaction
+			)
+			{
+				var minimumOverflowWeight = int.MaxValue;
+				var minimumOverflow = Inventory.Empty;
+				IBaseInventoryComponent target = null;
+				Func<InventoryTransaction> getTransaction = null;
+				transaction = null;
+
+				foreach (var model in parent.Inventories)
+				{
+					Func<InventoryTransaction> currentGetTransaction;
+					var currentOverflow = Inventory.Empty;
+					switch (model)
+					{
+						case InventoryComponent inventory:
+							if (!inventory.Permission.Value.CanDeposit(Agent)) continue;
+
+							inventory.AvailableCapacity.Value.AddClamped(
+								inventory.Available.Value,
+								SourceState.cache.Transaction.Items,
+								out currentOverflow
+							);
+
+							currentGetTransaction = () =>
+							{
+								inventory.RequestDeliver(
+									SourceState.cache.Transaction.Items,
+									out var currentTransaction,
+									out _
+								);
+
+								return currentTransaction;
+							};
+							break;
+						default:
+							Debug.LogError("Unrecognized type: " + model.GetType());
+							continue;
+					}
+
+					if (currentOverflow.TotalWeight < minimumOverflowWeight)
+					{
+						minimumOverflowWeight = currentOverflow.TotalWeight;
+						minimumOverflow = currentOverflow;
+						getTransaction = currentGetTransaction;
+						target = model;
+						if (minimumOverflowWeight == 0) break;
+					}
+				}
+
+				if (minimumOverflowWeight == int.MaxValue) return false;
+
+				if (getTransaction == null)
+				{
+					Debug.LogError("No transaction creator was specified");
+					return false;
+				}
+
+				transaction = getTransaction();
+				
+				return true;
 			}
 		}
 

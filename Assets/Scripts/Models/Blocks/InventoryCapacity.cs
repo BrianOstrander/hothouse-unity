@@ -79,6 +79,20 @@ namespace Lunra.Hothouse.Models
 		public bool IsNotFull(Inventory inventory) => !IsFull(inventory);
 
 		public bool HasCapacityFor(
+			Inventory inventory0,
+			Inventory inventory1
+		)
+		{
+			foreach (var entry in inventory1.Entries)
+			{
+				if (entry.Weight == 0) continue;
+				if (HasCapacityFor(inventory0, entry.Type)) return true;
+			}
+
+			return false;
+		}
+
+		public bool HasCapacityFor(
 			Inventory inventory,
 			Inventory.Types type
 		)
