@@ -1,3 +1,4 @@
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
@@ -34,6 +35,7 @@ namespace Lunra.Hothouse.Ai
 		
 		Cache cache = Cache.Default();
 		int timeouts;
+		int timeoutsLimit = 1;
 
 		public override void OnInitialize()
 		{
@@ -41,14 +43,30 @@ namespace Lunra.Hothouse.Ai
 				new BaseNavigateState<S1, A>(),
 				timeoutState = new BaseTimeoutState<S1, A>()
 			);
+
+			AddTransitions(
+				new ToReturnOnMissingTransaction()
+			);
+
+			var validTransactionTypes = EnumExtensions.GetValues(InventoryTransaction.Types.Unknown);
+			
+			foreach (var transactionType in validTransactionTypes)
+			{
+				AddTransitions(
+					new ToReturnOnTimeout(transactionType)	
+				);
+			}
 			
 			AddTransitions(
-				new ToReturnOnMissingTransaction(),
-				new ToReturnOnTimeout(),
-				
-				new ToTimeoutOnDeliverTarget(),
-				new ToNavigateToDeliverTarget()
+				new ToTimeoutOnDeliverTarget()
 			);
+			
+			foreach (var transactionType in validTransactionTypes)
+			{
+				AddTransitions(
+					new ToNavigateToTarget(transactionType)	
+				);
+			}
 		}
 
 		public override void Begin() => Recalculate();
@@ -110,8 +128,6 @@ namespace Lunra.Hothouse.Ai
 		
 		class ToTimeoutOnDeliverTarget : AgentTransition<S1, BaseTimeoutState<S1, A>, GameModel, A>
 		{
-			
-			
 			public override bool IsTriggered()
 			{
 				if (!SourceState.cache.IsNavigable) return false;
@@ -139,12 +155,17 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		class ToNavigateToDeliverTarget : AgentTransition<S1, BaseNavigateState<S1, A>, GameModel, A>
+		class ToNavigateToTarget : AgentTransition<S1, BaseNavigateState<S1, A>, GameModel, A>
 		{
+			public override string Name => "ToNavigateTo" + transactionType + "Target";
+			
+			InventoryTransaction.Types transactionType;
+
+			public ToNavigateToTarget(InventoryTransaction.Types transactionType) => this.transactionType = transactionType;
+			
 			public override bool IsTriggered()
 			{
-				if (SourceState.cache.Transaction.Type != InventoryTransaction.Types.Deliver) return false;
-				return SourceState.cache.IsNavigable;
+				return SourceState.cache.IsNavigable && transactionType == SourceState.cache.Transaction.Type;
 			}
 
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(SourceState.cache.NavigationResult.Path);
@@ -152,7 +173,17 @@ namespace Lunra.Hothouse.Ai
 
 		class ToReturnOnTimeout : AgentTransition<S1, S0, GameModel, A>
 		{
-			public override bool IsTriggered() => 1 < SourceState.timeouts;
+			public override string Name => "ToReturnOn" + transactionType + "Timeout";
+			
+			InventoryTransaction.Types transactionType;
+
+			public ToReturnOnTimeout(InventoryTransaction.Types transactionType) => this.transactionType = transactionType;
+
+			public override bool IsTriggered()
+			{
+				if (SourceState.timeouts <= SourceState.timeoutsLimit) return false;
+				return transactionType == SourceState.cache.Transaction.Type;
+			}
 
 			public override void Transition()
 			{
