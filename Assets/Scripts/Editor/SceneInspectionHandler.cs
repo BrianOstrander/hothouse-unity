@@ -437,17 +437,9 @@ namespace Lunra.Hothouse.Editor
 				else label += "None";
 			}
 
-			label += model.Inventory;
+			label += "\n" + model.Inventory;
 
 			label += "\n" + model.InventoryPromises;
-
-			if (model.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.None)
-			{
-				label += GetInventory(
-					model.InventoryPromise.Value.Operation+"Promise",
-					model.InventoryPromise.Value.Inventory
-				);
-			}
 
 			switch (model.NavigationPlan.Value.State)
 			{

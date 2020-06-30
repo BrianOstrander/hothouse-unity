@@ -326,6 +326,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			var items = Inventory.FromEntry(Inventory.Types.Stalks, 1);
 			
+			/*
 			for (var i = 0; i < 3; i++)
 			{
 				var itemDrop = payload.Game.ItemDrops.Activate(
@@ -349,11 +350,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				// 	dweller.InventoryPromises.Transactions.Push(transaction);
 				// }
 			}
+			*/
 
-			/*
-			var items = Inventory.FromEntry(Inventory.Types.Stalks, 2);
-			
-			if (false)
+			if (true)
 			{
 				// ---- Delivery
 				dweller.Inventory.Add(items);
@@ -380,7 +379,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				if (isRequestValid) dweller.InventoryPromises.Transactions.Push(transaction);
 				else Debug.LogError("Invalid distribution");
 			}
-			*/
+			
 			// Debugging End
 			
 			done();

@@ -118,39 +118,8 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
-			switch (Model.InventoryPromise.Value.Operation)
-			{
-				case InventoryPromiseOld.Operations.None: break;
-				case InventoryPromiseOld.Operations.ConstructionDeposit:
-					if (Model.InventoryPromise.Value.Target.TryGetInstance<IConstructionModel>(Game, out var constructionDepositTarget))
-					{
-						constructionDepositTarget.ConstructionInventory.RemoveReserved(Model.InventoryPromise.Value.Inventory);
-					}
-					
-					var constructionInventory = Model.InventoryPromise.Value.Inventory - Model.Inventory.All.Value;
-					if (!constructionInventory.IsEmpty)
-					{
-						if (Model.InventoryPromise.Value.Source.TryGetInstance<IInventoryModel>(Game, out var constructionDepositSource))
-						{
-							constructionDepositSource.Inventory.RemoveForbidden(constructionInventory);
-						}
-					}
-					break;
-				case InventoryPromiseOld.Operations.CleanupWithdrawal:
-					if (Model.InventoryPromise.Value.Target.TryGetInstance<IInventoryModel>(Game, out var cleanupNextTarget))
-					{
-						cleanupNextTarget.Inventory.RemoveReserved(Model.InventoryPromise.Value.Inventory); 
-					}
-					
-					if (Model.InventoryPromise.Value.Source.TryGetInstance<IInventoryModel>(Game, out var cleanupNextSource))
-					{
-						cleanupNextSource.Inventory.RemoveForbidden(Model.InventoryPromise.Value.Inventory); 
-					}
-					break;
-				default:
-					Debug.LogError("Unrecognized operation: " + Model.InventoryPromise.Value.Operation);
-					break;
-			}
+			Model.InventoryPromises.BreakRemainingPromises(Game);
+			
 
 			Debug.LogWarning("Handle unfulfilled obligation promises here!");
 			

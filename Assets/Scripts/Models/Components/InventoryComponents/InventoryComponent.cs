@@ -212,7 +212,8 @@ namespace Lunra.Hothouse.Models
 
 		public bool CompleteDeliver(
 			InventoryTransaction transaction,
-			out Inventory overflow
+			out Inventory overflow,
+			bool addIntersection = true
 		)
 		{
 			var isIntersecting = ReservedCapacity.Value.GetMaximum().Intersects(
@@ -225,7 +226,7 @@ namespace Lunra.Hothouse.Models
 			if (!isIntersecting) return false;
 			
 			RemoveReserved(intersection);
-			Add(intersection);
+			if (addIntersection) Add(intersection);
 			return true;
 		}
 
@@ -261,7 +262,8 @@ namespace Lunra.Hothouse.Models
 		
 		public bool CompleteDistribution(
 			InventoryTransaction transaction,
-			out Inventory overflow
+			out Inventory overflow,
+			bool removeIntersection = true
 		)
 		{
 			var isIntersecting = Forbidden.Value.Intersects(
@@ -274,7 +276,7 @@ namespace Lunra.Hothouse.Models
 			if (!isIntersecting) return false;
 			
 			RemoveForbidden(intersection);
-			Remove(intersection);
+			if (removeIntersection) Remove(intersection);
 			return true;
 		}
 		#endregion

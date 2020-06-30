@@ -20,9 +20,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] NavigationPlan navigationPlan = Models.NavigationPlan.Done();
 		[JsonIgnore] public ListenerProperty<NavigationPlan> NavigationPlan { get; }
 
-		[JsonProperty] InventoryPromiseOld inventoryPromise = Models.InventoryPromiseOld.Default();
-		[JsonIgnore] public ListenerProperty<InventoryPromiseOld> InventoryPromise { get; }
-		
 		[JsonProperty] ObligationPromise obligation = ObligationPromise.Default();
 		[JsonIgnore] public ListenerProperty<ObligationPromise> Obligation { get; }
 		
@@ -43,7 +40,6 @@ namespace Lunra.Hothouse.Models
 			NavigationVelocity = new ListenerProperty<float>(value => navigationVelocity = value, () => navigationVelocity);
 			NavigationForceDistanceMaximum = new ListenerProperty<float>(value => navigationForceDistanceMaximum = value, () => navigationForceDistanceMaximum);
 			NavigationPlan = new ListenerProperty<NavigationPlan>(value => navigationPlan = value, () => navigationPlan);
-			InventoryPromise = new ListenerProperty<InventoryPromiseOld>(value => inventoryPromise = value, () => inventoryPromise);
 			Obligation = new ListenerProperty<ObligationPromise>(value => obligation = value, () => obligation);
 			Inventories = new []
 			{

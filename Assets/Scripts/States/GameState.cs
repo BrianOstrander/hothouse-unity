@@ -107,24 +107,16 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 
-			/*
 			App.Heartbeat.WaitForSeconds(
 				() =>
 				{
-					Debug.Log("Recalculating...");
-					var dweller0 = Payload.Game.Dwellers.AllActive
-						.First(d => d.InventoryPromise.Value.Operation != InventoryPromise.Operations.None);
+					Debug.Log("Killing first dweller...");
+					var dweller = Payload.Game.Dwellers.AllActive.First();
 					
-					var dweller1 = Payload.Game.Dwellers.AllActive
-						.Last();
-
-					Damage.ApplyGeneric(999f, dweller0);
-
-					dweller1.IsDebugging = true;
+					Damage.ApplyGeneric(999f, dweller);
 				},
-				2f
+				1f
 			);
-			*/
 			
 			// App.Heartbeat.WaitForCondition(
 			// 	() =>

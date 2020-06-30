@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
@@ -24,6 +25,46 @@ namespace Lunra.Hothouse.Models
 		public InventoryPromiseComponent()
 		{
 			Transactions = new StackProperty<InventoryTransaction>(transactions);
+		}
+
+		public void BreakRemainingPromises(
+			GameModel game	
+		)
+		{
+			foreach (var transaction in Transactions.PeekAll())
+			{
+				if (!transaction.Target.TryGetInstance<IBaseInventoryComponent>(game, out var target)) continue;
+
+				switch (target)
+				{
+					case InventoryComponent inventory:
+						switch (transaction.Type)
+						{
+							case InventoryTransaction.Types.Deliver:
+								if (!inventory.CompleteDeliver(transaction, out _, false))
+								{
+									Debug.LogError("Unable to undo delivery");
+								}
+								break;
+							case InventoryTransaction.Types.Distribute:
+								if (!inventory.CompleteDistribution(transaction, out _, false))
+								{
+									Debug.LogError("Unable to undo distribute");
+								}
+								break;
+							default:
+								Debug.LogError("Unrecognized transaction type: "+transaction.Type);
+								break;
+						}
+						break;
+					case AgentInventoryComponent _:
+						break;
+					default:
+						Debug.LogError("Unrecognized transaction target type: "+target.GetType());
+						break;
+				}
+			}
+			// Debug.LogWarning("Handle unfulfilled inventory promises here");	
 		}
 
 		public void Reset()
