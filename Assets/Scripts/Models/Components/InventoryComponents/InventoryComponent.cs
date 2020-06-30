@@ -353,15 +353,14 @@ namespace Lunra.Hothouse.Models
 					}
 					break;
 				case InventoryCapacity.Clamps.TotalWeight:
-					if (capacityClampingNotMatched || AvailableCapacity.Value.GetMaximum().TotalWeight != (AllCapacity.Value.GetMaximum() - ReservedCapacity.Value.GetMaximum()).TotalWeight)
+					if (capacityClampingNotMatched || AvailableCapacity.Value.GetMaximum().TotalWeight != CalculateAvailableCapacity().TotalWeight)
 					{
 						availableCapacityListener.Value = InventoryCapacity.ByTotalWeight(AllCapacity.Value.GetMaximum().TotalWeight);
 					}
 					break;
 				case InventoryCapacity.Clamps.IndividualWeight:
-					var currentAvailableCapacity = AllCapacity.Value.GetMaximum() - ReservedCapacity.Value.GetMaximum();
-
-					if (capacityClampingNotMatched || currentAvailableCapacity != AvailableCapacity.Value.GetMaximum())
+					var currentAvailableCapacity = CalculateAvailableCapacity();
+					if (capacityClampingNotMatched || AvailableCapacity.Value.GetMaximum() != currentAvailableCapacity)
 					{
 						availableCapacityListener.Value = InventoryCapacity.ByIndividualWeight(currentAvailableCapacity);	
 					}
@@ -371,6 +370,8 @@ namespace Lunra.Hothouse.Models
 					break;
 			}
 		}
+
+		Inventory CalculateAvailableCapacity() => AllCapacity.Value.GetMaximum() - (ReservedCapacity.Value.GetMaximum() + Forbidden.Value);
 		#endregion
 	}
 }

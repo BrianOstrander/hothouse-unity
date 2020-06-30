@@ -274,8 +274,6 @@ namespace Lunra.Hothouse.Ai
 			{
 				if (model.Id.Value == SourceState.cache.Target.Id.Value) return false;
 				
-				// TODO: Check if this inventory is accepting deliveries... or should everything be reserved if it's not?
-
 				bool hasCapacityFor(InventoryCapacity targetCapacity, Inventory targetInventory)
 				{
 					return targetCapacity.HasCapacityFor(targetInventory, SourceState.cache.Transaction.Items);
@@ -300,8 +298,6 @@ namespace Lunra.Hothouse.Ai
 			)
 			{
 				var minimumOverflowWeight = int.MaxValue;
-				var minimumOverflow = Inventory.Empty;
-				IBaseInventoryComponent target = null;
 				Func<InventoryTransaction> getTransaction = null;
 				transaction = null;
 
@@ -322,12 +318,15 @@ namespace Lunra.Hothouse.Ai
 
 							currentGetTransaction = () =>
 							{
-								inventory.RequestDeliver(
+								var isRequestDeliverValid = inventory.RequestDeliver(
 									SourceState.cache.Transaction.Items,
 									out var currentTransaction,
-									out _
+									out var requestDeliverOverflow
 								);
-
+								
+								if (!isRequestDeliverValid) Debug.LogError("Invalid request to deliver made, this is unexpected");
+								if (!requestDeliverOverflow.IsEmpty) Debug.LogError("Overflow on request to deliver, this is unexpected");
+								
 								return currentTransaction;
 							};
 							break;
@@ -339,9 +338,7 @@ namespace Lunra.Hothouse.Ai
 					if (currentOverflow.TotalWeight < minimumOverflowWeight)
 					{
 						minimumOverflowWeight = currentOverflow.TotalWeight;
-						minimumOverflow = currentOverflow;
 						getTransaction = currentGetTransaction;
-						target = model;
 						if (minimumOverflowWeight == 0) break;
 					}
 				}

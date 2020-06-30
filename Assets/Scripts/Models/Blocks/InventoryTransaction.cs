@@ -69,8 +69,8 @@ namespace Lunra.Hothouse.Models
 
 		public override string ToString()
 		{
-			var result = Type + " to " + Model.ShortenId(Target?.Id);
-			result += "\n" + Items;
+			var result = Type + " to " + Target + " " + Items.TotalWeight + " items";
+			
 			return result;
 		}
 	}

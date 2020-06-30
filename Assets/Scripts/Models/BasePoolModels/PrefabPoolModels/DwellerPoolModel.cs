@@ -73,6 +73,8 @@ namespace Lunra.Hothouse.Models
 			model.LowRationThreshold.Value = 1;
 			model.ObligationDistance.Value = 0.75f;
 			model.ObligationMinimumConcentrationDuration.Value = 0.5f;
+			
+			model.InventoryPromises.Reset();
 		}
 	}
 }

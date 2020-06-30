@@ -323,9 +323,36 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
-
+			
 			var items = Inventory.FromEntry(Inventory.Types.Stalks, 1);
+			
+			for (var i = 0; i < 3; i++)
+			{
+				var itemDrop = payload.Game.ItemDrops.Activate(
+					"default",
+					spawn.RoomTransform.Id.Value,
+					position + (Vector3.right * 2f) + (Vector3.forward * (6f - i)),
+					Quaternion.identity,
+					m =>
+					{
+						m.Enterable.Reset();
+						m.Inventory.Reset(
+							InventoryPermission.AllForAnyJob(), 
+							InventoryCapacity.ByIndividualWeight(items)
+						);
+						m.Inventory.Add(items);
+					}
+				);
+				
+				// if (itemDrop.Inventory.RequestDistribution(itemDrop.Inventory.Available.Value, out var transaction, out _))
+				// {
+				// 	dweller.InventoryPromises.Transactions.Push(transaction);
+				// }
+			}
 
+			/*
+			var items = Inventory.FromEntry(Inventory.Types.Stalks, 2);
+			
 			if (false)
 			{
 				// ---- Delivery
@@ -353,8 +380,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				if (isRequestValid) dweller.InventoryPromises.Transactions.Push(transaction);
 				else Debug.LogError("Invalid distribution");
 			}
-
-			
+			*/
 			// Debugging End
 			
 			done();

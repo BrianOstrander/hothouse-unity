@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -27,6 +29,21 @@ namespace Lunra.Hothouse.Models
 		public void Reset()
 		{
 			Transactions.Clear();
+		}
+
+		public override string ToString()
+		{
+			var result = "Promise Transactions:";
+			var all = Transactions.PeekAll();
+			
+			if (all.None()) return result + " None";
+
+			foreach (var transaction in all)
+			{
+				result += "\n - " + transaction;
+			}
+
+			return result;
 		}
 	}
 }

@@ -94,13 +94,6 @@ namespace Lunra.Hothouse.Editor
 						if (model.Light.IsLight.Value) label += "\nLight State: " + model.Light.LightState.Value;
 					}
 
-					// label += GetInventory(
-					// 	"Inventory",
-					// 	model.Inventory.All.Value,
-					// 	model.Inventory.AllCapacity.Value,
-					// 	InventoryVisibilities.IfMaximumGreaterThanZero
-					// );
-
 					label += "\nInventory " + model.Inventory;
 
 					switch (model.BuildingState.Value)
@@ -147,7 +140,7 @@ namespace Lunra.Hothouse.Editor
 
 					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
 					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;
-
+					
 					AppendAgentStateLabel(
 						ref label,
 						model
@@ -445,14 +438,10 @@ namespace Lunra.Hothouse.Editor
 				}
 				else label += "None";
 			}
-			
-			label += GetInventory(
-				"Inventory",
-				model.Inventory.All.Value,
-				model.Inventory.AllCapacity.Value,
-				InventoryVisibilities.IfMaximumGreaterThanZero
-				
-			);
+
+			label += model.Inventory;
+
+			label += "\n" + model.InventoryPromises;
 
 			if (model.InventoryPromise.Value.Operation != InventoryPromiseOld.Operations.None)
 			{

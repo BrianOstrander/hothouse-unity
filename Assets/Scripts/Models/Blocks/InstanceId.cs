@@ -167,7 +167,7 @@ namespace Lunra.Hothouse.Models
 
 		IModel GetFirstOrDefault(IEnumerable<IModel> models, string id) => models.FirstOrDefault(m => m.Id.Value == id);
 
-		public override string ToString() => Model.ShortenId(Id) + " : " + Type + " [ " + (cachedInstance == null ? "not cached" : "cached") + " ]";
+		public override string ToString() => Model.ShortenId(Id) + " : " + Type + " [ " + (cachedInstance == null ? "unknown" : cachedInstance.GetType().Name) + " ]";
 	}
 
 	public static class InstanceIdExtensions

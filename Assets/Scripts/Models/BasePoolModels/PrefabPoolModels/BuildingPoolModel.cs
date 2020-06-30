@@ -400,15 +400,8 @@ namespace Lunra.Hothouse.Models
 			model.Type.Value = building;
 
 			model.Health.ResetToMaximum(info.HealthMaximum);
-			model.Inventory.Reset(
-				info.InventoryPermission,
-				info.InventoryCapacity
-			);
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
-			model.ConstructionInventory.Reset(
-				InventoryPermission.DepositForJobs(Jobs.Laborer), 
-				info.ConstructionInventoryCapacity
-			);
+			
 			model.SalvageInventory.Value = info.SalvageInventory;
 			model.Light.IsLightCalculationsEnabled.Value = false;
 			model.Light.LightFuel.Value = info.LightFuel;
@@ -422,6 +415,16 @@ namespace Lunra.Hothouse.Models
 			
 			model.Ownership.Reset();
 			model.Ownership.MaximumClaimers.Value = info.MaximumOwners;
+			
+			model.Inventory.Reset(
+				info.InventoryPermission,
+				info.InventoryCapacity
+			);
+			
+			model.ConstructionInventory.Reset(
+				buildingState == BuildingStates.Constructing ? InventoryPermission.DepositForJobs(Jobs.Laborer) : InventoryPermission.NoneForAnyJob(), 
+				info.ConstructionInventoryCapacity
+			);
 		}
 	}
 }

@@ -76,13 +76,10 @@ namespace Lunra.Hothouse.Models
 
 		public override string ToString()
 		{
-			var result = "Inventory Component:\n";
+			var result = "Inventory Component [ " + ShortId + " ]:\n";
 			foreach (var itemType in Inventory.ValidTypes)
 			{
-				result += "\n - " + itemType;
-				result += "\n\tStored: \t" + All.Value[itemType];
-				result += "\n\tCapacity: \t" + AllCapacity.Value.GetMaximumFor(itemType);
-				result += "\n";
+				result += "\n - " + itemType + "\t\t"+All.Value[itemType]+" / "+AllCapacity.Value.GetMaximumFor(itemType);
 			}
 
 			return result;
