@@ -154,6 +154,12 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		
+		/// <summary>
+		/// Gets the remaining capacity assuming the inventory is already filled with the specified items.
+		/// </summary>
+		/// <remarks>No negative inventories are returned by this.</remarks>
+		/// <param name="inventory"></param>
+		/// <returns>All items that could be added to the inventory without going over the capacity.</returns>
 		public Inventory GetCapacityFor(Inventory inventory)
 		{
 			switch (Clamping)
@@ -184,6 +190,15 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		
+		/// <summary>
+		/// Gets the remaining capacity assuming the inventory is already filled with the specified items.
+		/// </summary>
+		/// <remarks>No negative inventories are returned by this.</remarks>
+		/// <param name="inventory"></param>
+		/// <param name="type"></param>
+		/// <returns>
+		/// Number of items of the specified type that could be added to the inventory without going over capacity.
+		/// </returns>
 		public int GetCapacityFor(
 			Inventory inventory,
 			Inventory.Types type

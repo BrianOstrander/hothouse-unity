@@ -225,6 +225,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			public override bool IsTriggered()
 			{
+				throw new NotImplementedException();
+				/*
 				var target = NavigationUtility.CalculateNearestAvailableEntrance(
 					Agent.Transform.Position.Value,
 					out path,
@@ -233,6 +235,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				);
 
 				return target != null;
+				*/
 			}
 
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);

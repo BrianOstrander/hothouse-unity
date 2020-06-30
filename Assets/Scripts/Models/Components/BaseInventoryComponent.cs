@@ -67,14 +67,33 @@ namespace Lunra.Hothouse.Models
 	
 	public static class BaseInventoryGameModelExtensions
 	{
-		public static IEnumerable<IBaseInventoryComponent> GetInventories(
+		public static IEnumerable<IBaseInventoryModel> GetInventoryParents(
 			this GameModel game
 		)
 		{
 			return game.Dwellers.AllActive
 				.Concat<IBaseInventoryModel>(game.Buildings.AllActive)
+				.Concat(game.ItemDrops.AllActive);
+		}
+		
+		public static IBaseInventoryModel GetInventoryParent(
+			this GameModel game,
+			string inventoryId
+		)
+		{
+			return game.Dwellers.AllActive
+				.Concat<IBaseInventoryModel>(game.Buildings.AllActive)
 				.Concat(game.ItemDrops.AllActive)
-				.SelectMany(m => m.Inventories);
+				.FirstOrDefault(
+					m => m.Inventories.Any(i => i.Id.Value == inventoryId)
+				);
+		}
+		
+		public static IEnumerable<IBaseInventoryComponent> GetInventories(
+			this GameModel game
+		)
+		{
+			return game.GetInventoryParents().SelectMany(m => m.Inventories);
 		}
 	}
 }

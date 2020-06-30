@@ -14,6 +14,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override bool IsTriggered()
 		{
+			throw new NotImplementedException();
+			/*
 			if (lastLightUpdateChecked < Game.LastLightUpdate.Value.LastUpdate) return false;
 			lastLightUpdateChecked = Game.LastLightUpdate.Value.LastUpdate;
 			if (0 < Game.CalculateMaximumLighting((Agent.RoomTransform.Id.Value, Agent.Transform.Position.Value, null)).OperatingMaximum) return false;
@@ -27,6 +29,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			);
 
 			return target != null;
+			*/
 		}
 
 		public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);

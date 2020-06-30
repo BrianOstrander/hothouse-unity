@@ -1,3 +1,4 @@
+/*
 using Lunra.Hothouse.Models;
 
 namespace Lunra.Hothouse.Ai
@@ -6,24 +7,24 @@ namespace Lunra.Hothouse.Ai
 		where S : AgentState<GameModel, A>
 		where A : AgentModel 
 	{
-		protected abstract InventoryTransaction.Types TransactionType { get; }
 		
-		protected InventoryTransaction CurrentTransaction { get; private set; }
 
 		public override void Begin()
 		{
-			if (!Agent.InventoryPromises.Transactions.TryPeek(out var currentTransaction)) return;
+			Agent.InventoryPromises.Transactions.TryPeek(out var currentTransaction);
 			CurrentTransaction = currentTransaction;
 		}
-
-		class ToReturnOnMissingTransaction : AgentTransition<BaseInventoryTransactionState<S, A>, S, GameModel, A>
+		
+		protected void PopPush(InventoryTransaction transaction)
 		{
-			public override bool IsTriggered() => SourceState.CurrentTransaction == null;
+			Agent.InventoryPromises.Transactions.Pop();
+			Agent.InventoryPromises.Transactions.Push(
+				CurrentTransaction = transaction
+			);
 		}
 		
-		class ToReturnOnTypeMismatch : AgentTransition<BaseInventoryTransactionState<S, A>, S, GameModel, A>
-		{
-			public override bool IsTriggered() => SourceState.CurrentTransaction.Type != SourceState.TransactionType;
-		}
+		// protected bool Get
+
 	}
 }
+*/

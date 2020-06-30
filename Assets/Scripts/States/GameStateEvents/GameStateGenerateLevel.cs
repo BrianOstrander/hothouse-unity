@@ -311,7 +311,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var depot0 = payload.Game.Buildings.Activate(
 				Buildings.DepotSmall,
 				spawn.Id.Value,
-				position + (Vector3.forward * 6f),
+				position + (Vector3.back * 6f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
@@ -319,19 +319,22 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var depot1 = payload.Game.Buildings.Activate(
 				Buildings.DepotSmall,
 				spawn.Id.Value,
-				position + (Vector3.back * 6f),
+				position + (Vector3.forward * 6f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
 
-			var items = Inventory.FromEntry(Inventory.Types.Rations, 1);
+			var items = Inventory.FromEntry(Inventory.Types.Stalks, 1);
 			dweller.Inventory.Add(items);
-			dweller.InventoryPromises.Transactions.Push(
-				InventoryTransaction.RequestDeliver(
-					depot0.Inventory,
-					items
-				)
+
+			var validDelivery = depot0.Inventory.RequestDeliver(
+				items,
+				out var transaction,
+				out _
 			);
+			
+			if (validDelivery) dweller.InventoryPromises.Transactions.Push(transaction);
+			else Debug.LogError("Invalid delivory");
 			
 			// Debugging End
 			

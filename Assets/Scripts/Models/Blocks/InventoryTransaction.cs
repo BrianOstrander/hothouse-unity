@@ -4,27 +4,14 @@ namespace Lunra.Hothouse.Models
 {
 	public class InventoryTransaction
 	{
-		public static InventoryTransaction RequestDeliver(
+		public static InventoryTransaction New(
+			Types type,
 			IBaseInventoryComponent target,
 			Inventory items
 		)
 		{
 			return new InventoryTransaction(
-				Types.Deliver,
-				States.Request,
-				InstanceId.New(target),
-				items
-			);
-		}
-		
-		public static InventoryTransaction RequestDistribute(
-			IBaseInventoryComponent target,
-			Inventory items
-		)
-		{
-			return new InventoryTransaction(
-				Types.Distribute,
-				States.Request,
+				type,
 				InstanceId.New(target),
 				items
 			);
@@ -36,25 +23,14 @@ namespace Lunra.Hothouse.Models
 			Deliver = 10,
 			Distribute = 20
 		}
-
-		public enum States
-		{
-			Unknown = 0,
-			Request = 10,
-			Load = 20,
-			Unload = 30,
-			Complete = 40
-		}
-
+		
 		public Types Type { get; }
-		public States State { get; }
 		public InstanceId Target { get; }
 		public Inventory Items { get; }
 
 		
 		InventoryTransaction(
 			Types type,
-			States state,
 			InstanceId target,
 			Inventory items
 		)
@@ -62,21 +38,18 @@ namespace Lunra.Hothouse.Models
 			if (target.IsNull) throw new ArgumentException("Cannot have a null instance: " + target);
 			
 			Type = type;
-			State = state;
 			Target = target;
 			Items = items;
 		}
 		
 		public InventoryTransaction New(
 			Types? type = null,
-			States? state = null,
 			InstanceId target = null,
 			Inventory? items = null
 		)
 		{
 			return new InventoryTransaction(
 				type ?? Type,
-				state ?? State,
 				target ?? Target,
 				items ?? Items
 			);

@@ -184,6 +184,37 @@ namespace Lunra.Hothouse.Models
 			return this;
 		}
 		
+		#region Transactions
+		public bool RequestDeliver(
+			Inventory inventory,
+			out InventoryTransaction transaction,
+			out Inventory overflow
+		)
+		{
+			transaction = null;
+			AvailableCapacity.Value.AddClamped(
+				All.Value,
+				inventory,
+				out _,
+				out overflow
+			);
+			
+			var inventoryForDelivery = inventory - overflow;
+
+			if (inventoryForDelivery.IsEmpty) return false;
+			
+			AddReserved(inventoryForDelivery);
+			
+			transaction = InventoryTransaction.New(
+				InventoryTransaction.Types.Deliver,
+				this,
+				inventoryForDelivery
+			);
+
+			return true;
+		}
+		#endregion
+		
 		public void Reset(
 			InventoryPermission permission,
 			InventoryCapacity capacity
