@@ -1,13 +1,12 @@
-using System;
-using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Ai
 {
-	public class InventoryRequestState<S, A> : AgentState<GameModel, A>
-		where S : AgentState<GameModel, A>
+	public abstract class BaseInventoryRequestState<S0, S1, A> : AgentState<GameModel, A>
+		where S0 : AgentState<GameModel, A>
+		where S1 : BaseInventoryRequestState<S0, S1, A>
 		where A : AgentModel
 	{
 		struct Cache
@@ -31,7 +30,7 @@ namespace Lunra.Hothouse.Ai
 	
 		public override string Name => "InventoryRequest";
 
-		BaseTimeoutState<S, A> timeoutState;
+		BaseTimeoutState<S1, A> timeoutState;
 		
 		Cache cache = Cache.Default();
 		int timeouts;
@@ -39,8 +38,8 @@ namespace Lunra.Hothouse.Ai
 		public override void OnInitialize()
 		{
 			AddChildStates(
-				new BaseNavigateState<S, A>(),
-				timeoutState = new BaseTimeoutState<S, A>()
+				new BaseNavigateState<S1, A>(),
+				timeoutState = new BaseTimeoutState<S1, A>()
 			);
 			
 			AddTransitions(
@@ -96,7 +95,7 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		public class ToInventoryRequestOnPromises : AgentTransition<S, InventoryRequestState<S, A>, GameModel, A>
+		public class ToInventoryRequestOnPromises : AgentTransition<S0, S1, GameModel, A>
 		{
 			public override bool IsTriggered()
 			{
@@ -104,12 +103,12 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 		
-		class ToReturnOnMissingTransaction : AgentTransition<InventoryRequestState<S, A>, S, GameModel, A>
+		class ToReturnOnMissingTransaction : AgentTransition<S1, S0, GameModel, A>
 		{
 			public override bool IsTriggered() => SourceState.cache.isTargetNull;
 		}
 		
-		class ToTimeoutOnDeliverTarget : AgentTransition<InventoryRequestState<S, A>, BaseTimeoutState<S, A>, GameModel, A>
+		class ToTimeoutOnDeliverTarget : AgentTransition<S1, BaseTimeoutState<S1, A>, GameModel, A>
 		{
 			public override bool IsTriggered()
 			{
@@ -125,7 +124,7 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		class ToNavigateToDeliverTarget : AgentTransition<InventoryRequestState<S, A>, BaseNavigateState<S, A>, GameModel, A>
+		class ToNavigateToDeliverTarget : AgentTransition<S1, BaseNavigateState<S1, A>, GameModel, A>
 		{
 			public override bool IsTriggered()
 			{
@@ -137,7 +136,7 @@ namespace Lunra.Hothouse.Ai
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(SourceState.cache.navigationResult.Path);
 		}
 
-		class ToReturnOnTimeout : AgentTransition<InventoryRequestState<S, A>, S, GameModel, A>
+		class ToReturnOnTimeout : AgentTransition<S1, S0, GameModel, A>
 		{
 			public override bool IsTriggered() => 1 < SourceState.timeouts;
 

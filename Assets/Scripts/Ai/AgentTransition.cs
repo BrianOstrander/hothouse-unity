@@ -18,6 +18,13 @@ namespace Lunra.Hothouse.Ai
 		void Initialize(G game, A agent, AgentState<G, A> sourceState);
 	}
 	
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <typeparam name="S0">Source State</typeparam>
+	/// <typeparam name="S1">Target State</typeparam>
+	/// <typeparam name="G"></typeparam>
+	/// <typeparam name="A"></typeparam>
 	public abstract class AgentTransition<S0, S1, G, A> : IAgentTransition<G, A>
 		where S0 : AgentState<G, A>
 		where S1 : AgentState<G, A>

@@ -12,10 +12,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			AddChildStates(
 				timeoutState,
-				new InventoryRequestState<IdleState, DwellerModel>()
+				new InventoryRequestState<IdleState>()
 			);
 			AddTransitions(
-				new InventoryRequestState<IdleState, DwellerModel>.ToInventoryRequestOnPromises()
+				new InventoryRequestState<IdleState>.ToInventoryRequestOnPromises()
 			);
 		}
 	}
