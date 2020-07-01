@@ -2,10 +2,10 @@ using Lunra.Hothouse.Models;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class StockpilerState<S> : JobState<S, StockpilerState<S>>
+	public class LaborerState<S> : JobState<S, LaborerState<S>>
 		where S : AgentState<GameModel, DwellerModel>
 	{
-		protected override Jobs Job => Jobs.Stockpiler;
+		protected override Jobs Job => Jobs.Laborer;
 
 		public override void OnInitialize()
 		{

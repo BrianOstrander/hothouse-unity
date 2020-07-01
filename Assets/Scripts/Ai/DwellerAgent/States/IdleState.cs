@@ -9,10 +9,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 		public override void OnInitialize()
 		{
 			AddChildStates(
+				new LaborerState<IdleState>(),
 				new StockpilerState<IdleState>()
 			);
 			
 			AddTransitions(
+				new LaborerState<IdleState>.ToJobOnShiftBegin(),
 				new StockpilerState<IdleState>.ToJobOnShiftBegin()	
 			);
 		}

@@ -14,19 +14,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public class ToJobOnShiftBegin : AgentTransition<S0, S1, GameModel, DwellerModel>
 		{
-			Jobs? job;
-			
 			public override bool IsTriggered()
 			{
-				return Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
-				/*
-				if (!job.HasValue)
-				{
-					
-				}
-				
-				return job.Value == Agent.Job.Value && Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
-				*/
+				return TargetState.IsCurrentJob && Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
 			}
 		}
 
@@ -39,5 +29,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			public override bool IsTriggered() => !Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
 		}
+		
+		#region Child Classes
+		protected class CleanupState : CleanupItemDropsState<S1, CleanupState> { }
+		#endregion
 	}
 }
