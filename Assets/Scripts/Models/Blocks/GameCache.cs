@@ -19,6 +19,8 @@ namespace Lunra.Hothouse.Models
 			result.GlobalInventory = new InventoryComponent();
 			result.GlobalInventory.Reset(InventoryPermission.AllForAnyJob(), InventoryCapacity.None());
 			result.AnyItemDropsAvailableForPickup = false;
+			result.UniqueObligationsAvailable = new string[0];
+			result.AnyObligationsAvailable = false;
 			result.LowRationThreshold = 0;
 			result.Conditions = new Dictionary<Condition.Types, bool>().ToReadonlyDictionary();
 			
@@ -31,6 +33,8 @@ namespace Lunra.Hothouse.Models
 		public InventoryComponent GlobalInventory { get; private set; }
 		public Inventory GlobalItemDropsAvailable { get; private set; }
 		public bool AnyItemDropsAvailableForPickup { get; private set; }
+		public string[] UniqueObligationsAvailable { get; private set; }
+		public bool AnyObligationsAvailable { get; private set; }
 		public int LowRationThreshold { get; private set; }
 		public ReadOnlyDictionary<Condition.Types, bool> Conditions { get; private set; }
 
@@ -73,6 +77,14 @@ namespace Lunra.Hothouse.Models
 				result.AnyItemDropsAvailableForPickup = result.GlobalInventory.AvailableCapacity.Value
 					.HasCapacityFor(result.GlobalInventory.Available.Value, result.GlobalItemDropsAvailable);
 			}
+
+			result.UniqueObligationsAvailable = game.GetObligations()
+				.SelectMany(m => m.Obligations.All.Value.Available)
+				.Select(o => o.Type)
+				.Distinct()
+				.ToArray();
+
+			result.AnyObligationsAvailable = UniqueObligationsAvailable.Any();
 			
 			result.LowRationThreshold = game.Dwellers.AllActive.Sum(d => d.LowRationThreshold.Value);
 
