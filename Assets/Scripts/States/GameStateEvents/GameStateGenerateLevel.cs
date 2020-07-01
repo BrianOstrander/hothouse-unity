@@ -314,7 +314,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				.OrderBy(m => Vector3.Distance(m.Transform.Position.Value, position))
 				.First();
 			
-			// door.Obligations.Remove()
+			door.Obligations.Add(ObligationCategories.Door.Open);
 			
 			var depot0 = payload.Game.Buildings.Activate(
 				Buildings.DepotSmall,

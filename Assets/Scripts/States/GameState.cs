@@ -106,16 +106,24 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 
-			// App.Heartbeat.WaitForSeconds(
-			// 	() =>
-			// 	{
-			// 		Debug.Log("Killing first dweller...");
-			// 		var dweller = Payload.Game.Dwellers.AllActive.First();
-			// 		
-			// 		Damage.ApplyGeneric(999f, dweller);
-			// 	},
-			// 	1f
-			// );
+			App.Heartbeat.WaitForSeconds(
+				() =>
+				{
+					Debug.Log("Assigning obligation to dweller...");
+					var dweller = Payload.Game.Dwellers.AllActive.First();
+					var obligationTarget = Payload.Game.GetObligations().First(m => m.Obligations.HasAny());
+					var obligationPromise = ObligationPromise.New(
+						obligationTarget.Obligations.All.Value.Available.First(),
+						obligationTarget
+					);
+					obligationTarget.Obligations.AddForbidden(obligationPromise.Obligation);
+
+					dweller.ObligationPromises.All.Push(obligationPromise);
+					
+					// Damage.ApplyGeneric(999f, dweller);
+				},
+				1f
+			);
 			
 			// App.Heartbeat.WaitForCondition(
 			// 	() =>

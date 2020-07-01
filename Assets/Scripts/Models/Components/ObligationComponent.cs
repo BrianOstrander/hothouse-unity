@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -113,6 +114,7 @@ namespace Lunra.Hothouse.Models
 			return result;
 		}
 
+		public bool HasAny() => All.Value.Available.Any() || All.Value.Forbidden.Any();
 		public bool HasAny(Obligation obligation) => HasAvailable(obligation) || HasForbidden(obligation);
 		public bool HasForbidden(Obligation obligation) => All.Value.Forbidden.Any(o => o.Type == obligation.Type);
 		public bool HasAvailable(Obligation obligation) => All.Value.Available.Any(o => o.Type == obligation.Type);
@@ -178,6 +180,7 @@ namespace Lunra.Hothouse.Models
 
 		public void Reset()
 		{
+			Id.Value = App.M.CreateUniqueId();
 			UnBindAll();
 			All.Value = new State();
 		}
@@ -191,5 +194,14 @@ namespace Lunra.Hothouse.Models
 		{
 			return game.Doors.AllActive;
 		}
+		
+		// public static IObligationModel GetObligationComponentParent(
+		// 	this GameModel game,
+		// 	string obligationComponentId
+		// )
+		// {
+		// 	return game.GetObligations()
+		// 		.FirstOrDefault(m => m.Obligations.Id.Value == obligationComponentId);
+		// }
 	}
 }
