@@ -274,8 +274,6 @@ namespace Lunra.Hothouse.Models
 			SpeciesData data
 		)
 		{
-			model.Clearable.Reset();
-			
 			model.Species.Value = species;
 			model.Age.Value = Interval.WithMaximum(data.AgeDuration.Evaluate(DemonUtility.NextFloat));
 			model.ReproductionElapsed.Value = Interval.WithMaximum(data.ReproductionDuration.Evaluate(DemonUtility.NextFloat));
@@ -285,6 +283,8 @@ namespace Lunra.Hothouse.Models
 			model.SpreadDamage.Value = data.SpreadDamage;
 			model.AttacksBuildings.Value = data.AttacksBuildings;
 			model.Health.ResetToMaximum(data.HealthMaximum);
+			model.Enterable.Reset();
+			model.Obligations.Reset();
 			model.Clearable.ItemDrops.Value = data.GenerateDrops();
 		}
 	}

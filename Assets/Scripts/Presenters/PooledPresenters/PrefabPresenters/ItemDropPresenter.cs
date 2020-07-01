@@ -37,16 +37,7 @@ namespace Lunra.Hothouse.Presenters
 			var item = Model.Inventory.All.Value.Entries.OrderByDescending(i => i.Weight).FirstOrDefault();
 			View.SetEntry(item.Weight, item.Type);
 			
-			Model.Enterable.Entrances.Value = 
-				new Entrance(
-					Model.Transform.Position.Value,
-					Vector3.forward,
-					false,
-					Entrance.States.Unknown
-				)
-				.ToEnumerable().ToArray();
-			
-			Model.RecalculateEntrances();
+			Model.RecalculateEntrances(Model.Transform.Position.Value);
 		}
 		
 		#region ItemDropModel Events

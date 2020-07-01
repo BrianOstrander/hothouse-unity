@@ -94,7 +94,7 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		public class ToObligationOnObligations : AgentTransition<S0, S1, GameModel, A>
+		public class ToObligationOnExistingObligations : AgentTransition<S0, S1, GameModel, A>
 		{
 			public override bool IsTriggered()
 			{

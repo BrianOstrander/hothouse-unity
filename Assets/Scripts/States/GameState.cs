@@ -106,6 +106,7 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 
+			/*
 			for (var i = 0; i < 16; i++)
 			{
 				App.Heartbeat.WaitForSeconds(
@@ -124,6 +125,7 @@ namespace Lunra.Hothouse.Services
 					1.5f * i
 				);
 			}
+			*/
 
 			/*
 			App.Heartbeat.WaitForSeconds(

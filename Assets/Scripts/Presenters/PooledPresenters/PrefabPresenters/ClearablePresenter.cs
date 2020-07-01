@@ -1,5 +1,4 @@
-﻿using System;
-using Lunra.Hothouse.Models;
+﻿using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
 
@@ -16,9 +15,11 @@ namespace Lunra.Hothouse.Presenters
 			Model.Clearable.MeleeRangeBonus.Value = View.MeleeRangeBonus;
 
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
+			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 	
-			Model.Clearable.SelectionState.Changed += OnClearableSelectionState;
+			Model.Obligations.All.Changed += OnObligationAll;
 			Model.Health.Current.Changed += OnClearableHealthCurrent;
+			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
 			
 			base.Bind();
 		}
@@ -26,9 +27,11 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
+			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			Model.Clearable.SelectionState.Changed -= OnClearableSelectionState;
+			Model.Obligations.All.Changed -= OnObligationAll;
 			Model.Health.Current.Changed -= OnClearableHealthCurrent;
+			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
 			
 			base.UnBind();
 		}
@@ -37,24 +40,23 @@ namespace Lunra.Hothouse.Presenters
 		{
 			base.OnViewPrepare();
 			
-			View.Shown += () => OnClearableSelectionState(Model.Clearable.SelectionState.Value);
+			View.Shown += () => OnObligationAll(Model.Obligations.All.Value);
+			
+			Model.RecalculateEntrances(Model.Transform.Position.Value);
 		}
 
 		#region ClearableModel Events
-		void OnClearableSelectionState(SelectionStates selectionState)
+		void OnObligationAll(ObligationComponent.State state)
 		{
 			if (View.NotVisible) return;
-			
-			switch (selectionState)
+
+			if (Model.Obligations.HasAny(ObligationCategories.Attack.Melee))
 			{
-				case SelectionStates.NotSelected:
-					if (!Model.Clearable.IsMarkedForClearance.Value) View.Deselect();
-					break;
-				case SelectionStates.Highlighted: View.Highlight(); break;
-				case SelectionStates.Selected:
-					View.Select();
-					Model.Clearable.ClearancePriority.Value = 0;
-					break;
+				View.Select();
+			}
+			else
+			{
+				View.Deselect();
 			}
 		}
 
@@ -71,8 +73,8 @@ namespace Lunra.Hothouse.Presenters
 		#region ToolbarModel Events
 		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)
 		{
-			if (Model.Clearable.IsMarkedForClearance.Value) return;
 			if (interaction.State == Interaction.States.OutOfRange) return;
+			if (Model.Obligations.HasAny(ObligationCategories.Attack.Melee)) return;
 			
 			var radiusContains = interaction.Value.RadiusContains(Model.Transform.Position.Value);
 			
@@ -82,19 +84,29 @@ namespace Lunra.Hothouse.Presenters
 					break;
 				case Interaction.States.Begin:
 				case Interaction.States.Active:
-					Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
+					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.End:
-					Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
+					if (radiusContains) Model.Obligations.Add(ObligationCategories.Attack.Melee);
+					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.Cancel:
-					Model.Clearable.SelectionState.Value = SelectionStates.NotSelected;
+					// Model.Clearable.SelectionState.Value = SelectionStates.NotSelected;
 					break;
 				default:
 					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
 					break;
 			}
 		}
+		#endregion
+		
+		#region Miscellanious Model Events
+		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
+		{
+			if (calculationState == NavigationMeshModel.CalculationStates.Completed) Model.RecalculateEntrances();
+		}
+
+		void OnLightSensitiveLightLevel(float lightLevel) => Model.RecalculateEntrances();
 		#endregion
 		
 		#region Utility

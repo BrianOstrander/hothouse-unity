@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
@@ -24,6 +25,8 @@ namespace Lunra.Hothouse.Models
 		{
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
 		}
+		
+		
 
 		public bool AnyAvailable() => Entrances.Value.Any(e => e.State == Entrance.States.Available);
 		
@@ -32,9 +35,24 @@ namespace Lunra.Hothouse.Models
 
 	public static class IEnterableExtensions
 	{
+		static (Vector3 Position, Vector3 Forward) GetEntrance(IEnterableModel model, Vector3 entrance)
+		{
+			return (model.Transform.Position.Value, (entrance - model.Transform.Position.Value).normalized);
+		}
+		
 		public static void RecalculateEntrances(this IEnterableModel model)
 		{
 			model.RecalculateEntrances(model.Enterable.Entrances.Value.Select(e => (e.Position, e.Forward)));
+		}
+
+		public static void RecalculateEntrances(this IEnterableModel model, Vector3 entrance)
+		{
+			model.RecalculateEntrances(GetEntrance(model, entrance).ToEnumerable());
+		}
+		
+		public static void RecalculateEntrances(this IEnterableModel model, Vector3[] entrances)
+		{
+			model.RecalculateEntrances(entrances.Select(e => GetEntrance(model, e)));
 		}
 		
 		public static void RecalculateEntrances(this IEnterableModel model, IEnterableView view)

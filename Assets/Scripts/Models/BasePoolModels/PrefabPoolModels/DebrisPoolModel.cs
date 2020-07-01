@@ -48,8 +48,9 @@ namespace Lunra.Hothouse.Models
 			DebrisModel model
 		)
 		{
-			model.Clearable.Reset();
 			model.Health.ResetToMaximum(10f);
+			model.Obligations.Reset();
+			model.Enterable.Reset();
 			model.Clearable.ItemDrops.Value = new Inventory(
 				new Dictionary<Inventory.Types, int>
 				{
