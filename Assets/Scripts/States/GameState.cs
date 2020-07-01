@@ -125,6 +125,17 @@ namespace Lunra.Hothouse.Services
 				1f
 			);
 			
+			App.Heartbeat.WaitForSeconds(
+				() =>
+				{
+					Debug.Log("Killing dweller...");
+					var dweller = Payload.Game.Dwellers.AllActive.First();
+					
+					Damage.ApplyGeneric(999f, dweller);
+				},
+				1.5f
+			);
+			
 			// App.Heartbeat.WaitForCondition(
 			// 	() =>
 			// 	{

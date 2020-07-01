@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Models;

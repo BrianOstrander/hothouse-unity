@@ -114,8 +114,7 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.InventoryPromises.BreakRemainingPromises(Game);
 			
-
-			Debug.LogWarning("Handle unfulfilled obligation promises here!");
+			Model.ObligationPromises.BreakRemainingPromises(Game);
 			
 			Model.PooledState.Value = PooledStates.InActive;
 		}

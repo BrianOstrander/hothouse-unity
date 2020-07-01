@@ -1,6 +1,4 @@
 using System;
-using Lunra.Core;
-using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {

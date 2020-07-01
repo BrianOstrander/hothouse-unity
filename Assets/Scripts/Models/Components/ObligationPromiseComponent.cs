@@ -30,7 +30,12 @@ namespace Lunra.Hothouse.Models
 			GameModel game	
 		)
 		{
-			Debug.LogWarning("Handle unfulfilled inventory promises here");	
+			foreach (var promise in All.PeekAll())
+			{
+				if (!promise.Target.TryGetInstance<IObligationModel>(game, out var target)) continue;
+
+				target.Obligations.RemoveForbidden(promise.Obligation);
+			}	
 		}
 
 		public void Reset()
