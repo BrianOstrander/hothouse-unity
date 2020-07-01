@@ -12,15 +12,19 @@ namespace Lunra.Hothouse.Ai.Dweller
 		public override void OnInitialize()
 		{
 			AddChildStates(
-			
+				new CleanupState()
 			);
 			
 			AddTransitions(
 				new ToReturnOnJobChanged(),
-				new ToReturnOnShiftEnd()
+				new ToReturnOnShiftEnd(),
+				
+				new CleanupState.ToCleanupOnItemsAvailable()
 			);
 		}
 		
-		
+		#region Child Classes
+		class CleanupState : CleanupItemDropsState<StockpilerState<S>, CleanupState> { }
+		#endregion
 	}
 }

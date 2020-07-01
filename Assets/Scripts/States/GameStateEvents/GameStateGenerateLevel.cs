@@ -295,6 +295,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			// Debugging Begin
 
+			bonfire.Light.LightFuelInterval.Value = Interval.WithMaximum(999999f);
+			
 			wagon.PooledState.Value = PooledStates.InActive;
 			
 			foreach (var m in payload.Game.Dwellers.AllActive) m.PooledState.Value = PooledStates.InActive;
@@ -330,6 +332,16 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				position + (Vector3.forward * 6f),
 				Quaternion.identity,
 				BuildingStates.Operating
+			);
+			
+			depot0.Inventory.Reset(
+				depot0.Inventory.Permission.Value,
+				InventoryCapacity.ByIndividualWeight(Inventory.FromEntry(Inventory.Types.Stalks, 4))
+			);
+			
+			depot1.Inventory.Reset(
+				depot1.Inventory.Permission.Value,
+				InventoryCapacity.ByIndividualWeight(Inventory.FromEntry(Inventory.Types.Stalks, 4))
 			);
 			
 			/*

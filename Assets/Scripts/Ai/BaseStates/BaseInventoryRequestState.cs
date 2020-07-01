@@ -152,6 +152,11 @@ namespace Lunra.Hothouse.Ai
 				switch (transactionType)
 				{
 					case InventoryTransaction.Types.Deliver:
+						if (!Agent.Inventory.All.Value.Contains(SourceState.cache.Transaction.Items))
+						{
+							Debug.LogError("Currently trying to deliver resources the agent does not have, this is unexpected");
+							return false;
+						}
 						break;
 					case InventoryTransaction.Types.Distribute:
 						var isNextTargetNavigable = NavigationUtility.CalculateNearest(

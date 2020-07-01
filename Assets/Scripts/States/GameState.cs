@@ -106,6 +106,25 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 
+			for (var i = 0; i < 16; i++)
+			{
+				App.Heartbeat.WaitForSeconds(
+					() =>
+					{
+						Debug.Log("Adding drop...");
+						var spawn = Payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
+
+						Payload.Game.ItemDrops.Activate(
+							spawn.Id.Value,
+							spawn.Transform.Position.Value,
+							Quaternion.identity,
+							Inventory.FromEntry(Inventory.Types.Stalks, 1)
+						);
+					},
+					1.5f * i
+				);
+			}
+
 			/*
 			App.Heartbeat.WaitForSeconds(
 				() =>

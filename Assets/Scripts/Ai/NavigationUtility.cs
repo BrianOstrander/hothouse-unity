@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using System.Collections.Generic;
-using Lunra.Core;
 using Lunra.Hothouse.Models;
 using UnityEngine;
 using UnityEngine.AI;

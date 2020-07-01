@@ -25,6 +25,8 @@ namespace Lunra.Hothouse.Models
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
 		}
 
+		public bool AnyAvailable() => Entrances.Value.Any(e => e.State == Entrance.States.Available);
+		
 		public void Reset() => Entrances.Value = new Entrance[0];
 	}
 

@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Models
 		{
 			model.Enterable.Reset();
 			model.Inventory.Reset(
-				InventoryPermission.AllForAnyJob(),
+				InventoryPermission.WithdrawalForJobs(EnumExtensions.GetValues(Jobs.Unknown)),
 				InventoryCapacity.ByIndividualWeight(inventory)
 			);
 			model.Inventory.Add(inventory);
