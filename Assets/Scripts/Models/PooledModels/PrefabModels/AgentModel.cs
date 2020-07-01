@@ -1,5 +1,6 @@
 ﻿using System;
 using Lunra.Core;
+using Lunra.Hothouse.Ai;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 
@@ -31,6 +32,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public AgentContext Context { get; set; }
 		[JsonIgnore] public Action<Obligation> ObligationComplete { get; set; } = ActionExtensions.GetEmpty<Obligation>();
 		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
+		[JsonIgnore] public IAgentStateMachine StateMachine { get; set; }
 		#endregion
 		
 		public AgentModel()

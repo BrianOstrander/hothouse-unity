@@ -306,7 +306,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				position + (Vector3.left * 6f)
 			);
 			
-			dweller.Job.Value = Jobs.Laborer;
+			dweller.Job.Value = Jobs.Stockpiler;
 			dweller.Name.Value = "Buddy";
 			dweller.IsDebugging = true;
 

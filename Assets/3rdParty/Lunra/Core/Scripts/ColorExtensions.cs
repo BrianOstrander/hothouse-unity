@@ -120,6 +120,7 @@ namespace Lunra.Core
 		}
 		#endregion
 
+		#region Extended Utility
 		public static bool Approximately(this Color color, Color other)
 		{
 			return
@@ -128,5 +129,9 @@ namespace Lunra.Core
 					Mathf.Approximately(color.b, other.b) &&
 					Mathf.Approximately(color.a, other.a);
 		}
+
+		public static string ToHtmlRgb(this Color color) => ColorUtility.ToHtmlStringRGB(color);
+		public static string ToHtmlRgba(this Color color) => ColorUtility.ToHtmlStringRGBA(color);
+		#endregion
 	}
 }

@@ -8,16 +8,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void OnInitialize()
 		{
-			var timeoutState = new TimeoutState<IdleState>();
-			
 			AddChildStates(
-				timeoutState,
-				new InventoryRequestState<IdleState>(),
-				new ObligationState<IdleState>()
+				new StockpilerState<IdleState>()
 			);
+			
 			AddTransitions(
-				new InventoryRequestState<IdleState>.ToInventoryRequestOnPromises(),
-				new ObligationState<IdleState>.ToObligationOnObligations()
+				new StockpilerState<IdleState>.ToJobOnShiftBegin()	
 			);
 		}
 	}

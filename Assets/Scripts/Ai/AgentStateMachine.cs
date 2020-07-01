@@ -6,7 +6,13 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai
 {
-	public abstract class AgentStateMachine<G, A>
+	public interface IAgentStateMachine
+	{
+		string Name { get; }
+		string GetSerializedGraph(bool highlightCurrentState = false);
+	}
+
+	public abstract class AgentStateMachine<G, A> : IAgentStateMachine
 		where A : AgentModel
 	{
 		public string Name => Agent.ShortId + "<" + GetType().Name + ">";
@@ -18,8 +24,6 @@ namespace Lunra.Hothouse.Ai
 		
 		public G Game { get; private set; }
 		public A Agent { get; private set; }
-		
-		public bool IsOutOfState { get; private set; }
 
 		public void Initialize(
 			G game,
@@ -38,10 +42,12 @@ namespace Lunra.Hothouse.Ai
 				
 				States.Add(state);
 				
-				state.Initialize(Game, Agent);
+				state.Initialize(this);
 				
 				statesRemainingToInitialize.AddRange(state.ChildStates);
 			}
+
+			foreach (var state in States) state.InitializeTransitions();
 
 			if (DefaultState == null)
 			{
@@ -54,28 +60,28 @@ namespace Lunra.Hothouse.Ai
 			if (agent.IsDebugging)
 			{
 				Debug.Log(Name + ": entering default state " + CurrentState.Name);
-				// Debug.Log(ToString());
+				Debug.Log(ToString());
 			}
 		}
 
 		protected abstract List<AgentState<G, A>> GetStates();
+
+		public bool TryGetState<S>(
+			out S state
+		)
+			where S : AgentState<G, A>
+		{
+			state = States.FirstOrDefault(s => s is S) as S;
+			return state != null;
+		}
 		
 		public void Update()
 		{
-			if (IsOutOfState) return;
-			
 			foreach (var transition in CurrentState.Transitions)
 			{
 				if (!transition.IsTriggered()) continue;
 
-				var targetState = States.FirstOrDefault(s => s.GetType() == transition.TargetState);
-
-				if (targetState == null)
-				{
-					IsOutOfState = true;
-					Debug.LogError("Transition " + transition.Name + " requested a state that could not be found: " + transition.TargetState);
-					return;
-				}
+				var targetState = transition.TransitionTargetState;
 				
 				CurrentState.End();
 				transition.Transition();
@@ -116,62 +122,93 @@ namespace Lunra.Hothouse.Ai
 			CurrentState = DefaultState;
 		}
 
-		public override string ToString()
+		public override string ToString() => GetSerializedGraph();
+		
+		public string GetSerializedGraph(bool highlightCurrentState = false)
 		{
-			var states = new List<string>();
 			var transitions = new List<string>();
 
 			var rootStates = States.Where(
 				possibleChild => States.None(s => s.ChildStates.Contains(possibleChild))
 			).ToList();
 			
-			var stateNameMap = new Dictionary<AgentState<G, A>, string>();
+			var stateMap = new Dictionary<AgentState<G, A>, (string Name, Color Color)>();
+
+			void addStateMapEntry(
+				AgentState<G, A> state,
+				string name
+			)
+			{
+				stateMap.Add(
+					state,
+					(
+						name,
+						name.ToColor()
+					)
+				);
+			}
 			
 			foreach (var state in rootStates)
 			{
-				states.Add(state.Name);
-				stateNameMap.Add(state, state.Name);
+				addStateMapEntry(state, state.Name);
 
-				List<string> getChildStateNames(string path, List<AgentState<G, A>> childStates)
+				void getChildStateNames(string path, List<AgentState<G, A>> childStates)
 				{
-					var childResults = new List<string>();
-
 					foreach (var currChild in childStates)
 					{
 						var currChildPath = path + "." + currChild.Name;
-						childResults.Add(currChildPath);
-						stateNameMap.Add(currChild, currChildPath);
-						childResults.AddRange(getChildStateNames(currChildPath, currChild.ChildStates));
+						addStateMapEntry(currChild, currChildPath);
+						getChildStateNames(currChildPath, currChild.ChildStates);
 					}
-
-					return childResults;
 				}
-				
-				states.AddRange(
-					getChildStateNames(
-						state.Name,
-						state.ChildStates
-					)	
+
+				getChildStateNames(
+					state.Name,
+					state.ChildStates
 				);
 			}
 
 			foreach (var state in States)
 			{
-				var sourceStateName = stateNameMap[state];
+				var sourceState = stateMap[state];
 				foreach (var transition in state.Transitions)
 				{
-					var destinationStateName = stateNameMap[States.FirstOrDefault(s => s.GetType() == transition.TargetState)];
+					var targetState = stateMap[States.FirstOrDefault(s => s.GetType() == transition.TransitionTargetState.GetType())];
+					var transitionResult = "\"" + sourceState.Name + "\" -> \"" + targetState.Name + "\"";
+					transitionResult += " [ ";
+					transitionResult += "label = \"" + transition.Name + "\"";
+					transitionResult += ", color = \"#" + sourceState.Color.ToHtmlRgb() + "\"";
+					transitionResult += ", fontcolor = \"#" + sourceState.Color.NewV(0.65f).ToHtmlRgb() + "\"";
+					transitionResult += " ]";
+					
 					transitions.Add(
-						"\"" + sourceStateName + "\" -> \"" + destinationStateName + "\" [ label = \"" + transition.Name + "\" ]"
+						transitionResult
 					);
 				}
 			}
 			
 			var result = "digraph " + GetType().Name + " {";
 
-			foreach (var state in states)
+			var defaultFillSaturation = highlightCurrentState ? 0.08f : 0.16f;
+			
+			foreach (var kv in stateMap)
 			{
-				result += "\n\t \"" + state + "\" [ shape = circle, label = \"" + state.Split('.').LastOrFallback(state) + "\"]";
+				var state = kv.Key;
+				var entry = kv.Value;
+
+				var fillSaturation = defaultFillSaturation;
+				if (highlightCurrentState && state == CurrentState) fillSaturation = 0.75f;
+				
+				result += "\n\t\"" + entry.Name + "\"";
+				result += " [ ";
+				result += "shape = circle";
+				result += ", label = \"" + entry.Name.Split('.').LastOrFallback(entry.Name) + "\"";
+				result += ", color = \"#" + entry.Color.ToHtmlRgb() + "\"";
+				result += ", fillcolor = \"#" + entry.Color.NewS(fillSaturation).ToHtmlRgb() + "\"";
+				result += ", style = \"filled\"";
+				result += " ]";
+				
+				// result += "\n\t \"" + state + "\" [ shape = circle, label = \"" + state.Split('.').LastOrFallback(state) + "\"]";
 			}
 
 			foreach (var transition in transitions) result += "\n\t" + transition;

@@ -18,6 +18,7 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{
 			StateMachine = new S();
+			Model.StateMachine = StateMachine;
 			
 			View.Name = typeof(V).Name + "_" + (string.IsNullOrEmpty(Model.Id.Value) ? "null_or_empty_id" : Model.Id.Value);
 

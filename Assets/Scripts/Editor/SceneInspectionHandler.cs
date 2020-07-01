@@ -147,10 +147,16 @@ namespace Lunra.Hothouse.Editor
 					);
 					
 					Handles.Label(
-						model.Transform.Position.Value + (Vector3.up * 3f),
+						model.Transform.Position.Value + (Vector3.up * 3.5f),
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
 						labelStyle
 					);
+
+					if (DrawButton(model, new GUIContent("Serialize State")))
+					{
+						EditorGUIUtility.systemCopyBuffer = model.StateMachine.GetSerializedGraph(true);
+						Debug.Log("Serialized ai state copied to clipboard");
+					}
 				}
 			}
 			
@@ -355,7 +361,8 @@ namespace Lunra.Hothouse.Editor
 					
 					DrawSelectionButton(
 						model,
-						Vector3.up * 3f
+						new GUIContent("Select"),
+						Vector3.up * 3.25f
 					);
 				}
 			}
@@ -495,37 +502,53 @@ namespace Lunra.Hothouse.Editor
 			HandlesExtensions.EndDepthCheck();
 		}
 
-		static void DrawSelectionButton(IPrefabModel model, Vector3? offset = null)
+		static void DrawSelectionButton(
+			ITransformModel model,
+			GUIContent content,
+			Vector3? offset = null
+		)
 		{
+			if (DrawButton(model, content, offset))
+			{
+				var view = GameObject.FindObjectsOfType<PrefabView>()
+					.FirstOrDefault(v => v.ModelId == model.Id.Value);
+
+				if (view == null)
+				{
+					EditorWindow.focusedWindow.ShowNotification(new GUIContent("No view found with id: "+model.ShortId));
+				}
+				else
+				{
+					Selection.activeGameObject = view.gameObject;
+				}
+			}
+		}
+
+		static bool DrawButton(
+			ITransformModel model,
+			GUIContent content,
+			Vector3? offset = null
+		)
+		{
+			var result = false;
 			offset = offset ?? Vector3.zero;
 
 			var guiPoint = HandleUtility.WorldToGUIPointWithDepth(model.Transform.Position.Value + offset.Value);
 
-			if (guiPoint.z < 0f) return;
+			if (guiPoint.z < 0f) return result;
 			
 			Handles.BeginGUI();
 			{
 				var rect = new Rect(
 					guiPoint,
-					new Vector2(24, 24)
+					EditorStyles.miniButton.CalcSize(content)
 				);
-				
-				if (GUI.Button(rect, Texture2D.whiteTexture))
-				{
-					var view = GameObject.FindObjectsOfType<PrefabView>()
-						.FirstOrDefault(v => v.ModelId == model.Id.Value);
 
-					if (view == null)
-					{
-						EditorWindow.focusedWindow.ShowNotification(new GUIContent("No view found with id: "+model.ShortId));
-					}
-					else
-					{
-						Selection.activeGameObject = view.gameObject;
-					}
-				}
+				result = GUI.Button(rect, content, EditorStyles.miniButton);
 			}
 			Handles.EndGUI();
+
+			return result;
 		}
 	}
 }
