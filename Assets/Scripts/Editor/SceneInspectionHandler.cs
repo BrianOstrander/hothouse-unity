@@ -414,27 +414,7 @@ namespace Lunra.Hothouse.Editor
 			
 			if (SceneInspectionSettings.IsInspectingObligations.Value)
 			{
-				label += "\nObligationPromise: ";
-
-				if (model.Obligation.Value.IsEnabled)
-				{
-					/*
-					var obligation = gameState.Payload.Game.GetObligations()
-						.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.PromiseId == model.Obligation.Value.ObligationPromiseId)
-						.FirstOrDefault();
-
-					if (obligation.Model == null)
-					{
-						label += "Missing ObligationId \"" + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + "\" or TargetId \"" + Model.ShortenId(model.Obligation.Value.TargetId) + "\"";
-					}
-					else
-					{
-						label += Model.ShortenId(model.Obligation.Value.TargetId) + "[ " + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
-					}
-					*/
-					label += "TODO THIS";
-				}
-				else label += "None";
+				label += "\n" + model.ObligationPromises;
 			}
 
 			label += "\n" + model.Inventory;
@@ -459,16 +439,21 @@ namespace Lunra.Hothouse.Editor
 			
 			obligationIdsHandled.Add(model.Id.Value);
 			
-			label += "\nObligations:";
-			if (model.Obligations.All.Value.None())
+			label += "\nObligations: ";
+			if (model.Obligations.All.Value.Available.None() && model.Obligations.All.Value.Forbidden.None())
 			{
-				label += " None";
+				label += "None";
 			}
 			else
 			{
-				foreach (var obligation in model.Obligations.All.Value)
+				foreach (var obligation in model.Obligations.All.Value.Available)
 				{
-					label += "\n  [ " + Model.ShortenId(obligation.PromiseId) + " ] " + obligation.Type + "." + obligation.State + " #" + obligation.Priority + " : " + obligation.ConcentrationRequirement + "( " + obligation.ConcentrationElapsed.Current + " / " + obligation.ConcentrationElapsed.Maximum + " )";
+					label += "\n - [ available ] " + obligation;
+				}
+				
+				foreach (var obligation in model.Obligations.All.Value.Forbidden)
+				{
+					label += "\n - [ forbidden ] " + obligation;
 				}
 			}
 

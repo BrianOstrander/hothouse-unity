@@ -1,36 +1,33 @@
+using System;
 using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {
 	public class ObligationPromise
 	{
-		public static ObligationPromise Default() => new ObligationPromise(false, null, null);
-
 		public static ObligationPromise New(
-			IModel target,
-			string obligationPromiseId
+			string type,
+			IModel target
 		)
 		{
 			return new ObligationPromise(
-				true,
-				target,
-				obligationPromiseId
+				type,
+				InstanceId.New(target)
 			);
 		}
 		
-		public bool IsEnabled { get; }
-		public InstanceId TargetId { get; }
-		public string ObligationPromiseId { get; }
+		public string Type { get; }
+		public InstanceId Target { get; }
 
 		ObligationPromise(
-			bool isEnabled,
-			IModel target,
-			string obligationPromiseId
+			string type,
+			InstanceId target
 		)
 		{
-			IsEnabled = isEnabled;
-			TargetId = target == null ? InstanceId.Null() : InstanceId.New(target);
-			ObligationPromiseId = obligationPromiseId;
+			if (target.IsNull) throw new ArgumentException("Cannot have a null instance: "+target);
+
+			Type = type;
+			Target = target;
 		}
 	}
 }

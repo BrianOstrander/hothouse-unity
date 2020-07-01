@@ -264,6 +264,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				position = hit.point;
 			}
 			
+			position += Vector3.back * 4f;
+			
 			var wagon = payload.Game.Buildings.Activate(
 				Buildings.StartingWagon,
 				spawn.Id.Value,
@@ -308,6 +310,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			dweller.Name.Value = "Buddy";
 			dweller.IsDebugging = true;
 
+			var door = payload.Game.Doors.AllActive
+				.OrderBy(m => Vector3.Distance(m.Transform.Position.Value, position))
+				.First();
+			
+			// door.Obligations.Remove()
+			
 			var depot0 = payload.Game.Buildings.Activate(
 				Buildings.DepotSmall,
 				spawn.Id.Value,
@@ -324,9 +332,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 			
+			/*
 			var items = Inventory.FromEntry(Inventory.Types.Stalks, 1);
 			
-			/*
 			for (var i = 0; i < 3; i++)
 			{
 				var itemDrop = payload.Game.ItemDrops.Activate(
@@ -352,6 +360,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			}
 			*/
 
+			/*
 			if (false)
 			{
 				// ---- Delivery
@@ -379,6 +388,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				if (isRequestValid) dweller.InventoryPromises.Transactions.Push(transaction);
 				else Debug.LogError("Invalid distribution");
 			}
+			*/
 			
 			// Debugging End
 			

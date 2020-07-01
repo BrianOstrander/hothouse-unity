@@ -43,7 +43,7 @@ namespace Lunra.Hothouse.Models
 				{
 					m.Id.Value = id;
 					m.IsOpen.Value = false;
-					m.Obligations.All.Value = new Obligation[0];
+					m.Obligations.Reset();
 					m.RoomConnection.Value = new DoorModel.Connection(roomId0, roomId1);
 					m.LightSensitive.ConnectedRoomId.Value = roomId1;
 					

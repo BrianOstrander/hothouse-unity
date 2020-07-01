@@ -80,7 +80,6 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.Flora.Initialize(Payload.Game);
 			Payload.Game.ItemDrops.Initialize(Payload.Game);
 			Payload.Game.Dwellers.Initialize(Payload.Game);
-			Payload.Game.ObligationIndicators.Initialize(Payload.Game);
 			Payload.Game.Seekers.Initialize(Payload.Game);
 			
 			done();
@@ -107,16 +106,16 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 
-			App.Heartbeat.WaitForSeconds(
-				() =>
-				{
-					Debug.Log("Killing first dweller...");
-					var dweller = Payload.Game.Dwellers.AllActive.First();
-					
-					Damage.ApplyGeneric(999f, dweller);
-				},
-				1f
-			);
+			// App.Heartbeat.WaitForSeconds(
+			// 	() =>
+			// 	{
+			// 		Debug.Log("Killing first dweller...");
+			// 		var dweller = Payload.Game.Dwellers.AllActive.First();
+			// 		
+			// 		Damage.ApplyGeneric(999f, dweller);
+			// 	},
+			// 	1f
+			// );
 			
 			// App.Heartbeat.WaitForCondition(
 			// 	() =>

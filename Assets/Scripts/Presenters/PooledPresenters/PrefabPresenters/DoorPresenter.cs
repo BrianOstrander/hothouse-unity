@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.StyxMvp.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -26,8 +27,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
 			Model.LightSensitive.LightLevel.Changed += OnLightLevel;
 
-			Model.Obligations.All.ChangedSource += OnObligationObligations;
-			Model.Enterable.Entrances.Changed += OnEnterableEntrances;
+			Model.Obligations.Bind(ObligationCategories.Door.Open, OnObligationDoorOpen);
 
 			base.Bind();
 		}
@@ -42,8 +42,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
 			Model.LightSensitive.LightLevel.Changed -= OnLightLevel;
 			
-			Model.Obligations.All.ChangedSource -= OnObligationObligations;
-			Model.Enterable.Entrances.Changed -= OnEnterableEntrances;
+			Model.Obligations.UnBind(ObligationCategories.Door.Open, OnObligationDoorOpen);
 			
 			base.UnBind();
 		}
@@ -72,24 +71,11 @@ namespace Lunra.Hothouse.Presenters
 		void OnViewClick()
 		{
 			if (Model.IsOpen.Value) return;
+
+			var openDoorObligation = ObligationCategories.Door.Open;
 			
-			if (Model.Obligations.ContainsType(ObligationCategories.Door.Open))
-			{
-				Model.Obligations.Remove(ObligationCategories.Door.Open);
-			}
-			else
-			{
-				Game.ObligationIndicators.Register(
-					Obligation.New(
-						ObligationCategories.Door.Open,
-						0,
-						ObligationCategories.GetJobs(Jobs.Laborer),
-						Obligation.ConcentrationRequirements.Instant,
-						Interval.Zero()
-					),
-					Model
-				);
-			}
+			if (Model.Obligations.HasAny(openDoorObligation)) Model.Obligations.RemoveAny(openDoorObligation);
+			else Model.Obligations.Add(openDoorObligation);
 		}
 
 		void OnViewHighlight(bool isHighlighted)
@@ -158,98 +144,10 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region ObligationModel Events
-		void OnObligationObligations(Obligation[] obligations, object source)
+		void OnObligationDoorOpen(Obligation obligation, IModel source)
 		{
-			if (source == this) return;
-
-			foreach (var obligation in obligations)
-			{
-				if (obligation.State == Obligation.States.Complete) OnObligationHandle(obligation.Type);
-			}
-			
-			RecalculateObligations();
-		}
-
-		void OnObligationHandle(ObligationType type)
-		{
-			if (!ObligationCategories.Door.Contains(type))
-			{
-				Debug.LogError("Unrecognized category on this obligation: "+type);
-				return;
-			}
-			
-			switch (type.Action)
-			{
-				case ObligationCategories.Door.Actions.Open:
-					if (Model.IsOpen.Value) Debug.LogWarning("Handling obligation \""+type+"\" but the door is already open");
-					else
-					{
-						Model.IsOpen.Value = true;
-					}
-					break;
-				default:
-					Debug.LogError("Unrecognized obligation type: "+type);
-					break;
-			}
-		}
-		#endregion
-		
-		#region EnterableModel Events
-		void OnEnterableEntrances(Entrance[] entrances)
-		{
-			RecalculateObligations();
-		}
-		#endregion
-		
-		#region Utility
-		void RecalculateObligations()
-		{
-			var obligations = Model.Obligations.All.Value.ToArray();
-
-			var anyEntranceAvailable = Model.Enterable.Entrances.Value.Any(e => e.State == Entrance.States.Available);
-			var anyChanges = false;
-			var anyCompleted = false;
-			
-			for (var i = 0; i < obligations.Length; i++)
-			{
-				var previousState = obligations[i].State;
-				
-				switch (obligations[i].State)
-				{
-					case Obligation.States.NotInitialized:
-					case Obligation.States.Blocked:
-					case Obligation.States.Available:
-						obligations[i] = obligations[i].New(
-							anyEntranceAvailable ? Obligation.States.Available : Obligation.States.Blocked 
-						);
-						break;
-					case Obligation.States.Promised:
-						if (!anyEntranceAvailable)
-						{
-							// Something is blocking this door, or its no longer lit, so anyone trying to go to it
-							// should lose track of this obligation, which is why we block it AND change the PromiseId.
-							obligations[i] = obligations[i]
-								.New(Obligation.States.Blocked)
-								.NewPromiseId();
-						}
-						break;
-					case Obligation.States.Complete:
-						anyCompleted = true;
-						break;
-					default:
-						Debug.LogError("Unrecognized State: "+obligations[i].State);
-						break;
-				}
-
-				anyChanges |= previousState != obligations[i].State;
-			}
-
-			if (!anyChanges && !anyCompleted) return;
-
-			Model.Obligations.All.SetValue(
-				anyCompleted ? obligations.Where(o => o.State != Obligation.States.Complete).ToArray() : obligations,
-				this
-			);
+			if (Model.IsOpen.Value) Debug.LogWarning("Handling obligation \""+obligation.Type+"\" but the door is already open");
+			else Model.IsOpen.Value = true;
 		}
 		#endregion
 	}
