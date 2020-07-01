@@ -13,6 +13,7 @@ namespace Lunra.Hothouse.Models
 	public interface IConstructionModel : IBaseInventoryModel, IEnterableModel
 	{
 		InventoryComponent ConstructionInventory { get; }
+		InventoryComponent SalvageInventory { get; }
 	}
 
 	public class InventoryComponent : BaseInventoryComponent

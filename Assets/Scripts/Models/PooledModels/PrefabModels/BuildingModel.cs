@@ -25,9 +25,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] FloatRange placementLightRequirement = FloatRange.Zero;
 		[JsonIgnore] public ListenerProperty<FloatRange> PlacementLightRequirement { get; }
 		
-		[JsonProperty] Inventory salvageInventory = Models.Inventory.Empty;
-		[JsonIgnore] public ListenerProperty<Inventory> SalvageInventory { get; }
-
 		[JsonProperty] DesireQuality[] desireQualities = new DesireQuality[0];
 		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQualities { get; }
 
@@ -38,6 +35,7 @@ namespace Lunra.Hothouse.Models
 		public ClaimComponent Ownership { get; } = new ClaimComponent();
 		public InventoryComponent Inventory { get; } = new InventoryComponent();
 		public InventoryComponent ConstructionInventory { get; } = new InventoryComponent();
+		public InventoryComponent SalvageInventory { get; } = new InventoryComponent();
 		#endregion
 		
 		#region Non Serialized
@@ -55,7 +53,6 @@ namespace Lunra.Hothouse.Models
 			Type = new ListenerProperty<Buildings>(value => type = value, () => type);
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
-			SalvageInventory = new ListenerProperty<Inventory>(value => salvageInventory = value, () => salvageInventory);
 			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
 			Inventories = new []
 			{

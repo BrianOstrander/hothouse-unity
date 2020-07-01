@@ -401,8 +401,6 @@ namespace Lunra.Hothouse.Models
 
 			model.Health.ResetToMaximum(info.HealthMaximum);
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
-			
-			model.SalvageInventory.Value = info.SalvageInventory;
 			model.Light.IsLightCalculationsEnabled.Value = false;
 			model.Light.LightFuel.Value = info.LightFuel;
 			model.Light.LightFuelInterval.Value = info.LightFuelInterval;
@@ -420,11 +418,18 @@ namespace Lunra.Hothouse.Models
 				info.InventoryPermission,
 				info.InventoryCapacity
 			);
-			
+
 			model.ConstructionInventory.Reset(
 				buildingState == BuildingStates.Constructing ? InventoryPermission.DepositForJobs(Jobs.Laborer) : InventoryPermission.NoneForAnyJob(), 
 				info.ConstructionInventoryCapacity
 			);
+			
+			model.SalvageInventory.Reset(
+				buildingState == BuildingStates.Salvaging ? InventoryPermission.WithdrawalForJobs(Jobs.Laborer)	: InventoryPermission.NoneForAnyJob(),
+				InventoryCapacity.ByIndividualWeight(info.SalvageInventory)
+			);
+
+			model.SalvageInventory.Add(info.SalvageInventory);
 		}
 	}
 }

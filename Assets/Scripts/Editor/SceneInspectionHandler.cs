@@ -102,10 +102,7 @@ namespace Lunra.Hothouse.Editor
 							label += "\nConstruction " + model.ConstructionInventory;
 							break;
 						case BuildingStates.Salvaging:
-							label += GetInventory(
-								"Salvage",
-								model.SalvageInventory.Value
-							);
+							label += "\nSalvage " + model.SalvageInventory;
 							break;
 					}
 

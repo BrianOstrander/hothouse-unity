@@ -52,7 +52,7 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.Inventory.All.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
-			Model.SalvageInventory.Changed += OnBuildingSalvageInventory;
+			Model.SalvageInventory.All.Changed += OnBuildingSalvageInventory;
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
@@ -81,7 +81,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			Model.Inventory.All.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
-			Model.SalvageInventory.Changed -= OnBuildingSalvageInventory;
+			Model.SalvageInventory.All.Changed -= OnBuildingSalvageInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;

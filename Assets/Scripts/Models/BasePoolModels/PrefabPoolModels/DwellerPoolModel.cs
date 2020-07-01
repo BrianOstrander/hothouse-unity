@@ -52,8 +52,8 @@ namespace Lunra.Hothouse.Models
 			
 			// Dweller Properties
 			model.Job.Value = Jobs.None;
-			model.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
-			// model.JobShift.Value = DayTimeFrame.Maximum;
+			// model.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
+			model.JobShift.Value = DayTimeFrame.Maximum;
 			model.Desire.Value = Desires.None;
 			model.MeleeRange.Value = 0.75f;
 			model.MeleeCooldown.Value = 0.5f;

@@ -60,7 +60,7 @@ namespace Lunra.Hothouse.Ai
 			if (agent.IsDebugging)
 			{
 				Debug.Log(Name + ": entering default state " + CurrentState.Name);
-				Debug.Log(ToString());
+				// Debug.Log(ToString());
 			}
 		}
 
