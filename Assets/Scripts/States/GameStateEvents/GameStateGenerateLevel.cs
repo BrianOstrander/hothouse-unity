@@ -350,14 +350,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				position
 			);
 			
-			flora0.Obligations.Add(ObligationCategories.Attack.Melee);
-			flora0.Obligations.AddForbidden(ObligationCategories.Attack.Melee);
-			dweller.ObligationPromises.All.Push(
-				ObligationPromise.New(
-					ObligationCategories.Attack.Melee,
-					flora0
-				)	
-			);
+			flora0.Obligations.Add(ObligationCategories.Destroy.Melee);
+			// flora0.Obligations.AddForbidden(ObligationCategories.Attack.Melee);
+			// dweller.ObligationPromises.All.Push(
+			// 	ObligationPromise.New(
+			// 		ObligationCategories.Attack.Melee,
+			// 		flora0
+			// 	)	
+			// );
 			
 			/*
 			var items = Inventory.FromEntry(Inventory.Types.Stalks, 1);

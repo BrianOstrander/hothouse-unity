@@ -195,14 +195,5 @@ namespace Lunra.Hothouse.Models
 			return game.Doors.AllActive
 				.Concat<IObligationModel>(game.GetClearables());
 		}
-		
-		// public static IObligationModel GetObligationComponentParent(
-		// 	this GameModel game,
-		// 	string obligationComponentId
-		// )
-		// {
-		// 	return game.GetObligations()
-		// 		.FirstOrDefault(m => m.Obligations.Id.Value == obligationComponentId);
-		// }
 	}
 }

@@ -29,5 +29,7 @@ namespace Lunra.Hothouse.Models
 			Obligation = obligation;
 			Target = target;
 		}
+
+		public override string ToString() => Obligation.Type + " on " + Target;
 	}
 }

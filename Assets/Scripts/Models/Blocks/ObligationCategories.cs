@@ -9,9 +9,9 @@ namespace Lunra.Hothouse.Models
 			public static Obligation Open => Obligation.New(Category + "open");
 		}
 
-		public static class Attack
+		public static class Destroy
 		{
-			const string Category = "attack_";
+			const string Category = "destroy_";
 			
 			public static Obligation Melee => Obligation.New(Category + "melee");
 		}

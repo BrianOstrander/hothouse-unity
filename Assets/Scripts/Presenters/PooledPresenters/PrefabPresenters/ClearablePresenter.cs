@@ -50,7 +50,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.NotVisible) return;
 
-			if (Model.Obligations.HasAny(ObligationCategories.Attack.Melee))
+			if (Model.Obligations.HasAny(ObligationCategories.Destroy.Melee))
 			{
 				View.Select();
 			}
@@ -74,7 +74,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)
 		{
 			if (interaction.State == Interaction.States.OutOfRange) return;
-			if (Model.Obligations.HasAny(ObligationCategories.Attack.Melee)) return;
+			if (Model.Obligations.HasAny(ObligationCategories.Destroy.Melee)) return;
 			
 			var radiusContains = interaction.Value.RadiusContains(Model.Transform.Position.Value);
 			
@@ -87,7 +87,7 @@ namespace Lunra.Hothouse.Presenters
 					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.End:
-					if (radiusContains) Model.Obligations.Add(ObligationCategories.Attack.Melee);
+					if (radiusContains) Model.Obligations.Add(ObligationCategories.Destroy.Melee);
 					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.Cancel:

@@ -33,6 +33,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		#region Child Classes
 		protected class CleanupState : CleanupItemDropsState<S1, CleanupState> { }
 		
+		protected class DestroyMeleeHandlerState : DestroyMeleeHandlerState<S1> { }
+		
 		protected class ObligationState : ObligationState<S1> { }
 		#endregion
 	}

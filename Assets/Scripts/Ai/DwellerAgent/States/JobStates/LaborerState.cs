@@ -11,14 +11,18 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			AddChildStates(
 				new CleanupState(),
-				new ObligationState()
+				new DestroyMeleeHandlerState()
+				
+				// new ObligationState()
 			);
 			
 			AddTransitions(
 				new ToReturnOnJobChanged(),
 				new ToReturnOnShiftEnd(),
 				
-				new ObligationState.ToObligationOnExistingObligations(),
+				new DestroyMeleeHandlerState.ToObligationOnExistingObligation(),
+				new DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation(),
+				
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);
 		}

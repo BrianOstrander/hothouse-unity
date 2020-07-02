@@ -212,6 +212,8 @@ namespace Lunra.Hothouse.Editor
 
 					label += "\nRoomId: " + model.RoomTransform.Id.Value;
 					
+					label += "\nEnterable: "+(model.Enterable.AnyAvailable() ? "true" : "false");
+					
 					Handles.Label(
 						model.Transform.Position.Value + (Vector3.up * 1f),
 						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
@@ -221,6 +223,8 @@ namespace Lunra.Hothouse.Editor
 					if (model.IsReproducing.Value) continue;
 					Handles.color = Color.red;
 					Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
+					
+					DrawEntranceInspection(model);
 				}
 			}
 
