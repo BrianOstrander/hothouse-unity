@@ -60,5 +60,14 @@ namespace Lunra.Hothouse.Models
 			Claimers.Value = new InstanceId[0];
 			MaximumClaimers.Value = 0;
 		}
+
+		public override string ToString()
+		{
+			var result = "Owners [ " + Claimers.Value.Length + " / " + MaximumClaimers.Value + " ]:";
+
+			foreach (var claimer in Claimers.Value) result += "\n - " + ShortenId(claimer.Id);
+
+			return result;
+		}
 	}
 }

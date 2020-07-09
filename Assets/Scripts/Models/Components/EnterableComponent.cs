@@ -84,4 +84,18 @@ namespace Lunra.Hothouse.Models
 				.ToArray();
 		}
 	}
+
+	public static class EnterableGameModelExtensions
+	{
+		public static IEnumerable<IEnterableModel> GetEnterables(
+			this GameModel game
+		)
+		{
+			return game.Buildings.AllActive
+				.Concat<IEnterableModel>(game.Debris.AllActive)
+				.Concat(game.Doors.AllActive)
+				.Concat(game.Flora.AllActive)
+				.Concat(game.ItemDrops.AllActive);
+		}
+	}
 }

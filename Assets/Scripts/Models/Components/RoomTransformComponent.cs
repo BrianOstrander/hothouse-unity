@@ -6,6 +6,9 @@ namespace Lunra.Hothouse.Models
 	{
 		RoomTransformComponent RoomTransform { get; }
 	}
-	
-	public class RoomTransformComponent : Model { }
+
+	public class RoomTransformComponent : Model
+	{
+		public override string ToString() => "RoomId: " + Id.Value;
+	}
 }

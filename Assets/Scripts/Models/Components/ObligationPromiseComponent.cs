@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
@@ -19,6 +20,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
+		public bool HasAny() => all.Any();
 		#endregion
 
 		public ObligationPromiseComponent()

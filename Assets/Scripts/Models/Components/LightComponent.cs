@@ -96,6 +96,11 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public bool IsLightNotActive() => !IsLightActive();
+
+		public override string ToString()
+		{
+			return "Light State: " + (IsLight.Value ? LightState.Value.ToString() : " < Not a Light >");
+		}
 	}
 
 	public static class LightGameModelExtensions

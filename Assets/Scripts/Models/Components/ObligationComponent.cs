@@ -184,6 +184,22 @@ namespace Lunra.Hothouse.Models
 			UnBindAll();
 			All.Value = new State();
 		}
+
+		public override string ToString()
+		{
+			var result = "Obligations: ";
+			foreach (var obligation in All.Value.Available)
+			{
+				result += "\n - [ available ] " + obligation;
+			}
+				
+			foreach (var obligation in All.Value.Forbidden)
+			{
+				result += "\n - [ forbidden ] " + obligation;
+			}
+
+			return result;
+		}
 	}
 
 	public static class ObligationGameModelExtensions

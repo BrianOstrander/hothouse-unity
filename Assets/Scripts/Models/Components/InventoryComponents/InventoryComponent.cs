@@ -321,20 +321,38 @@ namespace Lunra.Hothouse.Models
 
 		public override string ToString()
 		{
-			var result = "Inventory Component [ " + ShortId + " ]:\n";
+			var result = "Inventory Component [ " + ShortId + " ]:";
+			var resultEntries = string.Empty;
 			foreach (var itemType in Inventory.ValidTypes)
 			{
-				result += "\n - " + itemType;
-				result += "\n\tStored: \t\t\t" + All.Value[itemType];
-				result += "\n\tAvailable: \t\t" + Available.Value[itemType];
-				result += "\n\tForbidden: \t\t" + Forbidden.Value[itemType];
-				result += "\n\tReserved Capacity: \t" + ReservedCapacity.Value.GetMaximumFor(itemType);
-				result += "\n\tStored Capacity: \t" + AllCapacity.Value.GetMaximumFor(itemType);
-				result += "\n\tAvailable Capacity: \t" + AvailableCapacity.Value.GetMaximumFor(itemType);
-				result += "\n";
+				var allCapacityForItem = AllCapacity.Value.GetMaximumFor(itemType);
+				
+				if (allCapacityForItem == 0) continue;
+				
+				
+				var allForItem = All.Value[itemType];
+				var availableForItem = Available.Value[itemType];
+				var forbiddenForItem = Forbidden.Value[itemType];
+				var reservedForItem = ReservedCapacity.Value.GetMaximumFor(itemType);
+				
+				resultEntries += "\n - " + itemType;
+
+				if (0 < allForItem || 0 < availableForItem || 0 < forbiddenForItem || 0 < reservedForItem)
+				{
+					resultEntries += "\n\tStored: \t\t\t" + All.Value[itemType];
+					resultEntries += "\n\tAvailable: \t\t" + Available.Value[itemType];
+					resultEntries += "\n\tForbidden: \t\t" + Forbidden.Value[itemType];
+					resultEntries += "\n\tReserved Capacity: \t" + ReservedCapacity.Value.GetMaximumFor(itemType);
+				}
+				
+				resultEntries += "\n\tStored Capacity: \t" + allCapacityForItem;
+				
+				var availableCapacityForItem = AvailableCapacity.Value.GetMaximumFor(itemType);
+
+				if (allCapacityForItem != availableCapacityForItem) resultEntries += "\n\tAvailable Capacity: \t" + availableCapacityForItem;
 			}
 
-			return result;
+			return result + (string.IsNullOrEmpty(resultEntries) ? "Empty" : resultEntries);
 		}
 
 		#region Utility
