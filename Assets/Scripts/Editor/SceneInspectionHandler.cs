@@ -72,7 +72,7 @@ namespace Lunra.Hothouse.Editor
 				}
 				return false;
 			}
-
+			
 			if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 			{
 				Handles.color = Color.yellow.NewA(0.05f);
@@ -252,50 +252,43 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 
-			if (SceneInspectionSettings.IsInspectingFlora.Value)
+			foreach (var model in gameState.Payload.Game.Flora.AllActive.Where(isInInspectedRoom))
 			{
-				foreach (var model in gameState.Payload.Game.Flora.AllActive.Where(isInInspectedRoom))
+				if (!SceneInspectionSettings.IsInspectingFlora.Value)
 				{
-					DrawLabel(
-						model
-					);
-					
-					if (model.IsReproducing.Value) continue;
-					Handles.color = Color.red;
-					Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
+					if (!(SceneInspectionSettings.IsInspectingObligations.Value && model.Obligations.HasAny())) continue;
 				}
-			}
-			else
-			{
-				foreach (var model in gameState.Payload.Game.Flora.AllActive.Where(isInInspectedRoom))
-				{
-					if (!(model.Obligations.HasAny() || model.Health.IsDamaged)) continue;
-					
-					DrawLabel(
-						model
-					);
-				}
-			}
 
-			if (SceneInspectionSettings.IsInspectingDoors.Value)
-			{
-				foreach (var model in gameState.Payload.Game.Doors.AllActive.Where(isInInspectedRoom))
-				{
-					DrawLabel(
-						model,
-						append =>
-						{
-							append("RoomId0: " + Model.ShortenId(model.RoomConnection.Value.RoomId0));
-							append("RoomId1: " + Model.ShortenId(model.RoomConnection.Value.RoomId1));
-							append("ConnectedRoomId: " + Model.ShortenId(model.LightSensitive.ConnectedRoomId.Value));		
-						}
-					);
+				DrawLabel(
+					model
+				);
 					
-					DrawSelectionButton(
-						model,
-						new GUIContent("Select")
-					);
+				if (model.IsReproducing.Value) continue;
+				Handles.color = Color.red;
+				Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
+			}
+			
+			foreach (var model in gameState.Payload.Game.Doors.AllActive.Where(isInInspectedRoom))
+			{
+				if (!SceneInspectionSettings.IsInspectingDoors.Value)
+				{
+					if (!(SceneInspectionSettings.IsInspectingObligations.Value && model.Obligations.HasAny())) continue;
 				}
+				
+				DrawLabel(
+					model,
+					append =>
+					{
+						append("RoomId0: " + Model.ShortenId(model.RoomConnection.Value.RoomId0));
+						append("RoomId1: " + Model.ShortenId(model.RoomConnection.Value.RoomId1));
+						append("ConnectedRoomId: " + Model.ShortenId(model.LightSensitive.ConnectedRoomId.Value));		
+					}
+				);
+					
+				DrawSelectionButton(
+					model,
+					new GUIContent("Select")
+				);
 			}
 		}
 		
