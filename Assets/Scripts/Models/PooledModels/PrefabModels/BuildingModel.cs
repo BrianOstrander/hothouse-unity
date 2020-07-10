@@ -13,7 +13,8 @@ namespace Lunra.Hothouse.Models
 		IHealthModel,
 		IClaimOwnershipModel,
 		IConstructionModel,
-		IInventoryModel
+		IInventoryModel,
+		IObligationModel
 	{
 		#region Serialized
 		[JsonProperty] Buildings type;
@@ -36,6 +37,7 @@ namespace Lunra.Hothouse.Models
 		public InventoryComponent Inventory { get; } = new InventoryComponent();
 		public InventoryComponent ConstructionInventory { get; } = new InventoryComponent();
 		public InventoryComponent SalvageInventory { get; } = new InventoryComponent();
+		public ObligationComponent Obligations { get; } = new ObligationComponent();
 		#endregion
 		
 		#region Non Serialized

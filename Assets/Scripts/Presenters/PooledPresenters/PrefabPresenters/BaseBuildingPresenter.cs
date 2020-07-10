@@ -255,7 +255,8 @@ namespace Lunra.Hothouse.Presenters
 			switch (Model.BuildingState.Value)
 			{
 				case BuildingStates.Constructing:
-					Model.BuildingState.Value = BuildingStates.Operating;
+					Model.Obligations.Add(ObligationCategories.Construct.Assemble);
+					// Model.BuildingState.Value = BuildingStates.Operating;
 					break;
 				default:
 					Debug.LogError("Tried to fill construction recipe while building is in invalid state: "+Model.BuildingState.Value);
@@ -296,7 +297,14 @@ namespace Lunra.Hothouse.Presenters
 						Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(Model.Id.Value);
 					}
 
-					if (buildingState != BuildingStates.Constructing && Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
+					if (buildingState == BuildingStates.Constructing)
+					{
+						if (Model.ConstructionInventory.IsFull())
+						{
+							Model.Obligations.Add(ObligationCategories.Construct.Assemble);
+						}
+					}
+					else if (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
 					{
 						Game.NavigationMesh.QueueCalculation();
 					}
@@ -305,7 +313,7 @@ namespace Lunra.Hothouse.Presenters
 					Debug.LogError("Unrecognized BuildingState: "+buildingState);
 					break;
 			}
-			
+
 			/*
 			if (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
 			{

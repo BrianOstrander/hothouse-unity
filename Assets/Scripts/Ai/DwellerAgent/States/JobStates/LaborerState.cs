@@ -12,8 +12,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 			AddChildStates(
 				new CleanupState(),
 				new DestroyMeleeHandlerState()
-				
-				// new ObligationState()
 			);
 			
 			AddTransitions(

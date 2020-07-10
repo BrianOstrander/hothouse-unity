@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public bool IsFull => MaximumClaimers.Value <= Claimers.Value.Length;
 		#endregion
 
-		public bool Contains(string id) => Claimers.Value.Any(instance => instance.Id == id);
+		public bool Contains(IModel model) => Claimers.Value.Any(instance => instance.Id == model.Id.Value);
 
 		public void Add(IModel model)
 		{

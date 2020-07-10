@@ -55,6 +55,9 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] InstanceId bed = InstanceId.Null();
 		[JsonIgnore] public  ListenerProperty<InstanceId> Bed { get; }
+		
+		[JsonProperty] InstanceId workplace = InstanceId.Null();
+		[JsonIgnore] public  ListenerProperty<InstanceId> Workplace { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -87,6 +90,7 @@ namespace Lunra.Hothouse.Models
 			TransferDistance = new ListenerProperty<float>(value => transferDistance = value, () => transferDistance);
 			LowRationThreshold = new ListenerProperty<int>(value => lowRationThreshold = value, () => lowRationThreshold);
 			Bed = new ListenerProperty<InstanceId>(value => bed = value, () => bed);
+			Workplace = new ListenerProperty<InstanceId>(value => workplace = value, () => workplace);
 		}
 	}
 }

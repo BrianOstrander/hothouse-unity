@@ -226,6 +226,7 @@ namespace Lunra.Hothouse.Editor
 						{
 							if (model.Job.Value != Jobs.None) append("Job: " + model.Job.Value);
 							if (model.Desire.Value != Desires.None) append("Desire: " + model.Desire.Value);
+							if (!model.Workplace.Value.IsNull) append("Workplace: " + model.Workplace.Value);
 						},
 						model.Name.Value
 					);

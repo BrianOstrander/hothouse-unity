@@ -40,7 +40,6 @@ namespace Lunra.Hothouse.Ai
 			List<NavigationCache> navigationCache = new List<NavigationCache>();
 
 			ItemDropModel selectedPickup;
-			// BuildingModel selectedDropoff;
 			NavigationCache selectedDropoffCache;
 			
 			public override bool IsTriggered()
@@ -51,7 +50,6 @@ namespace Lunra.Hothouse.Ai
 				navigationCache.Clear();
 
 				selectedPickup = null;
-				// selectedDropoff = null;
 
 				foreach (var itemDrop in Game.ItemDrops.AllActive)
 				{
@@ -102,8 +100,6 @@ namespace Lunra.Hothouse.Ai
 
 				if (selectedDropoffCache == null) return false;
 
-				// selectedDropoff = selectedDropoffCache.Model;
-				
 				return true;
 			}
 
@@ -121,20 +117,6 @@ namespace Lunra.Hothouse.Ai
 					out intersection
 				);
 
-				/*
-				var isValidDeliver = selectedDropoff.Inventory.RequestDeliver(
-					intersection,
-					out var deliverTransaction,
-					out _
-				);
-				
-				if (!isValidDeliver)
-				{
-					Debug.LogError("Deliver request failed, this is unexpected");
-					return;
-				}
-				*/
-				
 				var isValidDistribute = selectedPickup.Inventory.RequestDistribution(
 					intersection,
 					out var distributeTransaction,
@@ -147,7 +129,6 @@ namespace Lunra.Hothouse.Ai
 					return;
 				}
 				
-				// Agent.InventoryPromises.Transactions.Push(deliverTransaction);
 				Agent.InventoryPromises.Transactions.Push(distributeTransaction);
 			}
 

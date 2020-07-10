@@ -152,20 +152,20 @@ namespace Lunra.Hothouse.Models
 					Inventory.Empty, 
 					Interval.Zero(),
 					LightStates.Unknown,
-					new []
+					new DesireQuality[]
 					{
-						DesireQuality.New(
-							Desires.Eat,
-							1f,
-							new Inventory(
-								new Dictionary<Inventory.Types, int>
-								{
-									{ Inventory.Types.Rations , 1 }
-								}
-							)
-						) 
+						// DesireQuality.New(
+						// 	Desires.Eat,
+						// 	1f,
+						// 	new Inventory(
+						// 		new Dictionary<Inventory.Types, int>
+						// 		{
+						// 			{ Inventory.Types.Rations , 1 }
+						// 		}
+						// 	)
+						// ) 
 					},
-					0,
+					2,
 					new []
 					{
 						"starting_wagon"
@@ -430,6 +430,8 @@ namespace Lunra.Hothouse.Models
 			);
 
 			model.SalvageInventory.Add(info.SalvageInventory);
+			
+			model.Obligations.Reset();
 		}
 	}
 }

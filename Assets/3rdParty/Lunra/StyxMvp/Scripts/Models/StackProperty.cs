@@ -17,16 +17,19 @@ namespace Lunra.StyxMvp.Models
 
 		public struct Delta
 		{
+			public readonly StackProperty<T> Property;
 			public readonly Events Event;
 			public readonly object Source;
 			public readonly T Element;
 
 			public Delta(
+				StackProperty<T> property,
 				Events events,
 				object source = default,
 				T element = default
 			)
 			{
+				Property = property;
 				Event = events;
 				Source = source;
 				Element = element;
@@ -35,7 +38,7 @@ namespace Lunra.StyxMvp.Models
 		
 		public readonly string Name;
 
-		public event Action Changed = ActionExtensions.Empty;
+		public event Action<StackProperty<T>> Changed = ActionExtensions.GetEmpty<StackProperty<T>>();
 		public event Action<Delta> ChangedDelta = ActionExtensions.GetEmpty<Delta>();
 		
 		readonly Stack<T> stack;
@@ -46,9 +49,10 @@ namespace Lunra.StyxMvp.Models
 		{
 			if (stack.None()) return;
 			stack.Clear();
-			Changed();
+			Changed(this);
 			ChangedDelta(
 				new Delta(
+					this,
 					Events.Clear,
 					source
 				)
@@ -61,9 +65,10 @@ namespace Lunra.StyxMvp.Models
 		)
 		{
 			stack.Push(element);
-			Changed();
+			Changed(this);
 			ChangedDelta(
 				new Delta(
+					this,
 					Events.Push,
 					source,
 					element
@@ -88,9 +93,10 @@ namespace Lunra.StyxMvp.Models
 		)
 		{
 			var result = stack.Pop();
-			Changed();
+			Changed(this);
 			ChangedDelta(
 				new Delta(
+					this,
 					Events.Pop,
 					source,
 					result
@@ -118,7 +124,7 @@ namespace Lunra.StyxMvp.Models
 		public StackProperty(
 			Stack<T> stack,
 			string name,
-			params Action[] listeners
+			params Action<StackProperty<T>>[] listeners
 		)
 		{
 			Name = name;
@@ -129,7 +135,7 @@ namespace Lunra.StyxMvp.Models
 
 		public StackProperty(
 			Stack<T> stack,
-			params Action[] listeners
+			params Action<StackProperty<T>>[] listeners
 		) : this(
 			stack,
 			null,

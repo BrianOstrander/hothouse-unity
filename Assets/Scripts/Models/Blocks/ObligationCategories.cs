@@ -15,5 +15,12 @@ namespace Lunra.Hothouse.Models
 			
 			public static Obligation Melee => Obligation.New(Category + "melee");
 		}
+
+		public static class Construct
+		{
+			const string Category = "construct_";
+
+			public static Obligation Assemble => Obligation.New(Category + "assemble");
+		}
 	}
 }

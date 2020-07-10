@@ -224,14 +224,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var requiredJobs = new []
 			{
 				Jobs.Laborer,
-				Jobs.Laborer,
-				Jobs.Laborer,
-				Jobs.Laborer,
-				Jobs.Laborer,
-				// Jobs.Clearer
+				Jobs.Stockpiler,
+				Jobs.Stockpiler,
+				Jobs.Stockpiler
 			};
 
-			for (var i = 0; i < 2; i++)
+			for (var i = 0; i < 4; i++)
 			{
 				var position = spawn.Transform.Position.Value + (Vector3.forward * (4f + i));
 
@@ -273,6 +271,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
 				BuildingStates.Operating
 			);
+
+			wagon.Inventory.Add(wagon.Inventory.AllCapacity.Value.GetMaximum());
 		
 			var bonfire = payload.Game.Buildings.Activate(
 				Buildings.Bonfire,
