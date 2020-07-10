@@ -19,7 +19,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			AddChildStates(
 				new CleanupState(),
-				new InventoryRequestState()
+				new InventoryRequestState(),
+				new NavigateState()
 			);
 
 			AddTransitions(
@@ -28,7 +29,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				new InventoryRequestState.ToInventoryRequestOnPromises(),
 				
-				new CleanupState.ToCleanupOnItemsAvailable()
+				new CleanupState.ToCleanupOnItemsAvailable(),
+				
+				new ToNavigateToWorkplace()
 			);
 		}
 	}

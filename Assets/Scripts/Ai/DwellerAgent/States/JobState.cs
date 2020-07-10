@@ -97,6 +97,33 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			public override bool IsTriggered() => !Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
 		}
+
+		protected class ToNavigateToWorkplace : AgentTransition<NavigateState, GameModel, DwellerModel>
+		{
+			Navigation.Result navigationResult;
+			
+			public override bool IsTriggered()
+			{
+				if (!Agent.Workplace.Value.TryGetInstance<IClaimOwnershipModel>(Game, out var workplace)) return false;
+				if (!Navigation.TryQuery(workplace, out var query)) return false;
+
+				if (query.GetMinimumTargetDistance(Agent.Transform.Position.Value) < 0.1f) return false; // TODO: Don't hardcode this!
+
+				var isNavigable = NavigationUtility.CalculateNearest(
+					Agent.Transform.Position.Value,
+					out navigationResult,
+					query	
+				);
+
+				if (!isNavigable) return false;
+				return true;
+			}
+
+			public override void Transition()
+			{
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
+			}
+		}
 		
 		#region Child Classes
 		protected class CleanupState : CleanupItemDropsState<S1, CleanupState> { }
@@ -104,6 +131,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		protected class DestroyMeleeHandlerState : DestroyMeleeHandlerState<S1> { }
 		
 		protected class InventoryRequestState : InventoryRequestState<S1> { }
+		
+		protected class NavigateState : NavigateState<S1> { }
 		
 		// protected class ObligationState : ObligationState<S1> { }
 		#endregion
