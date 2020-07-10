@@ -135,27 +135,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 					SourceState.Workplace.Inventory,
 					target
 				);
-				
-				// Agent.InventoryPromises.Transactions.Push(
-				// 	SourceState.Workplace.Inventory.RequestDistribution(itemsForConstruction)	
-				// );
-				// var isDistributionValid = SourceState.Workplace.Inventory.RequestDistribution(
-				// 	inventoryForDelivery,
-				// 	out var distributionTransaction,
-				// 	out _
-				// );
-				/*
-				SourceState.Workplace.Inventory.Remove(inventoryForDelivery);
-				Agent.Inventory.Add(inventoryForDelivery);
-				
-				target.RequestDeliver(
-					inventoryForDelivery,
-					out var deliveryTransaction,
-					out _
-				);
-				
-				Agent.InventoryPromises.Transactions.Push(deliveryTransaction);
-				*/
 			}
 		}
 	}

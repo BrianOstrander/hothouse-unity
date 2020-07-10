@@ -247,7 +247,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				else dweller.Job.Value = generator.GetNextFrom(randomJobPool);
 
 				dweller.Name.Value = payload.Game.DwellerNames.GetName(generator);
-				dweller.IsDebugging = i == 0;
+				// dweller.IsDebugging = i == 0;
 			}
 
 			done();

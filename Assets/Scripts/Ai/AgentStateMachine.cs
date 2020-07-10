@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
@@ -79,7 +80,15 @@ namespace Lunra.Hothouse.Ai
 		{
 			foreach (var transition in CurrentState.Transitions)
 			{
-				if (!transition.IsTriggered()) continue;
+				try
+				{
+					if (!transition.IsTriggered()) continue;
+				}
+				catch (Exception e)
+				{
+					Debug.LogError(Name + " encountered the following error from transition: " + CurrentState.Name + " -> " + transition.Name);
+					throw e;
+				}
 
 				var targetState = transition.TransitionTargetState;
 				

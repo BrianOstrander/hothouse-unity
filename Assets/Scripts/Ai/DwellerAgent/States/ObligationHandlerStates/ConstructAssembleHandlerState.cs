@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DestroyMeleeHandlerState<S> : ObligationHandlerState<S, DestroyMeleeHandlerState<S>>
+	public class ConstructAssembleHandlerState<S> : ObligationHandlerState<S, ConstructAssembleHandlerState<S>>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		static readonly Obligation[] DefaultObligationsHandled =
 		{
-			ObligationCategories.Destroy.Melee
+			ObligationCategories.Construct.Assemble
 		};
 
 		public override Obligation[] ObligationsHandled => DefaultObligationsHandled;
@@ -24,13 +24,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToReturnOnMissingObligation(),
 				new ToReturnOnTimeout(),
 				
-				new ToTimeoutOnAttackTarget(),
+				new ToTimeoutOnAssembleTarget(),
 				
 				new ToNavigateToTarget()
 			);
 		}
 
-		class ToTimeoutOnAttackTarget : ToTimeoutOnTarget
+		class ToTimeoutOnAssembleTarget : ToTimeoutOnTarget
 		{
 			protected override bool CanPopObligation
 			{
@@ -38,15 +38,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				{
 					switch (SourceState.CurrentCache.TargetParent)
 					{
-						case IHealthModel healthModel:
-							var result = Damage.Apply(
-								Damage.Types.Generic,
-								Agent.MeleeDamage.Value,
-								Agent,
-								healthModel
-							);
-
-							return result.IsTargetDestroyed;
+						case BuildingModel buildingModel:
+							return buildingModel.IsBuildingState(BuildingStates.Constructing);
 						default:
 							Debug.LogError("Unrecognized target parent type: "+SourceState.CurrentCache.TargetParent.GetType());
 							return false;

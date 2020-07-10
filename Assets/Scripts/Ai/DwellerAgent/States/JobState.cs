@@ -260,6 +260,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		protected class CleanupState : CleanupItemDropsState<S1, CleanupState> { }
 		
 		protected class DestroyMeleeHandlerState : DestroyMeleeHandlerState<S1> { }
+		protected class ConstructAssembleHandlerState : ConstructAssembleHandlerState<S1> { }
 		
 		protected class InventoryRequestState : InventoryRequestState<S1> { }
 		

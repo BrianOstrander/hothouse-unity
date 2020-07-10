@@ -344,7 +344,7 @@ namespace Lunra.Hothouse.Models
 							)
 						)
 					},
-					0,
+					2,
 					new []
 					{
 						"debug_building"

@@ -3,6 +3,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.StyxMvp.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -56,6 +57,10 @@ namespace Lunra.Hothouse.Presenters
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
+			Model.Obligations.Bind(
+				ObligationCategories.Construct.Assemble,
+				OnObligationsConstructAssemble
+			);
 			
 			Model.Operate += OnBuildingOperate;
 
@@ -85,6 +90,10 @@ namespace Lunra.Hothouse.Presenters
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
+			Model.Obligations.UnBind(
+				ObligationCategories.Construct.Assemble,
+				OnObligationsConstructAssemble
+			);
 			
 			Model.Operate -= OnBuildingOperate;
 			
@@ -229,6 +238,16 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 			
 			Model.RecalculateEntrances();
+		}
+		#endregion
+
+		#region IObligationModel Events
+		void OnObligationsConstructAssemble(
+			Obligation obligation,
+			IModel source
+		)
+		{
+			Model.BuildingState.Value = BuildingStates.Operating;
 		}
 		#endregion
 		

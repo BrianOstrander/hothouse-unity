@@ -11,7 +11,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			AddChildStates(
 				new CleanupState(),
-				new DestroyMeleeHandlerState()
+				new DestroyMeleeHandlerState(),
+				new ConstructAssembleHandlerState()
 			);
 			
 			AddTransitions(
@@ -19,7 +20,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToReturnOnShiftEnd(),
 				
 				new DestroyMeleeHandlerState.ToObligationOnExistingObligation(),
+				new ConstructAssembleHandlerState.ToObligationOnExistingObligation(),
+				
 				new DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation(),
+				new ConstructAssembleHandlerState.ToObligationHandlerOnAvailableObligation(),
 				
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);
