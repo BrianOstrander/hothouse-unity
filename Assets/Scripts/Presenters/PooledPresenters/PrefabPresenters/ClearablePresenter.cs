@@ -1,5 +1,6 @@
 ﻿using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.StyxMvp.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -18,6 +19,10 @@ namespace Lunra.Hothouse.Presenters
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 	
 			Model.Obligations.All.Changed += OnObligationAll;
+			Model.Obligations.Bind(
+				ObligationCategories.Destroy.Melee,
+				OnObligationDestroyMelee
+			);
 			Model.Health.Current.Changed += OnClearableHealthCurrent;
 			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
 			
@@ -30,6 +35,10 @@ namespace Lunra.Hothouse.Presenters
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
 			Model.Obligations.All.Changed -= OnObligationAll;
+			Model.Obligations.UnBind(
+				ObligationCategories.Destroy.Melee,
+				OnObligationDestroyMelee
+			);
 			Model.Health.Current.Changed -= OnClearableHealthCurrent;
 			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
 			
@@ -62,7 +71,16 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnClearableHealthCurrent(float health)
 		{
-			if (Mathf.Approximately(0f, health)) Model.PooledState.Value = PooledStates.InActive;
+			if (!Mathf.Approximately(0f, health)) return;
+			
+			Game.ItemDrops.Activate(
+				Model.RoomTransform.Id.Value,
+				Model.Transform.Position.Value,
+				Quaternion.identity,
+				Model.Clearable.ItemDrops.Value
+			);
+			
+			Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion
 		
@@ -107,6 +125,8 @@ namespace Lunra.Hothouse.Presenters
 		}
 
 		void OnLightSensitiveLightLevel(float lightLevel) => Model.RecalculateEntrances();
+
+		protected virtual void OnObligationDestroyMelee(Obligation obligation, IModel source) { }
 		#endregion
 		
 		#region Utility

@@ -177,6 +177,36 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
+		public static Inventory operator *(Inventory inventory, float weight)
+		{
+			return new Inventory(
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => Mathf.FloorToInt(i.Weight * weight)
+				)	
+			);
+		}
+		
+		public static Inventory operator /(Inventory inventory, int weight)
+		{
+			return new Inventory(
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Weight / weight
+				)	
+			);
+		}
+		
+		public static Inventory operator /(Inventory inventory, float weight)
+		{
+			return new Inventory(
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => Mathf.FloorToInt(i.Weight / weight)
+				)	
+			);
+		}
+		
 		public static Inventory operator *(Inventory inventory, (Types Type, int Weight) entry)
 		{
 			return new Inventory(

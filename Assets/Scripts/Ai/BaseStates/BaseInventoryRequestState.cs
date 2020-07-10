@@ -110,8 +110,11 @@ namespace Lunra.Hothouse.Ai
 							);
 							cache.NavigationRadiusMaximum = 0.1f; // TODO: Don't hardcode this
 							break;
+						case null:
+							Debug.LogError("Unable to find parent for inventory " + cache.Target.ShortId + ", this should never happen");
+							break;
 						default:
-							Debug.LogError("Unrecognized target parent type: "+cache.Target.GetType().Name);
+							Debug.LogError("Unrecognized target parent type: "+cache.TargetParent.GetType().Name);
 							break;
 					}
 				}

@@ -29,7 +29,7 @@ namespace Lunra.Hothouse.Ai
 		{
 			class NavigationCache
 			{
-				public BuildingModel Model;
+				public InventoryComponent Inventory;
 				public Vector3 Position;
 				public bool IsNavigable;
 				public Inventory AvailableCapacity;
@@ -39,8 +39,9 @@ namespace Lunra.Hothouse.Ai
 			List<ItemDropModel> itemDrops = new List<ItemDropModel>();
 			List<NavigationCache> navigationCache = new List<NavigationCache>();
 
-			ItemDropModel selectedPickup;
-			NavigationCache selectedDropoffCache;
+			InventoryComponent selectedSource;
+			NavigationCache selectedDestination;
+			Inventory selectedItems;
 			
 			public override bool IsTriggered()
 			{
@@ -49,8 +50,8 @@ namespace Lunra.Hothouse.Ai
 				itemDrops.Clear();
 				navigationCache.Clear();
 
-				selectedPickup = null;
-
+				selectedSource = null;
+				
 				foreach (var itemDrop in Game.ItemDrops.AllActive)
 				{
 					if (!itemDrop.Enterable.AnyAvailable()) continue;
@@ -62,12 +63,13 @@ namespace Lunra.Hothouse.Ai
 
 				if (itemDrops.None()) return false;
 
-				selectedDropoffCache = null;
+				selectedDestination = null;
+				selectedItems = Inventory.Empty;
 				var buildingsRemaining = new Stack<BuildingModel>(Game.Buildings.AllActive);
 				
 				foreach (var itemDrop in itemDrops.OrderBy(m => Vector3.Distance(Agent.Transform.Position.Value, m.Transform.Position.Value)))
 				{
-					selectedPickup = itemDrop;
+					selectedSource = itemDrop.Inventory;
 					
 					var isItemDropNavigable = NavigationUtility.CalculateNearest(
 						Agent.Transform.Position.Value,
@@ -77,49 +79,55 @@ namespace Lunra.Hothouse.Ai
 					
 					if (!isItemDropNavigable) continue;
 
-					selectedDropoffCache = navigationCache
+					selectedDestination = navigationCache
 						.Where(m => m.IsNavigable)
 						.OrderBy(m => Vector3.Distance(itemDrop.Transform.Position.Value, m.Position))
 						.FirstOrDefault(m => m.AvailableCapacity.Intersects(itemDrop.Inventory.Available.Value));
 
-					if (selectedDropoffCache != null) break;
+					if (selectedDestination != null) break;
 					if (buildingsRemaining.None()) return false;
 
 					while (buildingsRemaining.Any())
 					{
 						var building = buildingsRemaining.Pop();
 
-						if (CalculateBuilding(building, out selectedDropoffCache)) break;
+						if (CalculateBuilding(building, out selectedDestination))
+						{
+							var isIntersecting = selectedSource.Available.Value.Intersects(
+								selectedDestination.AvailableCapacity,
+								out selectedItems
+							);
+
+							if (isIntersecting)
+							{
+								isIntersecting = Agent.Inventory.AllCapacity.Value
+									.GetCapacityFor(Agent.Inventory.All.Value)
+									.Intersects(
+										selectedItems,
+										out selectedItems
+									);
+
+								if (isIntersecting) break;
+							}
+						}
 						
-						navigationCache.Add(selectedDropoffCache);
-						selectedDropoffCache = null;
+						navigationCache.Add(selectedDestination);
+						selectedDestination = null;
 					}
 
-					if (selectedDropoffCache != null) break;
+					if (selectedDestination != null) break;
 				}
 
-				if (selectedDropoffCache == null) return false;
-
-				return true;
+				return selectedDestination != null;
 			}
 
 			public override void Transition()
 			{
-				selectedPickup.Inventory.Available.Value.Intersects(
-					selectedDropoffCache.AvailableCapacity,
-					out var intersection
+				Agent.InventoryPromises.Push(
+					selectedItems,
+					selectedSource,
+					selectedDestination.Inventory
 				);
-
-				var carryingCapacity = Agent.Inventory.AllCapacity.Value.GetCapacityFor(Agent.Inventory.All.Value);
-
-				carryingCapacity.Intersects(
-					intersection,
-					out intersection
-				);
-
-				var distributeTransaction = selectedPickup.Inventory.RequestDistribution(intersection);
-
-				Agent.InventoryPromises.Transactions.Push(distributeTransaction);
 			}
 
 			bool CalculateBuilding(
@@ -128,9 +136,10 @@ namespace Lunra.Hothouse.Ai
 			)
 			{
 				result = new NavigationCache();
-				result.Model = model;
+				result.Inventory = model.Inventory;
 
 				if (!model.Inventory.Permission.Value.CanDeposit(Agent)) return false;
+				if (!model.IsBuildingState(BuildingStates.Operating)) return false;
 				result.AvailableCapacity = model.Inventory.AvailableCapacity.Value.GetCapacityFor(model.Inventory.Available.Value);
 				if (result.AvailableCapacity.IsEmpty) return false;
 				

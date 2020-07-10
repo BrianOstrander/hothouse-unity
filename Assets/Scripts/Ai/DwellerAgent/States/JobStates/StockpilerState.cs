@@ -55,11 +55,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				new InventoryRequestState.ToInventoryRequestOnPromises(),
 				
-				new CleanupState.ToCleanupOnItemsAvailable(),
-				
 				new ToNavigateToWorkplace(),
 				
-				new ToGatherForConstruction()
+				new ToGatherForConstruction(),
+				
+				new CleanupState.ToCleanupOnItemsAvailable()
 			);
 		}
 

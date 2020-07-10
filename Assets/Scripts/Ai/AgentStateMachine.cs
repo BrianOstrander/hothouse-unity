@@ -86,16 +86,50 @@ namespace Lunra.Hothouse.Ai
 				}
 				catch (Exception e)
 				{
-					Debug.LogError(Name + " encountered the following error from transition: " + CurrentState.Name + " -> " + transition.Name);
-					throw e;
+					throw new Exception(
+						Name + " encountered the following error on: " + CurrentState.Name + "." + transition.Name + ".IsTriggered",
+						e
+					);
 				}
 
 				var targetState = transition.TransitionTargetState;
-				
-				CurrentState.End();
-				transition.Transition();
-				targetState.Begin();
 
+				try
+				{
+					CurrentState.End();
+				}
+				catch (Exception e)
+				{
+					throw new Exception(
+						Name + " encountered the following error on: " + CurrentState.Name + ".End",
+						e
+					);
+				}
+				
+				try
+				{
+					transition.Transition();
+				}
+				catch (Exception e)
+				{
+					throw new Exception(
+						Name + " encountered the following error on: " + CurrentState.Name + "." + transition.Name + ".Transition",
+						e
+					);
+				}
+				
+				try
+				{
+					targetState.Begin();
+				}
+				catch (Exception e)
+				{
+					throw new Exception(
+						Name + " encountered the following error on: " + targetState.Name + ".Begin",
+						e
+					);
+				}
+				
 				Agent.Context = new AgentContext(
 					Name,
 					CurrentState.Name,
@@ -108,8 +142,18 @@ namespace Lunra.Hothouse.Ai
 				CurrentState = targetState;
 				return;
 			}
-			
-			CurrentState.Idle();
+
+			try
+			{
+				CurrentState.Idle();
+			}
+			catch (Exception e)
+			{
+				throw new Exception(
+					Name + " encountered the following error on: " + CurrentState.Name + ".Idle",
+					e
+				);
+			}
 		}
 
 		public void Reset()

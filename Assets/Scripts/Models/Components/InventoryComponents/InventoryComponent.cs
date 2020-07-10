@@ -190,8 +190,12 @@ namespace Lunra.Hothouse.Models
 				out var overflow
 			);
 
-			if (!isValid) throw new Exception(nameof(RequestDeliver) + " transaction invalid");
-			if (!overflow.IsEmpty) throw new Exception(nameof(RequestDeliver) + " transaction returned overflow");
+			if (!isValid)
+			{
+				Debug.Break();
+				throw new Exception(nameof(RequestDeliver) + " transaction invalid on " + ShortId + " for items:\n" + inventory);
+			}
+			if (!overflow.IsEmpty) throw new Exception(nameof(RequestDeliver) + " transaction returned overflow on " + ShortId + " for items:\n" + inventory);
 
 			return transaction;
 		}
@@ -236,8 +240,8 @@ namespace Lunra.Hothouse.Models
 				addIntersection
 			);
 
-			if (!isValid) throw new Exception(nameof(CompleteDeliver) + " transaction invalid");
-			if (!overflow.IsEmpty) throw new Exception(nameof(CompleteDeliver) + " transaction returned overflow");
+			if (!isValid) throw new Exception(nameof(CompleteDeliver) + " transaction invalid on " + ShortId);
+			if (!overflow.IsEmpty) throw new Exception(nameof(CompleteDeliver) + " transaction returned overflow on " + ShortId);
 		}
 
 		bool TryCompleteDeliver(
@@ -268,8 +272,8 @@ namespace Lunra.Hothouse.Models
 				out var overflow
 			);
 
-			if (!isValid) throw new Exception(nameof(RequestDistribution) + " transaction invalid");
-			if (!overflow.IsEmpty) throw new Exception(nameof(RequestDistribution) + " transaction returned overflow");
+			if (!isValid) throw new Exception(nameof(RequestDistribution) + " transaction invalid on " + ShortId + " for items:\n" + inventory);
+			if (!overflow.IsEmpty) throw new Exception(nameof(RequestDistribution) + " transaction returned overflow on " + ShortId + " for items:\n" + inventory);
 
 			return transaction;
 		}
@@ -315,8 +319,8 @@ namespace Lunra.Hothouse.Models
 				removeIntersection
 			);
 
-			if (!isValid) throw new Exception(nameof(CompleteDistribution) + " transaction invalid");
-			if (!overflow.IsEmpty) throw new Exception(nameof(CompleteDistribution) + " transaction returned overflow");
+			if (!isValid) throw new Exception(nameof(CompleteDistribution) + " transaction invalid on " + ShortId);
+			if (!overflow.IsEmpty) throw new Exception(nameof(CompleteDistribution) + " transaction returned overflow on " + ShortId);
 		}
 		
 		bool TryCompleteDistribution(

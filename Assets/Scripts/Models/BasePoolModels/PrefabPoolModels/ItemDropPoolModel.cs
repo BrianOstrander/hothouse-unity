@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
-using Lunra.Hothouse.Views;
-using Lunra.NumberDemon;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models

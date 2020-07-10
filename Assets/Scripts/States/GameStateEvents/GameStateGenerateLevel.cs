@@ -294,7 +294,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-
+			wagon.Inventory.Remove(
+				Inventory.FromEntries(
+					wagon.Inventory.All.Value.Entries
+						.Select(e => (e.Type, 1))
+						.ToArray()
+				)
+			);
 			// Debugging End
 			
 			done();
