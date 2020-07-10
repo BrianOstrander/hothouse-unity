@@ -223,10 +223,10 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			var requiredJobs = new []
 			{
-				Jobs.Laborer,
 				Jobs.Stockpiler,
 				Jobs.Stockpiler,
-				Jobs.Stockpiler
+				Jobs.Stockpiler,
+				Jobs.Laborer
 			};
 
 			for (var i = 0; i < 4; i++)

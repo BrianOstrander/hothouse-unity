@@ -413,6 +413,11 @@ namespace Lunra.Hothouse.Editor
 				appendResult("Inventory " + inventoryModel.Inventory);
 			}
 
+			if (model is IInventoryPromiseModel inventoryPromiseModel)
+			{
+				appendResult(inventoryPromiseModel.InventoryPromises.ToString());
+			}
+
 			append?.Invoke(appendResult);
 
 			Handles.Label(

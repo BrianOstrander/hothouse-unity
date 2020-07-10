@@ -4,6 +4,7 @@ using System.Linq;
 using Lunra.Core;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -44,7 +45,9 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
 		
 		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
-		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
+		
+		Dictionary<BuildingStates, IBaseInventoryComponent[]> inventoriesByBuildingState = new Dictionary<BuildingStates, IBaseInventoryComponent[]>();
+		[JsonIgnore] public IBaseInventoryComponent[] Inventories => inventoriesByBuildingState[BuildingState.Value];
 		#endregion
 
 		public bool IsBuildingState(BuildingStates buildingState) => BuildingState.Value == buildingState;
@@ -56,11 +59,33 @@ namespace Lunra.Hothouse.Models
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
 			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
-			Inventories = new []
+
+			var emptyInventories = new IBaseInventoryComponent[0];
+			foreach (var buildState in EnumExtensions.GetValues<BuildingStates>())
 			{
-				Inventory,
-				ConstructionInventory
-			};
+				IBaseInventoryComponent[] buildStateInventories;
+				switch (buildState)
+				{
+					case BuildingStates.Unknown:
+					case BuildingStates.Placing:
+					case BuildingStates.Decaying:
+						buildStateInventories = emptyInventories;
+						break;
+					case BuildingStates.Constructing:
+						buildStateInventories = new IBaseInventoryComponent[] { ConstructionInventory };
+						break;
+					case BuildingStates.Operating:
+						buildStateInventories = new IBaseInventoryComponent[] { Inventory };
+						break;
+					case BuildingStates.Salvaging:
+						buildStateInventories = new IBaseInventoryComponent[] { SalvageInventory };
+						break;
+					default:
+						Debug.LogError("Unrecognized BuildState: "+buildState);
+						continue;
+				}
+				inventoriesByBuildingState.Add(buildState, buildStateInventories);
+			}
 		}
 	}
 }

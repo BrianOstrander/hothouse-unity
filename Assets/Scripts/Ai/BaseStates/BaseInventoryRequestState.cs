@@ -138,6 +138,7 @@ namespace Lunra.Hothouse.Ai
 			InventoryTransaction.Types transactionType;
 
 			InventoryTransaction nextTransaction;
+			bool pushNextTransaction;
 			
 			public ToTimeoutOnTarget(InventoryTransaction.Types transactionType) => this.transactionType = transactionType;
 			
@@ -148,6 +149,7 @@ namespace Lunra.Hothouse.Ai
 				if (SourceState.cache.NavigationRadiusMaximum < Vector3.Distance(Agent.Transform.Position.Value, SourceState.cache.NavigationResult.Target)) return false;
 
 				nextTransaction = null;
+				pushNextTransaction = false;
 				
 				switch (transactionType)
 				{
@@ -159,6 +161,12 @@ namespace Lunra.Hothouse.Ai
 						}
 						break;
 					case InventoryTransaction.Types.Distribute:
+
+						if (Agent.InventoryPromises.Transactions.TryPeek(out nextTransaction, 1))
+						{
+							if (nextTransaction.Type == InventoryTransaction.Types.Deliver) return true;
+						}
+						
 						var isNextTargetNavigable = NavigationUtility.CalculateNearest(
 							Agent.Transform.Position.Value,
 							out var nextTargetNavigationResult,
@@ -174,6 +182,12 @@ namespace Lunra.Hothouse.Ai
 								nextTargetNavigationResult.TargetModel as IBaseInventoryModel, 
 								out nextTransaction
 							);
+							pushNextTransaction = true;
+						}
+						else
+						{
+							Debug.LogError("TODO: Handle what happens when no target is available for distribution (drop on ground, etc)");
+							return false;
 						}
 						break;
 					default:
@@ -188,36 +202,25 @@ namespace Lunra.Hothouse.Ai
 			{
 				Agent.InventoryPromises.Transactions.Pop();
 
-				bool? completionSuccessful = null;
-				var overflow = Inventory.Empty;
-				
 				switch (SourceState.cache.Target)
 				{
 					case InventoryComponent inventory:
 						switch (SourceState.cache.Transaction.Type)
 						{
 							case InventoryTransaction.Types.Deliver:
-								completionSuccessful = inventory.CompleteDeliver(
-									SourceState.cache.Transaction,
-									out overflow
-								);
-								Agent.Inventory.Remove(
-									SourceState.cache.Transaction.Items - overflow
-								);
+								inventory.CompleteDeliver(SourceState.cache.Transaction);
+								Agent.Inventory.Remove(SourceState.cache.Transaction.Items);
 								break;
 							case InventoryTransaction.Types.Distribute:
-								completionSuccessful = inventory.CompleteDistribution(
-									SourceState.cache.Transaction,
-									out overflow
-								);
+								inventory.CompleteDistribution(SourceState.cache.Transaction);
 
 								if (!nextTransaction.Items.Contains(SourceState.cache.Transaction.Items))
 								{
-									Debug.LogError("TODO: Handle what happens when we can't distribute everything...");
+									Debug.LogError("TODO: Handle what happens when we can't distribute everything... this probably shouldn't happen?");
 								}
 								
 								Agent.Inventory.Add(nextTransaction.Items);
-								Agent.InventoryPromises.Transactions.Push(nextTransaction);
+								if (pushNextTransaction) Agent.InventoryPromises.Transactions.Push(nextTransaction);
 								break;
 							default:
 								Debug.LogError("Unrecognized Transaction.Type: "+SourceState.cache.Transaction.Type);
@@ -229,19 +232,7 @@ namespace Lunra.Hothouse.Ai
 						break;
 				}
 
-				if (completionSuccessful.HasValue)
-				{
-					if (completionSuccessful.Value)
-					{
-						if (!overflow.IsEmpty) Debug.LogWarning("Unable to " + transactionType + " all resources, this probably is ok, but maybe not?\n" + overflow);
-						SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(1f)); // TODO: Don't hardcode this...	
-					}
-					else
-					{
-						Debug.LogWarning("Not able to " + transactionType + " any resources, this probably is ok, but maybe not?");
-						SourceState.timeoutState.ConfigureForInterval(Interval.Zero());
-					}
-				}
+				SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(1f)); // TODO: Don't hardcode this...
 			}
 
 			Navigation.Query[] GetNavigationQueries(
@@ -289,8 +280,10 @@ namespace Lunra.Hothouse.Ai
 					case InventoryComponent inventory:
 						if (!inventory.Permission.Value.CanDeposit(Agent)) return false;
 						return hasCapacityFor(inventory.AvailableCapacity.Value, inventory.Available.Value);
-					case AgentInventoryComponent agentInventory:
-						return hasCapacityFor(agentInventory.AllCapacity.Value, agentInventory.All.Value);
+					case AgentInventoryComponent _:
+						// For the moment, I'm going to forbid delivering to agents, because why do I need this?
+						// return hasCapacityFor(agentInventory.AllCapacity.Value, agentInventory.All.Value);
+						return false;
 					default:
 						Debug.LogError("Unrecognized type: "+model.GetType());
 						return false;
@@ -321,19 +314,7 @@ namespace Lunra.Hothouse.Ai
 								out currentOverflow
 							);
 
-							currentGetTransaction = () =>
-							{
-								var isRequestDeliverValid = inventory.RequestDeliver(
-									SourceState.cache.Transaction.Items,
-									out var currentTransaction,
-									out var requestDeliverOverflow
-								);
-								
-								if (!isRequestDeliverValid) Debug.LogError("Invalid request to deliver made, this is unexpected");
-								if (!requestDeliverOverflow.IsEmpty) Debug.LogError("Overflow on request to deliver, this is unexpected");
-								
-								return currentTransaction;
-							};
+							currentGetTransaction = () => inventory.RequestDeliver(SourceState.cache.Transaction.Items);
 							break;
 						default:
 							Debug.LogError("Unrecognized type: " + model.GetType());

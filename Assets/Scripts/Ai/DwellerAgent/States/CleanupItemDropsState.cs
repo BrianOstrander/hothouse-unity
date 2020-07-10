@@ -117,18 +117,8 @@ namespace Lunra.Hothouse.Ai
 					out intersection
 				);
 
-				var isValidDistribute = selectedPickup.Inventory.RequestDistribution(
-					intersection,
-					out var distributeTransaction,
-					out _
-				);
+				var distributeTransaction = selectedPickup.Inventory.RequestDistribution(intersection);
 
-				if (!isValidDistribute)
-				{
-					Debug.LogError("Distribute request failed, this is unexpected");
-					return;
-				}
-				
 				Agent.InventoryPromises.Transactions.Push(distributeTransaction);
 			}
 

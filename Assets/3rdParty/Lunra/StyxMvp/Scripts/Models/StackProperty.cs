@@ -118,6 +118,19 @@ namespace Lunra.StyxMvp.Models
 			return false;
 		}
 		
+		public bool TryPeek(out T element, int offset)
+		{
+			element = default;
+
+			if (offset < stack.Count)
+			{
+				element = stack.ElementAt(offset);
+				return true;
+			}
+			
+			return false;
+		}
+		
 		public T Peek() => stack.Peek();
 		public T[] PeekAll() => stack.ToArray();
 

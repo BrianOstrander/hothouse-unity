@@ -27,6 +27,21 @@ namespace Lunra.Hothouse.Models
 			Transactions = new StackProperty<InventoryTransaction>(transactions);
 		}
 
+		public void Push(
+			Inventory inventory,
+			InventoryComponent source,
+			InventoryComponent destination
+		)
+		{
+			Transactions.Push(
+				destination.RequestDeliver(inventory)	
+			);
+			
+			Transactions.Push(
+				source.RequestDistribution(inventory)	
+			);
+		}
+
 		public void BreakRemainingPromises(
 			GameModel game	
 		)
@@ -41,16 +56,10 @@ namespace Lunra.Hothouse.Models
 						switch (transaction.Type)
 						{
 							case InventoryTransaction.Types.Deliver:
-								if (!inventory.CompleteDeliver(transaction, out _, false))
-								{
-									Debug.LogError("Unable to undo delivery");
-								}
+								inventory.CompleteDeliver(transaction, false);
 								break;
 							case InventoryTransaction.Types.Distribute:
-								if (!inventory.CompleteDistribution(transaction, out _, false))
-								{
-									Debug.LogError("Unable to undo distribute");
-								}
+								inventory.CompleteDistribution(transaction, false);
 								break;
 							default:
 								Debug.LogError("Unrecognized transaction type: "+transaction.Type);

@@ -11,6 +11,18 @@ namespace Lunra.Hothouse.Ai.Dweller
 		where S0 : AgentState<GameModel, DwellerModel>
 		where S1 : JobState<S0, S1>
 	{
+		class WorkplaceNavigationCache
+		{
+			public DateTime LastUpdated;
+			public bool IsCurrentlyAtWorkplace;
+			public Navigation.Result NavigationToWorkplace;
+
+			public WorkplaceNavigationCache()
+			{
+				LastUpdated = DateTime.Now;
+			}
+		}
+		
 		static readonly Buildings[] EmptyWorkplaces = new Buildings[0];
 		
 		public override string Name => "Job"+Job;
@@ -21,6 +33,77 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		protected bool IsCurrentJob => Job == Agent.Job.Value;
 
+		protected BuildingModel Workplace { get; private set; }
+
+		WorkplaceNavigationCache workplaceNavigation;
+		
+		public override void Begin()
+		{
+			workplaceNavigation = null;
+			if (Workplaces.None()) return;
+			
+			if (Agent.Workplace.Value.TryGetInstance<BuildingModel>(Game, out var workplace)) Workplace = workplace;
+			else Debug.LogError("Job " + Job + "requires workplace but was unable to find it, this is an invalid state");
+		}
+
+		/// <summary>
+		/// Checks if the agent is already at the workplace or if it can navigate to the workplace.
+		/// </summary>
+		/// <param name="isCurrentlyAtWorkplace"></param>
+		/// <param name="navigationToWorkplace"></param>
+		/// <returns>Returns true if the agent is at the workplace or can navigate to it.</returns>
+		protected bool TryCalculateWorkplaceNavigation(
+			out bool isCurrentlyAtWorkplace,
+			out Navigation.Result navigationToWorkplace
+		)
+		{
+			if (workplaceNavigation != null && Game.NavigationMesh.LastUpdated.Value <= workplaceNavigation.LastUpdated)
+			{
+				isCurrentlyAtWorkplace = workplaceNavigation.IsCurrentlyAtWorkplace;
+				navigationToWorkplace = workplaceNavigation.NavigationToWorkplace;
+				return isCurrentlyAtWorkplace || navigationToWorkplace.IsValid;
+			}
+			
+			workplaceNavigation = new WorkplaceNavigationCache();
+			
+			isCurrentlyAtWorkplace = false;
+			navigationToWorkplace = default;
+
+			if (Workplaces.None())
+			{
+				Debug.LogError("Job "+Job+" with no specified workplaces is trying to calculate its workplace, this is invalid");
+				return false;
+			}
+
+			if (Workplace == null)
+			{
+				Debug.LogError("Missing workplace, this is invalid");
+				return false;
+			}
+
+			if (!Navigation.TryQuery(Workplace, out var query))
+			{
+				Debug.LogError("Unable to query workplace, this should not happen");
+				return false;
+			}
+
+			if (query.GetMinimumTargetDistance(Agent.Transform.Position.Value) < 0.1f)
+			{
+				workplaceNavigation.IsCurrentlyAtWorkplace = (isCurrentlyAtWorkplace = true);
+				return true;
+			}
+
+			var isNavigable = NavigationUtility.CalculateNearest(
+				Agent.Transform.Position.Value,
+				out workplaceNavigation.NavigationToWorkplace,
+				query	
+			);
+			
+			navigationToWorkplace = workplaceNavigation.NavigationToWorkplace;
+
+			return isNavigable;
+		}
+		
 		public class ToJobOnShiftBegin : AgentTransition<S0, S1, GameModel, DwellerModel>
 		{
 			IClaimOwnershipModel workplaceTarget;
@@ -102,15 +185,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 		
 		protected class ToReturnOnWorkplaceMissing : AgentTransition<S1, S0, GameModel, DwellerModel>
 		{
-			IClaimOwnershipModel workplace;
-			
 			public override bool IsTriggered()
 			{
-				workplace = null;
 				if (Agent.Workplace.Value.IsNull) return true;
-				if (!Agent.Workplace.Value.TryGetInstance(Game, out workplace)) return true;
-				if (!workplace.Ownership.Contains(Agent)) return true;
-				if (workplace is BuildingModel workplaceBuilding && !workplaceBuilding.IsBuildingState(BuildingStates.Operating)) return true;
+				if (SourceState.Workplace == null) return true;
+				if (!SourceState.Workplace.Ownership.Contains(Agent)) return true;
+				if (!SourceState.Workplace.IsBuildingState(BuildingStates.Operating)) return true;
 
 				return false;
 			}
@@ -118,65 +198,61 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override void Transition()
 			{
 				if (!Agent.Workplace.Value.IsNull) Agent.Workplace.Value = InstanceId.Null();
-				workplace?.Ownership.Remove(Agent);
+				SourceState.Workplace?.Ownership.Remove(Agent);
 			}
 		}
 
 		protected class ToReturnOnWorkplaceIsNotNavigable : AgentTransition<S1, S0, GameModel, DwellerModel>
 		{
-			IClaimOwnershipModel workplace;
 			string lastWorkplaceId;
 			DateTime lastUpdated;
 			
 			public override bool IsTriggered()
 			{
 				if (lastWorkplaceId == Agent.Workplace.Value.Id && Game.NavigationMesh.LastUpdated.Value <= lastUpdated) return false;
-				if (!Agent.Workplace.Value.TryGetInstance(Game, out workplace)) return true;
-				if (!Navigation.TryQuery(workplace, out var query)) return true;
-				
-				lastWorkplaceId = workplace.Id.Value;
-				lastUpdated = DateTime.Now;
+				if (SourceState.Workplace == null) return false;
 
-				var isNavigable = NavigationUtility.CalculateNearest(
-					Agent.Transform.Position.Value,
+				var isNavigableOrAtWorkplace = SourceState.TryCalculateWorkplaceNavigation(
 					out _,
-					query
+					out _
 				);
 
-				return !isNavigable;
+				if (!isNavigableOrAtWorkplace) return true;
+
+				lastWorkplaceId = SourceState.Workplace.Id.Value;
+				lastUpdated = DateTime.Now;
+
+				return false;
 			}
 
 			public override void Transition()
 			{
 				if (!Agent.Workplace.Value.IsNull) Agent.Workplace.Value = InstanceId.Null();
-				workplace?.Ownership.Remove(Agent);
+				SourceState.Workplace?.Ownership.Remove(Agent);
 			}
 		}
 		
-		protected class ToNavigateToWorkplace : AgentTransition<NavigateState, GameModel, DwellerModel>
+		protected class ToNavigateToWorkplace : AgentTransition<S1, NavigateState, GameModel, DwellerModel>
 		{
-			Navigation.Result navigationResult;
+			Navigation.Result navigationToWorkplace;
 			
 			public override bool IsTriggered()
 			{
-				if (!Agent.Workplace.Value.TryGetInstance<IClaimOwnershipModel>(Game, out var workplace)) return false;
-				if (!Navigation.TryQuery(workplace, out var query)) return false;
+				if (SourceState.Workplace == null) return false;
 
-				if (query.GetMinimumTargetDistance(Agent.Transform.Position.Value) < 0.1f) return false; // TODO: Don't hardcode this!
-
-				var isNavigable = NavigationUtility.CalculateNearest(
-					Agent.Transform.Position.Value,
-					out navigationResult,
-					query	
+				var isNavigableOrAtWorkplace = SourceState.TryCalculateWorkplaceNavigation(
+					out var isCurrentlyAtWorkplace,
+					out navigationToWorkplace
 				);
 
-				if (!isNavigable) return false;
-				return true;
+				if (isCurrentlyAtWorkplace) return false;
+
+				return isNavigableOrAtWorkplace;
 			}
 
 			public override void Transition()
 			{
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationToWorkplace.Path);
 			}
 		}
 		

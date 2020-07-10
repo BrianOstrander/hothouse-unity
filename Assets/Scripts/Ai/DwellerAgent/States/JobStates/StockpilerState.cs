@@ -12,6 +12,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		struct NavigationEntry
 		{
 			public bool IsNavigable;
+			public bool IsFull;
 			public BuildingModel Model;
 		}
 		
@@ -37,7 +38,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 		protected override Buildings[] Workplaces => StockpilerWorkplaces;
 
 		Cache cache = new Cache();
-		BuildingModel workplace;
 		
 		public override void OnInitialize()
 		{
@@ -63,14 +63,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 			);
 		}
 
-		public override void Begin()
-		{
-			if (!Agent.Workplace.Value.TryGetInstance(Game, out workplace))
-			{
-				Debug.LogError("In stockpile state but unable to find workplace, this is an invalid state");
-			}
-		}
-
 		public override void Idle()
 		{
 			if (cache.LastUpdated < Game.NavigationMesh.LastUpdated.Value) cache = new Cache();
@@ -79,10 +71,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 		class ToGatherForConstruction : AgentTransition<StockpilerState<S>, InventoryRequestState, GameModel, DwellerModel>
 		{
 			InventoryComponent target;
-			Inventory inventoryForDelivery;
+			Inventory itemsForConstruction;
 
 			public override bool IsTriggered()
 			{
+				if (!SourceState.TryCalculateWorkplaceNavigation(out var isCurrentlyAtWorkplace, out _) || !isCurrentlyAtWorkplace) return false;
+				
 				foreach (var model in Game.Buildings.AllActive)
 				{
 					if (!model.IsBuildingState(BuildingStates.Constructing)) continue;
@@ -101,22 +95,33 @@ namespace Lunra.Hothouse.Ai.Dweller
 								Agent.Transform.Position.Value,
 								out _,
 								query
-							);
+							);	
 						}
+						
+						SourceState.cache.NavigationResults.Add(model.Id.Value, existingEntry);
 					}
 					
 					if (!existingEntry.IsNavigable) continue;
+					if (existingEntry.IsFull || (existingEntry.IsFull = model.ConstructionInventory.IsFull())) continue;
 					
-					var isIntersecting = existingEntry.Model.ConstructionInventory.AvailableCapacity.Value.GetMaximum().Intersects(
-						SourceState.workplace.Inventory.Available.Value,
+					var isIntersecting = model.ConstructionInventory.AvailableCapacity.Value.GetCapacityFor(model.ConstructionInventory.Available.Value).Intersects(
+						SourceState.Workplace.Inventory.Available.Value,
 						out var intersection
 					);
 
 					if (isIntersecting)
 					{
-						target = model.ConstructionInventory;
-						inventoryForDelivery = Inventory.FromEntries(intersection.Entries.First(i => 0 < i.Weight));
-						return true;
+						isIntersecting = Agent.Inventory.AllCapacity.Value.GetMaximum().Intersects(
+							intersection,
+							out intersection
+						);
+						
+						if (isIntersecting)
+						{
+							target = model.ConstructionInventory;
+							itemsForConstruction = Inventory.FromEntries(intersection.Entries.First(i => 0 < i.Weight));
+							return true;
+						}
 					}
 				}
 
@@ -125,12 +130,32 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
+				Agent.InventoryPromises.Push(
+					itemsForConstruction,
+					SourceState.Workplace.Inventory,
+					target
+				);
+				
+				// Agent.InventoryPromises.Transactions.Push(
+				// 	SourceState.Workplace.Inventory.RequestDistribution(itemsForConstruction)	
+				// );
+				// var isDistributionValid = SourceState.Workplace.Inventory.RequestDistribution(
+				// 	inventoryForDelivery,
+				// 	out var distributionTransaction,
+				// 	out _
+				// );
+				/*
+				SourceState.Workplace.Inventory.Remove(inventoryForDelivery);
+				Agent.Inventory.Add(inventoryForDelivery);
+				
 				target.RequestDeliver(
 					inventoryForDelivery,
 					out var deliveryTransaction,
 					out _
 				);
+				
 				Agent.InventoryPromises.Transactions.Push(deliveryTransaction);
+				*/
 			}
 		}
 	}

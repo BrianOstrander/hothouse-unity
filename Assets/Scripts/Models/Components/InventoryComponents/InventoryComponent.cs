@@ -182,7 +182,21 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		#region Transactions
-		public bool RequestDeliver(
+		public InventoryTransaction RequestDeliver(Inventory inventory)
+		{
+			var isValid = TryRequestDeliver(
+				inventory,
+				out var transaction,
+				out var overflow
+			);
+
+			if (!isValid) throw new Exception(nameof(RequestDeliver) + " transaction invalid");
+			if (!overflow.IsEmpty) throw new Exception(nameof(RequestDeliver) + " transaction returned overflow");
+
+			return transaction;
+		}
+		
+		bool TryRequestDeliver(
 			Inventory inventory,
 			out InventoryTransaction transaction,
 			out Inventory overflow
@@ -210,8 +224,23 @@ namespace Lunra.Hothouse.Models
 
 			return true;
 		}
+		
+		public void CompleteDeliver(
+			InventoryTransaction transaction,
+			bool addIntersection = true
+		)
+		{
+			var isValid = TryCompleteDeliver(
+				transaction,
+				out var overflow,
+				addIntersection
+			);
 
-		public bool CompleteDeliver(
+			if (!isValid) throw new Exception(nameof(CompleteDeliver) + " transaction invalid");
+			if (!overflow.IsEmpty) throw new Exception(nameof(CompleteDeliver) + " transaction returned overflow");
+		}
+
+		bool TryCompleteDeliver(
 			InventoryTransaction transaction,
 			out Inventory overflow,
 			bool addIntersection = true
@@ -230,8 +259,22 @@ namespace Lunra.Hothouse.Models
 			if (addIntersection) Add(intersection);
 			return true;
 		}
+		
+		public InventoryTransaction RequestDistribution(Inventory inventory)
+		{
+			var isValid = TryRequestDistribution(
+				inventory,
+				out var transaction,
+				out var overflow
+			);
 
-		public bool RequestDistribution(
+			if (!isValid) throw new Exception(nameof(RequestDistribution) + " transaction invalid");
+			if (!overflow.IsEmpty) throw new Exception(nameof(RequestDistribution) + " transaction returned overflow");
+
+			return transaction;
+		}
+
+		bool TryRequestDistribution(
 			Inventory inventory,
 			out InventoryTransaction transaction,
 			out Inventory overflow
@@ -261,7 +304,22 @@ namespace Lunra.Hothouse.Models
 			return true;
 		}
 		
-		public bool CompleteDistribution(
+		public void CompleteDistribution(
+			InventoryTransaction transaction,
+			bool removeIntersection = true
+		)
+		{
+			var isValid = TryCompleteDistribution(
+				transaction,
+				out var overflow,
+				removeIntersection
+			);
+
+			if (!isValid) throw new Exception(nameof(CompleteDistribution) + " transaction invalid");
+			if (!overflow.IsEmpty) throw new Exception(nameof(CompleteDistribution) + " transaction returned overflow");
+		}
+		
+		bool TryCompleteDistribution(
 			InventoryTransaction transaction,
 			out Inventory overflow,
 			bool removeIntersection = true

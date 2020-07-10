@@ -420,12 +420,12 @@ namespace Lunra.Hothouse.Models
 			);
 
 			model.ConstructionInventory.Reset(
-				buildingState == BuildingStates.Constructing ? InventoryPermission.DepositForJobs(Jobs.Laborer) : InventoryPermission.NoneForAnyJob(), 
+				InventoryPermission.DepositForJobs(Jobs.Stockpiler), 
 				info.ConstructionInventoryCapacity
 			);
 			
 			model.SalvageInventory.Reset(
-				buildingState == BuildingStates.Salvaging ? InventoryPermission.WithdrawalForJobs(Jobs.Laborer)	: InventoryPermission.NoneForAnyJob(),
+				InventoryPermission.WithdrawalForJobs(Jobs.Stockpiler),
 				InventoryCapacity.ByIndividualWeight(info.SalvageInventory)
 			);
 
