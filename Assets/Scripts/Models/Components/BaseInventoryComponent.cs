@@ -56,6 +56,7 @@ namespace Lunra.Hothouse.Models
 
 		public bool IsFull() => AllCapacity.Value.IsFull(All.Value);
 		public bool IsNotFull() => !IsFull();
+		public float GetNormalizedFull() => 1f - (AllCapacity.Value.GetCapacityFor(All.Value).TotalWeight / (float) AllCapacity.Value.GetMaximum().TotalWeight);
 
 		public abstract bool Add(Inventory inventory);
 		public abstract bool Add(Inventory inventory, out Inventory overflow);
