@@ -106,84 +106,15 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 
-			/*
-			for (var i = 0; i < 16; i++)
-			{
-				App.Heartbeat.WaitForSeconds(
-					() =>
-					{
-						Debug.Log("Adding drop...");
-						var spawn = Payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
-
-						Payload.Game.ItemDrops.Activate(
-							spawn.Id.Value,
-							spawn.Transform.Position.Value,
-							Quaternion.identity,
-							Inventory.FromEntry(Inventory.Types.Stalks, 1)
-						);
-					},
-					1.5f * i
-				);
-			}
-			*/
-
-			/*
 			App.Heartbeat.WaitForSeconds(
 				() =>
 				{
-					Debug.Log("Assigning obligation to dweller...");
-					var dweller = Payload.Game.Dwellers.AllActive.First();
-					var obligationTarget = Payload.Game.GetObligations().First(m => m.Obligations.HasAny());
-					var obligationPromise = ObligationPromise.New(
-						obligationTarget.Obligations.All.Value.Available.First(),
-						obligationTarget
-					);
-					obligationTarget.Obligations.AddForbidden(obligationPromise.Obligation);
-
-					dweller.ObligationPromises.All.Push(obligationPromise);
-					
-					// Damage.ApplyGeneric(999f, dweller);
+					Debug.Log("Killing wagon...");
+					var wagon = Payload.Game.Buildings.FirstOrDefaultActive(m => m.Type.Value == Buildings.StartingWagon);
+					Damage.ApplyGeneric(999f, wagon);
 				},
-				1f
+				5f
 			);
-			
-			App.Heartbeat.WaitForSeconds(
-				() =>
-				{
-					Debug.Log("Killing dweller...");
-					var dweller = Payload.Game.Dwellers.AllActive.First();
-					
-					Damage.ApplyGeneric(999f, dweller);
-				},
-				1.5f
-			);
-			*/
-			
-			// App.Heartbeat.WaitForCondition(
-			// 	() =>
-			// 	{
-			// 		
-			// 	},
-			// 	() => 
-			// )
-
-			// var spawnRoom = Payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
-			//
-			// var flora = Payload.Game.Flora.ActivateAdult(
-			// 	FloraSpecies.Wheat,
-			// 	spawnRoom.RoomTransform.Id.Value,
-			// 	spawnRoom.Transform.Position.Value + Vector3.right * 4f
-			// );
-
-			// Payload.Game.ObligationIndicators.Register(
-			// 	Obligation.New(
-			// 		ObligationCategories.Clearable.Clear,
-			// 		0,
-			// 		ObligationCategories.GetJobs(Jobs.Clearer),
-			// 		Obligation.ConcentrationRequirements.Interruptible
-			// 	),
-			// 	flora
-			// );
 		}
 
 		void OnHeartbeatUpdate()

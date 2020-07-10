@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.StyxMvp.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
@@ -97,7 +99,60 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			public override bool IsTriggered() => !Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
 		}
+		
+		protected class ToReturnOnWorkplaceMissing : AgentTransition<S1, S0, GameModel, DwellerModel>
+		{
+			IClaimOwnershipModel workplace;
+			
+			public override bool IsTriggered()
+			{
+				workplace = null;
+				if (Agent.Workplace.Value.IsNull) return true;
+				if (!Agent.Workplace.Value.TryGetInstance(Game, out workplace)) return true;
+				if (!workplace.Ownership.Contains(Agent)) return true;
+				if (workplace is BuildingModel workplaceBuilding && !workplaceBuilding.IsBuildingState(BuildingStates.Operating)) return true;
 
+				return false;
+			}
+
+			public override void Transition()
+			{
+				if (!Agent.Workplace.Value.IsNull) Agent.Workplace.Value = InstanceId.Null();
+				workplace?.Ownership.Remove(Agent);
+			}
+		}
+
+		protected class ToReturnOnWorkplaceIsNotNavigable : AgentTransition<S1, S0, GameModel, DwellerModel>
+		{
+			IClaimOwnershipModel workplace;
+			string lastWorkplaceId;
+			DateTime lastUpdated;
+			
+			public override bool IsTriggered()
+			{
+				if (lastWorkplaceId == Agent.Workplace.Value.Id && Game.NavigationMesh.LastUpdated.Value <= lastUpdated) return false;
+				if (!Agent.Workplace.Value.TryGetInstance(Game, out workplace)) return true;
+				if (!Navigation.TryQuery(workplace, out var query)) return true;
+				
+				lastWorkplaceId = workplace.Id.Value;
+				lastUpdated = DateTime.Now;
+
+				var isNavigable = NavigationUtility.CalculateNearest(
+					Agent.Transform.Position.Value,
+					out _,
+					query
+				);
+
+				return !isNavigable;
+			}
+
+			public override void Transition()
+			{
+				if (!Agent.Workplace.Value.IsNull) Agent.Workplace.Value = InstanceId.Null();
+				workplace?.Ownership.Remove(Agent);
+			}
+		}
+		
 		protected class ToNavigateToWorkplace : AgentTransition<NavigateState, GameModel, DwellerModel>
 		{
 			Navigation.Result navigationResult;
