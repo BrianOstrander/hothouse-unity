@@ -106,15 +106,15 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
 
-			App.Heartbeat.WaitForSeconds(
-				() =>
-				{
-					Debug.Log("Killing wagon...");
-					var wagon = Payload.Game.Buildings.FirstOrDefaultActive(m => m.Type.Value == Buildings.StartingWagon);
-					Damage.ApplyGeneric(999f, wagon);
-				},
-				5f
-			);
+			// App.Heartbeat.WaitForSeconds(
+			// 	() =>
+			// 	{
+			// 		Debug.Log("Killing wagon...");
+			// 		var wagon = Payload.Game.Buildings.FirstOrDefaultActive(m => m.Type.Value == Buildings.StartingWagon);
+			// 		Damage.ApplyGeneric(999f, wagon);
+			// 	},
+			// 	5f
+			// );
 		}
 
 		void OnHeartbeatUpdate()

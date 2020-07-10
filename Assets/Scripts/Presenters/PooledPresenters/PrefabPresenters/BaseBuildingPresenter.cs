@@ -303,6 +303,14 @@ namespace Lunra.Hothouse.Presenters
 						{
 							Model.Obligations.Add(ObligationCategories.Construct.Assemble);
 						}
+						// else
+						// {
+						// 	foreach (var constructionItem in Model.ConstructionInventory.AvailableCapacity.Value.GetMaximum().Entries)
+						// 	{
+						// 		if (constructionItem.Weight == 0) continue;
+						// 		Model.ConstructionInventory.requ
+						// 	}
+						// }
 					}
 					else if (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed)
 					{
