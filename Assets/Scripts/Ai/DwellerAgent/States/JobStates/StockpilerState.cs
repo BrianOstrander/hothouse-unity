@@ -28,15 +28,14 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		static readonly Buildings[] StockpilerWorkplaces = 
+		static readonly BuildingTypes[] StockpilerWorkplaces = 
 		{
-			Buildings.StartingWagon,
-			Buildings.DepotSmall
+			BuildingTypes.Stockpile
 		};
 		
 		protected override Jobs Job => Jobs.Stockpiler;
 
-		protected override Buildings[] Workplaces => StockpilerWorkplaces;
+		protected override BuildingTypes[] Workplaces => StockpilerWorkplaces;
 
 		Cache cache = new Cache();
 		

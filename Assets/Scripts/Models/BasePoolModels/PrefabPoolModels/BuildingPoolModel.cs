@@ -17,6 +17,7 @@ namespace Lunra.Hothouse.Models
 		
 		struct BuildingInfo
 		{
+			public BuildingTypes BuildingType;
 			public float HealthMaximum;
 			public Inventory Inventory;
 			public InventoryCapacity InventoryCapacity;
@@ -32,6 +33,7 @@ namespace Lunra.Hothouse.Models
 			public string[] ValidPrefabIds;
 
 			public BuildingInfo(
+				BuildingTypes buildingType,
 				float healthMaximum,
 				Inventory inventory,
 				InventoryCapacity inventoryCapacity,
@@ -47,6 +49,7 @@ namespace Lunra.Hothouse.Models
 				string[] validPrefabIds
 			)
 			{
+				BuildingType = buildingType;
 				HealthMaximum = healthMaximum;
 				Inventory = inventory;
 				InventoryCapacity = inventoryCapacity;
@@ -63,7 +66,7 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 
-		static readonly Dictionary<Buildings, BuildingInfo> Infos = new Dictionary<Buildings, BuildingInfo>
+		static readonly Dictionary<string, BuildingInfo> Infos = new Dictionary<string, BuildingInfo>
 		{
 			/*
 			{
@@ -119,8 +122,9 @@ namespace Lunra.Hothouse.Models
 			}
 			*/
 			{
-				Buildings.StartingWagon,
+				BuildingNames.Stockpiles.StartingWagon,
 				new BuildingInfo(
+					BuildingTypes.Stockpile,
 					100f,
 					Inventory.Empty,
 					InventoryCapacity.ByIndividualWeight(
@@ -173,8 +177,9 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-				Buildings.Bonfire,
+				BuildingNames.Lights.Bonfire,
 				new BuildingInfo(
+					BuildingTypes.Light,
 					100f,
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
@@ -226,8 +231,9 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-				Buildings.Bedroll,
+				BuildingNames.Beds.Bedroll,
 				new BuildingInfo(
+					BuildingTypes.Bed,
 					100f,
 					Inventory.Empty, 
 					InventoryCapacity.None(),
@@ -262,8 +268,9 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-				Buildings.WallSmall,
+				BuildingNames.Barricades.Small,
 				new BuildingInfo(
+					BuildingTypes.Barricade,
 					100f,
 					Inventory.Empty, 
 					InventoryCapacity.None(),
@@ -298,8 +305,9 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-				Buildings.DepotSmall,
+				BuildingNames.Stockpiles.SmallDepot,
 				new BuildingInfo(
+					BuildingTypes.Stockpile,
 					100f,
 					Inventory.Empty,
 					InventoryCapacity.ByIndividualWeight(
@@ -364,14 +372,14 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public BuildingModel Activate(
-			Buildings building,
+			string buildingName,
 			string roomId,
 			Vector3 position,
 			Quaternion rotation,
 			BuildingStates buildingState
 		)
 		{
-			var info = Infos[building];
+			var info = Infos[buildingName];
 			
 			var result = Activate(
 				info.ValidPrefabIds.Random(),
@@ -380,7 +388,7 @@ namespace Lunra.Hothouse.Models
 				rotation,
 				model => Reset(
 					model,
-					building,
+					buildingName,
 					info,
 					buildingState
 				)
@@ -392,12 +400,13 @@ namespace Lunra.Hothouse.Models
 
 		void Reset(
 			BuildingModel model,
-			Buildings building,
+			string buildingName,
 			BuildingInfo info,
 			BuildingStates buildingState
 		)
 		{
-			model.Type.Value = building;
+			model.BuildingName.Value = buildingName;
+			model.Type.Value = info.BuildingType;
 
 			model.Health.ResetToMaximum(info.HealthMaximum);
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;

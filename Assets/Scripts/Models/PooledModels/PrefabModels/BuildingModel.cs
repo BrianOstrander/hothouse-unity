@@ -18,8 +18,10 @@ namespace Lunra.Hothouse.Models
 		IObligationModel
 	{
 		#region Serialized
-		[JsonProperty] Buildings type;
-		[JsonIgnore] public ListenerProperty<Buildings> Type { get; }
+		[JsonProperty] string buildingName;
+		[JsonIgnore] public ListenerProperty<string> BuildingName { get; }
+		[JsonProperty] BuildingTypes type;
+		[JsonIgnore] public ListenerProperty<BuildingTypes> Type { get; }
 		
 		[JsonProperty] BuildingStates buildingState;
 		[JsonIgnore] public ListenerProperty<BuildingStates> BuildingState { get; }
@@ -55,7 +57,8 @@ namespace Lunra.Hothouse.Models
 		
 		public BuildingModel()
 		{
-			Type = new ListenerProperty<Buildings>(value => type = value, () => type);
+			BuildingName = new ListenerProperty<string>(value => buildingName = value, () => buildingName);
+			Type = new ListenerProperty<BuildingTypes>(value => type = value, () => type);
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
 			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);

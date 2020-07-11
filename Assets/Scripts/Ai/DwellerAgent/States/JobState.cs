@@ -23,13 +23,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		static readonly Buildings[] EmptyWorkplaces = new Buildings[0];
+		static readonly BuildingTypes[] EmptyWorkplaces = new BuildingTypes[0];
 		
 		public override string Name => "Job"+Job;
 
 		protected abstract Jobs Job { get; }
 
-		protected virtual Buildings[] Workplaces => EmptyWorkplaces;
+		protected virtual BuildingTypes[] Workplaces => EmptyWorkplaces;
 
 		protected bool IsCurrentJob => Job == Agent.Job.Value;
 
