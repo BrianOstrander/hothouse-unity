@@ -127,9 +127,9 @@ namespace Lunra.Hothouse.Models
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Rations , 100 },
-								{ Inventory.Types.Stalks , 100 },
-								{ Inventory.Types.Scrap , 100 }
+								{ Inventory.Types.Rations , 25 },
+								{ Inventory.Types.StalkDry , 25 },
+								{ Inventory.Types.Scrap , 25 }
 							}
 						)	
 					),
@@ -139,14 +139,14 @@ namespace Lunra.Hothouse.Models
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , 10 }
+								{ Inventory.Types.StalkDry , 10 }
 							}
 						)	
 					),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 4 }
+							{ Inventory.Types.StalkDry , 4 }
 						}
 					), 
 					Inventory.Empty, 
@@ -179,14 +179,14 @@ namespace Lunra.Hothouse.Models
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
+							{ Inventory.Types.StalkDry , Constants.BonfireStalkCost }
 						}
 					), 
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
+								{ Inventory.Types.StalkDry , Constants.BonfireStalkCost }
 							}
 						)	
 					),
@@ -196,20 +196,20 @@ namespace Lunra.Hothouse.Models
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
+								{ Inventory.Types.StalkDry , Constants.BonfireStalkCost }
 							}
 						)	
 					),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 1 }
+							{ Inventory.Types.StalkDry , 1 }
 						}
 					), 
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 1 }
+							{ Inventory.Types.StalkDry , 1 }
 						}
 					), 
 					Interval.WithMaximum(30f),
@@ -237,14 +237,14 @@ namespace Lunra.Hothouse.Models
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , 2 }
+								{ Inventory.Types.StalkDry , 2 }
 							}
 						)	
 					),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 1 }
+							{ Inventory.Types.StalkDry , 1 }
 						}
 					), 
 					Inventory.Empty, 
@@ -273,14 +273,14 @@ namespace Lunra.Hothouse.Models
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , 4 }
+								{ Inventory.Types.StalkDry , 4 }
 							}
 						)	
 					),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 1 }
+							{ Inventory.Types.StalkDry , 1 }
 						}
 					), 
 					Inventory.Empty, 
@@ -307,7 +307,7 @@ namespace Lunra.Hothouse.Models
 							new Dictionary<Inventory.Types, int>
 							{
 								{ Inventory.Types.Rations , 25 },
-								{ Inventory.Types.Stalks , 25 },
+								{ Inventory.Types.StalkDry , 25 },
 								{ Inventory.Types.Scrap , 25 }
 							}
 						)	
@@ -318,14 +318,14 @@ namespace Lunra.Hothouse.Models
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Stalks , 10 }
+								{ Inventory.Types.StalkDry , 10 }
 							}
 						)	
 					),
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
 						{
-							{ Inventory.Types.Stalks , 4 }
+							{ Inventory.Types.StalkDry , 4 }
 						}
 					), 
 					Inventory.Empty, 

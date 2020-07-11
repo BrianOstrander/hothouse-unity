@@ -88,12 +88,24 @@ namespace Lunra.Hothouse.Models
 					}
 				);
 			}
+			
+			public static Func<Inventory> GenerateDrops(
+				params (Inventory.Types Type, int Minimum, int Maximum)[] entries
+			)
+			{
+				return () => new Inventory(
+					entries.ToDictionary(
+						e => e.Type,
+						e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
+					)
+				);
+			}
 		}
 
 		readonly SpeciesData[] data =
 		{
 			new SpeciesData(
-				FloraSpecies.Grass,
+				FloraSpecies.Stalks,
 				new FloatRange(30f, 60f), 
 				new FloatRange(30f, 60f),
 				new FloatRange(0.5f, 1f),
@@ -101,7 +113,10 @@ namespace Lunra.Hothouse.Models
 				100f,
 				50f,
 				false,
-				Defaults.GenerateDrops(Inventory.Types.Stalks),
+				Defaults.GenerateDrops(
+					(Inventory.Types.StalkRaw, 1, 2),
+					(Inventory.Types.StalkSeed, 0, 1)
+				),
 				0,
 				4,
 				0f,
@@ -124,7 +139,7 @@ namespace Lunra.Hothouse.Models
 				100f,
 				50f,
 				true,
-				Defaults.GenerateDrops(Inventory.Types.Stalks),
+				Defaults.GenerateDrops(Inventory.Types.StalkDry),
 				0,
 				1,
 				0.5f,
@@ -169,7 +184,7 @@ namespace Lunra.Hothouse.Models
 				100f,
 				50f,
 				true,
-				Defaults.GenerateDrops(Inventory.Types.Stalks),
+				Defaults.GenerateDrops(Inventory.Types.StalkDry),
 				1,
 				1,
 				0f,
@@ -196,7 +211,7 @@ namespace Lunra.Hothouse.Models
 		{
 			switch (model.Species.Value)
 			{
-				case FloraSpecies.Grass:
+				case FloraSpecies.Stalks:
 				case FloraSpecies.Wheat:
 				case FloraSpecies.Shroom:
 					new FloraPresenter(game, model);

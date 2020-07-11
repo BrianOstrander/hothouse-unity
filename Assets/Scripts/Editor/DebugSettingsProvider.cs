@@ -156,7 +156,7 @@ namespace Lunra.Hothouse.Editor
 							{
 								{ Inventory.Types.Rations, 10 },
 								{ Inventory.Types.Scrap, 10 },
-								{ Inventory.Types.Stalks, 10 }
+								{ Inventory.Types.StalkDry, 10 }
 							}
 						)	
 					)

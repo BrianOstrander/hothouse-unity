@@ -59,15 +59,13 @@ namespace Lunra.Hothouse.Presenters
 				
 				switch (type)
 				{
-					case Inventory.Types.Stalks:
-					case Inventory.Types.Scrap:
-						if (count == 0) color = "yellow";
-						break;
 					case Inventory.Types.Rations:
 						if (cache.Conditions.TryGetValue(Condition.Types.NoRations, out var noRations) && noRations) color = "red";
 						else if (cache.Conditions.TryGetValue(Condition.Types.LowRations, out var lowRations) && lowRations) color = "yellow";
 						break;
-					default: throw new ArgumentOutOfRangeException();
+					default:
+						if (count == 0) color = "yellow";
+						break;
 				}
 				
 				result += StringExtensions.Wrap(type + ": " + count + " / " + maximum + "\n", "<color="+color+">", "</color>");

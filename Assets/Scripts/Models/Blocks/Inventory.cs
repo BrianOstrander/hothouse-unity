@@ -18,7 +18,11 @@ namespace Lunra.Hothouse.Models
 		public enum Types
 		{
 			Unknown = 0,
-			Stalks = 10,
+			
+			StalkSeed = 10,
+			StalkRaw = 11,
+			StalkDry = 12,
+			
 			Rations = 20,
 			Scrap = 30,
 		}
