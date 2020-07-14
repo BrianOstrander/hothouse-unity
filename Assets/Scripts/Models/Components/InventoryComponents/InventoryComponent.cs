@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -37,6 +38,9 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] InventoryCapacity availableCapacity = InventoryCapacity.None();
 		readonly ListenerProperty<InventoryCapacity> availableCapacityListener;
 		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> AvailableCapacity { get; }
+
+		[JsonProperty] InventoryDesire desired = InventoryDesire.None();
+		[JsonIgnore] public ListenerProperty<InventoryDesire> Desired { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -66,6 +70,9 @@ namespace Lunra.Hothouse.Models
 				() => availableCapacity,
 				out availableCapacityListener
 			);
+
+			Desired = new ListenerProperty<InventoryDesire>(value => desired = value, () => desired);
+			Desired.ChangedSource += OnDesired;
 		}
 
 		public override bool Add(Inventory inventory) => Add(inventory, out _);
@@ -346,7 +353,8 @@ namespace Lunra.Hothouse.Models
 		
 		public void Reset(
 			InventoryPermission permission,
-			InventoryCapacity capacity
+			InventoryCapacity capacity,
+			InventoryDesire? desired = null
 		)
 		{
 			ResetId();
@@ -359,6 +367,11 @@ namespace Lunra.Hothouse.Models
 			AllCapacityListener.Value = capacity;
 			availableCapacityListener.Value = capacity;
 
+			Desired.SetValue(
+				desired ?? InventoryDesire.None(),
+				this
+			);
+			
 			switch (capacity.Clamping)
 			{
 				case InventoryCapacity.Clamps.None:
@@ -414,7 +427,30 @@ namespace Lunra.Hothouse.Models
 				if (allCapacityForItem != availableCapacityForItem) resultEntries += "\n\tAvailable Capacity: \t" + availableCapacityForItem;
 			}
 
-			return result + (string.IsNullOrEmpty(resultEntries) ? "Empty" : resultEntries);
+			result += (string.IsNullOrEmpty(resultEntries) ? "Empty" : resultEntries);
+
+			string itemsToString(Inventory inventory)
+			{
+				if (inventory.IsEmpty) return "\t\tEmpty";
+
+				var itemsToStringResult = string.Empty;
+
+				foreach (var item in inventory.Entries.Where(e => 0 < e.Weight))
+				{
+					itemsToStringResult += "\n\t" + item.Type + "\t\t" + item.Weight;
+				}
+
+				return itemsToStringResult;
+			}
+			
+			if (Desired.Value.AnyInventoriesNotEmpty)
+			{
+				result += "\n - Desired Storage:" + itemsToString(Desired.Value.Storage);
+				result += "\n - Desired Delivery:" + itemsToString(Desired.Value.Delivery);
+				result += "\n - Desired Distribution:" + itemsToString(Desired.Value.Distribution);
+			}
+
+			return result;
 		}
 
 		#region Utility
@@ -452,9 +488,56 @@ namespace Lunra.Hothouse.Models
 					Debug.LogError("Unrecognized clamping: "+AllCapacity.Value.Clamping);
 					break;
 			}
+
+			if (Desired.Value.IsActive) RecalculateDesired();
+		}
+
+		void RecalculateDesired()
+		{
+			var allIncoming = Available.Value + ReservedCapacity.Value.GetMaximum();
+			
+			var desiredDelivery = Inventory.Empty;
+			var desiredDistribution = Inventory.Empty;
+
+			if (Desired.Value.Storage.Intersects(allIncoming, out var deliveryIntersection))
+			{
+				desiredDelivery = Desired.Value.Storage - deliveryIntersection;
+			}
+			else
+			{
+				desiredDelivery = Desired.Value.Storage;
+			}
+
+			if (Desired.Value.Storage.Intersects(Available.Value, out var availableDesiredIntersection))
+			{
+				desiredDistribution = Available.Value - availableDesiredIntersection;
+			}
+			else
+			{
+				desiredDistribution = Available.Value;
+			}
+
+			Desired.SetValue(
+				InventoryDesire.New(
+					Desired.Value.Storage,
+					desiredDelivery,
+					desiredDistribution
+				),
+				this
+			);
 		}
 
 		Inventory CalculateAvailableCapacity() => AllCapacity.Value.GetMaximum() - (ReservedCapacity.Value.GetMaximum() + Forbidden.Value);
+		#endregion
+		
+		#region Events
+		void OnDesired(
+			InventoryDesire desire,
+			object source
+		)
+		{
+			if (source != this) RecalculateDesired();
+		}
 		#endregion
 	}
 }

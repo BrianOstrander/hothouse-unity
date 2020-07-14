@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
@@ -15,11 +16,60 @@ namespace Lunra.Hothouse.Models
 			public static readonly FloatRange LightSourcePlacementLightRequirement = new FloatRange(0.001f, 0.33f);
 		}
 		
+		public struct DesiredInventoryInfo
+		{
+			public static DesiredInventoryInfo NewInActive()
+			{
+				return new DesiredInventoryInfo(
+					Types.InActive,
+					Inventory.Empty
+				);
+			}
+			
+			public static DesiredInventoryInfo NewCapacity()
+			{
+				return new DesiredInventoryInfo(
+					Types.Capacity,
+					Inventory.Empty
+				);
+			}
+			
+			public static DesiredInventoryInfo NewSpecified(Inventory specified)
+			{
+				return new DesiredInventoryInfo(
+					Types.Specified,
+					specified
+				);
+			}
+			
+			public enum Types
+			{
+				Unknown = 0,
+				InActive = 10,
+				Capacity = 20,
+				Specified = 30
+			}
+
+			public readonly Types Type;
+			public readonly Inventory Specified;
+			
+			public DesiredInventoryInfo(
+				Types type,
+				Inventory specified
+			)
+			{
+				Type = type;
+				Specified = specified;
+			}
+		}
+		
 		struct BuildingInfo
 		{
+		
 			public BuildingTypes BuildingType;
 			public float HealthMaximum;
 			public Inventory Inventory;
+			public DesiredInventoryInfo DesiredInventory;
 			public InventoryCapacity InventoryCapacity;
 			public InventoryPermission InventoryPermission;
 			public FloatRange PlacementLightRequirement;
@@ -36,6 +86,7 @@ namespace Lunra.Hothouse.Models
 				BuildingTypes buildingType,
 				float healthMaximum,
 				Inventory inventory,
+				DesiredInventoryInfo desiredInventory,
 				InventoryCapacity inventoryCapacity,
 				InventoryPermission inventoryPermission,
 				FloatRange placementLightRequirement,
@@ -52,6 +103,7 @@ namespace Lunra.Hothouse.Models
 				BuildingType = buildingType;
 				HealthMaximum = healthMaximum;
 				Inventory = inventory;
+				DesiredInventory = desiredInventory;
 				InventoryCapacity = inventoryCapacity;
 				InventoryPermission = inventoryPermission;
 				PlacementLightRequirement = placementLightRequirement;
@@ -127,6 +179,7 @@ namespace Lunra.Hothouse.Models
 					BuildingTypes.Stockpile,
 					100f,
 					Inventory.Empty,
+					DesiredInventoryInfo.NewInActive(), 
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
@@ -187,6 +240,7 @@ namespace Lunra.Hothouse.Models
 							{ Inventory.Types.StalkDry , Constants.BonfireStalkCost }
 						}
 					), 
+					DesiredInventoryInfo.NewCapacity(),
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
@@ -236,6 +290,7 @@ namespace Lunra.Hothouse.Models
 					BuildingTypes.Bed,
 					100f,
 					Inventory.Empty, 
+					DesiredInventoryInfo.NewInActive(),
 					InventoryCapacity.None(),
 					InventoryPermission.NoneForAnyJob(),
 					Constants.DefaultPlacementLightRequirement,
@@ -272,7 +327,8 @@ namespace Lunra.Hothouse.Models
 				new BuildingInfo(
 					BuildingTypes.Barricade,
 					100f,
-					Inventory.Empty, 
+					Inventory.Empty,
+					DesiredInventoryInfo.NewInActive(), 
 					InventoryCapacity.None(),
 					InventoryPermission.NoneForAnyJob(),
 					Constants.DefaultPlacementLightRequirement,
@@ -310,6 +366,7 @@ namespace Lunra.Hothouse.Models
 					BuildingTypes.Stockpile,
 					100f,
 					Inventory.Empty,
+					DesiredInventoryInfo.NewInActive(),
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
@@ -422,11 +479,32 @@ namespace Lunra.Hothouse.Models
 			
 			model.Ownership.Reset();
 			model.Ownership.MaximumClaimers.Value = info.MaximumOwners;
+
+			var desiredInventory = InventoryDesire.None();
+
+			switch (info.DesiredInventory.Type)
+			{
+				
+				case DesiredInventoryInfo.Types.InActive:
+					break;
+				case DesiredInventoryInfo.Types.Capacity:
+					desiredInventory = InventoryDesire.UnCalculated(info.InventoryCapacity.GetMaximum());
+					break;
+				case DesiredInventoryInfo.Types.Specified:
+					desiredInventory = InventoryDesire.UnCalculated(info.DesiredInventory.Specified);
+					break;
+				default:
+					Debug.LogError("Unrecognized DesiredInventory.Type: " + info.DesiredInventory.Type);
+					break;
+			}
 			
 			model.Inventory.Reset(
 				info.InventoryPermission,
-				info.InventoryCapacity
+				info.InventoryCapacity,
+				desiredInventory
 			);
+
+			model.Inventory.Add(info.Inventory);
 
 			model.ConstructionInventory.Reset(
 				InventoryPermission.DepositForJobs(Jobs.Stockpiler), 
