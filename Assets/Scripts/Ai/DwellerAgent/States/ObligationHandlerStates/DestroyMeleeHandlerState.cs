@@ -32,27 +32,30 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		class ToTimeoutOnAttackTarget : ToTimeoutOnTarget
 		{
-			protected override bool CanPopObligation
+			bool isTargetDestroyed;
+			
+			protected override void OnTimeoutEnd()
 			{
-				get
+				switch (SourceState.CurrentCache.TargetParent)
 				{
-					switch (SourceState.CurrentCache.TargetParent)
-					{
-						case IHealthModel healthModel:
-							var result = Damage.Apply(
-								Damage.Types.Generic,
-								Agent.MeleeDamage.Value,
-								Agent,
-								healthModel
-							);
+					case IHealthModel healthModel:
+						var result = Damage.Apply(
+							Damage.Types.Generic,
+							Agent.MeleeDamage.Value,
+							Agent,
+							healthModel
+						);
 
-							return result.IsTargetDestroyed;
-						default:
-							Debug.LogError("Unrecognized target parent type: "+SourceState.CurrentCache.TargetParent.GetType());
-							return false;
-					}
+						isTargetDestroyed = result.IsTargetDestroyed;
+						break;
+					default:
+						Debug.LogError("Unrecognized target parent type: "+SourceState.CurrentCache.TargetParent.GetType());
+						isTargetDestroyed = false;
+						break;
 				}
 			}
+
+			protected override bool CanPopObligation => isTargetDestroyed;
 		}
 	}
 }

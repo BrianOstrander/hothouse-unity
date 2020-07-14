@@ -198,7 +198,15 @@ namespace Lunra.Hothouse.Ai
 					Interval.WithMaximum(TimeoutDuration),
 					delta =>
 					{
-						if (delta.IsDone) OnTimeoutEnd();
+						if (delta.IsDone)
+						{
+							OnTimeoutEnd();
+							if (CanPopObligation)
+							{
+								Agent.ObligationPromises.All.Pop();
+								SourceState.CurrentCache.Target.Trigger(SourceState.CurrentCache.CurrentObligation.Obligation, Agent);
+							}
+						}
 						else OnTimeoutUpdate(delta.Progress);
 					}
 				);
@@ -208,14 +216,7 @@ namespace Lunra.Hothouse.Ai
 
 			protected virtual void OnTimeoutUpdate(float progress) { }
 
-			protected virtual void OnTimeoutEnd()
-			{
-				if (CanPopObligation)
-				{
-					Agent.ObligationPromises.All.Pop();
-					SourceState.CurrentCache.Target.Trigger(SourceState.CurrentCache.CurrentObligation.Obligation, Agent);
-				}
-			}
+			protected virtual void OnTimeoutEnd() { }
 		}
 		
 		#region Child States

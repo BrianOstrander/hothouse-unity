@@ -102,42 +102,6 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 
-			if (SceneInspectionSettings.IsInspectingEntrances.Value)
-			{
-				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
-				{
-					foreach (var enterableModel in gameState.Payload.Game.GetEnterables().Where(isInInspectedRoom))
-					{
-						foreach (var entrance in enterableModel.Enterable.Entrances.Value)
-						{
-							var color = Color.grey;
-
-							switch (entrance.State)
-							{
-								case Entrance.States.Available:
-									color = Color.green;
-									break;
-								case Entrance.States.NotAvailable:
-									color = entrance.IsNavigable ? Color.yellow : Color.red;
-									break;
-							}
-
-							Handles.color = color;
-							Handles.DrawDottedLine(
-								enterableModel.Transform.Position.Value,
-								entrance.Position,
-								4f
-							);
-							Handles.DrawWireCube(
-								entrance.Position,
-								Vector3.one * 0.1f
-							);
-						}
-					}
-				}
-				HandlesExtensions.EndDepthCheck();
-			}
-			
 			if (SceneInspectionSettings.IsInspectingRooms.Value)
 			{
 				foreach (var model in gameState.Payload.Game.Rooms.AllActive.Where(isInInspectedRoom))
@@ -259,6 +223,8 @@ namespace Lunra.Hothouse.Editor
 				{
 					if (!(SceneInspectionSettings.IsInspectingObligations.Value && model.Obligations.HasAny())) continue;
 				}
+				
+				DrawEntranceInspection(model);
 
 				DrawLabel(
 					model
@@ -275,6 +241,8 @@ namespace Lunra.Hothouse.Editor
 				{
 					if (!(SceneInspectionSettings.IsInspectingObligations.Value && model.Obligations.HasAny())) continue;
 				}
+				
+				DrawEntranceInspection(model);
 				
 				DrawLabel(
 					model,
@@ -428,7 +396,7 @@ namespace Lunra.Hothouse.Editor
 		}
 
 		static void DrawEntranceInspection(IEnterableModel model)
-		{
+		{	
 			if (!SceneInspectionSettings.IsInspectingEntrances.Value) return;
 			
 			HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
