@@ -229,7 +229,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Jobs.Laborer
 			};
 
-			for (var i = 0; i < 1; i++)
+			for (var i = 0; i < 4; i++)
 			{
 				var position = spawn.Transform.Position.Value + (Vector3.forward * (4f + i));
 

@@ -506,9 +506,27 @@ namespace Lunra.Hothouse.Models
 
 			model.Inventory.Add(info.Inventory);
 
+			var desiredConstructionInventory = InventoryDesire.None();
+
+			switch (buildingState)
+			{
+				case BuildingStates.Placing:
+				case BuildingStates.Constructing:
+					desiredConstructionInventory = InventoryDesire.UnCalculated(info.ConstructionInventoryCapacity.GetMaximum());
+					break;
+				case BuildingStates.Operating:
+				case BuildingStates.Salvaging:
+				case BuildingStates.Decaying:
+					break;
+				default:
+					Debug.LogError("Unrecognized BuildingState: "+buildingState);
+					break;
+			}
+			
 			model.ConstructionInventory.Reset(
 				InventoryPermission.DepositForJobs(Jobs.Stockpiler), 
-				info.ConstructionInventoryCapacity
+				info.ConstructionInventoryCapacity,
+				desiredConstructionInventory
 			);
 			
 			model.SalvageInventory.Reset(

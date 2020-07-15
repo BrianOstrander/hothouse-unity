@@ -57,9 +57,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToNavigateToWorkplace(),
 				
 				new BalanceItemState.ToBalanceOnAvailableDelivery(),
-				new ToGatherForConstruction(),
-				
 				new BalanceItemState.ToBalanceOnAvailableDistribution(),
+				
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);
 		}
@@ -67,81 +66,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 		public override void Idle()
 		{
 			if (cache.LastUpdated < Game.NavigationMesh.LastUpdated.Value) cache = new Cache();
-		}
-
-		bool IsCurrentlyAtWorkplace()
-		{
-			return TryCalculateWorkplaceNavigation(out var isCurrentlyAtWorkplace, out _) && isCurrentlyAtWorkplace;
-		}
-		
-		class ToGatherForConstruction : AgentTransition<StockpilerState<S>, InventoryRequestState, GameModel, DwellerModel>
-		{
-			InventoryComponent target;
-			Inventory itemsForConstruction;
-
-			public override bool IsTriggered()
-			{
-				if (!SourceState.IsCurrentlyAtWorkplace()) return false;
-				
-				foreach (var model in Game.Buildings.AllActive)
-				{
-					if (!model.IsBuildingState(BuildingStates.Constructing)) continue;
-					if (!model.Enterable.AnyAvailable()) continue;
-					
-					var existingEntryExists = SourceState.cache.NavigationResults.TryGetValue(model.Id.Value, out var existingEntry);
-
-					if (!existingEntryExists)
-					{
-						existingEntry = new NavigationEntry();
-						existingEntry.Model = model;
-
-						if (Navigation.TryQuery(model, out var query))
-						{
-							existingEntry.IsNavigable = NavigationUtility.CalculateNearest(
-								Agent.Transform.Position.Value,
-								out _,
-								query
-							);	
-						}
-						
-						SourceState.cache.NavigationResults.Add(model.Id.Value, existingEntry);
-					}
-					
-					if (!existingEntry.IsNavigable) continue;
-					if (existingEntry.IsFull || (existingEntry.IsFull = model.ConstructionInventory.IsFull())) continue;
-					
-					var isIntersecting = model.ConstructionInventory.AvailableCapacity.Value.GetCapacityFor(model.ConstructionInventory.Available.Value).Intersects(
-						SourceState.Workplace.Inventory.Available.Value,
-						out var intersection
-					);
-
-					if (isIntersecting)
-					{
-						isIntersecting = Agent.Inventory.AllCapacity.Value.GetMaximum().Intersects(
-							intersection,
-							out intersection
-						);
-						
-						if (isIntersecting)
-						{
-							target = model.ConstructionInventory;
-							itemsForConstruction = Inventory.FromEntries(intersection.Entries.First(i => 0 < i.Weight));
-							return true;
-						}
-					}
-				}
-
-				return false;
-			}
-
-			public override void Transition()
-			{
-				Agent.InventoryPromises.Push(
-					itemsForConstruction,
-					SourceState.Workplace.Inventory,
-					target
-				);
-			}
 		}
 	}
 }
