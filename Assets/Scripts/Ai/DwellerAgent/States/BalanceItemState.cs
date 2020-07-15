@@ -146,6 +146,22 @@ namespace Lunra.Hothouse.Ai
 				return Agent.Inventory.AllCapacity.Value.GetCapacityFor(Agent.Inventory.All.Value)
 					.Intersects(inventoryToTransfer, out inventory);
 			}
+
+			// It may not be necessary to break these out into the virtual methods below, but it does give the option of
+			// overriding how ordering is done in the future...
+
+			protected virtual float OnOrderByDistanceToAgent(InventoryCache inventoryCache)
+			{
+				return inventoryCache.Enterable.Model.DistanceTo(Agent);
+			}
+			
+			protected virtual float OnOrderByDistance(
+				InventoryCache inventoryCache0,
+				InventoryCache inventoryCache1
+			)
+			{
+				return inventoryCache0.Enterable.Model.DistanceTo(inventoryCache1.Enterable.Model);
+			}
 		}
 
 		public class ToBalanceOnAvailableDelivery : ToBalanceOnAvailable
@@ -160,7 +176,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				var possibleDeliveryTargets = InventoriesCached
 					.Where(m => m.CanDeposit && m.IsRequestingDelivery)
-					.OrderBy(m => m.Enterable.Model.DistanceTo(Agent));
+					.OrderBy(OnOrderByDistanceToAgent);
 
 				foreach (var possibleDeliveryTarget in possibleDeliveryTargets)
 				{
@@ -168,7 +184,7 @@ namespace Lunra.Hothouse.Ai
 
 					var possibleDeliverySources = InventoriesCached
 						.Where(m => m.CanWithdrawal)
-						.OrderBy(m => m.Enterable.Model.DistanceTo(possibleDeliveryTarget.Enterable.Model));
+						.OrderBy(m => OnOrderByDistance(m, possibleDeliveryTarget));
 
 					foreach (var possibleDeliverySource in possibleDeliverySources)
 					{
@@ -214,7 +230,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				var possibleDistributionSources = InventoriesCached
 					.Where(m => m.CanWithdrawal && m.IsRequestingDistribution)
-					.OrderBy(m => m.Enterable.Model.DistanceTo(Agent));
+					.OrderBy(OnOrderByDistanceToAgent);
 
 				foreach (var possibleDistributionSource in possibleDistributionSources)
 				{
@@ -222,7 +238,7 @@ namespace Lunra.Hothouse.Ai
 
 					var possibleDistributionDestinations = InventoriesCached
 						.Where(m => m.CanDeposit)
-						.OrderBy(m => m.Enterable.Model.DistanceTo(possibleDistributionSource.Enterable.Model));
+						.OrderBy(m => OnOrderByDistance(m, possibleDistributionSource));
 
 					foreach (var possibleDistributionDestination in possibleDistributionDestinations)
 					{
