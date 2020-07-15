@@ -170,7 +170,7 @@ namespace Lunra.Hothouse.Models
 			}
 			*/
 			{
-				BuildingNames.Stockpiles.StartingWagon,
+				BuildingTypes.Stockpiles.StartingWagon,
 				new BuildingInfo(
 					100f,
 					Inventory.Empty,
@@ -225,7 +225,7 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-				BuildingNames.Lights.Bonfire,
+				BuildingTypes.Lights.Bonfire,
 				new BuildingInfo(
 					100f,
 					new Inventory(
@@ -279,7 +279,7 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-				BuildingNames.Beds.Bedroll,
+				BuildingTypes.Beds.Bedroll,
 				new BuildingInfo(
 					100f,
 					Inventory.Empty, 
@@ -316,7 +316,7 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-				BuildingNames.Barricades.Small,
+				BuildingTypes.Barricades.Small,
 				new BuildingInfo(
 					100f,
 					Inventory.Empty,
@@ -353,7 +353,7 @@ namespace Lunra.Hothouse.Models
 				)
 			},
 			{
-				BuildingNames.Stockpiles.SmallDepot,
+				BuildingTypes.Stockpiles.SmallDepot,
 				new BuildingInfo(
 					100f,
 					Inventory.Empty,
@@ -448,12 +448,12 @@ namespace Lunra.Hothouse.Models
 
 		void Reset(
 			BuildingModel model,
-			string buildingName,
+			string type,
 			BuildingInfo info,
 			BuildingStates buildingState
 		)
 		{
-			model.BuildingName.Value = buildingName;
+			model.Type.Value = type;
 
 			model.Health.ResetToMaximum(info.HealthMaximum);
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;

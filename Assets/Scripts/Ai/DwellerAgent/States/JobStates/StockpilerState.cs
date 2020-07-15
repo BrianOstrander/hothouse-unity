@@ -10,8 +10,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 	{
 		static readonly string[] StockpilerWorkplaces = 
 		{
-			BuildingNames.Stockpiles.SmallDepot,
-			BuildingNames.Stockpiles.StartingWagon
+			BuildingTypes.Stockpiles.SmallDepot,
+			BuildingTypes.Stockpiles.StartingWagon
 		};
 		
 		protected override Jobs Job => Jobs.Stockpiler;

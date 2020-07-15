@@ -1,6 +1,6 @@
 namespace Lunra.Hothouse.Models
 {
-	public static class BuildingNames
+	public static class BuildingTypes
 	{
 		public static class Stockpiles
 		{

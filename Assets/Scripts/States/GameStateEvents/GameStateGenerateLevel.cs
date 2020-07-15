@@ -265,7 +265,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			position += Vector3.back * 4f;
 			
 			var wagon = payload.Game.Buildings.Activate(
-				BuildingNames.Stockpiles.StartingWagon,
+				BuildingTypes.Stockpiles.StartingWagon,
 				spawn.Id.Value,
 				position + (Vector3.left * 2f),
 				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
@@ -275,7 +275,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			wagon.Inventory.Add(wagon.Inventory.AllCapacity.Value.GetMaximum());
 		
 			var bonfire = payload.Game.Buildings.Activate(
-				BuildingNames.Lights.Bonfire,
+				BuildingTypes.Lights.Bonfire,
 				spawn.Id.Value,
 				position + (Vector3.right * 6f),
 				Quaternion.identity,

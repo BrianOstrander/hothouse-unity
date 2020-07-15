@@ -144,7 +144,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				var possibleWorkplaces = Game.Buildings.AllActive
 					.Where(m => m.BuildingState.Value == BuildingStates.Operating)
 					.Where(m => !m.Ownership.IsFull)
-					.Where(m => TargetState.Workplaces.Contains(m.BuildingName.Value))
+					.Where(m => TargetState.Workplaces.Contains(m.Type.Value))
 					.Where(m => m.Enterable.AnyAvailable())
 					.OrderBy(m => Vector3.Distance(Agent.Transform.Position.Value, m.Transform.Position.Value))
 					.Select(m => Navigation.QueryEntrances(m));
