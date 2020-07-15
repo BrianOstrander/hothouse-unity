@@ -25,14 +25,20 @@ namespace Lunra.Hothouse.Ai
 
 		public abstract class ToBalanceOnAvailable : AgentTransition<S, BalanceItemState<S>, GameModel, DwellerModel>
 		{
-			protected class Cache
+			protected class EnterableCache
 			{
-				public BuildingModel Model;
+				public IEnterableModel Model;
+				public Navigation.Result NavigationResult;
+				public bool? IsNavigable;
+			}
+
+			protected class InventoryCache
+			{
+				public EnterableCache Enterable;
+				public InventoryComponent Inventory;
 				public bool CanDeposit;
 				public bool CanWithdrawal;
-				public bool? IsNavigable;
-				public Navigation.Result NavigationResult;
-
+				
 				public bool IsRequestingDelivery;
 				public bool IsRequestingDistribution;
 			}
@@ -46,34 +52,60 @@ namespace Lunra.Hothouse.Ai
 
 			protected abstract Actions CurrentAction { get; }
 			
-			protected List<Cache> Cached = new List<Cache>();
+			protected List<EnterableCache> EnterablesCached = new List<EnterableCache>();
+			protected List<InventoryCache> InventoriesCached = new List<InventoryCache>();
 			
 			public override bool IsTriggered()
 			{
-				Cached.Clear();
+				EnterablesCached.Clear();
+				InventoriesCached.Clear();
 
 				var anyDeliveries = false;
 				var anyDistributions = false;
 				
-				foreach (var model in Game.Buildings.AllActive)
+				foreach (var parent in Game.GetInventoryParents())
 				{
-					if (!model.Enterable.AnyAvailable()) continue;
-
-					var entry = new Cache();
-
-					entry.Model = model;
-					entry.CanDeposit = model.Inventory.Permission.Value.CanDeposit(Agent);
-					entry.CanWithdrawal = model.Inventory.Permission.Value.CanWithdrawal(Agent);
+					switch (parent)
+					{
+						case IEnterableModel enterableModel:
+							if (!enterableModel.Enterable.AnyAvailable()) continue;
+							break;
+						default:
+							continue;
+					}
 					
-					if (!entry.CanDeposit && !entry.CanWithdrawal) continue;
-
-					entry.IsRequestingDelivery = !model.Inventory.Desired.Value.Delivery.IsEmpty && entry.CanDeposit;
-					entry.IsRequestingDistribution = !model.Inventory.Desired.Value.Distribution.IsEmpty && entry.CanWithdrawal;
+					if (!(parent is IInventoryModel parentTyped)) continue;
 					
-					Cached.Add(entry);
+					var enterableEntry = new EnterableCache();
+					enterableEntry.Model = parentTyped;
+					
+					var anyInventoriesReferenced = false;
 
-					anyDeliveries |= entry.IsRequestingDelivery;
-					anyDistributions |= entry.IsRequestingDistribution;
+					foreach (var baseInventory in parentTyped.Inventories)
+					{
+						if (!(baseInventory is InventoryComponent inventory)) continue;
+
+						var inventoryEntry = new InventoryCache();
+
+						inventoryEntry.Enterable = enterableEntry;
+						inventoryEntry.Inventory = inventory;
+						inventoryEntry.CanDeposit = inventory.Permission.Value.CanDeposit(Agent);
+						inventoryEntry.CanWithdrawal = inventory.Permission.Value.CanWithdrawal(Agent);
+					
+						if (!inventoryEntry.CanDeposit && !inventoryEntry.CanWithdrawal) continue;
+
+						inventoryEntry.IsRequestingDelivery = !inventory.Desired.Value.Delivery.IsEmpty && inventoryEntry.CanDeposit;
+						inventoryEntry.IsRequestingDistribution = !inventory.Desired.Value.Distribution.IsEmpty && inventoryEntry.CanWithdrawal;
+					
+						InventoriesCached.Add(inventoryEntry);
+						
+						anyDeliveries |= inventoryEntry.IsRequestingDelivery;
+						anyDistributions |= inventoryEntry.IsRequestingDistribution;
+
+						anyInventoriesReferenced = true;
+					}
+					
+					if (anyInventoriesReferenced) EnterablesCached.Add(enterableEntry);
 				}
 
 				switch (CurrentAction)
@@ -92,18 +124,18 @@ namespace Lunra.Hothouse.Ai
 
 			protected abstract bool IsActionTriggered();
 			
-			protected bool GetIsNavigable(Cache cache)
+			protected bool GetIsNavigable(EnterableCache enterableCache)
 			{
-				if (!cache.IsNavigable.HasValue)
+				if (!enterableCache.IsNavigable.HasValue)
 				{
-					cache.IsNavigable = NavigationUtility.CalculateNearest(
+					enterableCache.IsNavigable = NavigationUtility.CalculateNearest(
 						Agent.Transform.Position.Value,
-						out cache.NavigationResult,
-						Navigation.QueryEntrances(cache.Model)
+						out enterableCache.NavigationResult,
+						Navigation.QueryEntrances(enterableCache.Model)
 					);
 				}
 
-				return cache.IsNavigable.Value;
+				return enterableCache.IsNavigable.Value;
 			}
 			
 			protected bool TryGetItems(
@@ -120,30 +152,30 @@ namespace Lunra.Hothouse.Ai
 		{
 			protected override Actions CurrentAction => Actions.Delivery;
 
-			Cache deliveryTarget;
-			Cache deliverySource;
+			InventoryCache deliveryTarget;
+			InventoryCache deliverySource;
 			Inventory items;
 			
 			protected override bool IsActionTriggered()
 			{
-				var possibleDeliveryTargets = Cached
+				var possibleDeliveryTargets = InventoriesCached
 					.Where(m => m.CanDeposit && m.IsRequestingDelivery)
-					.OrderBy(m => m.Model.DistanceTo(Agent));
+					.OrderBy(m => m.Enterable.Model.DistanceTo(Agent));
 
 				foreach (var possibleDeliveryTarget in possibleDeliveryTargets)
 				{
-					if (!GetIsNavigable(possibleDeliveryTarget)) continue;
+					if (!GetIsNavigable(possibleDeliveryTarget.Enterable)) continue;
 
-					var possibleDeliverySources = Cached
+					var possibleDeliverySources = InventoriesCached
 						.Where(m => m.CanWithdrawal)
-						.OrderBy(m => m.Model.DistanceTo(possibleDeliveryTarget.Model));
+						.OrderBy(m => m.Enterable.Model.DistanceTo(possibleDeliveryTarget.Enterable.Model));
 
 					foreach (var possibleDeliverySource in possibleDeliverySources)
 					{
-						if (!GetIsNavigable(possibleDeliverySource)) continue;
+						if (!GetIsNavigable(possibleDeliverySource.Enterable)) continue;
 
-						var isIntersecting = possibleDeliveryTarget.Model.Inventory.Desired.Value.Delivery.Intersects(
-							possibleDeliverySource.Model.Inventory.Available.Value,
+						var isIntersecting = possibleDeliveryTarget.Inventory.Desired.Value.Delivery.Intersects(
+							possibleDeliverySource.Inventory.Available.Value,
 							out var intersection
 						);
 						
@@ -164,8 +196,8 @@ namespace Lunra.Hothouse.Ai
 			{
 				Agent.InventoryPromises.Push(
 					items,
-					deliverySource.Model.Inventory,
-					deliveryTarget.Model.Inventory
+					deliverySource.Inventory,
+					deliveryTarget.Inventory
 				);
 			}
 		}
@@ -174,31 +206,31 @@ namespace Lunra.Hothouse.Ai
 		{
 			protected override Actions CurrentAction => Actions.Distribution;
 			
-			Cache distributionSource;
-			Cache distributionDestination;
+			InventoryCache distributionSource;
+			InventoryCache distributionDestination;
 			Inventory items;
 			
 			protected override bool IsActionTriggered()
 			{
-				var possibleDistributionSources = Cached
+				var possibleDistributionSources = InventoriesCached
 					.Where(m => m.CanWithdrawal && m.IsRequestingDistribution)
-					.OrderBy(m => m.Model.DistanceTo(Agent));
+					.OrderBy(m => m.Enterable.Model.DistanceTo(Agent));
 
 				foreach (var possibleDistributionSource in possibleDistributionSources)
 				{
-					if (!GetIsNavigable(possibleDistributionSource)) continue;
+					if (!GetIsNavigable(possibleDistributionSource.Enterable)) continue;
 
-					var possibleDistributionDestinations = Cached
+					var possibleDistributionDestinations = InventoriesCached
 						.Where(m => m.CanDeposit)
-						.OrderBy(m => m.Model.DistanceTo(possibleDistributionSource.Model));
+						.OrderBy(m => m.Enterable.Model.DistanceTo(possibleDistributionSource.Enterable.Model));
 
 					foreach (var possibleDistributionDestination in possibleDistributionDestinations)
 					{
-						if (!GetIsNavigable(possibleDistributionDestination)) continue;
+						if (!GetIsNavigable(possibleDistributionDestination.Enterable)) continue;
 
-						var isIntersecting = possibleDistributionSource.Model.Inventory.Desired.Value.Distribution.Intersects(
-							possibleDistributionDestination.Model.Inventory.AvailableCapacity.Value.GetCapacityFor(
-								possibleDistributionDestination.Model.Inventory.Available.Value	
+						var isIntersecting = possibleDistributionSource.Inventory.Desired.Value.Distribution.Intersects(
+							possibleDistributionDestination.Inventory.AvailableCapacity.Value.GetCapacityFor(
+								possibleDistributionDestination.Inventory.Available.Value	
 							),
 							out var intersection
 						);
@@ -220,8 +252,8 @@ namespace Lunra.Hothouse.Ai
 			{
 				Agent.InventoryPromises.Push(
 					items,
-					distributionSource.Model.Inventory,
-					distributionDestination.Model.Inventory
+					distributionSource.Inventory,
+					distributionDestination.Inventory
 				);
 			}
 		}
