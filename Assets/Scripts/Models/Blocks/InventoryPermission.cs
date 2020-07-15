@@ -21,10 +21,27 @@ namespace Lunra.Hothouse.Models
 				new ReadOnlyDictionary<Jobs, Types>(jobs.ToDictionary(job => job, job => type))
 			);
 		}
+		
+		public static InventoryPermission SpecifiedForJobs(
+			params (Jobs Job, Types type)[] entries
+		)
+		{
+			return new InventoryPermission(
+				Types.None,
+				new ReadOnlyDictionary<Jobs, Types>(
+					entries.ToDictionary(
+						e => e.Job,
+						e => e.type
+					)
+				)
+			);
+		}
 
 		public static InventoryPermission WithdrawalForJobs(params Jobs[] jobs) => SpecifiedForJobs(Types.Withdrawal, jobs);
 
 		public static InventoryPermission DepositForJobs(params Jobs[] jobs) => SpecifiedForJobs(Types.Deposit, jobs);
+		
+		public static InventoryPermission AllForJobs(params Jobs[] jobs) => SpecifiedForJobs(Types.Withdrawal | Types.Deposit, jobs);
 
 		[Flags]
 		public enum Types

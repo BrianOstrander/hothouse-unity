@@ -8,24 +8,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 	public class StockpilerState<S> : JobState<S, StockpilerState<S>>
 		where S : AgentState<GameModel, DwellerModel>
 	{
-		struct NavigationEntry
-		{
-			public bool IsNavigable;
-			public bool IsFull;
-			public BuildingModel Model;
-		}
-		
-		class Cache
-		{
-			public DateTime LastUpdated;
-			public Dictionary<string, NavigationEntry> NavigationResults = new Dictionary<string, NavigationEntry>();
-
-			public Cache()
-			{
-				LastUpdated = DateTime.Now;
-			}
-		}
-		
 		static readonly BuildingTypes[] StockpilerWorkplaces = 
 		{
 			BuildingTypes.Stockpile
@@ -35,8 +17,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		protected override BuildingTypes[] Workplaces => StockpilerWorkplaces;
 
-		Cache cache = new Cache();
-		
 		public override void OnInitialize()
 		{
 			AddChildStates(
@@ -61,11 +41,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);
-		}
-
-		public override void Idle()
-		{
-			if (cache.LastUpdated < Game.NavigationMesh.LastUpdated.Value) cache = new Cache();
 		}
 	}
 }
