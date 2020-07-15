@@ -65,8 +65,6 @@ namespace Lunra.Hothouse.Models
 		
 		struct BuildingInfo
 		{
-		
-			public BuildingTypes BuildingType;
 			public float HealthMaximum;
 			public Inventory Inventory;
 			public DesiredInventoryInfo DesiredInventory;
@@ -83,7 +81,6 @@ namespace Lunra.Hothouse.Models
 			public string[] ValidPrefabIds;
 
 			public BuildingInfo(
-				BuildingTypes buildingType,
 				float healthMaximum,
 				Inventory inventory,
 				DesiredInventoryInfo desiredInventory,
@@ -100,7 +97,6 @@ namespace Lunra.Hothouse.Models
 				string[] validPrefabIds
 			)
 			{
-				BuildingType = buildingType;
 				HealthMaximum = healthMaximum;
 				Inventory = inventory;
 				DesiredInventory = desiredInventory;
@@ -176,7 +172,6 @@ namespace Lunra.Hothouse.Models
 			{
 				BuildingNames.Stockpiles.StartingWagon,
 				new BuildingInfo(
-					BuildingTypes.Stockpile,
 					100f,
 					Inventory.Empty,
 					DesiredInventoryInfo.NewInActive(), 
@@ -232,7 +227,6 @@ namespace Lunra.Hothouse.Models
 			{
 				BuildingNames.Lights.Bonfire,
 				new BuildingInfo(
-					BuildingTypes.Light,
 					100f,
 					new Inventory(
 						new Dictionary<Inventory.Types, int>
@@ -287,7 +281,6 @@ namespace Lunra.Hothouse.Models
 			{
 				BuildingNames.Beds.Bedroll,
 				new BuildingInfo(
-					BuildingTypes.Bed,
 					100f,
 					Inventory.Empty, 
 					DesiredInventoryInfo.NewInActive(),
@@ -325,7 +318,6 @@ namespace Lunra.Hothouse.Models
 			{
 				BuildingNames.Barricades.Small,
 				new BuildingInfo(
-					BuildingTypes.Barricade,
 					100f,
 					Inventory.Empty,
 					DesiredInventoryInfo.NewInActive(), 
@@ -363,7 +355,6 @@ namespace Lunra.Hothouse.Models
 			{
 				BuildingNames.Stockpiles.SmallDepot,
 				new BuildingInfo(
-					BuildingTypes.Stockpile,
 					100f,
 					Inventory.Empty,
 					DesiredInventoryInfo.NewInActive(),
@@ -463,7 +454,6 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			model.BuildingName.Value = buildingName;
-			model.Type.Value = info.BuildingType;
 
 			model.Health.ResetToMaximum(info.HealthMaximum);
 			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;

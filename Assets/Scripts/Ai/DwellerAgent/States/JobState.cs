@@ -23,13 +23,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 		}
 		
-		static readonly BuildingTypes[] EmptyWorkplaces = new BuildingTypes[0];
+		static readonly string[] EmptyWorkplaces = new string[0];
 		
 		public override string Name => "Job"+Job;
 
 		protected abstract Jobs Job { get; }
 
-		protected virtual BuildingTypes[] Workplaces => EmptyWorkplaces;
+		protected virtual string[] Workplaces => EmptyWorkplaces;
 
 		protected bool IsCurrentJob => Job == Agent.Job.Value;
 
@@ -144,7 +144,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				var possibleWorkplaces = Game.Buildings.AllActive
 					.Where(m => m.BuildingState.Value == BuildingStates.Operating)
 					.Where(m => !m.Ownership.IsFull)
-					.Where(m => TargetState.Workplaces.Contains(m.Type.Value))
+					.Where(m => TargetState.Workplaces.Contains(m.BuildingName.Value))
 					.Where(m => m.Enterable.AnyAvailable())
 					.OrderBy(m => Vector3.Distance(Agent.Transform.Position.Value, m.Transform.Position.Value))
 					.Select(m => Navigation.QueryEntrances(m));
