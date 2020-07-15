@@ -6,25 +6,24 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai
 {
-	public class BalanceItemState<S0, S1> : AgentState<GameModel, DwellerModel>
-		where S0 : AgentState<GameModel, DwellerModel>
-		where S1 : BalanceItemState<S0, S1>
+	public class BalanceItemState<S> : AgentState<GameModel, DwellerModel>
+		where S : AgentState<GameModel, DwellerModel>
 	{
 		public override string Name => "BalanceItems";
 		
 		public override void OnInitialize()
 		{
 			AddChildStates(
-				new InventoryRequestState<S1>()	
+				new InventoryRequestState<BalanceItemState<S>>()	
 			);
 		
 			AddTransitions(
-				new InventoryRequestState<S1>.ToInventoryRequestOnPromises(),
+				new InventoryRequestState<BalanceItemState<S>>.ToInventoryRequestOnPromises(),
 				new ToReturnOnFallthrough()
 			);
 		}
 
-		public abstract class ToBalanceOnAvailable : AgentTransition<S0, S1, GameModel, DwellerModel>
+		public abstract class ToBalanceOnAvailable : AgentTransition<S, BalanceItemState<S>, GameModel, DwellerModel>
 		{
 			protected class Cache
 			{
@@ -227,7 +226,7 @@ namespace Lunra.Hothouse.Ai
 			}
 		}
 
-		class ToReturnOnFallthrough : AgentTransition<S1, S0, GameModel, DwellerModel>
+		class ToReturnOnFallthrough : AgentTransition<BalanceItemState<S>, S, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => true;
 		}		

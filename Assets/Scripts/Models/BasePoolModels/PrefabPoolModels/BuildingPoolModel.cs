@@ -249,7 +249,7 @@ namespace Lunra.Hothouse.Models
 							}
 						)	
 					),
-					InventoryPermission.DepositForJobs(Jobs.Laborer),
+					InventoryPermission.DepositForJobs(Jobs.Laborer, Jobs.Stockpiler),
 					Constants.LightSourcePlacementLightRequirement,
 					InventoryCapacity.ByIndividualWeight(
 						new Inventory(

@@ -266,6 +266,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		
 		protected class NavigateState : NavigateState<S1> { }
 		
+		protected class BalanceItemState : BalanceItemState<S1> { } 
+		
 		// protected class ObligationState : ObligationState<S1> { }
 		#endregion
 	}
