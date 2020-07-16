@@ -168,38 +168,38 @@ namespace Lunra.Hothouse.Ai
 		{
 			protected override Actions CurrentAction => Actions.Delivery;
 
-			InventoryCache deliveryTarget;
+			InventoryCache deliveryDestination;
 			InventoryCache deliverySource;
 			Inventory items;
 			
 			protected override bool IsActionTriggered()
 			{
-				var possibleDeliveryTargets = InventoriesCached
+				var possibleDeliveryDestinations = InventoriesCached
 					.Where(m => m.CanDeposit && m.IsRequestingDelivery)
 					.OrderBy(OnOrderByDistanceToAgent);
 
-				foreach (var possibleDeliveryTarget in possibleDeliveryTargets)
+				foreach (var possibleDeliveryDestination in possibleDeliveryDestinations)
 				{
-					if (!GetIsNavigable(possibleDeliveryTarget.Enterable)) continue;
+					if (!GetIsNavigable(possibleDeliveryDestination.Enterable)) continue;
 
 					var possibleDeliverySources = InventoriesCached
 						.Where(m => m.CanWithdrawal)
-						.OrderBy(m => OnOrderByDistance(m, possibleDeliveryTarget));
+						.OrderBy(m => OnOrderByDistance(m, possibleDeliveryDestination));
 
 					foreach (var possibleDeliverySource in possibleDeliverySources)
 					{
 						if (!GetIsNavigable(possibleDeliverySource.Enterable)) continue;
 
-						var isIntersecting = possibleDeliveryTarget.Inventory.Desired.Value.Delivery.Intersects(
+						var isIntersecting = possibleDeliveryDestination.Inventory.Desired.Value.Delivery.Intersects(
 							possibleDeliverySource.Inventory.Available.Value,
 							out var intersection
 						);
 						
 						if (!isIntersecting) continue;
-
-						if (!TryGetItems(intersection, out items)) continue;
 						
-						deliveryTarget = possibleDeliveryTarget;
+						if (!TryGetItems(intersection, out items)) continue;
+
+						deliveryDestination = possibleDeliveryDestination;
 						deliverySource = possibleDeliverySource;
 						return true;
 					}
@@ -213,7 +213,7 @@ namespace Lunra.Hothouse.Ai
 				Agent.InventoryPromises.Push(
 					items,
 					deliverySource.Inventory,
-					deliveryTarget.Inventory
+					deliveryDestination.Inventory
 				);
 			}
 		}
@@ -244,12 +244,14 @@ namespace Lunra.Hothouse.Ai
 					{
 						if (!GetIsNavigable(possibleDistributionDestination.Enterable)) continue;
 
-						var isIntersecting = possibleDistributionSource.Inventory.Desired.Value.Distribution.Intersects(
-							possibleDistributionDestination.Inventory.AvailableCapacity.Value.GetCapacityFor(
-								possibleDistributionDestination.Inventory.Available.Value	
-							),
-							out var intersection
-						);
+						var isIntersecting = possibleDistributionSource.Inventory.Desired.Value.Distribution
+							.Intersects(
+								possibleDistributionDestination.Inventory.AvailableCapacity.Value
+									.GetCapacityFor(
+										possibleDistributionDestination.Inventory.Available.Value	
+									),
+								out var intersection
+							);
 						
 						if (!isIntersecting) continue;
 						

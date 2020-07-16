@@ -71,11 +71,8 @@ namespace Lunra.Hothouse.Models
 
 			try { TotalWeight = entries.Select(kv => kv.Value).Sum(); }
 			catch (OverflowException) { TotalWeight = int.MaxValue; }
-			
-			Assert.IsTrue(
-				entries.None(e => e.Value < 0),
-				nameof(entries)+" should never contain values less than zero\n"+ToString(true)
-			);
+
+			if (entries.Any(e => e.Value < 0)) throw new Exception(nameof(entries) + " should never contain values less than zero\n" + ToString(true));
 		}
 
 		[JsonIgnore]

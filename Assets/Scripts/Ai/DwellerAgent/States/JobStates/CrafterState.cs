@@ -44,7 +44,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				case RecipeComponent.States.Idle:
 				case RecipeComponent.States.Gathering:
-					Workplace.Recipes.ProcessRecipe(Workplace);
+					Workplace.Recipes.ProcessRecipe(Game, Workplace);
 					break;
 				case RecipeComponent.States.Ready:
 				case RecipeComponent.States.Crafting:

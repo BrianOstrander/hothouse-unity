@@ -235,7 +235,7 @@ namespace Lunra.Hothouse.Ai
 						break;
 				}
 
-				SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(1f)); // TODO: Don't hardcode this...
+				SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(0.01f)); // TODO: Don't hardcode this...
 			}
 
 			Navigation.Query[] GetNavigationQueries(

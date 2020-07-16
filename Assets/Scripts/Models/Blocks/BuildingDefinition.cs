@@ -102,8 +102,8 @@ namespace Lunra.Hothouse.Models
 			model.Obligations.Reset();
 			
 			model.Recipes.Reset(Recipes);
-			
-			if (Recipes.Any()) model.Recipes.Queue.Enqueue(Recipes.First());
+
+			if (Recipes.Any()) model.Recipes.Queue.Enqueue(RecipeComponent.RecipeIteration.ForInfinity(Recipes.First()));
 		}
 	}
 }
