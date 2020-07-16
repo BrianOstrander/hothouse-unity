@@ -33,6 +33,8 @@ namespace Lunra.Hothouse.Ai
 		
 		public abstract Obligation[] ObligationsHandled { get; }
 
+		protected virtual bool RequiresOwnership => false;
+
 		protected TimeoutState TimeoutInstance { get; set; } 
 			
 		protected Cache CurrentCache = Cache.Default();
@@ -107,6 +109,13 @@ namespace Lunra.Hothouse.Ai
 				{
 					if (!obligationParent.Enterable.AnyAvailable()) continue;
 					if (!obligationParent.Obligations.HasAny()) continue;
+					if (TargetState.RequiresOwnership)
+					{
+						if (obligationParent is IClaimOwnershipModel obligationParentClaimable && !obligationParentClaimable.Ownership.Contains(Agent))
+						{
+							continue;
+						}
+					}
 					if (obligationParent.Obligations.All.Value.Available.None(o => TargetState.ObligationsHandled.Any(h => h.Type == o.Type))) continue;
 					
 					obligationParents.Add(obligationParent);

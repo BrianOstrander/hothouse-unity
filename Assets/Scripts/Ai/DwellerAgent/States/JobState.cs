@@ -6,6 +6,11 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
+	public interface IJobState
+	{
+		
+	}
+	
 	public abstract class JobState<S0, S1> : AgentState<GameModel, DwellerModel>
 		where S0 : AgentState<GameModel, DwellerModel>
 		where S1 : JobState<S0, S1>
@@ -267,6 +272,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		
 		protected class BalanceItemState : BalanceItemState<S1> { } 
 		
+		protected class TimeoutState : TimeoutState<S1> { }
 		// protected class ObligationState : ObligationState<S1> { }
 		#endregion
 	}

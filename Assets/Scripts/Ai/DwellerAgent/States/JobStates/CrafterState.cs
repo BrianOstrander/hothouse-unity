@@ -1,4 +1,6 @@
+using System;
 using Lunra.Hothouse.Models;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
@@ -12,7 +14,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new CleanupState(),
 				new InventoryRequestState(),
 				new NavigateState(),
-				new BalanceItemState()
+				new BalanceItemState(),
+				new CraftRecipeHandlerState()
 			);
 
 			AddTransitions(
@@ -25,7 +28,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				new ToNavigateToWorkplace(),
 				
-				
+				new CraftRecipeHandlerState.ToObligationOnExistingObligation(),
+				new CraftRecipeHandlerState.ToObligationHandlerOnAvailableObligation(),
 				
 				new BalanceItemState.ToBalanceOnAvailableDelivery(),
 				new BalanceItemState.ToBalanceOnAvailableDistribution(),
@@ -34,20 +38,23 @@ namespace Lunra.Hothouse.Ai.Dweller
 			);
 		}
 
-		public override void Begin()
+		public override void Idle()
 		{
-			base.Begin();
-
-			if (Workplace == null) return;
-
-			if (Workplace.Recipes.Current.Value != null) return;
-			if (!Workplace.Recipes.Queue.TryPeek(out var next)) return;
-
-			Workplace.Recipes.Current.Value = Workplace.Recipes.Queue.Dequeue();
-
-			Workplace.Inventory.Desired.Value = InventoryDesire.UnCalculated(Workplace.Recipes.Current.Value.InputItems);
+			switch (Workplace.Recipes.Current.Value.State)
+			{
+				case RecipeComponent.States.Idle:
+				case RecipeComponent.States.Gathering:
+					Workplace.Recipes.ProcessRecipe(Workplace);
+					break;
+				case RecipeComponent.States.Ready:
+				case RecipeComponent.States.Crafting:
+					break;
+				default:
+					Debug.LogError("Unrecognized Recipe State: "+Workplace.Recipes.Current.Value.State);
+					break;
+			}
 		}
 		
-		// class ToTimeoutForCrafting : AgentTransition<CrafterState<S>>
+		class CraftRecipeHandlerState : CraftRecipeHandlerState<S1> { }
 	}
 }

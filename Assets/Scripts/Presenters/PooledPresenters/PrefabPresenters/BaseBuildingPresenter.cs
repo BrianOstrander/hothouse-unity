@@ -61,6 +61,10 @@ namespace Lunra.Hothouse.Presenters
 				ObligationCategories.Construct.Assemble,
 				OnObligationsConstructAssemble
 			);
+			Model.Obligations.Bind(
+				ObligationCategories.Craft.Recipe,
+				OnObligationsCraftRecipe
+			);
 			
 			Model.Operate += OnBuildingOperate;
 
@@ -93,6 +97,10 @@ namespace Lunra.Hothouse.Presenters
 			Model.Obligations.UnBind(
 				ObligationCategories.Construct.Assemble,
 				OnObligationsConstructAssemble
+			);
+			Model.Obligations.UnBind(
+				ObligationCategories.Craft.Recipe,
+				OnObligationsCraftRecipe
 			);
 			
 			Model.Operate -= OnBuildingOperate;
@@ -248,6 +256,14 @@ namespace Lunra.Hothouse.Presenters
 		)
 		{
 			Model.BuildingState.Value = BuildingStates.Operating;
+		}
+		
+		void OnObligationsCraftRecipe(
+			Obligation obligation,
+			IModel source
+		)
+		{
+			// Not sure we need this? It does stop an unhandled obligation error from appearing though...
 		}
 		#endregion
 		

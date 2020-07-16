@@ -496,8 +496,8 @@ namespace Lunra.Hothouse.Models
 		{
 			var allIncoming = Available.Value + ReservedCapacity.Value.GetMaximum();
 			
-			var desiredDelivery = Inventory.Empty;
-			var desiredDistribution = Inventory.Empty;
+			Inventory desiredDelivery;
+			Inventory desiredDistribution;
 
 			if (Desired.Value.Storage.Intersects(allIncoming, out var deliveryIntersection))
 			{
