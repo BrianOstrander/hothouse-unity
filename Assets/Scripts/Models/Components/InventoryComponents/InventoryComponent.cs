@@ -86,7 +86,7 @@ namespace Lunra.Hothouse.Models
 			if (inventory.IsEmpty) return false;
 			
 			// TODO: I suspect this should specify Available.Value as inventory0...
-			var hasOverflow = AvailableCapacity.Value.AddClamped(
+			var hasOverflow = AllCapacity.Value.AddClamped(
 				All.Value,
 				inventory,
 				out var allReplacement,
@@ -214,9 +214,6 @@ namespace Lunra.Hothouse.Models
 			out Inventory overflow
 		)
 		{
-			var ogInv = inventory;
-			var ogAll = All.Value;
-			
 			transaction = default;
 			AvailableCapacity.Value.AddClamped(
 				Available.Value,
@@ -225,16 +222,8 @@ namespace Lunra.Hothouse.Models
 				out overflow
 			);
 
-			try
-			{
-				inventory -= overflow;
-			}
-			catch (Exception e)
-			{
-				Debug.Log("OG: " + ogInv + "\n+All\n" + ogAll + "\nOv\n" + overflow);
-				throw e;
-			}
-
+			inventory -= overflow;
+			
 			if (inventory.IsEmpty) return false;
 			
 			AddReserved(inventory);
