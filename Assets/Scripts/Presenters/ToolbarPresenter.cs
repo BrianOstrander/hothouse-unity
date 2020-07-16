@@ -29,11 +29,11 @@ namespace Lunra.Hothouse.Presenters
 					"Gather"
 				);
 
-				foreach (var building in BuildingTypes.All)
+				foreach (var building in game.Buildings.Definitions)
 				{
 					taskLabels.Add(
-						GetConstructionTaskId(building),
-						"Build " + building
+						GetConstructionTaskId(building.Type),
+						"Build " + building.Type
 					);
 				}
 
@@ -61,10 +61,10 @@ namespace Lunra.Hothouse.Presenters
 							);
 							break;
 						case ToolbarModel.Tasks.Construction:
-							foreach (var building in BuildingTypes.All)
+							foreach (var building in game.Buildings.Definitions)
 							{
 								taskActions.Add(
-									GetConstructionTaskId(building),
+									GetConstructionTaskId(building.Type),
 									() => OnConstructSelectionClick(building)
 								);
 							}
@@ -229,16 +229,16 @@ namespace Lunra.Hothouse.Presenters
 			if (ToggleTask(task)) View.SetSelection(GetGenericTaskId(task));
 		}
 		
-		void OnConstructSelectionClick(string buildingType)
+		void OnConstructSelectionClick(BuildingDefinition buildingDefinition)
 		{
-			if (ToggleTask(ToolbarModel.Tasks.Construction, buildingType)) View.SetSelection(GetConstructionTaskId(buildingType));
+			if (ToggleTask(ToolbarModel.Tasks.Construction, buildingDefinition)) View.SetSelection(GetConstructionTaskId(buildingDefinition.Type));
 		}
 		#endregion
 		
 		#region Utility
 		bool ToggleTask(
 			ToolbarModel.Tasks task,
-			string buildingType = null
+			BuildingDefinition buildingDefinition = null
 		)
 		{
 			Assert.IsFalse(task == ToolbarModel.Tasks.None, "It should not be possible to toggle to "+nameof(ToolbarModel.Tasks.None));
@@ -249,7 +249,7 @@ namespace Lunra.Hothouse.Presenters
 					task = task == toolbar.Task.Value ? ToolbarModel.Tasks.None : task;
 					break;
 				case ToolbarModel.Tasks.Construction:
-					task = toolbar.Building.Value != null && toolbar.Building.Value.Type.Value == buildingType ? ToolbarModel.Tasks.None : task;
+					task = toolbar.Building.Value != null && toolbar.Building.Value.Type.Value == buildingDefinition.Type ? ToolbarModel.Tasks.None : task;
 					break;
 				default:
 					Debug.LogError("Unrecognized Task: " + task);
@@ -265,7 +265,7 @@ namespace Lunra.Hothouse.Presenters
 			if (task == ToolbarModel.Tasks.Construction)
 			{
 				toolbar.Building.Value = game.Buildings.Activate(
-					buildingType,
+					buildingDefinition,
 					game.Rooms.FirstActive().Id.Value,
 					Vector3.down * 100f, // Just stick it under everything for the moment...
 					Quaternion.identity,

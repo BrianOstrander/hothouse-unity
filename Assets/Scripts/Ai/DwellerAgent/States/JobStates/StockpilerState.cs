@@ -8,18 +8,16 @@ namespace Lunra.Hothouse.Ai.Dweller
 	public class StockpilerState<S> : JobState<S, StockpilerState<S>>
 		where S : AgentState<GameModel, DwellerModel>
 	{
-		static readonly string[] StockpilerWorkplaces = 
-		{
-			BuildingTypes.Stockpiles.SmallDepot,
-			BuildingTypes.Stockpiles.StartingWagon
-		};
-		
 		protected override Jobs Job => Jobs.Stockpiler;
-
-		protected override string[] Workplaces => StockpilerWorkplaces;
 
 		public override void OnInitialize()
 		{
+			Workplaces = new []
+			{
+				Game.Buildings.GetSerializedType<SmallDepotDefinition>(),
+				Game.Buildings.GetSerializedType<StartingWagonDefinition>(),	
+			};
+			
 			AddChildStates(
 				new CleanupState(),
 				new InventoryRequestState(),

@@ -55,10 +55,10 @@ namespace Lunra.Hothouse.Models
 			MaximumClaimers = new ListenerProperty<int>(value => maximumClaimers = value, () => maximumClaimers);
 		}
 		
-		public void Reset()
+		public void Reset(int maximumClaimers)
 		{
 			Claimers.Value = new InstanceId[0];
-			MaximumClaimers.Value = 0;
+			MaximumClaimers.Value = maximumClaimers;
 		}
 
 		public override string ToString()

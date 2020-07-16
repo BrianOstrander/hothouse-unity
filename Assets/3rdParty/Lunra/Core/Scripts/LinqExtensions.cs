@@ -194,5 +194,7 @@ namespace Lunra.Core
 		{
 			yield return element;
 		}
+		
+		public static T[] WrapInArray<T>(this T element) => new [] { element };
 	}
 }

@@ -39,7 +39,7 @@ namespace Lunra.Hothouse.Models
 		readonly ListenerProperty<InventoryCapacity> availableCapacityListener;
 		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> AvailableCapacity { get; }
 
-		[JsonProperty] InventoryDesire desired = InventoryDesire.None();
+		[JsonProperty] InventoryDesire desired = InventoryDesire.Ignored();
 		[JsonIgnore] public ListenerProperty<InventoryDesire> Desired { get; }
 		#endregion
 		
@@ -368,7 +368,7 @@ namespace Lunra.Hothouse.Models
 			availableCapacityListener.Value = capacity;
 
 			Desired.SetValue(
-				desired ?? InventoryDesire.None(),
+				desired ?? InventoryDesire.Ignored(),
 				this
 			);
 			

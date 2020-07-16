@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
-using Lunra.StyxMvp.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
@@ -29,7 +28,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		protected abstract Jobs Job { get; }
 
-		protected virtual string[] Workplaces => EmptyWorkplaces;
+		protected virtual string[] Workplaces { get; set; } = EmptyWorkplaces;
 
 		protected bool IsCurrentJob => Job == Agent.Job.Value;
 

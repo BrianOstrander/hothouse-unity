@@ -32,6 +32,8 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public bool IsLit => 0f < LightLevel.Value;
 		[JsonIgnore] public bool IsNotLit => !IsLit;
 
+		public void Reset() => LightLevel.Value = 0f;
+		
 		public override string ToString()
 		{
 			return "Light Level: " + LightLevel.Value.ToString("N2");

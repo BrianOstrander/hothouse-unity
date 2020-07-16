@@ -42,6 +42,12 @@ namespace Lunra.Hothouse.Models
 			0,
 			inventoryMaximum
 		);
+		
+		public static InventoryCapacity ByIndividualWeight(params (Inventory.Types Type, int Weight)[] entries) => new InventoryCapacity(
+			Clamps.IndividualWeight,
+			0,
+			Inventory.FromEntries(entries)
+		);
 
 		public readonly Clamps Clamping;
 		[JsonProperty] readonly int weightMaximum;

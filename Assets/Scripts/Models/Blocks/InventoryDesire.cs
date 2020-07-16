@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 	
-		public static InventoryDesire None()
+		public static InventoryDesire Ignored()
 		{
 			return new InventoryDesire(
 				false,
