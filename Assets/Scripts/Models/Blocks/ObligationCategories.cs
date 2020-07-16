@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Models
 		public static class Destroy
 		{
 			const string Category = "destroy_";
-			
+
 			public static Obligation Melee => Obligation.New(Category + "melee");
 		}
 
@@ -21,6 +21,13 @@ namespace Lunra.Hothouse.Models
 			const string Category = "construct_";
 
 			public static Obligation Assemble => Obligation.New(Category + "assemble");
+		}
+
+		public static class Craft
+		{
+			const string Category = "craft_";
+
+			public static Obligation Recipe => Obligation.New(Category + "recipe");
 		}
 	}
 }

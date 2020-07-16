@@ -386,6 +386,11 @@ namespace Lunra.Hothouse.Editor
 				appendResult(inventoryPromiseModel.InventoryPromises.ToString());
 			}
 
+			if (model is IRecipeModel recipeModel && (recipeModel.Recipes.Available.Value.Any() || recipeModel.Recipes.Queue.TryPeek(out _)))
+			{
+				appendResult(recipeModel.Recipes.ToString());
+			}
+
 			append?.Invoke(appendResult);
 
 			Handles.Label(

@@ -14,8 +14,7 @@ namespace Lunra.Hothouse.Models
 		IHealthModel,
 		IClaimOwnershipModel,
 		IConstructionModel,
-		IInventoryModel,
-		IObligationModel
+		IRecipeModel
 	{
 		#region Serialized
 		[JsonProperty] string type;
@@ -39,6 +38,7 @@ namespace Lunra.Hothouse.Models
 		public InventoryComponent ConstructionInventory { get; } = new InventoryComponent();
 		public InventoryComponent SalvageInventory { get; } = new InventoryComponent();
 		public ObligationComponent Obligations { get; } = new ObligationComponent();
+		public RecipeComponent Recipes { get; } = new RecipeComponent();
 		#endregion
 		
 		#region Non Serialized

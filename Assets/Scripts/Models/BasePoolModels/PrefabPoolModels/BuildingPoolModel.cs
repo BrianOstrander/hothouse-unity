@@ -92,7 +92,12 @@ namespace Lunra.Hothouse.Models
 		public string GetSerializedType<T>()
 			where T : BuildingDefinition
 		{
-			return definitions[typeof(T)].Type;
+			return GetSerializedType(typeof(T));
+		}
+		
+		public string GetSerializedType(Type type)
+		{
+			return definitions[type].Type;
 		}
 	}
 }

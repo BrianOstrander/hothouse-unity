@@ -225,7 +225,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				Jobs.Stockpiler,
 				Jobs.Stockpiler,
-				Jobs.Stockpiler,
+				Jobs.Smoker,
 				Jobs.Laborer
 			};
 
@@ -277,6 +277,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				spawn.Id.Value,
 				position + (Vector3.right * 6f),
 				Quaternion.identity,
+				BuildingStates.Operating
+			);
+
+			var dryingRack = payload.Game.Buildings.Activate<DryingRackDefinition>(
+				spawn.Id.Value,
+				position + (Vector3.right * 3f) + (Vector3.back * 3f),
+				Quaternion.identity, 
 				BuildingStates.Operating
 			);
 			

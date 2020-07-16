@@ -5,6 +5,7 @@ namespace Lunra.Hothouse.Models
 		Unknown = 0,
 		None = 10,
 		Laborer = 20,
-		Stockpiler = 30
+		Stockpiler = 30,
+		Smoker = 40
 	}
 }

@@ -25,6 +25,7 @@ namespace Lunra.Hothouse.Models
 		protected virtual Inventory DefaultInventory => Inventory.Empty;
 		protected virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.StalkDry, 2);
 		protected virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
+		protected virtual Recipe[] Recipes => new Recipe[0];
 		
 		public BuildingDefinition()
 		{
@@ -99,6 +100,10 @@ namespace Lunra.Hothouse.Models
 			model.SalvageInventory.Add(SalvageInventory);
 			
 			model.Obligations.Reset();
+			
+			model.Recipes.Reset(Recipes);
+			
+			if (Recipes.Any()) model.Recipes.Queue.Enqueue(Recipes.First());
 		}
 	}
 }
