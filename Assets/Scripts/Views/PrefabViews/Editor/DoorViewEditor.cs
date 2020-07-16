@@ -15,13 +15,22 @@ namespace Lunra.Hothouse.Views.Editor
 			var typedTarget = target as DoorView;
 			if (typedTarget == null) return;
 
-			var isGamePlaying = GameStateEditorUtility.GetGame(out var game);
+			var isGamePlaying = GameStateEditorUtility.GetGame(out var game, out _);
 
 			var modelIdNullOrEmpty = string.IsNullOrEmpty(typedTarget.ModelId);
 			var model = modelIdNullOrEmpty ? null : game?.Doors.FirstOrDefaultActive(typedTarget.ModelId);
 			
 			Handles.BeginGUI();
 			{
+				GUIExtensions.PushEnabled(!Application.isPlaying);
+				{
+					if (GUILayout.Button("Recache", GUILayout.ExpandWidth(false)))
+					{
+						typedTarget.CalculateCachedData();
+					}
+				}
+				GUIExtensions.PopEnabled();
+				
 				if (isGamePlaying && model == null)
 				{
 					GUIExtensions.PushColor(Color.red);
@@ -32,7 +41,7 @@ namespace Lunra.Hothouse.Views.Editor
 					}
 					GUIExtensions.PopColor();
 				}
-				
+
 				GUIExtensions.PushEnabled(isGamePlaying && model != null);
 				{
 					if (GUILayout.Button("Open Door", GUILayout.ExpandWidth(false)))

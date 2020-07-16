@@ -2,38 +2,32 @@ namespace Lunra.Hothouse.Models
 {
 	public static class ObligationCategories
 	{
-		public static Jobs[] GetJobs(params Jobs[] jobs) => jobs;
-		
 		public static class Door
 		{
-			const string Category = "door";
-			
-			public static bool Contains(ObligationType obligation) => obligation.Category == Category;
-			
-			static ObligationType New(string action) => new ObligationType(Category, action);
+			const string Category = "door_";
 
-			public static class Actions
-			{
-				public const string Open = "open";
-			}
-			
-			public static ObligationType Open => New(Actions.Open);
+			public static Obligation Open => Obligation.New(Category + "open");
 		}
 
-		// public static class Clearable
-		// {
-		// 	const string Category = "clearable";
-		// 	
-		// 	public static bool Contains(ObligationType obligation) => obligation.Category == Category;
-		// 	
-		// 	static ObligationType New(string action) => new ObligationType(Category, action);
-		//
-		// 	public static class Actions
-		// 	{
-		// 		public const string Clear = "clear";
-		// 	}
-		// 	
-		// 	public static ObligationType Clear => New(Actions.Clear);
-		// }
+		public static class Destroy
+		{
+			const string Category = "destroy_";
+
+			public static Obligation Melee => Obligation.New(Category + "melee");
+		}
+
+		public static class Construct
+		{
+			const string Category = "construct_";
+
+			public static Obligation Assemble => Obligation.New(Category + "assemble");
+		}
+
+		public static class Craft
+		{
+			const string Category = "craft_";
+
+			public static Obligation Recipe => Obligation.New(Category + "recipe");
+		}
 	}
 }

@@ -37,6 +37,7 @@ namespace Lunra.Hothouse.Services
 				() => Payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
 			);
 			
+			App.S.PushBlocking(Payload.Game.DwellerNames.Initialize);
 			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
 
 			if (Payload.Game.Rooms.AllActive.None()) new GameStateGenerateLevel(this).Push();
@@ -77,9 +78,8 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.Doors.Initialize(Payload.Game);
 			Payload.Game.Debris.Initialize(Payload.Game);
 			Payload.Game.Flora.Initialize(Payload.Game);
-			Payload.Game.ItemDrops.Initialize(m => new ItemDropPresenter(Payload.Game, m));
+			Payload.Game.ItemDrops.Initialize(Payload.Game);
 			Payload.Game.Dwellers.Initialize(Payload.Game);
-			Payload.Game.ObligationIndicators.Initialize(Payload.Game);
 			Payload.Game.Seekers.Initialize(Payload.Game);
 			
 			done();
@@ -105,33 +105,15 @@ namespace Lunra.Hothouse.Services
 
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
-			
-			// App.Heartbeat.Wait(
+
+			// App.Heartbeat.WaitForSeconds(
 			// 	() =>
 			// 	{
-			// 		Debug.Log("Recalculating...");
-			// 		Payload.Game.Doors.FirstActive().IsOpen.Value = true;
-			// 		// Payload.Game.Dwellers.AllActive.First(d => d.Id.Value == "0").Health.Value = 0f;
+			// 		Debug.Log("Killing wagon...");
+			// 		var wagon = Payload.Game.Buildings.FirstOrDefaultActive(m => m.Type.Value == Buildings.StartingWagon);
+			// 		Damage.ApplyGeneric(999f, wagon);
 			// 	},
-			// 	6f
-			// );
-
-			var spawnRoom = Payload.Game.Rooms.FirstActive(m => m.IsSpawn.Value);
-			
-			var flora = Payload.Game.Flora.ActivateAdult(
-				FloraSpecies.Wheat,
-				spawnRoom.RoomTransform.Id.Value,
-				spawnRoom.Transform.Position.Value + Vector3.right * 4f
-			);
-
-			// Payload.Game.ObligationIndicators.Register(
-			// 	Obligation.New(
-			// 		ObligationCategories.Clearable.Clear,
-			// 		0,
-			// 		ObligationCategories.GetJobs(Jobs.Clearer),
-			// 		Obligation.ConcentrationRequirements.Interruptible
-			// 	),
-			// 	flora
+			// 	5f
 			// );
 		}
 
@@ -164,13 +146,6 @@ namespace Lunra.Hothouse.Services
 		{
 			if (Payload.Game.GameResult.Value.State == GameResult.States.Unknown) return;
 			
-			Payload.Game.SimulationMultiplier.Changed -= OnGameSimulationMultiplier;
-			
-			App.Heartbeat.Update -= OnHeartbeatUpdate;
-			App.Heartbeat.LateUpdate -= OnHeartbeatLateUpdate;
-
-			Payload.Game.CalculateMaximumLighting = null;
-			
 			App.S.RequestState(
 				new MainMenuPayload
 				{
@@ -183,6 +158,13 @@ namespace Lunra.Hothouse.Services
 		#region End
 		protected override void End()
 		{
+			Payload.Game.SimulationMultiplier.Changed -= OnGameSimulationMultiplier;
+			
+			App.Heartbeat.Update -= OnHeartbeatUpdate;
+			App.Heartbeat.LateUpdate -= OnHeartbeatLateUpdate;
+
+			Payload.Game.CalculateMaximumLighting = null;
+			
 			App.S.PushBlocking(
 				done => App.P.UnRegisterAll(done)
 			);

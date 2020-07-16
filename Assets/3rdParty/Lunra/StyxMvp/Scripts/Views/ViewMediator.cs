@@ -38,18 +38,19 @@ namespace Lunra.StyxMvp
 
 		public void Initialize(Action<Result> done)
 		{
-			pool = new List<IView>();
-			
-			prefabs.AddRange(Resources.LoadAll<GameObject>("StyxDefaultViews"));
-
-			foreach (var prefab in prefabs)
+			foreach (var prefab in Resources.LoadAll<GameObject>("StyxDefaultViews"))
 			{
+				if (prefab.CompareTag("IgnoredView")) continue;
+				
 				var prefabView = prefab.GetComponent<IView>();
 				if (prefabView == null)
 				{
 					Debug.LogError("View prefab \"" + prefab.name + "\" has no root IView component.");
 					continue;
 				}
+				if (prefabView.Ignore) continue;
+				prefabs.Add(prefab);
+				
 				for (var i = 0; i < Mathf.Max(prefabView.PoolSize, 1); i++)
 				{
 					Pool(CreateFromPrefab(prefab));
@@ -281,7 +282,7 @@ namespace Lunra.StyxMvp
 				else if (unmodifiedView.TransitionState == TransitionStates.Closing) Closing(unmodifiedView);
 				else
 				{
-					var error = "The view " + unmodifiedView.InstanceName + " with state " + unmodifiedView.TransitionState + " is still on the waldo, this should not be possible";
+					var error = "The view " + unmodifiedView.Name + " with state " + unmodifiedView.TransitionState + " is still on the waldo, this should not be possible";
 					Debug.LogError(error);
 					views.Remove(unmodifiedView);
 				}

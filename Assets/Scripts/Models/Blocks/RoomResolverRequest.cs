@@ -7,94 +7,77 @@ namespace Lunra.Hothouse.Models
 {
 	public struct RoomResolverRequest
 	{
-		public struct FloraConstraint
+		public static class Defaults
 		{
-			public FloraSpecies Species;
-			public int CountPerRoomMinimum;
-			public int CountPerRoomMaximum;
-			public float SpawnDistanceNormalizedMinimum;
-			public int CountPerClusterMinimum;
-			public int CountPerClusterMaximum;
-			
-			public FloraConstraint(
-				FloraSpecies species,
-				int countPerRoomMinimum,
-				int countPerRoomMaximum,
-				float spawnDistanceNormalizedMinimum,
-				int countPerClusterMinimum,
-				int countPerClusterMaximum
+			public static RoomResolverRequest Tiny(
+				Demon generator,
+				RoomPoolModel.ActivateRoom activateRoom,
+				DoorPoolModel.ActivateDoor activateDoor
 			)
 			{
-				Species = species;
-				CountPerRoomMinimum = countPerRoomMinimum;
-				CountPerRoomMaximum = countPerRoomMaximum;
-				SpawnDistanceNormalizedMinimum = spawnDistanceNormalizedMinimum;
-				CountPerClusterMinimum = countPerClusterMinimum;
-				CountPerClusterMaximum = countPerClusterMaximum;
+				return new RoomResolverRequest(
+					generator,
+					4,
+					5,
+					2,
+					activateRoom,
+					activateDoor
+				);
 			}
-		}
-		
-		static readonly FloraConstraint[] DefaultFloraConstraints = 
-		{
-			new FloraConstraint(
-				FloraSpecies.Grass,
-				0,
-				3,
-				0f,
-				4,
-				10
-			),
-			new FloraConstraint(
-				FloraSpecies.Wheat,
-				0,
-				6,
-				0f,
-				3,
-				6
-			),
-			new FloraConstraint(
-				FloraSpecies.Shroom,
-				0,
-				1,
-				0.5f,
-				1,
-				2
-			),
-			new FloraConstraint(
-				FloraSpecies.SeekerSpawner,
-				1,
-				1,
-				0f,
-				1,
-				2
+			
+			public static RoomResolverRequest Small(
+				Demon generator,
+				RoomPoolModel.ActivateRoom activateRoom,
+				DoorPoolModel.ActivateDoor activateDoor
 			)
-		};
+			{
+				return new RoomResolverRequest(
+					generator,
+					10,
+					20,
+					2,
+					activateRoom,
+					activateDoor
+				);
+			}
+			
+			public static RoomResolverRequest Medium(
+				Demon generator,
+				RoomPoolModel.ActivateRoom activateRoom,
+				DoorPoolModel.ActivateDoor activateDoor
+			)
+			{
+				return new RoomResolverRequest(
+					generator,
+					20,
+					40,
+					2,
+					activateRoom,
+					activateDoor
+				);
+			}
 		
-		public static RoomResolverRequest Default(
-			Demon generator,
-			RoomPoolModel.ActivateRoom activateRoom,
-			DoorPoolModel.ActivateDoor activateDoor
-		)
-		{
-			return new RoomResolverRequest(
-				generator,
-				10,
-				20,
-				2,
-				3,
-				DefaultFloraConstraints,
-				activateRoom,
-				activateDoor
-			);
+			public static RoomResolverRequest Large(
+				Demon generator,
+				RoomPoolModel.ActivateRoom activateRoom,
+				DoorPoolModel.ActivateDoor activateDoor
+			)
+			{
+				return new RoomResolverRequest(
+					generator,
+					100,
+					200,
+					2,
+					activateRoom,
+					activateDoor
+				);
+			}	
 		}
 
 		public Demon Generator;
 		public int RoomCountMinimum;
 		public int RoomCountMaximum;
 		public int SpawnDoorCountRequired;
-		public int ExitDistanceMinimum;
-
-		public FloraConstraint[] FloraConstraints;
 
 		public RoomPoolModel.ActivateRoom ActivateRoom;
 		public DoorPoolModel.ActivateDoor ActivateDoor;
@@ -106,8 +89,6 @@ namespace Lunra.Hothouse.Models
 			int roomCountMinimum,
 			int roomCountMaximum,
 			int spawnDoorCountRequired,
-			int exitDistanceMinimum,
-			FloraConstraint[] floraConstraints,
 			RoomPoolModel.ActivateRoom activateRoom,
 			DoorPoolModel.ActivateDoor activateDoor
 		)
@@ -116,8 +97,7 @@ namespace Lunra.Hothouse.Models
 			RoomCountMinimum = roomCountMinimum;
 			RoomCountMaximum = roomCountMaximum;
 			SpawnDoorCountRequired = spawnDoorCountRequired;
-			ExitDistanceMinimum = exitDistanceMinimum;
-			FloraConstraints = floraConstraints;
+			
 			ActivateRoom = activateRoom;
 			ActivateDoor = activateDoor;
 			

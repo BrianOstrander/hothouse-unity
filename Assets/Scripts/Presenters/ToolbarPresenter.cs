@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Presenters;
@@ -9,9 +12,76 @@ namespace Lunra.Hothouse.Presenters
 {
 	public class ToolbarPresenter : Presenter<ToolbarView>
 	{
+		static string GetGenericTaskId(ToolbarModel.Tasks task) => task.ToString();
+		static string GetConstructionTaskId(string buildingType) => GetGenericTaskId(ToolbarModel.Tasks.Construction) + "_" + buildingType;
+
+		Dictionary<string, string> taskLabels;
+		Dictionary<string, string> TaskLabels
+		{
+			get
+			{
+				if (taskLabels != null) return taskLabels;
+				
+				taskLabels = new Dictionary<string, string>();
+
+				taskLabels.Add(
+					GetGenericTaskId(ToolbarModel.Tasks.Clearance),
+					"Gather"
+				);
+
+				foreach (var building in game.Buildings.Definitions)
+				{
+					taskLabels.Add(
+						GetConstructionTaskId(building.Type),
+						"Build " + building.Type
+					);
+				}
+
+				return taskLabels;
+			}
+		}
+
+		Dictionary<string, Action> taskActions;
+		Dictionary<string, Action> TaskActions
+		{
+			get
+			{
+				if (taskActions != null) return taskActions;
+				
+				taskActions = new Dictionary<string, Action>();
+				
+				foreach (var task in EnumExtensions.GetValues(ToolbarModel.Tasks.Unknown, ToolbarModel.Tasks.None))
+				{
+					switch (task)
+					{
+						case ToolbarModel.Tasks.Clearance:
+							taskActions.Add(
+								GetGenericTaskId(task),
+								() => OnGenericSelectionClick(task)
+							);
+							break;
+						case ToolbarModel.Tasks.Construction:
+							foreach (var building in game.Buildings.Definitions)
+							{
+								taskActions.Add(
+									GetConstructionTaskId(building.Type),
+									() => OnConstructSelectionClick(building)
+								);
+							}
+							break;
+						default:
+							Debug.LogError("Unrecognized task: " + task);
+							break;
+					}
+				}
+
+				return taskActions;
+			}
+		}
+
 		GameModel game;
 		ToolbarModel toolbar;
-		
+
 		public ToolbarPresenter(
 			GameModel game
 		)
@@ -49,11 +119,21 @@ namespace Lunra.Hothouse.Presenters
 			if (View.Visible) return;
 			
 			View.Cleanup();
+			
+			View.Selection += OnViewSelection;
+			
+			View.InitializeControls(
+				TaskLabels.Select(
+					kv => new ToolbarView.Control
+					{
+						Id = kv.Key,
+						Label = kv.Value
+					}
+				)
+				.ToArray()
+			);
 
-			View.ClearanceClick += OnClearanceClick;
-			View.ConstructFireClick += OnConstructFireClick;
-			View.ConstructBedClick += OnConstructBedClick;
-			View.ConstructWallClick += OnConstructWallClick;
+			View.SetSelection();
 			
 			ShowView(instant: true);
 		}
@@ -127,41 +207,38 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region View Events
-		void OnClearanceClick()
+		void OnViewSelection(string id)
 		{
-			View.ClearanceSelected = ToggleTask(ToolbarModel.Tasks.Clearance);
-		}
+			if (!TaskActions.TryGetValue(id, out var callback))
+			{
+				Debug.LogError("No callback registered for id: " + id);
+				return;
+			}
 
-		void OnConstructFireClick()
-		{
-			View.ConstructFireSelected = ToggleTask(
-				ToolbarModel.Tasks.Construction,
-				Buildings.Bonfire
-			);
+			if (callback == null)
+			{
+				Debug.LogError("Callback with id \"" + id + "\" is null");
+				return;
+			}
 			
+			callback();
 		}
 		
-		void OnConstructBedClick()
+		void OnGenericSelectionClick(ToolbarModel.Tasks task)
 		{
-			View.ConstructBedSelected = ToggleTask(
-				ToolbarModel.Tasks.Construction,
-				Buildings.Bedroll
-			);
+			if (ToggleTask(task)) View.SetSelection(GetGenericTaskId(task));
 		}
 		
-		void OnConstructWallClick()
+		void OnConstructSelectionClick(BuildingDefinition buildingDefinition)
 		{
-			View.ConstructWallSelected = ToggleTask(
-				ToolbarModel.Tasks.Construction,
-				Buildings.WallSmall
-			);
+			if (ToggleTask(ToolbarModel.Tasks.Construction, buildingDefinition)) View.SetSelection(GetConstructionTaskId(buildingDefinition.Type));
 		}
 		#endregion
 		
 		#region Utility
 		bool ToggleTask(
 			ToolbarModel.Tasks task,
-			Buildings building = Buildings.Unknown
+			BuildingDefinition buildingDefinition = null
 		)
 		{
 			Assert.IsFalse(task == ToolbarModel.Tasks.None, "It should not be possible to toggle to "+nameof(ToolbarModel.Tasks.None));
@@ -172,7 +249,7 @@ namespace Lunra.Hothouse.Presenters
 					task = task == toolbar.Task.Value ? ToolbarModel.Tasks.None : task;
 					break;
 				case ToolbarModel.Tasks.Construction:
-					task = toolbar.Building.Value != null && toolbar.Building.Value.Type.Value == building ? ToolbarModel.Tasks.None : task;
+					task = toolbar.Building.Value != null && toolbar.Building.Value.Type.Value == buildingDefinition.Type ? ToolbarModel.Tasks.None : task;
 					break;
 				default:
 					Debug.LogError("Unrecognized Task: " + task);
@@ -188,7 +265,7 @@ namespace Lunra.Hothouse.Presenters
 			if (task == ToolbarModel.Tasks.Construction)
 			{
 				toolbar.Building.Value = game.Buildings.Activate(
-					building,
+					buildingDefinition,
 					game.Rooms.FirstActive().Id.Value,
 					Vector3.down * 100f, // Just stick it under everything for the moment...
 					Quaternion.identity,
@@ -207,10 +284,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.NotVisible) return;
 			
-			View.ClearanceSelected = false;
-			View.ConstructFireSelected = false;
-			View.ConstructBedSelected = false;
-			View.ConstructWallSelected = false;
+			View.SetSelection();
 		}
 		#endregion
 	}

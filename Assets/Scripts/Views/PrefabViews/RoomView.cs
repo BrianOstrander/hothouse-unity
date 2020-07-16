@@ -3,7 +3,6 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using UnityEngine;
-using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -12,76 +11,169 @@ namespace Lunra.Hothouse.Views
 {
 	public class RoomView : PrefabView, IRoomIdView, IBoundaryView
 	{
+		static class Constants
+		{
+			
+			public const string FloorKeyword = "floor";
+			public const string GeometryRoot = "geometry_root";
+			public const string UnexploredRoot = "unexplored_root";
+			public const string BoundaryColliderRoot = "boundary_collider_root";
+			
+			public const string DoorAnchorPrefix = "door_anchor_";
+			public const char DoorAnchorSizeTerminator = 'm';
+			public const string DoorPlugPrefix = "door_plug";
+			
+			public const string UnexploredMaterialPath = "Materials/unexplored";
+			public const string DefaultFloorMaterialPath = "Materials/default_floors";
+		}
+
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
-		[SerializeField] Light[] lights;
-		[SerializeField] AnimationCurve lightIntensityByTimeOfDay;
-		[FormerlySerializedAs("unexploredRoot")] [SerializeField] GameObject notRevealedRoot;
+		[SerializeField] Transform unexploredRoot;
 
 		[SerializeField] GameObject boundaryColliderRoot;
-		[SerializeField] Transform[] doorAnchors = new Transform[0];
+		[SerializeField] DoorCache[] doorDefinitions = new DoorCache[0];
 		[SerializeField] ColliderCache[] boundaryColliders = new ColliderCache[0];
+		[SerializeField] RoomVisibilityLeaf[] visibilityLeaves = new RoomVisibilityLeaf[0];
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
 		#region Bindings
-		public float TimeOfDay
+		public bool IsRevealed { set => unexploredRoot.gameObject.SetActive(!value); }
+
+		public void UnPlugDoors(params int[] activeDoorIndices)
 		{
-			set
+			foreach (var door in doorDefinitions)
 			{
-				foreach (var light in lights) light.intensity = lightIntensityByTimeOfDay.Evaluate(value);
+				door.Plug.SetActive(!activeDoorIndices.Contains(door.Index));
+			}
+
+			foreach (var visibilityLeaf in visibilityLeaves)
+			{
+				visibilityLeaf.gameObject.SetActive(visibilityLeaf.CalculateVisibility(activeDoorIndices));
 			}
 		}
+		#endregion
 
-		public bool IsRevealed { set => notRevealedRoot.SetActive(!value); }
-
+		#region Reverse Bindings
 		public ColliderCache[] BoundaryColliders => boundaryColliders;
-		public (Vector3 Position, Vector3 Forward)[] DoorAnchors => doorAnchors.Select(d => (d.position, d.forward)).ToArray();
+		public DoorCache[] DoorDefinitions => doorDefinitions;
 		#endregion
 
 		public override void Cleanup()
 		{
 			base.Cleanup();
 
-			TimeOfDay = 0f;
 			IsRevealed = false;
-		}
-
-		void OnDrawGizmosSelected()
-		{
-			if (doorAnchors == null) return;
-
-			Gizmos.color = Color.blue;
-			foreach (var doorAnchor in doorAnchors)
-			{
-				if (doorAnchor == null) continue;
-				Gizmos.DrawRay(doorAnchor.position, doorAnchor.forward);
-			}
+			UnPlugDoors();
 		}
 
 #if UNITY_EDITOR
+		void OnDrawGizmosSelected()
+		{
+			if (!Application.isPlaying) ViewGizmos.DrawDoorGizmo(doorDefinitions);
+		}
+		
 		public void CalculateCachedData()
 		{
 			Undo.RecordObject(this, "Calculate Cached Data");
-			
-			doorAnchors = transform.GetDescendants(c => c.name == "DoorAnchor").ToArray();
 
-			if (notRevealedRoot == null)
+			PrefabId = gameObject.name;
+
+			var doorDefinitionsList = new List<DoorCache>();
+
+			var doorId = 0;
+			foreach (var door in transform.GetDescendants(c => !string.IsNullOrEmpty(c.name) && c.name.StartsWith(Constants.DoorAnchorPrefix)))
 			{
-				Debug.LogError("Unable to calculate room colliders because unexploredRoot is null");
+				if (!door.gameObject.activeInHierarchy) continue;
 				
+				var doorAnchorSizeSerialized = door.name.Substring(Constants.DoorAnchorPrefix.Length, door.name.Length - Constants.DoorAnchorPrefix.Length);
+				if (string.IsNullOrEmpty(doorAnchorSizeSerialized) || !doorAnchorSizeSerialized.Contains(Constants.DoorAnchorSizeTerminator))
+				{
+					Debug.LogError("Unable to parse door anchor size, no terminator detected: "+door.name, door);
+					continue;
+				}
+
+				doorAnchorSizeSerialized = doorAnchorSizeSerialized.Split(Constants.DoorAnchorSizeTerminator).FirstOrDefault();
+
+				if (string.IsNullOrEmpty(doorAnchorSizeSerialized))
+				{
+					Debug.LogError("Unable to parse door anchor size, null or empty result: "+door.name, door);
+					continue;
+				}
+
+				if (!int.TryParse(doorAnchorSizeSerialized, out var doorAnchorSize))
+				{
+					Debug.LogError("Unable to parse door anchor size, could not deserialize: "+door.name, door);
+					continue;
+				}
+
+				var doorPlug = door.parent.GetFirstDescendantOrDefault(d => !string.IsNullOrEmpty(d.name) && d.name.StartsWith(Constants.DoorPlugPrefix));
+
+				if (doorPlug == null)
+				{
+					Debug.LogError("Unable to find a plug for door: "+door.name, door);
+					continue;
+				}
+				
+				doorDefinitionsList.Add(
+					new DoorCache
+					{
+						Index = doorId,
+						Anchor = door,
+						Plug = doorPlug.gameObject,
+						Size = doorAnchorSize
+					}
+				);
+
+				doorId++;
+			}
+
+			doorDefinitions = doorDefinitionsList.ToArray();
+
+			unexploredRoot = unexploredRoot == null ? transform.GetFirstDescendantOrDefault(d => d.name == Constants.UnexploredRoot) : unexploredRoot;
+			
+			if (unexploredRoot == null)
+			{
+				Debug.LogError("Unable to calculate room colliders, could not find: "+Constants.UnexploredRoot);
 				return;
 			}
 			
+			unexploredRoot.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Unexplored));
+			
+			NormalizeMeshColliders(unexploredRoot);
+
+			var unexploredMaterial = Resources.Load<Material>(Constants.UnexploredMaterialPath);
+			
+			if (unexploredMaterial == null) Debug.LogError("Unable to find unexplored material at resources path: "+Constants.UnexploredMaterialPath);
+			else
+			{
+				foreach (var meshRender in unexploredRoot.GetDescendants<MeshRenderer>())
+				{
+					meshRender.sharedMaterial = unexploredMaterial;
+				}
+			}
+
+			foreach (var floorElement in transform.GetDescendants(d => !string.IsNullOrEmpty(d.name) && d.name.Contains(Constants.FloorKeyword)))
+			{
+				floorElement.gameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Floor));	
+			}
+			
+			var geometryRoot = transform.GetFirstDescendantOrDefault(d => d.name == Constants.GeometryRoot);
+			
+			if (geometryRoot == null) Debug.LogError("Unable to find: "+Constants.GeometryRoot);
+			else NormalizeMeshColliders(geometryRoot);
+
 			if (boundaryColliderRoot != null) DestroyImmediate(boundaryColliderRoot);
 			
-			boundaryColliderRoot = new GameObject("BoundaryColliderRoot");
+			boundaryColliderRoot = new GameObject(Constants.BoundaryColliderRoot);
 			boundaryColliderRoot.transform.SetParent(RootTransform);
 
 			var roomCollidersResult = new List<ColliderCache>();
 			
-			foreach (var sourceCollider in notRevealedRoot.transform.GetDescendants<Collider>())
+			foreach (var sourceCollider in unexploredRoot.transform.GetDescendants<Collider>())
 			{
+				if (sourceCollider is MeshCollider meshCollider) meshCollider.convex = true;
 				sourceCollider.isTrigger = true;
 				
 				var duplicateRoot = boundaryColliderRoot.InstantiateChildObject(
@@ -113,21 +205,53 @@ namespace Lunra.Hothouse.Views
 				colliderCache.Rotation = collider.transform.rotation;
 				
 				roomCollidersResult.Add(colliderCache);
-				
-				// duplicateRoot.name = sourceCollider.name;
-
-				/*
-				var roomCollider = new ColliderCache();
-				roomCollider.Collider = collider;
-				roomCollider.Position = collider.transform.position;
-				roomCollider.Scale = collider.transform.lossyScale;
-				roomCollider.Rotation = collider.transform.rotation;
-				
-				roomCollidersResult.Add(roomCollider);
-				*/
 			}
 
 			boundaryColliders = roomCollidersResult.ToArray();
+
+			visibilityLeaves = transform.GetDescendants<RoomVisibilityLeaf>().ToArray();
+			
+			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+		}
+
+		public void ApplyDefaultMaterials()
+		{
+			
+			var defaultFloorMaterial = Resources.Load<Material>(Constants.DefaultFloorMaterialPath);
+			
+			if (defaultFloorMaterial == null) Debug.LogError("Unable to find material at resources path: "+Constants.DefaultFloorMaterialPath);
+			else
+			{
+				foreach (var floorElement in transform.GetDescendants<MeshRenderer>(d => !string.IsNullOrEmpty(d.name) && d.name.Contains(Constants.FloorKeyword)))
+				{
+					if (floorElement.sharedMaterial == defaultFloorMaterial) continue;
+					Undo.RecordObject(floorElement, "Apply Default Materials");
+					floorElement.sharedMaterial = defaultFloorMaterial;
+				}
+			}
+			PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject);
+		}
+
+		void NormalizeMeshColliders(Transform root)
+		{
+			foreach (var mesh in root.GetDescendants<MeshFilter>())
+			{
+				var meshCollider = mesh.GetComponent<MeshCollider>();
+				if (meshCollider == null) continue;
+				if (meshCollider.sharedMesh != null && meshCollider.sharedMesh == mesh.sharedMesh) continue;
+					
+				meshCollider.sharedMesh = mesh.sharedMesh;
+			}
+		}
+
+		public void ToggleSpawnTag()
+		{
+			Undo.RecordObject(this, "Toggle Spawn Tag");
+			
+			if (PrefabTags.Contains(PrefabTagCategories.Room.Spawn)) PrefabTags = PrefabTags.ExceptOne(PrefabTagCategories.Room.Spawn).ToArray();
+			else PrefabTags = PrefabTags.Append(PrefabTagCategories.Room.Spawn).ToArray();
+			
+			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 		}
 #endif
 	}

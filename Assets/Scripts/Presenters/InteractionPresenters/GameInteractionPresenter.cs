@@ -2,6 +2,7 @@ using System;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.StyxMvp;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -196,7 +197,7 @@ namespace Lunra.Hothouse.Presenters
 			roomId = null;
 			if (!HasCollision(out hit, LayerMasks.Floor)) return false;
 
-			var result = hit.transform.GetAncestor<IRoomIdView>();
+			var result = hit.transform.GetAncestor<View>(v => v is IRoomIdView) as IRoomIdView;
 
 			if (result == null) return false;
 

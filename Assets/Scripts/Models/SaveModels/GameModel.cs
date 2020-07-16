@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
+using Lunra.Hothouse.Services;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Lunra.Hothouse.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
+		public TimestampModel GenerationLog { get; } = new TimestampModel();
 		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
 		public ToolbarModel Toolbar { get; } = new ToolbarModel();
 		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();
@@ -24,14 +26,13 @@ namespace Lunra.Hothouse.Models
 		public EventLogModel EventLog { get; } = new EventLogModel();
 		public JobManageModel JobManage { get; } = new JobManageModel();
 
-		public GenericPrefabPoolModel<ItemDropModel> ItemDrops { get; } = new GenericPrefabPoolModel<ItemDropModel>();
+		public ItemDropPoolModel ItemDrops { get; } = new ItemDropPoolModel();
 		public RoomPoolModel Rooms { get; } = new RoomPoolModel();
 		public DoorPoolModel Doors { get; } = new DoorPoolModel();
 		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
 		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
 		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
 		public FloraPoolModel Flora { get; } = new FloraPoolModel();
-		public ObligationIndicatorPoolModel ObligationIndicators { get; } = new ObligationIndicatorPoolModel();
 		public SeekerPoolModel Seekers { get; } = new SeekerPoolModel();
 
 		[JsonProperty] float desireDamageMultiplier = 1f;
@@ -62,6 +63,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region NonSerialized
+		[JsonIgnore] public NameGenerator DwellerNames { get; } = new NameGenerator();
 		[JsonIgnore] public GameInteractionModel Interaction { get; } = new GameInteractionModel();
 		[JsonIgnore] public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
 		[JsonIgnore] public float SimulationDelta => Time.deltaTime;

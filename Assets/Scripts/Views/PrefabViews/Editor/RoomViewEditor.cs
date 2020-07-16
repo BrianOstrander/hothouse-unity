@@ -1,3 +1,4 @@
+using System.Linq;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
 using Lunra.NumberDemon;
@@ -28,6 +29,16 @@ namespace Lunra.Hothouse.Views.Editor
 					if (GUILayout.Button("Recache", GUILayout.ExpandWidth(false)))
 					{
 						typedTarget.CalculateCachedData();
+					}
+					
+					if (GUILayout.Button("Default Materials", GUILayout.ExpandWidth(false)))
+					{
+						typedTarget.ApplyDefaultMaterials();
+					}
+
+					if (GUILayout.Button("Is Spawn <b>" + (typedTarget.PrefabTags.Contains(PrefabTagCategories.Room.Spawn) ? "True" : "False") + "</b>", EditorStylesExtensions.ButtonRichText, GUILayout.ExpandWidth(false)))
+					{
+						typedTarget.ToggleSpawnTag();
 					}
 				}
 				GUIExtensions.PopEnabled();

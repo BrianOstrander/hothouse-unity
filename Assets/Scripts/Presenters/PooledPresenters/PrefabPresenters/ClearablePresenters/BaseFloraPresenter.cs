@@ -3,6 +3,7 @@ using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
+using Lunra.StyxMvp;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -82,7 +83,7 @@ namespace Lunra.Hothouse.Presenters
 				return;
 			}
 			
-			TryReproducing();
+			TryReproducing(out _);
 		}
 		#endregion
 
@@ -104,23 +105,31 @@ namespace Lunra.Hothouse.Presenters
 			if (View.Visible) Game.Effects.Queued.Enqueue(new EffectsModel.Request(Model.Transform.Position.Value, View.DeathEffectId));
 		}
 
-		bool OnFloraTriggerReproduction(Demon generatorOverride)
+		FloraModel OnFloraTriggerReproduction(Demon generatorOverride)
 		{
-			return TryReproducing(
+			TryReproducing(
+				out var offspring,
 				ReproductionEvents.ReproduceAdult,
+				false,
 				false,
 				generatorOverride
 			);
+
+			return offspring;
 		}
 		#endregion
 		
 		#region Utility
 		bool TryReproducing(
+			out FloraModel offspring,
 			ReproductionEvents reproductionEvent = ReproductionEvents.Default,
 			bool incrementFailures = true,
+			bool spreadDamageEnabled = true,
 			Demon generatorOverride = null
 		)
 		{
+			offspring = null;
+			
 			if (reproductionEvent == ReproductionEvents.Default) reproductionEvent = DefaultReproductionEvent;
 			
 			var currentGenerator = generatorOverride ?? generator;
@@ -158,22 +167,21 @@ namespace Lunra.Hothouse.Presenters
 
 							if (hasFloorHit)
 							{
-								var roomView = floorHit.transform.GetAncestor<IRoomIdView>();
-								if (roomView != null)
+								if (floorHit.transform.GetAncestor<View>(v => v is IRoomIdView) is IRoomIdView roomView)
 								{
 									increaseReproductionFailures = false;
 
 									switch (reproductionEvent)
 									{
 										case ReproductionEvents.ReproduceChild:
-											Game.Flora.ActivateChild(
+											offspring = Game.Flora.ActivateChild(
 												Model.Species.Value,
 												roomView.RoomId,
 												hit.position
 											);
 											break;
 										case ReproductionEvents.ReproduceAdult:
-											Game.Flora.ActivateAdult(
+											offspring = Game.Flora.ActivateAdult(
 												Model.Species.Value,
 												roomView.RoomId,
 												hit.position
@@ -195,8 +203,8 @@ namespace Lunra.Hothouse.Presenters
 					}
 				}
 			}
-
-			if (increaseReproductionFailures && 0f < Model.SpreadDamage.Value)
+			
+			if (spreadDamageEnabled && increaseReproductionFailures && 0f < Model.SpreadDamage.Value)
 			{
 				var nearestFloraOfDifferentSpecies = Game.Flora.AllActive
 					.Where(

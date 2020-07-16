@@ -8,35 +8,17 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void OnInitialize()
 		{
-			var timeoutState = new TimeoutState<IdleState>();
-			
 			AddChildStates(
-				timeoutState	
-			);
-			AddTransitions(
-				new DropItemsTransition<IdleState>(timeoutState)
+				new LaborerState<IdleState>(),
+				new StockpilerState<IdleState>(),
+				new SmokerState<IdleState>()
 			);
 			
-			InstantiateJob<ClearerJobState>();
-			InstantiateJob<ConstructionJobState>();
-			InstantiateDesire<SleepDesireState>();
-			InstantiateDesire<EatDesireState>();
-		}
-
-		void InstantiateJob<S>()
-			where S : JobState<S>, new()
-		{
-			var state = new S();
-			AddChildStates(state);
-			AddTransitions(state.GetToJobOnShiftBegin);
-		}
-		
-		void InstantiateDesire<S>()
-			where S : DesireState<S>, new()
-		{
-			var state = new S();
-			AddChildStates(state);
-			AddTransitions(new DesireState<S>.ToDesireOnShiftEnd(state));
+			AddTransitions(
+				new LaborerState<IdleState>.ToJobOnShiftBegin(),
+				new StockpilerState<IdleState>.ToJobOnShiftBegin(),
+				new SmokerState<IdleState>.ToJobOnShiftBegin()
+			);
 		}
 	}
 }

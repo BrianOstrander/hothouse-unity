@@ -24,4 +24,15 @@ namespace Lunra.Hothouse.Models
 			Rotation = new ListenerProperty<Quaternion>(value => rotation = value, () => rotation);
 		}
 	}
+
+	public static class ITransformModelExtensions
+	{
+		public static float DistanceTo(
+			this ITransformModel begin,
+			ITransformModel end
+		)
+		{
+			return Vector3.Distance(begin.Transform.Position.Value, end.Transform.Position.Value);
+		}
+	}
 }

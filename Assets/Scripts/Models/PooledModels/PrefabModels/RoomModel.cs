@@ -14,11 +14,15 @@ namespace Lunra.Hothouse.Models
         [JsonIgnore] public ListenerProperty<bool> IsSpawn { get; }
         [JsonProperty] int spawnDistance;
         [JsonIgnore] public ListenerProperty<int> SpawnDistance { get; }
+        [JsonProperty] float spawnDistanceNormalized;
+        [JsonIgnore] public ListenerProperty<float> SpawnDistanceNormalized { get; }
         
         [JsonProperty] bool isRevealed;
         [JsonIgnore] public ListenerProperty<bool> IsRevealed { get; }
         [JsonProperty] int revealDistance;
         [JsonIgnore] public ListenerProperty<int> RevealDistance { get; }
+        [JsonProperty] int[] unpluggedDoors = new int[0];
+        [JsonIgnore] public ListenerProperty<int[]> UnPluggedDoors { get; }
         
         public BoundaryComponent Boundary { get; } = new BoundaryComponent();
         #endregion
@@ -35,9 +39,11 @@ namespace Lunra.Hothouse.Models
         {
             IsSpawn = new ListenerProperty<bool>(value => isSpawn = value, () => isSpawn);
             SpawnDistance = new ListenerProperty<int>(value => spawnDistance = value, () => spawnDistance);
+            SpawnDistanceNormalized = new ListenerProperty<float>(value => spawnDistanceNormalized = value, () => spawnDistanceNormalized);
             
             IsRevealed = new ListenerProperty<bool>(value => isRevealed = value, () => isRevealed);
             RevealDistance = new ListenerProperty<int>(value => revealDistance = value, () => revealDistance);
+            UnPluggedDoors = new ListenerProperty<int[]>(value => unpluggedDoors = value, () => unpluggedDoors);
             
             AdjacentRoomIds = new ListenerProperty<ReadOnlyDictionary<string, bool>>(value => adjacentRoomIds = value, () => adjacentRoomIds);
         }

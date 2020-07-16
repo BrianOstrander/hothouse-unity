@@ -10,10 +10,33 @@ namespace Lunra.Hothouse.Models
 {
 	public static class Navigation
 	{
+		public static bool TryQuery(
+			IModel model,
+			out Query query
+		)
+		{
+			switch (model)
+			{
+				case IEnterableModel modelEnterable:
+					query = QueryEntrances(modelEnterable);
+					break;
+				case IAgentInventoryModel modelAgent:
+					query = QueryOrigin(modelAgent);
+					break;
+				default:
+					Debug.LogError("Unrecognized type: "+model.GetType());
+					query = default;
+					return false;
+			}
+
+			return true;
+		}
+		
 		public static Query QueryOrigin(ITransformModel model)
 		{
 			return new Query(
-				model.Transform.Position.Value
+				model.Transform.Position.Value,
+				model
 			);
 		}
 		
@@ -24,6 +47,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return new Query(
 				model.Transform.Position.Value,
+				model,
 				getTargets: () => model.Enterable.Entrances.Value
 					.Where(e => entranceValidation?.Invoke(e) ?? (e.IsNavigable && e.State == Entrance.States.Available))
 					.Select(e => e.Position)
@@ -37,6 +61,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return new Query(
 				model.Transform.Position.Value,
+				model,
 				model.Boundary.Radius.Value + radiusBonus,
 				validate: validation =>
 				{
@@ -61,18 +86,21 @@ namespace Lunra.Hothouse.Models
 		public struct Query
 		{
 			public Vector3 Origin { get; }
+			public IModel TargetModel { get; }
 			public float MaximumRadius { get; }
 			public Func<Vector3, IEnumerable<Vector3>> GetTargets { get; }
 			public Func<Validation, Result> Validate { get; }
 
 			public Query(
 				Vector3 origin,
+				IModel targetModel,
 				float maximumRadius = 0f,
 				Func<IEnumerable<Vector3>> getTargets = null,
 				Func<Validation, Result> validate = null
 			)
 			{
 				Origin = origin;
+				TargetModel = targetModel;
 				MaximumRadius = maximumRadius;
 
 				if (getTargets == null)
@@ -106,6 +134,7 @@ namespace Lunra.Hothouse.Models
 		public struct Validation
 		{
 			public Vector3 Origin { get; }
+			public IModel TargetModel { get; }
 			public Vector3 Target { get; }
 			public NavMeshPath Path { get; }
 
@@ -119,6 +148,7 @@ namespace Lunra.Hothouse.Models
 			)
 			{
 				Origin = query.Origin;
+				TargetModel = query.TargetModel;
 				Target = target;
 				Path = path;
 
@@ -143,6 +173,7 @@ namespace Lunra.Hothouse.Models
 		public struct Result
 		{
 			public Vector3 Origin { get; }
+			public IModel TargetModel { get; }
 			public Vector3 Target { get; }
 			public NavMeshPath Path { get; }
 			public bool IsValid { get; }
@@ -153,6 +184,7 @@ namespace Lunra.Hothouse.Models
 			)
 			{
 				Origin = validation.Origin;
+				TargetModel = validation.TargetModel;
 				Target = validation.Target;
 				Path = validation.Path;
 				IsValid = isValid;

@@ -10,6 +10,8 @@ namespace Lunra.Hothouse.Models
 	public class DwellerModel : AgentModel
 	{
 		#region Serialized
+		[JsonProperty] string name;
+		[JsonIgnore] public ListenerProperty<string> Name { get; }
 		[JsonProperty] Jobs job;
 		[JsonIgnore] public ListenerProperty<Jobs> Job { get; }
 
@@ -50,10 +52,15 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] int lowRationThreshold;
 		[JsonIgnore] public ListenerProperty<int> LowRationThreshold { get; }
+
+		[JsonProperty] InstanceId bed = InstanceId.Null();
+		[JsonIgnore] public  ListenerProperty<InstanceId> Bed { get; }
+		
+		[JsonProperty] InstanceId workplace = InstanceId.Null();
+		[JsonIgnore] public  ListenerProperty<InstanceId> Workplace { get; }
 		#endregion
 		
 		#region Non Serialized
-
 		[JsonIgnore] public Action<Desires, bool> DesireUpdated = ActionExtensions.GetEmpty<Desires, bool>();
 		#endregion
 
@@ -67,6 +74,7 @@ namespace Lunra.Hothouse.Models
 		
 		public DwellerModel()
 		{
+			Name = new ListenerProperty<string>(value => name = value, () => name);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
 			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);
@@ -81,6 +89,8 @@ namespace Lunra.Hothouse.Models
 			ObligationMinimumConcentrationDuration = new ListenerProperty<float>(value => obligationMinimumConcentrationDuration = value, () => obligationMinimumConcentrationDuration);
 			TransferDistance = new ListenerProperty<float>(value => transferDistance = value, () => transferDistance);
 			LowRationThreshold = new ListenerProperty<int>(value => lowRationThreshold = value, () => lowRationThreshold);
+			Bed = new ListenerProperty<InstanceId>(value => bed = value, () => bed);
+			Workplace = new ListenerProperty<InstanceId>(value => workplace = value, () => workplace);
 		}
 	}
 }

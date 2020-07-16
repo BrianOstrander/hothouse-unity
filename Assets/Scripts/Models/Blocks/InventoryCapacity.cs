@@ -42,6 +42,12 @@ namespace Lunra.Hothouse.Models
 			0,
 			inventoryMaximum
 		);
+		
+		public static InventoryCapacity ByIndividualWeight(params (Inventory.Types Type, int Weight)[] entries) => new InventoryCapacity(
+			Clamps.IndividualWeight,
+			0,
+			Inventory.FromEntries(entries)
+		);
 
 		public readonly Clamps Clamping;
 		[JsonProperty] readonly int weightMaximum;
@@ -77,6 +83,20 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		public bool IsNotFull(Inventory inventory) => !IsFull(inventory);
+
+		public bool HasCapacityFor(
+			Inventory inventory0,
+			Inventory inventory1
+		)
+		{
+			foreach (var entry in inventory1.Entries)
+			{
+				if (entry.Weight == 0) continue;
+				if (HasCapacityFor(inventory0, entry.Type)) return true;
+			}
+
+			return false;
+		}
 
 		public bool HasCapacityFor(
 			Inventory inventory,
@@ -154,6 +174,12 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		
+		/// <summary>
+		/// Gets the remaining capacity assuming the inventory is already filled with the specified items.
+		/// </summary>
+		/// <remarks>No negative inventories are returned by this.</remarks>
+		/// <param name="inventory"></param>
+		/// <returns>All items that could be added to the inventory without going over the capacity.</returns>
 		public Inventory GetCapacityFor(Inventory inventory)
 		{
 			switch (Clamping)
@@ -184,6 +210,15 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		
+		/// <summary>
+		/// Gets the remaining capacity assuming the inventory is already filled with the specified items.
+		/// </summary>
+		/// <remarks>No negative inventories are returned by this.</remarks>
+		/// <param name="inventory"></param>
+		/// <param name="type"></param>
+		/// <returns>
+		/// Number of items of the specified type that could be added to the inventory without going over capacity.
+		/// </returns>
 		public int GetCapacityFor(
 			Inventory inventory,
 			Inventory.Types type

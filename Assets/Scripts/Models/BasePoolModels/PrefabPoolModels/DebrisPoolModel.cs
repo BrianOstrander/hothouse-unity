@@ -10,7 +10,7 @@ namespace Lunra.Hothouse.Models
 {
 	public class DebrisPoolModel : BasePrefabPoolModel<DebrisModel>
 	{
-		static readonly string[] ValidPrefabIds = new[]
+		public readonly string[] ValidPrefabIds =
 		{
 			"debris_small",
 			"debris_large"
@@ -27,29 +27,30 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public DebrisModel Activate(
+			string prefabId,
 			string roomId,
-			Vector3 position
+			Vector3 position,
+			Quaternion rotation
 		)
 		{
 			var result = Activate(
-				ValidPrefabIds.Random(),
+				prefabId,
 				roomId,
 				position,
-				RandomRotation,
+				rotation,
 				model => Reset(model)
 			);
 			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 		
-		Quaternion RandomRotation => Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
-
 		void Reset(
 			DebrisModel model
 		)
 		{
-			model.Clearable.Reset();
 			model.Health.ResetToMaximum(10f);
+			model.Obligations.Reset();
+			model.Enterable.Reset();
 			model.Clearable.ItemDrops.Value = new Inventory(
 				new Dictionary<Inventory.Types, int>
 				{

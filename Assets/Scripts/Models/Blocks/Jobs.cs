@@ -4,8 +4,8 @@ namespace Lunra.Hothouse.Models
 	{
 		Unknown = 0,
 		None = 10,
-		Clearer = 20,
-		Construction = 30,
-		Stoker = 40
+		Laborer = 20,
+		Stockpiler = 30,
+		Smoker = 40
 	}
 }

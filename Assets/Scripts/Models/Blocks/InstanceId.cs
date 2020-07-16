@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -35,6 +37,12 @@ namespace Lunra.Hothouse.Models
 					return Types.Door;
 				case SeekerModel _:
 					return Types.Seeker;
+				case DebrisModel _:
+					return Types.Debris;
+				case ItemDropModel _:
+					return Types.ItemDrop;
+				case BaseInventoryComponent _:
+					return Types.Inventory;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -50,7 +58,10 @@ namespace Lunra.Hothouse.Models
 			Building = 40,
 			Room = 50,
 			Door = 60,
-			Seeker = 70
+			Seeker = 70,
+			Debris = 80,
+			ItemDrop = 90,
+			Inventory = 100
 		}
 
 		public Types Type { get; }
@@ -129,6 +140,15 @@ namespace Lunra.Hothouse.Models
 				case Types.Seeker:
 					cachedInstance = game.Seekers.FirstOrDefaultActive(Id);
 					break;
+				case Types.Debris:
+					cachedInstance = game.Debris.FirstOrDefaultActive(Id);
+					break;
+				case Types.ItemDrop:
+					cachedInstance = game.ItemDrops.FirstOrDefaultActive(Id);
+					break;
+				case Types.Inventory:
+					cachedInstance = GetFirstOrDefault(game.GetInventories(), Id);
+					break;
 				default:
 					Debug.LogError("Unrecognized type: " + Type);
 					return false;
@@ -136,10 +156,18 @@ namespace Lunra.Hothouse.Models
 
 			instance = cachedInstance as T;
 
-			if (instance == null) Debug.LogError("Successfully found a "+Type+" but was unable to convert it to "+typeof(T));
+			if (instance == null)
+			{
+				Debug.LogError("Successfully found a "+Type+" but was unable to convert it to "+typeof(T));
+				Debug.Break();
+			}
 			
 			return instance != null;
 		}
+
+		IModel GetFirstOrDefault(IEnumerable<IModel> models, string id) => models.FirstOrDefault(m => m.Id.Value == id);
+
+		public override string ToString() => Model.ShortenId(Id) + " : " + Type + " [ " + (cachedInstance == null ? "unknown" : cachedInstance.GetType().Name) + " ]";
 	}
 
 	public static class InstanceIdExtensions

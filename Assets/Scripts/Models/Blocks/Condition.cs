@@ -162,13 +162,13 @@ namespace Lunra.Hothouse.Models
 				
 				// Inventory
 				case Types.NoRations:
-					return game.Cache.Value.GlobalInventory[Inventory.Types.Rations] <= 0;
+					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Rations] <= 0;
 				case Types.NoStalks: 
-					return game.Cache.Value.GlobalInventory[Inventory.Types.Stalks] <= 0;
+					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.StalkDry] <= 0;
 				case Types.NoScrap: 
-					return game.Cache.Value.GlobalInventory[Inventory.Types.Scrap] <= 0;
+					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Scrap] <= 0;
 				case Types.LowRations:
-					return game.Cache.Value.GlobalInventory[Inventory.Types.Rations] <= game.Cache.Value.LowRationThreshold;
+					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Rations] <= game.Cache.Value.LowRationThreshold;
 				
 				// Environment
 				case Types.ZeroDoorsOpen:
@@ -181,7 +181,7 @@ namespace Lunra.Hothouse.Models
 				// Flora
 				case Types.SeenStalksFlora:
 					return getCachedTrueOrCalculate(
-						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Grass && m.LightSensitive.IsLit)
+						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Stalks && m.LightSensitive.IsLit)
 					);
 				case Types.SeenEdibleFlora:
 					return getCachedTrueOrCalculate(

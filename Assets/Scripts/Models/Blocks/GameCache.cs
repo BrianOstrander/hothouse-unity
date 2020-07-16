@@ -14,8 +14,13 @@ namespace Lunra.Hothouse.Models
 			var result = new GameCache();
 			
 			result.LastUpdated = TimeSpan.Zero;
-			result.GlobalInventory = Inventory.Empty;
-			result.GlobalInventoryCapacity = InventoryCapacity.None();
+			result.Population = 0;
+			result.GlobalItemDropsAvailable = Inventory.Empty;
+			result.GlobalInventory = new InventoryComponent();
+			result.GlobalInventory.Reset(InventoryPermission.AllForAnyJob(), InventoryCapacity.None());
+			result.AnyItemDropsAvailableForPickup = false;
+			result.UniqueObligationsAvailable = new string[0];
+			result.AnyObligationsAvailable = false;
 			result.LowRationThreshold = 0;
 			result.Conditions = new Dictionary<Condition.Types, bool>().ToReadonlyDictionary();
 			
@@ -23,28 +28,63 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		public TimeSpan LastUpdated { get; private set; }
-		public Inventory GlobalInventory { get; private set; }
-		public InventoryCapacity GlobalInventoryCapacity { get; private set; }
+		public int Population { get; private set; }
+		
+		public InventoryComponent GlobalInventory { get; private set; }
+		public Inventory GlobalItemDropsAvailable { get; private set; }
+		public bool AnyItemDropsAvailableForPickup { get; private set; }
+		public string[] UniqueObligationsAvailable { get; private set; }
+		public bool AnyObligationsAvailable { get; private set; }
 		public int LowRationThreshold { get; private set; }
 		public ReadOnlyDictionary<Condition.Types, bool> Conditions { get; private set; }
 
 		public GameCache Calculate(GameModel game)
 		{
-			var result = new GameCache();
+			var result = Default();
 
 			result.LastUpdated = game.PlaytimeElapsed.Value;
 
-			var globalInventory = Inventory.Empty;
-			var globalInventoryMaximumByIndividualWeight = Inventory.Empty;
+			result.Population = game.Dwellers.AllActive.Length;
+
+			var globalInventoryAll = Inventory.Empty;
+			var globalInventoryAllCapacity = Inventory.Empty;
+			var globalInventoryForbidden = Inventory.Empty;
+			var globalInventoryReserved = Inventory.Empty;
 			
-			foreach (var building in game.Buildings.AllActive.Where(b => b.IsBuildingState(BuildingStates.Operating) && !b.Light.IsLight.Value))
+			foreach (var model in game.Buildings.AllActive.Where(b => b.IsBuildingState(BuildingStates.Operating) && b.Enterable.AnyAvailable()))
 			{
-				globalInventory += building.Inventory.Value;
-				globalInventoryMaximumByIndividualWeight += building.InventoryCapacity.Value.GetMaximum();
+				globalInventoryAll += model.Inventory.All.Value;
+				globalInventoryAllCapacity += model.Inventory.AllCapacity.Value.GetMaximum();
+				globalInventoryForbidden += model.Inventory.Forbidden.Value;
+				globalInventoryReserved += model.Inventory.ReservedCapacity.Value.GetMaximum();
 			}
 
-			result.GlobalInventory = globalInventory;
-			result.GlobalInventoryCapacity = InventoryCapacity.ByIndividualWeight(globalInventoryMaximumByIndividualWeight);
+			result.GlobalInventory.Reset(
+				InventoryPermission.AllForAnyJob(),
+				InventoryCapacity.ByIndividualWeight(globalInventoryAllCapacity)
+			);
+			result.GlobalInventory.Add(globalInventoryAll);
+			result.GlobalInventory.AddForbidden(globalInventoryForbidden);
+			result.GlobalInventory.AddReserved(globalInventoryReserved);
+
+			foreach (var model in game.ItemDrops.AllActive)
+			{
+				result.GlobalItemDropsAvailable += model.Inventory.Available.Value;
+			}
+
+			if (!result.GlobalItemDropsAvailable.IsEmpty)
+			{
+				result.AnyItemDropsAvailableForPickup = result.GlobalInventory.AvailableCapacity.Value
+					.HasCapacityFor(result.GlobalInventory.Available.Value, result.GlobalItemDropsAvailable);
+			}
+
+			result.UniqueObligationsAvailable = game.GetObligations()
+				.SelectMany(m => m.Obligations.All.Value.Available)
+				.Select(o => o.Type)
+				.Distinct()
+				.ToArray();
+
+			result.AnyObligationsAvailable = UniqueObligationsAvailable.Any();
 			
 			result.LowRationThreshold = game.Dwellers.AllActive.Sum(d => d.LowRationThreshold.Value);
 

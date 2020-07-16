@@ -62,7 +62,8 @@ namespace Lunra.Hothouse.Views
 		public void AddRoomDefinition(
 			string prefabId,
 			ColliderCache[] roomColliders,
-			(Vector3 Position, Vector3 Forward)[] doorAnchors
+			DoorCache[] doorAnchors,
+			string[] prefabTags
 		)
 		{
 			roomDefinitions.Add(
@@ -71,14 +72,16 @@ namespace Lunra.Hothouse.Views
 					CollisionResolverDefinitionLeaf.Types.Room,
 					prefabId,
 					roomColliders,
-					doorAnchors
+					doorAnchors,
+					prefabTags
 				)	
 			);
 		}
 		
 		public void AddDoorDefinition(
 			string prefabId,
-			(Vector3 Position, Vector3 Forward)[] doorAnchors
+			DoorCache[] doorAnchors,
+			string[] prefabTags
 		)
 		{
 			doorDefinitions.Add(
@@ -87,7 +90,8 @@ namespace Lunra.Hothouse.Views
 					CollisionResolverDefinitionLeaf.Types.Door,
 					prefabId,
 					null,
-					doorAnchors
+					doorAnchors,
+					prefabTags
 				)	
 			);
 		}
@@ -97,7 +101,8 @@ namespace Lunra.Hothouse.Views
 			CollisionResolverDefinitionLeaf.Types type,
 			string prefabId,
 			ColliderCache[] roomColliders,
-			(Vector3 Position, Vector3 Forward)[] doorAnchors
+			DoorCache[] doorAnchors,
+			string[] prefabTags
 		)
 		{
 			var definition = RootGameObject.InstantiateChild(
@@ -113,7 +118,8 @@ namespace Lunra.Hothouse.Views
 				type,
 				prefabId,
 				roomColliders,
-				doorAnchors
+				doorAnchors,
+				prefabTags
 			);
 
 			return definition;
@@ -200,7 +206,7 @@ namespace Lunra.Hothouse.Views
 			
 			var root = WorkspaceInstantiate(
 				roomDefinitions,
-				r => 4 <= r.DoorAnchors.Length
+				r => r.PrefabTags.Contains(PrefabTagCategories.Room.Spawn)
 			);
 
 			if (root == null)
@@ -236,6 +242,8 @@ namespace Lunra.Hothouse.Views
 					instance.transform.position,
 					instance.transform.rotation
 				);
+
+				model.PrefabTags.Value = instance.PrefabTags;
 				
 				rooms.Add(model);
 			}
@@ -250,6 +258,8 @@ namespace Lunra.Hothouse.Views
 					instance.transform.position,
 					instance.transform.rotation
 				);
+				
+				model.PrefabTags.Value = instance.PrefabTags;
 
 				foreach (var room in rooms.Where(r => model.IsConnnecting(r.Id.Value)))
 				{
@@ -263,8 +273,24 @@ namespace Lunra.Hothouse.Views
 						kv => kv.Key,
 						kv => kv.Value
 					);
-				}
 
+					try
+					{
+						var roomReference = workspaceCache.Rooms.First(m => m.Id == room.RoomTransform.Id.Value);
+						var closestIndex = roomReference.DoorAnchors
+							.OrderBy(
+								d => Mathf.Min(
+									Vector3.Distance(d.Anchor.position, instance.DoorAnchors.First().Anchor.position),
+									Vector3.Distance(d.Anchor.position, instance.DoorAnchors.Last().Anchor.position)
+								)
+							)
+							.First();
+
+						room.UnPluggedDoors.Value = room.UnPluggedDoors.Value.Append(closestIndex.Index).ToArray();
+					}
+					catch (Exception e) { Debug.LogException(e); }
+				}
+				
 				doors.Add(model);
 			}
 
@@ -286,7 +312,11 @@ namespace Lunra.Hothouse.Views
 			{
 				var possibleRoom = WorkspaceInstantiate(
 					roomDefinitions,
-					r => !invalidRoomIds.Contains(r.PrefabId),
+					r =>
+					{
+						if (invalidRoomIds.Contains(r.PrefabId)) return false;
+						return r.DoorAnchors.Any(d => d.Size == originDoor.DoorAnchorSizeMaximum);
+					},
 					true
 				);
 
@@ -294,24 +324,22 @@ namespace Lunra.Hothouse.Views
 				
 				invalidRoomIds.Add(possibleRoom.PrefabId);
 
-				yield return new WaitForFixedUpdate();
+				// yield return new WaitForFixedUpdate();
 
 				for (var doorIndex = 0; doorIndex < possibleRoom.DoorAnchors.Length; doorIndex++)
 				{
 					var door = possibleRoom.DoorAnchors[doorIndex];
+
+					if (door.Size != originDoor.DoorAnchorSizeMaximum) continue;
 					
 					possibleRoom.Dock(
 						door,
 						originDoor.DoorAnchors.Last()
 					);
-
-					yield return new WaitForFixedUpdate();
 					
-					// for (var c = 0; c < possibleRoom.Colliders.Length * 2; c++)
-					// {
-					// 	yield return new WaitForFixedUpdate();
-					// 	if (possibleRoom.HasCollisions()) break;
-					// }
+					// Investigate speeding up map generation by using translate instead of waiting for a fixed update.
+					// door.Anchor.Translate(Vector3.zero);
+					yield return new WaitForFixedUpdate();
 
 					if (!possibleRoom.HasCollisions())
 					{
@@ -364,7 +392,16 @@ namespace Lunra.Hothouse.Views
 				
 				if (!string.IsNullOrEmpty(roomDoorOpening.Id)) continue;
 
-				var door = WorkspaceInstantiate(doorDefinitions);
+				var door = WorkspaceInstantiate(
+					doorDefinitions,
+					d => roomDoorOpening.Size == d.DoorAnchorSizeMaximum
+				);
+
+				if (door == null)
+				{
+					Debug.LogError("Unable to find a door that is " + roomDoorOpening.Size + " meters wide");
+					continue;
+				}
 
 				door.Dock(
 					door.DoorAnchors.First(),

@@ -65,7 +65,13 @@ namespace Lunra.Hothouse.Views
 						Mathf.Lerp(box.bounds.min.y, box.bounds.max.y, 0.5f),
 						generator.GetNextFloat(box.bounds.min.z, box.bounds.max.z)
 					);
-					
+					break;
+				case MeshCollider _:
+					center = new Vector3(
+						generator.GetNextFloat(collider.bounds.min.x, collider.bounds.max.x),
+						Mathf.Lerp(collider.bounds.min.y, collider.bounds.max.y, 0.5f),
+						generator.GetNextFloat(collider.bounds.min.z, collider.bounds.max.z)
+					);
 					break;
 				default:
 					Debug.LogError("Unrecognized type: "+collider.GetType());

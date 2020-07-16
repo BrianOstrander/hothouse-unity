@@ -5,6 +5,6 @@ namespace Lunra.Hothouse.Views
 {
 	public interface IEnterableView : IView
 	{
-		Vector3[] Entrances { get; }
+		Transform[] Entrances { get; }
 	}
 }

@@ -44,7 +44,7 @@ namespace Lunra.Hothouse.Models
 		bool isReproducing;
 		[JsonIgnore] public DerivedProperty<bool, int, int> IsReproducing { get; }
 
-		[JsonIgnore] public Func<Demon, bool> TriggerReproduction;
+		[JsonIgnore] public Func<Demon, FloraModel> TriggerReproduction;
 		#endregion
 		
 		public FloraModel()

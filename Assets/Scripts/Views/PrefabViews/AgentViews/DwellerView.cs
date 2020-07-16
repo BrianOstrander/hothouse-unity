@@ -39,6 +39,8 @@ namespace Lunra.Hothouse.Views
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		[FormerlySerializedAs("desireParticles")] [SerializeField] DesireParticles[] desires;
+		[SerializeField] Transform throwRoot;
+		[SerializeField] ParticleSystem glowstickParticles;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
@@ -47,6 +49,12 @@ namespace Lunra.Hothouse.Views
 		{
 			desires.FirstOrDefault(d => d.Desire == desire).Play(filled);
 		}
+		
+		public void LaunchGlowstick(Vector3 direction)
+		{
+			throwRoot.transform.forward = direction;
+			glowstickParticles.Emit(1);
+		}
 		#endregion
 		
 		public override void Cleanup()
@@ -54,6 +62,14 @@ namespace Lunra.Hothouse.Views
 			base.Cleanup();
 			
 			foreach (var desire in desires) desire.Stop();
+			
+			glowstickParticles.Stop();
+		}
+
+		void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawLine(throwRoot.position, throwRoot.position + (throwRoot.forward * 2f));
 		}
 	}
 }

@@ -34,24 +34,44 @@ namespace Lunra.Hothouse.Editor
 		public override void OnGUI(string searchContext)
 		{
 			if (GUILayout.Button(Content.OpenInspectorHandler)) SceneInspectionHandler.OpenHandlerAsset();
+			
 			SceneInspectionSettings.IsInspecting.Draw();
-			SceneInspectionSettings.IsInspectingBuildings.Draw();
-			SceneInspectionSettings.IsInspectingEntrances.Draw();
 			
-			SceneInspectionSettings.IsInspectingDwellers.Draw();
-			OnDwellersGui();
-			SceneInspectionSettings.IsInspectingOtherAgents.Draw();
-			
-			SceneInspectionSettings.IsInspectingFlora.Draw();
-			SceneInspectionSettings.IsInspectingItemDrops.Draw();
-			SceneInspectionSettings.IsInspectingLightLevels.Draw();
-			SceneInspectionSettings.IsInspectingObligations.Draw();
-			SceneInspectionSettings.IsInspectingRooms.Draw();
-			SceneInspectionSettings.IsInspectingDoors.Draw();
+			GUIExtensions.PushEnabled(SceneInspectionSettings.IsInspecting.Value);
+			{
+				GUILayout.BeginHorizontal();
+				{
+					GUILayout.BeginVertical();
+					{
+						SceneInspectionSettings.IsInspectingBuildings.Draw();
+						SceneInspectionSettings.IsInspectingDwellers.Draw();
+						SceneInspectionSettings.IsInspectingOtherAgents.Draw();
+						SceneInspectionSettings.IsInspectingFlora.Draw();
+						SceneInspectionSettings.IsInspectingItemDrops.Draw();
+						SceneInspectionSettings.IsInspectingRooms.Draw();
+						SceneInspectionSettings.IsInspectingDoors.Draw();
+					}
+					GUILayout.EndVertical();
+
+					GUILayout.BeginVertical();
+					{
+						SceneInspectionSettings.IsInspectingEntrances.Draw();
+						SceneInspectionSettings.IsInspectingLightLevels.Draw();
+						SceneInspectionSettings.IsInspectingObligations.Draw();
+					}
+					GUILayout.EndVertical();
+				}
+				GUILayout.EndHorizontal();
+				
+				OnDwellersGui();
+			}
+			GUIExtensions.PopEnabled();
+
 		}
 
 		void OnDwellersGui()
 		{
+			if (!SceneInspectionSettings.IsInspecting.Value) return;
 			if (!SceneInspectionSettings.IsInspectingDwellers.Value) return;
 			if (!GameStateEditorUtility.GetGameState(out var gameState)) return;
 			

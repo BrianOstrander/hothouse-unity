@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
@@ -57,213 +58,21 @@ namespace Lunra.Hothouse.Editor
 
 			obligationIdsHandled.Clear();
 
-			if (SceneInspectionSettings.IsInspectingBuildings.Value)
+			var roomRevealDistances = gameState.Payload.Game.Rooms.AllActive.ToDictionary(
+				m => m.RoomTransform.Id.Value,
+				m => m.RevealDistance.Value
+			);
+
+			bool isInInspectedRoom(IRoomTransformModel model)
 			{
-				foreach (var model in gameState.Payload.Game.Buildings.AllActive)
+				if (roomRevealDistances[model.RoomTransform.Id.Value] == 0) return true;
+				if (model is DoorModel doorModel)
 				{
-					var label = GetIdLabel(model);
-
-					if (model.BuildingState.Value != BuildingStates.Operating)
-					{
-						label += "\nState: " + model.BuildingState.Value;
-					}
-					
-					if (SceneInspectionSettings.IsInspectingRooms.Value)
-					{
-						label += "\nRoomId: " + model.RoomTransform.Id.Value;
-					}
-
-					if (model.Health.IsDamaged)
-					{
-						label += "\nHealth: " + model.Health.Current.Value + " / " + model.Health.Maximum.Value;
-						if (model.Health.IsDestroyed) label += " - " + StringExtensions.Wrap("Dead", "<color=red>", "</color>");
-					}
-
-					if (SceneInspectionSettings.IsInspectingLightLevels.Value)
-					{
-						label += "\nLight Level: " + model.LightSensitive.LightLevel.Value.ToString("N2");
-						if (model.Light.IsLight.Value) label += "\nLight State: " + model.Light.LightState.Value;
-					}
-
-					label += GetInventory(
-						"Inventory",
-						model.Inventory.Value,
-						model.InventoryCapacity.Value,
-						InventoryVisibilities.IfMaximumGreaterThanZero
-					);
-
-					switch (model.BuildingState.Value)
-					{
-						case BuildingStates.Constructing:
-							label += GetInventory(
-								"Construction",
-								model.ConstructionInventory.Value,
-								model.ConstructionInventoryCapacity.Value,
-								InventoryVisibilities.IfNotFull
-							);
-							
-							label += GetInventory(
-								"Construction Promised",
-								model.ConstructionInventoryPromised.Value
-							);
-							break;
-						case BuildingStates.Salvaging:
-							label += GetInventory(
-								"Salvage",
-								model.SalvageInventory.Value
-							);
-							break;
-					}
-
-					if (model.DesireQualities.Value.Any())
-					{
-						label += "\nDesires:";
-						foreach (var desireQuality in model.DesireQualities.Value)
-						{
-							label += "\n  " + desireQuality.Desire + " : " + desireQuality.Quality.ToString("N1") + " - " + desireQuality.State;
-						}
-					}
-
-					Handles.Label(
-						model.Transform.Position.Value,
-						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
-						labelStyle
-					);
-
-					if (model.BuildingState.Value == BuildingStates.Constructing)
-					{
-						Handles.color = Color.yellow.NewA(0.2f);
-						Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
-					}
+					return roomRevealDistances[doorModel.RoomConnection.Value.RoomId0] == 0 || roomRevealDistances[doorModel.RoomConnection.Value.RoomId1] == 0;
 				}
-			}
-
-			if (SceneInspectionSettings.IsInspectingEntrances.Value)
-			{
-				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
-				{
-					var enterableModelsForInspection = gameState.Payload.Game.Buildings.AllActive
-						.Concat<IEnterableModel>(gameState.Payload.Game.Doors.AllActive);
-					
-					foreach (var model in enterableModelsForInspection)
-					{
-						foreach (var entrance in model.Enterable.Entrances.Value)
-						{
-							var color = Color.grey;
-
-							switch (entrance.State)
-							{
-								case Entrance.States.Available:
-									color = Color.green;
-									break;
-								case Entrance.States.NotAvailable:
-									color = entrance.IsNavigable ? Color.yellow : Color.red;
-									break;
-							}
-
-							Handles.color = color;
-							Handles.DrawDottedLine(
-								model.Transform.Position.Value,
-								entrance.Position,
-								4f
-							);
-							Handles.DrawWireCube(
-								entrance.Position,
-								Vector3.one * 0.1f
-							);
-						}
-					}
-				}
-				HandlesExtensions.EndDepthCheck();
-			}
-
-			if (SceneInspectionSettings.IsInspectingDwellers.Value)
-			{
-				foreach (var model in gameState.Payload.Game.Dwellers.AllActive)
-				{
-					var label = GetIdLabel(model);
-
-					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
-					if (model.Desire.Value != Desires.None) label += "\nDesire: " + model.Desire.Value;
-
-					AppendAgentStateLabel(
-						ref label,
-						model
-					);
-					
-					Handles.Label(
-						model.Transform.Position.Value + (Vector3.up * 3f),
-						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
-						labelStyle
-					);
-				}
+				return false;
 			}
 			
-			if (SceneInspectionSettings.IsInspectingOtherAgents.Value)
-			{
-				foreach (var model in gameState.Payload.Game.Seekers.AllActive)
-				{
-					var label = GetIdLabel(model);
-
-					AppendAgentStateLabel(
-						ref label,
-						model
-					);
-					
-					Handles.Label(
-						model.Transform.Position.Value + (Vector3.up * 3f),
-						StringExtensions.Wrap(label, "<color=yellow>", "</color>"),
-						labelStyle
-					);
-				}
-			}
-			
-			if (SceneInspectionSettings.IsInspectingItemDrops.Value)
-			{
-				foreach (var model in gameState.Payload.Game.ItemDrops.AllActive)
-				{
-					var label = GetIdLabel(model);
-					
-					if (model.Job.Value != Jobs.None) label += "\nJob: " + model.Job.Value;
-					
-					label += GetInventory(
-						"Inventory",
-						model.Inventory.Value
-					);
-					
-					label += GetInventory(
-						"Cleanup Promised",
-						model.WithdrawalInventoryPromised.Value
-					);
-
-					Handles.Label(
-						model.Transform.Position.Value + (Vector3.up * 1f),
-						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
-						labelStyle
-					);
-				}
-			}
-
-			if (SceneInspectionSettings.IsInspectingFlora.Value)
-			{
-				foreach (var model in gameState.Payload.Game.Flora.AllActive)
-				{
-					var label = GetIdLabel(model);
-
-					label += "\nRoomId: " + model.RoomTransform.Id.Value;
-					
-					Handles.Label(
-						model.Transform.Position.Value + (Vector3.up * 1f),
-						StringExtensions.Wrap(label, "<color=cyan>", "</color>"),
-						labelStyle
-					);
-					
-					if (model.IsReproducing.Value) continue;
-					Handles.color = Color.red;
-					Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
-				}
-			}
-
 			if (SceneInspectionSettings.IsInspectingLightLevels.Value)
 			{
 				Handles.color = Color.yellow.NewA(0.05f);
@@ -283,7 +92,7 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.EndDepthCheck();
 
 				var lightSensitiveOffset = Vector3.up * 4f;
-				foreach (var model in gameState.Payload.Game.GetLightSensitives())
+				foreach (var model in gameState.Payload.Game.GetLightSensitives().Where(isInInspectedRoom))
 				{
 					Debug.DrawLine(
 						model.Transform.Position.Value + lightSensitiveOffset,
@@ -293,112 +102,162 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 
-			if (SceneInspectionSettings.IsInspectingObligations.Value)
-			{
-				foreach (var model in gameState.Payload.Game.GetObligations())
-				{
-					var label = GetIdLabel(model);
-
-					if (!AppendObligationsLabel(ref label, model)) continue;
-
-					var labelColor = "<color=cyan>";
-					
-					// TODO: Something fancy with how we render the color of this label...
-					
-					Handles.Label(
-						model.Transform.Position.Value + (Vector3.up * 3f),
-						StringExtensions.Wrap(
-							label,
-							labelColor,
-							"</color>"
-						),
-						labelStyle
-					);
-				}
-			}
-
-			var inspectedRooms = new List<string>();
-
 			if (SceneInspectionSettings.IsInspectingRooms.Value)
 			{
-				foreach (var model in gameState.Payload.Game.Rooms.AllActive)
+				foreach (var model in gameState.Payload.Game.Rooms.AllActive.Where(isInInspectedRoom))
 				{
-					if (1 < model.RevealDistance.Value) continue;
-					
-					inspectedRooms.Add(model.RoomTransform.Id.Value);
-					
-					var label = GetIdLabel(model);
+					DrawLabel(
+						model,
+						append =>
+						{
+							if (model.IsSpawn.Value) append("Is Spawn: true");
+							else
+							{
+								if (0 < model.SpawnDistance.Value) append("Spawn Distance: " + model.SpawnDistance.Value);
+								if (0 < model.RevealDistance.Value) append("Reveal Distance: " + model.RevealDistance.Value);
+							}
 
-					if (model.IsSpawn.Value) label += "\nIs Spawn: true";
-					
-					label += "\nSpawn Distance: " + model.SpawnDistance.Value;
-					label += "\nReveal Distance: " + model.RevealDistance.Value;
-					
-					label += "\nConnections";
+							var connectionsResult = "Connections";
 
-					foreach (var kv in model.AdjacentRoomIds.Value)
+							foreach (var kv in model.AdjacentRoomIds.Value)
+							{
+								connectionsResult += "\n  " + Model.ShortenId(kv.Key) + " : ";
+
+								if (kv.Value) connectionsResult += "<color=green>Open";
+								else connectionsResult += "<color=red>Closed";
+
+								connectionsResult += "</color>";
+							}
+
+							append(connectionsResult);
+						}
+					);
+				}
+			}
+			
+			if (SceneInspectionSettings.IsInspectingBuildings.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Buildings.AllActive.Where(isInInspectedRoom))
+				{
+					DrawEntranceInspection(model);
+					
+					DrawLabel(
+						model,
+						append =>
+						{
+							if (model.BuildingState.Value != BuildingStates.Operating)
+							{
+								append("State: " + model.BuildingState.Value);
+							}
+					
+							switch (model.BuildingState.Value)
+							{
+								case BuildingStates.Constructing:
+									append("Construction " + model.ConstructionInventory);
+									break;
+								case BuildingStates.Salvaging:
+									append("Salvage " + model.SalvageInventory);
+									break;
+							}
+
+							if (model.DesireQualities.Value.Any())
+							{
+								var desireResult = "Desires";
+								foreach (var desireQuality in model.DesireQualities.Value)
+								{
+									desireResult += "\n  " + desireQuality.Desire + " : " + desireQuality.Quality.ToString("N1") + " - " + desireQuality.State;
+								}
+								append(desireResult);
+							}							
+						}
+					);
+
+					if (model.BuildingState.Value == BuildingStates.Constructing)
 					{
-						label += "\n  " + Model.ShortenId(kv.Key) + " : ";
-
-						if (kv.Value) label += "<color=green>Open";
-						else label += "<color=red>Closed";
-
-						label += "</color>";
+						Handles.color = Color.yellow.NewA(0.2f);
+						Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
 					}
+				}
+			}
 
-					var labelColor = "<color=cyan>";
-					
-					Handles.Label(
-						model.Transform.Position.Value + (Vector3.up * 6f),
-						StringExtensions.Wrap(
-							label,
-							labelColor,
-							"</color>"
-						),
-						labelStyle
+			if (SceneInspectionSettings.IsInspectingDwellers.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Dwellers.AllActive.Where(isInInspectedRoom))
+				{
+					DrawLabel(
+						model,
+						append =>
+						{
+							if (model.Job.Value != Jobs.None) append("Job: " + model.Job.Value);
+							if (model.Desire.Value != Desires.None) append("Desire: " + model.Desire.Value);
+							if (!model.Workplace.Value.IsNull) append("Workplace: " + model.Workplace.Value);
+						},
+						model.Name.Value
+					);
+				}
+			}
+			
+			if (SceneInspectionSettings.IsInspectingOtherAgents.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Seekers.AllActive.Where(isInInspectedRoom))
+				{
+					DrawLabel(
+						model
+					);
+				}
+			}
+			
+			if (SceneInspectionSettings.IsInspectingItemDrops.Value)
+			{
+				foreach (var model in gameState.Payload.Game.ItemDrops.AllActive.Where(isInInspectedRoom))
+				{
+					DrawLabel(
+						model
 					);
 				}
 			}
 
-			if (SceneInspectionSettings.IsInspectingDoors.Value)
+			foreach (var model in gameState.Payload.Game.Flora.AllActive.Where(isInInspectedRoom))
 			{
-				if (!SceneInspectionSettings.IsInspectingRooms.Value)
+				if (!SceneInspectionSettings.IsInspectingFlora.Value)
 				{
-					inspectedRooms = gameState.Payload.Game.Rooms.AllActive
-						.Where(m => m.RevealDistance.Value < 2)
-						.Select(m => m.RoomTransform.Id.Value)
-						.ToList();
+					if (!(SceneInspectionSettings.IsInspectingObligations.Value && model.Obligations.HasAny())) continue;
 				}
 				
-				foreach (var model in gameState.Payload.Game.Doors.AllActive)
-				{
-					if (!inspectedRooms.Contains(model.RoomTransform.Id.Value)) continue;
-					
-					var label = GetIdLabel(model);
+				DrawEntranceInspection(model);
 
-					label += "\nRoomId: " + model.RoomTransform.ShortId;
+				DrawLabel(
+					model
+				);
 					
-					label += "\nRoomId0: " + Model.ShortenId(model.RoomConnection.Value.RoomId0);
-					label += "\nRoomId1: " + Model.ShortenId(model.RoomConnection.Value.RoomId1);
-					label += "\nConnectedRoomId: " + Model.ShortenId(model.LightSensitive.ConnectedRoomId.Value);
-					
-					var labelColor = "<color=cyan>";
-					
-					Handles.Label(
-						model.Transform.Position.Value + (Vector3.up * 6f),
-						StringExtensions.Wrap(
-							label,
-							labelColor,
-							"</color>"
-						),
-						labelStyle
-					);
-					
-					DrawSelectionButton(
-						model,
-						Vector3.up * 3f
-					);
+				if (model.IsReproducing.Value) continue;
+				Handles.color = Color.red;
+				Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
+			}
+			
+			foreach (var model in gameState.Payload.Game.Doors.AllActive.Where(isInInspectedRoom))
+			{
+				if (!SceneInspectionSettings.IsInspectingDoors.Value)
+				{
+					if (!(SceneInspectionSettings.IsInspectingObligations.Value && model.Obligations.HasAny())) continue;
 				}
+				
+				DrawEntranceInspection(model);
+				
+				DrawLabel(
+					model,
+					append =>
+					{
+						append("RoomId0: " + Model.ShortenId(model.RoomConnection.Value.RoomId0));
+						append("RoomId1: " + Model.ShortenId(model.RoomConnection.Value.RoomId1));
+						append("ConnectedRoomId: " + Model.ShortenId(model.LightSensitive.ConnectedRoomId.Value));		
+					}
+				);
+					
+				DrawSelectionButton(
+					model,
+					new GUIContent("Select")
+				);
 			}
 		}
 		
@@ -445,120 +304,184 @@ namespace Lunra.Hothouse.Editor
 			return string.IsNullOrEmpty(result) ? result : ("\n" + label + ":" + result);
 		}
 
-		static string GetIdLabel(IModel model) => "Id: " + model.ShortId;
-
-		static void AppendAgentStateLabel(ref string label, AgentModel model)
+		static void DrawLabel(
+			IModel model,
+			Action<Action<string>> append = null,
+			string overrideName = null
+		)
 		{
-			if (!Mathf.Approximately(model.Health.Current.Value, model.Health.Maximum.Value)) label += "\nHealth: " + model.Health.Current.Value.ToString("N1") + " / " + model.Health.Maximum.Value.ToString("N1");
+			var position = Vector3.zero;
+
+			if (model is ITransformModel transformModel) position = transformModel.Transform.Position.Value;
+			else Debug.LogError("Trying to draw a label on a non-transform model");
 			
-			label += "\nState: " + model.Context.CurrentState;
+			var result = "Id: " + model.ShortId;
+
+			if (!string.IsNullOrEmpty(overrideName)) result += " - " + overrideName;
+
+			void appendResult(string addition)
+			{
+				result += "\n" + addition;
+			}
+
+			if (SceneInspectionSettings.IsInspectingRooms.Value && model is IRoomTransformModel roomTransformModel)
+			{
+				appendResult(roomTransformModel.RoomTransform.ToString());
+			}
+
+			if (model is AgentModel agentModel)
+			{
+				appendResult("Ai State: " + agentModel.Context.CurrentState);
+				
+				if (DrawButton(agentModel, new GUIContent("Serialize State")))
+				{
+					EditorGUIUtility.systemCopyBuffer = agentModel.StateMachine.GetSerializedGraph(true);
+					Debug.Log("Serialized ai state copied to clipboard");
+				}
+			}
 			
+			if (model is IHealthModel healthModel && healthModel.Health.IsDamaged)
+			{
+				appendResult(healthModel.Health.ToString());
+			}
+
 			if (SceneInspectionSettings.IsInspectingObligations.Value)
 			{
-				label += "\nObligationPromise: ";
-
-				if (model.Obligation.Value.IsEnabled)
+				if (model is IObligationModel obligationModel && obligationModel.Obligations.HasAny())
 				{
-					/*
-					var obligation = gameState.Payload.Game.GetObligations()
-						.GetIndividualObligations(mo => mo.Model.Id.Value == model.Obligation.Value.TargetId && mo.Obligation.PromiseId == model.Obligation.Value.ObligationPromiseId)
-						.FirstOrDefault();
-
-					if (obligation.Model == null)
-					{
-						label += "Missing ObligationId \"" + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + "\" or TargetId \"" + Model.ShortenId(model.Obligation.Value.TargetId) + "\"";
-					}
-					else
-					{
-						label += Model.ShortenId(model.Obligation.Value.TargetId) + "[ " + Model.ShortenId(model.Obligation.Value.ObligationPromiseId) + " ]." + obligation.Obligation.Type;
-					}
-					*/
-					label += "TODO THIS";
+					appendResult(obligationModel.Obligations.ToString());
 				}
-				else label += "None";
+
+				if (model is IObligationPromiseModel obligationPromiseModel && obligationPromiseModel.ObligationPromises.HasAny())
+				{
+					appendResult(obligationPromiseModel.ObligationPromises.ToString());
+				}
 			}
 			
-			label += GetInventory(
-				"Inventory",
-				model.Inventory.Value,
-				model.InventoryCapacity.Value,
-				InventoryVisibilities.IfMaximumGreaterThanZero
-				
+			if (model is IClaimOwnershipModel claimOwnershipModel && 0 < claimOwnershipModel.Ownership.MaximumClaimers.Value)
+			{
+				appendResult(claimOwnershipModel.Ownership.ToString());
+			}
+
+			if (SceneInspectionSettings.IsInspectingLightLevels.Value)
+			{
+				if (model is ILightModel lightModel && lightModel.Light.IsLight.Value)
+				{
+					appendResult(lightModel.Light.ToString());
+				}
+
+				if (model is ILightSensitiveModel lightSensitiveModel)
+				{
+					appendResult(lightSensitiveModel.LightSensitive.ToString());
+				}
+			}
+
+			if (model is IInventoryModel inventoryModel)
+			{
+				appendResult("Inventory " + inventoryModel.Inventory);
+			}
+
+			if (model is IInventoryPromiseModel inventoryPromiseModel)
+			{
+				appendResult(inventoryPromiseModel.InventoryPromises.ToString());
+			}
+
+			if (model is IRecipeModel recipeModel && (recipeModel.Recipes.Available.Value.Any() || recipeModel.Recipes.Queue.TryPeek(out _)))
+			{
+				appendResult(recipeModel.Recipes.ToString());
+			}
+
+			append?.Invoke(appendResult);
+
+			Handles.Label(
+				position + (Vector3.up * 3f),
+				StringExtensions.Wrap(result, "<color=cyan>", "</color>"),
+				labelStyle
 			);
-
-			if (model.InventoryPromise.Value.Operation != InventoryPromise.Operations.None)
-			{
-				label += GetInventory(
-					model.InventoryPromise.Value.Operation+"Promise",
-					model.InventoryPromise.Value.Inventory
-				);
-			}
-
-			switch (model.NavigationPlan.Value.State)
-			{
-				case NavigationPlan.States.Navigating:
-					var nodes = model.NavigationPlan.Value.Nodes;
-					for (var i = 1; i < nodes.Length; i++) Debug.DrawLine(nodes[i - 1], nodes[i], Color.green);
-					break;
-				case NavigationPlan.States.Invalid:
-					Debug.DrawLine(model.NavigationPlan.Value.Position, model.NavigationPlan.Value.EndPosition, Color.red);
-					break;
-			}
 		}
-		
-		static bool AppendObligationsLabel(ref string label, IObligationModel model)
-		{
-			if (obligationIdsHandled.Contains(model.Id.Value)) return false;
+
+		static void DrawEntranceInspection(IEnterableModel model)
+		{	
+			if (!SceneInspectionSettings.IsInspectingEntrances.Value) return;
 			
-			obligationIdsHandled.Add(model.Id.Value);
-			
-			label += "\nObligations:";
-			if (model.Obligations.All.Value.None())
+			HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 			{
-				label += " None";
-			}
-			else
-			{
-				foreach (var obligation in model.Obligations.All.Value)
+				foreach (var entrance in model.Enterable.Entrances.Value)
 				{
-					label += "\n  [ " + Model.ShortenId(obligation.PromiseId) + " ] " + obligation.Type + "." + obligation.State + " #" + obligation.Priority + " : " + obligation.ConcentrationRequirement + "( " + obligation.ConcentrationElapsed.Current + " / " + obligation.ConcentrationElapsed.Maximum + " )";
+					var color = Color.grey;
+
+					switch (entrance.State)
+					{
+						case Entrance.States.Available:
+							color = Color.green;
+							break;
+						case Entrance.States.NotAvailable:
+							color = entrance.IsNavigable ? Color.yellow : Color.red;
+							break;
+					}
+
+					Handles.color = color;
+					Handles.DrawDottedLine(
+						model.Transform.Position.Value,
+						entrance.Position,
+						4f
+					);
+					Handles.DrawWireCube(
+						entrance.Position,
+						Vector3.one * 0.1f
+					);
 				}
 			}
-
-			return true;
+			HandlesExtensions.EndDepthCheck();
 		}
 
-		static void DrawSelectionButton(IPrefabModel model, Vector3? offset = null)
+		static void DrawSelectionButton(
+			ITransformModel model,
+			GUIContent content,
+			Vector3? offset = null
+		)
 		{
+			if (DrawButton(model, content, offset))
+			{
+				var view = GameObject.FindObjectsOfType<PrefabView>()
+					.FirstOrDefault(v => v.ModelId == model.Id.Value);
+
+				if (view == null)
+				{
+					EditorWindow.focusedWindow.ShowNotification(new GUIContent("No view found with id: "+model.ShortId));
+				}
+				else
+				{
+					Selection.activeGameObject = view.gameObject;
+				}
+			}
+		}
+
+		static bool DrawButton(
+			ITransformModel model,
+			GUIContent content,
+			Vector3? offset = null
+		)
+		{
+			var result = false;
 			offset = offset ?? Vector3.zero;
 
 			var guiPoint = HandleUtility.WorldToGUIPointWithDepth(model.Transform.Position.Value + offset.Value);
 
-			if (guiPoint.z < 0f) return;
+			if (guiPoint.z < 0f) return result;
 			
 			Handles.BeginGUI();
 			{
 				var rect = new Rect(
 					guiPoint,
-					new Vector2(24, 24)
+					EditorStyles.miniButton.CalcSize(content)
 				);
-				
-				if (GUI.Button(rect, Texture2D.whiteTexture))
-				{
-					var view = GameObject.FindObjectsOfType<PrefabView>()
-						.FirstOrDefault(v => v.ModelId == model.Id.Value);
 
-					if (view == null)
-					{
-						EditorWindow.focusedWindow.ShowNotification(new GUIContent("No view found with id: "+model.ShortId));
-					}
-					else
-					{
-						Selection.activeGameObject = view.gameObject;
-					}
-				}
+				result = GUI.Button(rect, content, EditorStyles.miniButton);
 			}
 			Handles.EndGUI();
+
+			return result;
 		}
 	}
 }

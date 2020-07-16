@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Models
 		Extinguished = 30
 	}
 	
-	public interface ILightModel : IModel, IRoomTransformModel
+	public interface ILightModel : IInventoryModel
 	{
 		LightComponent Light { get; }
 	}
@@ -23,7 +23,7 @@ namespace Lunra.Hothouse.Models
 	public class LightComponent : Model
 	{
 		#region Serialized
-		[JsonProperty] bool isLightEnabled;
+		[JsonProperty] bool isLightEnabled; // TODO: Rename? Unify name?
 		[JsonIgnore] public ListenerProperty<bool> IsLightCalculationsEnabled { get; }
 		[JsonProperty] LightStates lightState;
 		[JsonIgnore] public ListenerProperty<LightStates> LightState { get; }
@@ -96,6 +96,26 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public bool IsLightNotActive() => !IsLightActive();
+
+		public void Reset(
+			Inventory lightFuel,
+			Interval lightFuelInterval,
+			LightStates lightState
+		)
+		{
+			IsLightCalculationsEnabled.Value = false;
+			
+			LightFuel.Value = lightFuel;
+			LightFuelInterval.Value = lightFuelInterval;
+			LightState.Value = lightState;
+			
+			IsLightRefueling.Value = true;
+		}
+		
+		public override string ToString()
+		{
+			return "Light State: " + (IsLight.Value ? LightState.Value.ToString() : " < Not a Light >");
+		}
 	}
 
 	public static class LightGameModelExtensions

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
 using UnityEngine;
@@ -7,353 +9,95 @@ namespace Lunra.Hothouse.Models
 {
 	public class BuildingPoolModel : BasePrefabPoolModel<BuildingModel>
 	{
-		static class Constants
-		{
-			public const int BonfireStalkCost = 2;
-			// public static readonly FloatRange DefaultPlacementLightRequirement = new FloatRange(-1f, 1f);
-			public static readonly FloatRange DefaultPlacementLightRequirement = new FloatRange(0.001f, 1f);
-			public static readonly FloatRange LightSourcePlacementLightRequirement = new FloatRange(0.001f, 0.33f);
-		}
-		
-		struct BuildingInfo
-		{
-			public float HealthMaximum;
-			public Inventory Inventory;
-			public InventoryCapacity InventoryCapacity;
-			public InventoryPermission InventoryPermission;
-			public FloatRange PlacementLightRequirement;
-			public InventoryCapacity ConstructionInventoryCapacity;
-			public Inventory SalvageInventory;
-			public Inventory LightFuel;
-			public Interval LightFuelInterval;
-			public LightStates LightStateDefault;
-			public DesireQuality[] DesireQualities;
-			public string[] ValidPrefabIds;
-
-			public BuildingInfo(
-				float healthMaximum,
-				Inventory inventory,
-				InventoryCapacity inventoryCapacity,
-				InventoryPermission inventoryPermission,
-				FloatRange placementLightRequirement,
-				InventoryCapacity constructionInventoryCapacity,
-				Inventory salvageInventory,
-				Inventory lightFuel,
-				Interval lightFuelInterval,
-				LightStates lightStateDefault,
-				DesireQuality[] desireQualities,
-				string[] validPrefabIds
-			)
-			{
-				HealthMaximum = healthMaximum;
-				Inventory = inventory;
-				InventoryCapacity = inventoryCapacity;
-				InventoryPermission = inventoryPermission;
-				PlacementLightRequirement = placementLightRequirement;
-				ConstructionInventoryCapacity = constructionInventoryCapacity;
-				SalvageInventory = salvageInventory;
-				LightFuel = lightFuel;
-				LightFuelInterval = lightFuelInterval;
-				LightStateDefault = lightStateDefault;
-				DesireQualities = desireQualities;
-				ValidPrefabIds = validPrefabIds;
-			}
-		}
-
-		static readonly Dictionary<Buildings, BuildingInfo> Infos = new Dictionary<Buildings, BuildingInfo>
-		{
-			/*
-			{
-				Buildings.Unknown,
-				new BuildingInfo(
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Rations , 20 }
-						}
-					), 
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Rations , 100 },
-								{ Inventory.Types.Stalks , 100 },
-								{ Inventory.Types.Scrap , 100 }
-							}
-						)	
-					),
-					InventoryPermission.AllForAnyJob(), 
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Stalks , 10 }
-							}
-						)	
-					),
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , 4 }
-						}
-					), 
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , 1 }
-						}
-					), 
-					Interval.WithMaximum(10f),
-					new []
-					{
-						DesireQuality.New(Desires.Eat, 1f) 
-					},
-					new []
-					{
-						"starting_wagon"
-					}
-				)
-			}
-			*/
-			{
-				Buildings.StartingWagon,
-				new BuildingInfo(
-					100f,
-					Inventory.Empty,
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Rations , 100 },
-								{ Inventory.Types.Stalks , 100 },
-								{ Inventory.Types.Scrap , 100 }
-							}
-						)	
-					),
-					InventoryPermission.AllForAnyJob(),
-					Constants.DefaultPlacementLightRequirement,
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Stalks , 10 }
-							}
-						)	
-					),
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , 4 }
-						}
-					), 
-					Inventory.Empty, 
-					Interval.Zero(),
-					LightStates.Unknown,
-					new []
-					{
-						DesireQuality.New(
-							Desires.Eat,
-							1f,
-							new Inventory(
-								new Dictionary<Inventory.Types, int>
-								{
-									{ Inventory.Types.Rations , 1 }
-								}
-							)
-						) 
-					},
-					new []
-					{
-						"starting_wagon"
-					}
-				)
-			},
-			{
-				Buildings.Bonfire,
-				new BuildingInfo(
-					100f,
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
-						}
-					), 
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
-							}
-						)	
-					),
-					InventoryPermission.DepositForJobs(Jobs.Stoker),
-					Constants.LightSourcePlacementLightRequirement,
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Stalks , Constants.BonfireStalkCost }
-							}
-						)	
-					),
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , 1 }
-						}
-					), 
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , 1 }
-						}
-					), 
-					Interval.WithMaximum(99999f),
-					LightStates.Fueled,
-					new DesireQuality[]
-					{
-						// DesireQuality.New(Desires.Warmup, 1f) 
-					},
-					new []
-					{
-						"fire_bonfire"
-					}
-				)
-			},
-			{
-				Buildings.Bedroll,
-				new BuildingInfo(
-					100f,
-					Inventory.Empty, 
-					InventoryCapacity.None(),
-					InventoryPermission.NoneForAnyJob(),
-					Constants.DefaultPlacementLightRequirement,
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Stalks , 2 }
-							}
-						)	
-					),
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , 1 }
-						}
-					), 
-					Inventory.Empty, 
-					Interval.Zero(),
-					LightStates.Unknown,
-					new []
-					{
-						DesireQuality.New(Desires.Sleep, 1f) 
-					},
-					new []
-					{
-						"bed_bedroll"
-					}
-				)
-			},
-			{
-				Buildings.WallSmall,
-				new BuildingInfo(
-					100f,
-					Inventory.Empty, 
-					InventoryCapacity.None(),
-					InventoryPermission.NoneForAnyJob(),
-					Constants.DefaultPlacementLightRequirement,
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Stalks , 4 }
-							}
-						)	
-					),
-					new Inventory(
-						new Dictionary<Inventory.Types, int>
-						{
-							{ Inventory.Types.Stalks , 1 }
-						}
-					), 
-					Inventory.Empty, 
-					Interval.Zero(),
-					LightStates.Unknown,
-					new DesireQuality[]
-					{
-						// DesireQuality.New(Desires.Sleep, 1f) 
-					},
-					new []
-					{
-						"wall_small_0"
-					}
-				)
-			}
-		};
-
 		GameModel game;
+		Dictionary<Type, BuildingDefinition> definitions = new Dictionary<Type, BuildingDefinition>();
+		
+		public BuildingDefinition[] Definitions { get; private set; }
 		
 		public override void Initialize(GameModel game)
 		{
 			this.game = game;
+
+			foreach (var type in AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()))
+			{
+				if (type.IsAbstract) continue;
+				if (type.GetCustomAttributes(typeof(BuildingDefinitionAttribute), true).None()) continue;
+				if (!typeof(BuildingDefinition).IsAssignableFrom(type))
+				{
+					Debug.LogError("The class \"" + type.FullName + "\" tries to include the \"" + typeof(BuildingDefinitionAttribute).Name + "\" attribute without inheriting from the \"" + typeof(BuildingDefinition).FullName + "\" class");
+					continue;
+				}
+
+				try
+				{
+					var instance = (BuildingDefinition) Activator.CreateInstance(type);
+					
+					if (definitions.TryGetValue(type, out var existingInstance))
+					{
+						Debug.LogError("Tried to add building definition of type " + type.FullName + " but an entry of type " + existingInstance.GetType().FullName + " already exists");
+					}
+					else
+					{
+						definitions.Add(type, instance);
+					}
+				}
+				catch (Exception e) { Debug.LogException(e); }
+			}
+
+			Definitions = definitions.Values.ToArray();
+			// Debug.Log("found:\n"+definitions.Keys.ToReadableJson());
+			
 			Initialize(
 				model => new BuildingPresenter(game, model)	
 			);
 		}
 
+		public BuildingModel Activate<T>(
+			string roomId,
+			Vector3 position,
+			Quaternion rotation,
+			BuildingStates buildingState
+		)
+			where T : BuildingDefinition
+		{
+			return Activate(
+				definitions[typeof(T)],
+				roomId,
+				position,
+				rotation,
+				buildingState
+			);
+		}
+		
 		public BuildingModel Activate(
-			Buildings building,
+			BuildingDefinition buildingDefinition,
 			string roomId,
 			Vector3 position,
 			Quaternion rotation,
 			BuildingStates buildingState
 		)
 		{
-			var info = Infos[building];
-			
 			var result = Activate(
-				info.ValidPrefabIds.Random(),
+				buildingDefinition.PrefabId,
 				roomId,
 				position,
 				rotation,
-				model => Reset(
-					model,
-					building,
-					info,
-					buildingState
-				)
+				model => buildingDefinition.Reset(model, buildingState)
 			);
 
 			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 
-		void Reset(
-			BuildingModel model,
-			Buildings building,
-			BuildingInfo info,
-			BuildingStates buildingState
-		)
+		public string GetSerializedType<T>()
+			where T : BuildingDefinition
 		{
-			model.Type.Value = building;
-
-			model.Health.ResetToMaximum(info.HealthMaximum);
-			model.Inventory.Value = info.Inventory;
-			model.InventoryCapacity.Value = info.InventoryCapacity;
-			model.InventoryPermission.Value = info.InventoryPermission;
-			model.PlacementLightRequirement.Value = info.PlacementLightRequirement;
-			model.ConstructionInventoryCapacity.Value = info.ConstructionInventoryCapacity;
-			model.SalvageInventory.Value = info.SalvageInventory;
-			model.Light.IsLightCalculationsEnabled.Value = false;
-			model.Light.LightFuel.Value = info.LightFuel;
-			model.Light.LightFuelInterval.Value = info.LightFuelInterval;
-			model.Light.LightState.Value = info.LightStateDefault;
-			model.DesireQualities.Value = info.DesireQualities;
-			model.BuildingState.Value = buildingState;
-			
-			model.Light.IsLightRefueling.Value = true;
-			model.LightSensitive.LightLevel.Value = 0f;
+			return GetSerializedType(typeof(T));
+		}
+		
+		public string GetSerializedType(Type type)
+		{
+			return definitions[type].Type;
 		}
 	}
 }

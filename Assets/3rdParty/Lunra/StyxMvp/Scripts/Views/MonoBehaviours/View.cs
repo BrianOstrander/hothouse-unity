@@ -37,6 +37,7 @@ namespace Lunra.StyxMvp
 		float OpacityStack { get; }
 
 		bool Interactable { get; set; }
+		bool Ignore { get; }
 		int PoolSize { get; }
 
 		TransitionStates TransitionState { get; }
@@ -94,7 +95,8 @@ namespace Lunra.StyxMvp
 
 		void Cleanup();
 
-		string InstanceName { get; set; }
+		string Name { get; set; }
+		string Tag { get; set; }
 
 		void SetLayer(string layer);
 	}
@@ -193,20 +195,35 @@ namespace Lunra.StyxMvp
 
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		public virtual bool Interactable { get; set; } = true;
+		
+		[SerializeField]
+		bool ignore;
+		public bool Ignore => ignore;
+		
 		[SerializeField, Tooltip("Size of initial pool, entering \"0\" uses ViewMediator defaults.")]
 		int poolSize;
 		public virtual int PoolSize => poolSize;
+		
 		public ShowCloseDurationBlock ShowCloseDuration;
+		
 		[SerializeField]
 		ViewAnimation[] animations;
 		public virtual ViewAnimation[] ViewAnimations => animations;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 
-		public string InstanceName 
+		public string Name 
 		{
 			get => gameObject.name;
 			set => gameObject.name = value;
 		}
+
+		public string Tag
+		{
+			get => gameObject.tag;
+			set => gameObject.tag = value;
+		}
+
+		public bool CompareInstanceTag(string tag) => gameObject.CompareTag(tag);
 
 		public Action Prepare { get; set; }
 		public Action<float> Showing { get; set; }

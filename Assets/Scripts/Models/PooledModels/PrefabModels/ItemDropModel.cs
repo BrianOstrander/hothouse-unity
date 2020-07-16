@@ -1,28 +1,24 @@
-﻿using Newtonsoft.Json;
-using Lunra.StyxMvp.Models;
-
-namespace Lunra.Hothouse.Models
+﻿namespace Lunra.Hothouse.Models
 {
-	public class ItemDropModel : PrefabModel, ILightSensitiveModel
+	public class ItemDropModel : PrefabModel,
+		IInventoryModel
 	{
 		#region Serialized
-		[JsonProperty] Inventory inventory = Models.Inventory.Empty;
-		[JsonIgnore] public ListenerProperty<Inventory> Inventory { get; }
-		
-		[JsonProperty] Inventory withdrawalInventoryPromised = Models.Inventory.Empty;
-		[JsonIgnore] public ListenerProperty<Inventory> WithdrawalInventoryPromised { get; }
-
-		[JsonProperty] Jobs job;
-		[JsonIgnore] public ListenerProperty<Jobs> Job { get; }
-		
 		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
+		public EnterableComponent Enterable { get; } = new EnterableComponent();
+		public InventoryComponent Inventory { get; } = new InventoryComponent();
+		#endregion
+		
+		#region Non Serialized
+		public IBaseInventoryComponent[] Inventories { get; }
 		#endregion
 
 		public ItemDropModel()
 		{
-			Inventory = new ListenerProperty<Inventory>(value => inventory = value, () => inventory);
-			WithdrawalInventoryPromised = new ListenerProperty<Inventory>(value => withdrawalInventoryPromised = value, () => withdrawalInventoryPromised);
-			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
+			Inventories = new []
+			{
+				Inventory	
+			};
 		}
 	}
 }

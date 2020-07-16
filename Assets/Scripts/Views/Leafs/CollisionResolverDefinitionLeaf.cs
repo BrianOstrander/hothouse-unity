@@ -20,19 +20,26 @@ namespace Lunra.Hothouse.Views
 		public struct Connection
 		{
 			public string Id;
+			public int Index;
+			public int Size;
 			public Transform Anchor;
 
 			public Connection(
 				string id,
+				int index,
+				int size,
 				Transform anchor
 			)
 			{
 				Id = id;
+				Index = index;
+				Size = size;
 				Anchor = anchor;
 			}
 		}
 
 		public string PrefabId;
+		public string[] PrefabTags;
 		public string Id;
 		public Types Type;
 		public int RootDistance;
@@ -40,6 +47,7 @@ namespace Lunra.Hothouse.Views
 		public Vector2 Size;
 		public Collider[] Colliders;
 		public Connection[] DoorAnchors;
+		public int DoorAnchorSizeMaximum;
 		
 		public int CollisionCount;
 		
@@ -47,7 +55,8 @@ namespace Lunra.Hothouse.Views
 			Types type,
 			string prefabId,
 			ColliderCache[] colliders,
-			(Vector3 Position, Vector3 Forward)[] doorAnchors
+			DoorCache[] doorAnchors,
+			string[] prefabTags
 		)
 		{
 			var colliderList = new List<Collider>();
@@ -71,10 +80,16 @@ namespace Lunra.Hothouse.Views
 
 					switch (collider.Collider)
 					{
-						case BoxCollider boxRef:
+						case BoxCollider boxReference:
 							var box = child.AddComponent<BoxCollider>();
-							box.center = boxRef.center;
-							box.size = boxRef.size;
+							box.center = boxReference.center;
+							box.size = boxReference.size;
+							break;
+						case MeshCollider meshReference:
+							var mesh = child.AddComponent<MeshCollider>();
+							mesh.convex = meshReference.convex;
+							mesh.cookingOptions = meshReference.cookingOptions;
+							mesh.sharedMesh = meshReference.sharedMesh;
 							break;
 						default:
 							Debug.LogError("Unrecognized collider of type: " + collider.Collider.GetType().Name);
@@ -97,6 +112,7 @@ namespace Lunra.Hothouse.Views
 			}
 
 			PrefabId = prefabId;
+			PrefabTags = prefabTags;
 			Type = type;
 			Size = new Vector2(
 				colliderMaximumX - colliderMinimumX,
@@ -105,20 +121,28 @@ namespace Lunra.Hothouse.Views
 
 			Colliders = colliderList.ToArray();
 
-			var doorAnchorList = new List<Transform>();
+			var doorAnchorsList = new List<Connection>();
 			
-			foreach (var doorAnchorRef in doorAnchors)
+			foreach (var doorAnchorReference in doorAnchors)
 			{
-				var doorAnchor = new GameObject("DoorAnchor_"+doorAnchorList.Count).transform;
+				var doorAnchor = new GameObject("DoorAnchor_"+doorAnchorsList.Count).transform;
 				doorAnchor.SetParent(transform);
+
+				doorAnchor.localPosition = doorAnchorReference.Anchor.position;
+				doorAnchor.forward = doorAnchorReference.Anchor.forward;
 				
-				doorAnchor.localPosition = doorAnchorRef.Position;
-				doorAnchor.forward = doorAnchorRef.Forward;
-				
-				doorAnchorList.Add(doorAnchor);
+				doorAnchorsList.Add(
+					new Connection(
+						null,
+						doorAnchorReference.Index,
+						doorAnchorReference.Size,
+						doorAnchor
+					)	
+				);
 			}
 
-			DoorAnchors = doorAnchorList.Select(d => new Connection(null, d)).ToArray();
+			DoorAnchors = doorAnchorsList.ToArray();
+			DoorAnchorSizeMaximum = doorAnchorsList.Max(d => d.Size);
 		}
 
 		public void Dock(
@@ -143,28 +167,6 @@ namespace Lunra.Hothouse.Views
 			}
 
 			obj_root_1.position = obj_door_0.position + (obj_root_1.position - obj_door_1.position);
-			
-			// var dot = Vector3.Dot(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward);
-			//
-			// Quaternion.LookRotation()
-			/*
-			transform.Rotate(Vector3.up, 180f - Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward));
-
-			if (!Mathf.Approximately(180f, Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)))
-			{
-				transform.Rotate(
-					Vector3.up,
-					Vector3.Angle(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)
-				);
-			}
-			
-			if (Mathf.Approximately(1f, Vector3.Dot(doorAnchor.Anchor.forward, otherDoorAnchor.Anchor.forward)))
-			{
-				transform.Rotate(Vector3.up, 180f);
-			}
-			
-			transform.position = otherDoorAnchor.Anchor.position + (transform.position - doorAnchor.Anchor.position);
-			*/
 		}
 
 		public bool HasCollisions() => 0 < CollisionCount;

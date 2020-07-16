@@ -11,7 +11,7 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			Model.Inventory.Changed += OnBuildingInventory;
+			Model.Inventory.All.Changed += OnBuildingInventory;
 			Model.DesireQualities.Changed += OnBuildingDesireQuality;
 			
 			base.Bind();
@@ -19,7 +19,7 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
-			Model.Inventory.Changed -= OnBuildingInventory;
+			Model.Inventory.All.Changed -= OnBuildingInventory;
 			Model.DesireQualities.Changed -= OnBuildingDesireQuality;
 			
 			base.UnBind();

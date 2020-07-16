@@ -1,4 +1,5 @@
-﻿using Lunra.Hothouse.Ai;
+﻿using System;
+using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
@@ -17,17 +18,19 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{
 			StateMachine = new S();
+			Model.StateMachine = StateMachine;
 			
-			View.InstanceName = typeof(V).Name + "_" + (string.IsNullOrEmpty(Model.Id.Value) ? "null_or_empty_id" : Model.Id.Value);
+			View.Name = typeof(V).Name + "_" + (string.IsNullOrEmpty(Model.Id.Value) ? "null_or_empty_id" : Model.Id.Value);
 
 			Model.NavigationPlan.Value = NavigationPlan.Done(Model.Transform.Position.Value);
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
-			
+
 			Model.Transform.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 			Model.Health.Current.Changed += OnAgentHealthCurrent;
 			Model.Health.Damaged += OnAgentHealthDamaged;
+			Model.ObligationComplete += OnAgentObligationComplete;
 			
 			base.Bind();
 		}
@@ -40,6 +43,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 			Model.Health.Current.Changed -= OnAgentHealthCurrent;
 			Model.Health.Damaged -= OnAgentHealthDamaged;
+			Model.ObligationComplete -= OnAgentObligationComplete;
 			
 			base.UnBind();
 		}
@@ -99,46 +103,19 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (!Mathf.Approximately(0f, health)) return;
 
-			if (!Model.Inventory.Value.IsEmpty)
+			if (!Model.Inventory.All.Value.IsEmpty)
 			{
 				Game.ItemDrops.Activate(
-					"default",
 					Model.RoomTransform.Id.Value,
 					Model.Transform.Position.Value,
 					Quaternion.identity,
-					m =>
-					{
-						m.Inventory.Value = Model.Inventory.Value;
-						m.Job.Value = Jobs.None;
-						m.Transform.Position.Value = Model.Transform.Position.Value;
-						m.Transform.Rotation.Value = Quaternion.identity;
-					}
+					Model.Inventory.All.Value
 				);
 			}
 
-			switch (Model.InventoryPromise.Value.Operation)
-			{
-				case InventoryPromise.Operations.None: break;
-				case InventoryPromise.Operations.ConstructionDeposit:
-					var building = Game.Buildings.FirstOrDefaultActive(Model.InventoryPromise.Value.TargetId);
-				
-					if (building == null) Debug.LogError("Cannot find an active building with id \"" + Model.InventoryPromise.Value.TargetId + "\" to cancel out promise operation: " + Model.InventoryPromise.Value.Operation+", this should never happen");
-					else building.ConstructionInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory;
-					
-					break;
-				case InventoryPromise.Operations.CleanupWithdrawal:
-					var itemDrop = Game.ItemDrops.FirstOrDefaultActive(Model.InventoryPromise.Value.TargetId);
-
-					if (itemDrop == null) Debug.LogError("Cannot find an active itemDrop with id \"" + Model.InventoryPromise.Value.TargetId + "\" to cancel out operation: " + Model.InventoryPromise.Value.Operation + ", this should never happen");
-					else itemDrop.WithdrawalInventoryPromised.Value -= Model.InventoryPromise.Value.Inventory;
-					
-					break;
-				default:
-					Debug.LogError("Unrecognized operation: " + Model.InventoryPromise.Value.Operation);
-					break;
-			}
+			Model.InventoryPromises.BreakRemainingPromises(Game);
 			
-			Debug.LogWarning("Handle unfulfilled obligation promises here!");
+			Model.ObligationPromises.BreakRemainingPromises(Game);
 			
 			Model.PooledState.Value = PooledStates.InActive;
 		}
@@ -158,6 +135,8 @@ namespace Lunra.Hothouse.Presenters
 				}
 			}
 		}
+
+		public virtual void OnAgentObligationComplete(Obligation obligation) { }
 		#endregion
 	}
 }

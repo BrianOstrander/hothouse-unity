@@ -17,16 +17,19 @@ namespace Lunra.StyxMvp.Models
 
 		public struct Delta
 		{
+			public readonly QueueProperty<T> Property;
 			public readonly Events Event;
 			public readonly object Source;
 			public readonly T Element;
 
 			public Delta(
+				QueueProperty<T> property,
 				Events events,
 				object source = default,
 				T element = default
 			)
 			{
+				Property = property;
 				Event = events;
 				Source = source;
 				Element = element;
@@ -35,7 +38,7 @@ namespace Lunra.StyxMvp.Models
 		
 		public readonly string Name;
 
-		public event Action Changed = ActionExtensions.Empty;
+		public event Action<QueueProperty<T>> Changed = ActionExtensions.GetEmpty<QueueProperty<T>>();
 		public event Action<Delta> ChangedDelta = ActionExtensions.GetEmpty<Delta>();
 		
 		readonly Queue<T> queue;
@@ -46,9 +49,10 @@ namespace Lunra.StyxMvp.Models
 		{
 			if (queue.None()) return;
 			queue.Clear();
-			Changed();
+			Changed(this);
 			ChangedDelta(
 				new Delta(
+					this,
 					Events.Clear,
 					source
 				)
@@ -61,9 +65,10 @@ namespace Lunra.StyxMvp.Models
 		)
 		{
 			queue.Enqueue(element);
-			Changed();
+			Changed(this);
 			ChangedDelta(
 				new Delta(
+					this,
 					Events.Enqueue,
 					source,
 					element
@@ -88,9 +93,10 @@ namespace Lunra.StyxMvp.Models
 		)
 		{
 			var result = queue.Dequeue();
-			Changed();
+			Changed(this);
 			ChangedDelta(
 				new Delta(
+					this,
 					Events.Dequeue,
 					source,
 					result
@@ -118,7 +124,7 @@ namespace Lunra.StyxMvp.Models
 		public QueueProperty(
 			Queue<T> queue,
 			string name,
-			params Action[] listeners
+			params Action<QueueProperty<T>>[] listeners
 		)
 		{
 			Name = name;
@@ -129,7 +135,7 @@ namespace Lunra.StyxMvp.Models
 
 		public QueueProperty(
 			Queue<T> queue,
-			params Action[] listeners
+			params Action<QueueProperty<T>>[] listeners
 		) : this(
 			queue,
 			null,

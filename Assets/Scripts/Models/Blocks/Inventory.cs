@@ -18,7 +18,11 @@ namespace Lunra.Hothouse.Models
 		public enum Types
 		{
 			Unknown = 0,
-			Stalks = 10,
+			
+			StalkSeed = 10,
+			StalkRaw = 11,
+			StalkDry = 12,
+			
 			Rations = 20,
 			Scrap = 30,
 		}
@@ -30,6 +34,18 @@ namespace Lunra.Hothouse.Models
 				type => Int32.MaxValue
 			)	
 		);
+		
+		public static Inventory FromDictionary(Dictionary<Types, int> entries) => new Inventory(entries);
+		public static Inventory FromEntry(Types type, int weight) => FromEntries((type, weight));
+		public static Inventory FromEntries(params (Types Type, int Weight)[] entries)
+		{
+			return FromDictionary(
+				entries.ToDictionary(
+					entry => entry.Type,
+					entry => entry.Weight
+				)
+			);
+		}
 		
 		public static Types[] ValidTypes = EnumExtensions.GetValues(Types.Unknown);
 		
@@ -52,12 +68,11 @@ namespace Lunra.Hothouse.Models
 		public Inventory(Dictionary<Types, int> entries)
 		{
 			this.entries = new ReadOnlyDictionary<Types, int>(entries);
-			TotalWeight = entries.Select(kv => kv.Value).Sum();
-			
-			Assert.IsTrue(
-				entries.None(e => e.Value < 0),
-				nameof(entries)+" should never contain values less than zero\n"+ToString(true)
-			);
+
+			try { TotalWeight = entries.Select(kv => kv.Value).Sum(); }
+			catch (OverflowException) { TotalWeight = int.MaxValue; }
+
+			if (entries.Any(e => e.Value < 0)) throw new Exception(nameof(entries) + " should never contain values less than zero\n" + ToString(true));
 		}
 
 		[JsonIgnore]
@@ -163,6 +178,36 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
+		public static Inventory operator *(Inventory inventory, float weight)
+		{
+			return new Inventory(
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => Mathf.FloorToInt(i.Weight * weight)
+				)	
+			);
+		}
+		
+		public static Inventory operator /(Inventory inventory, int weight)
+		{
+			return new Inventory(
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => i.Weight / weight
+				)	
+			);
+		}
+		
+		public static Inventory operator /(Inventory inventory, float weight)
+		{
+			return new Inventory(
+				inventory.Entries.ToDictionary(
+					i => i.Type,
+					i => Mathf.FloorToInt(i.Weight / weight)
+				)	
+			);
+		}
+		
 		public static Inventory operator *(Inventory inventory, (Types Type, int Weight) entry)
 		{
 			return new Inventory(
@@ -246,5 +291,7 @@ namespace Lunra.Hothouse.Models
 			foreach (var entry in entries) result += entry;
 			return result;
 		}
+
+		public static Inventory ToInventory(this (Inventory.Types Type, int Weight) entry) => Inventory.FromEntry(entry.Type, entry.Weight);
 	}
 }

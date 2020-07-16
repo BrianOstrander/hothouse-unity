@@ -114,10 +114,13 @@ namespace Lunra.Editor.Core
 			GUI.contentColor = contentColorStack.Pop();
 		}
 
-		public static void PushEnabled(bool enabled)
+		public static void PushEnabled(
+			bool enabled,
+			bool ignoreExistingState = false
+		)
 		{
 			enabledStack.Push(GUI.enabled);
-			GUI.enabled &= enabled;
+			GUI.enabled = ignoreExistingState ? enabled : GUI.enabled && enabled;
 		}
 
 		public static void PopEnabled()

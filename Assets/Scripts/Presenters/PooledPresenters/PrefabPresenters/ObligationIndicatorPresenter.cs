@@ -42,7 +42,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (targetInstance == null)
 			{
-				Model.ObligationId.Value = null;
+				Model.Obligation.Value = null;
 				Model.PooledState.Value = PooledStates.InActive;
 				return;
 			}
@@ -52,11 +52,9 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		#region TargetInstance Events
-		void OnTargetInstanceObligations(Obligation[] obligations)
+		void OnTargetInstanceObligations(ObligationComponent.State obligationState)
 		{
-			var obligation = Model.ObligationInstance;
-
-			if (!obligation.IsValid)
+			if (!Model.TargetInstance.Value.Obligations.HasAny(Model.Obligation.Value))
 			{
 				Model.TargetInstance.Value = null;
 				return;
@@ -81,7 +79,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.NotVisible) return;
 			
-			View.SetAction(Model.ObligationInstance.Type.Action);
+			View.SetAction(Model.Obligation.Value.Type);
 		}
 		#endregion
 	}

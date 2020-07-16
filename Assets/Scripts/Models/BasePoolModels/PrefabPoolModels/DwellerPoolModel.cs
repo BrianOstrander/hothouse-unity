@@ -48,11 +48,12 @@ namespace Lunra.Hothouse.Models
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(100f);
-			model.InventoryCapacity.Value = InventoryCapacity.ByTotalWeight(2);
+			model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
 			
 			// Dweller Properties
 			model.Job.Value = Jobs.None;
-			model.JobShift.Value = new DayTimeFrame(0.0f, 0.75f);
+			// model.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
+			model.JobShift.Value = DayTimeFrame.Maximum;
 			model.Desire.Value = Desires.None;
 			model.MeleeRange.Value = 0.75f;
 			model.MeleeCooldown.Value = 0.5f;
@@ -72,6 +73,8 @@ namespace Lunra.Hothouse.Models
 			model.LowRationThreshold.Value = 1;
 			model.ObligationDistance.Value = 0.75f;
 			model.ObligationMinimumConcentrationDuration.Value = 0.5f;
+			
+			model.InventoryPromises.Reset();
 		}
 	}
 }

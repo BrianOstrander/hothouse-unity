@@ -21,15 +21,21 @@ namespace Lunra.Core
 		{
 			if (string.IsNullOrEmpty(search)) return entries;
 			var pattern = string.Empty;
-			foreach (var character in search) pattern += character+".*";
+			foreach (var character in search) pattern += character + ".*";
 			var regex = new Regex(pattern, RegexOptions.IgnoreCase);
 			return entries.Where(e => regex.IsMatch(keySelector(e)));
 		}
 
 		public static T FirstOrFallback<T>(this IEnumerable<T> entries, Func<T, bool> predicate, T fallback = default)
 		{
-			try { return entries.First(predicate); }
-			catch (InvalidOperationException) { return fallback; }
+			try
+			{
+				return entries.First(predicate);
+			}
+			catch (InvalidOperationException)
+			{
+				return fallback;
+			}
 		}
 
 		public static T FirstOrFallback<T>(this IEnumerable<T> entries, T fallback = default)
@@ -39,8 +45,14 @@ namespace Lunra.Core
 
 		public static T LastOrFallback<T>(this IEnumerable<T> entries, Func<T, bool> predicate, T fallback = default)
 		{
-			try { return entries.Last(predicate); }
-			catch (InvalidOperationException) { return fallback; }
+			try
+			{
+				return entries.Last(predicate);
+			}
+			catch (InvalidOperationException)
+			{
+				return fallback;
+			}
 		}
 
 		public static T LastOrFallback<T>(this IEnumerable<T> entries, T fallback = default)
@@ -64,6 +76,7 @@ namespace Lunra.Core
 				offset += getWeight(entry);
 				keyed.Add(new KeyValuePair<float, T>(offset, entry));
 			}
+
 			var selectedOffset = DemonUtility.GetNextFloat(max: offset);
 
 			var lastOffset = 0f;
@@ -131,15 +144,24 @@ namespace Lunra.Core
 
 		public static IEnumerable<T> ExceptOne<T>(this IEnumerable<T> entries, T element)
 		{
-			return entries.Except(new[] { element });
+			return entries.Except(new[] {element});
 		}
-		
+
 		public static IEnumerable<T> Union<T>(this IEnumerable<T> source, T element)
 		{
 			return source.Union(Enumerable.Repeat(element, 1));
 		}
 
-		public static ReadOnlyDictionary<TKey, TElement> ToReadonlyDictionary<TKey, TElement>(
+		public static IEnumerable<T> DistinctBy<T, K>(
+			this IEnumerable<T> elements,
+			Func<T, K> keySelector
+		)
+		{
+			return elements.GroupBy(keySelector)
+				.Select(g => g.First());
+		}
+
+	public static ReadOnlyDictionary<TKey, TElement> ToReadonlyDictionary<TKey, TElement>(
 			this Dictionary<TKey, TElement> source
 		)
 		{
@@ -171,6 +193,8 @@ namespace Lunra.Core
 		public static IEnumerable<T> ToEnumerable<T>(this T element)
 		{
 			yield return element;
-		}    
+		}
+		
+		public static T[] WrapInArray<T>(this T element) => new [] { element };
 	}
 }
