@@ -23,6 +23,10 @@ namespace Lunra.Hothouse.Models
 			StalkRaw = 11,
 			StalkDry = 12,
 			
+			FungalBloomSpore = 10,
+			FungalBloomRaw = 11,
+			FungalBloomJerky = 12,
+			
 			Rations = 20,
 			Scrap = 30,
 		}
