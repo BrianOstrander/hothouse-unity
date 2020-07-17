@@ -118,7 +118,7 @@ namespace Lunra.Hothouse.Ai
 					if (selectedDestination != null) break;
 				}
 
-				return selectedDestination != null;
+				return selectedDestination != null && !selectedItems.IsEmpty;
 			}
 
 			public override void Transition()

@@ -10,8 +10,9 @@ namespace Lunra.Hothouse.Models
 	public abstract class FloraDefinition
 	{
 		public string Type { get; private set; }
-		protected GameModel Game { get; private set; }
 		public virtual string[] PrefabIds { get; private set; }
+		public abstract Inventory.Types Seed { get; }
+		protected GameModel Game { get; private set; }
 		protected Demon Generator { get; private set; }
 		
 		public virtual FloatRange AgeDuration => new FloatRange(30f, 60f);
@@ -29,8 +30,6 @@ namespace Lunra.Hothouse.Models
 		public virtual int CountPerClusterMaximum => 60;
 		public virtual bool RequiredInSpawn => true;
 		public virtual bool AllowedInSpawn => true;
-
-		// TODO: Allow a flora presenter to be specified...
 
 		public void Initialize(
 			GameModel game,
