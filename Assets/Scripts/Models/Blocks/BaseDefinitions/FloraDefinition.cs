@@ -14,14 +14,14 @@ namespace Lunra.Hothouse.Models
 		public virtual string[] PrefabIds { get; private set; }
 		protected Demon Generator { get; private set; }
 		
-		protected virtual FloatRange AgeDuration => new FloatRange(30f, 60f);
-		protected virtual FloatRange ReproductionDuration => new FloatRange(30f, 60f);
-		protected virtual FloatRange ReproductionRadius => new FloatRange(0.5f, 1f);
-		protected virtual int ReproductionFailureLimit => 40;
-		protected virtual float HealthMaximum => 100f;
-		protected virtual float SpreadDamage => 50f;
-		protected virtual bool AttacksBuildings => false;
-		protected virtual (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new (Inventory.Types Type, int Minimum, int Maximum)[0];
+		public virtual FloatRange AgeDuration => new FloatRange(30f, 60f);
+		public virtual FloatRange ReproductionDuration => new FloatRange(30f, 60f);
+		public virtual FloatRange ReproductionRadius => new FloatRange(0.5f, 1f);
+		public virtual int ReproductionFailureLimit => 40;
+		public virtual float HealthMaximum => 100f;
+		public virtual float SpreadDamage => 50f;
+		public virtual bool AttacksBuildings => false;
+		public virtual (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new (Inventory.Types Type, int Minimum, int Maximum)[0];
 		public virtual int CountPerRoomMinimum => 0;
 		public virtual int CountPerRoomMaximum => 4;
 		public virtual float SpawnDistanceNormalizedMinimum => 0f;

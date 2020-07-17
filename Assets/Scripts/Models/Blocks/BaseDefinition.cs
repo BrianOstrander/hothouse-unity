@@ -9,9 +9,10 @@ namespace Lunra.Hothouse.Models
 		where M : IPrefabModel
 	{
 		public string Type { get; private set; }
-		protected GameModel Game { get; private set; }
 		public virtual string[] PrefabIds { get; private set; }
-		protected virtual string DefaultPrefabId => null;
+		public virtual string DefaultPrefabId => null;
+		
+		protected GameModel Game { get; private set; }
 		protected Demon Generator { get; private set; }
 		
 		public virtual void Initialize(

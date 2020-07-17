@@ -2,19 +2,19 @@ namespace Lunra.Hothouse.Models
 {
 	public class DryingRackDefinition : BuildingDefinition
 	{
-		protected override int MaximumOwners => 1;
+		public override int MaximumOwners => 1;
 
-		protected override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
+		public override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
 			(Inventory.Types.StalkRaw, 1),
 			(Inventory.Types.StalkDry, 1)
 		);
 
-		protected override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForJobs(
+		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForJobs(
 			Jobs.Stockpiler,
 			Jobs.Smoker
 		);
 
-		protected override Recipe[] Recipes => new[]
+		public override Recipe[] Recipes => new[]
 		{
 			new Recipe(
 				"Dry Stalks",

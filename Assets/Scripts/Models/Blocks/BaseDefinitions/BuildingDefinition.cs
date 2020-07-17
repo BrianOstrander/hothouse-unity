@@ -9,23 +9,22 @@ namespace Lunra.Hothouse.Models
 	[BuildingDefinition]
 	public abstract class BuildingDefinition : BaseDefinition<BuildingModel>
 	{
-		protected override string DefaultPrefabId => "debug_building";
+		public override string DefaultPrefabId => "debug_building";
 
-		protected virtual float HealthMaximum => 100f;
-		protected virtual FloatRange PlacementLightRequirement => new FloatRange(0.001f, 1f);
-		protected virtual Inventory LightFuel => Inventory.Empty;
-		protected virtual Interval LightFuelInterval => Interval.Zero();
-		protected virtual LightStates LightState => LightStates.Unknown;
-		// protected virtual LightStates LightState => LightStates.Fueled; // <- what light sources should override
-		protected virtual DesireQuality[] DesireQualities => new DesireQuality[0];
-		protected virtual int MaximumOwners => 0;
-		protected virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
-		protected virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
-		protected virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.Ignored();
-		protected virtual Inventory DefaultInventory => Inventory.Empty;
-		protected virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.StalkDry, 2);
-		protected virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
-		protected virtual Recipe[] Recipes => new Recipe[0];
+		public virtual float HealthMaximum => 100f;
+		public virtual FloatRange PlacementLightRequirement => new FloatRange(0.001f, 1f);
+		public virtual Inventory LightFuel => Inventory.Empty;
+		public virtual Interval LightFuelInterval => Interval.Zero();
+		public virtual LightStates LightState => LightStates.Unknown;
+		public virtual DesireQuality[] DesireQualities => new DesireQuality[0];
+		public virtual int MaximumOwners => 0;
+		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
+		public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
+		public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.Ignored();
+		public virtual Inventory DefaultInventory => Inventory.Empty;
+		public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.StalkDry, 2);
+		public virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
+		public virtual Recipe[] Recipes => new Recipe[0];
 		
 		public virtual void Reset(
 			BuildingModel model,

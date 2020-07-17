@@ -5,14 +5,14 @@ namespace Lunra.Hothouse.Models
 {
 	public class SmallDepotDefinition : BuildingDefinition
 	{
-		protected override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
+		public override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
 			EnumExtensions.GetValues(Inventory.Types.Unknown)
 				.Select(t => (t, 25))
 				.ToArray()
 		);
 
-		protected override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
+		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 		
-		protected override int MaximumOwners => 2;
+		public override int MaximumOwners => 2;
 	}
 }
