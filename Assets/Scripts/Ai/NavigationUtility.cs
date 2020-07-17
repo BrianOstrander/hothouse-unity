@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
+using Lunra.StyxMvp;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,6 +11,42 @@ namespace Lunra.Hothouse.Ai
 {
 	public static class NavigationUtility
 	{
+		public static bool CalculateNearestFloor(
+			Vector3 position,
+			out NavMeshHit navHit,
+			out RaycastHit physicsHit,
+			out string roomId,
+			float tolerance = 0.1f
+		)
+		{
+			navHit = default;
+			roomId = null;
+			
+			var raycastHit = Physics.Raycast(
+				new Ray(
+					position.NewY(8f),
+					Vector3.down
+				),
+				out physicsHit,
+				16f,
+				LayerMasks.Floor
+			);
+
+			if (!raycastHit) return false;
+
+			if (physicsHit.transform.GetAncestor<View>(v => v is IRoomIdView) is IRoomIdView roomIdView)
+			{
+				roomId = roomIdView.RoomId;
+			}
+
+			return NavMesh.SamplePosition(
+				physicsHit.point,
+				out navHit,
+				tolerance,
+				NavMesh.AllAreas
+			);
+		}
+		
 		public static bool CalculateNearest(
 			Vector3 beginPosition,
 			out Navigation.Result result,

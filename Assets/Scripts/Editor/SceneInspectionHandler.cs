@@ -390,6 +390,35 @@ namespace Lunra.Hothouse.Editor
 			{
 				appendResult(recipeModel.Recipes.ToString());
 			}
+			
+			if (model is IFarmModel farmModel && farmModel.Farm.IsFarm)
+			{
+				appendResult(farmModel.Farm.ToString());
+
+				Debug.DrawLine(farmModel.Transform.Position.Value, farmModel.Transform.Position.Value + Vector3.up, Color.red);
+				
+				foreach (var farmPlot in farmModel.Farm.Plots)
+				{
+					var farmPlotColor = Color.green;
+					
+					switch (farmPlot.State)
+					{
+						// case FarmPlot.States.Unknown: break;
+						case FarmPlot.States.Invalid:
+							farmPlotColor = Color.red;
+							break;
+						// case FarmPlot.States.ReadyToPlow: break;
+						// case FarmPlot.States.ReadyToSow: break;
+						// case FarmPlot.States.Sown: break;
+						// case FarmPlot.States.ReadyForHarvest: break;
+						// case FarmPlot.States.Harvested: break;
+						// default:
+						// 	break;
+					}
+					
+					Debug.DrawLine(farmPlot.Position, farmPlot.Position + Vector3.up, farmPlotColor);
+				}
+			}
 
 			append?.Invoke(appendResult);
 

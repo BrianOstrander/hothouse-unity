@@ -1,5 +1,6 @@
 using System.Linq;
 using Lunra.Core;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -22,5 +23,8 @@ namespace Lunra.Hothouse.Models
 		);
 		
 		public override int MaximumOwners => 2;
+
+		public override bool IsFarm => true;
+		public override Vector2 FarmSize => Vector2.one * 4f;
 	}
 }

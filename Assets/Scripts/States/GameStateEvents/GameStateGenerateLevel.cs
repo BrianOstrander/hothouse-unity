@@ -293,12 +293,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			payload.Game.Buildings.Activate<SeedSiloDefinition>(
+			var farm = payload.Game.Buildings.Activate<SeedSiloDefinition>(
 				spawn.Id.Value,
 				position + (Vector3.right * 3f) + (Vector3.back * 3f),
 				Quaternion.identity, 
 				BuildingStates.Operating
 			);
+
+			farm.Farm.SelectedSeed = Inventory.Types.StalkSeed;
 			// Debugging End
 			
 			done();

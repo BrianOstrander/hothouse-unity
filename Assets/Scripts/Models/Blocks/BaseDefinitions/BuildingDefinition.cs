@@ -25,6 +25,8 @@ namespace Lunra.Hothouse.Models
 		public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.StalkDry, 2);
 		public virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
 		public virtual Recipe[] Recipes => new Recipe[0];
+		public virtual bool IsFarm => false;
+		public virtual Vector2 FarmSize => Vector2.zero;
 		
 		public virtual void Reset(
 			BuildingModel model,
@@ -94,6 +96,11 @@ namespace Lunra.Hothouse.Models
 			model.Recipes.Reset(Recipes);
 
 			if (Recipes.Any()) model.Recipes.Queue.Enqueue(RecipeComponent.RecipeIteration.ForInfinity(Recipes.First()));
+			
+			model.Farm.Reset(
+				IsFarm,
+				FarmSize
+			);
 		}
 
 		public override void Instantiate(BuildingModel model) => new BuildingPresenter(Game, model);
