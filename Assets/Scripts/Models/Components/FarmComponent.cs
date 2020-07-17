@@ -45,6 +45,13 @@ namespace Lunra.Hothouse.Models
 				Plots = plotsList.ToArray();
 				return;
 			}
+			
+			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(
+				Inventory.FromEntry(
+					SelectedSeed,
+					model.Inventory.AllCapacity.Value.GetMaximumFor(SelectedSeed)
+				)
+			);
 
 			var definition = game.Flora.Definitions.First(d => d.Seed == SelectedSeed);
 
@@ -69,6 +76,7 @@ namespace Lunra.Hothouse.Models
 					var plot = new FarmPlot(
 						rowOrigin + (columnNormal * (x * spacing)),
 						null,
+						definition.ReproductionRadius.Minimum,
 						FarmPlot.States.Invalid,
 						InstanceId.Null()
 					);
@@ -100,13 +108,70 @@ namespace Lunra.Hothouse.Models
 				}	
 			}
 
-			var plotRooms = plotsList
-				.Select(p => p.RoomId)
-				.Distinct();
-			
-			// foreach (var flora in game.Flora.)
+			// var plotRooms = plotsList
+			// 	.Select(p => p.RoomId)
+			// 	.Distinct();
+			//
+			// foreach (var flora in game.Flora.AllActive.Where(m => plotRooms.Contains(m.RoomTransform.Id.Value)))
+			// {
+			// 	
+			// }
 
 			Plots = plotsList.ToArray();
+			
+			CalculateFloraObligations(
+				game,
+				model
+			);
+		}
+		
+		public void CalculateFloraObligations(
+			GameModel game,
+			IFarmModel model
+		)
+		{
+			LastUpdated = DateTime.Now;
+
+			var plotFloraIds = Plots
+				.Where(p => !p.Flora.IsNull)
+				.Select(p => p.Flora.Id);
+
+			var plotRooms = Plots
+				.Select(p => p.RoomId)
+				.Distinct();
+
+			var blockedPlots = new List<string>();
+			
+			foreach (var flora in game.Flora.AllActive.Where(m => plotRooms.Contains(m.RoomTransform.Id.Value)))
+			{
+				if (!plotRooms.Contains(flora.RoomTransform.Id.Value)) continue;
+				
+				if (plotFloraIds.Contains(flora.Id.Value))
+				{
+					// TODO: Calculate what happens here...	
+				}
+				else
+				{
+					var invalidPlots = Plots
+						.Where(p => Vector3.Distance(p.Position, flora.Transform.Position.Value) < p.Radius);
+					
+					if (invalidPlots.Any())
+					{
+						if (!flora.Obligations.HasAny(ObligationCategories.Destroy.Melee)) flora.Obligations.Add(ObligationCategories.Destroy.Melee);
+						
+						foreach (var blockedPlot in invalidPlots.Where(p => p.State == FarmPlot.States.ReadyToPlow))
+						{
+							blockedPlot.State = FarmPlot.States.Blocked;
+							blockedPlots.Add(blockedPlot.Id);
+						}
+					}
+				}
+			}
+
+			var nonBlockedPlots = Plots
+				.Where(p => p.State == FarmPlot.States.Blocked && !blockedPlots.Contains(p.Id));
+
+			foreach (var plot in nonBlockedPlots) plot.State = FarmPlot.States.ReadyToPlow;
 		}
 		
 		public void Reset(

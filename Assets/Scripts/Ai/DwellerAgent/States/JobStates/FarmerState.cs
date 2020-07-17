@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
 	public class FarmerState<S> : JobState<S, FarmerState<S>>
 		where S : AgentState<GameModel, DwellerModel>
 	{
+		const float CalculateFloraObligationsDelay = 3f; 
+		
 		protected override Jobs Job => Jobs.Farmer;
 
 		public override void OnInitialize()
@@ -22,7 +25,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new CleanupState(),
 				new InventoryRequestState(),
 				new NavigateState(),
-				new BalanceItemState()
+				new BalanceItemState(),
+				new DestroyMeleeHandlerState()
 			);
 
 			AddTransitions(
@@ -34,6 +38,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new InventoryRequestState.ToInventoryRequestOnPromises(),
 				
 				new ToNavigateToWorkplace(),
+				
+				new DestroyMeleeHandlerState.ToObligationOnExistingObligation(),
+				new ToDestroyOvergrownFlora(),
 				
 				new BalanceItemState.ToBalanceOnAvailableDelivery(),
 				new BalanceItemState.ToBalanceOnAvailableDistribution(),
@@ -52,6 +59,20 @@ namespace Lunra.Hothouse.Ai.Dweller
 				{
 					Workplace.Farm.CalculatePlots(Game, Workplace);
 				}
+				else if (CalculateFloraObligationsDelay < (DateTime.Now - Workplace.Farm.LastUpdated).TotalSeconds)
+				{
+					Workplace.Farm.CalculateFloraObligations(Game, Workplace);
+				}
+			}
+		}
+
+		class ToDestroyOvergrownFlora : DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation
+		{
+			protected override bool IsObligationParentValid(IObligationModel obligationParent)
+			{
+				return SourceState.Workplace.Farm.Plots.Any(
+					p => Vector3.Distance(obligationParent.Transform.Position.Value, p.Position) < p.Radius	
+				);
 			}
 		}
 	}

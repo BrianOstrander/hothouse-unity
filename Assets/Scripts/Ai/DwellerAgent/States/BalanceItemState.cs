@@ -188,6 +188,7 @@ namespace Lunra.Hothouse.Ai
 
 					foreach (var possibleDeliverySource in possibleDeliverySources)
 					{
+						if (possibleDeliveryDestination.Inventory.Id == possibleDeliverySource.Inventory.Id) continue;
 						if (!GetIsNavigable(possibleDeliverySource.Enterable)) continue;
 
 						var isIntersecting = possibleDeliveryDestination.Inventory.Desired.Value.Delivery.Intersects(
@@ -242,6 +243,7 @@ namespace Lunra.Hothouse.Ai
 
 					foreach (var possibleDistributionDestination in possibleDistributionDestinations)
 					{
+						if (possibleDistributionSource.Inventory.Id == possibleDistributionDestination.Inventory.Id) continue;
 						if (!GetIsNavigable(possibleDistributionDestination.Enterable)) continue;
 
 						var isIntersecting = possibleDistributionSource.Inventory.Desired.Value.Distribution

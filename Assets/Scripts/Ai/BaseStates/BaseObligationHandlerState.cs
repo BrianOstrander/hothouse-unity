@@ -94,16 +94,16 @@ namespace Lunra.Hothouse.Ai
 		
 		public class ToObligationHandlerOnAvailableObligation : AgentTransition<S0, S1, GameModel, A>
 		{
-			List<IObligationModel> obligationParents = new List<IObligationModel>();
-			IObligationModel selectedObligationParent;
+			List<(IObligationModel Parent, Obligation Obligation)> entries = new List<(IObligationModel Parent, Obligation Obligation)>();
+			(IObligationModel Parent, Obligation Obligation) selection;
 			
 			public override bool IsTriggered()
 			{
 				if (!Game.Cache.Value.AnyObligationsAvailable) return false;
 				if (TargetState.ObligationsHandled.None(o => Game.Cache.Value.UniqueObligationsAvailable.Contains(o.Type))) return false;
 				
-				obligationParents.Clear();
-				selectedObligationParent = null;
+				entries.Clear();
+				selection = default;
 
 				foreach (var obligationParent in Game.GetObligations())
 				{
@@ -116,16 +116,21 @@ namespace Lunra.Hothouse.Ai
 							continue;
 						}
 					}
-					if (obligationParent.Obligations.All.Value.Available.None(o => TargetState.ObligationsHandled.Any(h => h.Type == o.Type))) continue;
-					
-					obligationParents.Add(obligationParent);
+					if (!IsObligationParentValid(obligationParent)) continue;
+					var obligation = obligationParent.Obligations.All.Value.Available
+						.FirstOrDefault(
+							o => TargetState.ObligationsHandled.Any(h => h.Type == o.Type) && IsObligationValid(obligationParent, o)
+						);
+					if (obligation == null) continue;
+
+					entries.Add((obligationParent, obligation));
 				}
 
-				if (obligationParents.None()) return false;
+				if (entries.None()) return false;
 
-				foreach (var obligationParent in obligationParents.OrderBy(m => Vector3.Distance(Agent.Transform.Position.Value, m.Transform.Position.Value)))
+				foreach (var entry in entries.OrderBy(e => Vector3.Distance(Agent.Transform.Position.Value, e.Parent.Transform.Position.Value)))
 				{
-					if (!Navigation.TryQuery(obligationParent, out var query)) continue;
+					if (!Navigation.TryQuery(entry.Parent, out var query)) continue;
 
 					var isNavigable = NavigationUtility.CalculateNearest(
 						Agent.Transform.Position.Value,
@@ -135,25 +140,26 @@ namespace Lunra.Hothouse.Ai
 					
 					if (!isNavigable) continue;
 
-					selectedObligationParent = obligationParent;
+					selection = entry;
 					break;
 				}
 
-				return selectedObligationParent != null;
+				return selection.Obligation != null;
 			}
 
 			public override void Transition()
 			{
-				var obligation = selectedObligationParent.Obligations.All.Value.Available.First(o => TargetState.ObligationsHandled.Any(h => h.Type == o.Type));
-
-				selectedObligationParent.Obligations.AddForbidden(obligation);
+				selection.Parent.Obligations.AddForbidden(selection.Obligation);
 				Agent.ObligationPromises.All.Push(
 					ObligationPromise.New(
-						obligation,
-						selectedObligationParent
+						selection.Obligation,
+						selection.Parent
 					)	
 				);
 			}
+
+			protected virtual bool IsObligationParentValid(IObligationModel obligationParent) => true;
+			protected virtual bool IsObligationValid(IObligationModel obligationParent, Obligation obligation) => true;
 		}
 
 		protected class ToReturnOnMissingObligation : AgentTransition<S1, S0, GameModel, A>

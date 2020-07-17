@@ -404,6 +404,7 @@ namespace Lunra.Hothouse.Editor
 					switch (farmPlot.State)
 					{
 						// case FarmPlot.States.Unknown: break;
+						case FarmPlot.States.Blocked:
 						case FarmPlot.States.Invalid:
 							farmPlotColor = Color.red;
 							break;
