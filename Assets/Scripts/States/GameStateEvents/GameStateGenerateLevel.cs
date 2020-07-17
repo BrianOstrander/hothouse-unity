@@ -152,7 +152,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				GenerateFloraInRoom(
 					room,
-					payload.Game.Flora.GetValidSpeciesData(room)	
+					payload.Game.Flora.GetTypesValidForRoom(room)	
 				);
 			}
 			
@@ -416,7 +416,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		
 		void GenerateFloraInRoom(
 			RoomModel room,
-			FloraPoolModel.SpeciesData[] species
+			FloraDefinition[] species
 		)
 		{
 			if (species.None()) return;
@@ -448,10 +448,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 						}
 
 						parentPool.Add(
-							payload.Game.Flora.ActivateAdult(
-								currentSpecies.Species,
+							payload.Game.Flora.Activate(
+								currentSpecies,
 								room.RoomTransform.Id.Value,
-								position
+								position,
+								isAdult: true,
+								generator: generator
 							)
 						);
 						
@@ -473,7 +475,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				clusterCount = currentSpecies.CountPerClusterMaximum;
 				
 				var currentSpeciesParentPool = parentPool
-					.Where(m => m.Species.Value == currentSpecies.Species)
+					.Where(m => m.Type.Value == currentSpecies.Type)
 					.ToList();
 				
 				if (currentSpeciesParentPool.None()) continue;

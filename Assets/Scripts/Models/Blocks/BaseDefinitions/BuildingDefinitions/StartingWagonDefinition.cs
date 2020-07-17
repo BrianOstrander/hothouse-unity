@@ -5,8 +5,6 @@ namespace Lunra.Hothouse.Models
 {
 	public class StartingWagonDefinition : BuildingDefinition
 	{
-		public override string PrefabId => "starting_wagon";
-
 		protected override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
 			EnumExtensions.GetValues(Inventory.Types.Unknown)
 				.Select(t => (t, 25))

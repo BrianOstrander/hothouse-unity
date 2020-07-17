@@ -165,7 +165,7 @@ GameObject:
   - component: {fileID: 4316015773024962226}
   - component: {fileID: 1823652012535546700}
   m_Layer: 0
-  m_Name: wall_small_0
+  m_Name: barricade_small
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -200,6 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 777e8c5323064eaea52e73fee14ef296, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignore: 0
   poolSize: 0
   ShowCloseDuration:
     OverrideShow: 0
@@ -207,7 +208,8 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: wall_small_0
+  prefabId: barricade_small
+  prefabTags: []
   navigationColliders:
   - {fileID: 8348105340903504755}
   navigationCollidersRadius: 2.0029588

@@ -200,7 +200,7 @@ GameObject:
   - component: {fileID: 6278881143626287066}
   - component: {fileID: 6075714665180566942}
   m_Layer: 0
-  m_Name: Grass0
+  m_Name: stalk_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -235,6 +235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f563597af35b444709dbd9e72f832d5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignore: 0
   poolSize: 0
   ShowCloseDuration:
     OverrideShow: 0
@@ -242,7 +243,8 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: grass0
+  prefabId: stalk_0
+  prefabTags: []
   meleeRangeBonus: 0
   maximumHeight: 3
   heightRoot: {fileID: 466282901779698963}

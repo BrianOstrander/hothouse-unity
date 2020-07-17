@@ -5,8 +5,6 @@ namespace Lunra.Hothouse.Models
 {
 	public class SmallDepotDefinition : BuildingDefinition
 	{
-		public override string PrefabId => "debug_building";
-		
 		protected override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
 			EnumExtensions.GetValues(Inventory.Types.Unknown)
 				.Select(t => (t, 25))

@@ -72,14 +72,17 @@ namespace Lunra.Hothouse.Presenters
 		void OnClearableHealthCurrent(float health)
 		{
 			if (!Mathf.Approximately(0f, health)) return;
-			
-			Game.ItemDrops.Activate(
-				Model.RoomTransform.Id.Value,
-				Model.Transform.Position.Value,
-				Quaternion.identity,
-				Model.Clearable.ItemDrops.Value
-			);
-			
+
+			if (!Model.Clearable.ItemDrops.Value.IsEmpty)
+			{
+				Game.ItemDrops.Activate(
+					Model.RoomTransform.Id.Value,
+					Model.Transform.Position.Value,
+					Quaternion.identity,
+					Model.Clearable.ItemDrops.Value
+				);
+			}
+
 			Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion

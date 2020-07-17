@@ -181,17 +181,20 @@ namespace Lunra.Hothouse.Models
 				// Flora
 				case Types.SeenStalksFlora:
 					return getCachedTrueOrCalculate(
-						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Stalks && m.LightSensitive.IsLit)
+						() => true
+						// () => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Stalks && m.LightSensitive.IsLit)
 					);
 				case Types.SeenEdibleFlora:
 					return getCachedTrueOrCalculate(
-						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Wheat && m.LightSensitive.IsLit)
+						() => true
+						// () => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Wheat && m.LightSensitive.IsLit)
 					);
 				case Types.SeenAttackFlora:
 					return getCachedTrueOrCalculate(
-						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Shroom && m.LightSensitive.IsLit)
+						() => true
+						// () => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Shroom && m.LightSensitive.IsLit)
 					);
-				
+					
 				// Invalid or Unrecognized
 				case Types.Unknown:
 					Debug.LogError("Invalid "+nameof(type)+": "+type);

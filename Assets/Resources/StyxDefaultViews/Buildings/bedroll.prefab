@@ -211,7 +211,7 @@ GameObject:
   - component: {fileID: 182006854958870606}
   - component: {fileID: 1823652012535546700}
   m_Layer: 0
-  m_Name: bed_bedroll
+  m_Name: bedroll
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -249,6 +249,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 777e8c5323064eaea52e73fee14ef296, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignore: 0
   poolSize: 0
   ShowCloseDuration:
     OverrideShow: 0
@@ -256,7 +257,8 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: bed_bedroll
+  prefabId: bedroll
+  prefabTags: []
   navigationColliders:
   - {fileID: 6554878188423417055}
   navigationCollidersRadius: 1.8319461

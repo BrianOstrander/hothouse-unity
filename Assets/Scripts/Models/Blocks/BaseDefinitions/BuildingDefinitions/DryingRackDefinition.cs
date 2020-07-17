@@ -2,8 +2,6 @@ namespace Lunra.Hothouse.Models
 {
 	public class DryingRackDefinition : BuildingDefinition
 	{
-		public override string PrefabId => "debug_building";
-
 		protected override int MaximumOwners => 1;
 
 		protected override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(

@@ -1,15 +1,15 @@
 using System;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Hothouse.Presenters;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
 	[BuildingDefinition]
-	public abstract class BuildingDefinition
+	public abstract class BuildingDefinition : BaseDefinition<BuildingModel>
 	{
-		public string Type { get; }
-		public virtual string PrefabId => Type;
+		protected override string DefaultPrefabId => "debug_building";
 
 		protected virtual float HealthMaximum => 100f;
 		protected virtual FloatRange PlacementLightRequirement => new FloatRange(0.001f, 1f);
@@ -26,15 +26,6 @@ namespace Lunra.Hothouse.Models
 		protected virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.StalkDry, 2);
 		protected virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
 		protected virtual Recipe[] Recipes => new Recipe[0];
-		
-		public BuildingDefinition()
-		{
-			Type = string.Concat(
-				GetType().Name
-					.Replace("Definition", String.Empty)
-					.Select((c, i) => 0 < i && char.IsUpper(c) ? "_" + c : c.ToString())
-			).ToLower();
-		}
 		
 		public virtual void Reset(
 			BuildingModel model,
@@ -105,5 +96,7 @@ namespace Lunra.Hothouse.Models
 
 			if (Recipes.Any()) model.Recipes.Queue.Enqueue(RecipeComponent.RecipeIteration.ForInfinity(Recipes.First()));
 		}
+
+		public override void Instantiate(BuildingModel model) => new BuildingPresenter(Game, model);
 	}
 }

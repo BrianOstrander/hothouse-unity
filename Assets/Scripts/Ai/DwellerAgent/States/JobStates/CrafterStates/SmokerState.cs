@@ -10,7 +10,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			Workplaces = new []
 			{
-				Game.Buildings.GetSerializedType<DryingRackDefinition>()	
+				Game.Buildings.GetDefinitionType<DryingRackDefinition>()	
 			};
 			
 			base.OnInitialize();

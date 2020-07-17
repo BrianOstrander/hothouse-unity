@@ -149,7 +149,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7233379631256066315}
-  m_Mesh: {fileID: -7695873427682586512, guid: 94cb8c6628e5942b39d0c59d20ccc632, type: 3}
+  m_Mesh: {fileID: 8688538118215608824, guid: 94cb8c6628e5942b39d0c59d20ccc632, type: 3}
 --- !u!23 &4585987135065609475
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -168,7 +168,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: de6939e296b6440c1ae9df8595c623d7, type: 2}
+  - {fileID: 2100000, guid: ac3e289800d964fc0914ead61b997cf3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -200,7 +200,7 @@ GameObject:
   - component: {fileID: 6278881143626287066}
   - component: {fileID: 6075714665180566942}
   m_Layer: 0
-  m_Name: Wheat0
+  m_Name: stalk_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -235,6 +235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f563597af35b444709dbd9e72f832d5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignore: 0
   poolSize: 0
   ShowCloseDuration:
     OverrideShow: 0
@@ -242,7 +243,8 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: wheat0
+  prefabId: stalk_1
+  prefabTags: []
   meleeRangeBonus: 0
   maximumHeight: 3
   heightRoot: {fileID: 466282901779698963}

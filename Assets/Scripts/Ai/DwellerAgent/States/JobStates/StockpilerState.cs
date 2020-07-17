@@ -14,8 +14,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			Workplaces = new []
 			{
-				Game.Buildings.GetSerializedType<SmallDepotDefinition>(),
-				Game.Buildings.GetSerializedType<StartingWagonDefinition>(),	
+				Game.Buildings.GetDefinitionType<SmallDepotDefinition>(),
+				Game.Buildings.GetDefinitionType<StartingWagonDefinition>(),	
 			};
 			
 			AddChildStates(

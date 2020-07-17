@@ -174,17 +174,20 @@ namespace Lunra.Hothouse.Presenters
 									switch (reproductionEvent)
 									{
 										case ReproductionEvents.ReproduceChild:
-											offspring = Game.Flora.ActivateChild(
-												Model.Species.Value,
+											offspring = Game.Flora.Activate(
+												Model.Type.Value,
 												roomView.RoomId,
-												hit.position
+												hit.position,
+												generator: currentGenerator
 											);
 											break;
 										case ReproductionEvents.ReproduceAdult:
-											offspring = Game.Flora.ActivateAdult(
-												Model.Species.Value,
+											offspring = Game.Flora.Activate(
+												Model.Type.Value,
 												roomView.RoomId,
-												hit.position
+												hit.position,
+												isAdult: true,
+												generator: currentGenerator
 											);
 											break;
 										case ReproductionEvents.Custom:
@@ -210,7 +213,7 @@ namespace Lunra.Hothouse.Presenters
 					.Where(
 						f =>
 						{
-							if (f.Species.Value == Model.Species.Value) return false;
+							if (f.Type.Value == Model.Type.Value) return false;
 							return Vector3.Distance(f.Transform.Position.Value, Model.Transform.Position.Value) < Model.ReproductionRadius.Value.Maximum;
 						}
 					)

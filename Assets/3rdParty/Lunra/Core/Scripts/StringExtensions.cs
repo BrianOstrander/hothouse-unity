@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Linq;
+using UnityEngine;
 
 namespace Lunra.Core
 {
@@ -21,6 +23,13 @@ namespace Lunra.Core
 
 		// TODO: Convert to use "this string"
 		public static string Wrap(string value, string begin, string end) => begin + value + end;
+
+		public static string ToSnakeCase(this string value)
+		{
+			return string.Concat(
+				value.Select((c, i) => 0 < i && char.IsUpper(c) ? "_" + c : c.ToString())
+			).ToLower();
+		}
 		
 		public static Color ToColor(this string value)
 		{

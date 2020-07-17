@@ -196,7 +196,7 @@ GameObject:
   - component: {fileID: 2081618020461291662}
   - component: {fileID: 6870393366402354332}
   m_Layer: 0
-  m_Name: fire_bonfire
+  m_Name: bonfire_light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -241,7 +241,8 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: fire_bonfire
+  prefabId: bonfire_light
+  prefabTags: []
   navigationColliders:
   - {fileID: 1311359037803919897}
   navigationCollidersRadius: 1.7263846
