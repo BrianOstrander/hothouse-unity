@@ -5,17 +5,16 @@ using Lunra.Hothouse.Models;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class StockpilerState<S> : JobState<S, StockpilerState<S>>
+	public class FarmerState<S> : JobState<S, FarmerState<S>>
 		where S : AgentState<GameModel, DwellerModel>
 	{
-		protected override Jobs Job => Jobs.Stockpiler;
+		protected override Jobs Job => Jobs.Farmer;
 
 		public override void OnInitialize()
 		{
 			Workplaces = new []
 			{
-				Game.Buildings.GetDefinitionType<DepotSmallDefinition>(),
-				Game.Buildings.GetDefinitionType<StartingWagonDefinition>(),	
+				Game.Buildings.GetDefinitionType<SeedSiloDefinition>()	
 			};
 			
 			AddChildStates(

@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Models
 	[BuildingDefinition]
 	public abstract class BuildingDefinition : BaseDefinition<BuildingModel>
 	{
-		public override string DefaultPrefabId => "debug_building";
+		public override string DefaultPrefabId => "debug";
 
 		public virtual float HealthMaximum => 100f;
 		public virtual FloatRange PlacementLightRequirement => new FloatRange(0.001f, 1f);

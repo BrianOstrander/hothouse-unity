@@ -226,7 +226,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Jobs.Smoker,
 				Jobs.Stockpiler,
 				Jobs.Stockpiler,
-				Jobs.Stockpiler,
+				Jobs.Farmer,
 				Jobs.Laborer
 			};
 
@@ -281,13 +281,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
-			var dryingRack = payload.Game.Buildings.Activate<DryingRackDefinition>(
-				spawn.Id.Value,
-				position + (Vector3.right * 3f) + (Vector3.back * 3f),
-				Quaternion.identity, 
-				BuildingStates.Operating
-			);
-			
 			payload.Game.WorldCamera.Transform.Position.Value = bonfire.Transform.Position.Value;
 
 			payload.Game.WorldCamera.Transform.Rotation.Value = Quaternion.LookRotation(
@@ -300,12 +293,11 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			wagon.Inventory.Remove(
-				Inventory.FromEntries(
-					wagon.Inventory.All.Value.Entries
-						.Select(e => (e.Type, 1))
-						.ToArray()
-				)
+			payload.Game.Buildings.Activate<SeedSiloDefinition>(
+				spawn.Id.Value,
+				position + (Vector3.right * 3f) + (Vector3.back * 3f),
+				Quaternion.identity, 
+				BuildingStates.Operating
 			);
 			// Debugging End
 			

@@ -55,6 +55,7 @@ namespace Lunra.Hothouse.Models
 		public virtual void Reset(FloraModel model)
 		{
 			model.Type.Value = Type;
+			model.Seed.Value = Seed;
 			model.Age.Value = Interval.WithMaximum(AgeDuration.Evaluate(DemonUtility.NextFloat));
 			model.ReproductionElapsed.Value = Interval.WithMaximum(ReproductionDuration.Evaluate(DemonUtility.NextFloat));
 			model.ReproductionRadius.Value = ReproductionRadius;

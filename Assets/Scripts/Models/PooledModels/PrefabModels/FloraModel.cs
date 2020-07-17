@@ -11,6 +11,9 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		[JsonProperty] string type;
 		[JsonIgnore] public ListenerProperty<string> Type { get; }
+		
+		[JsonProperty] Inventory.Types seed;
+		[JsonIgnore] public ListenerProperty<Inventory.Types> Seed { get; }
 
 		[JsonProperty] Interval age;
 		[JsonIgnore] public ListenerProperty<Interval> Age { get; }
@@ -50,6 +53,7 @@ namespace Lunra.Hothouse.Models
 		public FloraModel()
 		{
 			Type = new ListenerProperty<string>(value => type = value, () => type);
+			Seed = new ListenerProperty<Inventory.Types>(value => seed = value, () => seed);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);

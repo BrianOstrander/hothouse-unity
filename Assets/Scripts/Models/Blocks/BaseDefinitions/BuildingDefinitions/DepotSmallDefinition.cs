@@ -3,7 +3,7 @@ using Lunra.Core;
 
 namespace Lunra.Hothouse.Models
 {
-	public class SmallDepotDefinition : BuildingDefinition
+	public class DepotSmallDefinition : BuildingDefinition
 	{
 		public override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
 			EnumExtensions.GetValues(Inventory.Types.Unknown)
