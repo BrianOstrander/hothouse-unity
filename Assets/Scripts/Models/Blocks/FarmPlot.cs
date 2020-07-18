@@ -10,11 +10,8 @@ namespace Lunra.Hothouse.Models
 			Unknown = 0,
 			Invalid = 10,
 			Blocked = 20,
-			ReadyToPlow = 30,
-			ReadyToSow = 40,
-			Sown = 50,
-			ReadyForHarvest = 60,
-			Harvested = 70
+			ReadyToSow = 30,
+			Sown = 40
 		}
 
 		public string Id;
@@ -23,6 +20,7 @@ namespace Lunra.Hothouse.Models
 		public float Radius;
 		public States State;
 		public InstanceId Flora;
+		public InstanceId AttendingFarmer;
 		
 		public FarmPlot(
 			Vector3 position,
@@ -38,6 +36,7 @@ namespace Lunra.Hothouse.Models
 			Radius = radius;
 			State = state;
 			Flora = flora;
+			AttendingFarmer = InstanceId.Null();
 		}
 	}
 }

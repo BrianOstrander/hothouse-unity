@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Ai;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
@@ -9,7 +10,7 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IFarmModel : IInventoryModel
+	public interface IFarmModel : IInventoryModel, IClaimOwnershipModel
 	{
 		FarmComponent Farm { get; }
 	}
@@ -104,18 +105,9 @@ namespace Lunra.Hothouse.Models
 					
 					if (!isNavigable) continue;
 
-					plot.State = FarmPlot.States.ReadyToPlow;
+					plot.State = FarmPlot.States.ReadyToSow;
 				}	
 			}
-
-			// var plotRooms = plotsList
-			// 	.Select(p => p.RoomId)
-			// 	.Distinct();
-			//
-			// foreach (var flora in game.Flora.AllActive.Where(m => plotRooms.Contains(m.RoomTransform.Id.Value)))
-			// {
-			// 	
-			// }
 
 			Plots = plotsList.ToArray();
 			
@@ -159,7 +151,7 @@ namespace Lunra.Hothouse.Models
 					{
 						if (!flora.Obligations.HasAny(ObligationCategories.Destroy.Melee)) flora.Obligations.Add(ObligationCategories.Destroy.Melee);
 						
-						foreach (var blockedPlot in invalidPlots.Where(p => p.State == FarmPlot.States.ReadyToPlow))
+						foreach (var blockedPlot in invalidPlots.Where(p => p.State == FarmPlot.States.ReadyToSow))
 						{
 							blockedPlot.State = FarmPlot.States.Blocked;
 							blockedPlots.Add(blockedPlot.Id);
@@ -168,11 +160,36 @@ namespace Lunra.Hothouse.Models
 				}
 			}
 
-			var nonBlockedPlots = Plots
-				.Where(p => p.State == FarmPlot.States.Blocked && !blockedPlots.Contains(p.Id));
+			foreach (var plot in Plots)
+			{
+				if (plot.State == FarmPlot.States.Blocked && !blockedPlots.Contains(plot.Id))
+				{
+					plot.State = FarmPlot.States.ReadyToSow;
+				}
 
-			foreach (var plot in nonBlockedPlots) plot.State = FarmPlot.States.ReadyToPlow;
+				if (!plot.AttendingFarmer.IsNull && model.Ownership.Claimers.Value.None(o => o.Id == plot.AttendingFarmer.Id))
+				{
+					plot.AttendingFarmer = InstanceId.Null();
+				}
+			}
 		}
+
+		// public bool CanSow(
+		// 	IFarmModel model,
+		// 	AgentModel agent,
+		// 	out FarmPlot plot
+		// )
+		// {
+		// 	plot = Plots
+		// 		.Where(p => p.State == FarmPlot.States.ReadyToSow)
+		// 		.OrderBy(p => Vector3.Distance(agent.Transform.Position.Value, p.Position))
+		// 		.FirstOrDefault();
+		//
+		// 	if (plot == null) return false;
+		// 	if (!model.Inventory.Available.Value.Contains(Inventory.FromEntry(SelectedSeed, 1))) return false;
+		// 	
+		// 	return Vector3.Distance(agent.Transform.Position.Value, plot.Position) < plot.Radius;
+		// }
 		
 		public void Reset(
 			bool isFarm,

@@ -73,7 +73,36 @@ namespace Lunra.Hothouse.Models
 							return validation.GetInValid();
 					}
 						
-					if (Vector3.Distance(validation.PathEnd, validation.Target) < (model.Boundary.Radius.Value + radiusBonus))
+					if (Vector3.Distance(validation.PathEnd, validation.Target) <= (model.Boundary.Radius.Value + radiusBonus))
+					{
+						return validation.GetValid();
+					}
+
+					return validation.GetInValid();
+				}
+			);
+		}
+		
+		public static Query QueryPosition(
+			Vector3 position,
+			float radiusBonus = 0f
+		)
+		{
+			return new Query(
+				position,
+				null,
+				radiusBonus,
+				validate: validation =>
+				{
+					switch (validation.Path.status)
+					{
+						case NavMeshPathStatus.PathComplete:
+							return validation.GetValid();
+						case NavMeshPathStatus.PathInvalid:
+							return validation.GetInValid();
+					}
+						
+					if (Vector3.Distance(validation.PathEnd, validation.Target) <= radiusBonus)
 					{
 						return validation.GetValid();
 					}

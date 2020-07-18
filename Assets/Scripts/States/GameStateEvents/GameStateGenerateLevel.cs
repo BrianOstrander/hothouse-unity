@@ -223,14 +223,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			var requiredJobs = new []
 			{
-				// Jobs.Smoker,
-				// Jobs.Stockpiler,
-				// Jobs.Stockpiler,
+				Jobs.Smoker,
+				Jobs.Stockpiler,
+				Jobs.Stockpiler,
 				Jobs.Farmer,
-				// Jobs.Laborer
+				Jobs.Laborer
 			};
 
-			for (var i = 0; i < 1; i++)
+			for (var i = 0; i < requiredJobs.Length; i++)
 			{
 				var position = spawn.Transform.Position.Value + (Vector3.forward * (4f + i));
 

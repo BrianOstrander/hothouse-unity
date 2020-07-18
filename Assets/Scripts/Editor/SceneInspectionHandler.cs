@@ -399,25 +399,38 @@ namespace Lunra.Hothouse.Editor
 				
 				foreach (var farmPlot in farmModel.Farm.Plots)
 				{
-					var farmPlotColor = Color.green;
+					var farmPlotColor = Color.magenta;
 					
 					switch (farmPlot.State)
 					{
-						// case FarmPlot.States.Unknown: break;
 						case FarmPlot.States.Blocked:
 						case FarmPlot.States.Invalid:
 							farmPlotColor = Color.red;
 							break;
-						// case FarmPlot.States.ReadyToPlow: break;
-						// case FarmPlot.States.ReadyToSow: break;
-						// case FarmPlot.States.Sown: break;
-						// case FarmPlot.States.ReadyForHarvest: break;
-						// case FarmPlot.States.Harvested: break;
-						// default:
-						// 	break;
+						case FarmPlot.States.ReadyToSow:
+							farmPlotColor = Color.green;
+							break;
+						case FarmPlot.States.Sown:
+							farmPlotColor = Color.yellow;
+							break;
 					}
-					
-					Debug.DrawLine(farmPlot.Position, farmPlot.Position + Vector3.up, farmPlotColor);
+
+					Handles.color = farmPlotColor;
+					if (farmPlot.AttendingFarmer.IsNull)
+					{
+						Handles.DrawLine(
+							farmPlot.Position,
+							farmPlot.Position + Vector3.up
+						);
+					}
+					else
+					{
+						Handles.DrawDottedLine(
+							farmPlot.Position,
+							farmPlot.Position + Vector3.up,
+							4f
+						);
+					}
 				}
 			}
 
