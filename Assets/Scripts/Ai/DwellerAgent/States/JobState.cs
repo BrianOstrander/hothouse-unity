@@ -38,7 +38,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 		protected bool IsCurrentJob => Job == Agent.Job.Value;
 
 		protected BuildingModel Workplace { get; private set; }
-
 		WorkplaceNavigationCache workplaceNavigation;
 		
 		public override void Begin()
@@ -258,6 +257,36 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationToWorkplace.Path);
 			}
+		}
+		
+		protected class NavigateToNearestLight : AgentTransition<S1, NavigateState<S1>, GameModel, DwellerModel>
+		{
+			DayTime nextCheck;
+			DateTime lastLightUpdateChecked;
+			Navigation.Result navigationResult;
+
+			public override string Name => "ToNavigateToNearestLight";
+
+			public override bool IsTriggered()
+			{
+				if (Game.SimulationTime.Value < nextCheck && lastLightUpdateChecked <= Game.LastLightUpdate.Value.LastUpdate) return false;
+				
+				nextCheck = Game.SimulationTime.Value + new DayTime(0.991f); // TODO: Don't hardcode this...
+				lastLightUpdateChecked = Game.LastLightUpdate.Value.LastUpdate;
+				
+				// if (0 < Game.CalculateMaximumLighting((Agent.RoomTransform.Id.Value, Agent.Transform.Position.Value, null)).OperatingMaximum) return false;
+	
+				return NavigationUtility.CalculateNearest(
+					Agent.Transform.Position.Value,
+					out navigationResult,
+					Game.Buildings.AllActive
+						.Where(m => m.IsBuildingState(BuildingStates.Operating) && m.Light.IsLight.Value && m.Enterable.AnyAvailable())
+						.Select(m => Navigation.QueryEntrances(m))
+						.ToArray()
+				);
+			}
+
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
 		}
 		
 		#region Child Classes

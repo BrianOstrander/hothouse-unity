@@ -265,7 +265,8 @@ namespace Lunra.Hothouse.Models
 
 		public override string ToString()
 		{
-			return "TotalYears: " + TotalYears;
+			return ToDayTimeString();
+			// return "TotalYears: " + TotalYears;
 		}
 	}
 }

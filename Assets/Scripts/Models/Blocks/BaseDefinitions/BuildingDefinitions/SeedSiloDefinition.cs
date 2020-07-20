@@ -26,5 +26,6 @@ namespace Lunra.Hothouse.Models
 
 		public override bool IsFarm => true;
 		public override Vector2 FarmSize => Vector2.one * 4f;
+		public override Inventory.Types FarmSeed => Inventory.Types.StalkSeed;
 	}
 }

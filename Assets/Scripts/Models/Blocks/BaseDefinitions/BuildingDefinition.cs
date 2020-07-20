@@ -27,6 +27,7 @@ namespace Lunra.Hothouse.Models
 		public virtual Recipe[] Recipes => new Recipe[0];
 		public virtual bool IsFarm => false;
 		public virtual Vector2 FarmSize => Vector2.zero;
+		public virtual Inventory.Types FarmSeed => Inventory.Types.Unknown;
 		
 		public virtual void Reset(
 			BuildingModel model,
@@ -99,7 +100,8 @@ namespace Lunra.Hothouse.Models
 			
 			model.Farm.Reset(
 				IsFarm,
-				FarmSize
+				FarmSize,
+				FarmSeed
 			);
 		}
 

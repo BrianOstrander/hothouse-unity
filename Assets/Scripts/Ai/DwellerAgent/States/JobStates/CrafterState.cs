@@ -34,7 +34,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new BalanceItemState.ToBalanceOnAvailableDelivery(),
 				new BalanceItemState.ToBalanceOnAvailableDistribution(),
 				
-				new CleanupState.ToCleanupOnItemsAvailable()
+				new CleanupState.ToCleanupOnItemsAvailable(),
+				
+				new NavigateToNearestLight()
 			);
 		}
 

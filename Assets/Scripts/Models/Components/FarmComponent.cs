@@ -223,12 +223,13 @@ namespace Lunra.Hothouse.Models
 		
 		public void Reset(
 			bool isFarm,
-			Vector2 size	
+			Vector2 size,
+			Inventory.Types selectedSeed
 		)
 		{
 			IsFarm = isFarm;
 			Size = size;
-			SelectedSeed = Inventory.Types.Unknown;
+			SelectedSeed = selectedSeed;
 			Plots = new FarmPlot[0];
 			
 			LastUpdated = DateTime.MinValue;

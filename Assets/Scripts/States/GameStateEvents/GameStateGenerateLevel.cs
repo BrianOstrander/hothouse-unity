@@ -295,6 +295,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
+			/*
 			var farm0 = payload.Game.Buildings.Activate<SeedSiloDefinition>(
 				spawn.Id.Value,
 				position + (Vector3.right * 3f) + (Vector3.back * 3f),
@@ -320,6 +321,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				farm0.Transform.Position.Value + (Vector3.back * 1.5f) + (Vector3.right * 2.5f),
 				isAdult: false
 			);
+			*/
 			// Debugging End
 			
 			done();
