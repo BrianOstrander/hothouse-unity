@@ -77,7 +77,7 @@ namespace Lunra.Hothouse.Models
 					var plot = new FarmPlot(
 						rowOrigin + (columnNormal * (x * spacing)),
 						null,
-						definition.ReproductionRadius.Minimum,
+						definition.ReproductionRadius,
 						FarmPlot.States.Invalid,
 						InstanceId.Null()
 					);
@@ -123,33 +123,28 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			LastUpdated = DateTime.Now;
-
-			var plotFloraIds = Plots
-				.Where(p => !p.Flora.IsNull)
-				.Select(p => p.Flora.Id);
-
+			
 			var plotRooms = Plots
 				.Select(p => p.RoomId)
 				.Distinct();
 
 			var blockedPlots = new List<string>();
+
+			void tryAddDestroyObligation(FloraModel flora)
+			{
+				if (!flora.Obligations.HasAny(ObligationCategories.Destroy.Melee)) flora.Obligations.Add(ObligationCategories.Destroy.Melee);
+			}
 			
 			foreach (var flora in game.Flora.AllActive.Where(m => plotRooms.Contains(m.RoomTransform.Id.Value)))
 			{
-				if (!plotRooms.Contains(flora.RoomTransform.Id.Value)) continue;
-				
-				if (plotFloraIds.Contains(flora.Id.Value))
-				{
-					// TODO: Calculate what happens here...	
-				}
-				else
+				if (flora.Farm.Value.IsNull)
 				{
 					var invalidPlots = Plots
-						.Where(p => Vector3.Distance(p.Position, flora.Transform.Position.Value) < p.Radius);
+						.Where(p => Vector3.Distance(p.Position, flora.Transform.Position.Value) < p.Radius.Maximum);
 					
 					if (invalidPlots.Any())
 					{
-						if (!flora.Obligations.HasAny(ObligationCategories.Destroy.Melee)) flora.Obligations.Add(ObligationCategories.Destroy.Melee);
+						tryAddDestroyObligation(flora);
 						
 						foreach (var blockedPlot in invalidPlots.Where(p => p.State == FarmPlot.States.ReadyToSow))
 						{
@@ -158,15 +153,36 @@ namespace Lunra.Hothouse.Models
 						}
 					}
 				}
+				else if (flora.Farm.Value.Id == model.Id.Value && flora.Age.Value.IsDone)
+				{
+					tryAddDestroyObligation(flora);
+				}
 			}
 
 			foreach (var plot in Plots)
 			{
-				if (plot.State == FarmPlot.States.Blocked && !blockedPlots.Contains(plot.Id))
+				switch (plot.State)
 				{
-					plot.State = FarmPlot.States.ReadyToSow;
+					case FarmPlot.States.Blocked:
+						if (!blockedPlots.Contains(plot.Id))
+						{
+							plot.State = FarmPlot.States.ReadyToSow;
+						}
+						break;
+					case FarmPlot.States.Sown:
+						if (!plot.Flora.TryGetInstance<FloraModel>(game, out _))
+						{
+							plot.State = FarmPlot.States.ReadyToSow;
+						}
+						break;
+					case FarmPlot.States.Invalid:
+					case FarmPlot.States.ReadyToSow:
+						break;
+					default:
+						Debug.LogError("Unrecognized plot state: " + plot.State);
+						break;
 				}
-
+				
 				if (!plot.AttendingFarmer.IsNull && model.Ownership.Claimers.Value.None(o => o.Id == plot.AttendingFarmer.Id))
 				{
 					plot.AttendingFarmer = InstanceId.Null();

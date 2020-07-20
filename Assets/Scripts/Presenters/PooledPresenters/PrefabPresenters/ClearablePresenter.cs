@@ -45,6 +45,8 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 		}
 
+		protected virtual Inventory CalculateItemDrops() => Model.Clearable.ItemDrops.Value;
+
 		protected override void OnViewPrepare()
 		{
 			base.OnViewPrepare();
@@ -79,7 +81,7 @@ namespace Lunra.Hothouse.Presenters
 					Model.RoomTransform.Id.Value,
 					Model.Transform.Position.Value,
 					Quaternion.identity,
-					Model.Clearable.ItemDrops.Value
+					CalculateItemDrops()
 				);
 			}
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
@@ -85,9 +84,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			protected override bool IsObligationParentValid(IObligationModel obligationParent)
 			{
-				return SourceState.Workplace.Farm.Plots.Any(
-					p => Vector3.Distance(obligationParent.Transform.Position.Value, p.Position) < p.Radius	
-				);
+				if (obligationParent is FloraModel obligationParentFlora && !obligationParentFlora.Farm.Value.IsNull)
+				{
+					return obligationParentFlora.Farm.Value.Id == SourceState.Workplace.Id.Value;
+				}
+				
+				return SourceState.Workplace.Farm.Plots
+					.Any(p => Vector3.Distance(obligationParent.Transform.Position.Value, p.Position) < p.Radius.Maximum);
 			}
 		}
 
@@ -101,7 +104,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				selectedPlot = SourceState.Workplace.Farm.Plots
 					.FirstOrDefault(
-						p => p.State == FarmPlot.States.ReadyToSow && p.AttendingFarmer.Id == Agent.Id.Value && Vector3.Distance(p.Position, Agent.Transform.Position.Value) < (p.Radius + Agent.MeleeRange.Value)
+						p => p.State == FarmPlot.States.ReadyToSow && p.AttendingFarmer.Id == Agent.Id.Value && Vector3.Distance(p.Position, Agent.Transform.Position.Value) < (p.Radius.Minimum + Agent.MeleeRange.Value)
 					);
 
 				if (selectedPlot == null)
@@ -135,6 +138,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 									selectedPlot.Position
 								);
 
+								flora.Farm.Value = InstanceId.New(SourceState.Workplace);
 								selectedPlot.Flora = InstanceId.New(flora);
 							}
 							else
@@ -179,7 +183,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					isNavigable = NavigationUtility.CalculateNearest(
 						Agent.Transform.Position.Value,
 						out navigationResult,
-						Navigation.QueryPosition(plot.Position, plot.Radius)
+						Navigation.QueryPosition(plot.Position, plot.Radius.Minimum)
 					);
 
 					if (isNavigable)

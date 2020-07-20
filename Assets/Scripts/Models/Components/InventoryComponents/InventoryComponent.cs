@@ -26,6 +26,9 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] Inventory available = Inventory.Empty;
 		readonly ListenerProperty<Inventory> availableListener;
 		[JsonIgnore] public ReadonlyProperty<Inventory> Available { get; }
+		[JsonProperty] Inventory availableWithoutDesire = Inventory.Empty;
+		readonly ListenerProperty<Inventory> availableWithoutDesireListener;
+		[JsonIgnore] public ReadonlyProperty<Inventory> AvailableWithoutDesire { get; }
 		
 		[JsonProperty] Inventory forbidden = Inventory.Empty;
 		readonly ListenerProperty<Inventory> forbiddenListener;
@@ -69,6 +72,11 @@ namespace Lunra.Hothouse.Models
 				value => availableCapacity = value,
 				() => availableCapacity,
 				out availableCapacityListener
+			);
+			AvailableWithoutDesire = new ReadonlyProperty<Inventory>(
+				value => availableWithoutDesire = value,
+				() => availableWithoutDesire,
+				out availableWithoutDesireListener
 			);
 
 			Desired = new ListenerProperty<InventoryDesire>(value => desired = value, () => desired);
@@ -490,7 +498,20 @@ namespace Lunra.Hothouse.Models
 					break;
 			}
 
-			if (Desired.Value.IsActive) RecalculateDesired();
+			if (Desired.Value.IsActive)
+			{
+				RecalculateDesired();
+
+				if (Available.Value.Intersects(Desired.Value.Storage, out var availableStorageIntersection))
+				{
+					availableWithoutDesireListener.Value = Available.Value - availableStorageIntersection;
+				}
+				else availableWithoutDesireListener.Value = Available.Value;
+			}
+			else
+			{
+				availableWithoutDesireListener.Value = Available.Value;
+			}
 		}
 
 		void RecalculateDesired()
@@ -508,6 +529,10 @@ namespace Lunra.Hothouse.Models
 			{
 				desiredDelivery = Desired.Value.Storage;
 			}
+
+			AllCapacity.Value
+				.GetCapacityFor(All.Value)
+				.Intersects(desiredDelivery, out desiredDelivery);
 
 			if (Desired.Value.Storage.Intersects(Available.Value, out var availableDesiredIntersection))
 			{

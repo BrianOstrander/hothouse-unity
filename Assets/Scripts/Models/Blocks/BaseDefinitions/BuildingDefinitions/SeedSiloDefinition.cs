@@ -22,7 +22,7 @@ namespace Lunra.Hothouse.Models
 			Jobs.Farmer
 		);
 		
-		public override int MaximumOwners => 2;
+		public override int MaximumOwners => 1;
 
 		public override bool IsFarm => true;
 		public override Vector2 FarmSize => Vector2.one * 4f;

@@ -56,6 +56,7 @@ namespace Lunra.Hothouse.Models
 		{
 			model.Type.Value = Type;
 			model.Seed.Value = Seed;
+			model.Farm.Value = InstanceId.Null();
 			model.Age.Value = Interval.WithMaximum(AgeDuration.Evaluate(DemonUtility.NextFloat));
 			model.ReproductionElapsed.Value = Interval.WithMaximum(ReproductionDuration.Evaluate(DemonUtility.NextFloat));
 			model.ReproductionRadius.Value = ReproductionRadius;

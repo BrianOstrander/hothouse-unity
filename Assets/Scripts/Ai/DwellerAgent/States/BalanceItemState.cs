@@ -192,7 +192,7 @@ namespace Lunra.Hothouse.Ai
 						if (!GetIsNavigable(possibleDeliverySource.Enterable)) continue;
 
 						var isIntersecting = possibleDeliveryDestination.Inventory.Desired.Value.Delivery.Intersects(
-							possibleDeliverySource.Inventory.Available.Value,
+							possibleDeliverySource.Inventory.AvailableWithoutDesire.Value,
 							out var intersection
 						);
 						

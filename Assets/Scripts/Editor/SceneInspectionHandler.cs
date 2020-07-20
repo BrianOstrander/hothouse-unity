@@ -397,10 +397,43 @@ namespace Lunra.Hothouse.Editor
 
 				Debug.DrawLine(farmModel.Transform.Position.Value, farmModel.Transform.Position.Value + Vector3.up, Color.red);
 				
+				var farmRight = (farmModel.Transform.Rotation.Value * Vector3.right) * (farmModel.Farm.Size.x * 0.5f);
+				var farmForward = (farmModel.Transform.Rotation.Value * Vector3.forward) * (farmModel.Farm.Size.y * 0.5f);
+
+				var farmBoundaries = new[]
+				{
+					farmForward + farmRight,
+					farmRight - farmForward,
+					(-farmForward) - farmRight,
+					farmForward - farmRight
+				};
+					
+				Handles.color = Color.green;
+				
+				Handles.matrix = Matrix4x4.TRS(
+					farmModel.Transform.Position.Value,
+					farmModel.Transform.Rotation.Value,
+					Vector3.one
+				);
+					
+				Handles.DrawDottedLines(
+					farmBoundaries,
+					new []
+					{
+						0, 1,
+						1, 2,
+						2, 3,
+						3, 0
+					},
+					4f
+				);
+				
+				Handles.matrix = Matrix4x4.identity;
+					
 				foreach (var farmPlot in farmModel.Farm.Plots)
 				{
 					var farmPlotColor = Color.magenta;
-					
+
 					switch (farmPlot.State)
 					{
 						case FarmPlot.States.Blocked:
@@ -415,22 +448,13 @@ namespace Lunra.Hothouse.Editor
 							break;
 					}
 
-					Handles.color = farmPlotColor;
-					if (farmPlot.AttendingFarmer.IsNull)
-					{
-						Handles.DrawLine(
-							farmPlot.Position,
-							farmPlot.Position + Vector3.up
-						);
-					}
-					else
-					{
-						Handles.DrawDottedLine(
-							farmPlot.Position,
-							farmPlot.Position + Vector3.up,
-							4f
-						);
-					}
+					Handles.color = farmPlot.AttendingFarmer.IsNull ? farmPlotColor.NewA(0.5f) : farmPlotColor;
+
+					Handles.DrawWireDisc(
+						farmPlot.Position,
+						Vector3.up,
+						0.2f
+					);
 				}
 			}
 

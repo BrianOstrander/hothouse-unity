@@ -14,6 +14,9 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] Inventory.Types seed;
 		[JsonIgnore] public ListenerProperty<Inventory.Types> Seed { get; }
+		
+		[JsonProperty] InstanceId farm;
+		[JsonIgnore] public ListenerProperty<InstanceId> Farm { get; }
 
 		[JsonProperty] Interval age;
 		[JsonIgnore] public ListenerProperty<Interval> Age { get; }
@@ -54,6 +57,7 @@ namespace Lunra.Hothouse.Models
 		{
 			Type = new ListenerProperty<string>(value => type = value, () => type);
 			Seed = new ListenerProperty<Inventory.Types>(value => seed = value, () => seed);
+			Farm = new ListenerProperty<InstanceId>(value => farm = value, () => farm);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);

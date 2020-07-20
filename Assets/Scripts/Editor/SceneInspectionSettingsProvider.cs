@@ -1,4 +1,5 @@
 using Lunra.Editor.Core;
+using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -81,7 +82,19 @@ namespace Lunra.Hothouse.Editor
 				{
 					GUILayoutExtensions.BeginVertical(EditorStyles.helpBox, Color.white);
 					{
-						GUILayout.Label("Dweller : "+dweller.Id.Value+" - "+dweller.Job.Value, EditorStyles.boldLabel);
+						GUILayout.BeginHorizontal();
+						{
+							GUILayout.Label("Dweller [ " + dweller.ShortId + " ] : " + dweller.Name.Value + " - " + dweller.Job.Value, EditorStyles.boldLabel);
+							if (GUILayout.Button("Kill"))
+							{
+								Damage.ApplyGeneric(
+									9999f,
+									dweller
+								);
+							}
+						}
+						GUILayout.EndHorizontal();
+						
 						dweller.IsDebugging = EditorGUILayout.Toggle(nameof(dweller.IsDebugging), dweller.IsDebugging);
 
 					}

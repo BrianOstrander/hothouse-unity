@@ -1,4 +1,5 @@
 using System;
+using Lunra.Core;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -17,7 +18,7 @@ namespace Lunra.Hothouse.Models
 		public string Id;
 		public Vector3 Position;
 		public string RoomId;
-		public float Radius;
+		public FloatRange Radius;
 		public States State;
 		public InstanceId Flora;
 		public InstanceId AttendingFarmer;
@@ -25,7 +26,7 @@ namespace Lunra.Hothouse.Models
 		public FarmPlot(
 			Vector3 position,
 			string roomId,
-			float radius,
+			FloatRange radius,
 			States state,
 			InstanceId flora
 		)
