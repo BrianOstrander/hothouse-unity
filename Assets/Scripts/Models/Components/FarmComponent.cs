@@ -167,7 +167,7 @@ namespace Lunra.Hothouse.Models
 				foreach (var otherPlot in otherFarm.Farm.Plots.Where(p => p.State != FarmPlot.States.Invalid))
 				{
 					var nearbyPlots = Plots
-						.Where(p => Vector3.Distance(p.Position, otherPlot.Position) < (p.Radius.Minimum + otherPlot.Radius.Minimum));
+						.Where(p => Vector3.Distance(p.Position, otherPlot.Position) < Mathf.Max(p.Radius.Minimum, otherPlot.Radius.Minimum));
 
 					foreach (var nearbyPlot in nearbyPlots) nearbyPlot.State = FarmPlot.States.Invalid;
 				}

@@ -56,12 +56,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				new ToNavigateToWorkplace(),
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery(),
-				new BalanceItemState.ToBalanceOnAvailableDistribution(),
+				new BalanceItemState.ToBalanceOnAvailableDelivery(true),
+				new BalanceItemState.ToBalanceOnAvailableDistribution(true),
 				
-				new CleanupState.ToCleanupOnItemsAvailable(),
-				
-				new NavigateToNearestLight()
+				new CleanupState.ToCleanupOnItemsAvailable()
 			);
 		}
 

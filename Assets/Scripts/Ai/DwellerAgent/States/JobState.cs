@@ -271,7 +271,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				if (Game.SimulationTime.Value < nextCheck && lastLightUpdateChecked <= Game.LastLightUpdate.Value.LastUpdate) return false;
 				
-				nextCheck = Game.SimulationTime.Value + new DayTime(0.991f); // TODO: Don't hardcode this...
+				nextCheck = Game.SimulationTime.Value + new DayTime(0.5f); // TODO: Don't hardcode this...
 				lastLightUpdateChecked = Game.LastLightUpdate.Value.LastUpdate;
 				
 				// if (0 < Game.CalculateMaximumLighting((Agent.RoomTransform.Id.Value, Agent.Transform.Position.Value, null)).OperatingMaximum) return false;
