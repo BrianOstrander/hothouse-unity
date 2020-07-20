@@ -412,7 +412,7 @@ namespace Lunra.Hothouse.Editor
 				
 				Handles.matrix = Matrix4x4.TRS(
 					farmModel.Transform.Position.Value,
-					farmModel.Transform.Rotation.Value,
+					Quaternion.identity, 
 					Vector3.one
 				);
 					

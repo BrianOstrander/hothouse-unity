@@ -159,6 +159,20 @@ namespace Lunra.Hothouse.Models
 				}
 			}
 
+			foreach (var otherFarm in game.Buildings.AllActive.Where(m => m.IsBuildingState(BuildingStates.Operating) && m.Farm.IsFarm))
+			{
+				if (otherFarm.Id.Value == model.Id.Value) continue;
+				if (!plotRooms.Contains(otherFarm.RoomTransform.Id.Value)) continue;
+				
+				foreach (var otherPlot in otherFarm.Farm.Plots.Where(p => p.State != FarmPlot.States.Invalid))
+				{
+					var nearbyPlots = Plots
+						.Where(p => Vector3.Distance(p.Position, otherPlot.Position) < (p.Radius.Minimum + otherPlot.Radius.Minimum));
+
+					foreach (var nearbyPlot in nearbyPlots) nearbyPlot.State = FarmPlot.States.Invalid;
+				}
+			}
+
 			foreach (var plot in Plots)
 			{
 				switch (plot.State)

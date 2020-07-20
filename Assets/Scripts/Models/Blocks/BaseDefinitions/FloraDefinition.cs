@@ -15,8 +15,8 @@ namespace Lunra.Hothouse.Models
 		protected GameModel Game { get; private set; }
 		protected Demon Generator { get; private set; }
 		
-		public virtual FloatRange AgeDuration => new FloatRange(30f, 60f);
-		public virtual FloatRange ReproductionDuration => new FloatRange(30f, 60f);
+		public virtual FloatRange AgeDuration => new FloatRange(60f * 5f, 60f * 7f);
+		public virtual FloatRange ReproductionDuration => new FloatRange(60f * 5f, 60f * 7f);
 		public virtual FloatRange ReproductionRadius => new FloatRange(0.5f, 1f);
 		public virtual int ReproductionFailureLimit => 40;
 		public virtual float HealthMaximum => 100f;

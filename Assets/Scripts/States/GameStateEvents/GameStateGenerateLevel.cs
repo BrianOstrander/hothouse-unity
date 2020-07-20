@@ -228,6 +228,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Jobs.Stockpiler,
 				Jobs.Farmer,
 				Jobs.Farmer,
+				Jobs.Farmer,
 				Jobs.Laborer
 			};
 
@@ -302,15 +303,17 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 
 			farm0.Farm.SelectedSeed = Inventory.Types.StalkSeed;
+			farm0.Inventory.Add(farm0.Inventory.AllCapacity.Value.GetMaximum());
 			
 			var farm1 = payload.Game.Buildings.Activate<SeedSiloDefinition>(
 				spawn.Id.Value,
 				position + (Vector3.right * 3f) + (Vector3.back * 7f),
-				Quaternion.identity, 
+				Quaternion.AngleAxis(45f, Vector3.up), 
 				BuildingStates.Operating
 			);
 
 			farm1.Farm.SelectedSeed = Inventory.Types.StalkSeed;
+			farm1.Inventory.Add(farm1.Inventory.AllCapacity.Value.GetMaximum());
 
 			payload.Game.Flora.Activate<StalkDefinition>(
 				spawn.Id.Value,
