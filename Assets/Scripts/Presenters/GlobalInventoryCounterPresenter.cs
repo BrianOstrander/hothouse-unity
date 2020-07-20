@@ -55,7 +55,7 @@ namespace Lunra.Hothouse.Presenters
 				var color = "white";
 
 				var count = cache.GlobalInventory.Available.Value[type];
-				var maximum = cache.GlobalInventory.AvailableCapacity.Value.GetMaximumFor(type);
+				var maximum = cache.GlobalInventory.AllCapacity.Value.GetMaximumFor(type);
 				
 				switch (type)
 				{
