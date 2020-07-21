@@ -26,9 +26,6 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] FloatRange placementLightRequirement = FloatRange.Zero;
 		[JsonIgnore] public ListenerProperty<FloatRange> PlacementLightRequirement { get; }
-		
-		[JsonProperty] DesireQuality[] desireQualities = new DesireQuality[0];
-		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQualities { get; }
 
 		public LightComponent Light { get; } = new LightComponent();
 		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
@@ -45,23 +42,19 @@ namespace Lunra.Hothouse.Models
 		
 		#region Non Serialized
 		[JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
-		
-		[JsonIgnore] public Action<DwellerModel, Motives> Operate = ActionExtensions.GetEmpty<DwellerModel, Motives>();
-		
+
 		Dictionary<BuildingStates, IBaseInventoryComponent[]> inventoriesByBuildingState = new Dictionary<BuildingStates, IBaseInventoryComponent[]>();
 		[JsonIgnore] public IBaseInventoryComponent[] Inventories => inventoriesByBuildingState[BuildingState.Value];
 		#endregion
 
 		public bool IsBuildingState(BuildingStates buildingState) => BuildingState.Value == buildingState;
-		public bool IsDesireAvailable(Motives motive) => DesireQualities.Value.Any(d => d.Motive == motive && d.State == DesireQuality.States.Available);
 		
 		public BuildingModel()
 		{
 			Type = new ListenerProperty<string>(value => type = value, () => type);
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
-			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
-
+		
 			var emptyInventories = new IBaseInventoryComponent[0];
 			foreach (var buildState in EnumExtensions.GetValues<BuildingStates>())
 			{

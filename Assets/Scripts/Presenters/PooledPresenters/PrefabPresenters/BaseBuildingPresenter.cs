@@ -51,7 +51,6 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed += OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
-			Model.Inventory.All.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.All.Changed += OnBuildingSalvageInventory;
 			Model.BuildingState.Changed += OnBuildingState;
@@ -65,8 +64,6 @@ namespace Lunra.Hothouse.Presenters
 				ObligationCategories.Craft.Recipe,
 				OnObligationsCraftRecipe
 			);
-			
-			Model.Operate += OnBuildingOperate;
 
 			base.Bind();
 		}
@@ -88,7 +85,6 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed -= OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			Model.Inventory.All.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.All.Changed -= OnBuildingSalvageInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
@@ -102,15 +98,14 @@ namespace Lunra.Hothouse.Presenters
 				ObligationCategories.Craft.Recipe,
 				OnObligationsCraftRecipe
 			);
-			
-			Model.Operate -= OnBuildingOperate;
-			
+
 			base.UnBind();
 		}
 
 		protected override void OnSimulationInitialized()
 		{
-			OnBuildingInventory(Model.Inventory.All.Value);
+			// OnBuildingInventory(Model.Inventory.All.Value);
+			// This was used to calculate desire desirequality etc
 		}
 		
 		#region LightSourceModel Events
@@ -268,21 +263,6 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region BuildingModel Events
-		void OnBuildingInventory(Inventory inventory)
-		{
-			var anyChanged = false;
-			var newDesireQuality = Model.DesireQualities.Value.Select(
-				d =>
-				{
-					var result = d.CalculateState(inventory);
-					anyChanged |= d.State != result.State;
-					return result;
-				}
-			).ToArray(); // Has to call ToArray otherwise anyChanged will never get called...
-			
-			if (anyChanged) Model.DesireQualities.Value = newDesireQuality;
-		}
-
 		void OnBuildingConstructionInventory(Inventory constructionInventory)
 		{
 			if (constructionInventory.IsEmpty || Model.ConstructionInventory.AllCapacity.Value.IsNotFull(constructionInventory)) return;
@@ -387,26 +367,6 @@ namespace Lunra.Hothouse.Presenters
 					Debug.LogError("Unrecognized BuildingState: "+Model.BuildingState.Value);
 					return;
 			}
-		}
-
-		void OnBuildingOperate(DwellerModel dweller, Motives motive)
-		{
-			var quality = Model.DesireQualities.Value.FirstOrDefault(d => d.Motive == motive);
-
-			if (quality.Motive != motive)
-			{
-				Debug.LogError("Dweller "+dweller.Id.Value+" tried to operate desire "+motive+" on this building, but it doesn't fulfill that");
-				return;
-			}
-			if (quality.State != DesireQuality.States.Available)
-			{
-				Debug.LogError("Dweller "+dweller.Id.Value+" tried to operate desire "+motive+" on this building, but its state is "+quality.State);
-				return;
-			}
-
-			if (quality.Cost.IsEmpty) return;
-
-			Model.Inventory.Remove(quality.Cost);
 		}
 		#endregion
 		

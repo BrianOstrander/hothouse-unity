@@ -12,7 +12,6 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{
 			Model.Inventory.All.Changed += OnBuildingInventory;
-			Model.DesireQualities.Changed += OnBuildingDesireQuality;
 			
 			base.Bind();
 		}
@@ -20,7 +19,6 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Model.Inventory.All.Changed -= OnBuildingInventory;
-			Model.DesireQualities.Changed -= OnBuildingDesireQuality;
 			
 			base.UnBind();
 		}
@@ -90,8 +88,6 @@ namespace Lunra.Hothouse.Presenters
 		
 		#region Building Events
 		void OnBuildingInventory(Inventory inventory) => OnRefreshDebugLabel();
-
-		void OnBuildingDesireQuality(DesireQuality[] desireQuality) => OnRefreshDebugLabel();
 		#endregion
 	}
 }

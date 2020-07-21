@@ -159,16 +159,6 @@ namespace Lunra.Hothouse.Editor
 									append("Salvage " + model.SalvageInventory);
 									break;
 							}
-
-							if (model.DesireQualities.Value.Any())
-							{
-								var desireResult = "Desires";
-								foreach (var desireQuality in model.DesireQualities.Value)
-								{
-									desireResult += "\n  " + desireQuality.Motive + " : " + desireQuality.Quality.ToString("N1") + " - " + desireQuality.State;
-								}
-								append(desireResult);
-							}							
 						}
 					);
 
