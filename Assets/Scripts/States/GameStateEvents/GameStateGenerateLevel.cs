@@ -274,7 +274,19 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
-			wagon.Inventory.Add(wagon.Inventory.AllCapacity.Value.GetMaximum());
+			var startingResources = new[]
+			{
+				Inventory.Types.StalkSeed,
+				Inventory.Types.StalkDry
+			};
+			
+			wagon.Inventory.Add(
+				Inventory.FromEntries(
+					wagon.Inventory.AllCapacity.Value.GetMaximum().Entries
+						.Where(e => startingResources.Contains(e.Type))
+						.ToArray()
+				)
+			);
 		
 			var bonfire = payload.Game.Buildings.Activate<BonfireLightDefinition>(
 				spawn.Id.Value,

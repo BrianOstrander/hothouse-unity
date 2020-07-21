@@ -1,12 +1,14 @@
 namespace Lunra.Hothouse.Models
 {
-	public class DryingRackDefinition : BuildingDefinition
+	public class SmokeRackDefinition : BuildingDefinition
 	{
 		public override int MaximumOwners => 1;
 
 		public override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
 			(Inventory.Types.StalkRaw, 1),
-			(Inventory.Types.StalkDry, 1)
+			(Inventory.Types.StalkDry, 1),
+			(Inventory.Types.StalkSeed, 1),
+			(Inventory.Types.StalkPop, 1)
 		);
 
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForJobs(
@@ -19,8 +21,15 @@ namespace Lunra.Hothouse.Models
 			new Recipe(
 				"Dry Stalks",
 				Inventory.FromEntry(Inventory.Types.StalkRaw, 1),
-				Inventory.FromEntry(Inventory.Types.StalkDry, 1) 
-			), 
+				Inventory.FromEntry(Inventory.Types.StalkDry, 1),
+				4f
+			),
+			new Recipe(
+				"Stalk Pop",
+				Inventory.FromEntry(Inventory.Types.StalkSeed, 1),
+				Inventory.FromEntry(Inventory.Types.StalkPop, 1),
+				4f
+			),
 		};
 	}
 }

@@ -6,7 +6,13 @@ namespace Lunra.Hothouse.Models
 	public class StartingWagonDefinition : BuildingDefinition
 	{
 		public override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
-			EnumExtensions.GetValues(Inventory.Types.Unknown)
+			new []
+			{
+				Inventory.Types.StalkSeed,
+				Inventory.Types.StalkRaw,
+				Inventory.Types.StalkDry,
+				Inventory.Types.StalkPop
+			}
 				.Select(t => (t, 25))
 				.ToArray()
 		);

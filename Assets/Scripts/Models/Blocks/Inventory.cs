@@ -22,13 +22,18 @@ namespace Lunra.Hothouse.Models
 			StalkSeed = 10,
 			StalkRaw = 11,
 			StalkDry = 12,
+			StalkPop = 13,
+			
+			SweetStalkSeed = 20,
+			SweetStalkRaw = 21,
+			SweetStalkBrittle = 22,
 			
 			// FungalBloomSpore = 10,
 			// FungalBloomRaw = 11,
 			// FungalBloomJerky = 12,
 			
-			Rations = 20,
-			Scrap = 30,
+			Rations = 1000,
+			Scrap = 1001,
 		}
 		
 		public static Inventory Empty => new Inventory(new Dictionary<Types, int>());

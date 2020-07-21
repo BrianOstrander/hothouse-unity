@@ -96,7 +96,16 @@ namespace Lunra.Hothouse.Models
 			
 			model.Recipes.Reset(Recipes);
 
-			if (Recipes.Any()) model.Recipes.Queue.Enqueue(RecipeComponent.RecipeIteration.ForInfinity(Recipes.First()));
+			/*
+			if (Recipes.Any())
+			{
+				model.Recipes.Queue.Value = new[]
+				{
+					RecipeComponent.RecipeIteration.ForCount(Recipes.First(), 10),
+					RecipeComponent.RecipeIteration.ForDesired(Recipes.First(), 5)
+				};
+			}
+			*/
 			
 			model.Farm.Reset(
 				IsFarm,

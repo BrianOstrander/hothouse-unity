@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			Workplaces = new []
 			{
-				Game.Buildings.GetDefinitionType<SeedSiloDefinition>()	
+				Game.Buildings.GetDefinitionType<StalkSeedSiloDefinition>()	
 			};
 			
 			AddChildStates(
