@@ -453,6 +453,11 @@ namespace Lunra.Hothouse.Editor
 				appendResult(goalModel.Goals.ToString());
 			}
 
+			if (model is IGoalActivityModel goalActivityModel)
+			{
+				appendResult(goalActivityModel.Activities.ToString());
+			}
+
 			append?.Invoke(appendResult);
 
 			Handles.Label(

@@ -53,6 +53,7 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.All.Changed += OnBuildingSalvageInventory;
+			Model.Inventory.Available.Changed += OnBuildingAvailableInventory;
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
@@ -87,6 +88,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.All.Changed -= OnBuildingSalvageInventory;
+			Model.Inventory.Available.Changed -= OnBuildingAvailableInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
@@ -104,8 +106,7 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnSimulationInitialized()
 		{
-			// OnBuildingInventory(Model.Inventory.All.Value);
-			// This was used to calculate desire desirequality etc
+			OnBuildingAvailableInventory(Model.Inventory.All.Value);
 		}
 		
 		#region LightSourceModel Events
@@ -239,8 +240,9 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (calculationState != NavigationMeshModel.CalculationStates.Completed) return;
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
-			
+
 			Model.RecalculateEntrances();
+			Model.Activities.CalculateRestrictions(Model);
 		}
 		#endregion
 
@@ -284,6 +286,11 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.BuildingState.Value != BuildingStates.Salvaging || !salvageInventory.IsEmpty) return;
 
 			Model.PooledState.Value = PooledStates.InActive;
+		}
+
+		void OnBuildingAvailableInventory(Inventory availableInventory)
+		{
+			Model.Activities.CalculateRestrictions(Model);
 		}
 
 		void OnBuildingState(BuildingStates buildingState)

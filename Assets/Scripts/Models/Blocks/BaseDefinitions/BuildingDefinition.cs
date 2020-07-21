@@ -28,6 +28,8 @@ namespace Lunra.Hothouse.Models
 		public virtual Vector2 FarmSize => Vector2.zero;
 		public virtual Inventory.Types FarmSeed => Inventory.Types.Unknown;
 		
+		public virtual GoalActivity[] Activities => new GoalActivity[0];
+		
 		public virtual void Reset(
 			BuildingModel model,
 			BuildingStates state
@@ -110,6 +112,8 @@ namespace Lunra.Hothouse.Models
 				FarmSize,
 				FarmSeed
 			);
+
+			model.Activities.Reset(Activities);
 		}
 
 		public override void Instantiate(BuildingModel model) => new BuildingPresenter(Game, model);
