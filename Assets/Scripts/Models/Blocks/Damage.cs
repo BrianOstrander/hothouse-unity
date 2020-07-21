@@ -18,24 +18,24 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public static bool GetDamageTypeFromDesire(
-			Desires desire,
+			Motives motive,
 			out Types type
 		)
 		{
 			type = Types.Unknown;
 			
-			switch (desire)
+			switch (motive)
 			{
-				case Desires.None:
+				case Motives.None:
 					break;
-				case Desires.Sleep:
+				case Motives.Sleep:
 					type = Types.Exhaustion;
 					break;
-				case Desires.Eat:
+				case Motives.Eat:
 					type = Types.Starvation;
 					break;
 				default:
-					Debug.LogError("Unrecognized desire: " + desire);
+					Debug.LogError("Unrecognized desire: " + motive);
 					break;
 			}
 
@@ -44,25 +44,25 @@ namespace Lunra.Hothouse.Models
 		
 		public static bool GetDesireFromDamageType(
 			Types type,
-			out Desires desire
+			out Motives motive
 		)
 		{
-			desire = Desires.Unknown;
+			motive = Motives.Unknown;
 			
 			switch (type)
 			{
 				case Types.Exhaustion:
-					desire = Desires.Sleep;
+					motive = Motives.Sleep;
 					break;
 				case Types.Starvation:
-					desire = Desires.Eat;
+					motive = Motives.Eat;
 					break;
 				default:
 					Debug.LogError("Unrecognized desire: " + type);
 					break;
 			}
 
-			return desire != Desires.Unknown;
+			return motive != Motives.Unknown;
 		}
 
 		public class Request

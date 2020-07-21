@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
@@ -8,11 +9,36 @@ namespace Lunra.Hothouse.Models
 {
 	public class DwellerPoolModel : BasePrefabPoolModel<DwellerModel>
 	{
+		
+		struct GoalCalculationCache
+		{
+			public Motives Motive { get; }
+			public GoalComponent.CalculateGoal Calculation { get; }
+			
+			public GoalCalculationCache(
+				Motives motive,
+				Func<float, float> calculation
+			)
+			{
+				Motive = motive;
+				var discontentRange = new FloatRange(
+					calculation(0f),
+					calculation(1f)
+				);
+				Calculation = (motives, insistence) => new GoalResult(
+					insistence,
+					calculation(insistence),
+					discontentRange
+				);
+			}
+		}
+		
 		static readonly string[] ValidPrefabIds = new[]
 		{
 			"default"
 		};
 
+		Dictionary<Motives, GoalCalculationCache> goalCalculationCache = new Dictionary<Motives, GoalCalculationCache>();
 		GameModel game;
 		
 		public override void Initialize(GameModel game)
@@ -21,6 +47,32 @@ namespace Lunra.Hothouse.Models
 			Initialize(
 				model => new DwellerPresenter(game, model)	
 			);
+
+			foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
+			{
+				Func<float, float> calculation = null;
+				switch (motive)
+				{
+					case Motives.Sleep:
+						calculation = insistence => Mathf.Pow(insistence + 0.05f, 10f);
+						break;
+					case Motives.Eat:
+						calculation = insistence => Mathf.Pow(insistence, 5f);
+						break;
+					default:
+						Debug.LogError("Unrecognized Motive: " + motive);
+						calculation = insistence => 0f;
+						break;
+				}
+				
+				goalCalculationCache.Add(
+					motive,
+					new GoalCalculationCache(
+						motive,
+						calculation
+					)
+				);
+			}
 		}
 
 		public DwellerModel Activate(
@@ -54,7 +106,7 @@ namespace Lunra.Hothouse.Models
 			model.Job.Value = Jobs.None;
 			// model.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
 			model.JobShift.Value = DayTimeFrame.Maximum;
-			model.Desire.Value = Desires.None;
+			model.Desire.Value = Motives.None;
 			model.MeleeRange.Value = 0.75f;
 			model.MeleeCooldown.Value = 0.5f;
 			model.MeleeDamage.Value = 60f;
@@ -63,10 +115,10 @@ namespace Lunra.Hothouse.Models
 			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;
 			model.TransferDistance.Value = 0.75f;
 			
-			model.DesireDamage.Value = new Dictionary<Desires, float>
+			model.DesireDamage.Value = new Dictionary<Motives, float>
 			{
-				{ Desires.Eat , 0.3f },
-				{ Desires.Sleep , 0.1f }
+				{ Motives.Eat , 0.3f },
+				{ Motives.Sleep , 0.1f }
 			};
 			model.DesireMissedEmoteTimeout.Value = 2;
 
@@ -75,6 +127,23 @@ namespace Lunra.Hothouse.Models
 			model.ObligationMinimumConcentrationDuration.Value = 0.5f;
 			
 			model.InventoryPromises.Reset();
+			
+			model.Goals.Reset(
+				0.01f,
+				new []
+				{
+					Motives.Eat,
+					Motives.Sleep
+				},
+				OnCalculateGoal
+			);
+		}
+
+		GoalResult OnCalculateGoal(Motives motive, float insistence)
+		{
+			if (goalCalculationCache.TryGetValue(motive, out var cache)) return cache.Calculation(motive, insistence);
+			Debug.LogError("No cached calculation for Motive: "+motive);
+			return default;
 		}
 	}
 }

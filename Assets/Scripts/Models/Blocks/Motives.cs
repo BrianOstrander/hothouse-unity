@@ -1,6 +1,6 @@
 namespace Lunra.Hothouse.Models
 {
-	public enum Desires
+	public enum Motives
 	{
 		Unknown = 0,
 		None = 10,

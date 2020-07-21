@@ -165,7 +165,7 @@ namespace Lunra.Hothouse.Editor
 								var desireResult = "Desires";
 								foreach (var desireQuality in model.DesireQualities.Value)
 								{
-									desireResult += "\n  " + desireQuality.Desire + " : " + desireQuality.Quality.ToString("N1") + " - " + desireQuality.State;
+									desireResult += "\n  " + desireQuality.Motive + " : " + desireQuality.Quality.ToString("N1") + " - " + desireQuality.State;
 								}
 								append(desireResult);
 							}							
@@ -189,7 +189,7 @@ namespace Lunra.Hothouse.Editor
 						append =>
 						{
 							if (model.Job.Value != Jobs.None) append("Job: " + model.Job.Value);
-							if (model.Desire.Value != Desires.None) append("Desire: " + model.Desire.Value);
+							if (model.Desire.Value != Motives.None) append("Desire: " + model.Desire.Value);
 							if (!model.Workplace.Value.IsNull) append("Workplace: " + model.Workplace.Value);
 						},
 						model.Name.Value
@@ -456,6 +456,11 @@ namespace Lunra.Hothouse.Editor
 						0.2f
 					);
 				}
+			}
+
+			if (model is IGoalModel goalModel)
+			{
+				appendResult(goalModel.Goals.ToString());
 			}
 
 			append?.Invoke(appendResult);

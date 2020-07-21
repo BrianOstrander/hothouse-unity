@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class DwellerModel : AgentModel
+	public class DwellerModel : AgentModel, IGoalModel
 	{
 		#region Serialized
 		[JsonProperty] string name;
@@ -18,11 +18,11 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
 		[JsonIgnore] public ListenerProperty<DayTimeFrame> JobShift { get; }
 		
-		[JsonProperty] Desires desire;
-		[JsonIgnore] public ListenerProperty<Desires> Desire { get; }
+		[JsonProperty] Motives motive;
+		[JsonIgnore] public ListenerProperty<Motives> Desire { get; }
 		
-		[JsonProperty] Dictionary<Desires, float> desireDamage = new Dictionary<Desires, float>();
-		[JsonIgnore] public ListenerProperty<Dictionary<Desires, float>> DesireDamage { get; }
+		[JsonProperty] Dictionary<Motives, float> desireDamage = new Dictionary<Motives, float>();
+		[JsonIgnore] public ListenerProperty<Dictionary<Motives, float>> DesireDamage { get; }
 		
 		[JsonProperty] float desireMissedEmoteTimeout;
 		[JsonIgnore] public ListenerProperty<float> DesireMissedEmoteTimeout { get; }
@@ -57,16 +57,17 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public  ListenerProperty<InstanceId> Bed { get; }
 		
 		[JsonProperty] InstanceId workplace = InstanceId.Null();
-		[JsonIgnore] public  ListenerProperty<InstanceId> Workplace { get; }
+		[JsonIgnore] public ListenerProperty<InstanceId> Workplace { get; }
+		[JsonIgnore] public GoalComponent Goals { get; } = new GoalComponent();
 		#endregion
 		
 		#region Non Serialized
-		[JsonIgnore] public Action<Desires, bool> DesireUpdated = ActionExtensions.GetEmpty<Desires, bool>();
+		[JsonIgnore] public Action<Motives, bool> DesireUpdated = ActionExtensions.GetEmpty<Motives, bool>();
 		#endregion
 
-		public bool GetDesireDamage(Desires desire, GameModel game, out float damage)
+		public bool GetDesireDamage(Motives motive, GameModel game, out float damage)
 		{
-			if (!DesireDamage.Value.TryGetValue(desire, out damage)) damage = 0f;
+			if (!DesireDamage.Value.TryGetValue(motive, out damage)) damage = 0f;
 			else damage *= Health.Maximum.Value * game.DesireDamageMultiplier.Value;
 
 			return !Mathf.Approximately(0f, damage);
@@ -77,8 +78,8 @@ namespace Lunra.Hothouse.Models
 			Name = new ListenerProperty<string>(value => name = value, () => name);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
-			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);
-			DesireDamage = new ListenerProperty<Dictionary<Desires, float>>(value => desireDamage = value, () => desireDamage);
+			Desire = new ListenerProperty<Motives>(value => motive = value, () => motive);
+			DesireDamage = new ListenerProperty<Dictionary<Motives, float>>(value => desireDamage = value, () => desireDamage);
 			DesireMissedEmoteTimeout = new ListenerProperty<float>(value => desireMissedEmoteTimeout = value, () => desireMissedEmoteTimeout);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);

@@ -389,18 +389,18 @@ namespace Lunra.Hothouse.Presenters
 			}
 		}
 
-		void OnBuildingOperate(DwellerModel dweller, Desires desire)
+		void OnBuildingOperate(DwellerModel dweller, Motives motive)
 		{
-			var quality = Model.DesireQualities.Value.FirstOrDefault(d => d.Desire == desire);
+			var quality = Model.DesireQualities.Value.FirstOrDefault(d => d.Motive == motive);
 
-			if (quality.Desire != desire)
+			if (quality.Motive != motive)
 			{
-				Debug.LogError("Dweller "+dweller.Id.Value+" tried to operate desire "+desire+" on this building, but it doesn't fulfill that");
+				Debug.LogError("Dweller "+dweller.Id.Value+" tried to operate desire "+motive+" on this building, but it doesn't fulfill that");
 				return;
 			}
 			if (quality.State != DesireQuality.States.Available)
 			{
-				Debug.LogError("Dweller "+dweller.Id.Value+" tried to operate desire "+desire+" on this building, but its state is "+quality.State);
+				Debug.LogError("Dweller "+dweller.Id.Value+" tried to operate desire "+motive+" on this building, but its state is "+quality.State);
 				return;
 			}
 

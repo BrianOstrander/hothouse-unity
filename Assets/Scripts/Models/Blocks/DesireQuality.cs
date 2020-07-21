@@ -7,12 +7,12 @@ namespace Lunra.Hothouse.Models
 	public struct DesireQuality
 	{
 		public static DesireQuality New(
-			Desires desire,
+			Motives motive,
 			float quality
 		)
 		{
 			return new DesireQuality(
-				desire,
+				motive,
 				Inventory.Empty,
 				quality,
 				States.Available
@@ -20,13 +20,13 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		public static DesireQuality New(
-			Desires desire,
+			Motives motive,
 			float quality,
 			Inventory inventory
 		)
 		{
 			return new DesireQuality(
-				desire,
+				motive,
 				inventory,
 				quality,
 				States.Available
@@ -40,19 +40,19 @@ namespace Lunra.Hothouse.Models
 			NotAvailable = 20
 		}
 		
-		public readonly Desires Desire;
+		public readonly Motives Motive;
 		public readonly Inventory Cost;
 		public readonly float Quality;
 		public readonly States State;
 
 		public DesireQuality(
-			Desires desire,
+			Motives motive,
 			Inventory cost,
 			float quality,
 			States state = States.Unknown
 		)
 		{
-			Desire = desire;
+			Motive = motive;
 			Cost = cost;
 			Quality = quality;
 			State = state;
@@ -61,7 +61,7 @@ namespace Lunra.Hothouse.Models
 		public DesireQuality CalculateState(Inventory availableItems)
 		{
 			return new DesireQuality(
-				Desire,
+				Motive,
 				Cost,
 				Quality,
 				availableItems.Contains(Cost) ? States.Available : States.NotAvailable
@@ -71,9 +71,9 @@ namespace Lunra.Hothouse.Models
 
 	public static class DesireQualityLinqExtensions
 	{
-		public static float FirstAvailableQualityOrDefault(this IEnumerable<DesireQuality> entries, Desires desire)
+		public static float FirstAvailableQualityOrDefault(this IEnumerable<DesireQuality> entries, Motives motive)
 		{
-			return entries.FirstOrDefault(e => e.Desire == desire && e.State == DesireQuality.States.Available).Quality;
+			return entries.FirstOrDefault(e => e.Motive == motive && e.State == DesireQuality.States.Available).Quality;
 		}
 	}
 }

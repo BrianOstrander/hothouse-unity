@@ -46,14 +46,14 @@ namespace Lunra.Hothouse.Models
 		#region Non Serialized
 		[JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
 		
-		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
+		[JsonIgnore] public Action<DwellerModel, Motives> Operate = ActionExtensions.GetEmpty<DwellerModel, Motives>();
 		
 		Dictionary<BuildingStates, IBaseInventoryComponent[]> inventoriesByBuildingState = new Dictionary<BuildingStates, IBaseInventoryComponent[]>();
 		[JsonIgnore] public IBaseInventoryComponent[] Inventories => inventoriesByBuildingState[BuildingState.Value];
 		#endregion
 
 		public bool IsBuildingState(BuildingStates buildingState) => BuildingState.Value == buildingState;
-		public bool IsDesireAvailable(Desires desire) => DesireQualities.Value.Any(d => d.Desire == desire && d.State == DesireQuality.States.Available);
+		public bool IsDesireAvailable(Motives motive) => DesireQualities.Value.Any(d => d.Motive == motive && d.State == DesireQuality.States.Available);
 		
 		public BuildingModel()
 		{

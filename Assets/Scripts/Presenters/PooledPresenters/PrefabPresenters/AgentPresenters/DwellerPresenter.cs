@@ -17,6 +17,8 @@ namespace Lunra.Hothouse.Presenters
 			Model.DesireUpdated += OnDwellerDesireUpdated;
 			
 			Model.Health.Damaged += OnDwellerHealthDamage;
+			
+			Game.SimulationUpdate += OnGameSimulationUpdate;
 
 			base.Bind();
 		}
@@ -27,17 +29,19 @@ namespace Lunra.Hothouse.Presenters
 			
 			Model.Health.Damaged -= OnDwellerHealthDamage;
 			
+			Game.SimulationUpdate -= OnGameSimulationUpdate;
+			
 			if (Model.Bed.Value.TryGetInstance<BuildingModel>(Game, out var bed)) bed.Ownership.Remove(Model);
 			
 			base.UnBind();
 		}
 		
 		#region DwellerModel Events
-		void OnDwellerDesireUpdated(Desires desire, bool filled)
+		void OnDwellerDesireUpdated(Motives motive, bool filled)
 		{
 			if (View.NotVisible) return;
 			
-			View.PlayDesire(desire, filled);
+			View.PlayDesire(motive, filled);
 		}
 
 		void OnDwellerHealthDamage(Damage.Result result)
@@ -73,6 +77,11 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 
+		void OnGameSimulationUpdate()
+		{
+			Model.Goals.Update(Game.SimulationDelta);
+		}
+		
 		public override void OnAgentObligationComplete(Obligation obligation)
 		{
 			if (View.NotVisible) return;
