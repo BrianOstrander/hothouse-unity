@@ -224,7 +224,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var requiredJobs = new []
 			{
 				Jobs.Smoker,
-				Jobs.Stockpiler,
+				// Jobs.Stockpiler,
 				// Jobs.Stockpiler,
 				// Jobs.Farmer,
 				// Jobs.Farmer,

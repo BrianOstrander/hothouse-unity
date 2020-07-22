@@ -12,13 +12,24 @@ namespace Lunra.Hothouse.Models
 		public GoalResult(
 			float insistence,
 			float discontent,
-			FloatRange discontentRange
+			FloatRange discontentRange,
+			float? discontentNormal = null
 		)
 		{
 			Insistence = insistence;
 			Discontent = discontent;
 			DiscontentRange = discontentRange;
-			DiscontentNormal = DiscontentRange.ProgressClamped(Discontent);
+			DiscontentNormal = discontentNormal ?? DiscontentRange.ProgressClamped(Discontent);
+		}
+
+		public GoalResult New(float insistence)
+		{
+			return new GoalResult(
+				insistence,
+				-1f,
+				DiscontentRange,
+				-1f
+			);
 		}
 	}
 }

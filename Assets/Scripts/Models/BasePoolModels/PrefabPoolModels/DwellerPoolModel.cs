@@ -54,10 +54,13 @@ namespace Lunra.Hothouse.Models
 				switch (motive)
 				{
 					case Motives.Sleep:
-						calculation = insistence => Mathf.Pow(insistence + 0.05f, 10f);
+						calculation = insistence => Mathf.Pow(insistence + 0.05f, 10f) - 0.01f;
 						break;
 					case Motives.Eat:
-						calculation = insistence => Mathf.Pow(insistence, 5f);
+						calculation = insistence => Mathf.Pow(insistence, 5f) - 0.01f;
+						break;
+					case Motives.Heal:
+						calculation = insistence => Mathf.Pow(insistence, 2f);
 						break;
 					default:
 						Debug.LogError("Unrecognized Motive: " + motive);
@@ -69,7 +72,7 @@ namespace Lunra.Hothouse.Models
 					motive,
 					new GoalCalculationCache(
 						motive,
-						calculation
+						insistence => Mathf.Max(0f, calculation(insistence))
 					)
 				);
 			}
@@ -129,13 +132,16 @@ namespace Lunra.Hothouse.Models
 			model.ObligationMinimumConcentrationDuration.Value = 0.5f;
 			
 			model.InventoryPromises.Reset();
+
+			const float GoalInsistenceVelocity = 0.25f;
 			
 			model.Goals.Reset(
-				0.25f,
 				new []
 				{
-					Motives.Eat,
-					Motives.Sleep
+					(Motives.Eat, GoalInsistenceVelocity),
+					(Motives.Sleep, GoalInsistenceVelocity),
+					
+					(Motives.Heal, 0f)
 				},
 				OnCalculateGoal
 			);

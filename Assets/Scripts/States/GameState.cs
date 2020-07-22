@@ -121,12 +121,8 @@ namespace Lunra.Hothouse.Services
 		{
 			if (!Payload.Game.IsSimulating.Value) return;
 			
-			Payload.Game.SimulationTime.Value += new DayTime(Payload.Game.SimulationTimeDelta);
-			Payload.Game.SimulationUpdate();
+			Payload.Game.StepSimulation(Time.deltaTime);
 			
-			Payload.Game.SimulationPlaytimeElapsed.Value += TimeSpan.FromSeconds(Time.deltaTime);
-			Payload.Game.PlaytimeElapsed.Value += TimeSpan.FromSeconds(Time.unscaledDeltaTime);
-
 			switch (Payload.Game.LastLightUpdate.Value.State)
 			{
 				case LightDelta.States.Calculated:
@@ -140,6 +136,11 @@ namespace Lunra.Hothouse.Services
 			}
 
 			Payload.Game.CalculateCache();
+
+			var d = Payload.Game.Dwellers.FirstActive();
+			d.Goals.Apply(
+				(Motives.Heal, 0.1f * Payload.Game.SimulationTimeDelta)
+			);
 		}
 
 		void OnHeartbeatLateUpdate()

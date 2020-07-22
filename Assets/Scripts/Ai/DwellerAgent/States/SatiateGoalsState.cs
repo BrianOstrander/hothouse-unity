@@ -8,8 +8,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 	public class SatiateGoalsState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
-		const float DiscontentDeltaForActionThreshold = -0.05f;
-	
 		public override string Name => "SatiateGoals";
 
 		TimeoutState timeoutState;
@@ -118,14 +116,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 							activity,
 							deltaTime,
 							minimumDiscontent,
-							out var improvedDiscontent,
-							out var improvedDiscontentDelta
+							out var improvedDiscontent
 						);
 						
 						if (!hasLessDiscontent) continue;
 
 						minimumDiscontent = improvedDiscontent;
-						minimumDiscontentDelta = improvedDiscontentDelta;
 						bestNavigationResult = navigationResult;
 						bestActivity = activity;
 						bestActivityParent = activityParent;
@@ -133,9 +129,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 					}
 				}
 
-				// TODO: I should be able to calculate when this threshold will be met and timeout until then...
-				if (DiscontentDeltaForActionThreshold < minimumDiscontentDelta) return false;
-				
 				return !Mathf.Approximately(minimumDiscontent, float.MaxValue);
 			}
 
