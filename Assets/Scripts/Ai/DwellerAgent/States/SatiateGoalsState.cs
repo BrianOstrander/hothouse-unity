@@ -61,6 +61,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
+				var activity = destination.Activities.GetActivity(reservation.ReservationId);
+				
 				SourceState.timeoutState.ConfigureForDayAndTime(
 					reservation.AppointmentEnd,
 					delta =>
@@ -73,6 +75,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 								destination
 							);
 						}
+						else Agent.Goals.Apply(delta.Progress, activity.Modifiers);
 					}
 				);
 			}

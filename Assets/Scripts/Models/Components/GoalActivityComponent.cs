@@ -208,8 +208,6 @@ namespace Lunra.Hothouse.Models
 				destination.Inventory.Add(activity.Output.Value);
 			}
 			
-			client.Goals.Apply(activity.Modifiers);
-
 			return activity;
 		}
 

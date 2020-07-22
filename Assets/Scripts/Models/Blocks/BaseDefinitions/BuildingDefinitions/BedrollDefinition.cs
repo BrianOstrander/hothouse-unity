@@ -8,9 +8,10 @@ namespace Lunra.Hothouse.Models
 				GetActionName(Motives.Sleep),
 				new []
 				{
-					(Motives.Sleep, -0.5f)
+					(Motives.Sleep, -0.5f),
+					(Motives.Heal, -0.2f)
 				},
-				new DayTime(0.33f)
+				DayTime.FromHours(8f)
 			), 
 		};
 	}

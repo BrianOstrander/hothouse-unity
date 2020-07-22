@@ -79,13 +79,21 @@ namespace Lunra.Hothouse.Models
 			params (Motives Motive, float InsistenceModifier)[] modifiers
 		)
 		{
+			Apply(1f, modifiers);
+		}
+
+		public void Apply(
+			float multiplier,
+			params (Motives Motive, float InsistenceModifier)[] modifiers
+		)
+		{
 			for (var i = 0; i < current.Values.Length; i++)
 			{
 				var modifier = modifiers.FirstOrDefault(m => m.Motive == current.Values[i].Motive);
 				if (modifier.Motive != current.Values[i].Motive) continue;
 
 				current.Values[i].Value = current.Values[i].Value.New(
-					current.Values[i].Value.Insistence + modifier.InsistenceModifier	
+					current.Values[i].Value.Insistence + (modifier.InsistenceModifier * multiplier)	
 				);
 			}
 

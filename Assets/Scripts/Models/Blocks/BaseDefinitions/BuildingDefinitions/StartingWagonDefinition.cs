@@ -29,7 +29,7 @@ namespace Lunra.Hothouse.Models
 				{
 					(Motives.Eat, -0.5f)
 				},
-				DayTime.FromMinutes(10f),
+				DayTime.FromHours(1f),
 				Inventory.FromEntry(Inventory.Types.StalkPop, 1)
 			),
 		};
