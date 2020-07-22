@@ -86,7 +86,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!Model.Age.Value.IsDone)
 			{
-				Model.Age.Value = Model.Age.Value.Update(Game.SimulationDelta);
+				Model.Age.Value = Model.Age.Value.Update(Game.SimulationTimeDelta);
 
 				if (View.Visible) View.Age = Model.Age.Value.Normalized;
 				
@@ -97,7 +97,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!Model.ReproductionElapsed.Value.IsDone)
 			{
-				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Game.SimulationDelta);
+				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Game.SimulationTimeDelta);
 				return;
 			}
 			

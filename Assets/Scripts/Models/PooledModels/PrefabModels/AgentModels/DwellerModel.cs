@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class DwellerModel : AgentModel, IGoalModel
+	public class DwellerModel : AgentModel, IGoalModel, IGoalPromiseModel
 	{
 		#region Serialized
 		[JsonProperty] string name;
@@ -58,7 +58,8 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] InstanceId workplace = InstanceId.Null();
 		[JsonIgnore] public ListenerProperty<InstanceId> Workplace { get; }
-		[JsonIgnore] public GoalComponent Goals { get; } = new GoalComponent();
+		public GoalComponent Goals { get; } = new GoalComponent();
+		public GoalPromiseComponent GoalPromises { get; } = new GoalPromiseComponent();
 		#endregion
 		
 		#region Non Serialized

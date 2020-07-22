@@ -79,7 +79,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnGameSimulationUpdate()
 		{
-			Model.Goals.Update(Game.SimulationDelta);
+			Model.Goals.Update(Game.SimulationTimeDelta);
 		}
 		
 		public override void OnAgentObligationComplete(Obligation obligation)

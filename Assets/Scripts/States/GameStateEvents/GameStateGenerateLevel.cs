@@ -224,12 +224,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var requiredJobs = new []
 			{
 				Jobs.Smoker,
-				Jobs.Stockpiler,
-				Jobs.Stockpiler,
-				Jobs.Farmer,
-				Jobs.Farmer,
-				Jobs.Farmer,
-				Jobs.Laborer
+				// Jobs.Stockpiler,
+				// Jobs.Stockpiler,
+				// Jobs.Farmer,
+				// Jobs.Farmer,
+				// Jobs.Farmer,
+				// Jobs.Laborer
 			};
 
 			for (var i = 0; i < requiredJobs.Length; i++)
@@ -310,6 +310,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			payload.Game.Buildings.Activate<BedrollDefinition>(
 				spawn.Id.Value,
 				position + (Vector3.right * 3f) + (Vector3.back * 3f),
+				Quaternion.identity, 
+				BuildingStates.Operating
+			);
+			
+			payload.Game.Buildings.Activate<BedrollDefinition>(
+				spawn.Id.Value,
+				position,
 				Quaternion.identity, 
 				BuildingStates.Operating
 			);

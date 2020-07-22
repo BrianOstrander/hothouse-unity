@@ -98,7 +98,7 @@ namespace Lunra.Hothouse.Ai
 			switch (configuration.TimeoutType)
 			{
 				case Types.Interval:
-					configuration.TimeoutInterval = configuration.TimeoutInterval.Update(Game.SimulationDelta);
+					configuration.TimeoutInterval = configuration.TimeoutInterval.Update(Game.SimulationTimeDelta);
 					progress = configuration.TimeoutInterval.Normalized;
 					break;
 				case Types.Time:

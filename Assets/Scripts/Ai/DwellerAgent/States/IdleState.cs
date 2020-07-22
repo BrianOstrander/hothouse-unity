@@ -12,14 +12,16 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new LaborerState<IdleState>(),
 				new StockpilerState<IdleState>(),
 				new SmokerState<IdleState>(),
-				new FarmerState<IdleState>()
+				new FarmerState<IdleState>(),
+				new SatiateGoalsState<IdleState>()
 			);
 			
 			AddTransitions(
 				new LaborerState<IdleState>.ToJobOnShiftBegin(),
 				new StockpilerState<IdleState>.ToJobOnShiftBegin(),
 				new SmokerState<IdleState>.ToJobOnShiftBegin(),
-				new FarmerState<IdleState>.ToJobOnShiftBegin()
+				new FarmerState<IdleState>.ToJobOnShiftBegin(),
+				new SatiateGoalsState<IdleState>.ToSatiateGoalsOnShiftEnd()
 			);
 		}
 	}

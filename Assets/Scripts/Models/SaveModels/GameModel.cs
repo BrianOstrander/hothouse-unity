@@ -44,6 +44,13 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ListenerProperty<float> SimulationMultiplier { get; }
 		
 		[JsonProperty] float simulationTimeConversion = 1f;
+		/// <summary>
+		/// Multiply by this by real seconds to get DayTime passed, or DayTime divided by this gets real seconds that
+		/// DayTime represents. 
+		/// </summary>
+		/// <remarks>
+		/// Once set, this probably shouldn't be messed with...
+		/// </remarks>
 		[JsonIgnore] public ListenerProperty<float> SimulationTimeConversion { get; }
 		
 		[JsonProperty] DayTime simulationTime = DayTime.Zero;
@@ -66,8 +73,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public NameGenerator DwellerNames { get; } = new NameGenerator();
 		[JsonIgnore] public GameInteractionModel Interaction { get; } = new GameInteractionModel();
 		[JsonIgnore] public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
-		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
-		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
+		[JsonIgnore] public float SimulationTimeDelta => Time.deltaTime * SimulationTimeConversion.Value;
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
 
 		[JsonIgnore] public Func<(string RoomId, Vector3 Position, ILightModel[] Except), LightingResult> CalculateMaximumLighting;

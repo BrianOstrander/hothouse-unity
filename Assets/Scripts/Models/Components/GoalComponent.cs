@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
@@ -9,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IGoalModel : IRoomTransformModel
+	public interface IGoalModel : IGoalPromiseModel
 	{
 		GoalComponent Goals { get; }
 	}
@@ -65,7 +63,10 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public void Update(float deltaTime)
+		public void Update(
+			float deltaTime,
+			params (Motives Motive, float InsistenceModifier)[] modifiers
+		)
 		{
 			var totalDiscontent = 0f;
 			var totalInsistence = 0f;
@@ -77,7 +78,9 @@ namespace Lunra.Hothouse.Models
 				values[i].Motive = current.Values[i].Motive;
 				values[i].Value = calculateGoal(
 					current.Values[i].Motive,
-					Mathf.Clamp01(current.Values[i].Value.Insistence + (Velocity * deltaTime))
+					Mathf.Clamp01(
+						current.Values[i].Value.Insistence + (Velocity * deltaTime) + modifiers.FirstOrDefault(m => m.Motive == values[i].Motive).InsistenceModifier
+					)
 				);
 
 				totalInsistence += values[i].Value.Insistence;
@@ -94,24 +97,32 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		bool TryCalculateDiscontent(
-			IDictionary<Motives, GoalResult> beginValues,
+		public bool TryCalculateDiscontent(
+			GoalActivity activity,
 			float deltaTime,
 			float maximumDiscontent,
 			out float discontent
 		)
 		{
 			discontent = 0f;
-			var sampleVelocity = Velocity * deltaTime;
-			
-			foreach (var kv in beginValues)
+			var sampleVelocity = Velocity * deltaTime * activity.Duration.TotalTime;
+
+			foreach (var value in Current.Value.Values)
 			{
-				discontent += calculateGoal(kv.Key, kv.Value.Insistence + sampleVelocity).Discontent;
+				var discontentModifier = activity.Modifiers
+					.FirstOrDefault(m => m.Motive == value.Motive)
+					.InsistenceModifier;
+			
+				discontent += calculateGoal(
+						value.Motive,
+						value.Value.Insistence + discontentModifier + sampleVelocity
+					)
+					.Discontent;
 
 				if (maximumDiscontent < discontent) return false;
 			}
-
-			return discontent <= maximumDiscontent;
+			
+			return discontent < maximumDiscontent;
 		}
 
 		public override string ToString()

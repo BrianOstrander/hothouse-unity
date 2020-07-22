@@ -218,6 +218,23 @@ namespace Lunra.Hothouse.Models
 				Path = validation.Path;
 				IsValid = isValid;
 			}
+
+			public float CalculateNavigationTime(float velocity)
+			{
+				if (!IsValid) return float.MaxValue;
+				
+				var distance = 0f;
+
+				for (var i = 1; i < Path.corners.Length; i++)
+				{
+					distance += Vector3.Distance(
+						Path.corners[i - 1],
+						Path.corners[i]
+					);
+				}
+
+				return distance / velocity;
+			}
 		}
 	}
 }

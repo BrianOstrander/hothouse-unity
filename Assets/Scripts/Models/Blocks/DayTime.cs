@@ -82,6 +82,13 @@ namespace Lunra.Hothouse.Models
 			var dayTime = time - newTime;
 			Day = Mathf.FloorToInt(dayTime / TimeInDay);
 			Time = newTime;
+
+			// I added the below to avoid positive days with negative times... hopefully it doesn't cause issues...
+			if (Time < 0f)
+			{
+				Day--;
+				Time += 1f;
+			}
 		}
 
 		public DayTime(int day)

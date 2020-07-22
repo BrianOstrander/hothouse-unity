@@ -8,7 +8,7 @@ namespace Lunra.Hothouse.Models
 				Type+".sleep",
 				new []
 				{
-					(Motives.Sleep, -0.1f)
+					(Motives.Sleep, -0.5f)
 				},
 				new DayTime(0.33f)
 			), 

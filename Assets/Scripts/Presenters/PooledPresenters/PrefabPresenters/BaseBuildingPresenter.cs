@@ -115,7 +115,7 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 			if (Model.Light.LightState.Value == LightStates.Extinguished) return;
 
-			Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Update(Game.SimulationDelta);
+			Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Update(Game.SimulationTimeDelta);
 
 			if (Model.Light.LightFuelInterval.Value.IsDone)
 			{

@@ -83,12 +83,46 @@ namespace Lunra.Hothouse.Models
 			reservationsListener.Value = new GoalActivityReservation[0];
 		}
 
-		// public GoalActivity[] GetAvailable(
-		// 	DayTime appointmentBegin
-		// )
-		// {
-		// 	
-		// }
+		public GoalActivity[] GetAvailable(DayTime appointmentBegin)
+		{
+			var results = new List<GoalActivity>();
+
+			var appointmentEndLimit = appointmentBegin + new DayTime(99);
+			
+			foreach (var reservation in Reservations.Value)
+			{
+				if (reservation.AppointmentBegin < appointmentBegin && appointmentBegin < reservation.AppointmentEnd)
+				{
+					// Our appointment time begins in the middle of a reservation.
+					return results.ToArray();
+				}
+				
+
+				if (appointmentBegin < reservation.AppointmentBegin)
+				{
+					appointmentEndLimit = reservation.AppointmentBegin;
+					break;
+				}
+			}
+
+			foreach (var activity in All.Value)
+			{
+				if (activity.AnyRestrictions) continue;
+				
+				if ((appointmentBegin + activity.Activity.Duration) < appointmentEndLimit)
+				{
+					results.Add(activity.Activity);
+				}
+			}
+
+			return results.ToArray();
+		}
+
+		public GoalActivity GetActivity(string reservationId)
+		{
+			var reservation = Reservations.Value.First(r => r.ReservationId == reservationId);
+			return All.Value.First(a => a.Activity.Id == reservation.ActivityId).Activity;
+		}
 		
 		public GoalActivityReservation ReserveActivity(
 			IGoalPromiseModel client,
@@ -97,13 +131,11 @@ namespace Lunra.Hothouse.Models
 			DayTime appointmentBegin
 		)
 		{
-			var reservation = new GoalActivityReservation(
-				Guid.NewGuid().ToString(),
-				activity.Id,
-				InstanceId.New(client),
-				InstanceId.New(destination),
-				appointmentBegin,
-				appointmentBegin + activity.Duration
+			var reservation = GoalActivityReservation.New(
+				activity,
+				client,
+				destination,
+				appointmentBegin
 			);
 			
 			client.GoalPromises.All.Push(reservation);
@@ -113,8 +145,75 @@ namespace Lunra.Hothouse.Models
 				// .OrderBy(r => r.AppointmentBegin)
 				.OrderBy(r => r.AppointmentBegin.TotalTime) // Not sure if ordering works on these... need to check...
 				.ToArray();
+
+			if (activity.Input.HasValue)
+			{
+				destination.Inventory.AddForbidden(activity.Input.Value);	
+			}
+			
+			if (activity.Output.HasValue)
+			{
+				destination.Inventory.AddReserved(activity.Output.Value);
+			}
 			
 			return reservation;
+		}
+
+		// I don't think I need this...
+		/*
+		public void CorrectReservation(
+			string reservationId,
+			DayTime appointmentBegin
+		)
+		{
+			var activity = GetActivity(reservationId);
+
+			reservationsListener.Value = Reservations.Value
+				.Select(
+					r =>
+					{
+						if (r.ReservationId != reservationId) return r;
+
+						return r.New(
+							appointmentBegin,
+							appointmentBegin + activity.Duration
+						);
+					}
+				)
+				.ToArray();
+		}
+		*/
+
+		public GoalActivity UnReserveActivity(
+			IGoalModel client,
+			IGoalActivityModel destination
+		)
+		{
+			var reservation = client.GoalPromises.All.Pop();
+			var activity = All.Value.First(a => a.Activity.Id == reservation.ActivityId).Activity;
+			
+			reservationsListener.Value = reservationsListener.Value
+				.Where(r => r.ReservationId != reservation.ReservationId)
+				.ToArray();
+
+			if (activity.Input.HasValue)
+			{
+				destination.Inventory.RemoveForbidden(activity.Input.Value);
+				destination.Inventory.Remove(activity.Input.Value);
+			}
+
+			if (activity.Output.HasValue)
+			{
+				destination.Inventory.RemoveReserved(activity.Output.Value);
+				destination.Inventory.Add(activity.Output.Value);
+			}
+			
+			client.Goals.Update(
+				0f,
+				activity.Modifiers
+			);
+
+			return activity;
 		}
 
 		public void CalculateRestrictions(
@@ -182,11 +281,28 @@ namespace Lunra.Hothouse.Models
 						}
 					}
 				}
-				
-				
+
+				if (Reservations.Value.Any())
+				{
+					result += "\n - Reservations:";
+					foreach (var reservation in Reservations.Value)
+					{
+						result += "\n\t" + reservation;
+					}
+				}
 			}
 
 			return result;
+		}
+	}
+	
+	public static class GoalActivityGameModelExtensions
+	{
+		public static IEnumerable<IGoalActivityModel> GetActivities(
+			this GameModel game	
+		)
+		{
+			return game.Buildings.AllActive;
 		}
 	}
 }

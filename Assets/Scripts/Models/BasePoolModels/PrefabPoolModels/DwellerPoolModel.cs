@@ -96,7 +96,7 @@ namespace Lunra.Hothouse.Models
 		{
 			// Agent Properties
 			// TODO: NavigationPlan and others may need to be reset...
-			model.NavigationVelocity.Value = 4f;
+			model.NavigationVelocity.Value = 40f;
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(100f);
@@ -105,7 +105,9 @@ namespace Lunra.Hothouse.Models
 			// Dweller Properties
 			model.Job.Value = Jobs.None;
 			// model.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
-			model.JobShift.Value = DayTimeFrame.Maximum;
+			// model.JobShift.Value = DayTimeFrame.Maximum;
+			model.JobShift.Value = DayTimeFrame.Zero;
+			
 			model.Desire.Value = Motives.None;
 			model.MeleeRange.Value = 0.75f;
 			model.MeleeCooldown.Value = 0.5f;
@@ -129,7 +131,7 @@ namespace Lunra.Hothouse.Models
 			model.InventoryPromises.Reset();
 			
 			model.Goals.Reset(
-				0.01f,
+				0.25f,
 				new []
 				{
 					Motives.Eat,
@@ -137,6 +139,8 @@ namespace Lunra.Hothouse.Models
 				},
 				OnCalculateGoal
 			);
+			
+			model.GoalPromises.Reset();
 		}
 
 		GoalResult OnCalculateGoal(Motives motive, float insistence)
