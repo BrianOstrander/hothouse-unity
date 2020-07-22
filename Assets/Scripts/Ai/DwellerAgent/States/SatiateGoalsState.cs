@@ -118,8 +118,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 							out var improvedDiscontent
 						);
 						
-						// TODO: Don't hardcode this threshold!
-						if (Mathf.Abs(Agent.Goals.Current.Value.Total.Discontent - improvedDiscontent) < 0.001f) continue;
 						if (!hasLessDiscontent) continue;
 						
 						minimumDiscontent = improvedDiscontent;
@@ -130,7 +128,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 					}
 				}
 				
-				return !Mathf.Approximately(minimumDiscontent, float.MaxValue);
+				if (Mathf.Approximately(minimumDiscontent, float.MaxValue)) return false;
+				
+				// TODO: Don't hardcode this threshold!
+				return 0.001f < Mathf.Abs(Agent.Goals.Current.Value.Total.Discontent - minimumDiscontent);
 			}
 
 			public override void Transition()
