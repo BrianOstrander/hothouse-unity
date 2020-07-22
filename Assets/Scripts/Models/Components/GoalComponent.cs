@@ -101,10 +101,14 @@ namespace Lunra.Hothouse.Models
 			GoalActivity activity,
 			float deltaTime,
 			float maximumDiscontent,
-			out float discontent
+			out float discontentWithActivity,
+			out float discontentDelta
 		)
 		{
-			discontent = 0f;
+			var discontentWithoutActivity = 0f;
+			discontentWithActivity = 0f;
+			discontentDelta = 0f; // The difference between the discontent if you take or don't take the activity
+			
 			var sampleVelocity = Velocity * deltaTime * activity.Duration.TotalTime;
 
 			foreach (var value in Current.Value.Values)
@@ -113,21 +117,28 @@ namespace Lunra.Hothouse.Models
 					.FirstOrDefault(m => m.Motive == value.Motive)
 					.InsistenceModifier;
 			
-				discontent += calculateGoal(
+				discontentWithoutActivity += calculateGoal(
+						value.Motive,
+						value.Value.Insistence + sampleVelocity
+					)
+					.Discontent; 
+				
+				discontentWithActivity += calculateGoal(
 						value.Motive,
 						value.Value.Insistence + discontentModifier + sampleVelocity
 					)
 					.Discontent;
 
-				if (maximumDiscontent < discontent) return false;
+				if (maximumDiscontent < discontentWithActivity) return false;
 			}
-			
-			return discontent < maximumDiscontent;
+
+			discontentDelta = discontentWithActivity - discontentWithoutActivity;
+			return discontentWithActivity < discontentWithoutActivity && discontentWithActivity < maximumDiscontent;
 		}
 
 		public override string ToString()
 		{
-			var result = "Goals: " + Current.Value.Total.DiscontentNormal.ToString("N2");
+			var result = "Goals: " + Current.Value.Total.Discontent.ToString("N2");
 
 			foreach (var value in Current.Value.Values)
 			{

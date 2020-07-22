@@ -91,7 +91,7 @@ namespace Lunra.Hothouse.Models
 			
 			foreach (var reservation in Reservations.Value)
 			{
-				if (reservation.AppointmentBegin < appointmentBegin && appointmentBegin < reservation.AppointmentEnd)
+				if (reservation.AppointmentBegin <= appointmentBegin && appointmentBegin <= reservation.AppointmentEnd)
 				{
 					// Our appointment time begins in the middle of a reservation.
 					return results.ToArray();

@@ -117,5 +117,16 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public override void Instantiate(BuildingModel model) => new BuildingPresenter(Game, model);
+
+		protected string GetActionName(
+			Motives motive,
+			string suffix = null
+		)
+		{
+			var result = GetActionName(motive.ToString().ToLower());
+			return string.IsNullOrEmpty(suffix) ? result : result + "_" + suffix;
+		}
+
+		protected string GetActionName(string suffix) => Type + "." + suffix;
 	}
 }

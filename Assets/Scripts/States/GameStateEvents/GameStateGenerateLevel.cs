@@ -224,7 +224,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var requiredJobs = new []
 			{
 				Jobs.Smoker,
-				// Jobs.Stockpiler,
+				Jobs.Stockpiler,
 				// Jobs.Stockpiler,
 				// Jobs.Farmer,
 				// Jobs.Farmer,
@@ -277,7 +277,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var startingResources = new[]
 			{
 				Inventory.Types.StalkSeed,
-				Inventory.Types.StalkDry
+				Inventory.Types.StalkDry,
+				Inventory.Types.StalkPop
 			};
 			
 			wagon.Inventory.Add(

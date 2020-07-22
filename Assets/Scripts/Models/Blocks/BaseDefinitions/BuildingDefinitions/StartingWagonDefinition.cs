@@ -20,5 +20,18 @@ namespace Lunra.Hothouse.Models
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 
 		public override int MaximumOwners => 2;
+		
+		public override GoalActivity[] Activities => new[]
+		{
+			new GoalActivity(
+				GetActionName(Motives.Eat),
+				new []
+				{
+					(Motives.Eat, -0.5f)
+				},
+				DayTime.FromMinutes(10f),
+				Inventory.FromEntry(Inventory.Types.StalkPop, 1)
+			),
+		};
 	}
 }
