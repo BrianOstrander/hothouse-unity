@@ -15,6 +15,7 @@ namespace Lunra.Hothouse.Models
 			public Motives Motive { get; }
 			public GoalComponent.CalculateGoal Calculation { get; }
 			
+			
 			public GoalCalculationCache(
 				Motives motive,
 				Func<float, float> calculation
