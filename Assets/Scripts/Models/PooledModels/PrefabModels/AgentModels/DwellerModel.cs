@@ -18,15 +18,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
 		[JsonIgnore] public ListenerProperty<DayTimeFrame> JobShift { get; }
 		
-		[JsonProperty] Motives motive;
-		[JsonIgnore] public ListenerProperty<Motives> Desire { get; }
-		
-		[JsonProperty] Dictionary<Motives, float> desireDamage = new Dictionary<Motives, float>();
-		[JsonIgnore] public ListenerProperty<Dictionary<Motives, float>> DesireDamage { get; }
-		
-		[JsonProperty] float desireMissedEmoteTimeout;
-		[JsonIgnore] public ListenerProperty<float> DesireMissedEmoteTimeout { get; }
-		
 		[JsonProperty] float meleeRange;
 		[JsonIgnore] public ListenerProperty<float> MeleeRange { get; }
 		
@@ -63,25 +54,13 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
-		[JsonIgnore] public Action<Motives, bool> DesireUpdated = ActionExtensions.GetEmpty<Motives, bool>();
 		#endregion
 
-		public bool GetDesireDamage(Motives motive, GameModel game, out float damage)
-		{
-			if (!DesireDamage.Value.TryGetValue(motive, out damage)) damage = 0f;
-			else damage *= Health.Maximum.Value * game.DesireDamageMultiplier.Value;
-
-			return !Mathf.Approximately(0f, damage);
-		}
-		
 		public DwellerModel()
 		{
 			Name = new ListenerProperty<string>(value => name = value, () => name);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
-			Desire = new ListenerProperty<Motives>(value => motive = value, () => motive);
-			DesireDamage = new ListenerProperty<Dictionary<Motives, float>>(value => desireDamage = value, () => desireDamage);
-			DesireMissedEmoteTimeout = new ListenerProperty<float>(value => desireMissedEmoteTimeout = value, () => desireMissedEmoteTimeout);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
 			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);

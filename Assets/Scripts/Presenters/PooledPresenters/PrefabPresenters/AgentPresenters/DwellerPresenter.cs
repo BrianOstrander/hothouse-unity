@@ -14,8 +14,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			Model.DesireUpdated += OnDwellerDesireUpdated;
-			
 			Model.Health.Damaged += OnDwellerHealthDamage;
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
@@ -25,8 +23,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
-			Model.DesireUpdated -= OnDwellerDesireUpdated;
-			
 			Model.Health.Damaged -= OnDwellerHealthDamage;
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
@@ -37,13 +33,6 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region DwellerModel Events
-		void OnDwellerDesireUpdated(Motives motive, bool filled)
-		{
-			if (View.NotVisible) return;
-			
-			View.PlayDesire(motive, filled);
-		}
-
 		void OnDwellerHealthDamage(Damage.Result result)
 		{
 			if (result.IsTargetDestroyed)

@@ -137,10 +137,10 @@ namespace Lunra.Hothouse.Services
 
 			Payload.Game.CalculateCache();
 
-			var d = Payload.Game.Dwellers.FirstActive();
-			d.Goals.Apply(
-				(Motives.Heal, 0.1f * Payload.Game.SimulationTimeDelta)
-			);
+			// var d = Payload.Game.Dwellers.FirstActive();
+			// d.Goals.Apply(
+			// 	(Motives.Heal, 0.1f * Payload.Game.SimulationTimeDelta)
+			// );
 		}
 
 		void OnHeartbeatLateUpdate()

@@ -111,7 +111,6 @@ namespace Lunra.Hothouse.Models
 			// model.JobShift.Value = DayTimeFrame.Maximum;
 			model.JobShift.Value = DayTimeFrame.Zero;
 			
-			model.Desire.Value = Motives.None;
 			model.MeleeRange.Value = 0.75f;
 			model.MeleeCooldown.Value = 0.5f;
 			model.MeleeDamage.Value = 60f;
@@ -120,13 +119,6 @@ namespace Lunra.Hothouse.Models
 			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;
 			model.TransferDistance.Value = 0.75f;
 			
-			model.DesireDamage.Value = new Dictionary<Motives, float>
-			{
-				{ Motives.Eat , 0.3f },
-				{ Motives.Sleep , 0.1f }
-			};
-			model.DesireMissedEmoteTimeout.Value = 2;
-
 			model.LowRationThreshold.Value = 1;
 			model.ObligationDistance.Value = 0.75f;
 			model.ObligationMinimumConcentrationDuration.Value = 0.5f;

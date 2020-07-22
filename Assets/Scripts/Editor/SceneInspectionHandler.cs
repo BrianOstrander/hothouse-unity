@@ -179,7 +179,6 @@ namespace Lunra.Hothouse.Editor
 						append =>
 						{
 							if (model.Job.Value != Jobs.None) append("Job: " + model.Job.Value);
-							if (model.Desire.Value != Motives.None) append("Desire: " + model.Desire.Value);
 							if (!model.Workplace.Value.IsNull) append("Workplace: " + model.Workplace.Value);
 						},
 						model.Name.Value
