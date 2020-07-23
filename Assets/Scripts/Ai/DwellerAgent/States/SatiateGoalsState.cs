@@ -100,7 +100,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				var minimumDiscontent = float.MaxValue;
-				var minimumDiscontentDelta = 0f;
 				
 				foreach (var activityParent in Game.GetActivities())
 				{
