@@ -85,7 +85,15 @@ namespace Lunra.Hothouse.Editor
 						GUILayout.BeginHorizontal();
 						{
 							GUILayout.Label("Dweller [ " + dweller.ShortId + " ] : " + dweller.Name.Value + " - " + dweller.Job.Value, EditorStyles.boldLabel);
-							if (GUILayout.Button("Kill"))
+							
+							if (GUILayout.Button("Hurt", GUILayout.ExpandWidth(false)))
+							{
+								Damage.ApplyGeneric(
+									dweller.Health.Current.Value * 0.25f,
+									dweller
+								);
+							}
+							if (GUILayout.Button("Kill", GUILayout.ExpandWidth(false)))
 							{
 								Damage.ApplyGeneric(
 									9999f,

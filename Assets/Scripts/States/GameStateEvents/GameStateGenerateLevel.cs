@@ -315,12 +315,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 			
-			payload.Game.Buildings.Activate<BedrollDefinition>(
-				spawn.Id.Value,
-				position,
-				Quaternion.identity, 
-				BuildingStates.Operating
-			);
+			// payload.Game.Buildings.Activate<BedrollDefinition>(
+			// 	spawn.Id.Value,
+			// 	position,
+			// 	Quaternion.identity, 
+			// 	BuildingStates.Operating
+			// );
 			/*
 			var farm0 = payload.Game.Buildings.Activate<SeedSiloDefinition>(
 				spawn.Id.Value,

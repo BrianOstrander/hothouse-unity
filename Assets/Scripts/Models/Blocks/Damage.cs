@@ -12,59 +12,10 @@ namespace Lunra.Hothouse.Models
 			// Miscellaneous 
 			Generic = 10,
 			
-			// Desire Damage
-			Exhaustion = 100,
-			Starvation = 110,
-		}
-
-		public static bool GetDamageTypeFromDesire(
-			Motives motive,
-			out Types type
-		)
-		{
-			type = Types.Unknown;
-			
-			switch (motive)
-			{
-				case Motives.None:
-					break;
-				case Motives.Sleep:
-					type = Types.Exhaustion;
-					break;
-				case Motives.Eat:
-					type = Types.Starvation;
-					break;
-				default:
-					Debug.LogError("Unrecognized desire: " + motive);
-					break;
-			}
-
-			return type != Types.Unknown;
+			// Motivation Damage
+			GoalHurt = 100,
 		}
 		
-		public static bool GetDesireFromDamageType(
-			Types type,
-			out Motives motive
-		)
-		{
-			motive = Motives.Unknown;
-			
-			switch (type)
-			{
-				case Types.Exhaustion:
-					motive = Motives.Sleep;
-					break;
-				case Types.Starvation:
-					motive = Motives.Eat;
-					break;
-				default:
-					Debug.LogError("Unrecognized desire: " + type);
-					break;
-			}
-
-			return motive != Motives.Unknown;
-		}
-
 		public class Request
 		{
 			public static Request Generic(

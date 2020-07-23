@@ -13,24 +13,26 @@ namespace Lunra.Hothouse.Models
 		struct GoalCalculationCache
 		{
 			public Motives Motive { get; }
-			public GoalComponent.CalculateGoal Calculation { get; }
-			
+			public GoalComponent.CalculateGoal CalculateGoal { get; }
+			public GoalComponent.CalculateGoalOverflowEffects CalculateGoalOverflowEffects { get; }
 			
 			public GoalCalculationCache(
 				Motives motive,
-				Func<float, float> calculation
+				Func<float, float> calculateGoal,
+				Func<float, (Motives Motive, float InsistenceModifier)[]> calculateGoaloverflowEffects
 			)
 			{
 				Motive = motive;
 				var discontentRange = new FloatRange(
-					calculation(0f),
-					calculation(1f)
+					calculateGoal(0f),
+					calculateGoal(1f)
 				);
-				Calculation = (motives, insistence) => new GoalResult(
+				CalculateGoal = (motives, insistence) => new GoalResult(
 					insistence,
-					calculation(insistence),
+					calculateGoal(insistence),
 					discontentRange
 				);
+				CalculateGoalOverflowEffects = (_, simulationTimeAtMaximum) => calculateGoaloverflowEffects(simulationTimeAtMaximum);
 			}
 		}
 		
@@ -49,23 +51,43 @@ namespace Lunra.Hothouse.Models
 				model => new DwellerPresenter(game, model)	
 			);
 
+			var emptyModifiers = new (Motives Motive, float InsistenceModifier)[0];
+			Func<float, (Motives Motive, float InsistenceModifier)[]> calculateGoalOverflowEffectsDefault = simulationTimeAtMaximum => emptyModifiers;
+
+			Func<float, (Motives Motive, float InsistenceModifier)[]> getHurtOverflowEffects(Func<float, float> calculation = null)
+			{
+				return simulationTimeAtMaximum =>
+				{
+					return new[]
+					{
+						(Motives.Heal, calculation?.Invoke(simulationTimeAtMaximum) ?? simulationTimeAtMaximum)
+					};
+				};
+			}
+			
 			foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
 			{
-				Func<float, float> calculation = null;
+				Func<float, float> calculateGoal;
+				var calculateGoalOverflowEffects = calculateGoalOverflowEffectsDefault;
+					
 				switch (motive)
 				{
 					case Motives.Sleep:
-						calculation = insistence => Mathf.Pow(insistence + 0.05f, 10f) - 0.01f;
+						calculateGoal = insistence => Mathf.Pow(insistence + 0.05f, 10f) - 0.01f;
+						calculateGoalOverflowEffects = getHurtOverflowEffects();
 						break;
 					case Motives.Eat:
-						calculation = insistence => Mathf.Pow(insistence, 5f) - 0.01f;
+						calculateGoal = insistence => Mathf.Pow(insistence, 5f) - 0.01f;
+						calculateGoalOverflowEffects = getHurtOverflowEffects(
+							simulationTimeAtMaximum => Mathf.Pow(simulationTimeAtMaximum, 2f)
+						);
 						break;
 					case Motives.Heal:
-						calculation = insistence => Mathf.Pow(insistence, 2f);
+						calculateGoal = insistence => Mathf.Pow(insistence, 2f);
 						break;
 					default:
 						Debug.LogError("Unrecognized Motive: " + motive);
-						calculation = insistence => 0f;
+						calculateGoal = insistence => 0f;
 						break;
 				}
 				
@@ -73,7 +95,8 @@ namespace Lunra.Hothouse.Models
 					motive,
 					new GoalCalculationCache(
 						motive,
-						insistence => Mathf.Max(0f, calculation(insistence))
+						insistence => Mathf.Max(0f, calculateGoal(insistence)),
+						calculateGoalOverflowEffects
 					)
 				);
 			}
@@ -136,16 +159,30 @@ namespace Lunra.Hothouse.Models
 					
 					(Motives.Heal, 0f)
 				},
-				OnCalculateGoal
+				OnCalculateGoal,
+				OnCalculateGoalOverflowEffects
 			);
 			
 			model.GoalPromises.Reset();
 		}
 
-		GoalResult OnCalculateGoal(Motives motive, float insistence)
+		GoalResult OnCalculateGoal(
+			Motives motive,
+			float insistence
+		)
 		{
-			if (goalCalculationCache.TryGetValue(motive, out var cache)) return cache.Calculation(motive, insistence);
+			if (goalCalculationCache.TryGetValue(motive, out var cache)) return cache.CalculateGoal(motive, insistence);
 			Debug.LogError("No cached calculation for Motive: "+motive);
+			return default;
+		}
+		
+		(Motives Motive, float InsistenceModifier)[] OnCalculateGoalOverflowEffects(
+			Motives motive,
+			float simulationTimeAtMaximum
+		)
+		{
+			if (goalCalculationCache.TryGetValue(motive, out var cache)) return cache.CalculateGoalOverflowEffects(motive, simulationTimeAtMaximum);
+			Debug.LogError("No cached calculation overflow for Motive: "+motive);
 			return default;
 		}
 	}

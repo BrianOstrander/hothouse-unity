@@ -106,7 +106,7 @@ namespace Lunra.Hothouse.Ai
 					var total = Mathf.Abs((configuration.TimeoutDayTime - configuration.TimeoutBeginDayTime).TotalTime);
 					var remaining = Mathf.Abs((configuration.TimeoutDayTime - Game.SimulationTime.Value).TotalTime);
 					// TODO: This isn't super tested...
-					progress = Mathf.Approximately(0f, total) ? 1f : Mathf.Min(remaining / total, 1f);
+					progress = 1f - (Mathf.Approximately(0f, total) ? 1f : Mathf.Min(remaining / total, 1f));
 					break;
 				default:
 					Debug.LogError("Unrecognized Type: " + configuration.TimeoutType);

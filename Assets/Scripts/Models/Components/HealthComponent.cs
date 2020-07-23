@@ -74,6 +74,8 @@ namespace Lunra.Hothouse.Models
 			return result;
 		}
 
+		public void Heal(float amount) => currentListener.Value = Mathf.Min(Current.Value + amount, Maximum.Value);
+
 		public override string ToString()
 		{
 			var result = "Health: " + Current.Value + " / " + Maximum.Value;

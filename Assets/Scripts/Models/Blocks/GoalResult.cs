@@ -26,9 +26,9 @@ namespace Lunra.Hothouse.Models
 		{
 			return new GoalResult(
 				insistence,
-				-1f,
+				Discontent,
 				DiscontentRange,
-				-1f
+				DiscontentNormal
 			);
 		}
 	}

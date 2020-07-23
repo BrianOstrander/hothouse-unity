@@ -62,11 +62,21 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override void Transition()
 			{
 				var activity = destination.Activities.GetActivity(reservation.ReservationId);
+				var previousProgress = 0f;
 				
 				SourceState.timeoutState.ConfigureForDayAndTime(
 					reservation.AppointmentEnd,
 					delta =>
 					{
+						var progressDelta = Mathf.Max(0f, delta.Progress - previousProgress);
+
+						Agent.Goals.Apply(
+							progressDelta,
+							activity.Modifiers
+						);
+						
+						previousProgress = delta.Progress;
+
 						if (delta.IsDone)
 						{
 							// TODO: Need to check if building has been destroyed...
@@ -75,7 +85,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 								destination
 							);
 						}
-						else Agent.Goals.Apply(delta.Progress, activity.Modifiers);
 					}
 				);
 			}

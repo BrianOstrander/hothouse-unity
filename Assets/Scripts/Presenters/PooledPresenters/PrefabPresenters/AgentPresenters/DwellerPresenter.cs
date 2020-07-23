@@ -62,6 +62,12 @@ namespace Lunra.Hothouse.Presenters
 						Model.GetInstanceId()
 					)
 				);
+				if (result.Type != Damage.Types.GoalHurt)
+				{
+					Model.Goals.Apply(
+						(Motives.Heal, result.AmountApplied / Model.Health.Maximum.Value)
+					);	
+				}
 			}
 		}
 		#endregion
@@ -69,6 +75,22 @@ namespace Lunra.Hothouse.Presenters
 		void OnGameSimulationUpdate()
 		{
 			Model.Goals.Update(Game.SimulationTimeDelta);
+			
+			var newHealth = 1f - Model.Goals[Motives.Heal].Insistence;
+
+			var healthUpdateDelta = (newHealth - Model.Health.Normalized) * Model.Health.Maximum.Value;
+			if (!Mathf.Approximately(0f, healthUpdateDelta))
+			{
+				if (healthUpdateDelta < 0f)
+				{
+					Damage.Apply(
+						Damage.Types.GoalHurt,
+						Mathf.Abs(healthUpdateDelta),
+						Model
+					);
+				}
+				else Model.Health.Heal(healthUpdateDelta);
+			}
 		}
 		
 		public override void OnAgentObligationComplete(Obligation obligation)

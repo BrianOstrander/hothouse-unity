@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Models
 				new []
 				{
 					(Motives.Sleep, -0.5f),
-					(Motives.Heal, -0.2f)
+					(Motives.Heal, -0.5f)
 				},
 				DayTime.FromHours(8f)
 			), 
