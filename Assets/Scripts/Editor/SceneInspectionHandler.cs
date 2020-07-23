@@ -159,16 +159,6 @@ namespace Lunra.Hothouse.Editor
 									append("Salvage " + model.SalvageInventory);
 									break;
 							}
-
-							if (model.DesireQualities.Value.Any())
-							{
-								var desireResult = "Desires";
-								foreach (var desireQuality in model.DesireQualities.Value)
-								{
-									desireResult += "\n  " + desireQuality.Desire + " : " + desireQuality.Quality.ToString("N1") + " - " + desireQuality.State;
-								}
-								append(desireResult);
-							}							
 						}
 					);
 
@@ -189,7 +179,6 @@ namespace Lunra.Hothouse.Editor
 						append =>
 						{
 							if (model.Job.Value != Jobs.None) append("Job: " + model.Job.Value);
-							if (model.Desire.Value != Desires.None) append("Desire: " + model.Desire.Value);
 							if (!model.Workplace.Value.IsNull) append("Workplace: " + model.Workplace.Value);
 						},
 						model.Name.Value
@@ -386,9 +375,86 @@ namespace Lunra.Hothouse.Editor
 				appendResult(inventoryPromiseModel.InventoryPromises.ToString());
 			}
 
-			if (model is IRecipeModel recipeModel && (recipeModel.Recipes.Available.Value.Any() || recipeModel.Recipes.Queue.TryPeek(out _)))
+			if (model is IRecipeModel recipeModel && (recipeModel.Recipes.Available.Value.Any() || recipeModel.Recipes.Queue.Value.Any()))
 			{
 				appendResult(recipeModel.Recipes.ToString());
+			}
+			
+			if (model is IFarmModel farmModel && farmModel.Farm.IsFarm)
+			{
+				appendResult(farmModel.Farm.ToString());
+
+				Debug.DrawLine(farmModel.Transform.Position.Value, farmModel.Transform.Position.Value + Vector3.up, Color.red);
+				
+				var farmRight = (farmModel.Transform.Rotation.Value * Vector3.right) * (farmModel.Farm.Size.x * 0.5f);
+				var farmForward = (farmModel.Transform.Rotation.Value * Vector3.forward) * (farmModel.Farm.Size.y * 0.5f);
+
+				var farmBoundaries = new[]
+				{
+					farmForward + farmRight,
+					farmRight - farmForward,
+					(-farmForward) - farmRight,
+					farmForward - farmRight
+				};
+					
+				Handles.color = Color.green;
+				
+				Handles.matrix = Matrix4x4.TRS(
+					farmModel.Transform.Position.Value,
+					Quaternion.identity, 
+					Vector3.one
+				);
+					
+				Handles.DrawDottedLines(
+					farmBoundaries,
+					new []
+					{
+						0, 1,
+						1, 2,
+						2, 3,
+						3, 0
+					},
+					4f
+				);
+				
+				Handles.matrix = Matrix4x4.identity;
+					
+				foreach (var farmPlot in farmModel.Farm.Plots)
+				{
+					var farmPlotColor = Color.magenta;
+
+					switch (farmPlot.State)
+					{
+						case FarmPlot.States.Blocked:
+						case FarmPlot.States.Invalid:
+							farmPlotColor = Color.red;
+							break;
+						case FarmPlot.States.ReadyToSow:
+							farmPlotColor = Color.green;
+							break;
+						case FarmPlot.States.Sown:
+							farmPlotColor = Color.yellow;
+							break;
+					}
+
+					Handles.color = farmPlot.AttendingFarmer.IsNull ? farmPlotColor.NewA(0.5f) : farmPlotColor;
+
+					Handles.DrawWireDisc(
+						farmPlot.Position,
+						Vector3.up,
+						0.2f
+					);
+				}
+			}
+
+			if (model is IGoalModel goalModel)
+			{
+				appendResult(goalModel.Goals.ToString());
+			}
+
+			if (model is IGoalActivityModel goalActivityModel)
+			{
+				appendResult(goalActivityModel.Activities.ToString());
 			}
 
 			append?.Invoke(appendResult);

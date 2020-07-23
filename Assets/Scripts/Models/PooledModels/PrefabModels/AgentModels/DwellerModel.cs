@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public class DwellerModel : AgentModel
+	public class DwellerModel : AgentModel, IGoalModel, IGoalPromiseModel
 	{
 		#region Serialized
 		[JsonProperty] string name;
@@ -17,15 +17,6 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
 		[JsonIgnore] public ListenerProperty<DayTimeFrame> JobShift { get; }
-		
-		[JsonProperty] Desires desire;
-		[JsonIgnore] public ListenerProperty<Desires> Desire { get; }
-		
-		[JsonProperty] Dictionary<Desires, float> desireDamage = new Dictionary<Desires, float>();
-		[JsonIgnore] public ListenerProperty<Dictionary<Desires, float>> DesireDamage { get; }
-		
-		[JsonProperty] float desireMissedEmoteTimeout;
-		[JsonIgnore] public ListenerProperty<float> DesireMissedEmoteTimeout { get; }
 		
 		[JsonProperty] float meleeRange;
 		[JsonIgnore] public ListenerProperty<float> MeleeRange { get; }
@@ -57,29 +48,19 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public  ListenerProperty<InstanceId> Bed { get; }
 		
 		[JsonProperty] InstanceId workplace = InstanceId.Null();
-		[JsonIgnore] public  ListenerProperty<InstanceId> Workplace { get; }
+		[JsonIgnore] public ListenerProperty<InstanceId> Workplace { get; }
+		public GoalComponent Goals { get; } = new GoalComponent();
+		public GoalPromiseComponent GoalPromises { get; } = new GoalPromiseComponent();
 		#endregion
 		
 		#region Non Serialized
-		[JsonIgnore] public Action<Desires, bool> DesireUpdated = ActionExtensions.GetEmpty<Desires, bool>();
 		#endregion
 
-		public bool GetDesireDamage(Desires desire, GameModel game, out float damage)
-		{
-			if (!DesireDamage.Value.TryGetValue(desire, out damage)) damage = 0f;
-			else damage *= Health.Maximum.Value * game.DesireDamageMultiplier.Value;
-
-			return !Mathf.Approximately(0f, damage);
-		}
-		
 		public DwellerModel()
 		{
 			Name = new ListenerProperty<string>(value => name = value, () => name);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
-			Desire = new ListenerProperty<Desires>(value => desire = value, () => desire);
-			DesireDamage = new ListenerProperty<Dictionary<Desires, float>>(value => desireDamage = value, () => desireDamage);
-			DesireMissedEmoteTimeout = new ListenerProperty<float>(value => desireMissedEmoteTimeout = value, () => desireMissedEmoteTimeout);
 			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
 			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
 			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);

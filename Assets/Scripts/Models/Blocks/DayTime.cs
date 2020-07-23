@@ -1,4 +1,5 @@
 using System;
+using Lunra.Core;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -10,9 +11,23 @@ namespace Lunra.Hothouse.Models
 #pragma warning restore CS0659 // Overrides Object.Equals(object) but does not override Object.GetHashCode()
 #pragma warning restore CS0661 // Defines == or != operator but does not override Ojbect.GetHashCode()
 	{
-		public const float DaysInYear = 365f;
+		public enum Formats
+		{
+			Unknown = 0,
+			Raw = 10,
+			TotalTime = 20,
+			Year = 30,
+			YearMonth = 40,
+			YearMonthDay = 50,
+			YearMonthDayHour = 60,
+			YearMonthDayHourMinute = 70
+		}
+		
+		public const float DaysInYear = MonthsInYear * DaysInMonth; // 360
 		public const float MonthsInYear = 12f;
 		public const float DaysInMonth = 30f;
+		public const float HoursInDay = 24f;
+		public const float MinutesInHour = 60f;
 		public const float TimeInDay = 1f;
 
 		public static DayTime Zero => new DayTime();
@@ -23,6 +38,9 @@ namespace Lunra.Hothouse.Models
 			var wholeYears = Mathf.FloorToInt(years);
 			return new DayTime(wholeYears * Mathf.FloorToInt(DaysInYear), (years - wholeYears) * DaysInYear);
 		}
+
+		public static DayTime FromHours(float hours) => new DayTime((hours / HoursInDay) * TimeInDay);
+		public static DayTime FromMinutes(float minutes) => FromHours(minutes / MinutesInHour);
 
 		/// <summary>
 		/// Gets the current DayTime with a Time of zero.
@@ -45,13 +63,6 @@ namespace Lunra.Hothouse.Models
 		/// The Time component of this DayTime.
 		/// </summary>
 		[JsonProperty] public readonly float Time;
-
-		/// <summary>
-		/// The Year component of this DayTime.
-		/// </summary>
-		/// <value>The years.</value>
-		[JsonIgnore]
-		public int Year => Mathf.FloorToInt(TotalYears);
 
 		/// <summary>
 		/// Gets the total time.
@@ -82,6 +93,13 @@ namespace Lunra.Hothouse.Models
 			var dayTime = time - newTime;
 			Day = Mathf.FloorToInt(dayTime / TimeInDay);
 			Time = newTime;
+
+			// I added the below to avoid positive days with negative times... hopefully it doesn't cause issues...
+			if (Time < 0f)
+			{
+				Day--;
+				Time += 1f;
+			}
 		}
 
 		public DayTime(int day)
@@ -93,15 +111,6 @@ namespace Lunra.Hothouse.Models
 		public DayTime(int day, float time) : this(time)
 		{
 			Day += day;
-		}
-
-		public void GetValues(out int years, out int months, out int days)
-		{
-			var dayRemainder = Day % DaysInYear;
-			years = Year;
-			var monthRemainder = dayRemainder % DaysInMonth;
-			months = (int)((dayRemainder - monthRemainder) / DaysInMonth);
-			days = Mathf.FloorToInt(monthRemainder);
 		}
 
 		/// <summary>
@@ -254,18 +263,84 @@ namespace Lunra.Hothouse.Models
 
 		public static bool operator !=(DayTime obj0, DayTime obj1) { return !(obj0 == obj1); }
 
-		public string ToDayTimeString()
+		public void GetYearDayHourMinute(
+			out int years,
+			out int months,
+			out int days,
+			out int hours,
+			out int minutes
+		)
 		{
-			var totalHours = Time * 24f;
-			var daysInYear = Day % DaysInYear;
-			var hours = Mathf.Floor(totalHours);
-			var minutes = Mathf.Floor(60f * (totalHours - hours));
-			return "Year " + Year + " Day " + daysInYear + ", " + hours.ToString("N0").PadLeft(2, '0') + ":" + minutes.ToString("N0").PadLeft(2, '0');
+
+			years = Day / Mathf.FloorToInt(DaysInYear);
+			months = (Day / Mathf.FloorToInt(DaysInMonth)) % Mathf.FloorToInt(MonthsInYear);
+			days = (Day % Mathf.FloorToInt(DaysInYear)) % Mathf.FloorToInt(DaysInMonth);
+			
+			var rawHours = Time * HoursInDay;
+			
+			hours = Mathf.FloorToInt(rawHours);
+			minutes = Mathf.FloorToInt(MinutesInHour * (rawHours - hours));
+		}
+		
+		public void GetYearDayHourMinutePadded(
+			out string years,
+			out string months,
+			out string days,
+			out string hours,
+			out string minutes
+		)
+		{
+			GetYearDayHourMinute(
+				out var yearCount,
+				out var monthCount,
+				out var dayCount,
+				out var hourCount,
+				out var minuteCount
+			);
+
+			years = yearCount.Pad(4);
+			months = monthCount.Pad(2);
+			days = dayCount.Pad(2);
+			hours = hourCount.Pad(2);
+			minutes = minuteCount.Pad(2);
 		}
 
-		public override string ToString()
+		public override string ToString() => ToString(Formats.YearMonthDayHourMinute);
+		
+		public string ToString(Formats format)
 		{
-			return "TotalYears: " + TotalYears;
+			switch (format)
+			{
+				case Formats.Raw:
+					return $"{Day} , {Time:N2}";
+				case Formats.TotalTime:
+					return $"{TotalTime:N2}";
+			}
+
+			GetYearDayHourMinutePadded(
+				out var years,
+				out var months,
+				out var days,
+				out var hours,
+				out var minutes
+			);
+			
+			switch (format)
+			{
+				case Formats.Year:
+					return $"{years}";
+				case Formats.YearMonth:
+					return $"{years}-{months}";
+				case Formats.YearMonthDay:
+					return $"{years}-{months}-{days}";
+				case Formats.YearMonthDayHour:
+					return $"{years}-{months}-{days} {hours}";
+				case Formats.YearMonthDayHourMinute:
+					return $"{years}-{months}-{days} {hours}:{minutes}";
+				default:
+					Debug.LogError("Unrecognized format: " + format);
+					return $"{Day} , {Time:N2}";
+			}
 		}
 	}
 }

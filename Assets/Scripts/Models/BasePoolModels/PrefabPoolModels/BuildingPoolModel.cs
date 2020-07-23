@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
+using Lunra.Hothouse.Views;
+using Lunra.StyxMvp;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -17,38 +19,34 @@ namespace Lunra.Hothouse.Models
 		public override void Initialize(GameModel game)
 		{
 			this.game = game;
+			
+			var prefabIdsFromViews = App.V.GetPrefabs<BuildingView>()
+				.Select(v => v.View.PrefabId)
+				.ToArray();
 
-			foreach (var type in AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()))
+			foreach (var definitionType in ReflectionUtility.GetTypesWithAttribute<BuildingDefinitionAttribute, BuildingDefinition>())
 			{
-				if (type.IsAbstract) continue;
-				if (type.GetCustomAttributes(typeof(BuildingDefinitionAttribute), true).None()) continue;
-				if (!typeof(BuildingDefinition).IsAssignableFrom(type))
+				if (ReflectionUtility.TryGetInstanceOfType<BuildingDefinition>(definitionType, out var definitionInstance))
 				{
-					Debug.LogError("The class \"" + type.FullName + "\" tries to include the \"" + typeof(BuildingDefinitionAttribute).Name + "\" attribute without inheriting from the \"" + typeof(BuildingDefinition).FullName + "\" class");
-					continue;
-				}
-
-				try
-				{
-					var instance = (BuildingDefinition) Activator.CreateInstance(type);
-					
-					if (definitions.TryGetValue(type, out var existingInstance))
+					try
 					{
-						Debug.LogError("Tried to add building definition of type " + type.FullName + " but an entry of type " + existingInstance.GetType().FullName + " already exists");
+						definitionInstance.Initialize(
+							game,
+							prefabIdsFromViews
+						);
+						definitions.Add(definitionType, definitionInstance);
 					}
-					else
+					catch (Exception e)
 					{
-						definitions.Add(type, instance);
+						Debug.LogException(e);
 					}
 				}
-				catch (Exception e) { Debug.LogException(e); }
 			}
-
+			
 			Definitions = definitions.Values.ToArray();
-			// Debug.Log("found:\n"+definitions.Keys.ToReadableJson());
 			
 			Initialize(
-				model => new BuildingPresenter(game, model)	
+				m => Definitions.First(d => d.Type == m.Type.Value).Instantiate(m)
 			);
 		}
 
@@ -70,7 +68,7 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		public BuildingModel Activate(
-			BuildingDefinition buildingDefinition,
+			BuildingDefinition definition,
 			string roomId,
 			Vector3 position,
 			Quaternion rotation,
@@ -78,24 +76,24 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			var result = Activate(
-				buildingDefinition.PrefabId,
+				definition.GetPrefabId(),
 				roomId,
 				position,
 				rotation,
-				model => buildingDefinition.Reset(model, buildingState)
+				model => definition.Reset(model, buildingState)
 			);
 
 			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 
-		public string GetSerializedType<T>()
+		public string GetDefinitionType<T>()
 			where T : BuildingDefinition
 		{
-			return GetSerializedType(typeof(T));
+			return GetDefinitionType(typeof(T));
 		}
 		
-		public string GetSerializedType(Type type)
+		public string GetDefinitionType(Type type)
 		{
 			return definitions[type].Type;
 		}

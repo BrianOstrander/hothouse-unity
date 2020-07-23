@@ -51,9 +51,9 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed += OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
-			Model.Inventory.All.Changed += OnBuildingInventory;
 			Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
 			Model.SalvageInventory.All.Changed += OnBuildingSalvageInventory;
+			Model.Inventory.Available.Changed += OnBuildingAvailableInventory;
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
@@ -65,8 +65,6 @@ namespace Lunra.Hothouse.Presenters
 				ObligationCategories.Craft.Recipe,
 				OnObligationsCraftRecipe
 			);
-			
-			Model.Operate += OnBuildingOperate;
 
 			base.Bind();
 		}
@@ -88,9 +86,9 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed -= OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			Model.Inventory.All.Changed -= OnBuildingInventory;
 			Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
 			Model.SalvageInventory.All.Changed -= OnBuildingSalvageInventory;
+			Model.Inventory.Available.Changed -= OnBuildingAvailableInventory;
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
@@ -102,15 +100,13 @@ namespace Lunra.Hothouse.Presenters
 				ObligationCategories.Craft.Recipe,
 				OnObligationsCraftRecipe
 			);
-			
-			Model.Operate -= OnBuildingOperate;
-			
+
 			base.UnBind();
 		}
 
 		protected override void OnSimulationInitialized()
 		{
-			OnBuildingInventory(Model.Inventory.All.Value);
+			OnBuildingAvailableInventory(Model.Inventory.All.Value);
 		}
 		
 		#region LightSourceModel Events
@@ -119,7 +115,7 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 			if (Model.Light.LightState.Value == LightStates.Extinguished) return;
 
-			Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Update(Game.SimulationDelta);
+			Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Update(Game.SimulationTimeDelta);
 
 			if (Model.Light.LightFuelInterval.Value.IsDone)
 			{
@@ -244,8 +240,9 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (calculationState != NavigationMeshModel.CalculationStates.Completed) return;
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
-			
+
 			Model.RecalculateEntrances();
+			Model.Activities.CalculateRestrictions(Model);
 		}
 		#endregion
 
@@ -268,21 +265,6 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region BuildingModel Events
-		void OnBuildingInventory(Inventory inventory)
-		{
-			var anyChanged = false;
-			var newDesireQuality = Model.DesireQualities.Value.Select(
-				d =>
-				{
-					var result = d.CalculateState(inventory);
-					anyChanged |= d.State != result.State;
-					return result;
-				}
-			).ToArray(); // Has to call ToArray otherwise anyChanged will never get called...
-			
-			if (anyChanged) Model.DesireQualities.Value = newDesireQuality;
-		}
-
 		void OnBuildingConstructionInventory(Inventory constructionInventory)
 		{
 			if (constructionInventory.IsEmpty || Model.ConstructionInventory.AllCapacity.Value.IsNotFull(constructionInventory)) return;
@@ -304,6 +286,11 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.BuildingState.Value != BuildingStates.Salvaging || !salvageInventory.IsEmpty) return;
 
 			Model.PooledState.Value = PooledStates.InActive;
+		}
+
+		void OnBuildingAvailableInventory(Inventory availableInventory)
+		{
+			Model.Activities.CalculateRestrictions(Model);
 		}
 
 		void OnBuildingState(BuildingStates buildingState)
@@ -387,26 +374,6 @@ namespace Lunra.Hothouse.Presenters
 					Debug.LogError("Unrecognized BuildingState: "+Model.BuildingState.Value);
 					return;
 			}
-		}
-
-		void OnBuildingOperate(DwellerModel dweller, Desires desire)
-		{
-			var quality = Model.DesireQualities.Value.FirstOrDefault(d => d.Desire == desire);
-
-			if (quality.Desire != desire)
-			{
-				Debug.LogError("Dweller "+dweller.Id.Value+" tried to operate desire "+desire+" on this building, but it doesn't fulfill that");
-				return;
-			}
-			if (quality.State != DesireQuality.States.Available)
-			{
-				Debug.LogError("Dweller "+dweller.Id.Value+" tried to operate desire "+desire+" on this building, but its state is "+quality.State);
-				return;
-			}
-
-			if (quality.Cost.IsEmpty) return;
-
-			Model.Inventory.Remove(quality.Cost);
 		}
 		#endregion
 		

@@ -12,9 +12,10 @@ namespace Lunra.Hothouse.Models
 		ILightModel,
 		IBoundaryModel,
 		IHealthModel,
-		IClaimOwnershipModel,
 		IConstructionModel,
-		IRecipeModel
+		IRecipeModel,
+		IFarmModel,
+		IGoalActivityModel
 	{
 		#region Serialized
 		[JsonProperty] string type;
@@ -25,9 +26,6 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] FloatRange placementLightRequirement = FloatRange.Zero;
 		[JsonIgnore] public ListenerProperty<FloatRange> PlacementLightRequirement { get; }
-		
-		[JsonProperty] DesireQuality[] desireQualities = new DesireQuality[0];
-		[JsonIgnore] public ListenerProperty<DesireQuality[]> DesireQualities { get; }
 
 		public LightComponent Light { get; } = new LightComponent();
 		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
@@ -39,27 +37,25 @@ namespace Lunra.Hothouse.Models
 		public InventoryComponent SalvageInventory { get; } = new InventoryComponent();
 		public ObligationComponent Obligations { get; } = new ObligationComponent();
 		public RecipeComponent Recipes { get; } = new RecipeComponent();
+		public FarmComponent Farm { get; } = new FarmComponent();
+		public GoalActivityComponent Activities { get; } = new GoalActivityComponent();
 		#endregion
 		
 		#region Non Serialized
 		[JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
-		
-		[JsonIgnore] public Action<DwellerModel, Desires> Operate = ActionExtensions.GetEmpty<DwellerModel, Desires>();
-		
+
 		Dictionary<BuildingStates, IBaseInventoryComponent[]> inventoriesByBuildingState = new Dictionary<BuildingStates, IBaseInventoryComponent[]>();
 		[JsonIgnore] public IBaseInventoryComponent[] Inventories => inventoriesByBuildingState[BuildingState.Value];
 		#endregion
 
 		public bool IsBuildingState(BuildingStates buildingState) => BuildingState.Value == buildingState;
-		public bool IsDesireAvailable(Desires desire) => DesireQualities.Value.Any(d => d.Desire == desire && d.State == DesireQuality.States.Available);
 		
 		public BuildingModel()
 		{
 			Type = new ListenerProperty<string>(value => type = value, () => type);
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
-			DesireQualities = new ListenerProperty<DesireQuality[]>(value => desireQualities = value, () => desireQualities);
-
+		
 			var emptyInventories = new IBaseInventoryComponent[0];
 			foreach (var buildState in EnumExtensions.GetValues<BuildingStates>())
 			{

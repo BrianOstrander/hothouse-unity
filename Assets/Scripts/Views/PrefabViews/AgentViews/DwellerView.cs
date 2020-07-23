@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Views
 		struct DesireParticles
 		{
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
-			public Desires Desire;
+			public Motives motive;
 			public ParticleSystem Filled;
 			public ParticleSystem Missed;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
@@ -45,9 +45,9 @@ namespace Lunra.Hothouse.Views
 		#endregion
 		
 		#region Bindings
-		public void PlayDesire(Desires desire, bool filled)
+		public void PlayDesire(Motives motive, bool filled)
 		{
-			desires.FirstOrDefault(d => d.Desire == desire).Play(filled);
+			desires.FirstOrDefault(d => d.motive == motive).Play(filled);
 		}
 		
 		public void LaunchGlowstick(Vector3 direction)

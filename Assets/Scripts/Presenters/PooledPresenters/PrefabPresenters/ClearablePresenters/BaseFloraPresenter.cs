@@ -51,6 +51,24 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsReproducing.Changed -= OnFloraIsReproducing;
 		}
 
+		protected override Inventory CalculateItemDrops()
+		{
+			var result = base.CalculateItemDrops();
+
+			if (!Model.Farm.Value.IsNull)
+			{
+				var seedCount = result[Model.Seed.Value];
+				result -= (Model.Seed.Value, seedCount);
+
+				if (Game.Cache.Value.SeedsWithCapacity.Contains(Model.Seed.Value))
+				{
+					result += (Model.Seed.Value, Mathf.Max(1, seedCount));
+				}
+			}
+
+			return result;
+		}
+
 		protected override void OnViewPrepare()
 		{
 			base.OnViewPrepare();
@@ -68,7 +86,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!Model.Age.Value.IsDone)
 			{
-				Model.Age.Value = Model.Age.Value.Update(Game.SimulationDelta);
+				Model.Age.Value = Model.Age.Value.Update(Game.SimulationTimeDelta);
 
 				if (View.Visible) View.Age = Model.Age.Value.Normalized;
 				
@@ -79,7 +97,7 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!Model.ReproductionElapsed.Value.IsDone)
 			{
-				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Game.SimulationDelta);
+				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Game.SimulationTimeDelta);
 				return;
 			}
 			
@@ -174,17 +192,20 @@ namespace Lunra.Hothouse.Presenters
 									switch (reproductionEvent)
 									{
 										case ReproductionEvents.ReproduceChild:
-											offspring = Game.Flora.ActivateChild(
-												Model.Species.Value,
+											offspring = Game.Flora.Activate(
+												Model.Type.Value,
 												roomView.RoomId,
-												hit.position
+												hit.position,
+												generator: currentGenerator
 											);
 											break;
 										case ReproductionEvents.ReproduceAdult:
-											offspring = Game.Flora.ActivateAdult(
-												Model.Species.Value,
+											offspring = Game.Flora.Activate(
+												Model.Type.Value,
 												roomView.RoomId,
-												hit.position
+												hit.position,
+												isAdult: true,
+												generator: currentGenerator
 											);
 											break;
 										case ReproductionEvents.Custom:
@@ -210,7 +231,7 @@ namespace Lunra.Hothouse.Presenters
 					.Where(
 						f =>
 						{
-							if (f.Species.Value == Model.Species.Value) return false;
+							if (f.Type.Value == Model.Type.Value) return false;
 							return Vector3.Distance(f.Transform.Position.Value, Model.Transform.Position.Value) < Model.ReproductionRadius.Value.Maximum;
 						}
 					)

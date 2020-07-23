@@ -158,7 +158,8 @@ namespace Lunra.Hothouse.Models
 				case Types.AnyFireExtinguishing:
 					return game.GetLightsActive().Any(l => l.Light.LightState.Value == LightStates.Extinguishing);
 				case Types.ZeroBeds:
-					return game.Buildings.AllActive.None(t => t.IsBuildingState(BuildingStates.Operating) && t.IsDesireAvailable(Desires.Sleep));
+					return true;
+					// return game.Buildings.AllActive.None(t => t.IsBuildingState(BuildingStates.Operating) && t.IsDesireAvailable(Motives.Sleep));
 				
 				// Inventory
 				case Types.NoRations:
@@ -181,17 +182,20 @@ namespace Lunra.Hothouse.Models
 				// Flora
 				case Types.SeenStalksFlora:
 					return getCachedTrueOrCalculate(
-						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Stalks && m.LightSensitive.IsLit)
+						() => true
+						// () => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Stalks && m.LightSensitive.IsLit)
 					);
 				case Types.SeenEdibleFlora:
 					return getCachedTrueOrCalculate(
-						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Wheat && m.LightSensitive.IsLit)
+						() => true
+						// () => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Wheat && m.LightSensitive.IsLit)
 					);
 				case Types.SeenAttackFlora:
 					return getCachedTrueOrCalculate(
-						() => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Shroom && m.LightSensitive.IsLit)
+						() => true
+						// () => game.Flora.AllActive.Any(m => m.Species.Value == FloraSpecies.Shroom && m.LightSensitive.IsLit)
 					);
-				
+					
 				// Invalid or Unrecognized
 				case Types.Unknown:
 					Debug.LogError("Invalid "+nameof(type)+": "+type);

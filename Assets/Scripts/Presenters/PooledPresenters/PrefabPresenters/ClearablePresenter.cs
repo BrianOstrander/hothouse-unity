@@ -45,6 +45,8 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 		}
 
+		protected virtual Inventory CalculateItemDrops() => Model.Clearable.ItemDrops.Value;
+
 		protected override void OnViewPrepare()
 		{
 			base.OnViewPrepare();
@@ -72,14 +74,17 @@ namespace Lunra.Hothouse.Presenters
 		void OnClearableHealthCurrent(float health)
 		{
 			if (!Mathf.Approximately(0f, health)) return;
-			
-			Game.ItemDrops.Activate(
-				Model.RoomTransform.Id.Value,
-				Model.Transform.Position.Value,
-				Quaternion.identity,
-				Model.Clearable.ItemDrops.Value
-			);
-			
+
+			if (!Model.Clearable.ItemDrops.Value.IsEmpty)
+			{
+				Game.ItemDrops.Activate(
+					Model.RoomTransform.Id.Value,
+					Model.Transform.Position.Value,
+					Quaternion.identity,
+					CalculateItemDrops()
+				);
+			}
+
 			Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion

@@ -152,7 +152,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				GenerateFloraInRoom(
 					room,
-					payload.Game.Flora.GetValidSpeciesData(room)	
+					payload.Game.Flora.GetTypesValidForRoom(room)	
 				);
 			}
 			
@@ -224,13 +224,15 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var requiredJobs = new []
 			{
 				Jobs.Smoker,
-				Jobs.Stockpiler,
-				Jobs.Stockpiler,
-				Jobs.Stockpiler,
-				Jobs.Laborer
+				// Jobs.Stockpiler,
+				// Jobs.Stockpiler,
+				// Jobs.Farmer,
+				// Jobs.Farmer,
+				// Jobs.Farmer,
+				// Jobs.Laborer
 			};
 
-			for (var i = 0; i < 5; i++)
+			for (var i = 0; i < requiredJobs.Length; i++)
 			{
 				var position = spawn.Transform.Position.Value + (Vector3.forward * (4f + i));
 
@@ -272,7 +274,20 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
-			wagon.Inventory.Add(wagon.Inventory.AllCapacity.Value.GetMaximum());
+			var startingResources = new[]
+			{
+				Inventory.Types.StalkSeed,
+				Inventory.Types.StalkDry,
+				Inventory.Types.StalkPop
+			};
+			
+			wagon.Inventory.Add(
+				Inventory.FromEntries(
+					wagon.Inventory.AllCapacity.Value.GetMaximum().Entries
+						.Where(e => startingResources.Contains(e.Type))
+						.ToArray()
+				)
+			);
 		
 			var bonfire = payload.Game.Buildings.Activate<BonfireLightDefinition>(
 				spawn.Id.Value,
@@ -281,13 +296,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
-			var dryingRack = payload.Game.Buildings.Activate<DryingRackDefinition>(
-				spawn.Id.Value,
-				position + (Vector3.right * 3f) + (Vector3.back * 3f),
-				Quaternion.identity, 
-				BuildingStates.Operating
-			);
-			
 			payload.Game.WorldCamera.Transform.Position.Value = bonfire.Transform.Position.Value;
 
 			payload.Game.WorldCamera.Transform.Rotation.Value = Quaternion.LookRotation(
@@ -300,13 +308,46 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			wagon.Inventory.Remove(
-				Inventory.FromEntries(
-					wagon.Inventory.All.Value.Entries
-						.Select(e => (e.Type, 1))
-						.ToArray()
-				)
+			payload.Game.Buildings.Activate<BedrollDefinition>(
+				spawn.Id.Value,
+				position + (Vector3.right * 3f) + (Vector3.back * 3f),
+				Quaternion.identity, 
+				BuildingStates.Operating
 			);
+			
+			// payload.Game.Buildings.Activate<BedrollDefinition>(
+			// 	spawn.Id.Value,
+			// 	position,
+			// 	Quaternion.identity, 
+			// 	BuildingStates.Operating
+			// );
+			/*
+			var farm0 = payload.Game.Buildings.Activate<SeedSiloDefinition>(
+				spawn.Id.Value,
+				position + (Vector3.right * 3f) + (Vector3.back * 3f),
+				Quaternion.identity, 
+				BuildingStates.Operating
+			);
+
+			farm0.Farm.SelectedSeed = Inventory.Types.StalkSeed;
+			farm0.Inventory.Add(farm0.Inventory.AllCapacity.Value.GetMaximum());
+			
+			var farm1 = payload.Game.Buildings.Activate<SeedSiloDefinition>(
+				spawn.Id.Value,
+				position + (Vector3.right * 3f) + (Vector3.back * 7f),
+				Quaternion.AngleAxis(45f, Vector3.up), 
+				BuildingStates.Operating
+			);
+
+			farm1.Farm.SelectedSeed = Inventory.Types.StalkSeed;
+			farm1.Inventory.Add(farm1.Inventory.AllCapacity.Value.GetMaximum());
+
+			payload.Game.Flora.Activate<StalkDefinition>(
+				spawn.Id.Value,
+				farm0.Transform.Position.Value + (Vector3.back * 1.5f) + (Vector3.right * 2.5f),
+				isAdult: false
+			);
+			*/
 			// Debugging End
 			
 			done();
@@ -416,7 +457,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		
 		void GenerateFloraInRoom(
 			RoomModel room,
-			FloraPoolModel.SpeciesData[] species
+			FloraDefinition[] species
 		)
 		{
 			if (species.None()) return;
@@ -448,10 +489,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 						}
 
 						parentPool.Add(
-							payload.Game.Flora.ActivateAdult(
-								currentSpecies.Species,
+							payload.Game.Flora.Activate(
+								currentSpecies,
 								room.RoomTransform.Id.Value,
-								position
+								position,
+								isAdult: true,
+								generator: generator
 							)
 						);
 						
@@ -473,7 +516,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				clusterCount = currentSpecies.CountPerClusterMaximum;
 				
 				var currentSpeciesParentPool = parentPool
-					.Where(m => m.Species.Value == currentSpecies.Species)
+					.Where(m => m.Type.Value == currentSpecies.Type)
 					.ToList();
 				
 				if (currentSpeciesParentPool.None()) continue;

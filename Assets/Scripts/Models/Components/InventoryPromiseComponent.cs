@@ -33,6 +33,8 @@ namespace Lunra.Hothouse.Models
 			InventoryComponent destination
 		)
 		{
+			if (source.Id.Value == destination.Id.Value) throw new Exception("Cannot transfer between the same inventory!");
+			
 			Transactions.Push(
 				destination.RequestDeliver(inventory)	
 			);

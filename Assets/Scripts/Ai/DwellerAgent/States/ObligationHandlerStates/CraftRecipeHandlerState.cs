@@ -35,7 +35,23 @@ namespace Lunra.Hothouse.Ai.Dweller
 		class ToTimeoutOnCraftRecipe : ToTimeoutOnTarget
 		{
 			IRecipeModel workplace;
-			
+
+			protected override float TimeoutDuration
+			{
+				get
+				{
+					if (Agent.Workplace.Value.TryGetInstance(Game, out workplace))
+					{
+						if (workplace.Recipes.TryGetCurrent(out var current)) return current.Recipe.Duration;
+						
+						Debug.LogError("Unable to find current recipe, this is unexpected");
+					}
+					else Debug.LogError("Unable to find workplace, this is unexpected");
+
+					return base.TimeoutDuration;
+				}
+			}
+
 			protected override void OnTimeoutBegin()
 			{
 				if (Agent.Workplace.Value.TryGetInstance(Game, out workplace))

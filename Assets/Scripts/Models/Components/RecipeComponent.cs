@@ -32,8 +32,8 @@ namespace Lunra.Hothouse.Models
 			Desired = 20,
 			Infinite = 30
 		}
-
-		public struct RecipeIteration
+		
+		public class RecipeIteration
 		{
 			public static RecipeIteration Default()
 			{
@@ -56,7 +56,7 @@ namespace Lunra.Hothouse.Models
 					States.Idle,
 					Iterations.Count,
 					recipe,
-					count,
+					0,
 					count,
 					0
 				);
@@ -69,7 +69,7 @@ namespace Lunra.Hothouse.Models
 			{
 				return new RecipeIteration(
 					States.Idle,
-					Iterations.Count,
+					Iterations.Desired,
 					recipe,
 					0,
 					0,
@@ -91,20 +91,20 @@ namespace Lunra.Hothouse.Models
 				);
 			}
 			
-			public States State { get; }
+			public States State { get; private set; }
 			public Iterations Iteration { get; }
 			public Recipe Recipe { get; }
 
-			public int Count;
-			public int CountRemaining;
-			public int DesiredMultiplier;
+			public int Count { get; private set; }
+			public int CountTarget { get; }
+			public int DesiredMultiplier { get; }
 
 			RecipeIteration(
 				States state,
 				Iterations iteration,
 				Recipe recipe,
 				int count,
-				int countRemaining,
+				int countTarget,
 				int desiredMultiplier
 			)
 			{
@@ -112,15 +112,15 @@ namespace Lunra.Hothouse.Models
 				Iteration = iteration;
 				Recipe = recipe;
 				Count = count;
-				CountRemaining = countRemaining;
+				CountTarget = countTarget;
 				DesiredMultiplier = desiredMultiplier;
 			}
 
-			public RecipeIteration New(
+			public void Process(
 				States state
 			)
 			{
-				var newCountRemaining = Count;
+				var newCount = Count;
 				
 				switch (Iteration)
 				{
@@ -128,7 +128,7 @@ namespace Lunra.Hothouse.Models
 						if (State == States.Idle)
 						{
 							if (state != States.Gathering) Debug.LogError("Expected to go from " + States.Idle + " to " + States.Gathering + " but went to " + state + " instead");
-							else newCountRemaining = Mathf.Max(0, newCountRemaining - 1);
+							else newCount = Mathf.Min(CountTarget, newCount + 1);
 						}
 						break;
 					case Iterations.Infinite:
@@ -138,15 +138,26 @@ namespace Lunra.Hothouse.Models
 						Debug.LogError("Unrecognized Iteration: "+Iteration);
 						break;
 				}
-			
-				return new RecipeIteration(
-					state,
-					Iteration,
-					Recipe,
-					Count,
-					newCountRemaining,
-					DesiredMultiplier
-				);
+
+				State = state;
+				Count = newCount;
+			}
+
+			public bool IsDone(GameModel game)
+			{
+				switch (Iteration)
+				{
+					case Iterations.Count:
+						return CountTarget <= Count;
+					case Iterations.Infinite:
+						return false;
+					case Iterations.Desired:
+						return game.Cache.Value.GlobalInventory.Available.Value
+							.Contains(Recipe.OutputItems * DesiredMultiplier);
+					default:
+						Debug.LogError("Unrecognized Reload Option: " + Iteration);
+						return true;
+				}
 			}
 
 			public override string ToString()
@@ -161,7 +172,7 @@ namespace Lunra.Hothouse.Models
 				switch (Iteration)
 				{
 					case Iterations.Count:
-						result += " [ " + Count + " / " + CountRemaining + " ]";
+						result += " [ " + Count + " / " + CountTarget + " ]";
 						break;
 					case Iterations.Desired:
 						result += " [ Desired x " + DesiredMultiplier + " ]";
@@ -183,34 +194,42 @@ namespace Lunra.Hothouse.Models
 		protected readonly ListenerProperty<Recipe[]> availableListener;
 		[JsonIgnore] public ReadonlyProperty<Recipe[]> Available { get; }
 
-		[JsonProperty] Queue<RecipeIteration> queue = new Queue<RecipeIteration>();
-		[JsonIgnore] public QueueProperty<RecipeIteration> Queue { get; }
+		[JsonProperty] RecipeIteration[] queue = new RecipeIteration[0];
+		[JsonIgnore] public ListenerProperty<RecipeIteration[]> Queue { get; }
 
-		[JsonProperty] RecipeIteration current;
-		readonly ListenerProperty<RecipeIteration> currentListener;
-		[JsonIgnore] public ReadonlyProperty<RecipeIteration> Current { get; }
-		
+		[JsonProperty] int? currentIndex;
+		readonly ListenerProperty<int?> currentIndexListener;
+		[JsonIgnore] public ReadonlyProperty<int?> CurrentIndex { get; }
 		#endregion
 		
-		#region Non Serialized 
+		#region Non Serialized
 		#endregion
 
 		public RecipeComponent()
 		{
 			Available = new ReadonlyProperty<Recipe[]>(
-					value => available = value,
-					() => available,
-					out availableListener
+				value => available = value,
+				() => available,
+				out availableListener
 			);
-			Queue = new QueueProperty<RecipeIteration>(queue);
-			Current = new ReadonlyProperty<RecipeIteration>(
-				value => current = value,
-				() => current,
-				out currentListener
+			Queue = new ListenerProperty<RecipeIteration[]>(
+				value => queue = value,
+				() => queue
+			);
+			CurrentIndex = new ReadonlyProperty<int?>(
+				value => currentIndex = value,
+				() => currentIndex,
+				out currentIndexListener
 			);
 		}
 
 		public void ProcessRecipe(GameModel game, IRecipeModel model) => TryProcessRecipe(game, model, out _);
+		
+		public bool TryGetCurrent(out RecipeIteration current)
+		{
+			current = CurrentIndex.Value.HasValue ? Queue.Value[CurrentIndex.Value.Value] : null;
+			return CurrentIndex.Value.HasValue;
+		}
 		
 		bool TryProcessRecipe(
 			GameModel game,
@@ -218,69 +237,56 @@ namespace Lunra.Hothouse.Models
 			out RecipeIteration result	
 		)
 		{
-			var previousState = Current.Value.State;
-			result = Current.Value;
+			if (!TryGetCurrent(out result)) result = RecipeIteration.Default(); 
+			var previousState = result.State;
 			
-			switch (Current.Value.State)
+			switch (result.State)
 			{
 				case States.Idle:
-					if (Queue.TryDequeue(out var next))
+					var noneFound = true;
+					for (var i = 0; i < Queue.Value.Length; i++)
 					{
-						model.Inventory.Desired.Value = InventoryDesire.UnCalculated(next.Recipe.InputItems);
-						currentListener.Value = (result = next.New(States.Gathering));
+						if (Queue.Value[i].IsDone(game)) continue;
+						
+						result = Queue.Value[i];
+						model.Inventory.Desired.Value = InventoryDesire.UnCalculated(result.Recipe.InputItems);
+						result.Process(States.Gathering);
+						currentIndexListener.Value = i;
+						noneFound = false;
+						break;
+					}
+
+					if (noneFound)
+					{
+						result = RecipeIteration.Default();
+						currentIndexListener.Value = null;
 					}
 					break;
 				case States.Gathering:
-					if (model.Inventory.Available.Value.Intersects(Current.Value.Recipe.InputItems))
+					if (model.Inventory.Available.Value.Intersects(result.Recipe.InputItems))
 					{
 						var isOutputCapacityAvailable = model.Inventory.AvailableCapacity.Value
 							.GetCapacityFor(model.Inventory.Available.Value)
-							.Contains(Current.Value.Recipe.OutputItems);
+							.Contains(result.Recipe.OutputItems);
 
 						if (isOutputCapacityAvailable)
 						{
 							model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
-							model.Inventory.Remove(Current.Value.Recipe.InputItems);
+							model.Inventory.Remove(result.Recipe.InputItems);
 							model.Obligations.Add(ObligationCategories.Craft.Recipe);
-							currentListener.Value = (result = Current.Value.New(States.Ready));
+							result.Process(States.Ready);
 						}
 					}
 					break;
 				case States.Ready:
-					currentListener.Value = (result = Current.Value.New(States.Crafting));
+					result.Process(States.Crafting);
 					break;
 				case States.Crafting:
-					//model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
-					model.Inventory.Add(Current.Value.Recipe.OutputItems);
-
-					var returnToQueue = false;
-					switch (Current.Value.Iteration)
-					{
-						case Iterations.Count:
-							returnToQueue = 0 < Current.Value.CountRemaining;
-							break;
-						case Iterations.Infinite:
-							returnToQueue = true;
-							break;
-						case Iterations.Desired:
-							returnToQueue = !game.Cache.Value.GlobalInventory.Available.Value.Contains(
-								Current.Value.Recipe.OutputItems * Current.Value.DesiredMultiplier
-							);
-							break;
-						default:
-							Debug.LogError("Unrecognized Reload Option: " + Current.Value.Iteration);
-							break;
-					}
-
-					if (returnToQueue)
-					{
-						queue.Enqueue(Current.Value.New(States.Idle));
-					}
-					
-					currentListener.Value = (result = RecipeIteration.Default());
+					model.Inventory.Add(result.Recipe.OutputItems);
+					result.Process(States.Idle);
 					break;
 				default:
-					Debug.LogError("Unrecognized Recipe State: "+Current.Value.State);
+					Debug.LogError("Unrecognized Recipe State: "+result.State);
 					break;
 			}
 
@@ -292,8 +298,8 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			availableListener.Value = available;
-			Queue.Clear();
-			currentListener.Value = RecipeIteration.Default();
+			Queue.Value = new RecipeIteration[0];
+			currentIndexListener.Value = null;
 		}
 
 		public override string ToString()
@@ -309,24 +315,28 @@ namespace Lunra.Hothouse.Models
 			{
 				result += "\n - [ " + prefix + " ] " + recipe;
 			}
-			
-			switch (Current.Value.State)
+
+			if (TryGetCurrent(out var current))
 			{
-				case States.Idle:
-				case States.Gathering:
-				case States.Ready:
-				case States.Crafting:
-					appendRecipeIteration(nameof(Current) + "." + Current.Value.State, Current.Value);
-					break;
-				default:
-					Debug.LogError("Unrecognized Recipe State: " + Current.Value.State);
-					break;
+				switch (current.State)
+				{
+					case States.Idle:
+					case States.Gathering:
+					case States.Ready:
+					case States.Crafting:
+						appendRecipeIteration("Current" + "." + current.State, current);
+						break;
+					default:
+						Debug.LogError("Unrecognized Recipe State: " + current.State);
+						break;
+				}	
 			}
 			
 			var index = 0;
-			foreach (var next in Queue.PeekAll())
+			foreach (var next in Queue.Value)
 			{
-				appendRecipeIteration(nameof(Queue) + " ] [ " + index, next);
+				var isCurrent = index == (CurrentIndex.Value ?? -1);
+				appendRecipeIteration(nameof(Queue) + " ] " + (isCurrent ? "*" : String.Empty) + " [ " + index, next);
 				index++;
 			}
 

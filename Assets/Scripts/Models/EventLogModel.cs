@@ -26,7 +26,7 @@ namespace Lunra.Hothouse.Models
 
 			public override string ToString()
 			{
-				return "[ " + SimulationTime.ToDayTimeString() + " ] " + ShortenId(Source.Id) + ": " + Message;
+				return "[ " + SimulationTime + " ] " + ShortenId(Source.Id) + ": " + Message;
 			}
 		}
 		

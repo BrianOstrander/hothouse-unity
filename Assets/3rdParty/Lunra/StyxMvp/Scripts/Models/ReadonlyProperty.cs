@@ -1,30 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using Lunra.Core;
 
 namespace Lunra.StyxMvp.Models
 {
     public class ReadonlyProperty<T>
     {
-        public readonly string Name;
         ListenerProperty<T> property;
 
-        public Action<T> Changed = ActionExtensions.GetEmpty<T>();
+        public event Action<T> Changed = ActionExtensions.GetEmpty<T>();
 
         public T Value => property.Value;
-
-        public ReadonlyProperty(
-            Action<T> set,
-            Func<T> get,
-            out ListenerProperty<T> property,
-            string name,
-            params Action<T>[] listeners
-        )
-        {
-            Name = name;
-            this.property = new ListenerProperty<T>(set, get, name, listeners);
-            this.property.Changed += value => Changed(value);
-            property = this.property;
-        }
 
         public ReadonlyProperty(
             Action<T> set,
@@ -34,9 +20,22 @@ namespace Lunra.StyxMvp.Models
         ) : this(
             set,
             get,
+            value => EqualityComparer<T>.Default.Equals(get(), value),
             out property,
-            null,
             listeners
         ) { }
+        
+        public ReadonlyProperty(
+            Action<T> set,
+            Func<T> get,
+            Func<T, bool> equalityComparer,
+            out ListenerProperty<T> property,
+            params Action<T>[] listeners
+        )
+        {
+            this.property = new ListenerProperty<T>(set, get, equalityComparer, listeners);
+            this.property.Changed += value => Changed(value);
+            property = this.property;
+        }
     }
 }

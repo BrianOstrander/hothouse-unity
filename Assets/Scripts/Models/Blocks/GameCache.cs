@@ -33,6 +33,7 @@ namespace Lunra.Hothouse.Models
 		public InventoryComponent GlobalInventory { get; private set; }
 		public Inventory GlobalItemDropsAvailable { get; private set; }
 		public bool AnyItemDropsAvailableForPickup { get; private set; }
+		public Inventory.Types[] SeedsWithCapacity { get; private set; }
 		public string[] UniqueObligationsAvailable { get; private set; }
 		public bool AnyObligationsAvailable { get; private set; }
 		public int LowRationThreshold { get; private set; }
@@ -51,7 +52,7 @@ namespace Lunra.Hothouse.Models
 			var globalInventoryForbidden = Inventory.Empty;
 			var globalInventoryReserved = Inventory.Empty;
 			
-			foreach (var model in game.Buildings.AllActive.Where(b => b.IsBuildingState(BuildingStates.Operating) && b.Enterable.AnyAvailable()))
+			foreach (var model in game.Buildings.AllActive.Where(b => b.IsBuildingState(BuildingStates.Operating) && !b.Light.IsLight.Value))
 			{
 				globalInventoryAll += model.Inventory.All.Value;
 				globalInventoryAllCapacity += model.Inventory.AllCapacity.Value.GetMaximum();
@@ -77,6 +78,12 @@ namespace Lunra.Hothouse.Models
 				result.AnyItemDropsAvailableForPickup = result.GlobalInventory.AvailableCapacity.Value
 					.HasCapacityFor(result.GlobalInventory.Available.Value, result.GlobalItemDropsAvailable);
 			}
+
+			var allSeedTypes = game.Flora.Definitions.Select(d => d.Seed);
+			result.SeedsWithCapacity = globalInventoryAllCapacity.Entries
+				.Where(e => 0 < e.Weight && allSeedTypes.Contains(e.Type))
+				.Select(e => e.Type)
+				.ToArray();
 
 			result.UniqueObligationsAvailable = game.GetObligations()
 				.SelectMany(m => m.Obligations.All.Value.Available)

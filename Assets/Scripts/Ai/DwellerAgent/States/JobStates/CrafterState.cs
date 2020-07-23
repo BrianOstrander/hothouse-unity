@@ -31,8 +31,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new CraftRecipeHandlerState.ToObligationOnExistingObligation(),
 				new CraftRecipeHandlerState.ToObligationHandlerOnAvailableObligation(),
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery(),
-				new BalanceItemState.ToBalanceOnAvailableDistribution(),
+				new BalanceItemState.ToBalanceOnAvailableDelivery(true),
+				new BalanceItemState.ToBalanceOnAvailableDistribution(true),
 				
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);
@@ -40,19 +40,24 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void Idle()
 		{
-			switch (Workplace.Recipes.Current.Value.State)
+
+			if (Workplace.Recipes.TryGetCurrent(out var current))
 			{
-				case RecipeComponent.States.Idle:
-				case RecipeComponent.States.Gathering:
-					Workplace.Recipes.ProcessRecipe(Game, Workplace);
-					break;
-				case RecipeComponent.States.Ready:
-				case RecipeComponent.States.Crafting:
-					break;
-				default:
-					Debug.LogError("Unrecognized Recipe State: "+Workplace.Recipes.Current.Value.State);
-					break;
+				switch (current.State)
+				{
+					case RecipeComponent.States.Idle:
+					case RecipeComponent.States.Gathering:
+						Workplace.Recipes.ProcessRecipe(Game, Workplace);
+						break;
+					case RecipeComponent.States.Ready:
+					case RecipeComponent.States.Crafting:
+						break;
+					default:
+						Debug.LogError("Unrecognized Recipe State: "+current.State);
+						break;
+				}
 			}
+			else Workplace.Recipes.ProcessRecipe(Game, Workplace);
 		}
 		
 		class CraftRecipeHandlerState : CraftRecipeHandlerState<S1> { }

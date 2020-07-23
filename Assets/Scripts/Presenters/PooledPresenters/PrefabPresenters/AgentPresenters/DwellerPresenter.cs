@@ -14,18 +14,18 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			Model.DesireUpdated += OnDwellerDesireUpdated;
-			
 			Model.Health.Damaged += OnDwellerHealthDamage;
+			
+			Game.SimulationUpdate += OnGameSimulationUpdate;
 
 			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			Model.DesireUpdated -= OnDwellerDesireUpdated;
-			
 			Model.Health.Damaged -= OnDwellerHealthDamage;
+			
+			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
 			if (Model.Bed.Value.TryGetInstance<BuildingModel>(Game, out var bed)) bed.Ownership.Remove(Model);
 			
@@ -33,13 +33,6 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region DwellerModel Events
-		void OnDwellerDesireUpdated(Desires desire, bool filled)
-		{
-			if (View.NotVisible) return;
-			
-			View.PlayDesire(desire, filled);
-		}
-
 		void OnDwellerHealthDamage(Damage.Result result)
 		{
 			if (result.IsTargetDestroyed)
@@ -69,10 +62,37 @@ namespace Lunra.Hothouse.Presenters
 						Model.GetInstanceId()
 					)
 				);
+				if (result.Type != Damage.Types.GoalHurt)
+				{
+					Model.Goals.Apply(
+						(Motives.Heal, result.AmountApplied / Model.Health.Maximum.Value)
+					);	
+				}
 			}
 		}
 		#endregion
 
+		void OnGameSimulationUpdate()
+		{
+			Model.Goals.Update(Game.SimulationTimeDelta);
+			
+			var newHealth = 1f - Model.Goals[Motives.Heal].Insistence;
+
+			var healthUpdateDelta = (newHealth - Model.Health.Normalized) * Model.Health.Maximum.Value;
+			if (!Mathf.Approximately(0f, healthUpdateDelta))
+			{
+				if (healthUpdateDelta < 0f)
+				{
+					Damage.Apply(
+						Damage.Types.GoalHurt,
+						Mathf.Abs(healthUpdateDelta),
+						Model
+					);
+				}
+				else Model.Health.Heal(healthUpdateDelta);
+			}
+		}
+		
 		public override void OnAgentObligationComplete(Obligation obligation)
 		{
 			if (View.NotVisible) return;

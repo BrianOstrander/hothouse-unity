@@ -15,7 +15,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 			AddChildStates(
 				new CleanupState(),
 				new DestroyMeleeHandlerState(),
-				new ConstructAssembleHandlerState()
+				new ConstructAssembleHandlerState(),
+				new NavigateState()
 			);
 			
 			AddTransitions(
@@ -28,7 +29,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation(),
 				new ConstructAssembleHandlerState.ToObligationHandlerOnAvailableObligation(),
 				
-				new CleanupState.ToCleanupOnItemsAvailable()
+				new CleanupState.ToCleanupOnItemsAvailable(),
+				
+				new NavigateToNearestLight()
 			);
 		}
 	}

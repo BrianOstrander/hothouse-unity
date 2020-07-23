@@ -9,8 +9,14 @@ namespace Lunra.Hothouse.Models
 	public class FloraModel : PrefabModel, IClearableModel
 	{
 		#region Serialized
-		[JsonProperty] FloraSpecies species;
-		[JsonIgnore] public ListenerProperty<FloraSpecies> Species { get; }
+		[JsonProperty] string type;
+		[JsonIgnore] public ListenerProperty<string> Type { get; }
+		
+		[JsonProperty] Inventory.Types seed;
+		[JsonIgnore] public ListenerProperty<Inventory.Types> Seed { get; }
+		
+		[JsonProperty] InstanceId farm;
+		[JsonIgnore] public ListenerProperty<InstanceId> Farm { get; }
 
 		[JsonProperty] Interval age;
 		[JsonIgnore] public ListenerProperty<Interval> Age { get; }
@@ -49,7 +55,9 @@ namespace Lunra.Hothouse.Models
 		
 		public FloraModel()
 		{
-			Species = new ListenerProperty<FloraSpecies>(value => species = value, () => species);
+			Type = new ListenerProperty<string>(value => type = value, () => type);
+			Seed = new ListenerProperty<Inventory.Types>(value => seed = value, () => seed);
+			Farm = new ListenerProperty<InstanceId>(value => farm = value, () => farm);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);
 			ReproductionRadius = new ListenerProperty<FloatRange>(value => reproductionRadius = value, () => reproductionRadius);

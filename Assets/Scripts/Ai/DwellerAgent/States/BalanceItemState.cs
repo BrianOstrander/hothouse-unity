@@ -30,6 +30,7 @@ namespace Lunra.Hothouse.Ai
 				public IEnterableModel Model;
 				public Navigation.Result NavigationResult;
 				public bool? IsNavigable;
+				public bool IsOwner;
 			}
 
 			protected class InventoryCache
@@ -52,8 +53,11 @@ namespace Lunra.Hothouse.Ai
 
 			protected abstract Actions CurrentAction { get; }
 			
+			protected bool RequiresOwnership { get; }
 			protected List<EnterableCache> EnterablesCached = new List<EnterableCache>();
 			protected List<InventoryCache> InventoriesCached = new List<InventoryCache>();
+
+			public ToBalanceOnAvailable(bool requiresOwnership = false) => RequiresOwnership = requiresOwnership;
 			
 			public override bool IsTriggered()
 			{
@@ -73,11 +77,16 @@ namespace Lunra.Hothouse.Ai
 						default:
 							continue;
 					}
-					
+
 					if (!(parent is IInventoryModel parentTyped)) continue;
-					
+
 					var enterableEntry = new EnterableCache();
 					enterableEntry.Model = parentTyped;
+
+					if (RequiresOwnership && parent is IClaimOwnershipModel parentOwnershipTyped)
+					{
+						enterableEntry.IsOwner = parentOwnershipTyped.Ownership.Contains(Agent); 
+					}
 					
 					var anyInventoriesReferenced = false;
 
@@ -171,7 +180,9 @@ namespace Lunra.Hothouse.Ai
 			InventoryCache deliveryDestination;
 			InventoryCache deliverySource;
 			Inventory items;
-			
+
+			public ToBalanceOnAvailableDelivery(bool requiresOwnership = false) : base(requiresOwnership) {}
+
 			protected override bool IsActionTriggered()
 			{
 				var possibleDeliveryDestinations = InventoriesCached
@@ -180,6 +191,8 @@ namespace Lunra.Hothouse.Ai
 
 				foreach (var possibleDeliveryDestination in possibleDeliveryDestinations)
 				{
+					if (RequiresOwnership && !possibleDeliveryDestination.Enterable.IsOwner) continue;
+					
 					if (!GetIsNavigable(possibleDeliveryDestination.Enterable)) continue;
 
 					var possibleDeliverySources = InventoriesCached
@@ -188,10 +201,11 @@ namespace Lunra.Hothouse.Ai
 
 					foreach (var possibleDeliverySource in possibleDeliverySources)
 					{
+						if (possibleDeliveryDestination.Inventory.Id == possibleDeliverySource.Inventory.Id) continue;
 						if (!GetIsNavigable(possibleDeliverySource.Enterable)) continue;
 
 						var isIntersecting = possibleDeliveryDestination.Inventory.Desired.Value.Delivery.Intersects(
-							possibleDeliverySource.Inventory.Available.Value,
+							possibleDeliverySource.Inventory.AvailableWithoutDesire.Value,
 							out var intersection
 						);
 						
@@ -221,10 +235,12 @@ namespace Lunra.Hothouse.Ai
 		public class ToBalanceOnAvailableDistribution : ToBalanceOnAvailable
 		{
 			protected override Actions CurrentAction => Actions.Distribution;
-			
+
 			InventoryCache distributionSource;
 			InventoryCache distributionDestination;
 			Inventory items;
+			
+			public ToBalanceOnAvailableDistribution(bool requiresOwnership = false) : base(requiresOwnership) {}
 			
 			protected override bool IsActionTriggered()
 			{
@@ -234,6 +250,8 @@ namespace Lunra.Hothouse.Ai
 
 				foreach (var possibleDistributionSource in possibleDistributionSources)
 				{
+					if (RequiresOwnership && !possibleDistributionSource.Enterable.IsOwner) continue;
+					
 					if (!GetIsNavigable(possibleDistributionSource.Enterable)) continue;
 
 					var possibleDistributionDestinations = InventoriesCached
@@ -242,6 +260,7 @@ namespace Lunra.Hothouse.Ai
 
 					foreach (var possibleDistributionDestination in possibleDistributionDestinations)
 					{
+						if (possibleDistributionSource.Inventory.Id == possibleDistributionDestination.Inventory.Id) continue;
 						if (!GetIsNavigable(possibleDistributionDestination.Enterable)) continue;
 
 						var isIntersecting = possibleDistributionSource.Inventory.Desired.Value.Distribution

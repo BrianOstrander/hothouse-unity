@@ -78,7 +78,16 @@ namespace Lunra.Core
 		/// </summary>
 		/// <returns>The clamped.</returns>
 		/// <param name="value">Value.</param>
-		public float ProgressClamped(float value) { return Progress(Mathf.Clamp(value, Mathf.Min(Primary, Secondary), Mathf.Max(Primary, Secondary))); }
+		public float ProgressClamped(float value)
+		{
+			return Progress(
+				Mathf.Clamp(
+					value,
+					Mathf.Min(Primary, Secondary),
+					Mathf.Max(Primary, Secondary)
+				)
+			);
+		}
 		
 		public static implicit operator FloatRange(Vector2 v)
 		{

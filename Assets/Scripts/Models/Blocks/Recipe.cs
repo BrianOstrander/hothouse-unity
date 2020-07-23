@@ -7,16 +7,19 @@ namespace Lunra.Hothouse.Models
 		public string Name { get; }
 		public Inventory InputItems { get; }
 		public Inventory OutputItems { get; }
+		public float Duration { get; }
 
 		public Recipe(
 			string name,
 			Inventory inputItems,
-			Inventory outputItems
+			Inventory outputItems,
+			float duration
 		)
 		{
 			Name = name;
 			InputItems = inputItems;
 			OutputItems = outputItems;
+			Duration = duration;
 		}
 
 		public override string ToString()
@@ -36,6 +39,8 @@ namespace Lunra.Hothouse.Models
 			{
 				result += "\n\t\t" + entry.Type + "\t" + entry.Weight;
 			}
+			
+			result += "\n\tDuration: "+Duration.ToString("N2");
 
 			return result;
 		}

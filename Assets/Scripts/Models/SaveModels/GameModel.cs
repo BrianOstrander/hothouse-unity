@@ -44,10 +44,18 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ListenerProperty<float> SimulationMultiplier { get; }
 		
 		[JsonProperty] float simulationTimeConversion = 1f;
+		/// <summary>
+		/// Multiply by this by real seconds to get DayTime passed, or DayTime divided by this gets real seconds that
+		/// DayTime represents. 
+		/// </summary>
+		/// <remarks>
+		/// Once set, this probably shouldn't be messed with...
+		/// </remarks>
 		[JsonIgnore] public ListenerProperty<float> SimulationTimeConversion { get; }
 		
 		[JsonProperty] DayTime simulationTime = DayTime.Zero;
-		[JsonIgnore] public ListenerProperty<DayTime> SimulationTime { get; }
+		readonly ListenerProperty<DayTime> simulationTimeListener;
+		[JsonIgnore] public ReadonlyProperty<DayTime> SimulationTime { get; }
 		
 		[JsonProperty] TimeSpan simulationPlaytimeElapsed;
 		[JsonIgnore] public ListenerProperty<TimeSpan> SimulationPlaytimeElapsed { get; }
@@ -66,8 +74,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public NameGenerator DwellerNames { get; } = new NameGenerator();
 		[JsonIgnore] public GameInteractionModel Interaction { get; } = new GameInteractionModel();
 		[JsonIgnore] public NavigationMeshModel NavigationMesh = new NavigationMeshModel();
-		[JsonIgnore] public float SimulationDelta => Time.deltaTime;
-		[JsonIgnore] public float SimulationTimeDelta => SimulationDelta * SimulationTimeConversion.Value;
+		[JsonIgnore] public float SimulationTimeDelta { get; private set; }
 		[JsonIgnore] public bool IsSimulationInitialized { get; private set; }
 
 		[JsonIgnore] public Func<(string RoomId, Vector3 Position, ILightModel[] Except), LightingResult> CalculateMaximumLighting;
@@ -82,7 +89,7 @@ namespace Lunra.Hothouse.Models
 		
 		#region Events
 		public event Action SimulationInitialize = ActionExtensions.Empty;
-		[JsonIgnore] public Action SimulationUpdate = ActionExtensions.Empty;
+		public event Action SimulationUpdate = ActionExtensions.Empty;
 		#endregion
 
 		public GameModel()
@@ -90,7 +97,11 @@ namespace Lunra.Hothouse.Models
 			DesireDamageMultiplier = new ListenerProperty<float>(value => desireDamageMultiplier = value, () => desireDamageMultiplier);
 			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
-			SimulationTime = new ListenerProperty<DayTime>(value => simulationTime = value, () => simulationTime);
+			SimulationTime = new ReadonlyProperty<DayTime>(
+				value => simulationTime = value,
+				() => simulationTime,
+				out simulationTimeListener
+			);
 			SimulationPlaytimeElapsed = new ListenerProperty<TimeSpan>(value => simulationPlaytimeElapsed = value, () => simulationPlaytimeElapsed);
 			PlaytimeElapsed = new ListenerProperty<TimeSpan>(value => playtimeElapsed = value, () => playtimeElapsed);
 			LastLightUpdate = new ListenerProperty<LightDelta>(value => lastLightUpdate = value, () => lastLightUpdate);
@@ -119,6 +130,17 @@ namespace Lunra.Hothouse.Models
 
 		public void ResetSimulationInitialized() => IsSimulationInitialized = false;
 
+		public void StepSimulation(float deltaTime)
+		{
+			SimulationTimeDelta = deltaTime * SimulationTimeConversion.Value;
+			simulationTimeListener.Value += new DayTime(SimulationTimeDelta);
+			
+			SimulationPlaytimeElapsed.Value += TimeSpan.FromSeconds(deltaTime);
+			PlaytimeElapsed.Value += TimeSpan.FromSeconds(deltaTime);
+
+			SimulationUpdate();
+		}
+		
 		public void InitializeCache()
 		{
 			// This is a little broken but ok...
