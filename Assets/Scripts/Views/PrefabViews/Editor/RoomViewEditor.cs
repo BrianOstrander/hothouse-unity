@@ -8,8 +8,23 @@ using UnityEngine;
 namespace Lunra.Hothouse.Views.Editor
 {
 	[CustomEditor(typeof(RoomView))]
+	[CanEditMultipleObjects]
 	public class RoomViewEditor : UnityEditor.Editor
 	{
+		public override void OnInspectorGUI()
+		{
+			if (targets == null || targets.Length == 1)
+			{
+				base.OnInspectorGUI();
+				return;
+			}
+
+			if (GUILayout.Button("Batch Cache " + targets.Length + " items"))
+			{
+				
+			}
+		}
+		
 		void OnSceneGUI()
 		{
 			var typedTarget = target as RoomView;
