@@ -57,8 +57,8 @@ namespace Lunra.Hothouse.Views.Editor
 							onProcess,
 							() =>
 							{
-								// StageUtility.GoBackToPreviousStage();
-								// Selection.objects = batchTargets;
+								StageUtility.GoBackToPreviousStage();
+								Selection.objects = batchTargets;
 					
 								Debug.Log(batchResult);								
 							}
