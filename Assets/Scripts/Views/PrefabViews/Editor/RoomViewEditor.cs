@@ -103,6 +103,11 @@ namespace Lunra.Hothouse.Views.Editor
 				}
 				GUIExtensions.PopEnabled();
 
+				if (GUILayout.Button("Test Wall Detection", GUILayout.ExpandWidth(false)))
+				{
+					typedTarget.GetWallBoundaries();
+				}
+				
 				GUIExtensions.PushEnabled(Application.isPlaying);
 				{
 					if (GUILayout.Button("Test Random Point", GUILayout.ExpandWidth(false)))
