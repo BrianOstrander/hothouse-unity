@@ -41,6 +41,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			App.S.PushBlocking(OnCalculateNavigation);
 			
+			App.S.PushBlocking(OnGenerateWallDecorations);
+			
 			App.S.PushBlocking(OnGenerateDebris);
 			
 			App.S.PushBlocking(OnCalculateNavigation);
@@ -131,6 +133,38 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			payload.Game.GenerationLog.Append(GenerationEvents.SpawnChosen);
 			done();
+		}
+
+		void OnGenerateWallDecorations(Action done)
+		{
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				foreach (var wall in room.Walls.Value.Where(w => w.Valid))
+				{
+					Debug.DrawLine(
+						wall.Begin,
+						wall.End,
+						Color.green,
+						999f
+					);
+					
+					Debug.DrawLine(
+						wall.Begin,
+						wall.Begin + wall.Normal,
+						Color.yellow,
+						999f
+					);
+					
+					Debug.DrawLine(
+						wall.Begin,
+						wall.Begin + (Vector3.up * wall.Height),
+						Color.yellow,
+						999f
+					);
+				}
+			}
+			
+			// done();
 		}
 		
 		void OnGenerateDebris(Action done)

@@ -289,8 +289,8 @@ namespace Lunra.Hothouse.Views
 
 			const float QueryRotationDelta = 360f / 8f;
 			const float FloorWallDistance = 1f;
-			const float MinimumWallHeight = 3f;
-			const float WallHeightIncrements = MinimumWallHeight / 6f;
+			const float WallHeightMaximum = 4f;
+			const float WallHeightIncrements = WallHeightMaximum / 8f;
 			const float WallCastIncrement = 0.5f;
 
 			var wallPoints = new List<WallPoint>();
@@ -352,7 +352,7 @@ namespace Lunra.Hothouse.Views
 						var hasCheckedForDoor = false;
 						int? doorIndex = null;
 						
-						for (var h = WallHeightIncrements; h < MinimumWallHeight; h += WallHeightIncrements)
+						for (var h = WallHeightIncrements; h < WallHeightMaximum; h += WallHeightIncrements)
 						{
 							var didHitWall = physicsScene.Raycast(
 								currentOrigin + (Vector3.up * h),
@@ -585,12 +585,12 @@ namespace Lunra.Hothouse.Views
 				
 				var result = new WallCache();
 
-				result.Id = results.Count;
+				result.Index = results.Count;
 				result.Begin = wallPointTerminal.Position;
 				result.End = wallEnd.Position;
 				result.Normal = wallPointTerminal.WallNormal;
 				result.Height = wallPointTerminalMinimumHeight;
-				result.DoorId = wallPointTerminal.DoorIndex;
+				result.DoorIndex = wallPointTerminal.DoorIndex;
 				
 				results.Add(result);
 			}
@@ -610,23 +610,20 @@ namespace Lunra.Hothouse.Views
 		
 		void OnDrawGizmosSelected()
 		{
-			if (!Application.isPlaying)
+			if (!Application.isPlaying) ViewGizmos.DrawDoorGizmo(doorDefinitions);
+				
+			if (wallDefinitions != null)
 			{
-				ViewGizmos.DrawDoorGizmo(doorDefinitions);
-
-				if (wallDefinitions != null)
+				foreach (var wall in wallDefinitions)
 				{
-					foreach (var wall in wallDefinitions)
-					{
-						Gizmos.color = Color.green;
-						Gizmos.DrawLine(wall.Begin, wall.Begin + (Vector3.up * wall.Height));
+					Gizmos.color = Color.green;
+					Gizmos.DrawLine(wall.Begin, wall.Begin + (Vector3.up * wall.Height));
 
-						Gizmos.color = wall.DoorId.HasValue ? Color.cyan : Color.magenta;
-						Gizmos.DrawLine(wall.Begin + (Vector3.up * 0.1f), wall.End + (Vector3.up * 0.1f));
+					Gizmos.color = wall.DoorIndex.HasValue ? Color.cyan : Color.magenta;
+					Gizmos.DrawLine(wall.Begin + (Vector3.up * 0.1f), wall.End + (Vector3.up * 0.1f));
 
-						Gizmos.color = Color.yellow;
-						Gizmos.DrawLine(wall.Begin, wall.Begin + wall.Normal);
-					}
+					Gizmos.color = Color.yellow;
+					Gizmos.DrawLine(wall.Begin, wall.Begin + wall.Normal);
 				}
 			}
 		}

@@ -63,6 +63,7 @@ namespace Lunra.Hothouse.Views
 			string prefabId,
 			ColliderCache[] roomColliders,
 			DoorCache[] doorAnchors,
+			WallCache[] walls,
 			string[] prefabTags
 		)
 		{
@@ -73,6 +74,7 @@ namespace Lunra.Hothouse.Views
 					prefabId,
 					roomColliders,
 					doorAnchors,
+					walls,
 					prefabTags
 				)	
 			);
@@ -91,6 +93,7 @@ namespace Lunra.Hothouse.Views
 					prefabId,
 					null,
 					doorAnchors,
+					null,
 					prefabTags
 				)	
 			);
@@ -102,6 +105,7 @@ namespace Lunra.Hothouse.Views
 			string prefabId,
 			ColliderCache[] roomColliders,
 			DoorCache[] doorAnchors,
+			WallCache[] walls,
 			string[] prefabTags
 		)
 		{
@@ -119,6 +123,7 @@ namespace Lunra.Hothouse.Views
 				prefabId,
 				roomColliders,
 				doorAnchors,
+				walls,
 				prefabTags
 			);
 
@@ -244,6 +249,28 @@ namespace Lunra.Hothouse.Views
 				);
 
 				model.PrefabTags.Value = instance.PrefabTags;
+
+				var walls = new WallCache[instance.Walls.Length];
+
+				for (var i = 0; i < walls.Length; i++)
+				{
+					var wall = new WallCache();
+					var wallInstance = instance.Walls[i];
+					
+					wall.Index = wallInstance.Index;
+					
+					if (wallInstance.DoorIndex == -1) wall.DoorIndex = null;
+					else wall.DoorIndex = wallInstance.DoorIndex;
+
+					wall.Begin = wallInstance.BeginAnchor.position;
+					wall.End = wallInstance.EndAnchor.position;
+					wall.Normal = wallInstance.BeginAnchor.forward;
+					wall.Height = wallInstance.Height;
+
+					walls[i] = wall;
+				}
+
+				model.Walls.Value = walls;
 				
 				rooms.Add(model);
 			}
@@ -292,6 +319,16 @@ namespace Lunra.Hothouse.Views
 				}
 				
 				doors.Add(model);
+			}
+
+			foreach (var room in rooms)
+			{
+				var walls = room.Walls.Value;
+				for (var i = 0; i < walls.Length; i++)
+				{
+					walls[i].Valid = !walls[i].DoorIndex.HasValue || !room.UnPluggedDoors.Value.Contains(walls[i].DoorIndex.Value);
+				}
+				room.Walls.Value = walls;
 			}
 
 			workspaceCache.Result.Rooms = rooms.ToArray();
