@@ -609,7 +609,7 @@ namespace Lunra.Hothouse.Views
 							Gizmos.DrawLine(result.Begin, result.Begin + (Vector3.up * result.Height));
 
 							Gizmos.color = result.DoorId.HasValue ? Color.cyan : Color.magenta;
-							Gizmos.DrawLine(result.Begin, result.End);
+							Gizmos.DrawLine(result.Begin + (Vector3.up * 0.1f), result.End + (Vector3.up * 0.1f));
 
 							Gizmos.color = Color.yellow;
 							Gizmos.DrawLine(result.Begin, result.Begin + result.Normal);
