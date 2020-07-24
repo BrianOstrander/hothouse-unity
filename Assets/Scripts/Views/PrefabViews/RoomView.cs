@@ -34,6 +34,7 @@ namespace Lunra.Hothouse.Views
 
 		[SerializeField] GameObject boundaryColliderRoot;
 		[SerializeField] DoorCache[] doorDefinitions = new DoorCache[0];
+		[SerializeField] WallCache[] wallDefinitions = new WallCache[0];
 		[SerializeField] ColliderCache[] boundaryColliders = new ColliderCache[0];
 		[SerializeField] RoomVisibilityLeaf[] visibilityLeaves = new RoomVisibilityLeaf[0];
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
@@ -59,6 +60,7 @@ namespace Lunra.Hothouse.Views
 		#region Reverse Bindings
 		public ColliderCache[] BoundaryColliders => boundaryColliders;
 		public DoorCache[] DoorDefinitions => doorDefinitions;
+		public WallCache[] WallDefinitions => wallDefinitions;
 		#endregion
 
 		public override void Cleanup()
@@ -206,6 +208,8 @@ namespace Lunra.Hothouse.Views
 			boundaryColliders = roomCollidersResult.ToArray();
 
 			visibilityLeaves = transform.GetDescendants<RoomVisibilityLeaf>().ToArray();
+
+			wallDefinitions = CalculateWallDefinitions();
 			
 			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 		}
@@ -240,9 +244,7 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
-		List<Action> gizmoCache;
-		
-		public WallCache[] GetWallBoundaries()
+		WallCache[] CalculateWallDefinitions()
 		{
 			const float MaximumHitDistance = 1000f;
 			
@@ -255,9 +257,6 @@ namespace Lunra.Hothouse.Views
 			}
 
 			var physicsScene = gameObject.scene.GetPhysicsScene();
-			
-			gizmoCache = new List<Action>();
-			gizmoCache.Add(() => Gizmos.color = Color.green);
 
 			var minimumHeight = float.MaxValue;
 			var maximumHeight = float.MinValue;
@@ -446,8 +445,6 @@ namespace Lunra.Hothouse.Views
 			}
 			else Debug.LogError("Unable to find " + Constants.GeometryRoot);
 
-			gizmoCache.Add(() => Gizmos.color = Color.green);
-
 			var wallPointsCachedForCleanup = wallPoints.ToArray();
 			wallPoints.Clear();
 
@@ -597,48 +594,7 @@ namespace Lunra.Hothouse.Views
 				
 				results.Add(result);
 			}
-
-			if (true)
-			{
-				foreach (var result in results)
-				{
-					gizmoCache.Add(
-						() =>
-						{
-							Gizmos.color = Color.green;
-							Gizmos.DrawLine(result.Begin, result.Begin + (Vector3.up * result.Height));
-
-							Gizmos.color = result.DoorId.HasValue ? Color.cyan : Color.magenta;
-							Gizmos.DrawLine(result.Begin + (Vector3.up * 0.1f), result.End + (Vector3.up * 0.1f));
-
-							Gizmos.color = Color.yellow;
-							Gizmos.DrawLine(result.Begin, result.Begin + result.Normal);
-						}
-					);
-				}
-			}
-			else
-			{	
-				foreach (var wallPoint in wallPoints)
-				{
-					gizmoCache.Add(
-						() =>
-						{
-							Gizmos.color = wallPoint.DoorIndex.HasValue ? Color.cyan : Color.green;
-							Gizmos.DrawLine(wallPoint.Position, wallPoint.Position + (Vector3.up * wallPoint.Height));
-				
-							foreach (var neighbor in wallPoints.Where(w => wallPoint.Neighbors.Contains(w.Index)))
-							{
-								Gizmos.DrawLine(wallPoint.Position, neighbor.Position);
-							}
-							
-							Gizmos.color = Color.yellow;
-							Gizmos.DrawLine(wallPoint.Position, wallPoint.Position + wallPoint.WallNormal);
-						}
-					);
-				}
-			}
-
+			
 			return results.ToArray();
 		}
 
@@ -654,11 +610,25 @@ namespace Lunra.Hothouse.Views
 		
 		void OnDrawGizmosSelected()
 		{
-			if (!Application.isPlaying) ViewGizmos.DrawDoorGizmo(doorDefinitions);
+			if (!Application.isPlaying)
+			{
+				ViewGizmos.DrawDoorGizmo(doorDefinitions);
 
-			if (gizmoCache == null) return;
+				if (wallDefinitions != null)
+				{
+					foreach (var wall in wallDefinitions)
+					{
+						Gizmos.color = Color.green;
+						Gizmos.DrawLine(wall.Begin, wall.Begin + (Vector3.up * wall.Height));
 
-			foreach (var giz in gizmoCache) giz();
+						Gizmos.color = wall.DoorId.HasValue ? Color.cyan : Color.magenta;
+						Gizmos.DrawLine(wall.Begin + (Vector3.up * 0.1f), wall.End + (Vector3.up * 0.1f));
+
+						Gizmos.color = Color.yellow;
+						Gizmos.DrawLine(wall.Begin, wall.Begin + wall.Normal);
+					}
+				}
+			}
 		}
 #endif
 	}
