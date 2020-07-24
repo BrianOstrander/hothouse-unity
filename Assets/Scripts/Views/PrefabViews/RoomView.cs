@@ -526,6 +526,30 @@ namespace Lunra.Hothouse.Views
 				
 				wallPoints.Add(wallPoint);
 			}
+			
+
+			var colliders = geometryRoot.GetDescendants<Collider>(c => !c.isTrigger);
+
+			if (colliders.Any())
+			{
+				wallPointsCachedForCleanup = wallPoints.ToArray();
+				wallPoints.Clear();
+				// Remove wall points inside collisions
+				foreach (var wallPoint in wallPointsCachedForCleanup)
+				{
+					var wallPointPositionToCheckInBounds = wallPoint.Position + (Vector3.up * 0.1f);
+					var collides = false;
+					foreach (var collider in colliders)
+					{
+						if (!collider.bounds.Contains(wallPointPositionToCheckInBounds)) continue;
+						
+						collides = collider.ClosestPointIsInside(wallPointPositionToCheckInBounds);
+						if (collides) break;
+					}
+
+					if (!collides) wallPoints.Add(wallPoint);
+				}
+			}
 
 			var wallPointTerminals = wallPoints
 				.Where(r => r.Neighbors.Length == 1)
@@ -569,11 +593,12 @@ namespace Lunra.Hothouse.Views
 				result.End = wallEnd.Position;
 				result.Normal = wallPointTerminal.WallNormal;
 				result.Height = wallPointTerminalMinimumHeight;
+				result.DoorId = wallPointTerminal.DoorIndex;
 				
 				results.Add(result);
 			}
 
-			if (false)
+			if (true)
 			{
 				foreach (var result in results)
 				{
