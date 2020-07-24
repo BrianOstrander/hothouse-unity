@@ -9,6 +9,7 @@ namespace Lunra.Hothouse.Models
 		public Vector3 Position;
 		public Vector3 WallNormal;
 		public float Height;
+		public int? DoorIndex;
 		public int[] Neighbors;
 	}
 }
