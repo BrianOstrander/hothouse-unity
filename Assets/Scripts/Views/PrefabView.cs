@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Lunra.StyxMvp;
 using UnityEngine;
@@ -6,8 +7,8 @@ namespace Lunra.Hothouse.Views
 {
 	public interface IPrefabView : IView
 	{
-		string PrefabId { get; }
-		string[] PrefabTags { get; }
+		string PrefabId { get; set; }
+		string[] PrefabTags { get; set; }
 		string RoomId { get; set; }
 		string ModelId { get; set; }
 	}
@@ -21,7 +22,7 @@ namespace Lunra.Hothouse.Views
 		public string PrefabId
 		{
 			get => prefabId;
-			protected set => prefabId = value;
+			set => prefabId = value;
 		}
 		
 		[SerializeField] string[] prefabTags = new string[0];
@@ -29,7 +30,7 @@ namespace Lunra.Hothouse.Views
 		public string[] PrefabTags
 		{
 			get => prefabTags ?? new string[0];
-			protected set => prefabTags = (value ?? new string[0]);
+			set => prefabTags = (value ?? new string[0]);
 		}
 
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null

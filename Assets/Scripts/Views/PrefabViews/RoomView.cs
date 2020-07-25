@@ -10,9 +10,9 @@ using UnityEditor;
 
 namespace Lunra.Hothouse.Views
 {
-	public class RoomView : PrefabView, IRoomIdView, IBoundaryView
+	public class RoomView : PrefabView, IRoomIdView, IBoundaryView, ICachableView
 	{
-		static class Constants
+		public static class Constants
 		{
 			
 			public const string FloorKeyword = "floor";
@@ -26,6 +26,14 @@ namespace Lunra.Hothouse.Views
 			
 			public const string UnexploredMaterialPath = "Materials/unexplored";
 			public const string DefaultFloorMaterialPath = "Materials/default_floors";
+
+			public static class Walls
+			{
+				public const float DistanceMaximum = 1f;
+				public const float HeightMaximum = 4f;
+				public const float HeightIncrements = HeightMaximum / 8f;
+				public const float CastIncrement = 0.5f;
+			}
 		}
 
 		#region Serialized
@@ -74,8 +82,6 @@ namespace Lunra.Hothouse.Views
 #if UNITY_EDITOR
 		public void CalculateCachedData()
 		{
-			Undo.RecordObject(this, "Calculate Cached Data");
-
 			PrefabId = gameObject.name;
 
 			var doorDefinitionsList = new List<DoorCache>();
@@ -210,8 +216,6 @@ namespace Lunra.Hothouse.Views
 			visibilityLeaves = transform.GetDescendants<RoomVisibilityLeaf>().ToArray();
 
 			wallDefinitions = CalculateWallDefinitions();
-			
-			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 		}
 
 		public void ApplyDefaultMaterials()
@@ -287,12 +291,6 @@ namespace Lunra.Hothouse.Views
 				else Debug.Log("Did not hit maximum collider, unexpected");
 			}
 
-			const float QueryRotationDelta = 360f / 8f;
-			const float FloorWallDistance = 1f;
-			const float WallHeightMaximum = 4f;
-			const float WallHeightIncrements = WallHeightMaximum / 8f;
-			const float WallCastIncrement = 0.5f;
-
 			var wallPoints = new List<WallPoint>();
 			
 			void addHit(
@@ -343,7 +341,7 @@ namespace Lunra.Hothouse.Views
 	
 					var currentOrigin = origin + (direction * distance);
 					hitFloor = tryHitFloor(currentOrigin, out var hit);
-					distance += WallCastIncrement;
+					distance += Constants.Walls.CastIncrement;
 					
 					if (hitFloor)
 					{
@@ -352,18 +350,18 @@ namespace Lunra.Hothouse.Views
 						var hasCheckedForDoor = false;
 						int? doorIndex = null;
 						
-						for (var h = WallHeightIncrements; h < WallHeightMaximum; h += WallHeightIncrements)
+						for (var h = Constants.Walls.HeightIncrements; h < Constants.Walls.HeightMaximum; h += Constants.Walls.HeightIncrements)
 						{
 							var didHitWall = physicsScene.Raycast(
 								currentOrigin + (Vector3.up * h),
 								-wallNormal,
 								out var hitWall,
-								FloorWallDistance * 1.1f,
+								Constants.Walls.DistanceMaximum * 1.1f,
 								layerMask: LayerMasks.DefaultAndFloor,
 								queryTriggerInteraction: QueryTriggerInteraction.Collide
 							);
 
-							if (!didHitWall || hitWall.distance < (FloorWallDistance * 0.9f))
+							if (!didHitWall || hitWall.distance < (Constants.Walls.DistanceMaximum * 0.9f))
 							{
 								break;
 							}
@@ -426,7 +424,7 @@ namespace Lunra.Hothouse.Views
 
 						// gizmoCache.Add(() => Gizmos.color = Color.green);
 						
-						var origin = vert + (normal * FloorWallDistance) + (Vector3.up * 0.1f);
+						var origin = vert + (normal * Constants.Walls.DistanceMaximum) + (Vector3.up * 0.1f);
 						
 						if (tryHitFloor(origin, out var hit))
 						{
@@ -451,16 +449,16 @@ namespace Lunra.Hothouse.Views
 			// Make cohesive walls that don't include points that should belong to other points.
 			foreach (var wallPoint in wallPointsCachedForCleanup)
 			{
-				if (wallPoints.Any(r => r.DoorIndex == wallPoint.DoorIndex && Vector3.Distance(r.Position, wallPoint.Position) < (WallCastIncrement * 0.5f))) continue;
+				if (wallPoints.Any(r => r.DoorIndex == wallPoint.DoorIndex && Vector3.Distance(r.Position, wallPoint.Position) < (Constants.Walls.CastIncrement * 0.5f))) continue;
 				
 				var allNearbyResults = wallPointsCachedForCleanup
-					.Where(r => Vector3.Distance(r.Position, wallPoint.Position) < (WallCastIncrement * 1.1f))
+					.Where(r => Vector3.Distance(r.Position, wallPoint.Position) < (Constants.Walls.CastIncrement * 1.1f))
 					.ToArray();
 				
 				var averageDot = allNearbyResults.Sum(r => Vector3.Dot(r.WallNormal, Vector3.forward)) / allNearbyResults.Length;
 
 				var selectedResult = allNearbyResults
-					.Where(r => r.DoorIndex == wallPoint.DoorIndex && Vector3.Distance(r.Position, wallPoint.Position) < (WallCastIncrement * 0.5f))
+					.Where(r => r.DoorIndex == wallPoint.DoorIndex && Vector3.Distance(r.Position, wallPoint.Position) < (Constants.Walls.CastIncrement * 0.5f))
 					.OrderBy(r => Mathf.Abs(averageDot - Vector3.Dot(r.WallNormal, Vector3.forward)))
 					.First();
 				
@@ -473,7 +471,7 @@ namespace Lunra.Hothouse.Views
 			// Remove points near the edges of doors and walls that overlap.
 			foreach (var wallPoint in wallPointsCachedForCleanup)
 			{
-				if (wallPointsCachedForCleanup.Any(r => r.Index != wallPoint.Index && r.DoorIndex != wallPoint.DoorIndex && Vector3.Distance(r.Position, wallPoint.Position) < (WallCastIncrement * 0.5f)))
+				if (wallPointsCachedForCleanup.Any(r => r.Index != wallPoint.Index && r.DoorIndex != wallPoint.DoorIndex && Vector3.Distance(r.Position, wallPoint.Position) < (Constants.Walls.CastIncrement * 0.5f)))
 				{
 					continue;
 				}
@@ -487,7 +485,7 @@ namespace Lunra.Hothouse.Views
 
 				var possibleNeighbors = wallPoints
 					.Where(r => r.DoorIndex == wallPoint.DoorIndex)
-					.Where(r => r.Index != wallPoint.Index && Vector3.Distance(r.Position, wallPoint.Position) < (WallCastIncrement * 1.1f))
+					.Where(r => r.Index != wallPoint.Index && Vector3.Distance(r.Position, wallPoint.Position) < (Constants.Walls.CastIncrement * 1.1f))
 					// .Where(r => Mathf.Approximately(r.Height, wallPoint.Height))
 					.Where(r => Mathf.Approximately(1f, Vector3.Dot(r.WallNormal, wallPoint.WallNormal)))
 					.OrderBy(r => Vector3.Distance(r.Position, wallPoint.Position))

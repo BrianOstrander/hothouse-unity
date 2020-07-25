@@ -1,75 +1,16 @@
-using System;
-using System.Collections;
 using System.Linq;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
 using Lunra.NumberDemon;
-using Unity.EditorCoroutines.Editor;
 using UnityEditor;
-using UnityEditor.Experimental.SceneManagement;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Lunra.Hothouse.Views.Editor
 {
 	[CustomEditor(typeof(RoomView))]
 	[CanEditMultipleObjects]
-	public class RoomViewEditor : UnityEditor.Editor
+	public class RoomViewEditor : BatchEditor<RoomView>
 	{
-		public override void OnInspectorGUI()
-		{
-			if (targets == null || targets.Length == 1)
-			{
-				base.OnInspectorGUI();
-				return;
-			}
-
-			GUIExtensions.PushEnabled(!Application.isPlaying);
-			{
-				if (GUILayout.Button("Batch Cache " + targets.Length + " items"))
-				{
-					var batchTargets = targets;
-					var batchResult = "Batch Caching " + batchTargets.Length + " Objects...";
-
-					void onProcess(Object batchTarget)
-					{
-						try
-						{
-							AssetDatabase.OpenAsset(batchTarget);
-							var stage = StageUtility.GetCurrentStage();
-							var typedTarget = stage.FindComponentOfType<RoomView>();
-
-							typedTarget.CalculateCachedData();
-
-							batchResult += $"\n\t{typedTarget.name} - {stage.assetPath}";
-						}
-						catch (Exception e)
-						{
-							batchResult += $"\n\t<color=red>{batchTarget?.name} ERROR";
-							batchResult += $"\n\t\tMessage: {e.Message}</color>";
-						}
-					}
-
-					EditorCoroutineUtility.StartCoroutine(
-						BatchProcess(
-							batchTargets,
-							onProcess,
-							() =>
-							{
-								StageUtility.GoBackToPreviousStage();
-								Selection.objects = batchTargets;
-					
-								Debug.Log(batchResult);								
-							}
-						),
-						this
-					);
-				}
-			}
-			GUIExtensions.PopEnabled();
-		}
-
 		void OnSceneGUI()
 		{
 			var typedTarget = target as RoomView;
@@ -88,7 +29,7 @@ namespace Lunra.Hothouse.Views.Editor
 				{
 					if (GUILayout.Button("Recache", GUILayout.ExpandWidth(false)))
 					{
-						typedTarget.CalculateCachedData();
+						TriggerCalculateCache(typedTarget);
 					}
 					
 					if (GUILayout.Button("Default Materials", GUILayout.ExpandWidth(false)))
@@ -176,21 +117,6 @@ namespace Lunra.Hothouse.Views.Editor
 				GUIExtensions.PopEnabled();
 			}
 			Handles.EndGUI();
-		}
-		
-		IEnumerator BatchProcess(
-			Object[] objects,
-			Action<Object> process,
-			Action done = null
-		)
-		{
-			foreach (var current in objects)
-			{
-				process(current);
-				yield return null;
-			}
-			
-			done?.Invoke();
 		}
 	}
 }

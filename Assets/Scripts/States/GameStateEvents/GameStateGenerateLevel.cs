@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using UnityEngine;
@@ -137,34 +138,152 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateWallDecorations(Action done)
 		{
-			foreach (var room in payload.Game.Rooms.AllActive)
+			var wallDecorations = App.V.GetPrefabs<DecorationView>()
+				.Where(v => v.View.PrefabTags.Contains(DecorationView.Constants.Tags.DecorationWall))
+				.Select(v => v.View)
+				.ToList();
+
+			var minimumWallDecorationWidth = wallDecorations
+				.OrderBy(v => v.ExtentsLeftRightWidth)
+				.Select(v => v.ExtentsLeftRightWidth)
+				.Min();
+			
+			var minimumWallDecorationHeight = wallDecorations
+				.OrderBy(v => v.ExtentHeight)
+				.Select(v => v.ExtentHeight)
+				.Min();
+			
+			List<DecorationView> getValidDecorations(float width, float height)
 			{
-				foreach (var wall in room.Walls.Value.Where(w => w.Valid))
-				{
-					Debug.DrawLine(
-						wall.Begin,
-						wall.End,
-						Color.green,
-						999f
-					);
-					
-					Debug.DrawLine(
-						wall.Begin,
-						wall.Begin + wall.Normal,
-						Color.yellow,
-						999f
-					);
-					
-					Debug.DrawLine(
-						wall.Begin,
-						wall.Begin + (Vector3.up * wall.Height),
-						Color.yellow,
-						999f
-					);
-				}
+				return wallDecorations
+					.Where(w => w.ExtentsLeftRightWidth <= width && w.ExtentHeight <= height)
+					.ToList();
 			}
 			
-			// done();
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				var remainingWalls = room.Walls.Value
+					.Where(w => w.Valid).ToList();
+
+				var decorationBudgetRemaining = generator.GetNextInteger(16, 32);
+
+				while (remainingWalls.Any() && 0 < decorationBudgetRemaining)
+				{
+					var wallIndex = generator.GetNextInteger(0, remainingWalls.Count);
+					var wall = remainingWalls[wallIndex];
+					remainingWalls.RemoveAt(wallIndex);
+
+					var wallWidth = Vector3.Distance(wall.Begin, wall.End);
+					
+					var validDecorations = getValidDecorations(
+						wallWidth,		
+						wall.Height
+					);
+
+					if (validDecorations.None()) continue;
+
+					var clutter = generator.NextFloat;
+
+					var segmentNormal = (wall.End - wall.Begin).normalized;
+					
+					var segmentWidthRemaining = wallWidth;
+					var segmentBegin = wall.Begin;
+
+					while (minimumWallDecorationWidth < segmentWidthRemaining)
+					{
+						var segmentDivision = generator.NextFloat;
+						var segmentWidthMaximum = segmentWidthRemaining - Mathf.Max(1f - segmentDivision, segmentDivision);
+						var segmentWidthMinimum = segmentWidthRemaining - segmentWidthMaximum;
+						
+						var segmentBeginMaximum = segmentBegin;
+						var segmentEndMaximum = segmentBegin + (segmentNormal * segmentWidthMaximum);
+
+						var segmentBeginMinimum = segmentEndMaximum;
+						// var segmentEndMinimum = segmentBeginMinimum + (segmentNormal * segmentWidthMinimum);
+
+						float segmentWidthChosen;
+						Vector3 segmentBeginChosen;
+						float segmentWidthNotChosen;
+						Vector3 segmentBeginNotChosen;
+
+						if (generator.NextBool)
+						{
+							segmentWidthChosen = segmentWidthMinimum;
+							segmentBeginChosen = segmentBeginMinimum;
+							segmentWidthNotChosen = segmentWidthMaximum;
+							segmentBeginNotChosen = segmentBeginMaximum;
+						}
+						else
+						{
+							segmentWidthChosen = segmentWidthMaximum;
+							segmentBeginChosen = segmentBeginMaximum;
+							segmentWidthNotChosen = segmentWidthMinimum;
+							segmentBeginNotChosen = segmentBeginMinimum;
+						}
+
+						// var segmentEndChosen = segmentBeginChosen + (segmentNormal * segmentWidthChosen);
+						
+						validDecorations = getValidDecorations(
+							segmentWidthChosen,
+							wall.Height
+						);
+
+						if (validDecorations.Any() && generator.NextFloat < clutter)
+						{
+							// var offset = generator.GetNextFloat(0f, 1f);
+							// var color = Color.red.NewH(generator.NextFloat);
+							// Debug.DrawLine(
+							// 	segmentBeginChosen + (Vector3.up * offset),
+							// 	segmentEndChosen + (Vector3.up * offset),
+							// 	color,
+							// 	999f
+							// );
+							//
+							// Debug.DrawLine(
+							// 	segmentBeginChosen,
+							// 	segmentBeginChosen + (Vector3.up * offset),
+							// 	color,
+							// 	999f
+							// );
+							//
+							// Debug.DrawLine(
+							// 	segmentEndChosen,
+							// 	segmentEndChosen + (Vector3.up * offset),
+							// 	color,
+							// 	999f
+							// );
+
+							var decorationPosition = segmentBeginChosen + (segmentNormal * (segmentWidthChosen * 0.5f));
+
+							var didHit = Physics.Raycast(
+								decorationPosition + (Vector3.up * (RoomView.Constants.Walls.HeightIncrements)),
+								-wall.Normal,
+								out var wallHit,
+								RoomView.Constants.Walls.DistanceMaximum * 2f,
+								LayerMasks.DefaultAndFloor
+							);
+
+							if (didHit)
+							{
+								decorationBudgetRemaining--;
+
+								payload.Game.Decorations.Activate(
+									generator.GetNextFrom(validDecorations).PrefabId,
+									room.RoomTransform.Id.Value,
+									wallHit.point.NewY(decorationPosition.y),
+									Quaternion.LookRotation(wall.Normal)
+								);
+							}
+							else Debug.LogWarning("Missed hitting a wall, unlikely but not impossible...");
+						}
+
+						segmentWidthRemaining = segmentWidthNotChosen;
+						segmentBegin = segmentBeginNotChosen;
+					}
+				}	
+			}
+			
+			done();
 		}
 		
 		void OnGenerateDebris(Action done)
