@@ -40,9 +40,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			App.S.PushBlocking(OnGenerateRooms);
 			App.S.PushBlocking(OnGenerateSpawn);
 			
-			App.S.PushBlocking(OnCalculateNavigation);
-			
 			App.S.PushBlocking(OnGenerateWallDecorations);
+			
+			App.S.PushBlocking(OnCalculateNavigation);
 			
 			App.S.PushBlocking(OnGenerateDebris);
 			
