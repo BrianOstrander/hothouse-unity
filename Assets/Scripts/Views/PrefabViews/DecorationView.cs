@@ -1,7 +1,6 @@
 using System;
+using System.Collections.Generic;
 using Lunra.Core;
-using Lunra.Hothouse.Models;
-using UnityEditor;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Views
@@ -18,6 +17,13 @@ namespace Lunra.Hothouse.Views
 			public static class Tags
 			{
 				public const string DecorationWall = "decoration_wall";
+
+				public static class Sources
+				{
+					public const string Prefix = "source_";
+					
+					public const string Fluid = Prefix + "fluid";
+				}
 			}
 
 			public static class Boundaries
@@ -26,10 +32,16 @@ namespace Lunra.Hothouse.Views
 			}
 		}
 
+		#region Serialized
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
 		[SerializeField] float extentsLeft;
 		[SerializeField] float extentsRight;
 		[SerializeField] float extentForward;
 		[SerializeField] float extentHeight;
+
+		[SerializeField] FluidDecorationLeaf[] fluids;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
+		#endregion
 		
 		public float ExtentsLeft => extentsLeft;
 		public float ExtentsRight => extentsRight;
@@ -37,6 +49,20 @@ namespace Lunra.Hothouse.Views
 		public float ExtentHeight => extentHeight;
 		public float ExtentsLeftRightWidth => ExtentsLeft + ExtentsRight;
 
+		public float FlowRate
+		{
+			set
+			{
+				foreach (var fluid in fluids) fluid.FlowRate = value;
+			}
+		}
+		
+		public override void Cleanup()
+		{
+			base.Cleanup();
+
+			FlowRate = 0f;
+		}
 
 #if UNITY_EDITOR
 		protected override void OnCalculateCachedData()
@@ -75,6 +101,8 @@ namespace Lunra.Hothouse.Views
 			extentsRight = Constants.Boundaries.MaximumBoundary - rightSideHit.distance;
 			extentForward = Constants.Boundaries.MaximumBoundary - forwardSideHit.distance;
 			extentHeight = Constants.Boundaries.MaximumBoundary - topSideHit.distance;
+
+			fluids = transform.GetDescendants<FluidDecorationLeaf>().ToArray();
 		}
 
 		void OnDrawGizmosSelected()

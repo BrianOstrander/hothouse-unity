@@ -141,7 +141,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var wallDecorations = App.V.GetPrefabs<DecorationView>()
 				.Where(v => v.View.PrefabTags.Contains(DecorationView.Constants.Tags.DecorationWall))
 				.Select(v => v.View)
-				.ToList();
+				.ToArray();
 
 			var minimumWallDecorationWidth = wallDecorations
 				.OrderBy(v => v.ExtentsLeftRightWidth)
@@ -153,19 +153,30 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				.Select(v => v.ExtentHeight)
 				.Min();
 			
-			List<DecorationView> getValidDecorations(float width, float height)
-			{
-				return wallDecorations
-					.Where(w => w.ExtentsLeftRightWidth <= width && w.ExtentHeight <= height)
-					.ToList();
-			}
+			var roomInfo = new DecorationRule.RoomInfo();
 			
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
+				roomInfo.ResetForRoom(room);
+
+				if (room.IsSpawn.Value)
+				{
+					roomInfo.DecorationTagsRequiredForRoom.Add(DecorationView.Constants.Tags.Sources.Fluid, 1);
+					
+					roomInfo.DecorationTagsBudgetForRoom.Add(DecorationView.Constants.Tags.Sources.Fluid, 1);
+				}
+				else
+				{
+					roomInfo.DecorationTagsBudgetForRoom.Add(DecorationView.Constants.Tags.Sources.Fluid, 2);
+				}
+				
 				var remainingWalls = room.Walls.Value
 					.Where(w => w.Valid).ToList();
 
-				var decorationBudgetRemaining = generator.GetNextInteger(16, 32);
+				var decorationBudgetRemaining = generator.GetNextInteger(
+					Mathf.Max(request.RoomWallDecorationsMinimum, roomInfo.DecorationTagsRequiredForRoom.Sum(kv => kv.Value)),
+					request.RoomWallDecorationsMaximum
+				);
 
 				while (remainingWalls.Any() && 0 < decorationBudgetRemaining)
 				{
@@ -175,14 +186,24 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 					var wallWidth = Vector3.Distance(wall.Begin, wall.End);
 					
-					var validDecorations = getValidDecorations(
-						wallWidth,		
+					roomInfo.ResetForWall(
+						wallWidth,
 						wall.Height
+					);
+					
+					var validDecorations = payload.Game.Decorations.GetValidViews(
+						wallDecorations,
+						roomInfo
 					);
 
 					if (validDecorations.None()) continue;
 
-					var clutter = generator.NextFloat;
+					var clutter = 1f;
+
+					if (decorationBudgetRemaining < request.RoomWallDecorationsMinimum)
+					{
+						clutter = Mathf.Max(request.RoomClutterMinimum, generator.NextFloat);
+					}
 
 					var segmentNormal = (wall.End - wall.Begin).normalized;
 					
@@ -221,17 +242,18 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 							segmentBeginNotChosen = segmentBeginMinimum;
 						}
 
-						// var segmentEndChosen = segmentBeginChosen + (segmentNormal * segmentWidthChosen);
+						roomInfo.WallSegmentWidth = segmentWidthChosen;
 						
-						validDecorations = getValidDecorations(
-							segmentWidthChosen,
-							wall.Height
+						validDecorations = payload.Game.Decorations.GetValidViews(
+							validDecorations,
+							roomInfo
 						);
 
 						if (validDecorations.Any() && generator.NextFloat < clutter)
 						{
 							// var offset = generator.GetNextFloat(0f, 1f);
 							// var color = Color.red.NewH(generator.NextFloat);
+							// var segmentEndChosen = segmentBeginChosen + (segmentNormal * segmentWidthChosen);
 							// Debug.DrawLine(
 							// 	segmentBeginChosen + (Vector3.up * offset),
 							// 	segmentEndChosen + (Vector3.up * offset),
@@ -267,9 +289,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 							{
 								decorationBudgetRemaining--;
 
+								var validDecorationsRequired = payload.Game.Decorations.GetValidViewsRequired(
+									validDecorations,
+									roomInfo
+								);
+
 								payload.Game.Decorations.Activate(
-									generator.GetNextFrom(validDecorations).PrefabId,
-									room.RoomTransform.Id.Value,
+									generator.GetNextFrom(validDecorationsRequired.Any() ? validDecorationsRequired : validDecorations).PrefabId,
+									roomInfo,
 									wallHit.point.NewY(decorationPosition.y),
 									Quaternion.LookRotation(wall.Normal)
 								);

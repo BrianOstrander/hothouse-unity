@@ -601,6 +601,7 @@ namespace Lunra.Hothouse.Views
 				
 			if (wallDefinitions != null)
 			{
+				Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
 				foreach (var wall in wallDefinitions)
 				{
 					Gizmos.color = Color.green;
