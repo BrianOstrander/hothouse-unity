@@ -1,16 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using UnityEngine;
+
 #if UNITY_EDITOR
-using System;
 using UnityEditor;
 #endif
 
 namespace Lunra.Hothouse.Views
 {
-	public class RoomView : PrefabView, IRoomIdView, IBoundaryView, ICachableView
+	public class RoomView : PrefabView, IRoomIdView, IBoundaryView
 	{
 		public static class Constants
 		{
@@ -80,7 +81,7 @@ namespace Lunra.Hothouse.Views
 		}
 
 #if UNITY_EDITOR
-		public void CalculateCachedData()
+		protected override void OnCalculateCachedData()
 		{
 			PrefabId = gameObject.name;
 
@@ -216,36 +217,6 @@ namespace Lunra.Hothouse.Views
 			visibilityLeaves = transform.GetDescendants<RoomVisibilityLeaf>().ToArray();
 
 			wallDefinitions = CalculateWallDefinitions();
-		}
-
-		public void ApplyDefaultMaterials()
-		{
-			
-			var defaultFloorMaterial = Resources.Load<Material>(Constants.DefaultFloorMaterialPath);
-			
-			if (defaultFloorMaterial == null) Debug.LogError("Unable to find material at resources path: "+Constants.DefaultFloorMaterialPath);
-			else
-			{
-				foreach (var floorElement in transform.GetDescendants<MeshRenderer>(d => !string.IsNullOrEmpty(d.name) && d.name.Contains(Constants.FloorKeyword)))
-				{
-					if (floorElement.sharedMaterial == defaultFloorMaterial) continue;
-					Undo.RecordObject(floorElement, "Apply Default Materials");
-					floorElement.sharedMaterial = defaultFloorMaterial;
-				}
-			}
-			PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject);
-		}
-
-		void NormalizeMeshColliders(Transform root)
-		{
-			foreach (var mesh in root.GetDescendants<MeshFilter>())
-			{
-				var meshCollider = mesh.GetComponent<MeshCollider>();
-				if (meshCollider == null) continue;
-				if (meshCollider.sharedMesh != null && meshCollider.sharedMesh == mesh.sharedMesh) continue;
-					
-				meshCollider.sharedMesh = mesh.sharedMesh;
-			}
 		}
 
 		WallCache[] CalculateWallDefinitions()
@@ -595,6 +566,24 @@ namespace Lunra.Hothouse.Views
 			
 			return results.ToArray();
 		}
+		
+		public void ApplyDefaultMaterials()
+		{
+			
+			var defaultFloorMaterial = Resources.Load<Material>(Constants.DefaultFloorMaterialPath);
+			
+			if (defaultFloorMaterial == null) Debug.LogError("Unable to find material at resources path: "+Constants.DefaultFloorMaterialPath);
+			else
+			{
+				foreach (var floorElement in transform.GetDescendants<MeshRenderer>(d => !string.IsNullOrEmpty(d.name) && d.name.Contains(Constants.FloorKeyword)))
+				{
+					if (floorElement.sharedMaterial == defaultFloorMaterial) continue;
+					Undo.RecordObject(floorElement, "Apply Default Materials");
+					floorElement.sharedMaterial = defaultFloorMaterial;
+				}
+			}
+			PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject);
+		}
 
 		public void ToggleSpawnTag()
 		{
@@ -605,7 +594,7 @@ namespace Lunra.Hothouse.Views
 			
 			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
 		}
-		
+
 		void OnDrawGizmosSelected()
 		{
 			if (!Application.isPlaying) ViewGizmos.DrawDoorGizmo(doorDefinitions);

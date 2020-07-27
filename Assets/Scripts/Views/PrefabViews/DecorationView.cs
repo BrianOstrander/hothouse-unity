@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public class DecorationView : PrefabView, ICachableView
+	public class DecorationView : PrefabView
 	{
 		public static class Constants
 		{
@@ -39,15 +39,7 @@ namespace Lunra.Hothouse.Views
 
 
 #if UNITY_EDITOR
-		[ContextMenu("Calculate Cached Data")]
-		public void MenuTriggerCalculateCachedData()
-		{
-			Undo.RecordObject(this, "Calculate Cached Data");
-			CalculateCachedData();
-			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
-		}
-		
-		public void CalculateCachedData()
+		protected override void OnCalculateCachedData()
 		{
 			var boundaryCollider = transform.GetFirstDescendantOrDefault<BoxCollider>(d => d.gameObject.name == Constants.Names.BoundaryCollider);
 

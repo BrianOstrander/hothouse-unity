@@ -62,24 +62,8 @@ namespace Lunra.Hothouse.Views
 		#endregion
 		
 #if UNITY_EDITOR
-		void OnDrawGizmosSelected()
+		protected override void OnCalculateCachedData()
 		{
-			ViewGizmos.DrawDoorGizmo(doorDefinitions);
-			
-			if (Application.isPlaying) return;
-			if (entrances == null) return;
-			
-			Gizmos.color = Color.yellow.NewA(0.33f);
-			foreach (var entrance in entrances)
-			{
-				Gizmos.DrawLine(entrance.position, entrance.position + (entrance.forward * 0.25f));
-			}
-		}
-		
-		public void CalculateCachedData()
-		{
-			Undo.RecordObject(this, "Calculate Cached Data");
-
 			PrefabId = gameObject.name;
 
 			var doorAnchor = transform.GetFirstDescendantOrDefault(d => d.gameObject.activeInHierarchy && !string.IsNullOrEmpty(d.name) && d.name.StartsWith(Constants.DoorFramePrefix));
@@ -165,8 +149,20 @@ namespace Lunra.Hothouse.Views
 			}
 
 			entrances = entrancesList.ToArray();
+		}
+		
+		void OnDrawGizmosSelected()
+		{
+			ViewGizmos.DrawDoorGizmo(doorDefinitions);
 			
-			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+			if (Application.isPlaying) return;
+			if (entrances == null) return;
+			
+			Gizmos.color = Color.yellow.NewA(0.33f);
+			foreach (var entrance in entrances)
+			{
+				Gizmos.DrawLine(entrance.position, entrance.position + (entrance.forward * 0.25f));
+			}
 		}
 #endif
 	}

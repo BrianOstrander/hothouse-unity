@@ -9,9 +9,9 @@ namespace Lunra.Hothouse.Views.Editor
 {
 	[CustomEditor(typeof(RoomView))]
 	[CanEditMultipleObjects]
-	public class RoomViewEditor : BatchEditor<RoomView>
+	public class RoomViewEditor : PrefabEditor<RoomView>
 	{
-		void OnSceneGUI()
+		protected override void DrawScene()
 		{
 			var typedTarget = target as RoomView;
 			if (typedTarget == null) return;
@@ -27,11 +27,6 @@ namespace Lunra.Hothouse.Views.Editor
 
 				GUIExtensions.PushEnabled(!Application.isPlaying);
 				{
-					if (GUILayout.Button("Recache", GUILayout.ExpandWidth(false)))
-					{
-						TriggerCalculateCache(typedTarget);
-					}
-					
 					if (GUILayout.Button("Default Materials", GUILayout.ExpandWidth(false)))
 					{
 						typedTarget.ApplyDefaultMaterials();

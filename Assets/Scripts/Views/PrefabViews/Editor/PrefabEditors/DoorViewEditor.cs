@@ -8,9 +8,11 @@ using UnityEngine;
 namespace Lunra.Hothouse.Views.Editor
 {
 	[CustomEditor(typeof(DoorView))]
-	public class DoorViewEditor : UnityEditor.Editor
+	[CanEditMultipleObjects]
+	public class DoorViewEditor : PrefabEditor<DoorView>
 	{
-		void OnSceneGUI()
+		// void OnSceneGUI()
+		protected override void DrawScene()
 		{
 			var typedTarget = target as DoorView;
 			if (typedTarget == null) return;
@@ -22,15 +24,6 @@ namespace Lunra.Hothouse.Views.Editor
 			
 			Handles.BeginGUI();
 			{
-				GUIExtensions.PushEnabled(!Application.isPlaying);
-				{
-					if (GUILayout.Button("Recache", GUILayout.ExpandWidth(false)))
-					{
-						typedTarget.CalculateCachedData();
-					}
-				}
-				GUIExtensions.PopEnabled();
-				
 				if (isGamePlaying && model == null)
 				{
 					GUIExtensions.PushColor(Color.red);

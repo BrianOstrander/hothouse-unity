@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Views.Editor
 {
 	[CustomEditor(typeof(DecorationView))]
 	[CanEditMultipleObjects]
-	public class DecorationViewEditor : BatchEditor<DecorationView>
+	public class DecorationViewEditor : PrefabEditor<DecorationView>
 	{
 	}
 }
