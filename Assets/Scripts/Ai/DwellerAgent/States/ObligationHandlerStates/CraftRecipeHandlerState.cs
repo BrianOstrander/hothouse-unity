@@ -36,7 +36,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			IRecipeModel workplace;
 
-			protected override float TimeoutDuration
+			protected override DayTime TimeoutDuration
 			{
 				get
 				{

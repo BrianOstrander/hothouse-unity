@@ -70,12 +70,9 @@ namespace Lunra.Hothouse.Views
 			LightFuelNormal = 0f;
 		}
 		
-		[ContextMenu("Calculate Collider Radius")]
-		void CalculateBoundingNavigationColliderRadius()
-		{
 #if UNITY_EDITOR
-			Undo.RecordObject(this, "Calculate Bounding Navigation");
-
+		protected override void OnCalculateCachedData()
+		{
 			navigationColliders = transform.GetDescendants<Collider>().ToArray();
 			
 			var result = 0f;
@@ -90,17 +87,10 @@ namespace Lunra.Hothouse.Views
 			navigationCollidersRadius = result;
 
 			entrances = transform.GetDescendants(d => d.name.ToLower().Contains("entrance")).ToArray();
-
-			PrefabUtility.RecordPrefabInstancePropertyModifications(this);
-
-			// Optional step in order to save the Scene changes permanently.
-			//EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
-#endif
 		}
 
 		void OnDrawGizmosSelected()
 		{
-#if UNITY_EDITOR
 			Handles.color = Color.yellow;
 			Handles.DrawWireDisc(
 				transform.position,
@@ -124,7 +114,7 @@ namespace Lunra.Hothouse.Views
 				Vector3.up,
 				childLight.range
 			);
-#endif
 		}
+#endif
 	}
 }

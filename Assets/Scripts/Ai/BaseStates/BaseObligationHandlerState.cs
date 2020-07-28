@@ -203,14 +203,14 @@ namespace Lunra.Hothouse.Ai
 			}
 			
 			protected abstract bool CanPopObligation { get; }
-			protected virtual float TimeoutDuration => 1f;
+			protected virtual DayTime TimeoutDuration => DayTime.FromHours(1f);
 
 			public override void Transition()
 			{
 				OnTimeoutBegin();
 				
 				SourceState.TimeoutInstance.ConfigureForInterval(
-					Interval.WithMaximum(TimeoutDuration),
+					TimeoutDuration,
 					delta =>
 					{
 						if (delta.IsDone)

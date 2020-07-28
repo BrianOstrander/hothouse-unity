@@ -22,13 +22,13 @@ namespace Lunra.Hothouse.Models
 				"Dry Stalks",
 				Inventory.FromEntry(Inventory.Types.StalkRaw, 1),
 				Inventory.FromEntry(Inventory.Types.StalkDry, 1),
-				4f
+				DayTime.FromHours(4f)
 			),
 			new Recipe(
 				"Stalk Pop",
 				Inventory.FromEntry(Inventory.Types.StalkSeed, 1),
 				Inventory.FromEntry(Inventory.Types.StalkPop, 1),
-				4f
+				DayTime.FromHours(4f)
 			),
 		};
 	}

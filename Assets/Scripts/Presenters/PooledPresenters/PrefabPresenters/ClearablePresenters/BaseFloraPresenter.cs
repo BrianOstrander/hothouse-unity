@@ -37,6 +37,8 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.Health.Current.Changed += OnFloraHealthCurrent;
 			Model.IsReproducing.Changed += OnFloraIsReproducing;
+			Model.AgeModifier.Bind(Model);
+			Model.ReproductionModifier.Bind(Model);
 		}
 
 		protected override void UnBind()
@@ -49,6 +51,8 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.Health.Current.Changed -= OnFloraHealthCurrent;
 			Model.IsReproducing.Changed -= OnFloraIsReproducing;
+			Model.AgeModifier.UnBind(Model);
+			Model.ReproductionModifier.UnBind(Model);
 		}
 
 		protected override Inventory CalculateItemDrops()
@@ -83,10 +87,14 @@ namespace Lunra.Hothouse.Presenters
 		void OnGameSimulationUpdate()
 		{
 			if (View.NotVisible) return;
-
+			
+			Model.Tags.Update(Game.SimulationTime.Value);
+			
 			if (!Model.Age.Value.IsDone)
 			{
-				Model.Age.Value = Model.Age.Value.Update(Game.SimulationTimeDelta);
+				Model.Age.Value = Model.Age.Value.Update(
+					Mathf.Max((1f + Model.AgeModifier.Sum.Value) * Game.SimulationTimeDelta, 0f)
+				);
 
 				if (View.Visible) View.Age = Model.Age.Value.Normalized;
 				
@@ -97,7 +105,9 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!Model.ReproductionElapsed.Value.IsDone)
 			{
-				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Game.SimulationTimeDelta);
+				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(
+					Mathf.Max((1f + Model.ReproductionModifier.Sum.Value) * Game.SimulationTimeDelta, 0f)
+				);
 				return;
 			}
 			

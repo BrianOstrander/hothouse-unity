@@ -11,9 +11,11 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{
 			Game.SimulationUpdate += GameSimulationUpdate;
+			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
 			Model.Inventory.All.Changed += OnGeneratorInventoryAll;
-			Model.Generator.Rate.Changed += OnGeneratorRate;
+			Model.Generator.Rate.Changed += OnGeneratorGeneratorRate;
+			Model.LightSensitive.LightLevel.Changed += OnGeneratorLightSensitiveLightLevel;
 			
 			base.Bind();
 		}
@@ -21,21 +23,39 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Game.SimulationUpdate -= GameSimulationUpdate;
+			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
 			Model.Inventory.All.Changed -= OnGeneratorInventoryAll;
-			Model.Generator.Rate.Changed -= OnGeneratorRate;
+			Model.Generator.Rate.Changed -= OnGeneratorGeneratorRate;
+			Model.LightSensitive.LightLevel.Changed -= OnGeneratorLightSensitiveLightLevel;
 		
 			base.UnBind();
 		}
 		
+		#region View Events
+		protected override void OnViewPrepare()
+		{
+			base.OnViewPrepare();
+
+			Model.RecalculateEntrances(Model.Transform.Position.Value);
+		}
+		#endregion
+		
 		#region GameModel Events
 		void GameSimulationUpdate() => Model.Generator.Update(Game, Model);
+		#endregion
+		
+		#region Navigation Events
+		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
+        {
+        	if (calculationState == NavigationMeshModel.CalculationStates.Completed) Model.RecalculateEntrances();
+        }
 		#endregion
 
 		#region GeneratorModel Events
 		void OnGeneratorInventoryAll(Inventory all) => Model.Generator.CalculateRate(Model);
 
-		void OnGeneratorRate(float rate)
+		void OnGeneratorGeneratorRate(float rate)
 		{
 			if (!Model.Parent.Value.TryGetInstance<DecorationModel>(Game, out var parent))
 			{
@@ -45,6 +65,8 @@ namespace Lunra.Hothouse.Presenters
 
 			parent.Flow.Value = rate;
 		}
+
+		void OnGeneratorLightSensitiveLightLevel(float lightLevel) => Model.RecalculateEntrances();
 		#endregion
 	}
 }

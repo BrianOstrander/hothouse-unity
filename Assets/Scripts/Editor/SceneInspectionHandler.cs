@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
-using Lunra.StyxMvp;
-using Lunra.StyxMvp.Services;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services;
 using Lunra.Hothouse.Services.Editor;
@@ -27,11 +25,14 @@ namespace Lunra.Hothouse.Editor
 			IfMaximumGreaterThanZero = 30,
 			IfNotFull = 40
 		}
+
+		const float SceneCameraRadius = 10f;
 		
 		static GUIStyle labelStyle;
 		
 		static List<string> obligationIdsHandled = new List<string>();
 		static GameState gameState;
+		static Vector3 sceneCameraPosition;
 		
 		static SceneInspectionHandler()
 		{
@@ -62,6 +63,8 @@ namespace Lunra.Hothouse.Editor
 				m => m.RoomTransform.Id.Value,
 				m => m.RevealDistance.Value
 			);
+
+			sceneCameraPosition = SceneView.currentDrawingSceneView.camera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, SceneCameraRadius));
 
 			bool isInInspectedRoom(IRoomTransformModel model)
 			{
@@ -130,7 +133,8 @@ namespace Lunra.Hothouse.Editor
 							}
 
 							append(connectionsResult);
-						}
+						},
+						ignoreRenderLimiting: true
 					);
 				}
 			}
@@ -226,7 +230,20 @@ namespace Lunra.Hothouse.Editor
 				DrawEntranceInspection(model);
 
 				DrawLabel(
-					model
+					model,
+					append =>
+					{
+						if (model.Age.Value.IsDone)
+						{
+							append($"Reproduction: \t{model.ReproductionElapsed.Value.Normalized:N2}");
+							append($"Reproduction {model.ReproductionModifier}");
+						}
+						else
+						{
+							append($"Age: \t{model.Age.Value.Normalized:N2}");
+							append($"Age {model.AgeModifier}");
+						}
+					}
 				);
 					
 				if (model.IsReproducing.Value) continue;
@@ -250,7 +267,8 @@ namespace Lunra.Hothouse.Editor
 						append("RoomId0: " + Model.ShortenId(model.RoomConnection.Value.RoomId0));
 						append("RoomId1: " + Model.ShortenId(model.RoomConnection.Value.RoomId1));
 						append("ConnectedRoomId: " + Model.ShortenId(model.LightSensitive.ConnectedRoomId.Value));		
-					}
+					},
+					ignoreRenderLimiting: true
 				);
 					
 				DrawSelectionButton(
@@ -306,13 +324,16 @@ namespace Lunra.Hothouse.Editor
 		static void DrawLabel(
 			IModel model,
 			Action<Action<string>> append = null,
-			string overrideName = null
+			string overrideName = null,
+			bool ignoreRenderLimiting = false
 		)
 		{
 			var position = Vector3.zero;
 
 			if (model is ITransformModel transformModel) position = transformModel.Transform.Position.Value;
 			else Debug.LogError("Trying to draw a label on a non-transform model");
+
+			if (!ignoreRenderLimiting && SceneCameraRadius < Vector3.Distance(position, sceneCameraPosition)) return;
 			
 			var result = "Id: " + model.ShortId;
 
@@ -470,6 +491,11 @@ namespace Lunra.Hothouse.Editor
 			if (model is IGoalActivityModel goalActivityModel)
 			{
 				appendResult(goalActivityModel.Activities.ToString());
+			}
+
+			if (model is ITagModel tagModel)
+			{
+				appendResult(tagModel.Tags.ToString());
 			}
 
 			append?.Invoke(appendResult);

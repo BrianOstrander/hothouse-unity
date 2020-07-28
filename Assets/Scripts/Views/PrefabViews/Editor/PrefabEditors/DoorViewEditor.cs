@@ -11,7 +11,6 @@ namespace Lunra.Hothouse.Views.Editor
 	[CanEditMultipleObjects]
 	public class DoorViewEditor : PrefabEditor<DoorView>
 	{
-		// void OnSceneGUI()
 		protected override void DrawScene()
 		{
 			var typedTarget = target as DoorView;

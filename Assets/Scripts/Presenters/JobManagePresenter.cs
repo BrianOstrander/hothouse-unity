@@ -80,6 +80,12 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			target.Job.Value = Jobs.None;
+
+			if (!target.Workplace.Value.IsNull)
+			{
+				if (target.Workplace.Value.TryGetInstance<IClaimOwnershipModel>(game, out var workplace)) workplace.Ownership.Remove(target);
+				target.Workplace.Value = InstanceId.Null();
+			}
 			
 			UpdateJobs();
 		}

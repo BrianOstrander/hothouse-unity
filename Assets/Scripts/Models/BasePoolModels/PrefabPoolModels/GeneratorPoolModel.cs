@@ -63,6 +63,9 @@ namespace Lunra.Hothouse.Models
 					)	
 				)
 			);
+
+			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
+			
 			model.Generator.Reset(
 				refillDurationRange,
 				expireDurationRange,

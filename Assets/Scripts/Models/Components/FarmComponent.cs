@@ -10,7 +10,7 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IFarmModel : IInventoryModel, IClaimOwnershipModel
+	public interface IFarmModel : IInventoryModel, IClaimOwnershipModel, IBoundaryModel
 	{
 		FarmComponent Farm { get; }
 	}
@@ -56,7 +56,7 @@ namespace Lunra.Hothouse.Models
 
 			var definition = game.Flora.Definitions.First(d => d.Seed == SelectedSeed);
 
-			var spacing = definition.ReproductionRadius.Minimum;
+			var spacing = definition.ReproductionRadius.Maximum;
 			var rowCount = Mathf.FloorToInt((Size.x / spacing));
 			var columnCount = Mathf.FloorToInt((Size.y / spacing));
 
@@ -83,6 +83,8 @@ namespace Lunra.Hothouse.Models
 					);
 
 					plotsList.Add(plot);
+					
+					if (Vector3.Distance(plot.Position, model.Transform.Position.Value) < model.Boundary.Radius.Value) continue;
 					
 					var isNavigable = NavigationUtility.CalculateNearestFloor(
 							plot.Position,

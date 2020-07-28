@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			Workplaces = new []
 			{
-				Game.Buildings.GetDefinitionType<StalkSeedSiloDefinition>()	
+				Game.Buildings.GetDefinitionType<StalkSeedSiloDefinition>()
 			};
 			
 			AddChildStates(
@@ -56,8 +56,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				new ToNavigateToWorkplace(),
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery(true),
-				new BalanceItemState.ToBalanceOnAvailableDistribution(true),
+				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
+				new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner),
 				
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);
@@ -121,7 +121,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				SourceState.state = States.Sowing;
 				
 				SourceState.timeoutInstance.ConfigureForInterval(
-					Interval.WithMaximum(1f),
+					DayTime.FromHours(1f),
 					delta =>
 					{
 						if (delta.IsDone)
@@ -139,6 +139,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 								);
 
 								flora.Farm.Value = InstanceId.New(SourceState.Workplace);
+								
+								flora.Tags.AddTag(Modifiers.Farm.Sown);
+								
 								selectedPlot.Flora = InstanceId.New(flora);
 							}
 							else

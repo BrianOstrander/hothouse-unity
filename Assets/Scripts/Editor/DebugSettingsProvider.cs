@@ -35,6 +35,7 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
 			public static GUIContent AutoRevealRooms = new GUIContent("Auto Reveal");
 			public static GUIContent OpenAllDoors = new GUIContent("Open All Doors");
+			public static GUIContent SimulationSpeedReset = new GUIContent("Reset");
 			public static GUIContent SimulationSpeedIncrease = new GUIContent("->", "Increase");
 			public static GUIContent SimulationSpeedDecrease = new GUIContent("<-", "Decrease");
 		}
@@ -62,6 +63,7 @@ namespace Lunra.Hothouse.Editor
 				Content.RevealAllRooms.text,
 				Content.AutoRevealRooms.text,
 				Content.OpenAllDoors.text,
+				Content.SimulationSpeedReset.text,
 				Content.SimulationSpeedIncrease.text,
 				Content.SimulationSpeedDecrease.text
 			};
@@ -111,6 +113,8 @@ namespace Lunra.Hothouse.Editor
 				GUILayout.BeginHorizontal();
 				{
 					GUILayout.Label("Simulation Speed", GUILayout.ExpandWidth(false));
+					GUILayout.Label($"{(isInGame ? game.SimulationMultiplier.Value : 0f):N0}x", GUILayout.Width(32f));
+					if (GUILayout.Button(Content.SimulationSpeedReset)) game.SimulationMultiplier.Value = 1f;
 					if (GUILayout.Button(Content.SimulationSpeedDecrease)) game.SimulationMultiplier.Value = Mathf.Max(0f, game.SimulationMultiplier.Value - 1f);
 					if (GUILayout.Button(Content.SimulationSpeedIncrease)) game.SimulationMultiplier.Value++;
 				}

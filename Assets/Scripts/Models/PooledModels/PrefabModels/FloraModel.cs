@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public class FloraModel : PrefabModel, IClearableModel
+	public class FloraModel : PrefabModel, IClearableModel, ITagModel
 	{
 		#region Serialized
 		[JsonProperty] string type;
@@ -20,10 +20,10 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] Interval age;
 		[JsonIgnore] public ListenerProperty<Interval> Age { get; }
-
+		
 		[JsonProperty] Interval reproductionElapsed;
 		[JsonIgnore] public ListenerProperty<Interval> ReproductionElapsed { get; }
-		
+
 		[JsonProperty] FloatRange reproductionRadius;
 		[JsonIgnore] public ListenerProperty<FloatRange> ReproductionRadius { get; }
 		
@@ -43,7 +43,11 @@ namespace Lunra.Hothouse.Models
 		public HealthComponent Health { get; } = new HealthComponent();
 		public ClearableComponent Clearable { get; } = new ClearableComponent();
 		public ObligationComponent Obligations { get; } = new ObligationComponent();
-		public EnterableComponent Enterable { get; } = new EnterableComponent(); 
+		public EnterableComponent Enterable { get; } = new EnterableComponent();
+		public TagComponent Tags { get; } = new TagComponent();
+		
+		public ModifierComponent AgeModifier { get; } = new ModifierComponent();
+		public ModifierComponent ReproductionModifier { get; } = new ModifierComponent();
 		#endregion
 		
 		#region Non Serialized

@@ -30,6 +30,7 @@ namespace Lunra.Hothouse.Views.Editor
 			
 			Handles.BeginGUI();
 			{
+				GUILayout.Space(-46f);
 				GUIExtensions.PushEnabled(!Application.isPlaying);
 				{
 					if (GUILayout.Button("Calculate Cached Data", DefaultWidth))

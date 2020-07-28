@@ -49,7 +49,7 @@ namespace Lunra.Hothouse.Ai.Seeker
 				new ToNavigateToTarget(),
 				new AgentTransitionFallthrough<TimeoutState<HuntState>, GameModel, SeekerModel>(
 					"NoTargetTimeout",
-					transition: () => timeoutState.ConfigureForInterval(Interval.WithRandomMaximum(3, 6f))
+					transition: () => timeoutState.ConfigureForInterval(DayTime.FromHours(8f))
 				)
 			);
 		}
@@ -97,7 +97,7 @@ namespace Lunra.Hothouse.Ai.Seeker
 			public override void Transition()
 			{
 				SourceState.timeoutState.ConfigureForInterval(
-					Interval.WithMaximum(0.1f),
+					DayTime.FromHours(1f),
 					OnTimeoutUpdate
 				);
 			}

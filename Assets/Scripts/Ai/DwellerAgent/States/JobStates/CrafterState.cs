@@ -31,8 +31,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new CraftRecipeHandlerState.ToObligationOnExistingObligation(),
 				new CraftRecipeHandlerState.ToObligationHandlerOnAvailableObligation(),
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery(true),
-				new BalanceItemState.ToBalanceOnAvailableDistribution(true),
+				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
+				new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner),
 				
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);

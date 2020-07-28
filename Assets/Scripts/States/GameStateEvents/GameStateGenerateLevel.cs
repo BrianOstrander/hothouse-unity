@@ -474,13 +474,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			var requiredJobs = new []
 			{
-				Jobs.Smoker,
+				// Jobs.Smoker,
+				Jobs.Stockpiler,
+				Jobs.Stockpiler,
 				// Jobs.Stockpiler,
-				// Jobs.Stockpiler,
-				// Jobs.Farmer,
-				// Jobs.Farmer,
-				// Jobs.Farmer,
-				// Jobs.Laborer
+				Jobs.Farmer,
+				// Jobs.Laborer,
+				Jobs.Laborer
 			};
 
 			for (var i = 0; i < requiredJobs.Length; i++)
@@ -559,12 +559,30 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			payload.Game.Buildings.Activate<BedrollDefinition>(
+			// payload.Game.Buildings.Activate<StalkSeedSiloDefinition>(
+			// 	spawn.Id.Value,
+			// 	position + (Vector3.right * 3f) + (Vector3.back * 3f),
+			// 	Quaternion.identity, 
+			// 	BuildingStates.Operating
+			// );
+
+			var flora0 = payload.Game.Flora.Activate<StalkDefinition>(
 				spawn.Id.Value,
 				position + (Vector3.right * 3f) + (Vector3.back * 3f),
-				Quaternion.identity, 
-				BuildingStates.Operating
+				Quaternion.identity
 			);
+			
+			flora0.Tags.AddTag(Modifiers.Farm.Sown);
+			flora0.Tags.AddTag(Modifiers.Farm.Tended);
+			flora0.Tags.AddTag(Modifiers.Water.Applied);
+			
+			var flora1 = payload.Game.Flora.Activate<StalkDefinition>(
+				spawn.Id.Value,
+				position + (Vector3.right * 3f) + (Vector3.back * 2f),
+				Quaternion.identity
+			);
+			
+			
 			
 			// payload.Game.Buildings.Activate<BedrollDefinition>(
 			// 	spawn.Id.Value,

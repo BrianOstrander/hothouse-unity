@@ -7,13 +7,13 @@ namespace Lunra.Hothouse.Models
 		public string Name { get; }
 		public Inventory InputItems { get; }
 		public Inventory OutputItems { get; }
-		public float Duration { get; }
+		public DayTime Duration { get; }
 
 		public Recipe(
 			string name,
 			Inventory inputItems,
 			Inventory outputItems,
-			float duration
+			DayTime duration
 		)
 		{
 			Name = name;
@@ -39,9 +39,23 @@ namespace Lunra.Hothouse.Models
 			{
 				result += "\n\t\t" + entry.Type + "\t" + entry.Weight;
 			}
-			
-			result += "\n\tDuration: "+Duration.ToString("N2");
 
+			result += "\n\tDuration: ";
+
+			if (Duration.Day < 0)
+			{
+				Duration.GetYearDayHourMinutePadded(
+					out _,
+					out _,
+					out _,
+					out var hours,
+					out var minutes
+				);
+
+				result += $"{hours} : {minutes}";
+			}
+			else result += Duration.ToString();
+			
 			return result;
 		}
 	}

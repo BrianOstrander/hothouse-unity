@@ -71,8 +71,8 @@ namespace Lunra.Hothouse.Services
 		{
 			var game = App.M.Create<GameModel>(App.M.CreateUniqueId());
 
-			game.DesireDamageMultiplier.Value = 1f;
-			game.SimulationTimeConversion.Value = 1f / 10f;
+			game.DesireDamageMultiplier.Value = 0f;
+			game.SimulationTimeConversion.Value = 1f / 120f; // 1f / [ REAL SECONDS PER DAY HERE ]
 			
 			game.Effects.IsEnabled.Value = true;
 			game.Toolbar.IsEnabled.Value = true;

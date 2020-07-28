@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Hothouse.Ai.Dweller;
@@ -25,7 +26,7 @@ namespace Lunra.Hothouse.Ai
 
 		public abstract class ToBalanceOnAvailable : AgentTransition<S, BalanceItemState<S>, GameModel, DwellerModel>
 		{
-			protected class EnterableCache
+			public class EnterableCache
 			{
 				public IEnterableModel Model;
 				public Navigation.Result NavigationResult;
@@ -33,7 +34,7 @@ namespace Lunra.Hothouse.Ai
 				public bool IsOwner;
 			}
 
-			protected class InventoryCache
+			public class InventoryCache
 			{
 				public EnterableCache Enterable;
 				public InventoryComponent Inventory;
@@ -51,13 +52,15 @@ namespace Lunra.Hothouse.Ai
 				Distribution = 20
 			}
 
+			public delegate bool ValidateSourceAndDestination(InventoryCache source, InventoryCache destination);
+
 			protected abstract Actions CurrentAction { get; }
 			
-			protected bool RequiresOwnership { get; }
+			protected ValidateSourceAndDestination Validate { get; }
 			protected List<EnterableCache> EnterablesCached = new List<EnterableCache>();
 			protected List<InventoryCache> InventoriesCached = new List<InventoryCache>();
 
-			public ToBalanceOnAvailable(bool requiresOwnership = false) => RequiresOwnership = requiresOwnership;
+			public ToBalanceOnAvailable(ValidateSourceAndDestination validate = null) => Validate = validate ?? ((s, d) => true);
 			
 			public override bool IsTriggered()
 			{
@@ -83,7 +86,7 @@ namespace Lunra.Hothouse.Ai
 					var enterableEntry = new EnterableCache();
 					enterableEntry.Model = parentTyped;
 
-					if (RequiresOwnership && parent is IClaimOwnershipModel parentOwnershipTyped)
+					if (parent is IClaimOwnershipModel parentOwnershipTyped)
 					{
 						enterableEntry.IsOwner = parentOwnershipTyped.Ownership.Contains(Agent); 
 					}
@@ -181,7 +184,7 @@ namespace Lunra.Hothouse.Ai
 			InventoryCache deliverySource;
 			Inventory items;
 
-			public ToBalanceOnAvailableDelivery(bool requiresOwnership = false) : base(requiresOwnership) {}
+			public ToBalanceOnAvailableDelivery(ValidateSourceAndDestination validate = null) : base(validate) {}
 
 			protected override bool IsActionTriggered()
 			{
@@ -191,8 +194,6 @@ namespace Lunra.Hothouse.Ai
 
 				foreach (var possibleDeliveryDestination in possibleDeliveryDestinations)
 				{
-					if (RequiresOwnership && !possibleDeliveryDestination.Enterable.IsOwner) continue;
-					
 					if (!GetIsNavigable(possibleDeliveryDestination.Enterable)) continue;
 
 					var possibleDeliverySources = InventoriesCached
@@ -202,6 +203,7 @@ namespace Lunra.Hothouse.Ai
 					foreach (var possibleDeliverySource in possibleDeliverySources)
 					{
 						if (possibleDeliveryDestination.Inventory.Id == possibleDeliverySource.Inventory.Id) continue;
+						if (!Validate(possibleDeliverySource, possibleDeliveryDestination)) continue;
 						if (!GetIsNavigable(possibleDeliverySource.Enterable)) continue;
 
 						var isIntersecting = possibleDeliveryDestination.Inventory.Desired.Value.Delivery.Intersects(
@@ -240,7 +242,7 @@ namespace Lunra.Hothouse.Ai
 			InventoryCache distributionDestination;
 			Inventory items;
 			
-			public ToBalanceOnAvailableDistribution(bool requiresOwnership = false) : base(requiresOwnership) {}
+			public ToBalanceOnAvailableDistribution(ValidateSourceAndDestination validate = null) : base(validate) {}
 			
 			protected override bool IsActionTriggered()
 			{
@@ -250,8 +252,6 @@ namespace Lunra.Hothouse.Ai
 
 				foreach (var possibleDistributionSource in possibleDistributionSources)
 				{
-					if (RequiresOwnership && !possibleDistributionSource.Enterable.IsOwner) continue;
-					
 					if (!GetIsNavigable(possibleDistributionSource.Enterable)) continue;
 
 					var possibleDistributionDestinations = InventoriesCached
@@ -261,6 +261,7 @@ namespace Lunra.Hothouse.Ai
 					foreach (var possibleDistributionDestination in possibleDistributionDestinations)
 					{
 						if (possibleDistributionSource.Inventory.Id == possibleDistributionDestination.Inventory.Id) continue;
+						if (!Validate(possibleDistributionSource, possibleDistributionDestination)) continue;
 						if (!GetIsNavigable(possibleDistributionDestination.Enterable)) continue;
 
 						var isIntersecting = possibleDistributionSource.Inventory.Desired.Value.Distribution

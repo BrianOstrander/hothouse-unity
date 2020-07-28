@@ -125,7 +125,7 @@ namespace Lunra.Hothouse.Ai
 
 				SourceState.cache.Target.Trigger(SourceState.cache.CurrentObligation.Obligation, Agent);
 				
-				SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(1f)); // TODO: Don't hardcode this...
+				SourceState.timeoutState.ConfigureForInterval(DayTime.FromHours(1f)); // TODO: Don't hardcode this...
 			}
 		}
 

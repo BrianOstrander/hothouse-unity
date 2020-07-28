@@ -15,8 +15,8 @@ namespace Lunra.Hothouse.Models
 		protected GameModel Game { get; private set; }
 		protected Demon Generator { get; private set; }
 		
-		public virtual FloatRange AgeDuration => new FloatRange(60f * 5f, 60f * 7f);
-		public virtual FloatRange ReproductionDuration => new FloatRange(60f * 5f, 60f * 7f);
+		public virtual FloatRange AgeDuration => new FloatRange(7f, 10f);
+		public virtual FloatRange ReproductionDuration => new FloatRange(7f, 14f);
 		public virtual FloatRange ReproductionRadius => new FloatRange(0.5f, 1f);
 		public virtual int ReproductionFailureLimit => 40;
 		public virtual float HealthMaximum => 100f;
@@ -30,6 +30,20 @@ namespace Lunra.Hothouse.Models
 		public virtual int CountPerClusterMaximum => 60;
 		public virtual bool RequiredInSpawn => true;
 		public virtual bool AllowedInSpawn => true;
+
+		public virtual ModifierDefinition[] AgeModifiers => new[]
+		{
+			ModifierDefinition.NoStacking(Modifiers.Farm.Sown, 1f),
+			ModifierDefinition.NoStacking(Modifiers.Farm.Tended, 2f),
+			ModifierDefinition.NoStacking(Modifiers.Water.Applied, 4f),
+		};
+		
+		public virtual ModifierDefinition[] ReproductionModifiers => new[]
+		{
+			ModifierDefinition.NoStacking(Modifiers.Farm.Sown, -0.25f),
+			ModifierDefinition.NoStacking(Modifiers.Farm.Tended, -0.5f),
+			ModifierDefinition.NoStacking(Modifiers.Water.Applied, 2f),
+		};
 
 		public void Initialize(
 			GameModel game,
@@ -73,6 +87,10 @@ namespace Lunra.Hothouse.Models
 					e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
 				)
 			);
+			model.Tags.Reset();
+			
+			model.AgeModifier.Reset(AgeModifiers);
+			model.ReproductionModifier.Reset(ReproductionModifiers);
 		}
 
 		public virtual void Instantiate(FloraModel model) => new FloraPresenter(Game, model);
