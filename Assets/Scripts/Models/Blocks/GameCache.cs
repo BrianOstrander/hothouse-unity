@@ -37,6 +37,7 @@ namespace Lunra.Hothouse.Models
 		public string[] UniqueObligationsAvailable { get; private set; }
 		public bool AnyObligationsAvailable { get; private set; }
 		public int LowRationThreshold { get; private set; }
+		public GoalSnapshot AverageGoals { get; private set; }
 		public ReadOnlyDictionary<Condition.Types, bool> Conditions { get; private set; }
 
 		public GameCache Calculate(GameModel game)
@@ -44,8 +45,6 @@ namespace Lunra.Hothouse.Models
 			var result = Default();
 
 			result.LastUpdated = game.PlaytimeElapsed.Value;
-
-			result.Population = game.Dwellers.AllActive.Length;
 
 			var globalInventoryAll = Inventory.Empty;
 			var globalInventoryAllCapacity = Inventory.Empty;
@@ -92,9 +91,68 @@ namespace Lunra.Hothouse.Models
 				.ToArray();
 
 			result.AnyObligationsAvailable = UniqueObligationsAvailable.Any();
-			
-			result.LowRationThreshold = game.Dwellers.AllActive.Sum(d => d.LowRationThreshold.Value);
 
+			GoalResult getGoalResult((float Insistence, float Discontent, float DiscontentRangeMinimum, float DiscontentRangeMaximum) value)
+			{
+				return new GoalResult(
+					value.Insistence,
+					value.Discontent,
+					new FloatRange(value.DiscontentRangeMinimum, value.DiscontentRangeMaximum)
+				);
+			}
+			
+			(float Insistence, float Discontent, float DiscontentRangeMinimum, float DiscontentRangeMaximum) goalsTotal = default;
+			var goals = new Dictionary<Motives, (float Insistence, float Discontent, float DiscontentRangeMinimum, float DiscontentRangeMaximum)>();
+
+			foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None)) goals.Add(motive, default);
+
+			foreach (var dweller in game.Dwellers.AllActive)
+			{
+				result.LowRationThreshold += dweller.LowRationThreshold.Value;
+				result.Population++;
+				
+				goalsTotal.Insistence += dweller.Goals.Current.Value.Total.Insistence;
+				goalsTotal.Discontent += dweller.Goals.Current.Value.Total.Discontent;
+				goalsTotal.DiscontentRangeMinimum += dweller.Goals.Current.Value.Total.DiscontentRange.Minimum;
+				goalsTotal.DiscontentRangeMaximum += dweller.Goals.Current.Value.Total.DiscontentRange.Maximum;
+
+				foreach (var value in dweller.Goals.Current.Value.Values)
+				{
+					var goal = goals[value.Motive];
+					
+					goal.Insistence += value.Value.Insistence;
+					goal.Discontent += value.Value.Discontent;
+					goal.DiscontentRangeMinimum += value.Value.DiscontentRange.Minimum;
+					goal.DiscontentRangeMaximum += value.Value.DiscontentRange.Maximum;
+
+					goals[value.Motive] = goal;
+				}
+			}
+			
+			goalsTotal.Insistence /= result.Population;
+			goalsTotal.Discontent /= result.Population;
+			goalsTotal.DiscontentRangeMinimum /= result.Population;
+			goalsTotal.DiscontentRangeMaximum /= result.Population;
+
+			foreach (var motive in goals.Keys.ToArray())
+			{
+				var goal = goals[motive];
+				
+				goal.Insistence /= result.Population;
+				goal.Discontent /= result.Population;
+				goal.DiscontentRangeMinimum /= result.Population;
+				goal.DiscontentRangeMaximum /= result.Population;
+
+				goals[motive] = goal;
+			}
+			
+			result.AverageGoals = new GoalSnapshot(
+				getGoalResult(goalsTotal),
+				goals
+					.Select(g => (g.Key, getGoalResult(g.Value)))
+					.ToArray()
+			);
+			
 			result.Conditions = EnumExtensions
 				.GetValues(Condition.Types.Unknown)
 				.ToReadonlyDictionary(

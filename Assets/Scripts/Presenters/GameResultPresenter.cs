@@ -65,7 +65,7 @@ namespace Lunra.Hothouse.Presenters
 			if (!game.IsSimulating.Value) return;
 			if (all.Active.Any()) return;
 
-			Show("All your dwellers died!");
+			Show("All your dwellers died!" + GetTimeSurvived());
 		}
 
 		void OnLastLightUpdate(LightDelta lightUpdate)
@@ -73,9 +73,13 @@ namespace Lunra.Hothouse.Presenters
 			if (!game.IsSimulating.Value) return;
 			if (lightUpdate.State != LightDelta.States.Calculated) return;
 			if (game.GetLightsActive().Any(l => l.Light.IsLightActive())) return;
-			
-			Show("Plunged into darkness, your fires went out!");
+
+			Show("Plunged into darkness, your fires went out!" + GetTimeSurvived());
 		}
+		#endregion
+
+		#region MyRegion
+		string GetTimeSurvived() => "\n" + game.SimulationTime.Value;
 		#endregion
 	}
 }

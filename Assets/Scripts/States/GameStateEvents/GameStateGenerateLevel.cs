@@ -529,7 +529,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				Inventory.Types.StalkSeed,
 				Inventory.Types.StalkDry,
-				Inventory.Types.StalkPop
+				// Inventory.Types.StalkPop
 			};
 			
 			wagon.Inventory.Add(

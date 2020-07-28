@@ -48,7 +48,9 @@ namespace Lunra.Hothouse.Presenters
 
 			var result = string.Empty;
 
-			result += "Population: " + cache.Population + "\n";
+			result += game.SimulationTime.Value.ToString();
+			
+			result += "\nPopulation: " + cache.Population + "\n";
 
 			foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
 			{
@@ -69,6 +71,28 @@ namespace Lunra.Hothouse.Presenters
 				}
 				
 				result += StringExtensions.Wrap(type + ": " + count + " / " + maximum + "\n", "<color="+color+">", "</color>");
+			}
+			
+			void appendDiscontent(string title, float discontentNormal)
+			{
+				discontentNormal = 1f - discontentNormal;
+				
+				var color = "green";
+
+				if (discontentNormal < 0.33f) color = "red";
+				else if (discontentNormal < 0.66f) color = "yellow";
+
+				result += $"\n<color={color}>{title}: {discontentNormal:N2}</color>";
+			}
+
+			if (cache.AverageGoals.Values != null)
+			{
+				appendDiscontent("Total", cache.AverageGoals.Total.DiscontentNormal);
+
+				foreach (var goal in cache.AverageGoals.Values)
+				{
+					appendDiscontent(goal.Motive.ToString(), goal.Value.DiscontentNormal);
+				}
 			}
 
 			result += "\n";
