@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
@@ -15,6 +16,7 @@ namespace Lunra.Hothouse.Models
 		Dictionary<Type, BuildingDefinition> definitions = new Dictionary<Type, BuildingDefinition>();
 		
 		public BuildingDefinition[] Definitions { get; private set; }
+		public ReadOnlyDictionary<Jobs, string[]> Workplaces { get; private set; }
 		
 		public override void Initialize(GameModel game)
 		{
@@ -44,6 +46,21 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			Definitions = definitions.Values.ToArray();
+
+			var workplaces = new Dictionary<Jobs, string[]>();
+
+			foreach (var job in EnumExtensions.GetValues(Jobs.Unknown))
+			{
+				workplaces.Add(
+					job,
+					Definitions
+						.Where(d => d.WorkplaceForJobs.Contains(job))
+						.Select(d => d.Type)
+						.ToArray()
+				);
+			}
+
+			Workplaces = new ReadOnlyDictionary<Jobs, string[]>(workplaces);
 			
 			Initialize(
 				m => Definitions.First(d => d.Type == m.Type.Value).Instantiate(m)

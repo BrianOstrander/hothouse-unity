@@ -28,14 +28,18 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		protected abstract Jobs Job { get; }
 
-		// TODO: This is backwards, buildings should define their workplaces...
-		protected virtual string[] Workplaces { get; set; } = EmptyWorkplaces;
+		protected string[] Workplaces { get; private set; } = EmptyWorkplaces;
 
 		protected bool IsCurrentJob => Job == Agent.Job.Value;
 
 		protected BuildingModel Workplace { get; private set; }
 		WorkplaceNavigationCache workplaceNavigation;
-		
+
+		public override void OnInitialize()
+		{
+			if (Game.Buildings.Workplaces.TryGetValue(Job, out var workplaces)) Workplaces = workplaces;
+		}
+
 		public override void Begin()
 		{
 			workplaceNavigation = null;

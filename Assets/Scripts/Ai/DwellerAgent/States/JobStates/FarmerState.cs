@@ -28,10 +28,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		
 		public override void OnInitialize()
 		{
-			Workplaces = new []
-			{
-				Game.Buildings.GetDefinitionType<StalkSeedSiloDefinition>()
-			};
+			base.OnInitialize();
 			
 			AddChildStates(
 				new CleanupState(),

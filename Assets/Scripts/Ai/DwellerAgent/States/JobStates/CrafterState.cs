@@ -9,7 +9,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 		where S1 : CrafterState<S0, S1>
 	{
 		public override void OnInitialize()
-		{	
+		{
+			base.OnInitialize();
+
 			AddChildStates(
 				new CleanupState(),
 				new InventoryRequestState(),

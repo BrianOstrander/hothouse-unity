@@ -33,5 +33,7 @@ namespace Lunra.Hothouse.Models
 				Inventory.FromEntry(Inventory.Types.StalkPop, 1)
 			),
 		};
+		
+		public override Jobs[] WorkplaceForJobs => new[] {Jobs.Stockpiler};
 	}
 }

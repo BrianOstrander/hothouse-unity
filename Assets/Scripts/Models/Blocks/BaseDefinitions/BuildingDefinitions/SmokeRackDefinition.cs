@@ -31,5 +31,6 @@ namespace Lunra.Hothouse.Models
 				DayTime.FromHours(4f)
 			),
 		};
+		public override Jobs[] WorkplaceForJobs => new[] {Jobs.Smoker};
 	}
 }

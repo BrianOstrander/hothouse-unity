@@ -16,8 +16,11 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		[JsonProperty] InstanceId[] claimers = new InstanceId[0];
 		[JsonIgnore] public ListenerProperty<InstanceId[]> Claimers { get; }
+		
 		[JsonProperty] int maximumClaimers;
 		[JsonIgnore] public ListenerProperty<int> MaximumClaimers { get; }
+		
+		[JsonProperty] public Jobs[] JobRequirements { get; private set; } = new Jobs[0];
 		#endregion
 
 		#region Non Serialized
@@ -55,10 +58,14 @@ namespace Lunra.Hothouse.Models
 			MaximumClaimers = new ListenerProperty<int>(value => maximumClaimers = value, () => maximumClaimers);
 		}
 		
-		public void Reset(int maximumClaimers)
+		public void Reset(
+			int maximumClaimers,
+			params Jobs[] jobRequirements
+		)
 		{
 			Claimers.Value = new InstanceId[0];
 			MaximumClaimers.Value = maximumClaimers;
+			JobRequirements = jobRequirements;
 		}
 
 		public override string ToString()

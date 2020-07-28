@@ -19,6 +19,5 @@ namespace Lunra.Hothouse.Models
 			Jobs.Stockpiler,
 			Jobs.Laborer
 		);
-
 	}
 }

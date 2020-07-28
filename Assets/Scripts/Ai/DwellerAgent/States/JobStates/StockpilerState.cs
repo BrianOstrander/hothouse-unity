@@ -13,12 +13,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void OnInitialize()
 		{
-			Workplaces = new []
-			{
-				Game.Buildings.GetDefinitionType<DepotSmallDefinition>(),
-				Game.Buildings.GetDefinitionType<StartingWagonDefinition>(),
-				Game.Buildings.GetDefinitionType<TankSmallDefinition>()
-			};
+			base.OnInitialize();
 			
 			AddChildStates(
 				new CleanupState(),

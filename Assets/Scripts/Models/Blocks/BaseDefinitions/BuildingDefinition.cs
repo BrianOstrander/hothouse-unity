@@ -30,6 +30,8 @@ namespace Lunra.Hothouse.Models
 		
 		public virtual GoalActivity[] Activities => new GoalActivity[0];
 		
+		public virtual Jobs[] WorkplaceForJobs => new Jobs[0];
+		
 		public virtual void Reset(
 			BuildingModel model,
 			BuildingStates state
@@ -48,7 +50,10 @@ namespace Lunra.Hothouse.Models
 			);
 			model.LightSensitive.Reset();
 			
-			model.Ownership.Reset(MaximumOwners);
+			model.Ownership.Reset(
+				MaximumOwners,
+				WorkplaceForJobs
+			);
 			
 			model.Inventory.Reset(
 				DefaultInventoryPermission,

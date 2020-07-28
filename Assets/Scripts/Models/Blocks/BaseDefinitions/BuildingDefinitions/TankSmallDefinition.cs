@@ -12,5 +12,7 @@ namespace Lunra.Hothouse.Models
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 		
 		public override int MaximumOwners => 1;
+
+		public override Jobs[] WorkplaceForJobs => new[] {Jobs.Stockpiler};
 	}
 }

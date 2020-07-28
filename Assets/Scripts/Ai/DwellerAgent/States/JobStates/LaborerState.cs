@@ -12,6 +12,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void OnInitialize()
 		{
+			base.OnInitialize();
+			
 			AddChildStates(
 				new CleanupState(),
 				new DestroyMeleeHandlerState(),
