@@ -1,6 +1,6 @@
 namespace Lunra.Hothouse.Models
 {
-	public static class Modifiers
+	public static class Tags
 	{
 		public static class Farm
 		{

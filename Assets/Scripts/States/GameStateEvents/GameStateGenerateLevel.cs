@@ -559,28 +559,28 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			// payload.Game.Buildings.Activate<StalkSeedSiloDefinition>(
-			// 	spawn.Id.Value,
-			// 	position + (Vector3.right * 3f) + (Vector3.back * 3f),
-			// 	Quaternion.identity, 
-			// 	BuildingStates.Operating
-			// );
-
-			var flora0 = payload.Game.Flora.Activate<StalkDefinition>(
+			payload.Game.Buildings.Activate<StalkSeedSiloDefinition>(
 				spawn.Id.Value,
 				position + (Vector3.right * 3f) + (Vector3.back * 3f),
-				Quaternion.identity
+				Quaternion.identity, 
+				BuildingStates.Operating
 			);
-			
-			flora0.Tags.AddTag(Modifiers.Farm.Sown);
-			flora0.Tags.AddTag(Modifiers.Farm.Tended);
-			flora0.Tags.AddTag(Modifiers.Water.Applied);
-			
-			var flora1 = payload.Game.Flora.Activate<StalkDefinition>(
-				spawn.Id.Value,
-				position + (Vector3.right * 3f) + (Vector3.back * 2f),
-				Quaternion.identity
-			);
+
+			// var flora0 = payload.Game.Flora.Activate<StalkDefinition>(
+			// 	spawn.Id.Value,
+			// 	position + (Vector3.right * 3f) + (Vector3.back * 3f),
+			// 	Quaternion.identity
+			// );
+			//
+			// flora0.Tags.AddTag(Tags.Farm.Sown);
+			// flora0.Tags.AddTag(Tags.Farm.Tended);
+			// flora0.Tags.AddTag(Tags.Water.Applied);
+			//
+			// var flora1 = payload.Game.Flora.Activate<StalkDefinition>(
+			// 	spawn.Id.Value,
+			// 	position + (Vector3.right * 3f) + (Vector3.back * 2f),
+			// 	Quaternion.identity
+			// );
 			
 			
 			

@@ -16,7 +16,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 			Unknown = 0,
 			Idle = 10,
 			NavigatingToSow = 20,
-			Sowing = 30
+			Sowing = 30,
+			NavigatingToTend = 40,
+			Tending = 50
 		}
 		
 		protected override Jobs Job => Jobs.Farmer;
@@ -53,6 +55,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				new ToTimeoutOnSow(),
 				new ToNavigateToSow(),
+				
+				new ToTimeoutOnTending(),
+				new ToNavigateToTend(),
 				
 				new ToNavigateToWorkplace(),
 				
@@ -140,7 +145,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 								flora.Farm.Value = InstanceId.New(SourceState.Workplace);
 								
-								flora.Tags.AddTag(Modifiers.Farm.Sown);
+								flora.Tags.AddTag(Tags.Farm.Sown);
 								
 								selectedPlot.Flora = InstanceId.New(flora);
 							}
@@ -178,12 +183,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 				var nearestPlots = SourceState.Workplace.Farm.Plots
 					.Where(p => p.State == FarmPlot.States.ReadyToSow && (p.AttendingFarmer.IsNull || p.AttendingFarmer.Id == Agent.Id.Value))
 					.OrderBy(p => Vector3.Distance(p.Position, Agent.Transform.Position.Value));
-
-				var isNavigable = false;
 				
 				foreach (var plot in nearestPlots)
 				{
-					isNavigable = NavigationUtility.CalculateNearest(
+					var isNavigable = NavigationUtility.CalculateNearest(
 						Agent.Transform.Position.Value,
 						out navigationResult,
 						Navigation.QueryPosition(plot.Position, plot.Radius.Minimum)
@@ -192,11 +195,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 					if (isNavigable)
 					{
 						selectedPlot = plot;
-						break;
+						return true;
 					}
 				}
 
-				return isNavigable;
+				return false;
 			}
 
 			public override void Transition()
@@ -209,5 +212,100 @@ namespace Lunra.Hothouse.Ai.Dweller
 				Agent.Inventory.Add(seedInventory);
 			}
 		}
+		
+		class ToTimeoutOnTending : AgentTransition<FarmerState<S>, TimeoutState, GameModel, DwellerModel>
+		{
+			FarmPlot selectedPlot;
+			
+			public override bool IsTriggered()
+			{
+				if (SourceState.state != States.NavigatingToTend) return false;
+
+				selectedPlot = SourceState.Workplace.Farm.Plots
+					.FirstOrDefault(
+						p => p.State == FarmPlot.States.Sown && p.AttendingFarmer.Id == Agent.Id.Value && Vector3.Distance(p.Position, Agent.Transform.Position.Value) < (p.Radius.Minimum + Agent.MeleeRange.Value)
+					);
+
+				if (selectedPlot == null)
+				{
+					// Debug.LogError("Navigating to sow, but nearest plot is null, this is unexpected");
+					return false;
+				}
+
+				return true;
+			}
+
+			public override void Transition()
+			{
+				SourceState.state = States.Tending;
+				
+				SourceState.timeoutInstance.ConfigureForInterval(
+					DayTime.FromHours(1f),
+					delta =>
+					{
+						if (delta.IsDone)
+						{
+							if (selectedPlot.Flora.TryGetInstance<FloraModel>(Game, out var flora))
+							{
+								flora.Tags.AddTag(Tags.Farm.Tended, new DayTime(Game.SimulationTime.Value.Day + 1));
+							}
+							selectedPlot.AttendingFarmer = InstanceId.Null();
+							SourceState.state = States.Idle;
+						}
+					}
+				);
+			}
+		}
+		
+		class ToNavigateToTend : AgentTransition<FarmerState<S>, NavigateState, GameModel, DwellerModel>
+		{
+			FarmPlot selectedPlot;
+			Navigation.Result navigationResult;
+		
+			public override bool IsTriggered()
+			{
+				switch (SourceState.state)
+				{
+					case States.Idle:
+					case States.NavigatingToTend:
+						break;
+					default:
+						return false;
+				}
+				if (SourceState.state != States.Idle) return false;
+				
+				var nearestPlots = SourceState.Workplace.Farm.Plots
+					.Where(p => p.State == FarmPlot.States.Sown && (p.AttendingFarmer.IsNull || p.AttendingFarmer.Id == Agent.Id.Value))
+					.OrderBy(p => Vector3.Distance(p.Position, Agent.Transform.Position.Value));
+
+				foreach (var plot in nearestPlots)
+				{
+					var isNavigable = NavigationUtility.CalculateNearest(
+						Agent.Transform.Position.Value,
+						out navigationResult,
+						Navigation.QueryPosition(plot.Position, plot.Radius.Minimum)
+					);
+
+					if (isNavigable)
+					{
+						if (plot.Flora.TryGetInstance<FloraModel>(Game, out var flora) && !flora.Tags.Containts(Tags.Farm.Tended))
+						{
+							selectedPlot = plot;
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+
+			public override void Transition()
+			{
+				selectedPlot.AttendingFarmer = InstanceId.New(Agent);
+				SourceState.state = States.NavigatingToTend;
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
+			}
+		}
+
 	}
 }

@@ -75,6 +75,8 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
+		public bool Containts(string tag) => All.Value.Any(t => t.Tag == tag);
+
 		public void AddTag(
 			string tag,
 			DuplicateBehaviours duplicateBehaviour = DuplicateBehaviours.Append

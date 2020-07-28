@@ -33,16 +33,16 @@ namespace Lunra.Hothouse.Models
 
 		public virtual ModifierDefinition[] AgeModifiers => new[]
 		{
-			ModifierDefinition.NoStacking(Modifiers.Farm.Sown, 1f),
-			ModifierDefinition.NoStacking(Modifiers.Farm.Tended, 2f),
-			ModifierDefinition.NoStacking(Modifiers.Water.Applied, 4f),
+			ModifierDefinition.NoStacking(Tags.Farm.Sown, 1f),
+			ModifierDefinition.NoStacking(Tags.Farm.Tended, 2f),
+			ModifierDefinition.NoStacking(Tags.Water.Applied, 4f),
 		};
 		
 		public virtual ModifierDefinition[] ReproductionModifiers => new[]
 		{
-			ModifierDefinition.NoStacking(Modifiers.Farm.Sown, -0.25f),
-			ModifierDefinition.NoStacking(Modifiers.Farm.Tended, -0.5f),
-			ModifierDefinition.NoStacking(Modifiers.Water.Applied, 2f),
+			ModifierDefinition.NoStacking(Tags.Farm.Sown, -0.25f),
+			ModifierDefinition.NoStacking(Tags.Farm.Tended, -0.5f),
+			ModifierDefinition.NoStacking(Tags.Water.Applied, 2f),
 		};
 
 		public void Initialize(
