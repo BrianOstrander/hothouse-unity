@@ -82,6 +82,7 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.Dwellers.Initialize(Payload.Game);
 			Payload.Game.Seekers.Initialize(Payload.Game);
 			Payload.Game.Decorations.Initialize(Payload.Game);
+			Payload.Game.Generators.Initialize(Payload.Game);
 			
 			done();
 		}

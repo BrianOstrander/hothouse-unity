@@ -95,7 +95,8 @@ namespace Lunra.Hothouse.Models
 				.Concat<IEnterableModel>(game.Debris.AllActive)
 				.Concat(game.Doors.AllActive)
 				.Concat(game.Flora.AllActive)
-				.Concat(game.ItemDrops.AllActive);
+				.Concat(game.ItemDrops.AllActive)
+				.Concat(game.Generators.AllActive);
 		}
 	}
 }

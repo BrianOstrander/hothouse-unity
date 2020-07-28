@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
@@ -44,6 +45,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			App.S.PushBlocking(OnCalculateNavigation);
 			
+			App.S.PushBlocking(OnGenerateGenerators);
 			App.S.PushBlocking(OnGenerateDebris);
 			
 			App.S.PushBlocking(OnCalculateNavigation);
@@ -161,13 +163,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 				if (room.IsSpawn.Value)
 				{
-					roomInfo.DecorationTagsRequiredForRoom.Add(DecorationView.Constants.Tags.Sources.Fluid, 1);
+					roomInfo.DecorationTagsRequiredForRoom.Add(DecorationView.Constants.Tags.Sources.Water, 1);
 					
-					roomInfo.DecorationTagsBudgetForRoom.Add(DecorationView.Constants.Tags.Sources.Fluid, 1);
+					roomInfo.DecorationTagsBudgetForRoom.Add(DecorationView.Constants.Tags.Sources.Water, 1);
 				}
 				else
 				{
-					roomInfo.DecorationTagsBudgetForRoom.Add(DecorationView.Constants.Tags.Sources.Fluid, 2);
+					roomInfo.DecorationTagsBudgetForRoom.Add(DecorationView.Constants.Tags.Sources.Water, 2);
 				}
 				
 				var remainingWalls = room.Walls.Value
@@ -308,6 +310,75 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 						segmentBegin = segmentBeginNotChosen;
 					}
 				}	
+			}
+			
+			done();
+		}
+
+		void OnGenerateGenerators(Action done)
+		{
+			bool getDecorationEntrance(
+				DecorationModel model,
+				out Vector3 position
+			)
+			{
+				position = Vector3.zero;
+				
+				var isNavigable = NavigationUtility.CalculateNearestFloor(
+					model.PossibleEntrance.Value,
+					out var navHit,
+					out var physicsHit,
+					out var roomId
+				);
+				
+				if (!isNavigable) return false;
+				if (!model.IsInRoom(roomId)) return false;
+				
+				position = navHit.position;
+				
+				return true;
+			}
+			
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				foreach (var decoration in payload.Game.Decorations.AllActive.Where(m => room.RoomContains(m)))
+				{
+					foreach (var tag in decoration.PrefabTags.Value)
+					{
+						switch (tag)
+						{
+							case DecorationView.Constants.Tags.Sources.Water:
+								if (getDecorationEntrance(decoration, out var position))
+								{
+									payload.Game.Generators.Activate(
+										decoration,
+										position,
+										decoration.Transform.Rotation.Value,
+										new FloatRange(8f, 24f),
+										new FloatRange(8f, 12f),
+										(Inventory.Types.Water, 1, 2)
+									);
+								}
+								else
+								{
+									Debug.DrawRay(
+										decoration.PossibleEntrance.Value,
+										Vector3.up,
+										Color.red,
+										999f
+									);
+									Debug.LogError("Unable to get a valid entrance for Decoration with id: " + decoration.Id.Value);
+								}
+								break;
+							default:
+								if (tag.StartsWith(DecorationView.Constants.Tags.Sources.Prefix))
+								{
+									Debug.LogError($"Tag \"{tag}\" begins with \"{DecorationView.Constants.Tags.Sources.Prefix}\" but was not handled");
+								}
+								break;
+						}
+					}
+				}
 			}
 			
 			done();

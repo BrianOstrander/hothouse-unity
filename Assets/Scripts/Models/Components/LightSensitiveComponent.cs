@@ -46,9 +46,11 @@ namespace Lunra.Hothouse.Models
 			this GameModel game	
 		)
 		{
-			return game.Buildings.AllActive
+			return game
+				.Buildings.AllActive
 				.Concat<ILightSensitiveModel>(game.ItemDrops.AllActive)
 				.Concat(game.Doors.AllActive)
+				.Concat(game.Generators.AllActive)
 				.Concat(game.GetClearables());
 		}
 	}

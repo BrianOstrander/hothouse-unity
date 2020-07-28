@@ -19,6 +19,8 @@ namespace Lunra.Hothouse.Models
 		{
 			Unknown = 0,
 			
+			Water = 2,
+			
 			StalkSeed = 10,
 			StalkRaw = 11,
 			StalkDry = 12,

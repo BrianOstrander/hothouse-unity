@@ -140,7 +140,7 @@ MonoBehaviour:
   prefabTags:
   - decoration_wall
   - pipes
-  - source_fluid
+  - source_water
   extentsLeft: 0.31933594
   extentsRight: 0.31933594
   extentForward: 1.3132935

@@ -43,6 +43,8 @@ namespace Lunra.Hothouse.Models
 					return Types.ItemDrop;
 				case BaseInventoryComponent _:
 					return Types.Inventory;
+				case DecorationModel _:
+					return Types.Decoration;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -61,7 +63,8 @@ namespace Lunra.Hothouse.Models
 			Seeker = 70,
 			Debris = 80,
 			ItemDrop = 90,
-			Inventory = 100
+			Inventory = 100,
+			Decoration = 110
 		}
 
 		public Types Type { get; }
@@ -148,6 +151,9 @@ namespace Lunra.Hothouse.Models
 					break;
 				case Types.Inventory:
 					cachedInstance = GetFirstOrDefault(game.GetInventories(), Id);
+					break;
+				case Types.Decoration:
+					cachedInstance = game.Decorations.FirstOrDefaultActive(Id);
 					break;
 				default:
 					Debug.LogError("Unrecognized type: " + Type);

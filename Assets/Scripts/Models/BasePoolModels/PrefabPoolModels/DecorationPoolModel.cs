@@ -4,7 +4,6 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
 using Lunra.Hothouse.Views;
-using Lunra.NumberDemon;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -35,7 +34,7 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			Initialize(
-				m => new PrefabPresenter<DecorationModel, DecorationView>(game, m)
+				m => new DecorationPresenter(game, m)
 			);
 		}
 

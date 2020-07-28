@@ -51,5 +51,7 @@ namespace Lunra.Hothouse.Models
             
             AdjacentRoomIds = new ListenerProperty<ReadOnlyDictionary<string, bool>>(value => adjacentRoomIds = value, () => adjacentRoomIds);
         }
+
+        public bool RoomContains(IRoomTransformModel possibleOccupant) => RoomTransform.Id.Value == possibleOccupant.RoomTransform.Id.Value;
     }
 }

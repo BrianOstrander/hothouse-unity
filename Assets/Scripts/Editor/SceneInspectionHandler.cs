@@ -205,6 +205,16 @@ namespace Lunra.Hothouse.Editor
 					);
 				}
 			}
+			
+			if (SceneInspectionSettings.IsInspectingGenerators.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Generators.AllActive.Where(isInInspectedRoom))
+				{
+					DrawLabel(
+						model
+					);
+				}
+			}
 
 			foreach (var model in gameState.Payload.Game.Flora.AllActive.Where(isInInspectedRoom))
 			{
@@ -378,6 +388,11 @@ namespace Lunra.Hothouse.Editor
 			if (model is IRecipeModel recipeModel && (recipeModel.Recipes.Available.Value.Any() || recipeModel.Recipes.Queue.Value.Any()))
 			{
 				appendResult(recipeModel.Recipes.ToString());
+			}
+
+			if (model is IGeneratorModel generatorModel)
+			{
+				appendResult(generatorModel.Generator.ToString(gameState.Payload.Game.SimulationTime.Value));
 			}
 			
 			if (model is IFarmModel farmModel && farmModel.Farm.IsFarm)

@@ -22,13 +22,14 @@ namespace Lunra.Hothouse.Views
 				{
 					public const string Prefix = "source_";
 					
-					public const string Fluid = Prefix + "fluid";
+					public const string Water = Prefix + "water";
 				}
 			}
 
 			public static class Boundaries
 			{
 				public const float MaximumBoundary = 1000f;
+				public const float PossibleEntranceOffset = 1f;
 			}
 		}
 
@@ -49,11 +50,11 @@ namespace Lunra.Hothouse.Views
 		public float ExtentHeight => extentHeight;
 		public float ExtentsLeftRightWidth => ExtentsLeft + ExtentsRight;
 
-		public float FlowRate
+		public float Flow
 		{
 			set
 			{
-				foreach (var fluid in fluids) fluid.FlowRate = value;
+				foreach (var fluid in fluids) fluid.FlowTarget = value;
 			}
 		}
 		
@@ -61,7 +62,7 @@ namespace Lunra.Hothouse.Views
 		{
 			base.Cleanup();
 
-			FlowRate = 0f;
+			Flow = 0f;
 		}
 
 #if UNITY_EDITOR

@@ -21,7 +21,7 @@ namespace Lunra.Hothouse.Models
 	
 	public interface IBaseInventoryModel : IRoomTransformModel
 	{
-		IBaseInventoryComponent[] Inventories { get; }
+		[JsonIgnore] IBaseInventoryComponent[] Inventories { get; }
 	}
 
 	public abstract class BaseInventoryComponent : Model,
@@ -72,9 +72,12 @@ namespace Lunra.Hothouse.Models
 			this GameModel game
 		)
 		{
-			return game.Dwellers.AllActive
+			return game
+				.Dwellers.AllActive
 				.Concat<IBaseInventoryModel>(game.Buildings.AllActive)
-				.Concat(game.ItemDrops.AllActive);
+				.Concat(game.ItemDrops.AllActive)
+				.Concat(game.Generators.AllActive);
+				
 		}
 		
 		public static IBaseInventoryModel GetInventoryParent(
@@ -82,9 +85,8 @@ namespace Lunra.Hothouse.Models
 			string inventoryId
 		)
 		{
-			return game.Dwellers.AllActive
-				.Concat<IBaseInventoryModel>(game.Buildings.AllActive)
-				.Concat(game.ItemDrops.AllActive)
+			return game
+				.GetInventoryParents()
 				.FirstOrDefault(
 					m => m.Inventories.Any(i => i.Id.Value == inventoryId)
 				);
@@ -94,7 +96,9 @@ namespace Lunra.Hothouse.Models
 			this GameModel game
 		)
 		{
-			return game.GetInventoryParents().SelectMany(m => m.Inventories);
+			return game
+				.GetInventoryParents()
+				.SelectMany(m => m.Inventories);
 		}
 	}
 }
