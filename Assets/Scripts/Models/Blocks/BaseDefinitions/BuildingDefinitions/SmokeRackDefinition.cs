@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace Lunra.Hothouse.Models
 {
 	public class SmokeRackDefinition : BuildingDefinition

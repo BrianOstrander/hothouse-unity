@@ -183,12 +183,14 @@ namespace Lunra.Hothouse.Models
 						if (!blockedPlots.Contains(plot.Id))
 						{
 							plot.State = FarmPlot.States.ReadyToSow;
+							plot.Flora = InstanceId.Null();
 						}
 						break;
 					case FarmPlot.States.Sown:
 						if (!plot.Flora.TryGetInstance<FloraModel>(game, out _))
 						{
 							plot.State = FarmPlot.States.ReadyToSow;
+							plot.Flora = InstanceId.Null();
 						}
 						break;
 					case FarmPlot.States.Invalid:

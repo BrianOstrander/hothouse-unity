@@ -70,6 +70,7 @@ namespace Lunra.Hothouse.Services
 			new BuildValidationPresenter(Payload.Game);
 			new GlobalInventoryCounterPresenter(Payload.Game);
 			new JobManagePresenter(Payload.Game);
+			new BuildingManagePresenter(Payload.Game);
 
 			new RoomResolverPresenter(Payload.Game);
 			
@@ -111,9 +112,8 @@ namespace Lunra.Hothouse.Services
 			// App.Heartbeat.WaitForSeconds(
 			// 	() =>
 			// 	{
-			// 		Debug.Log("Killing wagon...");
-			// 		var wagon = Payload.Game.Buildings.FirstOrDefaultActive(m => m.Type.Value == Buildings.StartingWagon);
-			// 		Damage.ApplyGeneric(999f, wagon);
+			// 		Debug.Log("Selecting building...");
+			// 		Payload.Game.BuildingManage.Selection.Value = Payload.Game.Buildings.AllActive.First();
 			// 	},
 			// 	5f
 			// );

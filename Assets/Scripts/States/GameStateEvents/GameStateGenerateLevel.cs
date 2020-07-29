@@ -474,9 +474,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			var requiredJobs = new []
 			{
-				// Jobs.Smoker,
+				Jobs.Smoker,
 				Jobs.Stockpiler,
-				Jobs.Stockpiler,
+				// Jobs.Stockpiler,
 				// Jobs.Stockpiler,
 				Jobs.Farmer,
 				// Jobs.Laborer,
@@ -529,7 +529,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				Inventory.Types.StalkSeed,
 				Inventory.Types.StalkDry,
-				// Inventory.Types.StalkPop
+				Inventory.Types.StalkPop
 			};
 			
 			wagon.Inventory.Add(
@@ -559,64 +559,49 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			payload.Game.Buildings.Activate<StalkSeedSiloDefinition>(
-				spawn.Id.Value,
-				position + (Vector3.right * 3f) + (Vector3.back * 3f),
-				Quaternion.identity, 
+			payload.Game.SimulationMultiplier.Value = 20f;
+			
+			payload.Game.Buildings.Activate<BedrollDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + (Vector3.right * 4f) + (Vector3.back * -3f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
+			
+			payload.Game.Buildings.Activate<BedrollDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + (Vector3.right * 6f) + (Vector3.back * -3f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
+			
+			payload.Game.Buildings.Activate<BedrollDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + (Vector3.right * 8f) + (Vector3.back * -3f),
+				Quaternion.identity,
 				BuildingStates.Operating
 			);
 
-			// var flora0 = payload.Game.Flora.Activate<StalkDefinition>(
-			// 	spawn.Id.Value,
-			// 	position + (Vector3.right * 3f) + (Vector3.back * 3f),
-			// 	Quaternion.identity
-			// );
-			//
-			// flora0.Tags.AddTag(Tags.Farm.Sown);
-			// flora0.Tags.AddTag(Tags.Farm.Tended);
-			// flora0.Tags.AddTag(Tags.Water.Applied);
-			//
-			// var flora1 = payload.Game.Flora.Activate<StalkDefinition>(
-			// 	spawn.Id.Value,
-			// 	position + (Vector3.right * 3f) + (Vector3.back * 2f),
-			// 	Quaternion.identity
-			// );
-			
-			
-			
-			// payload.Game.Buildings.Activate<BedrollDefinition>(
-			// 	spawn.Id.Value,
-			// 	position,
-			// 	Quaternion.identity, 
-			// 	BuildingStates.Operating
-			// );
-			/*
-			var farm0 = payload.Game.Buildings.Activate<SeedSiloDefinition>(
-				spawn.Id.Value,
-				position + (Vector3.right * 3f) + (Vector3.back * 3f),
-				Quaternion.identity, 
+			var farm = payload.Game.Buildings.Activate<StalkSeedSiloDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + (Vector3.right * 4f) + (Vector3.back * 3f),
+				Quaternion.identity,
 				BuildingStates.Operating
 			);
 
-			farm0.Farm.SelectedSeed = Inventory.Types.StalkSeed;
-			farm0.Inventory.Add(farm0.Inventory.AllCapacity.Value.GetMaximum());
+			farm.Inventory.Add(farm.Inventory.AvailableCapacity.Value.GetMaximum());
 			
-			var farm1 = payload.Game.Buildings.Activate<SeedSiloDefinition>(
-				spawn.Id.Value,
-				position + (Vector3.right * 3f) + (Vector3.back * 7f),
-				Quaternion.AngleAxis(45f, Vector3.up), 
+			var smokerack = payload.Game.Buildings.Activate<SmokeRackDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + (Vector3.right * -4f) + (Vector3.back * 3f),
+				Quaternion.identity,
 				BuildingStates.Operating
 			);
 
-			farm1.Farm.SelectedSeed = Inventory.Types.StalkSeed;
-			farm1.Inventory.Add(farm1.Inventory.AllCapacity.Value.GetMaximum());
-
-			payload.Game.Flora.Activate<StalkDefinition>(
-				spawn.Id.Value,
-				farm0.Transform.Position.Value + (Vector3.back * 1.5f) + (Vector3.right * 2.5f),
-				isAdult: false
-			);
-			*/
+			smokerack.Recipes.Queue.Value = smokerack.Recipes.Queue.Value
+				.Append(RecipeComponent.RecipeIteration.ForInfinity(smokerack.Recipes.Available.Value.Last()))
+				.ToArray();
+			
 			// Debugging End
 			
 			done();
