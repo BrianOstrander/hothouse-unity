@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 	public class FarmerState<S> : JobState<S, FarmerState<S>>
 		where S : AgentState<GameModel, DwellerModel>
 	{
-		const float CalculateFloraObligationsDelay = 3f;
+		static readonly DayTime CalculateFloraObligationsDelay = DayTime.FromHours(12f);
 
 		enum States
 		{
@@ -38,7 +38,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new DestroyMeleeHandlerState(),
 				timeoutInstance = new TimeoutState()
 			);
-
+			
 			AddTransitions(
 				new ToReturnOnJobChanged(),
 				new ToReturnOnShiftEnd(),
@@ -50,6 +50,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new DestroyMeleeHandlerState.ToObligationOnExistingObligation(),
 				new ToDestroyOvergrownFlora(),
 				
+				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
+				new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner),
+				
 				new ToTimeoutOnSow(),
 				new ToNavigateToSow(),
 				
@@ -58,28 +61,39 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				new ToNavigateToWorkplace(),
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
-				new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner),
-				
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);
+		}
+		
+		public override void Begin()
+		{
+			base.Begin();
+
+			if (Workplace == null) return;
+			if (Workplace.Farm.SelectedSeed == Inventory.Types.Unknown) return;
+			
+			if (Workplace.Farm.Plots.None() || (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed && Workplace.Farm.LastUpdatedRealTime < Game.NavigationMesh.LastUpdated.Value))
+			{
+				Workplace.Farm.CalculatePlots(Game, Workplace);
+			}
+			else if (state == States.Idle && CalculateFloraObligationsDelay < (Game.SimulationTime.Value - Workplace.Farm.LastUpdated))
+			{
+				Workplace.Farm.CalculateFloraObligations(Game, Workplace);
+			}
 		}
 
 		public override void Idle()
 		{
-			if (Workplace == null) return;
-
-			if (Workplace.Farm.SelectedSeed != Inventory.Types.Unknown)
+			if (state == States.Idle && 0 < Workplace.Inventory.All.Value.TotalWeight)
 			{
-				if (Workplace.Farm.Plots.None() || (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed && Workplace.Farm.LastUpdated < Game.NavigationMesh.LastUpdated.Value))
-				{
-					Workplace.Farm.CalculatePlots(Game, Workplace);
-				}
-				else if (CalculateFloraObligationsDelay < (DateTime.Now - Workplace.Farm.LastUpdated).TotalSeconds)
-				{
-					Workplace.Farm.CalculateFloraObligations(Game, Workplace);
-				}
+				Debug.LogWarning("Idk what happened but we're idling with seeds available...");
+				Debug.Break();
 			}
+			
+			if (state == States.Idle) return;
+
+			state = States.Idle;
+			Workplace.Farm.RemoveAttendingFarmer(Agent.Id.Value);
 		}
 
 		class ToDestroyOvergrownFlora : DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation
@@ -173,8 +187,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					default:
 						return false;
 				}
-				if (SourceState.state != States.Idle) return false;
-				if (Agent.Inventory.IsFull()) return false;
+				// if (Agent.Inventory.IsFull()) return false;
 				if (SourceState.Workplace.Inventory.Available.Value[SourceState.Workplace.Farm.SelectedSeed] == 0) return false;
 
 				var nearestPlots = SourceState.Workplace.Farm.Plots
@@ -195,18 +208,32 @@ namespace Lunra.Hothouse.Ai.Dweller
 						return true;
 					}
 				}
-
+				
 				return false;
 			}
 
 			public override void Transition()
 			{
+				var seedInventory = Inventory.FromEntry(SourceState.Workplace.Farm.SelectedSeed, 1);
+				
+				if (!Agent.Inventory.All.Value.Contains(seedInventory))
+				{
+					if (Agent.Inventory.IsFull())
+					{
+						Game.ItemDrops.Activate(
+							Agent,
+							Quaternion.identity,
+							Agent.Inventory.All.Value.Entries.First(e => 0 < e.Weight).ToInventory()
+						);
+					}
+					
+					SourceState.Workplace.Inventory.Remove(seedInventory);
+					Agent.Inventory.Add(seedInventory);
+				}
+
 				selectedPlot.AttendingFarmer = InstanceId.New(Agent);
 				SourceState.state = States.NavigatingToSow;
 				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
-				var seedInventory = Inventory.FromEntry(SourceState.Workplace.Farm.SelectedSeed, 1);
-				SourceState.Workplace.Inventory.Remove(seedInventory);
-				Agent.Inventory.Add(seedInventory);
 			}
 		}
 		
@@ -269,7 +296,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 					default:
 						return false;
 				}
-				if (SourceState.state != States.Idle) return false;
 				
 				var nearestPlots = SourceState.Workplace.Farm.Plots
 					.Where(p => p.State == FarmPlot.States.Sown && (p.AttendingFarmer.IsNull || p.AttendingFarmer.Id == Agent.Id.Value))
@@ -285,8 +311,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 					if (isNavigable)
 					{
-						if (plot.Flora.TryGetInstance<FloraModel>(Game, out var flora) && !flora.Tags.Containts(Tags.Farm.Tended))
+						if (plot.Flora.TryGetInstance<FloraModel>(Game, out var flora))
 						{
+							if (flora.Age.Value.IsDone) continue;
+							if (flora.Tags.Containts(Tags.Farm.Tended)) continue;
 							selectedPlot = plot;
 							return true;
 						}

@@ -2,24 +2,37 @@ namespace Lunra.Hothouse.Models
 {
 	public struct GameResult
 	{
-		public static GameResult Default() => new GameResult(States.Unknown, null);
+		public static GameResult Default() => new GameResult(States.Unknown, null, DayTime.Zero);
 		
 		public enum States
 		{
 			Unknown = 0,
-			Failure = 10
+			Displaying = 10,
+			Failure = 20
 		}
 
-		public readonly States State;
-		public readonly string Reason;
+		public States State { get; }
+		public string Reason { get; }
+		public DayTime TimeSurvived { get; }
 
 		public GameResult(
 			States state,
-			string reason
+			string reason,
+			DayTime timeSurvived
 		)
 		{
 			State = state;
 			Reason = reason;
+			TimeSurvived = timeSurvived;
+		}
+
+		public GameResult New(States state)
+		{
+			return new GameResult(
+				state,
+				Reason,
+				TimeSurvived
+			);
 		}
 	}
 }

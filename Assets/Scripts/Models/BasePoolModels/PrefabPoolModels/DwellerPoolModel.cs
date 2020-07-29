@@ -82,6 +82,9 @@ namespace Lunra.Hothouse.Models
 							simulationTimeAtMaximum => Mathf.Pow(simulationTimeAtMaximum, 2f)
 						);
 						break;
+					case Motives.Comfort:
+						calculateGoal = insistence => (insistence * 0.2f) - 0.05f;
+						break;
 					case Motives.Heal:
 						calculateGoal = insistence => Mathf.Pow(insistence, 2f);
 						break;
@@ -156,6 +159,7 @@ namespace Lunra.Hothouse.Models
 				{
 					(Motives.Eat, GoalInsistenceVelocity),
 					(Motives.Sleep, GoalInsistenceVelocity),
+					(Motives.Comfort, GoalInsistenceVelocity),
 					
 					(Motives.Heal, 0f)
 				},

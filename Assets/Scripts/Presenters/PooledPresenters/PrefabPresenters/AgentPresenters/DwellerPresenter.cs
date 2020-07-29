@@ -36,12 +36,43 @@ namespace Lunra.Hothouse.Presenters
 		#region DwellerModel Events
 		void OnDwellerHealthDamage(Damage.Result result)
 		{
+			var affliction = string.Empty;
+			
+			switch (result.Type)
+			{
+				case Damage.Types.Generic:
+					if (result.IsSelfInflicted) affliction += "self";
+					else if (result.Source.TryGetInstance<IModel>(Game, out var source)) affliction += source.ShortId;
+					else affliction += "unknown";
+					break;
+				case Damage.Types.GoalHurt:
+					var goalsAtMaximum = Model.Goals.Caches
+						.Where(c => 0f < c.SimulatedTimeAtMaximum)
+						.OrderByDescending(c => c.SimulatedTimeAtMaximum)
+						.ToArray();
+
+					for (var i = 0; i < goalsAtMaximum.Length; i++)
+					{
+						affliction += goalsAtMaximum[i].Motive;
+
+						if (1 < goalsAtMaximum.Length)
+						{
+							if (i < (goalsAtMaximum.Length - 1)) affliction += ", ";
+						}
+					}
+					break;
+				default:
+					Debug.LogError("Unrecognized Damage Type: "+result.Type);
+					affliction += "UNKNOWN - " + result.Type;
+					break;
+			}
+		
 			if (result.IsTargetDestroyed)
 			{
 				Game.EventLog.DwellerEntries.Enqueue(
 					new EventLogModel.Entry(
 						StringExtensions.Wrap(
-							Model.Name.Value + " died from " + result.Type,
+							Model.Name.Value + " died from " + affliction,
 							"<color=red>",
 							"</color>"
 						),
@@ -52,41 +83,10 @@ namespace Lunra.Hothouse.Presenters
 			}
 			else
 			{
-				var affliction = Model.Name.Value + " is suffering from ";
-				
-				switch (result.Type)
-				{
-					case Damage.Types.Generic:
-						if (result.IsSelfInflicted) affliction += "self";
-						else if (result.Source.TryGetInstance<IModel>(Game, out var source)) affliction += source.ShortId;
-						else affliction += "unknown";
-						break;
-					case Damage.Types.GoalHurt:
-						var goalsAtMaximum = Model.Goals.Caches
-							.Where(c => 0f < c.SimulatedTimeAtMaximum)
-							.OrderByDescending(c => c.SimulatedTimeAtMaximum)
-							.ToArray();
-
-						for (var i = 0; i < goalsAtMaximum.Length; i++)
-						{
-							affliction += goalsAtMaximum[i].Motive;
-
-							if (1 < goalsAtMaximum.Length)
-							{
-								if (i < (goalsAtMaximum.Length - 1)) affliction += ", ";
-							}
-						}
-						break;
-					default:
-						Debug.LogError("Unrecognized Damage Type: "+result.Type);
-						affliction += "UNKNOWN - " + result.Type;
-						break;
-				}
-				
 				Game.EventLog.DwellerEntries.Enqueue(
 					new EventLogModel.Entry(
 						StringExtensions.Wrap(
-							affliction,
+							Model.Name.Value + " is suffering from " + affliction,
 							"<color=yellow>",
 							"</color>"
 						),

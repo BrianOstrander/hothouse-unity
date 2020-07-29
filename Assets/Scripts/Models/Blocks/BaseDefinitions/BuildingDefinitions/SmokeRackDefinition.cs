@@ -1,4 +1,5 @@
 using System.Linq;
+using Lunra.Core;
 
 namespace Lunra.Hothouse.Models
 {
@@ -7,10 +8,10 @@ namespace Lunra.Hothouse.Models
 		public override int MaximumOwners => 1;
 
 		public override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
-			(Inventory.Types.StalkRaw, 1),
-			(Inventory.Types.StalkDry, 1),
-			(Inventory.Types.StalkSeed, 1),
-			(Inventory.Types.StalkPop, 1)
+			(Inventory.Types.StalkRaw, 4),
+			(Inventory.Types.StalkDry, 4),
+			(Inventory.Types.StalkSeed, 4),
+			(Inventory.Types.StalkPop, 4)
 		);
 
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForJobs(

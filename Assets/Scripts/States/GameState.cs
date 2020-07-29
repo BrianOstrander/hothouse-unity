@@ -147,7 +147,7 @@ namespace Lunra.Hothouse.Services
 
 		void OnHeartbeatLateUpdate()
 		{
-			if (Payload.Game.GameResult.Value.State == GameResult.States.Unknown) return;
+			if (Payload.Game.GameResult.Value.State != GameResult.States.Failure) return;
 			
 			App.S.RequestState(
 				new MainMenuPayload

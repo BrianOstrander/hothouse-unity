@@ -17,6 +17,20 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public ItemDropModel Activate(
+			IRoomTransformModel origin,
+			Quaternion rotation,
+			Inventory inventory
+		)
+		{
+			return Activate(
+				origin.RoomTransform.Id.Value,
+				origin.Transform.Position.Value,
+				rotation,
+				inventory
+			);
+		}
+
+		public ItemDropModel Activate(
 			string roomId,
 			Vector3 position,
 			Quaternion rotation,

@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Models
 			{
 				Inventory.Types.StalkSeed	
 			}
-				.Select(t => (t, 25))
+				.Select(t => (t, 100))
 				.ToArray()
 		);
 
@@ -22,7 +22,7 @@ namespace Lunra.Hothouse.Models
 			Jobs.Farmer
 		);
 		
-		public override int MaximumOwners => 1;
+		public override int MaximumOwners => 2;
 
 		public override bool IsFarm => true;
 		public override Vector2 FarmSize => Vector2.one * 8f;

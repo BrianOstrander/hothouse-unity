@@ -479,8 +479,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				// Jobs.Stockpiler,
 				// Jobs.Stockpiler,
 				Jobs.Farmer,
+				Jobs.Farmer,
 				// Jobs.Laborer,
-				Jobs.Laborer
+				// Jobs.Laborer
 			};
 
 			for (var i = 0; i < requiredJobs.Length; i++)
@@ -559,7 +560,15 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			payload.Game.SimulationMultiplier.Value = 20f;
+			// payload.Game.DesireDamageMultiplier.Value = 0f;
+			payload.Game.SimulationMultiplier.Value = 60f;
+			
+			payload.Game.Buildings.Activate<BedrollDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + (Vector3.right * 2f) + (Vector3.back * -3f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
 			
 			payload.Game.Buildings.Activate<BedrollDefinition>(
 				spawn.RoomTransform.Id.Value,
@@ -599,7 +608,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 
 			smokerack.Recipes.Queue.Value = smokerack.Recipes.Queue.Value
-				.Append(RecipeComponent.RecipeIteration.ForInfinity(smokerack.Recipes.Available.Value.Last()))
+				.Append(RecipeComponent.RecipeIteration.ForDesired(smokerack.Recipes.Available.Value.Last(), 20))
 				.ToArray();
 			
 			// Debugging End
@@ -662,7 +671,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			result += "\n   - Room: " + roomTotal.TotalSeconds.ToString("N2");
 			result += "\n   - Flora: " + floraTotal.TotalSeconds.ToString("N2");
 			
-			Debug.Log(result);
+			// Debug.Log(result);
 		}
 		
 		#region Shared Events

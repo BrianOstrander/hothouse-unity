@@ -27,7 +27,8 @@ namespace Lunra.Hothouse.Models
 				GetActionName(Motives.Eat),
 				new []
 				{
-					(Motives.Eat, -0.5f)
+					(Motives.Eat, -0.5f),
+					(Motives.Comfort, 0.2f)
 				},
 				DayTime.FromHours(1f),
 				Inventory.FromEntry(Inventory.Types.StalkPop, 1)

@@ -1,3 +1,4 @@
+using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
@@ -89,6 +90,15 @@ namespace Lunra.Hothouse.Editor
 						{
 							GUILayout.Label("Dweller [ " + dweller.ShortId + " ] : " + dweller.Name.Value + " - " + dweller.Job.Value, EditorStyles.boldLabel);
 							
+							if (GUILayout.Button("Satisfy", GUILayout.ExpandWidth(false)))
+							{
+								dweller.Goals.Apply(
+									EnumExtensions.GetValues(Motives.Unknown, Motives.None)
+										.Select(m => (m, -1f))
+										.ToArray()
+								);
+							}
+							
 							if (GUILayout.Button("Hurt", GUILayout.ExpandWidth(false)))
 							{
 								Damage.ApplyGeneric(
@@ -130,7 +140,7 @@ namespace Lunra.Hothouse.Editor
 							{
 								if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
 								{
-									dweller.Goals.Apply((motive, 0.5f));
+									dweller.Goals.Apply((motive, -0.5f));
 								}	
 							}
 						}

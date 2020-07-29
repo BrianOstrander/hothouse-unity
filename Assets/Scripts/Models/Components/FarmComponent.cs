@@ -25,7 +25,14 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized 
-		[JsonIgnore] public DateTime LastUpdated { get; private set; } 
+		[JsonIgnore] public DateTime LastUpdatedRealTime { get; private set; }
+		[JsonIgnore] public DayTime LastUpdated { get; private set; }
+
+		public void SetLastUpdated(DayTime lastUpdated)
+		{
+			LastUpdatedRealTime = DateTime.Now;
+			LastUpdated = lastUpdated;
+		}
 		#endregion
 
 		public FarmComponent()
@@ -38,7 +45,7 @@ namespace Lunra.Hothouse.Models
 			IFarmModel model
 		)
 		{
-			LastUpdated = DateTime.Now;
+			SetLastUpdated(game.SimulationTime.Value);
 			var plotsList = new List<FarmPlot>();
 
 			if (SelectedSeed == Inventory.Types.Unknown)
@@ -47,13 +54,6 @@ namespace Lunra.Hothouse.Models
 				return;
 			}
 			
-			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(
-				Inventory.FromEntry(
-					SelectedSeed,
-					model.Inventory.AllCapacity.Value.GetMaximumFor(SelectedSeed)
-				)
-			);
-
 			var definition = game.Flora.Definitions.First(d => d.Seed == SelectedSeed);
 
 			var spacing = definition.ReproductionRadius.Maximum;
@@ -113,6 +113,13 @@ namespace Lunra.Hothouse.Models
 
 			Plots = plotsList.ToArray();
 			
+			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(
+				Inventory.FromEntry(
+					SelectedSeed,
+					Mathf.Min(model.Inventory.AllCapacity.Value.GetMaximumFor(SelectedSeed), Plots.Length)
+				)
+			);
+			
 			CalculateFloraObligations(
 				game,
 				model
@@ -124,7 +131,7 @@ namespace Lunra.Hothouse.Models
 			IFarmModel model
 		)
 		{
-			LastUpdated = DateTime.Now;
+			SetLastUpdated(game.SimulationTime.Value);
 			
 			var plotRooms = Plots
 				.Select(p => p.RoomId)
@@ -184,6 +191,7 @@ namespace Lunra.Hothouse.Models
 						{
 							plot.State = FarmPlot.States.ReadyToSow;
 							plot.Flora = InstanceId.Null();
+							plot.AttendingFarmer = InstanceId.Null();
 						}
 						break;
 					case FarmPlot.States.Sown:
@@ -191,6 +199,7 @@ namespace Lunra.Hothouse.Models
 						{
 							plot.State = FarmPlot.States.ReadyToSow;
 							plot.Flora = InstanceId.Null();
+							plot.AttendingFarmer = InstanceId.Null();
 						}
 						break;
 					case FarmPlot.States.Invalid:
@@ -205,6 +214,17 @@ namespace Lunra.Hothouse.Models
 				{
 					plot.AttendingFarmer = InstanceId.Null();
 				}
+			}
+		}
+
+		public void RemoveAttendingFarmer(
+			string attendingFarmerId
+		)
+		{
+			foreach (var plot in Plots)
+			{
+				if (plot.AttendingFarmer.IsNull) continue;
+				if (plot.AttendingFarmer.Id == attendingFarmerId) plot.AttendingFarmer = InstanceId.Null();
 			}
 		}
 
@@ -236,7 +256,7 @@ namespace Lunra.Hothouse.Models
 			SelectedSeed = selectedSeed;
 			Plots = new FarmPlot[0];
 			
-			LastUpdated = DateTime.MinValue;
+			SetLastUpdated(DayTime.Zero);
 		}
 
 		public override string ToString()

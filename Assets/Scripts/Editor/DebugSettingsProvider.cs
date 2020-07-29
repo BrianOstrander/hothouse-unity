@@ -21,10 +21,26 @@ namespace Lunra.Hothouse.Editor
 		const string KeyPrefix = SettingsProviderStrings.ProjectKeyPrefix + "DebugSettings.";
 
 		public static EditorPrefsBool AutoRevealRooms = new EditorPrefsBool(KeyPrefix + "AutoRevealRooms");
+		public static EditorPrefsBool LogGameOverAnalysis = new EditorPrefsBool(KeyPrefix + "LogGameOverAnalysis");
+		public static EditorPrefsBool GameOverOnDwellerDeath = new EditorPrefsBool(KeyPrefix + "GameOverOnDwellerDeath");
+		public static EditorPrefsBool AutoRestartOnGameOver = new EditorPrefsBool(KeyPrefix + "AutoRestartOnGameOver");
 	}
 	
 	public class DebugSettingsProvider : SettingsProvider
 	{
+		struct GameOverAnalysis
+		{
+			public string Id;
+			public GameResult Result;
+			public string Summary;
+
+			public DayTime SurvivalMinimum;
+			public DayTime SurvivalMaximum;
+			public DayTime SurvivalAverage;
+
+			public TimeSpan PlaytimeElapsed;
+		}
+		
 		static class Content
 		{
 			public static GUIContent OpenDebugSettingsProvider = new GUIContent("Open Debug Settings Provider");
@@ -33,14 +49,19 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent StartNewGame = new GUIContent("Start New Game");
 			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
 			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
-			public static GUIContent AutoRevealRooms = new GUIContent("Auto Reveal");
 			public static GUIContent OpenAllDoors = new GUIContent("Open All Doors");
 			public static GUIContent SimulationSpeedReset = new GUIContent("Reset");
 			public static GUIContent SimulationSpeedIncrease = new GUIContent("->", "Increase");
 			public static GUIContent SimulationSpeedDecrease = new GUIContent("<-", "Decrease");
+			
+			public static GUIContent LogGameOverAnalysis = new GUIContent("Log Game Over Analysis");
+			public static GUIContent AutoRestartOnGameOver = new GUIContent("Auto Restart On Game Over");
 		}
 
 		string lastAutoRevealedRoomsForGameId;
+
+		int previousDwellerCount = int.MinValue;
+		Stack<GameOverAnalysis> gameOverAnalyses = new Stack<GameOverAnalysis>();
 
 		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope)
 		{
@@ -55,17 +76,22 @@ namespace Lunra.Hothouse.Editor
 
 			provider.keywords = new []
 			{
+				DebugSettings.AutoRevealRooms.LabelName,
+				DebugSettings.LogGameOverAnalysis.LabelName,
+				DebugSettings.AutoRestartOnGameOver.LabelName,
+				
 				Content.OpenDebugSettingsProvider.text,
 				Content.OpenSaveLocation.text,
 				Content.SaveAndCopySerializedGameToClipboard.text,
 				Content.StartNewGame.text,
 				Content.QueueNavigationCalculation.text,
 				Content.RevealAllRooms.text,
-				Content.AutoRevealRooms.text,
 				Content.OpenAllDoors.text,
 				Content.SimulationSpeedReset.text,
 				Content.SimulationSpeedIncrease.text,
-				Content.SimulationSpeedDecrease.text
+				Content.SimulationSpeedDecrease.text,
+				Content.LogGameOverAnalysis.text,
+				Content.AutoRestartOnGameOver.text
 			};
 			
 			return provider;
@@ -119,6 +145,10 @@ namespace Lunra.Hothouse.Editor
 					if (GUILayout.Button(Content.SimulationSpeedIncrease)) game.SimulationMultiplier.Value++;
 				}
 				GUILayout.EndHorizontal();
+				
+				DebugSettings.LogGameOverAnalysis.Draw();
+				DebugSettings.AutoRestartOnGameOver.Draw();
+				DebugSettings.GameOverOnDwellerDeath.Draw();
 				
 				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 
@@ -239,11 +269,83 @@ namespace Lunra.Hothouse.Editor
 		
 		void OnUpdate()
 		{
-			if (GameStateEditorUtility.GetGame(out var game, out var state) && DebugSettings.AutoRevealRooms.Value && App.S.CurrentEvent == StateMachine.Events.Idle)
+			if (GameStateEditorUtility.GetGame(out var game, out _) && App.S.CurrentEvent == StateMachine.Events.Idle)
 			{
-				if (string.IsNullOrEmpty(lastAutoRevealedRoomsForGameId) || lastAutoRevealedRoomsForGameId != game.Id.Value)
+				if (DebugSettings.AutoRevealRooms.Value && (string.IsNullOrEmpty(lastAutoRevealedRoomsForGameId) || lastAutoRevealedRoomsForGameId != game.Id.Value))
 				{
 					RevealAllRooms(game);
+				}
+
+				if (game.GameResult.Value.State == GameResult.States.Unknown && DebugSettings.GameOverOnDwellerDeath.Value)
+				{
+					var dwellerCount = game.Dwellers.AllActive.Length;
+
+					if (dwellerCount < previousDwellerCount)
+					{
+						game.GameResult.Value = new GameResult(
+							GameResult.States.Displaying,
+							"DEBUG: Dweller died",
+							game.SimulationTime.Value
+						);
+
+						previousDwellerCount = int.MinValue;
+					}
+					else previousDwellerCount = dwellerCount;
+				}
+
+				if (game.GameResult.Value.State == GameResult.States.Displaying)
+				{
+					if (DebugSettings.LogGameOverAnalysis.Value && (gameOverAnalyses.None() || gameOverAnalyses.Peek().Id != game.Id.Value))
+					{
+						var analysis = new GameOverAnalysis();
+
+						analysis.Result = game.GameResult.Value;
+
+						analysis.Summary = analysis.Result.Reason;
+						analysis.Summary += "\nDweller Deaths:";
+
+						foreach (var logEntry in game.EventLog.DwellerEntries.PeekAll().Where(e => e.Message.Contains("died")))
+						{
+							analysis.Summary += $"\n - [ {logEntry.SimulationTime} ] {logEntry.Message}";
+						}
+
+						analysis.SurvivalMinimum = analysis.Result.TimeSurvived;
+						analysis.SurvivalMaximum = analysis.Result.TimeSurvived;
+						analysis.SurvivalAverage = analysis.Result.TimeSurvived;
+
+						var count = 1f;
+						
+						foreach (var previousAnalysis in gameOverAnalyses)
+						{
+							if (previousAnalysis.Result.TimeSurvived < analysis.SurvivalMinimum) analysis.SurvivalMinimum = previousAnalysis.Result.TimeSurvived;
+							if (analysis.SurvivalMaximum < previousAnalysis.Result.TimeSurvived) analysis.SurvivalMaximum = previousAnalysis.Result.TimeSurvived;
+							
+							analysis.SurvivalAverage += previousAnalysis.Result.TimeSurvived;
+							count++;
+						}
+
+						analysis.SurvivalAverage = new DayTime(analysis.SurvivalAverage.TotalTime / count);
+
+						analysis.Summary += "\nSurvival Times:";
+						analysis.Summary += "\n - Current: \t"+analysis.Result.TimeSurvived;
+						analysis.Summary += "\n - Minimum: \t"+analysis.SurvivalMinimum;
+						analysis.Summary += "\n - Maximum: \t"+analysis.SurvivalMaximum;
+						analysis.Summary += "\n - Average: \t"+analysis.SurvivalAverage;
+
+						analysis.PlaytimeElapsed = game.PlaytimeElapsed.Value;
+
+						analysis.Summary += $"\nPlaytime Elapsed:\n - {analysis.PlaytimeElapsed:g}";
+						
+						gameOverAnalyses.Push(analysis);
+						
+						Debug.Log(analysis.Summary);
+					}
+					
+					if (DebugSettings.AutoRestartOnGameOver.Value)
+					{
+						game.GameResult.Value = game.GameResult.Value.New(GameResult.States.Failure);
+						previousDwellerCount = int.MinValue;
+					}
 				}
 			}
 		}

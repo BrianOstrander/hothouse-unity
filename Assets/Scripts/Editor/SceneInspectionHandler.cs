@@ -473,13 +473,22 @@ namespace Lunra.Hothouse.Editor
 							break;
 					}
 
-					Handles.color = farmPlot.AttendingFarmer.IsNull ? farmPlotColor.NewA(0.5f) : farmPlotColor;
+					Handles.color = farmPlotColor.NewA(0.5f);
 
 					Handles.DrawWireDisc(
 						farmPlot.Position,
 						Vector3.up,
 						0.2f
 					);
+
+					if (!farmPlot.AttendingFarmer.IsNull)
+					{
+						Handles.DrawWireDisc(
+							farmPlot.Position,
+							Vector3.up,
+							0.15f
+						);	
+					}
 				}
 			}
 
