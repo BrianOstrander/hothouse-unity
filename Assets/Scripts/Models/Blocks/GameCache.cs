@@ -22,6 +22,7 @@ namespace Lunra.Hothouse.Models
 			result.UniqueObligationsAvailable = new string[0];
 			result.AnyObligationsAvailable = false;
 			result.LowRationThreshold = 0;
+			result.GoalsDiscontentDeltaByMotive = EnumExtensions.GetValues(Motives.Unknown, Motives.None).Select(m => (m, 0f)).ToArray();
 			result.Conditions = new Dictionary<Condition.Types, bool>().ToReadonlyDictionary();
 			
 			return result;
@@ -37,7 +38,10 @@ namespace Lunra.Hothouse.Models
 		public string[] UniqueObligationsAvailable { get; private set; }
 		public bool AnyObligationsAvailable { get; private set; }
 		public int LowRationThreshold { get; private set; }
-		public GoalSnapshot AverageGoals { get; private set; }
+		public GoalSnapshot GoalsAverage { get; private set; }
+		public float GoalsDiscontentDelta { get; private set; }
+		public (Motives Motive, float DiscontentDelta)[] GoalsDiscontentDeltaByMotive { get; private set; }
+	
 		public ReadOnlyDictionary<Condition.Types, bool> Conditions { get; private set; }
 
 		public GameCache Calculate(GameModel game)
@@ -146,13 +150,29 @@ namespace Lunra.Hothouse.Models
 				goals[motive] = goal;
 			}
 			
-			result.AverageGoals = new GoalSnapshot(
+			result.GoalsAverage = new GoalSnapshot(
 				getGoalResult(goalsTotal),
 				goals
 					.Select(g => (g.Key, getGoalResult(g.Value)))
 					.ToArray()
 			);
-			
+
+			float getWeightedGoalDiscontentDelta(float lastDiscontent, float nextDiscontent)
+			{
+				const float PredictedGoalDiscontentWeight = 0.95f;
+				return (lastDiscontent * PredictedGoalDiscontentWeight) + (nextDiscontent * (1f - PredictedGoalDiscontentWeight));
+			}
+
+			result.GoalsDiscontentDelta = getWeightedGoalDiscontentDelta(GoalsDiscontentDelta, result.GoalsAverage.Total.Discontent);
+
+			var currGoalsByMotive = GoalsDiscontentDeltaByMotive;
+
+			result.GoalsDiscontentDeltaByMotive = result.GoalsAverage.Values
+				.Select(
+					v => (v.Motive, getWeightedGoalDiscontentDelta(currGoalsByMotive.First(l => l.Motive == v.Motive).DiscontentDelta, v.Value.Discontent))
+				)
+				.ToArray();
+
 			result.Conditions = EnumExtensions
 				.GetValues(Condition.Types.Unknown)
 				.ToReadonlyDictionary(

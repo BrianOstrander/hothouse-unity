@@ -1,3 +1,4 @@
+using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services.Editor;
@@ -101,6 +102,36 @@ namespace Lunra.Hothouse.Editor
 									9999f,
 									dweller
 								);
+							}
+						}
+						GUILayout.EndHorizontal();
+
+						var addRemoveButtonWidth = GUILayout.Width(48f);
+						
+						GUILayout.BeginHorizontal();
+						{
+							GUILayout.Label("Add");
+							
+							foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
+							{
+								if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
+								{
+									dweller.Goals.Apply((motive, 0.5f));
+								}	
+							}
+						}
+						GUILayout.EndHorizontal();
+						
+						GUILayout.BeginHorizontal();
+						{
+							GUILayout.Label("Remove");
+							
+							foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
+							{
+								if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
+								{
+									dweller.Goals.Apply((motive, 0.5f));
+								}	
 							}
 						}
 						GUILayout.EndHorizontal();

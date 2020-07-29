@@ -84,7 +84,7 @@ namespace Lunra.Hothouse.Presenters
 					break;
 				case Interaction.States.Begin:
 				case Interaction.States.Active:
-					camera.Transform.Position.Value += ((camera.Transform.Rotation.Value * game.Interaction.CameraPan.Value.Value.Current) * (camera.PanVelocity.Value * Time.deltaTime));
+					camera.Transform.Position.Value += ((camera.Transform.Rotation.Value * game.Interaction.CameraPan.Value.Value.Current) * (camera.PanVelocity.Value * Time.unscaledDeltaTime));
 					break;
 				default:
 					Debug.LogError("Unrecognized State: "+game.Interaction.CameraPan.Value.State);
@@ -98,7 +98,7 @@ namespace Lunra.Hothouse.Presenters
 					break;
 				case Interaction.States.Begin:
 				case Interaction.States.Active:
-					camera.Transform.Rotation.Value *= Quaternion.Euler(Vector3.up * (game.Interaction.CameraOrbit.Value.Value.Current * camera.OrbitVelocity.Value * Time.deltaTime));		
+					camera.Transform.Rotation.Value *= Quaternion.Euler(Vector3.up * (game.Interaction.CameraOrbit.Value.Value.Current * camera.OrbitVelocity.Value * Time.unscaledDeltaTime));
 					break;
 				default:
 					Debug.LogError("Unrecognized State: "+game.Interaction.CameraPan.Value.State);

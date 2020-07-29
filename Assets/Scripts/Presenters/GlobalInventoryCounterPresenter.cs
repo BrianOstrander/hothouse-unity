@@ -85,11 +85,11 @@ namespace Lunra.Hothouse.Presenters
 				result += $"\n<color={color}>{title}: {discontentNormal:N2}</color>";
 			}
 
-			if (cache.AverageGoals.Values != null)
+			if (cache.GoalsAverage.Values != null)
 			{
-				appendDiscontent("Total", cache.AverageGoals.Total.DiscontentNormal);
+				appendDiscontent("Total", cache.GoalsAverage.Total.DiscontentNormal);
 
-				foreach (var goal in cache.AverageGoals.Values)
+				foreach (var goal in cache.GoalsAverage.Values)
 				{
 					appendDiscontent(goal.Motive.ToString(), goal.Value.DiscontentNormal);
 				}
