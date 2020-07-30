@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Models
 		protected GameModel Game { get; private set; }
 		protected Demon Generator { get; private set; }
 		
-		public virtual FloatRange AgeDuration => new FloatRange(7f, 10f);
+		public virtual FloatRange AgeDuration => new FloatRange(14f, 20f);
 		public virtual FloatRange ReproductionDuration => new FloatRange(7f, 14f);
 		public virtual FloatRange ReproductionRadius => new FloatRange(0.5f, 1f);
 		public virtual int ReproductionFailureLimit => 40;
@@ -33,16 +33,16 @@ namespace Lunra.Hothouse.Models
 
 		public virtual ModifierDefinition[] AgeModifiers => new[]
 		{
-			ModifierDefinition.NoStacking(Tags.Farm.Sown, 1f),
-			ModifierDefinition.NoStacking(Tags.Farm.Tended, 2f),
-			ModifierDefinition.NoStacking(Tags.Water.Applied, 4f),
+			ModifierDefinition.NoStacking(Tags.Farm.Sown, 0.25f),
+			ModifierDefinition.NoStacking(Tags.Farm.Tended, 0.25f),
+			ModifierDefinition.NoStacking(Tags.Water.Applied, 0.5f),
 		};
 		
 		public virtual ModifierDefinition[] ReproductionModifiers => new[]
 		{
 			ModifierDefinition.NoStacking(Tags.Farm.Sown, -0.25f),
 			ModifierDefinition.NoStacking(Tags.Farm.Tended, -0.5f),
-			ModifierDefinition.NoStacking(Tags.Water.Applied, 2f),
+			ModifierDefinition.NoStacking(Tags.Water.Applied, 0.5f),
 		};
 
 		public void Initialize(

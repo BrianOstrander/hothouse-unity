@@ -8,9 +8,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 	public class SatiateGoalsState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
+		const int IdleCountMaximum = 10;
+		
 		public override string Name => "SatiateGoals";
 
 		TimeoutState timeoutState;
+		int idleCount;
 		
 		public override void OnInitialize()
 		{
@@ -25,7 +28,17 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToReturnOnShiftBegin()	
 			);
 		}
-		
+
+		public override void Begin()
+		{
+			idleCount = 0;
+		}
+
+		public override void Idle()
+		{
+			if (Agent.JobShift.Value.Contains(Game.SimulationTime.Value)) idleCount++;
+		}
+
 		public class ToSatiateGoalsOnShiftEnd : AgentTransition<S, SatiateGoalsState<S>, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => !Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
@@ -33,7 +46,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		class ToReturnOnShiftBegin : AgentTransition<SatiateGoalsState<S>, S, GameModel, DwellerModel>
 		{
-			public override bool IsTriggered() => Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
+			public override bool IsTriggered()
+			{
+				if (!Agent.JobShift.Value.Contains(Game.SimulationTime.Value)) return false;
+
+				return !Agent.Goals.AnyAtMaximum || IdleCountMaximum <= SourceState.idleCount;
+			}
 		}
 
 		class ToTimeoutOnActivity : AgentTransition<SatiateGoalsState<S>, TimeoutState, GameModel, DwellerModel>

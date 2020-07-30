@@ -74,12 +74,14 @@ namespace Lunra.Hothouse.Models
 				{
 					case Motives.Sleep:
 						calculateGoal = insistence => Mathf.Pow(insistence + 0.05f, 10f) - 0.01f;
-						calculateGoalOverflowEffects = getHurtOverflowEffects();
+						calculateGoalOverflowEffects = getHurtOverflowEffects(
+							simulationTimeAtMaximum => Mathf.Max(0f, simulationTimeAtMaximum - 10f)
+						);
 						break;
 					case Motives.Eat:
 						calculateGoal = insistence => Mathf.Pow(insistence, 5f) - 0.01f;
 						calculateGoalOverflowEffects = getHurtOverflowEffects(
-							simulationTimeAtMaximum => Mathf.Pow(simulationTimeAtMaximum, 2f)
+							simulationTimeAtMaximum => Mathf.Pow(Mathf.Max(0f, simulationTimeAtMaximum - 16f), 2f)
 						);
 						break;
 					case Motives.Comfort:

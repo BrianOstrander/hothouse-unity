@@ -66,7 +66,7 @@ namespace Lunra.Hothouse.Presenters
 
 				if (Game.Cache.Value.SeedsWithCapacity.Contains(Model.Seed.Value))
 				{
-					result += (Model.Seed.Value, Mathf.Max(1, seedCount));
+					result += (Model.Seed.Value, Mathf.Max(2, seedCount));
 				}
 			}
 

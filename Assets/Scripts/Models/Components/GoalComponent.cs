@@ -47,6 +47,8 @@ namespace Lunra.Hothouse.Models
 		#region Non Serialized
 		CalculateGoal calculateGoal;
 		CalculateGoalOverflowEffects calculateGoalOverflowEffects;
+
+		[JsonIgnore] public bool AnyAtMaximum => Caches.Any(c => !Mathf.Approximately(c.SimulatedTimeAtMaximum, 0f));
 		#endregion
 
 		public GoalComponent()

@@ -30,8 +30,8 @@ namespace Lunra.Hothouse.Models
 			new Recipe(
 				"Stalk Pop",
 				Inventory.FromEntry(Inventory.Types.StalkSeed, 1),
-				Inventory.FromEntry(Inventory.Types.StalkPop, 1),
-				DayTime.FromHours(4f)
+				Inventory.FromEntry(Inventory.Types.StalkPop, 2),
+				DayTime.FromHours(2f)
 			),
 		};
 		public override Jobs[] WorkplaceForJobs => new[] {Jobs.Smoker};

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.NumberDemon;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
@@ -25,11 +26,15 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		States state = States.Idle;
 		TimeoutState timeoutInstance;
+		Demon generator;
+		float readyToSowRatio;
 		
 		public override void OnInitialize()
 		{
 			base.OnInitialize();
 			
+			generator = new Demon();
+
 			AddChildStates(
 				new CleanupState(),
 				new InventoryRequestState(),
@@ -64,6 +69,41 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new CleanupState.ToCleanupOnItemsAvailable()
 			);
 		}
+
+		void CalculateReadyToSowRatio()
+		{
+			var readyToSowCount = 0f;
+			var sownCount = 0f;
+
+			foreach (var plot in Workplace.Farm.Plots)
+			{
+				switch (plot.State)
+				{
+					case FarmPlot.States.Invalid:
+					case FarmPlot.States.Blocked:
+						break;
+					case FarmPlot.States.ReadyToSow:
+						readyToSowCount++;
+						break;
+					case FarmPlot.States.Sown:
+						sownCount++;
+						break;
+					default:
+						Debug.LogError("Unrecognized state: "+plot.State);
+						break;
+				}
+			}
+
+			var total = readyToSowCount + sownCount;
+
+			if (Mathf.Approximately(0f, total))
+			{
+				readyToSowRatio = 1f;
+				return;
+			}
+
+			readyToSowRatio = readyToSowCount / total;
+		}
 		
 		public override void Begin()
 		{
@@ -75,34 +115,39 @@ namespace Lunra.Hothouse.Ai.Dweller
 			if (Workplace.Farm.Plots.None() || (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed && Workplace.Farm.LastUpdatedRealTime < Game.NavigationMesh.LastUpdated.Value))
 			{
 				Workplace.Farm.CalculatePlots(Game, Workplace);
+				CalculateReadyToSowRatio();
 			}
 			else if (state == States.Idle && CalculateFloraObligationsDelay < (Game.SimulationTime.Value - Workplace.Farm.LastUpdated))
 			{
 				Workplace.Farm.CalculateFloraObligations(Game, Workplace);
+				CalculateReadyToSowRatio();
 			}
 		}
 
 		public override void Idle()
 		{
-			if (state == States.Idle && 0 < Workplace.Inventory.All.Value.TotalWeight)
-			{
-				Debug.LogWarning("Idk what happened but we're idling with seeds available...");
-				Debug.Break();
-			}
-			
 			if (state == States.Idle) return;
 
 			state = States.Idle;
 			Workplace.Farm.RemoveAttendingFarmer(Agent.Id.Value);
+			CalculateReadyToSowRatio();
 		}
 
 		class ToDestroyOvergrownFlora : DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation
 		{
+			bool isDestroyingFarmedFlora;
+			
+			public override bool IsTriggered()
+			{
+				isDestroyingFarmedFlora = SourceState.readyToSowRatio < SourceState.generator.NextFloat;
+				return base.IsTriggered();
+			}
+
 			protected override bool IsObligationParentValid(IObligationModel obligationParent)
 			{
 				if (obligationParent is FloraModel obligationParentFlora && !obligationParentFlora.Farm.Value.IsNull)
 				{
-					return obligationParentFlora.Farm.Value.Id == SourceState.Workplace.Id.Value;
+					return isDestroyingFarmedFlora && obligationParentFlora.Farm.Value.Id == SourceState.Workplace.Id.Value;
 				}
 				
 				return SourceState.Workplace.Farm.Plots
@@ -137,7 +182,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				SourceState.state = States.Sowing;
 				
 				SourceState.timeoutInstance.ConfigureForInterval(
-					DayTime.FromHours(1f),
+					DayTime.FromMinutes(15f),
 					delta =>
 					{
 						if (delta.IsDone)
@@ -264,7 +309,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				SourceState.state = States.Tending;
 				
 				SourceState.timeoutInstance.ConfigureForInterval(
-					DayTime.FromHours(1f),
+					DayTime.FromMinutes(15f),
 					delta =>
 					{
 						if (delta.IsDone)

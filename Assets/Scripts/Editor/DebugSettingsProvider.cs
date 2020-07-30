@@ -327,10 +327,11 @@ namespace Lunra.Hothouse.Editor
 						analysis.SurvivalAverage = new DayTime(analysis.SurvivalAverage.TotalTime / count);
 
 						analysis.Summary += "\nSurvival Times:";
-						analysis.Summary += "\n - Current: \t"+analysis.Result.TimeSurvived;
 						analysis.Summary += "\n - Minimum: \t"+analysis.SurvivalMinimum;
 						analysis.Summary += "\n - Maximum: \t"+analysis.SurvivalMaximum;
 						analysis.Summary += "\n - Average: \t"+analysis.SurvivalAverage;
+						analysis.Summary += "\n";
+						analysis.Summary += "\n - Current: \t"+analysis.Result.TimeSurvived;
 
 						analysis.PlaytimeElapsed = game.PlaytimeElapsed.Value;
 
