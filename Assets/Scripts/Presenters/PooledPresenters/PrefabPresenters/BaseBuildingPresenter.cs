@@ -57,6 +57,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
+			Model.Tags.Bind();
 			Model.Obligations.Bind(
 				ObligationCategories.Construct.Assemble,
 				OnObligationsConstructAssemble
@@ -92,6 +93,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
+			Model.Tags.UnBind();
 			Model.Obligations.UnBind(
 				ObligationCategories.Construct.Assemble,
 				OnObligationsConstructAssemble

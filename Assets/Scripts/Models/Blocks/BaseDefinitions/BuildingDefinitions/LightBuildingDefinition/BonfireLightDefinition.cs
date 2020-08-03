@@ -12,6 +12,16 @@ namespace Lunra.Hothouse.Models
 				},
 				DayTime.FromMinutes(15f)
 			),
+			new GoalActivity(
+				GetActionName(Motives.Sleep),
+				new []
+				{
+					(Motives.Sleep, -0.33f),
+					(Motives.Comfort, 0.5f),
+					(Motives.Heal, -0.1f)
+				},
+				DayTime.FromHours(8f)
+			), 
 		};
 	}
 }

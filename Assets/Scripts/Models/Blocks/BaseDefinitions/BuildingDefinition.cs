@@ -31,6 +31,8 @@ namespace Lunra.Hothouse.Models
 		public virtual GoalActivity[] Activities => new GoalActivity[0];
 		
 		public virtual Jobs[] WorkplaceForJobs => new Jobs[0];
+
+		public virtual string[] Tags => new string[0];
 		
 		public virtual void Reset(
 			BuildingModel model,
@@ -119,6 +121,9 @@ namespace Lunra.Hothouse.Models
 			);
 
 			model.Activities.Reset(Activities);
+			
+			model.Tags.Reset(Game);
+			foreach (var tag in Tags) model.Tags.AddTag(tag);
 		}
 
 		public override void Instantiate(BuildingModel model) => new BuildingPresenter(Game, model);

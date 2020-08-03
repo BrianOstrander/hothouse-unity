@@ -87,7 +87,7 @@ namespace Lunra.Hothouse.Models
 					e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
 				)
 			);
-			model.Tags.Reset();
+			model.Tags.Reset(Game);
 			
 			model.AgeModifier.Reset(AgeModifiers);
 			model.ReproductionModifier.Reset(ReproductionModifiers);

@@ -10,12 +10,12 @@ namespace Lunra.Hothouse.Models
 {
 	public class BuildingModel : PrefabModel,
 		ILightModel,
-		IBoundaryModel,
 		IHealthModel,
 		IConstructionModel,
 		IRecipeModel,
 		IFarmModel,
-		IGoalActivityModel
+		IGoalActivityModel,
+		ITagModel
 	{
 		#region Serialized
 		[JsonProperty] string type;
@@ -39,6 +39,7 @@ namespace Lunra.Hothouse.Models
 		public RecipeComponent Recipes { get; } = new RecipeComponent();
 		public FarmComponent Farm { get; } = new FarmComponent();
 		public GoalActivityComponent Activities { get; } = new GoalActivityComponent();
+		public TagComponent Tags { get; } = new TagComponent();
 		#endregion
 		
 		#region Non Serialized

@@ -359,7 +359,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						if (plot.Flora.TryGetInstance<FloraModel>(Game, out var flora))
 						{
 							if (flora.Age.Value.IsDone) continue;
-							if (flora.Tags.Containts(Tags.Farm.Tended)) continue;
+							if (flora.Tags.Contains(Tags.Farm.Tended)) continue;
 							selectedPlot = plot;
 							return true;
 						}

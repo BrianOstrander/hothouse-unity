@@ -32,6 +32,28 @@ namespace Lunra.Hothouse.Ai.Dweller
 		public override void Begin()
 		{
 			idleCount = 0;
+
+			if (Agent.Bed.Value.TryGetInstance<IClaimOwnershipModel>(Game, out var bed) && bed.Ownership.Contains(Agent)) return;
+			
+			Agent.Bed.Value = InstanceId.Null();
+
+			foreach (var possibleBed in Game.Buildings.AllActive.Where(m => m.Tags.Contains(BuildingTags.Bed)))
+			{
+				if (possibleBed.Ownership.IsFull) continue;
+
+				var isNavigable = NavigationUtility.CalculateNearest(
+					Agent.Transform.Position.Value,
+					out _,
+					Navigation.QueryEntrances(possibleBed)
+				);
+
+				if (isNavigable)
+				{
+					possibleBed.Ownership.Add(Agent);
+					Agent.Bed.Value = possibleBed.GetInstanceId();
+					return;
+				}
+			}
 		}
 
 		public override void Idle()
@@ -141,6 +163,15 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 					foreach (var activity in availableActivities)
 					{
+						if (activity.RequiresOwnership)
+						{
+							if (activityParent is IClaimOwnershipModel activityParentClaimOwnershipModel)
+							{
+								if (!activityParentClaimOwnershipModel.Ownership.Contains(Agent)) continue;
+							}
+							else Debug.LogWarning($"Activity {activity.Id} on {activityParent.ShortId} requires ownership but parent of type {activityParent.GetType().Name} does not implement {nameof(IClaimOwnershipModel)}");
+						}
+						
 						var hasLessDiscontent = Agent.Goals.TryCalculateDiscontent(
 							activity,
 							deltaTime,

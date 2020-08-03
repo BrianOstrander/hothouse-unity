@@ -58,6 +58,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region NonSerialized
+		GameModel game;
 		#endregion
 		
 		public TagComponent()
@@ -75,7 +76,11 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public bool Containts(string tag) => All.Value.Any(t => t.Tag == tag);
+		public void Bind() => game.SimulationUpdate += OnGameSimulationUpdate;
+
+		public void UnBind() => game.SimulationUpdate -= OnGameSimulationUpdate;
+		
+		public bool Contains(string tag) => All.Value.Any(t => t.Tag == tag);
 
 		public void AddTag(
 			string tag,
@@ -112,17 +117,20 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 
-		public void Update(DayTime simulatedTime)
+		#region GameModel Events
+		void OnGameSimulationUpdate()
 		{
-			if (simulatedTime < NextExpiration.Value) return;
+			if (game.SimulationTime.Value < NextExpiration.Value) return;
 
 			allListener.Value = All.Value
-				.Where(t => simulatedTime < t.Expiration)
+				.Where(t => game.SimulationTime.Value < t.Expiration)
 				.ToArray();
 		}
+		#endregion
 		
-		public void Reset()
+		public void Reset(GameModel game)
 		{
+			this.game = game;
 			allListener.Value = new Entry[0];
 			nextExpirationListener.Value = DayTime.MaxValue;
 		}

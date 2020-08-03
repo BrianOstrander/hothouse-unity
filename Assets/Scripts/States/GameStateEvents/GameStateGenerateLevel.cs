@@ -561,7 +561,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			// Debugging Begin
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
-			payload.Game.SimulationMultiplier.Value = 60f;
+			// payload.Game.SimulationMultiplier.Value = 60f;
 			
 			payload.Game.Buildings.Activate<BedrollDefinition>(
 				spawn.RoomTransform.Id.Value,
