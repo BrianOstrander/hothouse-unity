@@ -43,6 +43,8 @@ namespace Lunra.Hothouse.Services
 			if (Payload.Game.Rooms.AllActive.None()) new GameStateGenerateLevel(this).Push();
 			
 			App.S.PushBlocking(OnBeginInitializeCache);
+			
+			App.S.Push(OnBeginInitializeServices);
 		}
 
 		void OnBeginLoadScenes(Action done)
@@ -95,6 +97,11 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.InitializeCache(); 
 			
 			done();
+		}
+
+		void OnBeginInitializeServices()
+		{
+			new PopulationService(Payload.Game);
 		}
 		#endregion
 

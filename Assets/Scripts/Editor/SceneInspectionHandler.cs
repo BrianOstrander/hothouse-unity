@@ -511,7 +511,7 @@ namespace Lunra.Hothouse.Editor
 
 			Handles.Label(
 				position + (Vector3.up * 3f),
-				StringExtensions.Wrap(result, "<color=cyan>", "</color>"),
+				result.Wrap("<color=cyan>", "</color>"),
 				labelStyle
 			);
 		}

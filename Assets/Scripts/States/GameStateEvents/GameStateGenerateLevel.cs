@@ -495,13 +495,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				
 				var dweller = payload.Game.Dwellers.Activate(
 					spawn.Id.Value,
-					position
+					position,
+					generator
 				);
 
 				if (i < requiredJobs.Length) dweller.Job.Value = requiredJobs[i];
 				else dweller.Job.Value = generator.GetNextFrom(randomJobPool);
-
-				dweller.Name.Value = payload.Game.DwellerNames.GetName(generator);
+				
 				// dweller.IsDebugging = i == 0;
 			}
 

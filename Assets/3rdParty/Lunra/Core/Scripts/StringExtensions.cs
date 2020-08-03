@@ -20,8 +20,21 @@ namespace Lunra.Core
 		// TODO: Convert to use "this string"
 		public static string GetNonNullOrEmpty(string value, string defaultValue) => string.IsNullOrEmpty(value) ? defaultValue : value;
 
-		// TODO: Convert to use "this string"
-		public static string Wrap(string value, string begin, string end) => begin + value + end;
+		public static string Wrap(
+			this string value,
+			string begin,
+			string end
+		) => begin + value + end;
+
+		public static string WrapColor(
+			this string value,
+			string color
+		) => value.Wrap($"<color={color}>", "</color>");
+		
+		public static string WrapColor(
+			this string value,
+			Color color
+		) => value.Wrap($"<color=#{color.ToHtmlRgba()}>", "</color>");
 
 		public static string ToSnakeCase(this string value)
 		{

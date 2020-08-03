@@ -69,10 +69,9 @@ namespace Lunra.Hothouse.Presenters
 		
 			if (result.IsTargetDestroyed)
 			{
-				Game.EventLog.DwellerEntries.Enqueue(
+				Game.EventLog.Dwellers.Push(
 					new EventLogModel.Entry(
-						StringExtensions.Wrap(
-							Model.Name.Value + " died from " + affliction,
+						(Model.Name.Value + " died from " + affliction).Wrap(
 							"<color=red>",
 							"</color>"
 						),
@@ -83,10 +82,9 @@ namespace Lunra.Hothouse.Presenters
 			}
 			else
 			{
-				Game.EventLog.DwellerEntries.Enqueue(
+				Game.EventLog.Dwellers.Push(
 					new EventLogModel.Entry(
-						StringExtensions.Wrap(
-							Model.Name.Value + " is suffering from " + affliction,
+						(Model.Name.Value + " is suffering from " + affliction).Wrap(
 							"<color=yellow>",
 							"</color>"
 						),

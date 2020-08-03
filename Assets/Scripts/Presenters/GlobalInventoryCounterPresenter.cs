@@ -70,7 +70,7 @@ namespace Lunra.Hothouse.Presenters
 						break;
 				}
 				
-				result += StringExtensions.Wrap(type + ": " + count + " / " + maximum + "\n", "<color="+color+">", "</color>");
+				result += (type + ": " + count + " / " + maximum + "\n").Wrap("<color="+color+">", "</color>");
 			}
 			
 			void appendDiscontent(string title, float discontentNormal)
@@ -97,13 +97,29 @@ namespace Lunra.Hothouse.Presenters
 
 			result += "\n";
 
-			var dwellerEvents = game.EventLog.DwellerEntries.PeekAll()
+			var dwellerEvents = game.EventLog.Dwellers.PeekAll()
 				.Where(e => DayTime.Elapsed(game.SimulationTime.Value, e.SimulationTime).TotalTime < (DayTime.TimeInDay * 2f))
+				.DistinctBy(e => e.Message)
 				.ToList();
 			
 			for (var i = 0; i < Mathf.Min(10, dwellerEvents.Count); i++)
 			{
 				result += "\n - " + dwellerEvents[i];
+			}
+
+			var alertEvents = game.EventLog.Alerts.PeekAll()
+				.Where(e => DayTime.Elapsed(game.SimulationTime.Value, e.SimulationTime).TotalTime < (DayTime.TimeInDay * 2f))
+				.DistinctBy(e => e.Message)
+				.ToList();
+
+			if (alertEvents.Any())
+			{
+				result += "\n ------";
+
+				for (var i = 0; i < Mathf.Min(10, alertEvents.Count); i++)
+				{
+					result += "\n - " + alertEvents[i];
+				}
 			}
 
 			View.Label = result;

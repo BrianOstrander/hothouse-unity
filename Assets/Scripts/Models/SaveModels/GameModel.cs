@@ -26,6 +26,7 @@ namespace Lunra.Hothouse.Models
 		public EventLogModel EventLog { get; } = new EventLogModel();
 		public JobManageModel JobManage { get; } = new JobManageModel();
 		public BuildingManageModel BuildingManage { get; } = new BuildingManageModel();
+		public PopulationModel Population { get; } = new PopulationModel();
 
 		public ItemDropPoolModel ItemDrops { get; } = new ItemDropPoolModel();
 		public RoomPoolModel Rooms { get; } = new RoomPoolModel();

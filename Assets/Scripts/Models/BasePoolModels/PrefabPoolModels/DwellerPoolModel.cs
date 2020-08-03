@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
 using Lunra.NumberDemon;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
 	public class DwellerPoolModel : BasePrefabPoolModel<DwellerModel>
 	{
-		
 		struct GoalCalculationCache
 		{
 			public Motives Motive { get; }
@@ -36,13 +36,14 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		
-		static readonly string[] ValidPrefabIds = new[]
+		static readonly string[] ValidPrefabIds =
 		{
 			"default"
 		};
 
-		Dictionary<Motives, GoalCalculationCache> goalCalculationCache = new Dictionary<Motives, GoalCalculationCache>();
 		GameModel game;
+		Dictionary<Motives, GoalCalculationCache> goalCalculationCache = new Dictionary<Motives, GoalCalculationCache>();
+		Demon generator = new Demon();
 		
 		public override void Initialize(GameModel game)
 		{
@@ -109,7 +110,8 @@ namespace Lunra.Hothouse.Models
 
 		public DwellerModel Activate(
 			string roomId,
-			Vector3 position
+			Vector3 position,
+			Demon generator = null
 		)
 		{
 			var result = Activate(
@@ -117,14 +119,17 @@ namespace Lunra.Hothouse.Models
 				roomId,
 				position,
 				RandomRotation,
-				model => Reset(model)
+				model => Reset(model, generator ?? this.generator)
 			);
 			return result;
 		}
 		
 		Quaternion RandomRotation => Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
 
-		void Reset(DwellerModel model)
+		void Reset(
+			DwellerModel model,
+			Demon generator
+		)
 		{
 			// Agent Properties
 			// TODO: NavigationPlan and others may need to be reset...
@@ -170,6 +175,8 @@ namespace Lunra.Hothouse.Models
 			);
 			
 			model.GoalPromises.Reset();
+			
+			model.Name.Value = game.DwellerNames.GetName(generator);
 		}
 
 		GoalResult OnCalculateGoal(

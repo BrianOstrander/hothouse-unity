@@ -23,6 +23,9 @@ namespace Lunra.Hothouse.Models
 			result.AnyObligationsAvailable = false;
 			result.LowRationThreshold = 0;
 			result.GoalsDiscontentDeltaByMotive = EnumExtensions.GetValues(Motives.Unknown, Motives.None).Select(m => (m, 0f)).ToArray();
+			result.LastPopulationDecrease = DayTime.Zero;
+			result.LastPopulationIncrease = DayTime.Zero;
+			result.LastPopulationChange = DayTime.Zero;
 			result.Conditions = new Dictionary<Condition.Types, bool>().ToReadonlyDictionary();
 			
 			return result;
@@ -41,7 +44,10 @@ namespace Lunra.Hothouse.Models
 		public GoalSnapshot GoalsAverage { get; private set; }
 		public float GoalsDiscontentDelta { get; private set; }
 		public (Motives Motive, float DiscontentDelta)[] GoalsDiscontentDeltaByMotive { get; private set; }
-	
+		public DayTime LastPopulationDecrease { get; private set; }
+		public DayTime LastPopulationIncrease { get; private set; }
+		public DayTime LastPopulationChange { get; private set; }
+		
 		public ReadOnlyDictionary<Condition.Types, bool> Conditions { get; private set; }
 
 		public GameCache Calculate(GameModel game)
@@ -172,6 +178,20 @@ namespace Lunra.Hothouse.Models
 					v => (v.Motive, getWeightedGoalDiscontentDelta(currGoalsByMotive.First(l => l.Motive == v.Motive).DiscontentDelta, v.Value.Discontent))
 				)
 				.ToArray();
+
+			if (game.Cache.Value.Population != result.Population)
+			{
+				if (game.Cache.Value.Population < result.Population)
+				{
+					LastPopulationIncrease = game.SimulationTime.Value;
+				}
+				else if (result.Population < game.Cache.Value.Population)
+				{
+					LastPopulationDecrease = game.SimulationTime.Value;
+				}
+
+				LastPopulationChange = game.SimulationTime.Value;
+			}
 
 			result.Conditions = EnumExtensions
 				.GetValues(Condition.Types.Unknown)

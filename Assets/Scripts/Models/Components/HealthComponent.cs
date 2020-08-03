@@ -79,7 +79,7 @@ namespace Lunra.Hothouse.Models
 		public override string ToString()
 		{
 			var result = "Health: " + Current.Value + " / " + Maximum.Value;
-			if (IsDestroyed) result += " - " + StringExtensions.Wrap("Dead", "<color=red>", "</color>");
+			if (IsDestroyed) result += " - " + "Dead".Wrap("<color=red>", "</color>");
 			return result;
 		}
 	}

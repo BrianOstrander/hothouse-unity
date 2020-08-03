@@ -304,7 +304,7 @@ namespace Lunra.Hothouse.Editor
 						analysis.Summary = analysis.Result.Reason;
 						analysis.Summary += "\nDweller Deaths:";
 
-						foreach (var logEntry in game.EventLog.DwellerEntries.PeekAll().Where(e => e.Message.Contains("died")))
+						foreach (var logEntry in game.EventLog.Dwellers.PeekAll().Where(e => e.Message.Contains("died")))
 						{
 							analysis.Summary += $"\n - [ {logEntry.SimulationTime} ] {logEntry.Message}";
 						}
