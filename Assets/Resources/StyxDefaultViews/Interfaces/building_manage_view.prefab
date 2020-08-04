@@ -576,7 +576,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b76b99146c4142e28cd941cc0bb2abd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 40
+  Type: 30
   Label: {fileID: 1046746197660999419}
   ButtonLabel: {fileID: 0}
   Button: {fileID: 150361851402581228}

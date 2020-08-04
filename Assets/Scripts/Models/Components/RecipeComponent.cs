@@ -227,6 +227,12 @@ namespace Lunra.Hothouse.Models
 		
 		public bool TryGetCurrent(out RecipeIteration current)
 		{
+			if (CurrentIndex.Value.HasValue && Queue.Value.Length <= CurrentIndex.Value.Value)
+			{
+				current = null;
+				return false;
+			}
+			
 			current = CurrentIndex.Value.HasValue ? Queue.Value[CurrentIndex.Value.Value] : null;
 			return CurrentIndex.Value.HasValue;
 		}

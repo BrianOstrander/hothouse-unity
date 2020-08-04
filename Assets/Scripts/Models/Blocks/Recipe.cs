@@ -4,6 +4,7 @@ namespace Lunra.Hothouse.Models
 {
 	public class Recipe
 	{
+		public string Id => Name;
 		public string Name { get; }
 		public Inventory InputItems { get; }
 		public Inventory OutputItems { get; }

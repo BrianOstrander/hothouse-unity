@@ -23,7 +23,7 @@ namespace Lunra.Hothouse.Services
 		}
 		
 		// TODO: Don't hardcode this...
-		void IncrementNextUpdate() => Model.Population.NextUpdate.Value = Model.SimulationTime.Value + new DayTime(1); 
+		void IncrementNextUpdate() => Model.Population.NextUpdate.Value = Model.SimulationTime.Value + new DayTime(5); 
 		
 		#region GameModel Events
 		void OnGameSimulationUpdate()

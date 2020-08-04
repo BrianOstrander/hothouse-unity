@@ -600,12 +600,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			//
 			// farm.Inventory.Add(farm.Inventory.AvailableCapacity.Value.GetMaximum());
 			//
-			// var smokerack = payload.Game.Buildings.Activate<SmokeRackDefinition>(
-			// 	spawn.RoomTransform.Id.Value,
-			// 	position + (Vector3.right * -4f) + (Vector3.back * 3f),
-			// 	Quaternion.identity,
-			// 	BuildingStates.Operating
-			// );
+			var smokerack = payload.Game.Buildings.Activate<SmokeRackDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + (Vector3.right * -4f) + (Vector3.back * 3f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
 			//
 			// smokerack.Recipes.Queue.Value = smokerack.Recipes.Queue.Value
 			// 	.Append(RecipeComponent.RecipeIteration.ForDesired(smokerack.Recipes.Available.Value.Last(), 20))

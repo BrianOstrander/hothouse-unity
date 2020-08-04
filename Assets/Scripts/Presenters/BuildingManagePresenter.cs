@@ -24,6 +24,8 @@ namespace Lunra.Hothouse.Presenters
 			game.Toolbar.IsEnabled.Changed += OnToolbarIsEnabled;
 
 			game.BuildingManage.Selection.Changed += OnBuildingManageSelection;
+
+			game.Interaction.FloorSelection.Changed += OnInteractionFloorSelection;
 			
 			Show();
 		}
@@ -35,6 +37,8 @@ namespace Lunra.Hothouse.Presenters
 			game.Toolbar.IsEnabled.Changed -= OnToolbarIsEnabled;
 			
 			game.BuildingManage.Selection.Changed -= OnBuildingManageSelection;
+			
+			game.Interaction.FloorSelection.Changed -= OnInteractionFloorSelection;
 		}
 
 		void Show()
@@ -100,6 +104,8 @@ namespace Lunra.Hothouse.Presenters
 		
 		void OnBuildingManageSelectionOperating(BuildingModel selection)
 		{
+			Action refresh = () => OnBuildingManageSelectionOperating(selection);
+			
 			var controls = new List<BuildingManageView.Control>();
 			
 			controls.Add(
@@ -117,8 +123,28 @@ namespace Lunra.Hothouse.Presenters
 					LabelText = $"\n Health: {selection.Health.Current.Value:N0} / {selection.Health.Maximum.Value:N0}"
 				}
 			);
-			
-			
+
+			if (selection.Recipes.Available.Value.Any())
+			{
+				foreach (var recipe in selection.Recipes.Available.Value)
+				{
+					var isInQueue = selection.Recipes.Queue.Value.Any(r => r.Recipe.Id == recipe.Id);
+					
+					controls.Add(
+						new BuildingManageView.Control
+						{
+							Type = isInQueue ? BuildingManageView.Control.Types.RadioButtonEnabled : BuildingManageView.Control.Types.RadioButtonDisabled,
+							LabelText = $"{recipe.Name} [ {(isInQueue ? "ENABLED" : "DISABLED")} ]",
+							Click = () =>
+							{
+								if (isInQueue) selection.Recipes.Queue.Value = new RecipeComponent.RecipeIteration[0];
+								else selection.Recipes.Queue.Value = new [] { RecipeComponent.RecipeIteration.ForInfinity(recipe) };
+								refresh();
+							}
+						}
+					);
+				}	
+			}
 			
 			View.Controls(controls.ToArray());
 		}
@@ -140,6 +166,28 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (isEnabled) Show();
 			else if (View.Visible) CloseView(true);
+		}
+		#endregion
+		
+		#region GameInteractionModel Events
+		void OnInteractionFloorSelection(Interaction.RoomVector3 selection)
+		{
+			if (selection.State != Interaction.States.End) return;
+			if (string.IsNullOrEmpty(selection.RoomId)) return;
+			if (0.1f < selection.Value.Delta.magnitude) return;
+
+			var nearestBuilding = game.Buildings.AllActive
+				.Where(m => m.IsInRoom(selection.RoomId))
+				.OrderBy(m => Vector3.Distance(m.Transform.Position.Value, selection.Value.End))
+				.FirstOrDefault();
+
+			if (nearestBuilding == null || !nearestBuilding.Boundary.Contains(selection.Value.End))
+			{
+				game.BuildingManage.Selection.Value = null;
+				return;
+			}
+
+			game.BuildingManage.Selection.Value = nearestBuilding;
 		}
 		#endregion
 	}

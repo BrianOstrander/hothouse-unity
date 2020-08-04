@@ -65,6 +65,7 @@ namespace Lunra.Hothouse.Views
 						break;
 					case Control.Types.RadioButtonEnabled:
 						instance.Label.text = control.LabelText;
+						instance.Button.onClick.AddListener(() => control.Click?.Invoke());
 						break;
 					default:
 						Debug.LogError("Unrecognized Type: "+control.Type);
