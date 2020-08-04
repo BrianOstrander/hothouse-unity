@@ -36,7 +36,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 			generator = new Demon();
 
 			AddChildStates(
-				new CleanupState(),
 				new InventoryRequestState(),
 				new NavigateState(),
 				new BalanceItemState(),
@@ -64,9 +63,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToTimeoutOnTending(),
 				new ToNavigateToTend(),
 				
-				new ToNavigateToWorkplace(),
-				
-				new CleanupState.ToCleanupOnItemsAvailable()
+				new ToNavigateToWorkplace()
 			);
 		}
 

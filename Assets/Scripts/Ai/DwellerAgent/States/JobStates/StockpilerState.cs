@@ -16,7 +16,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 			base.OnInitialize();
 			
 			AddChildStates(
-				new CleanupState(),
 				new InventoryRequestState(),
 				new NavigateState(),
 				new BalanceItemState()
@@ -33,9 +32,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToNavigateToWorkplace(),
 				
 				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => s.Enterable.IsOwner),
-				new BalanceItemState.ToBalanceOnAvailableDistribution(ValidateDistribution),
-				
-				new CleanupState.ToCleanupOnItemsAvailable()
+				new BalanceItemState.ToBalanceOnAvailableDistribution(ValidateDistribution)
 			);
 		}
 

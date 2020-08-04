@@ -13,7 +13,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 			base.OnInitialize();
 
 			AddChildStates(
-				new CleanupState(),
 				new InventoryRequestState(),
 				new NavigateState(),
 				new BalanceItemState(),
@@ -34,9 +33,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new CraftRecipeHandlerState.ToObligationHandlerOnAvailableObligation(),
 				
 				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
-				new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner),
-				
-				new CleanupState.ToCleanupOnItemsAvailable()
+				new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner)
 			);
 		}
 

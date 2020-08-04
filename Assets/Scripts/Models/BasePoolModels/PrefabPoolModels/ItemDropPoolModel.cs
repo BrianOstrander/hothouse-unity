@@ -59,6 +59,7 @@ namespace Lunra.Hothouse.Models
 				InventoryCapacity.ByIndividualWeight(inventory)
 			);
 			model.Inventory.Add(inventory);
+			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
 		}
 	}
 }

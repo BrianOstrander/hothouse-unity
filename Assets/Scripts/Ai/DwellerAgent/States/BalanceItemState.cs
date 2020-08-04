@@ -264,17 +264,28 @@ namespace Lunra.Hothouse.Ai
 						if (!Validate(possibleDistributionSource, possibleDistributionDestination)) continue;
 						if (!GetIsNavigable(possibleDistributionDestination.Enterable)) continue;
 
+						Inventory possibleDistributionDestinationAvailableCapacity;
+						
+						if (possibleDistributionDestination.Inventory.Desired.Value.IsActive)
+						{
+							possibleDistributionDestinationAvailableCapacity = possibleDistributionDestination.Inventory.Desired.Value.Delivery;
+						}
+						else
+						{
+							possibleDistributionDestinationAvailableCapacity = possibleDistributionDestination.Inventory.AvailableCapacity.Value
+								.GetCapacityFor(
+									possibleDistributionDestination.Inventory.Available.Value
+								);
+						}
+						
 						var isIntersecting = possibleDistributionSource.Inventory.Desired.Value.Distribution
 							.Intersects(
-								possibleDistributionDestination.Inventory.AvailableCapacity.Value
-									.GetCapacityFor(
-										possibleDistributionDestination.Inventory.Available.Value	
-									),
+								possibleDistributionDestinationAvailableCapacity,
 								out var intersection
 							);
 						
 						if (!isIntersecting) continue;
-						
+
 						if (!TryGetItems(intersection, out items)) continue;
 
 						distributionSource = possibleDistributionSource;
