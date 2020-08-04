@@ -562,55 +562,55 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// Debugging Begin
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
 			// payload.Game.SimulationMultiplier.Value = 60f;
-			
-			payload.Game.Buildings.Activate<BedrollDefinition>(
-				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * 2f) + (Vector3.back * -3f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-			
-			payload.Game.Buildings.Activate<BedrollDefinition>(
-				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * 4f) + (Vector3.back * -3f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-			
-			payload.Game.Buildings.Activate<BedrollDefinition>(
-				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * 6f) + (Vector3.back * -3f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-			
-			payload.Game.Buildings.Activate<BedrollDefinition>(
-				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * 8f) + (Vector3.back * -3f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-
-			var farm = payload.Game.Buildings.Activate<StalkSeedSiloDefinition>(
-				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * 4f) + (Vector3.back * 3f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-
-			farm.Inventory.Add(farm.Inventory.AvailableCapacity.Value.GetMaximum());
-			
-			var smokerack = payload.Game.Buildings.Activate<SmokeRackDefinition>(
-				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * -4f) + (Vector3.back * 3f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-
-			smokerack.Recipes.Queue.Value = smokerack.Recipes.Queue.Value
-				.Append(RecipeComponent.RecipeIteration.ForDesired(smokerack.Recipes.Available.Value.Last(), 20))
-				.ToArray();
-			
+			//
+			// payload.Game.Buildings.Activate<BedrollDefinition>(
+			// 	spawn.RoomTransform.Id.Value,
+			// 	position + (Vector3.right * 2f) + (Vector3.back * -3f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Operating
+			// );
+			//
+			// payload.Game.Buildings.Activate<BedrollDefinition>(
+			// 	spawn.RoomTransform.Id.Value,
+			// 	position + (Vector3.right * 4f) + (Vector3.back * -3f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Operating
+			// );
+			//
+			// payload.Game.Buildings.Activate<BedrollDefinition>(
+			// 	spawn.RoomTransform.Id.Value,
+			// 	position + (Vector3.right * 6f) + (Vector3.back * -3f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Operating
+			// );
+			//
+			// payload.Game.Buildings.Activate<BedrollDefinition>(
+			// 	spawn.RoomTransform.Id.Value,
+			// 	position + (Vector3.right * 8f) + (Vector3.back * -3f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Operating
+			// );
+			//
+			// var farm = payload.Game.Buildings.Activate<StalkSeedSiloDefinition>(
+			// 	spawn.RoomTransform.Id.Value,
+			// 	position + (Vector3.right * 4f) + (Vector3.back * 3f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Operating
+			// );
+			//
+			// farm.Inventory.Add(farm.Inventory.AvailableCapacity.Value.GetMaximum());
+			//
+			// var smokerack = payload.Game.Buildings.Activate<SmokeRackDefinition>(
+			// 	spawn.RoomTransform.Id.Value,
+			// 	position + (Vector3.right * -4f) + (Vector3.back * 3f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Operating
+			// );
+			//
+			// smokerack.Recipes.Queue.Value = smokerack.Recipes.Queue.Value
+			// 	.Append(RecipeComponent.RecipeIteration.ForDesired(smokerack.Recipes.Available.Value.Last(), 20))
+			// 	.ToArray();
+			//
 			// Debugging End
 			
 			done();
