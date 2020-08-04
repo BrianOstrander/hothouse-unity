@@ -162,6 +162,7 @@ namespace Lunra.Hothouse.Models
 			const float GoalInsistenceVelocity = 0.25f;
 			
 			model.Goals.Reset(
+				game,
 				new []
 				{
 					(Motives.Eat, GoalInsistenceVelocity),

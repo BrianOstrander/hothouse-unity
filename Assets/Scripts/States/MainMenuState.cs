@@ -1,6 +1,7 @@
 ﻿using System;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
 
@@ -71,6 +72,8 @@ namespace Lunra.Hothouse.Services
 		{
 			var game = App.M.Create<GameModel>(App.M.CreateUniqueId());
 
+			game.LevelGeneration.Seed.Value = DemonUtility.NextInteger;
+			
 			game.DesireDamageMultiplier.Value = 1f;
 			game.SimulationTimeConversion.Value = 1f / 120f; // 1f / [ REAL SECONDS PER DAY HERE ]
 			

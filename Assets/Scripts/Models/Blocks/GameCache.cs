@@ -61,7 +61,7 @@ namespace Lunra.Hothouse.Models
 			var globalInventoryForbidden = Inventory.Empty;
 			var globalInventoryReserved = Inventory.Empty;
 			
-			foreach (var model in game.Buildings.AllActive.Where(b => b.IsBuildingState(BuildingStates.Operating) && !b.Light.IsLight.Value))
+			foreach (var model in game.Buildings.AllActive.Where(b => b.IsBuildingState(BuildingStates.Operating) && b.Tags.Contains(BuildingTags.Stockpile)))
 			{
 				globalInventoryAll += model.Inventory.All.Value;
 				globalInventoryAllCapacity += model.Inventory.AllCapacity.Value.GetMaximum();

@@ -13,6 +13,7 @@ namespace Lunra.Hothouse.Presenters
 	{
 		GameModel game;
 
+		DateTime lastBuildingUpdate;
 		BuildingStates lastBuildingState;
 
 		public BuildingManagePresenter(GameModel game)
@@ -55,7 +56,8 @@ namespace Lunra.Hothouse.Presenters
 		#region GameModelEvents
 		void OnGameSimulationUpdate()
 		{
-			if (game.BuildingManage.Selection.Value == null || lastBuildingState == game.BuildingManage.Selection.Value.BuildingState.Value) return;
+			if (game.BuildingManage.Selection.Value == null) return;
+			if (lastBuildingState == game.BuildingManage.Selection.Value.BuildingState.Value && (DateTime.Now - lastBuildingUpdate).TotalSeconds < 0.25) return;
 			
 			OnBuildingManageSelection(game.BuildingManage.Selection.Value);
 		}
@@ -71,6 +73,7 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			lastBuildingState = selection.BuildingState.Value;
+			lastBuildingUpdate = DateTime.Now;
 
 			switch (selection.BuildingState.Value)
 			{
@@ -93,13 +96,27 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingManageSelectionConstructing(BuildingModel selection)
 		{
-			View.Controls(
-				new BuildingManageView.Control
-				{
-					Type = BuildingManageView.Control.Types.Label,
-					LabelText = "Construction: TODO"
-				}
-			);
+			var controls = new List<BuildingManageView.Control>();
+			
+			var inventoryResult = string.Empty;
+			foreach (var inventoryType in selection.ConstructionInventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
+			{
+				inventoryResult += $"\n\t {inventoryType}: \t{selection.ConstructionInventory.All.Value[inventoryType]} \t/ {selection.ConstructionInventory.AllCapacity.Value.GetMaximumFor(inventoryType)}";
+			}
+
+			if (!string.IsNullOrEmpty(inventoryResult))
+			{
+				inventoryResult = "<b>Construction</b>" + inventoryResult;
+				controls.Add(
+					new BuildingManageView.Control
+					{
+						Type = BuildingManageView.Control.Types.Label,
+						LabelText = inventoryResult
+					}
+				);
+			}
+			
+			View.Controls(controls.ToArray());
 		}
 		
 		void OnBuildingManageSelectionOperating(BuildingModel selection)
@@ -122,6 +139,40 @@ namespace Lunra.Hothouse.Presenters
 					Type = BuildingManageView.Control.Types.Label,
 					LabelText = $"\n Health: {selection.Health.Current.Value:N0} / {selection.Health.Maximum.Value:N0}"
 				}
+			);
+
+			var inventoryResult = string.Empty;
+			foreach (var inventoryType in selection.Inventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
+			{
+				inventoryResult += $"\n\t {inventoryType}: \t{selection.Inventory.All.Value[inventoryType]} \t/ {selection.Inventory.AllCapacity.Value.GetMaximumFor(inventoryType)}";
+			}
+
+			if (!string.IsNullOrEmpty(inventoryResult))
+			{
+				inventoryResult = "<b>Inventory</b>" + inventoryResult;
+				controls.Add(
+					new BuildingManageView.Control
+					{
+						Type = BuildingManageView.Control.Types.Label,
+						LabelText = inventoryResult
+					}
+				);
+			}
+
+			controls.Add(
+				new BuildingManageView.Control
+				{
+					Type = BuildingManageView.Control.Types.Button,
+					ButtonText = "DEBUG: Clear Inventory",
+					Click = () =>
+					{
+						if (!selection.Inventory.Available.Value.IsEmpty)
+						{
+							selection.Inventory.Remove(selection.Inventory.Available.Value);
+							refresh();
+						}
+					}
+				}	
 			);
 
 			if (selection.Recipes.Available.Value.Any())

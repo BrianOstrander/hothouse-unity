@@ -19,7 +19,7 @@ namespace Lunra.Hothouse.Models
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
 		public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
-		public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.Ignored();
+		public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
 		public virtual Inventory DefaultInventory => Inventory.Empty;
 		public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.StalkDry, 2);
 		public virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
@@ -102,7 +102,7 @@ namespace Lunra.Hothouse.Models
 			model.Obligations.Reset();
 			
 			model.Recipes.Reset(Recipes);
-
+			
 			/*
 			if (Recipes.Any())
 			{
@@ -123,7 +123,7 @@ namespace Lunra.Hothouse.Models
 			model.Activities.Reset(Activities);
 			
 			model.Tags.Reset(Game);
-			foreach (var tag in Tags) model.Tags.AddTag(tag);
+			foreach (var tag in Tags) model.Tags.AddTag(tag); 
 		}
 
 		public override void Instantiate(BuildingModel model) => new BuildingPresenter(Game, model);

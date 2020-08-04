@@ -43,7 +43,7 @@ namespace Lunra.Hothouse.Presenters
 		#region GameModel Events
 		void OnDwellersAll(GenericPrefabPoolModel<DwellerModel>.Reservoir all)
 		{
-			if (!game.IsSimulating.Value) return;
+			if (!game.IsSimulating) return;
 			if (all.Active.Any()) return;
 
 			game.GameResult.Value = new GameResult(
@@ -55,7 +55,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnLastLightUpdate(LightDelta lightUpdate)
 		{
-			if (!game.IsSimulating.Value) return;
+			if (!game.IsSimulating) return;
 			if (lightUpdate.State != LightDelta.States.Calculated) return;
 			if (game.GetLightsActive().Any(l => l.Light.IsLightActive())) return;
 

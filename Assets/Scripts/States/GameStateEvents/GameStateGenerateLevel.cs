@@ -16,6 +16,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 	{
 		GameState state;
 		GamePayload payload;
+		
 		Demon generator;
 		RoomResolverRequest request;
 		
@@ -25,21 +26,18 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		{
 			this.state = state;
 			payload = state.Payload;
-			generator = new Demon(1);
-			// generator = new Demon();
-			request = RoomResolverRequest.Defaults.Tiny(
-				generator,
-				payload.Game.Rooms.Activate,
-				payload.Game.Doors.Activate
-			);
 		}
 
 		public void Push()
 		{
+			App.S.PushWaitForFixedUpdate();
+			
 			App.S.Push(OnBegin);
 
 			App.S.PushBlocking(OnGenerateRooms);
 			App.S.PushBlocking(OnGenerateSpawn);
+			
+			App.S.PushWaitForFixedUpdate();
 			
 			App.S.PushBlocking(OnGenerateWallDecorations);
 			
@@ -67,27 +65,35 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// 	() => payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
 			// );
 			
-			App.S.Push(() => payload.Game.IsSimulating.Value = true);
+			App.S.Push(() => payload.Game.SimulationMultiplier.Value = 1f);
 			App.S.Push(payload.Game.TriggerSimulationInitialize);
 			App.S.Push(OnEnd);
 		}
 
 		void OnBegin()
 		{
-			payload.Game.GenerationLog.Append(GenerationEvents.Begin);
-			payload.Game.IsSimulating.Value = false;
+			generator = new Demon(payload.Game.LevelGeneration.Seed.Value);
+			
+			request = RoomResolverRequest.Defaults.Tiny(
+				generator,
+				payload.Game.Rooms.Activate,
+				payload.Game.Doors.Activate
+			);
+			
+			payload.Game.LevelGeneration.Log.Append(GenerationEvents.Begin);
+			payload.Game.SimulationMultiplier.Value = 0f;
 			payload.Game.ResetSimulationInitialized();
 		}
 
 		void OnGenerateRooms(Action done)
 		{
-			payload.Game.GenerationLog.Append(GenerationEvents.RoomGenerationBegin);
+			payload.Game.LevelGeneration.Log.Append(GenerationEvents.RoomGenerationBegin);
 			payload.Game.RoomResolver.Generate(
 				request,
 				result =>
 				{
 					foreach (var room in payload.Game.Rooms.AllActive) room.IsRevealed.Value = true;
-					payload.Game.GenerationLog.Append(GenerationEvents.RoomGenerationEnd);
+					payload.Game.LevelGeneration.Log.Append(GenerationEvents.RoomGenerationEnd);
 					done();
 				}
 			);
@@ -134,7 +140,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 			foreach (var room in payload.Game.Rooms.AllActive) room.SpawnDistanceNormalized.Value = room.SpawnDistance.Value / (float)spawnDistanceMaximum;
 			
-			payload.Game.GenerationLog.Append(GenerationEvents.SpawnChosen);
+			payload.Game.LevelGeneration.Log.Append(GenerationEvents.SpawnChosen);
 			done();
 		}
 
@@ -476,9 +482,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				Jobs.Smoker,
 				Jobs.Stockpiler,
+				Jobs.Stockpiler,
 				// Jobs.Stockpiler,
-				// Jobs.Stockpiler,
-				Jobs.Farmer,
+				Jobs.Laborer,
 				Jobs.Farmer,
 				// Jobs.Laborer,
 				// Jobs.Laborer
@@ -600,12 +606,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			//
 			// farm.Inventory.Add(farm.Inventory.AvailableCapacity.Value.GetMaximum());
 			//
-			var smokerack = payload.Game.Buildings.Activate<SmokeRackDefinition>(
-				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * -4f) + (Vector3.back * 3f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
+			// var smokerack = payload.Game.Buildings.Activate<SmokeRackDefinition>(
+			// 	spawn.RoomTransform.Id.Value,
+			// 	position + (Vector3.right * -4f) + (Vector3.back * 3f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Operating
+			// );
 			//
 			// smokerack.Recipes.Queue.Value = smokerack.Recipes.Queue.Value
 			// 	.Append(RecipeComponent.RecipeIteration.ForDesired(smokerack.Recipes.Available.Value.Last(), 20))
@@ -653,14 +659,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		
 		void OnEnd()
 		{
-			payload.Game.GenerationLog.Append(GenerationEvents.End);
+			payload.Game.LevelGeneration.Log.Append(GenerationEvents.End);
 
-			var total = payload.Game.GenerationLog.TotalTime;
-			var roomTotal = payload.Game.GenerationLog.GetTimeBetween(
+			var total = payload.Game.LevelGeneration.Log.TotalTime;
+			var roomTotal = payload.Game.LevelGeneration.Log.GetTimeBetween(
 				GenerationEvents.RoomGenerationBegin,
 				GenerationEvents.RoomGenerationEnd
 			);
-			var floraTotal = payload.Game.GenerationLog.GetTimeBetween(
+			var floraTotal = payload.Game.LevelGeneration.Log.GetTimeBetween(
 				GenerationEvents.FloraSeedAppend,
 				GenerationEvents.FloraClusterAppend
 			);
@@ -677,13 +683,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		#region Shared Events
 		void OnCalculateNavigation(Action done)
 		{
-			payload.Game.GenerationLog.Append(GenerationEvents.CalculateNavigationBegin);
+			payload.Game.LevelGeneration.Log.Append(GenerationEvents.CalculateNavigationBegin);
 			payload.Game.NavigationMesh.QueueCalculation();
 
 			App.Heartbeat.WaitForCondition(
 				() =>
 				{
-					payload.Game.GenerationLog.Append(GenerationEvents.CalculateNavigationEnd);
+					payload.Game.LevelGeneration.Log.Append(GenerationEvents.CalculateNavigationEnd);
 					done();	
 				},
 				() => payload.Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed
@@ -761,7 +767,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 							)
 						);
 						
-						payload.Game.GenerationLog.Append(GenerationEvents.FloraSeedAppend);
+						payload.Game.LevelGeneration.Log.Append(GenerationEvents.FloraSeedAppend);
 						return true;
 					}
 				);
@@ -794,7 +800,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 						if (offspring == null) return false;
 						
 						currentSpeciesParentPool.Add(offspring);
-						payload.Game.GenerationLog.Append(GenerationEvents.FloraClusterAppend);
+						payload.Game.LevelGeneration.Log.Append(GenerationEvents.FloraClusterAppend);
 						
 						return true;
 					}

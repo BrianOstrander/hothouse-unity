@@ -266,6 +266,7 @@ namespace Lunra.Hothouse.Models
 					{
 						result = RecipeIteration.Default();
 						currentIndexListener.Value = null;
+						model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
 					}
 					break;
 				case States.Gathering:

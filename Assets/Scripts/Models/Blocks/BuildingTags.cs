@@ -5,5 +5,6 @@ namespace Lunra.Hothouse.Models
 		const string Prefix = "building_";
 
 		public const string Bed = Prefix + "bed";
+		public const string Stockpile = Prefix + "stockpile";
 	}
 }

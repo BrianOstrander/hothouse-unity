@@ -20,10 +20,12 @@ namespace Lunra.Hothouse.Editor
 	{
 		const string KeyPrefix = SettingsProviderStrings.ProjectKeyPrefix + "DebugSettings.";
 
-		public static EditorPrefsBool AutoRevealRooms = new EditorPrefsBool(KeyPrefix + "AutoRevealRooms");
-		public static EditorPrefsBool LogGameOverAnalysis = new EditorPrefsBool(KeyPrefix + "LogGameOverAnalysis");
-		public static EditorPrefsBool GameOverOnDwellerDeath = new EditorPrefsBool(KeyPrefix + "GameOverOnDwellerDeath");
-		public static EditorPrefsBool AutoRestartOnGameOver = new EditorPrefsBool(KeyPrefix + "AutoRestartOnGameOver");
+		public static EditorPrefsBool AutoRevealRooms { get; } = new EditorPrefsBool(KeyPrefix + "AutoRevealRooms");
+		public static EditorPrefsBool LogGameOverAnalysis { get; } = new EditorPrefsBool(KeyPrefix + "LogGameOverAnalysis");
+		public static EditorPrefsBool GameOverOnDwellerDeath { get; } = new EditorPrefsBool(KeyPrefix + "GameOverOnDwellerDeath");
+		public static EditorPrefsBool AutoRestartOnGameOver { get; } = new EditorPrefsBool(KeyPrefix + "AutoRestartOnGameOver");
+		public static EditorPrefsBool SeedOverrideEnabled { get; } = new EditorPrefsBool(KeyPrefix + "SeedOverrideEnabled");
+		public static EditorPrefsInt SeedOverride { get; } = new EditorPrefsInt(KeyPrefix + "SeedOverride");
 	}
 	
 	public class DebugSettingsProvider : SettingsProvider
@@ -67,6 +69,9 @@ namespace Lunra.Hothouse.Editor
 		{
 			EditorApplication.update -= OnUpdate;
 			EditorApplication.update += OnUpdate;
+
+			App.Instantiated -= OnAppInstantiated;
+			App.Instantiated += OnAppInstantiated;
 		}
 		
 		[SettingsProvider]
@@ -79,6 +84,8 @@ namespace Lunra.Hothouse.Editor
 				DebugSettings.AutoRevealRooms.LabelName,
 				DebugSettings.LogGameOverAnalysis.LabelName,
 				DebugSettings.AutoRestartOnGameOver.LabelName,
+				DebugSettings.SeedOverrideEnabled.LabelName,
+				DebugSettings.SeedOverride.LabelName,
 				
 				Content.OpenDebugSettingsProvider.text,
 				Content.OpenSaveLocation.text,
@@ -133,6 +140,28 @@ namespace Lunra.Hothouse.Editor
 						foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
 						foreach (var door in game.Doors.AllActive) door.IsOpen.Value = true;
 					}
+				}
+				GUILayout.EndHorizontal();
+				
+				GUILayout.BeginHorizontal();
+				{
+					GUIExtensions.PushEnabled(true, true);
+					{
+						var seedOverrideEnabled = DebugSettings.SeedOverrideEnabled.Draw(GUILayout.ExpandWidth(false));
+						
+						GUIExtensions.PushContentColor(seedOverrideEnabled ? Color.white : Color.gray);
+						{
+							DebugSettings.SeedOverride.DrawValue();
+						}
+						GUIExtensions.PopContentColor();
+					}
+					GUIExtensions.PopEnabled();
+					
+					GUIExtensions.PushEnabled(false);
+					{
+						EditorGUILayout.IntField(isInGame ? game.LevelGeneration.Seed.Value : 0);
+					}
+					GUIExtensions.PopEnabled();
 				}
 				GUILayout.EndHorizontal();
 
@@ -242,6 +271,22 @@ namespace Lunra.Hothouse.Editor
 		}
 		
 		#region Events
+		void OnAppInstantiated(App app)
+		{
+			App.S.StateChange += OnAppStateChange;
+		}
+
+		void OnAppStateChange(StateChange state)
+		{
+			if (DebugSettings.SeedOverrideEnabled.Value)
+			{
+				if (state.Is<GameState>(StateMachine.Events.Begin))
+				{
+					state.GetPayload<GamePayload>().Game.LevelGeneration.Seed.Value = DebugSettings.SeedOverride.Value;
+				}
+			}
+		}
+		
 		void OpenSettingsProviderAsset()
 		{
 			AssetDatabase.OpenAsset(

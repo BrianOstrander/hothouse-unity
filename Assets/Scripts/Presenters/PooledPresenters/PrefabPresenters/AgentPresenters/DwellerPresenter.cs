@@ -15,6 +15,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
+			Model.Goals.Bind();
+			
 			Model.Health.Damaged += OnDwellerHealthDamage;
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
@@ -24,6 +26,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
+			Model.Goals.UnBind();
+			
 			Model.Health.Damaged -= OnDwellerHealthDamage;
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
@@ -104,8 +108,6 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnGameSimulationUpdate()
 		{
-			Model.Goals.Update(Game.SimulationTimeDelta);
-			
 			var newHealth = 1f - Model.Goals[Motives.Heal].Insistence;
 
 			var healthUpdateDelta = (newHealth - Model.Health.Normalized) * Model.Health.Maximum.Value;

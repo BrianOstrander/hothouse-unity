@@ -45,6 +45,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
+		GameModel game;
 		CalculateGoal calculateGoal;
 		CalculateGoalOverflowEffects calculateGoalOverflowEffects;
 
@@ -61,11 +62,13 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public void Reset(
+			GameModel game,
 			(Motives Motive, float InsistenceModifier)[] velocities,
 			CalculateGoal calculateGoal,
 			CalculateGoalOverflowEffects calculateGoalOverflowEffects
 		)
 		{
+			this.game = game;
 			this.calculateGoal = calculateGoal;
 			this.calculateGoalOverflowEffects = calculateGoalOverflowEffects;
 			
@@ -100,6 +103,14 @@ namespace Lunra.Hothouse.Models
 			);
 			Previous = Current.Value;
 		}
+		
+		public void Bind() => game.SimulationUpdate += OnGameSimulationUpdate;
+
+		public void UnBind() => game.SimulationUpdate -= OnGameSimulationUpdate;
+
+		#region GameModel Events
+		void OnGameSimulationUpdate() => Update(game.SimulationTimeDelta);
+		#endregion
 
 		[JsonIgnore]
 		public GoalResult this[Motives motive] => Current.Value.Values.FirstOrDefault(v => v.Motive == motive).Value;
@@ -129,11 +140,13 @@ namespace Lunra.Hothouse.Models
 			Update(0f, false);
 		}
 
-		public void Update(
+		void Update(
 			float simulationDeltaTime,
 			bool updatePredictions = true
 		)
 		{
+			if (updatePredictions && Mathf.Approximately(simulationDeltaTime, 0f)) return;
+			
 			var totalDiscontent = 0f;
 			var totalInsistence = 0f;
 			

@@ -115,7 +115,7 @@ namespace Lunra.Hothouse.Services
 
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
-
+			
 			// App.Heartbeat.WaitForSeconds(
 			// 	() =>
 			// 	{
@@ -128,7 +128,25 @@ namespace Lunra.Hothouse.Services
 
 		void OnHeartbeatUpdate()
 		{
-			if (!Payload.Game.IsSimulating.Value) return;
+			if (Input.GetKeyUp(KeyCode.Alpha1))
+			{
+				Payload.Game.SimulationMultiplier.Value = 1f;
+			}
+			else if (Input.GetKeyUp(KeyCode.Alpha2))
+			{
+				Payload.Game.SimulationMultiplier.Value = 4f;
+			}
+			else if (Input.GetKeyUp(KeyCode.Alpha3))
+			{
+				Payload.Game.SimulationMultiplier.Value = 8f;
+			}
+			else if (Input.GetKeyUp(KeyCode.Space))
+			{
+				if (Payload.Game.IsSimulating) Payload.Game.SimulationMultiplier.Value = 0f;
+				else Payload.Game.SimulationMultiplier.Value = Payload.Game.LastNonZeroSimulationMultiplier.Value;
+			}
+			
+			if (!Payload.Game.IsSimulating) return;
 			
 			Payload.Game.StepSimulation(Time.deltaTime);
 			

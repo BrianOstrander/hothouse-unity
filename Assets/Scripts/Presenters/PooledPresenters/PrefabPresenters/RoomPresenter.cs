@@ -73,7 +73,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnRoomRevealDistance(int revealDistance)
 		{
-			if (!Game.IsSimulating.Value) return; 
+			if (!Game.IsSimulating) return; 
 			
 			foreach (var adjacentRoom in Model.AdjacentRoomIds.Value)
 			{

@@ -16,7 +16,7 @@ namespace Lunra.Hothouse.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
-		public TimestampModel GenerationLog { get; } = new TimestampModel();
+		public LevelGenerationModel LevelGeneration { get; } = new LevelGenerationModel();
 		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
 		public ToolbarModel Toolbar { get; } = new ToolbarModel();
 		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();
@@ -41,12 +41,16 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] float desireDamageMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> DesireDamageMultiplier { get; }
+		
+		[JsonProperty] float lastNonZeroSimulationMultiplier = 1f;
+		[JsonIgnore] public ReadonlyProperty<float> LastNonZeroSimulationMultiplier { get; }
+		
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc
 		/// </summary>
 		[JsonProperty] float simulationMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> SimulationMultiplier { get; }
-		
+
 		[JsonProperty] float simulationTimeConversion = 1f;
 		/// <summary>
 		/// Multiply by this by real seconds to get DayTime passed, or DayTime divided by this gets real seconds that
@@ -88,7 +92,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ReadonlyProperty<GameCache> Cache { get; }
 		
 		bool isSimulating;
-		[JsonIgnore] public ListenerProperty<bool> IsSimulating { get; }
+		[JsonIgnore] public bool IsSimulating => !Mathf.Approximately(0f, SimulationMultiplier.Value);
 		#endregion
 		
 		#region Events
@@ -99,7 +103,22 @@ namespace Lunra.Hothouse.Models
 		public GameModel()
 		{
 			DesireDamageMultiplier = new ListenerProperty<float>(value => desireDamageMultiplier = value, () => desireDamageMultiplier);
-			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
+			
+			LastNonZeroSimulationMultiplier = new ReadonlyProperty<float>(
+				value => lastNonZeroSimulationMultiplier = value,
+				() => lastNonZeroSimulationMultiplier,
+				out var lastNonZeroSimulationMultiplierListener
+			);
+			
+			SimulationMultiplier = new ListenerProperty<float>(
+				value => simulationMultiplier = value,
+				() => simulationMultiplier,
+				value =>
+				{
+					if (!Mathf.Approximately(0f, value)) lastNonZeroSimulationMultiplierListener.Value = value;
+				}
+			);
+
 			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
 			SimulationTime = new ReadonlyProperty<DayTime>(
 				value => simulationTime = value,
@@ -116,7 +135,6 @@ namespace Lunra.Hothouse.Models
 				() => cache,
 				out cacheListener
 			);
-			IsSimulating = new ListenerProperty<bool>(value => isSimulating = value, () => isSimulating);
 		}
 
 		public void TriggerSimulationInitialize()

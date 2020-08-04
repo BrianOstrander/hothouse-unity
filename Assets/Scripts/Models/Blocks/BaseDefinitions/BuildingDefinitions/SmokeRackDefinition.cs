@@ -1,6 +1,3 @@
-using System.Linq;
-using Lunra.Core;
-
 namespace Lunra.Hothouse.Models
 {
 	public class SmokeRackDefinition : BuildingDefinition
@@ -11,7 +8,7 @@ namespace Lunra.Hothouse.Models
 			(Inventory.Types.StalkRaw, 4),
 			(Inventory.Types.StalkDry, 4),
 			(Inventory.Types.StalkSeed, 4),
-			(Inventory.Types.StalkPop, 4)
+			(Inventory.Types.StalkPop, 8)
 		);
 
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForJobs(
@@ -28,9 +25,21 @@ namespace Lunra.Hothouse.Models
 				DayTime.FromHours(4f)
 			),
 			new Recipe(
+				"Dry Stalks x4",
+				Inventory.FromEntry(Inventory.Types.StalkRaw, 4),
+				Inventory.FromEntry(Inventory.Types.StalkDry, 4),
+				DayTime.FromHours(4f)
+			),
+			new Recipe(
 				"Stalk Pop",
 				Inventory.FromEntry(Inventory.Types.StalkSeed, 1),
 				Inventory.FromEntry(Inventory.Types.StalkPop, 2),
+				DayTime.FromHours(2f)
+			),
+			new Recipe(
+				"Stalk Pop x4",
+				Inventory.FromEntry(Inventory.Types.StalkSeed, 4),
+				Inventory.FromEntry(Inventory.Types.StalkPop, 8),
 				DayTime.FromHours(2f)
 			),
 		};

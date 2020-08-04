@@ -23,7 +23,7 @@ namespace Lunra.StyxMvp
 		/// <remarks>
 		/// Ideally nothing should use this except editor time scripts.
 		/// </remarks>
-		public static Action<App> Instantiated = ActionExtensions.GetEmpty<App>();
+		public static event Action<App> Instantiated = ActionExtensions.GetEmpty<App>();
 
 		Main main;
 		public static Main Main => instance.main;

@@ -74,7 +74,7 @@ namespace Lunra.Hothouse.Ai
 								out CurrentCache.NavigationResult,
 								Navigation.QueryEntrances(targetParentEnterable)
 							);
-							CurrentCache.NavigationRadiusMaximum = 0.1f; // TODO: Don't hardcode this
+							CurrentCache.NavigationRadiusMaximum = 0.25f; // TODO: Don't hardcode this
 							break;
 						default:
 							Debug.LogError("Unrecognized target parent type: "+CurrentCache.Target.GetType().Name);
