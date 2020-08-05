@@ -98,6 +98,28 @@ namespace Lunra.Hothouse.Presenters
 		{
 			var controls = new List<BuildingManageView.Control>();
 			
+			if (selection.Obligations.HasAny(ObligationCategories.Construct.Assemble))
+			{
+				var obligationResult = "<b>Obligations</b>";
+				foreach (var obligation in selection.Obligations.All.Value.Available)
+				{
+					obligationResult += $"\n - {obligation.Type}";
+				}
+				
+				foreach (var obligation in selection.Obligations.All.Value.Forbidden)
+				{
+					obligationResult += $"\n - {obligation.Type} : [ QUEUED ]";
+				}
+				
+				controls.Add(
+					new BuildingManageView.Control
+					{
+						Type = BuildingManageView.Control.Types.Label,
+						LabelText = obligationResult
+					}
+				);
+			}
+			
 			var inventoryResult = string.Empty;
 			foreach (var inventoryType in selection.ConstructionInventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
 			{
@@ -140,6 +162,54 @@ namespace Lunra.Hothouse.Presenters
 					LabelText = $"\n Health: {selection.Health.Current.Value:N0} / {selection.Health.Maximum.Value:N0}"
 				}
 			);
+			
+			if (0 < selection.Ownership.MaximumClaimers.Value)
+			{
+				var ownerResult = "<b>Owners</b>";
+				for (var i = 0; i < selection.Ownership.MaximumClaimers.Value; i++)
+				{
+					ownerResult += $"\n - [ {i} ] ";
+					if (i < selection.Ownership.Claimers.Value.Length)
+					{
+						if (selection.Ownership.Claimers.Value[i].TryGetInstance<DwellerModel>(game, out var owner))
+						{
+							ownerResult += owner.Name.Value;
+						}
+						else ownerResult += "< MISSING >";
+					}
+					else ownerResult += "NONE";
+				}
+				
+				controls.Add(
+					new BuildingManageView.Control
+					{
+						Type = BuildingManageView.Control.Types.Label,
+						LabelText = ownerResult
+					}
+				);
+			}
+			
+			if (selection.Obligations.HasAny(ObligationCategories.Construct.Assemble))
+			{
+				var obligationResult = "<b>Obligations</b>";
+				foreach (var obligation in selection.Obligations.All.Value.Available)
+				{
+					obligationResult += $"\n - {obligation.Type}";
+				}
+				
+				foreach (var obligation in selection.Obligations.All.Value.Forbidden)
+				{
+					obligationResult += $"\n - {obligation.Type} : [ QUEUED ]";
+				}
+				
+				controls.Add(
+					new BuildingManageView.Control
+					{
+						Type = BuildingManageView.Control.Types.Label,
+						LabelText = obligationResult
+					}
+				);
+			}
 
 			var inventoryResult = string.Empty;
 			foreach (var inventoryType in selection.Inventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
