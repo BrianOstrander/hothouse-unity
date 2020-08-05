@@ -16,7 +16,8 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{
 			Model.Goals.Bind();
-			
+
+			Model.Job.Changed += OnDwellerJob;
 			Model.Health.Damaged += OnDwellerHealthDamage;
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
@@ -28,6 +29,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Model.Goals.UnBind();
 			
+			Model.Job.Changed -= OnDwellerJob;
 			Model.Health.Damaged -= OnDwellerHealthDamage;
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
@@ -38,6 +40,11 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region DwellerModel Events
+		void OnDwellerJob(Jobs job)
+		{
+			View.Job = job;
+		}
+		
 		void OnDwellerHealthDamage(Damage.Result result)
 		{
 			var affliction = string.Empty;
@@ -103,6 +110,15 @@ namespace Lunra.Hothouse.Presenters
 					);	
 				}
 			}
+		}
+		#endregion
+
+		#region View Events
+		protected override void OnViewPrepare()
+		{
+			base.OnViewPrepare();
+			
+			OnDwellerJob(Model.Job.Value);
 		}
 		#endregion
 
