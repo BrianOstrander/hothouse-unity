@@ -251,6 +251,18 @@ namespace Lunra.Hothouse.Editor
 				Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
 			}
 			
+			foreach (var model in gameState.Payload.Game.Debris.AllActive.Where(isInInspectedRoom))
+			{
+				if (!SceneInspectionSettings.IsInspectingDebris.Value)
+				{
+					if (!(SceneInspectionSettings.IsInspectingObligations.Value && model.Obligations.HasAny())) continue;
+				}
+				
+				DrawEntranceInspection(model);
+
+				DrawLabel(model);
+			}
+			
 			foreach (var model in gameState.Payload.Game.Doors.AllActive.Where(isInInspectedRoom))
 			{
 				if (!SceneInspectionSettings.IsInspectingDoors.Value)

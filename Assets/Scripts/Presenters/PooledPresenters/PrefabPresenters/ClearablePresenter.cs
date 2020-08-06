@@ -53,7 +53,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			View.Shown += () => OnObligationAll(Model.Obligations.All.Value);
 			
-			Model.RecalculateEntrances(Model.Transform.Position.Value);
+			Model.RecalculateEntrances(View);
 		}
 
 		#region ClearableModel Events
@@ -100,7 +100,7 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.Obligations.HasAny(ObligationCategories.Destroy.Melee)) return;
 			
 			var radiusContains = interaction.Value.RadiusContains(Model.Transform.Position.Value);
-			
+
 			switch (interaction.State)
 			{
 				case Interaction.States.Idle:
@@ -110,6 +110,7 @@ namespace Lunra.Hothouse.Presenters
 					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.End:
+					if (radiusContains) Debug.Log("uhhh");
 					if (radiusContains) Model.Obligations.Add(ObligationCategories.Destroy.Melee);
 					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
 					break;

@@ -19,6 +19,7 @@ namespace Lunra.Hothouse.Editor
 		public static EditorPrefsBool IsInspectingOtherAgents = new EditorPrefsBool(KeyPrefix + "IsInspectingOtherAgents");
 		public static EditorPrefsBool IsInspectingGenerators = new EditorPrefsBool(KeyPrefix + "IsInspectingGenerators");
 		public static EditorPrefsBool IsInspectingFlora = new EditorPrefsBool(KeyPrefix + "IsInspectingFlora");
+		public static EditorPrefsBool IsInspectingDebris = new EditorPrefsBool(KeyPrefix + "IsInspectingDebris");
 		public static EditorPrefsBool IsInspectingItemDrops = new EditorPrefsBool(KeyPrefix + "IsInspectingItemDrops");
 		public static EditorPrefsBool IsInspectingLightLevels = new EditorPrefsBool(KeyPrefix + "IsInspectingLightLevels");
 		public static EditorPrefsBool IsInspectingObligations = new EditorPrefsBool(KeyPrefix + "IsInspectingObligations");
@@ -52,6 +53,7 @@ namespace Lunra.Hothouse.Editor
 						SceneInspectionSettings.IsInspectingOtherAgents.Draw();
 						SceneInspectionSettings.IsInspectingGenerators.Draw();
 						SceneInspectionSettings.IsInspectingFlora.Draw();
+						SceneInspectionSettings.IsInspectingDebris.Draw();
 						SceneInspectionSettings.IsInspectingItemDrops.Draw();
 						SceneInspectionSettings.IsInspectingRooms.Draw();
 						SceneInspectionSettings.IsInspectingDoors.Draw();
@@ -170,6 +172,7 @@ namespace Lunra.Hothouse.Editor
 				SceneInspectionSettings.IsInspectingOtherAgents.LabelName,
 				SceneInspectionSettings.IsInspectingGenerators.LabelName,
 				SceneInspectionSettings.IsInspectingFlora.LabelName,
+				SceneInspectionSettings.IsInspectingDebris.LabelName,
 				SceneInspectionSettings.IsInspectingItemDrops.LabelName,
 				SceneInspectionSettings.IsInspectingLightLevels.LabelName,
 				SceneInspectionSettings.IsInspectingObligations.LabelName,
