@@ -261,14 +261,6 @@ namespace Lunra.Hothouse.Services
 				HintCollection.NewDelay(0.5f),
 				HintCollection.New(
 					Hint.NewDismissedOnCondition(
-						"Finally, something edible, mark them for gathering...",
-						Condition.Any(Condition.Types.ConstantTrue),
-						Condition.None(Condition.Types.NoRations)
-					)
-				),
-				HintCollection.NewDelay(0.5f),
-				HintCollection.New(
-					Hint.NewDismissedOnCondition(
 						"Your dwellers grow weary, build a bedroll so they have a place to rest...",
 						Condition.Any(Condition.Types.ConstantTrue),
 						Condition.None(Condition.Types.ZeroBeds)

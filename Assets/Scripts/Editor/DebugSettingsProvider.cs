@@ -217,7 +217,6 @@ namespace Lunra.Hothouse.Editor
 						new Inventory(
 							new Dictionary<Inventory.Types, int>
 							{
-								{ Inventory.Types.Rations, 10 },
 								{ Inventory.Types.Scrap, 10 }
 							}
 						)	
@@ -226,14 +225,6 @@ namespace Lunra.Hothouse.Editor
 				
 				Debug.Log(testInventory);
 
-				testInventory.Add((Inventory.Types.Rations, 10).ToInventory());
-
-				Debug.Log("Added 10 Rations - " + testInventory);
-				
-				testInventory.Add((Inventory.Types.Rations, 10).ToInventory());
-				
-				Debug.Log("Added 10 Rations - " + testInventory);
-				
 				testInventory.Add((Inventory.Types.Scrap, 5).ToInventory());
 				
 				Debug.Log("Added 5 Scrap - " + testInventory);

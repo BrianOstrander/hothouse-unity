@@ -22,11 +22,9 @@ namespace Lunra.Hothouse.Models
 		public virtual float SpreadDamage => 50f;
 		public virtual bool AttacksBuildings => false;
 		public virtual (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new (Inventory.Types Type, int Minimum, int Maximum)[0];
-		public virtual int CountPerRoomMinimum => 0;
-		public virtual int CountPerRoomMaximum => 4;
+		public virtual IntegerRange ClusterPerRoom => new IntegerRange(0, 4);
+		public virtual IntegerRange CountPerCluster => new IntegerRange(6, 12);
 		public virtual float SpawnDistanceNormalizedMinimum => 0f;
-		public virtual int CountPerClusterMinimum => 40;
-		public virtual int CountPerClusterMaximum => 60;
 		public virtual bool RequiredInSpawn => true;
 		public virtual bool AllowedInSpawn => true;
 

@@ -110,7 +110,6 @@ namespace Lunra.Hothouse.Presenters
 					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.End:
-					if (radiusContains) Debug.Log("uhhh");
 					if (radiusContains) Model.Obligations.Add(ObligationCategories.Destroy.Melee);
 					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
 					break;

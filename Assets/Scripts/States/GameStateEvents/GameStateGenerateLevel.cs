@@ -480,14 +480,11 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			var requiredJobs = new []
 			{
-				Jobs.Smoker,
-				Jobs.Stockpiler,
-				Jobs.Stockpiler,
-				// Jobs.Stockpiler,
 				Jobs.Laborer,
-				Jobs.Farmer,
-				// Jobs.Laborer,
-				// Jobs.Laborer
+				Jobs.Laborer,
+				Jobs.Laborer,
+				Jobs.Laborer,
+				Jobs.Laborer
 			};
 
 			for (var i = 0; i < requiredJobs.Length; i++)
@@ -735,8 +732,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				var currentCount = 0;
 
-				if (currentSpecies.CountPerRoomMinimum == currentSpecies.CountPerRoomMaximum) currentCount = currentSpecies.CountPerRoomMinimum;
-				else currentCount = generator.GetNextInteger(currentSpecies.CountPerRoomMinimum, currentSpecies.CountPerRoomMaximum + 1);
+				if (currentSpecies.ClusterPerRoom.Minimum == currentSpecies.ClusterPerRoom.Maximum) currentCount = currentSpecies.ClusterPerRoom.Minimum;
+				else currentCount = generator.GetNextInteger(currentSpecies.ClusterPerRoom.Minimum, currentSpecies.ClusterPerRoom.Maximum + 1);
 
 				if (room.IsSpawn.Value && currentSpecies.RequiredInSpawn) currentCount = Mathf.Max(currentCount, 1);
 				
@@ -771,49 +768,67 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				);
 			}
 
-			foreach (var currentSpecies in species)
+			while (parentPool.Any())
 			{
-				int clusterCount;
+				var nextIndex = generator.GetNextInteger(0, parentPool.Count);
+				var next = parentPool[nextIndex];
+				parentPool.RemoveAt(nextIndex);
 
-				if (currentSpecies.CountPerClusterMinimum == currentSpecies.CountPerClusterMaximum) clusterCount = currentSpecies.CountPerClusterMinimum;
-				else clusterCount = generator.GetNextInteger(currentSpecies.CountPerClusterMinimum, currentSpecies.CountPerClusterMaximum + 1);
+				var currentSpecies = species.First(d => d.Type == next.Type.Value);
 				
-				if (clusterCount <= 1) continue;
+				int clusterRemaining;
 
-				clusterCount = currentSpecies.CountPerClusterMaximum;
+				if (currentSpecies.CountPerCluster.Minimum == currentSpecies.CountPerCluster.Maximum) clusterRemaining = currentSpecies.CountPerCluster.Minimum;
+				else clusterRemaining = generator.GetNextInteger(currentSpecies.CountPerCluster.Minimum, currentSpecies.CountPerCluster.Maximum + 1);
+
+				if (clusterRemaining <= 0) continue;
+
+				var clusterBoundaryParent = clusterRemaining / 2;
 				
-				var currentSpeciesParentPool = parentPool
-					.Where(m => m.Type.Value == currentSpecies.Type)
-					.ToList();
+				var clusterFailureBudget = clusterRemaining * 2;
+
+				var clusterElements = next.WrapInList();
 				
-				if (currentSpeciesParentPool.None()) continue;
-				
-				TryGenerating(
-					room,
-					clusterCount - 1,
-					position =>
+				while (0 < clusterRemaining && 0 < clusterFailureBudget)
+				{
+					var offspring = clusterElements[generator.GetNextInteger(0, Mathf.Max(1, Mathf.Min(clusterElements.Count, clusterBoundaryParent)))].TriggerReproduction(generator);
+
+					if (offspring == null)
 					{
-						var offspring = generator.GetNextFrom(currentSpeciesParentPool).TriggerReproduction(generator);
-
-						if (offspring == null) return false;
-						
-						currentSpeciesParentPool.Add(offspring);
-						payload.Game.LevelGeneration.Log.Append(GenerationEvents.FloraClusterAppend);
-						
-						return true;
+						clusterFailureBudget--;
+						continue;
 					}
-				);
+					
+					clusterElements.Add(offspring);
+					clusterRemaining--;
+					payload.Game.LevelGeneration.Log.Append(GenerationEvents.FloraClusterAppend);
+				}
 			}
 		}
 
-		void TryGenerating(
+		int TryGenerating(
 			RoomModel room,
 			int count,
 			Func<Vector3, bool> generate
 		)
 		{
+			return TryGenerating(
+				room,
+				count,
+				count * 2,
+				generate
+			);
+		}
+
+		int TryGenerating(
+			RoomModel room,
+			int count,
+			int failureLimit,
+			Func<Vector3, bool> generate
+		)
+		{
 			var budgetRemaining = count;
-			var failureBudgetRemaining = budgetRemaining * 2; // TODO: Don't hardcode this...
+			var failureBudgetRemaining = Mathf.Max(count, failureLimit); // TODO: Don't hardcode this...
 
 			while (0 < budgetRemaining && 0 < failureBudgetRemaining)
 			{
@@ -840,6 +855,8 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				if (generate(hit.position)) budgetRemaining--;
 				else failureBudgetRemaining--;
 			}
+
+			return count - budgetRemaining;
 		}
 		#endregion
 	}

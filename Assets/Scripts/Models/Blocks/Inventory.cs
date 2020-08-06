@@ -29,7 +29,6 @@ namespace Lunra.Hothouse.Models
 			// FungalBloomRaw = 11,
 			// FungalBloomJerky = 12,
 			
-			Rations = 1000,
 			Scrap = 1001,
 		}
 		

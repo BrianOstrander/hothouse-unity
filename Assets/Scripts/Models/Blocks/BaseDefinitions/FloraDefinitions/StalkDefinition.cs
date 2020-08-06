@@ -1,3 +1,5 @@
+using Lunra.Core;
+
 namespace Lunra.Hothouse.Models
 {
 	public class StalkDefinition : FloraDefinition
@@ -6,5 +8,8 @@ namespace Lunra.Hothouse.Models
 		{
 			(StalkRaw: Inventory.Types.Stalk, 1, 1)
 		};
+		
+		public override IntegerRange ClusterPerRoom => new IntegerRange(0, 12);
+		public override IntegerRange CountPerCluster => new IntegerRange(10, 30);
 	}
 }

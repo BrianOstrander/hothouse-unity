@@ -58,10 +58,8 @@ namespace Lunra.Hothouse.Models
 			ZeroBeds = 3,
 			
 			// Inventory
-			NoRations = 100,
 			NoStalks = 101,
 			NoScrap = 102,
-			LowRations = 103,
 			
 			// Environment
 			ZeroDoorsOpen = 200,
@@ -162,15 +160,11 @@ namespace Lunra.Hothouse.Models
 					// return game.Buildings.AllActive.None(t => t.IsBuildingState(BuildingStates.Operating) && t.IsDesireAvailable(Motives.Sleep));
 				
 				// Inventory
-				case Types.NoRations:
-					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Rations] <= 0;
 				case Types.NoStalks: 
 					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Stalk] <= 0;
 				case Types.NoScrap: 
 					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Scrap] <= 0;
-				case Types.LowRations:
-					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Rations] <= game.Cache.Value.LowRationThreshold;
-				
+
 				// Environment
 				case Types.ZeroDoorsOpen:
 					return 0 == doorOpenCount();

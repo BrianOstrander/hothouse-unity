@@ -86,7 +86,7 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			model.ConstructionInventory.Reset(
-				InventoryPermission.DepositForJobs(Jobs.Stockpiler), 
+				InventoryPermission.DepositForJobs(Jobs.Stockpiler, Jobs.Laborer), 
 				InventoryCapacity.ByIndividualWeight(ConstructionInventory),
 				constructionInventoryDesired
 			);

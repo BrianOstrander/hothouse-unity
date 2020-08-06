@@ -18,7 +18,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new DestroyMeleeHandlerState(),
 				new ConstructAssembleHandlerState(),
 				new DoorOpenHandlerState(),
-				new NavigateState()
+				new NavigateState(),
+				new BalanceItemState()
 			);
 
 			AddTransitions(
@@ -32,6 +33,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation(),
 				new ConstructAssembleHandlerState.ToObligationHandlerOnAvailableObligation(),
 				new DoorOpenHandlerState.ToObligationHandlerOnAvailableObligation(),
+				
+				new BalanceItemState.ToBalanceOnAvailableDelivery(),
+				new BalanceItemState.ToBalanceOnAvailableDistribution(),
 				
 				new NavigateToNearestLight()
 			);
