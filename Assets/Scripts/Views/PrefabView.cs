@@ -84,9 +84,9 @@ namespace Lunra.Hothouse.Views
 				meshCollider.sharedMesh = mesh.sharedMesh;
 			}
 		}
-#endif
 		
-		protected virtual void OnCalculateCachedData() { }
+		protected virtual void OnCalculateCachedData() {}
+#endif
 	}
 
 }

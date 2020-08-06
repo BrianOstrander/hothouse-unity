@@ -149,6 +149,8 @@ namespace Lunra.Hothouse.Views
 			}
 
 			entrances = entrancesList.ToArray();
+			
+			NormalizeMeshCollidersFromRoot();
 		}
 		
 		void OnDrawGizmosSelected()
