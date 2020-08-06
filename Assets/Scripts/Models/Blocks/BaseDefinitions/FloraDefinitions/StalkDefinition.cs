@@ -7,7 +7,7 @@ namespace Lunra.Hothouse.Models
 		public override (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new[]
 		{
 			(Inventory.Types.StalkSeed, 0, 2),
-			(Inventory.Types.StalkRaw, 1, 1)
+			(StalkRaw: Inventory.Types.Stalk, 1, 1)
 		};
 	}
 }

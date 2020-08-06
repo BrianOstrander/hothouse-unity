@@ -85,7 +85,6 @@ namespace Lunra.Hothouse.Models
 				switch (itemType)
 				{
 					case Inventory.Types.Scrap:
-					case Inventory.Types.StalkDry:
 						result += "\t";
 						break;
 				}

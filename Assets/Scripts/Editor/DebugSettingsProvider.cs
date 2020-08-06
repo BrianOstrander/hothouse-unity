@@ -218,8 +218,7 @@ namespace Lunra.Hothouse.Editor
 							new Dictionary<Inventory.Types, int>
 							{
 								{ Inventory.Types.Rations, 10 },
-								{ Inventory.Types.Scrap, 10 },
-								{ Inventory.Types.StalkDry, 10 }
+								{ Inventory.Types.Scrap, 10 }
 							}
 						)	
 					)

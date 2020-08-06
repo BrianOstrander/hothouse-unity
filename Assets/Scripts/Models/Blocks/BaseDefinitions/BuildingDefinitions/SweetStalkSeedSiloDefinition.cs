@@ -11,7 +11,7 @@ namespace Lunra.Hothouse.Models
 		public override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(
 			new []
 				{
-					Inventory.Types.SweetStalkSeed	
+					Inventory.Types.GrassSeed	
 				}
 				.Select(t => (t, 100))
 				.ToArray()
@@ -26,7 +26,7 @@ namespace Lunra.Hothouse.Models
 
 		public override bool IsFarm => true;
 		public override Vector2 FarmSize => Vector2.one * 8f;
-		public override Inventory.Types FarmSeed => Inventory.Types.SweetStalkSeed;
+		public override Inventory.Types FarmSeed => Inventory.Types.GrassSeed;
 		
 		public override Jobs[] WorkplaceForJobs => new[] {Jobs.Farmer};
 	}

@@ -21,7 +21,7 @@ namespace Lunra.Hothouse.Models
 		public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
 		public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
 		public virtual Inventory DefaultInventory => Inventory.Empty;
-		public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.StalkDry, 2);
+		public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.Stalk, 2);
 		public virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
 		public virtual Recipe[] Recipes => new Recipe[0];
 		public virtual bool IsFarm => false;

@@ -525,27 +525,25 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			position += Vector3.back * 4f;
 			
-			var wagon = payload.Game.Buildings.Activate<StartingWagonDefinition>(
-				spawn.Id.Value,
-				position + (Vector3.left * 2f),
-				Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
-				BuildingStates.Operating
-			);
-
-			var startingResources = new[]
-			{
-				Inventory.Types.StalkSeed,
-				Inventory.Types.StalkDry,
-				Inventory.Types.StalkPop
-			};
-			
-			wagon.Inventory.Add(
-				Inventory.FromEntries(
-					wagon.Inventory.AllCapacity.Value.GetMaximum().Entries
-						.Where(e => startingResources.Contains(e.Type))
-						.ToArray()
-				)
-			);
+			// var wagon = payload.Game.Buildings.Activate<StartingWagonDefinition>(
+			// 	spawn.Id.Value,
+			// 	position + (Vector3.left * 2f),
+			// 	Quaternion.identity * Quaternion.Euler(0f, 90f, 0f),
+			// 	BuildingStates.Operating
+			// );
+			//
+			// var startingResources = new[]
+			// {
+			// 	Inventory.Types.StalkSeed
+			// };
+			//
+			// wagon.Inventory.Add(
+			// 	Inventory.FromEntries(
+			// 		wagon.Inventory.AllCapacity.Value.GetMaximum().Entries
+			// 			.Where(e => startingResources.Contains(e.Type))
+			// 			.ToArray()
+			// 	)
+			// );
 		
 			var bonfire = payload.Game.Buildings.Activate<BonfireLightDefinition>(
 				spawn.Id.Value,
