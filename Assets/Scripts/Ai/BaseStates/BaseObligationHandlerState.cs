@@ -220,6 +220,7 @@ namespace Lunra.Hothouse.Ai
 							{
 								Agent.ObligationPromises.All.Pop();
 								SourceState.CurrentCache.Target.Trigger(SourceState.CurrentCache.CurrentObligation.Obligation, Agent);
+								Agent.ObligationPromises.Complete(SourceState.CurrentCache.CurrentObligation.Obligation);
 							}
 						}
 						else OnTimeoutUpdate(delta.Progress);

@@ -22,6 +22,8 @@ namespace Lunra.Hothouse.Models
 			Type = type;
 		}
 
+		public bool Is(Obligation obligation) => obligation.Type == Type; 
+
 		public override string ToString()
 		{
 			return StringExtensions.GetNonNullOrEmpty(Type, "< null or empty type >");

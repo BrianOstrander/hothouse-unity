@@ -145,7 +145,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.NotVisible) return;
 
-			if (obligation.Type.Equals(ObligationCategories.Door.Open)) OnAgentObligationOpenDoor();
+			if (obligation.Is(ObligationCategories.Door.Open)) OnAgentObligationOpenDoor();
 		}
 
 		void OnAgentObligationOpenDoor()

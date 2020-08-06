@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
@@ -20,6 +21,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
+		[JsonIgnore] public Action<Obligation> Complete { get; set; } = ActionExtensions.GetEmpty<Obligation>();
 		public bool HasAny() => all.Any();
 		#endregion
 
@@ -43,6 +45,7 @@ namespace Lunra.Hothouse.Models
 		public void Reset()
 		{
 			All.Clear();
+			Complete = ActionExtensions.GetEmpty<Obligation>();
 		}
 
 		public override string ToString()

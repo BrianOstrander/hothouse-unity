@@ -30,7 +30,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 			Model.Health.Current.Changed += OnAgentHealthCurrent;
 			Model.Health.Damaged += OnAgentHealthDamaged;
-			Model.ObligationComplete += OnAgentObligationComplete;
+			Model.ObligationPromises.Complete += OnAgentObligationComplete;
 			
 			base.Bind();
 		}
@@ -43,7 +43,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 			Model.Health.Current.Changed -= OnAgentHealthCurrent;
 			Model.Health.Damaged -= OnAgentHealthDamaged;
-			Model.ObligationComplete -= OnAgentObligationComplete;
+			Model.ObligationPromises.Complete -= OnAgentObligationComplete;
 			
 			base.UnBind();
 		}
