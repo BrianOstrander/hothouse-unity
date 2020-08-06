@@ -48,6 +48,8 @@ namespace Lunra.Hothouse.Views
 		#endregion
 
 		#region Bindings
+		public event Action RefreshControls = ActionExtensions.Empty;
+		
 		public void Controls(params Control[] controls)
 		{
 			controlRoot.ClearChildren();
@@ -77,7 +79,11 @@ namespace Lunra.Hothouse.Views
 				for (var i = 0; i < control.Click.Length; i++)
 				{
 					var click = control.Click[i];
-					if (click != null) instance.Buttons[i].onClick.AddListener(() => click());
+					if (click != null)
+					{
+						instance.Buttons[i].onClick.AddListener(() => click());
+						instance.Buttons[i].onClick.AddListener(OnRefreshControls);
+					}
 				}
 			}
 		}
@@ -87,12 +93,15 @@ namespace Lunra.Hothouse.Views
 		{
 			base.Cleanup();
 
+			RefreshControls = ActionExtensions.Empty;
+			
 			foreach (var prefab in prefabs) prefab.gameObject.SetActive(false);
 
 			Controls();
 		}
 
 		#region Events
+		void OnRefreshControls() => RefreshControls();
 		#endregion
 	}
  

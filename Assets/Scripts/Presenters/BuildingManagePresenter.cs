@@ -48,6 +48,8 @@ namespace Lunra.Hothouse.Presenters
 			
 			View.Cleanup();
 
+			View.RefreshControls += () => OnBuildingManageSelection(game.BuildingManage.Selection.Value);
+
 			View.Prepare += () => OnBuildingManageSelection(game.BuildingManage.Selection.Value);
 
 			ShowView(instant: true);
@@ -57,7 +59,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnGameSimulationUpdate()
 		{
 			if (game.BuildingManage.Selection.Value == null) return;
-			if (lastBuildingState == game.BuildingManage.Selection.Value.BuildingState.Value && (DateTime.Now - lastBuildingUpdate).TotalSeconds < 0.25) return;
+			if (lastBuildingState == game.BuildingManage.Selection.Value.BuildingState.Value) return;
 			
 			OnBuildingManageSelection(game.BuildingManage.Selection.Value);
 		}
@@ -141,8 +143,6 @@ namespace Lunra.Hothouse.Presenters
 		
 		void OnBuildingManageSelectionOperating(BuildingModel selection)
 		{
-			Action refresh = () => OnBuildingManageSelectionOperating(selection);
-			
 			var controls = new List<BuildingManageView.Control>();
 			
 			controls.Add(
@@ -269,7 +269,6 @@ namespace Lunra.Hothouse.Presenters
 								{
 									if (isInQueue) selection.Recipes.Queue.Value = new RecipeComponent.RecipeIteration[0];
 									else selection.Recipes.Queue.Value = new [] { RecipeComponent.RecipeIteration.ForInfinity(recipe) };
-									refresh();
 								}
 							}
 						)
