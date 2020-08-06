@@ -57,24 +57,6 @@ namespace Lunra.Hothouse.Presenters
 			Model.Tags.UnBind();
 		}
 
-		protected override Inventory CalculateItemDrops()
-		{
-			var result = base.CalculateItemDrops();
-
-			if (!Model.Farm.Value.IsNull)
-			{
-				var seedCount = result[Model.Seed.Value];
-				result -= (Model.Seed.Value, seedCount);
-
-				if (Game.Cache.Value.SeedsWithCapacity.Contains(Model.Seed.Value))
-				{
-					result += (Model.Seed.Value, Mathf.Max(2, seedCount));
-				}
-			}
-
-			return result;
-		}
-
 		protected override void OnViewPrepare()
 		{
 			base.OnViewPrepare();

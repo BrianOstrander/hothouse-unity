@@ -11,7 +11,6 @@ namespace Lunra.Hothouse.Models
 	{
 		public string Type { get; private set; }
 		public virtual string[] PrefabIds { get; private set; }
-		public abstract Inventory.Types Seed { get; }
 		protected GameModel Game { get; private set; }
 		protected Demon Generator { get; private set; }
 		
@@ -69,7 +68,6 @@ namespace Lunra.Hothouse.Models
 		public virtual void Reset(FloraModel model)
 		{
 			model.Type.Value = Type;
-			model.Seed.Value = Seed;
 			model.Farm.Value = InstanceId.Null();
 			model.Age.Value = Interval.WithMaximum(AgeDuration.Evaluate(DemonUtility.NextFloat));
 			model.ReproductionElapsed.Value = Interval.WithMaximum(ReproductionDuration.Evaluate(DemonUtility.NextFloat));

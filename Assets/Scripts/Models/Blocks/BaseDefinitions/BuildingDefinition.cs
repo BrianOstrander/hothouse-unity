@@ -26,14 +26,14 @@ namespace Lunra.Hothouse.Models
 		public virtual Recipe[] Recipes => new Recipe[0];
 		public virtual bool IsFarm => false;
 		public virtual Vector2 FarmSize => Vector2.zero;
-		public virtual Inventory.Types FarmSeed => Inventory.Types.Unknown;
-		
+		public virtual Type FarmFloraType => null;
+
 		public virtual GoalActivity[] Activities => new GoalActivity[0];
 		
 		public virtual Jobs[] WorkplaceForJobs => new Jobs[0];
 
 		public virtual string[] Tags => new string[0];
-		
+
 		public virtual void Reset(
 			BuildingModel model,
 			BuildingStates state
@@ -113,12 +113,16 @@ namespace Lunra.Hothouse.Models
 				};
 			}
 			*/
+
+			var farmFloraType = Game.Flora.Definitions.FirstOrDefault(d => d.GetType() == FarmFloraType)?.Type;
 			
+			if (IsFarm && string.IsNullOrEmpty(farmFloraType)) Debug.LogError($"{Type} is a farm, but no seed of type {FarmFloraType} could be found");
+
 			model.Farm.Reset(
 				IsFarm,
 				FarmSize,
-				FarmSeed
-			);
+				farmFloraType
+			);	
 
 			model.Activities.Reset(Activities);
 			

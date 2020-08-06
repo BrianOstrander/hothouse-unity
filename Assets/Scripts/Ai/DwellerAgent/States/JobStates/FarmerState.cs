@@ -107,7 +107,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			base.Begin();
 
 			if (Workplace == null) return;
-			if (Workplace.Farm.SelectedSeed == Inventory.Types.Unknown) return;
+			if (string.IsNullOrEmpty(Workplace.Farm.SelectedFloraType)) return;
 			
 			if (Workplace.Farm.Plots.None() || (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed && Workplace.Farm.LastUpdatedRealTime < Game.NavigationMesh.LastUpdated.Value))
 			{
@@ -184,28 +184,19 @@ namespace Lunra.Hothouse.Ai.Dweller
 					{
 						if (delta.IsDone)
 						{
-							var seedInventory = Inventory.FromEntry(SourceState.Workplace.Farm.SelectedSeed, 1);
+							selectedPlot.State = FarmPlot.States.Sown;
+							var flora = Game.Flora.Activate(
+								Game.Flora.Definitions.First(d => d.Type == SourceState.Workplace.Farm.SelectedFloraType),
+								selectedPlot.RoomId,
+								selectedPlot.Position
+							);
 
-							if (Agent.Inventory.All.Value.Intersects(seedInventory))
-							{
-								selectedPlot.State = FarmPlot.States.Sown;
-								Agent.Inventory.Remove(seedInventory);
-								var flora = Game.Flora.Activate(
-									Game.Flora.Definitions.First(d => d.Seed == SourceState.Workplace.Farm.SelectedSeed),
-									selectedPlot.RoomId,
-									selectedPlot.Position
-								);
-
-								flora.Farm.Value = InstanceId.New(SourceState.Workplace);
+							flora.Farm.Value = InstanceId.New(SourceState.Workplace);
 								
-								flora.Tags.AddTag(Tags.Farm.Sown);
+							flora.Tags.AddTag(Tags.Farm.Sown);
 								
-								selectedPlot.Flora = InstanceId.New(flora);
-							}
-							else
-							{
-								selectedPlot.State = FarmPlot.States.ReadyToSow;
-							}
+							selectedPlot.Flora = InstanceId.New(flora);
+							
 							selectedPlot.AttendingFarmer = InstanceId.Null();
 							SourceState.state = States.Idle;
 						}
@@ -229,8 +220,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 					default:
 						return false;
 				}
-				// if (Agent.Inventory.IsFull()) return false;
-				if (SourceState.Workplace.Inventory.Available.Value[SourceState.Workplace.Farm.SelectedSeed] == 0) return false;
 
 				var nearestPlots = SourceState.Workplace.Farm.Plots
 					.Where(p => p.State == FarmPlot.States.ReadyToSow && (p.AttendingFarmer.IsNull || p.AttendingFarmer.Id == Agent.Id.Value))
@@ -256,23 +245,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				var seedInventory = Inventory.FromEntry(SourceState.Workplace.Farm.SelectedSeed, 1);
-				
-				if (!Agent.Inventory.All.Value.Contains(seedInventory))
-				{
-					if (Agent.Inventory.IsFull())
-					{
-						Game.ItemDrops.Activate(
-							Agent,
-							Quaternion.identity,
-							Agent.Inventory.All.Value.Entries.First(e => 0 < e.Weight).ToInventory()
-						);
-					}
-					
-					SourceState.Workplace.Inventory.Remove(seedInventory);
-					Agent.Inventory.Add(seedInventory);
-				}
-
 				selectedPlot.AttendingFarmer = InstanceId.New(Agent);
 				SourceState.state = States.NavigatingToSow;
 				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);

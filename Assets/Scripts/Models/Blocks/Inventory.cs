@@ -21,11 +21,9 @@ namespace Lunra.Hothouse.Models
 			
 			Water = 2,
 			
-			StalkSeed = 10,
-			Stalk = 11,
+			Stalk = 10,
 			
-			GrassSeed = 20,
-			Grass = 21,
+			Grass = 20,
 			
 			// FungalBloomSpore = 10,
 			// FungalBloomRaw = 11,

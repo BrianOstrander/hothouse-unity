@@ -309,7 +309,7 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: sweet_stalk_0
+  prefabId: grass_0
   prefabTags: []
   entrancesRoot: {fileID: 3173811816924577414}
   entrances:

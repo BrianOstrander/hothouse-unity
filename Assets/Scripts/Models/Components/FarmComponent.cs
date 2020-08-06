@@ -6,7 +6,6 @@ using Lunra.Hothouse.Ai;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Models
 {
@@ -20,7 +19,7 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		public bool IsFarm { get; private set; }
 		public Vector2 Size { get; private set; }
-		public Inventory.Types SelectedSeed { get; set; } // todo make private or something...
+		public string SelectedFloraType { get; set; } // todo make private or something...
 		public FarmPlot[] Plots { get; private set; }
 		#endregion
 		
@@ -35,11 +34,6 @@ namespace Lunra.Hothouse.Models
 		}
 		#endregion
 
-		public FarmComponent()
-		{
-			
-		}
-
 		public void CalculatePlots(
 			GameModel game,
 			IFarmModel model
@@ -48,13 +42,13 @@ namespace Lunra.Hothouse.Models
 			SetLastUpdated(game.SimulationTime.Value);
 			var plotsList = new List<FarmPlot>();
 
-			if (SelectedSeed == Inventory.Types.Unknown)
+			if (string.IsNullOrEmpty(SelectedFloraType))
 			{
 				Plots = plotsList.ToArray();
 				return;
 			}
 			
-			var definition = game.Flora.Definitions.First(d => d.Seed == SelectedSeed);
+			var definition = game.Flora.Definitions.First(d => d.Type == SelectedFloraType);
 
 			var spacing = definition.ReproductionRadius.Maximum;
 			var rowCount = Mathf.FloorToInt((Size.x / spacing));
@@ -112,14 +106,7 @@ namespace Lunra.Hothouse.Models
 			}
 
 			Plots = plotsList.ToArray();
-			
-			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(
-				Inventory.FromEntry(
-					SelectedSeed,
-					Mathf.Min(model.Inventory.AllCapacity.Value.GetMaximumFor(SelectedSeed), Plots.Length)
-				)
-			);
-			
+
 			CalculateFloraObligations(
 				game,
 				model
@@ -248,12 +235,12 @@ namespace Lunra.Hothouse.Models
 		public void Reset(
 			bool isFarm,
 			Vector2 size,
-			Inventory.Types selectedSeed
+			string selectedFloraType
 		)
 		{
 			IsFarm = isFarm;
 			Size = size;
-			SelectedSeed = selectedSeed;
+			SelectedFloraType = selectedFloraType;
 			Plots = new FarmPlot[0];
 			
 			SetLastUpdated(DayTime.Zero);
