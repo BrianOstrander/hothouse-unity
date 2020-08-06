@@ -17,13 +17,27 @@ namespace Lunra.Hothouse.Views
 				Label = 10,
 				Button = 20,
 				RadioButtonEnabled = 30,
-				RadioButtonDisabled = 40
+				RadioButtonDisabled = 40,
+				LeftRightButton = 50
+			}
+
+			public Control(
+				Types type,
+				string[] labelText = null,
+				string[] buttonText = null,
+				Action[] click = null
+			)
+			{
+				Type = type;
+				LabelText = labelText ?? new string[0];
+				ButtonText = buttonText ?? new string[0];
+				Click = click ?? new Action[0];
 			}
 
 			public Types Type;
-			public string LabelText;
-			public string ButtonText;
-			public Action Click;
+			public string[] LabelText;
+			public string[] ButtonText;
+			public Action[] Click;
 		}
 	
 		#region Serialized
@@ -50,26 +64,20 @@ namespace Lunra.Hothouse.Views
 
 				var instance = controlRoot.gameObject.InstantiateChild(prefab, setActive: true);
 
-				switch (control.Type)
+				for (var i = 0; i < control.LabelText.Length; i++)
 				{
-					case Control.Types.Label:
-						instance.Label.text = control.LabelText;
-						break;
-					case Control.Types.Button:
-						instance.ButtonLabel.text = control.ButtonText;
-						instance.Button.onClick.AddListener(() => control.Click?.Invoke());
-						break;
-					case Control.Types.RadioButtonDisabled:
-						instance.Label.text = control.LabelText;
-						instance.Button.onClick.AddListener(() => control.Click?.Invoke());
-						break;
-					case Control.Types.RadioButtonEnabled:
-						instance.Label.text = control.LabelText;
-						instance.Button.onClick.AddListener(() => control.Click?.Invoke());
-						break;
-					default:
-						Debug.LogError("Unrecognized Type: "+control.Type);
-						break;
+					instance.Labels[i].text = control.LabelText[i];
+				}
+				
+				for (var i = 0; i < control.ButtonText.Length; i++)
+				{
+					instance.ButtonLabels[i].text = control.ButtonText[i];
+				}
+				
+				for (var i = 0; i < control.Click.Length; i++)
+				{
+					var click = control.Click[i];
+					if (click != null) instance.Buttons[i].onClick.AddListener(() => click());
 				}
 			}
 		}

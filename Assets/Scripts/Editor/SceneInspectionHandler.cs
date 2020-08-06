@@ -378,7 +378,7 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 			
-			if (model is IClaimOwnershipModel claimOwnershipModel && 0 < claimOwnershipModel.Ownership.MaximumClaimers.Value)
+			if (model is IClaimOwnershipModel claimOwnershipModel && 0 < claimOwnershipModel.Ownership.PermittedClaimers.Value)
 			{
 				appendResult(claimOwnershipModel.Ownership.ToString());
 			}

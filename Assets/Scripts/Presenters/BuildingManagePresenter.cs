@@ -112,11 +112,10 @@ namespace Lunra.Hothouse.Presenters
 				}
 				
 				controls.Add(
-					new BuildingManageView.Control
-					{
-						Type = BuildingManageView.Control.Types.Label,
-						LabelText = obligationResult
-					}
+					new BuildingManageView.Control(
+						BuildingManageView.Control.Types.Label,
+						obligationResult.WrapInArray()
+					)
 				);
 			}
 			
@@ -130,11 +129,10 @@ namespace Lunra.Hothouse.Presenters
 			{
 				inventoryResult = "<b>Construction</b>" + inventoryResult;
 				controls.Add(
-					new BuildingManageView.Control
-					{
-						Type = BuildingManageView.Control.Types.Label,
-						LabelText = inventoryResult
-					}
+					new BuildingManageView.Control(
+						BuildingManageView.Control.Types.Label,
+						inventoryResult.WrapInArray()
+					)
 				);
 			}
 			
@@ -148,44 +146,72 @@ namespace Lunra.Hothouse.Presenters
 			var controls = new List<BuildingManageView.Control>();
 			
 			controls.Add(
-				new BuildingManageView.Control
-				{
-					Type = BuildingManageView.Control.Types.Label,
-					LabelText = $"[ {selection.ShortId} ] {selection.Type.Value} - "+selection.BuildingState.Value
-				}
+				new BuildingManageView.Control(
+					BuildingManageView.Control.Types.Label,
+					($"[ {selection.ShortId} ] {selection.Type.Value} - "+selection.BuildingState.Value).WrapInArray()
+				)
 			);
 			
 			controls.Add(
-				new BuildingManageView.Control
-				{
-					Type = BuildingManageView.Control.Types.Label,
-					LabelText = $"\n Health: {selection.Health.Current.Value:N0} / {selection.Health.Maximum.Value:N0}"
-				}
+				new BuildingManageView.Control(
+					BuildingManageView.Control.Types.Label,
+					$"\n Health: {selection.Health.Current.Value:N0} / {selection.Health.Maximum.Value:N0}".WrapInArray()
+				)
 			);
 			
 			if (0 < selection.Ownership.MaximumClaimers.Value)
 			{
-				var ownerResult = "<b>Owners</b>";
-				for (var i = 0; i < selection.Ownership.MaximumClaimers.Value; i++)
+				var ownerResult = $"<b>Owners</b> {selection.Ownership.Claimers.Value.Length} / {selection.Ownership.PermittedClaimers.Value} / {selection.Ownership.MaximumClaimers.Value}";
+				
+				controls.Add(
+					new BuildingManageView.Control(
+						BuildingManageView.Control.Types.LeftRightButton,
+						ownerResult.WrapInArray(),
+						new [] { "<", ">" },
+						new Action[]
+						{
+							() =>
+							{
+								if (0 < selection.Ownership.PermittedClaimers.Value)
+								{
+									selection.Ownership.PermittedClaimers.Value--;
+									if (selection.Ownership.PermittedClaimers.Value < selection.Ownership.Claimers.Value.Length)
+									{
+										selection.Ownership.Remove(selection.Ownership.Claimers.Value.First());
+									}
+								}
+							},
+							() =>
+							{
+								if (selection.Ownership.PermittedClaimers.Value < selection.Ownership.MaximumClaimers.Value)
+								{
+									selection.Ownership.PermittedClaimers.Value++;
+								}
+							}
+						}
+					)
+				);
+
+				var ownerListResult = string.Empty;
+				for (var i = 0; i < selection.Ownership.PermittedClaimers.Value; i++)
 				{
-					ownerResult += $"\n - [ {i} ] ";
+					ownerListResult += $"\n - [ {i} ] ";
 					if (i < selection.Ownership.Claimers.Value.Length)
 					{
 						if (selection.Ownership.Claimers.Value[i].TryGetInstance<DwellerModel>(game, out var owner))
 						{
-							ownerResult += owner.Name.Value;
+							ownerListResult += owner.Name.Value;
 						}
-						else ownerResult += "< MISSING >";
+						else ownerListResult += "< MISSING >";
 					}
-					else ownerResult += "NONE";
+					else ownerListResult += "NONE";
 				}
 				
 				controls.Add(
-					new BuildingManageView.Control
-					{
-						Type = BuildingManageView.Control.Types.Label,
-						LabelText = ownerResult
-					}
+					new BuildingManageView.Control(
+						BuildingManageView.Control.Types.Label,
+						ownerListResult.WrapInArray()
+					)
 				);
 			}
 			
@@ -203,11 +229,10 @@ namespace Lunra.Hothouse.Presenters
 				}
 				
 				controls.Add(
-					new BuildingManageView.Control
-					{
-						Type = BuildingManageView.Control.Types.Label,
-						LabelText = obligationResult
-					}
+					new BuildingManageView.Control(
+						BuildingManageView.Control.Types.Label,
+						obligationResult.WrapInArray()
+					)
 				);
 			}
 
@@ -221,29 +246,12 @@ namespace Lunra.Hothouse.Presenters
 			{
 				inventoryResult = "<b>Inventory</b>" + inventoryResult;
 				controls.Add(
-					new BuildingManageView.Control
-					{
-						Type = BuildingManageView.Control.Types.Label,
-						LabelText = inventoryResult
-					}
+					new BuildingManageView.Control(
+						BuildingManageView.Control.Types.Label,
+						inventoryResult.WrapInArray()
+					)
 				);
 			}
-
-			controls.Add(
-				new BuildingManageView.Control
-				{
-					Type = BuildingManageView.Control.Types.Button,
-					ButtonText = "DEBUG: Clear Inventory",
-					Click = () =>
-					{
-						if (!selection.Inventory.Available.Value.IsEmpty)
-						{
-							selection.Inventory.Remove(selection.Inventory.Available.Value);
-							refresh();
-						}
-					}
-				}	
-			);
 
 			if (selection.Recipes.Available.Value.Any())
 			{
@@ -252,17 +260,19 @@ namespace Lunra.Hothouse.Presenters
 					var isInQueue = selection.Recipes.Queue.Value.Any(r => r.Recipe.Id == recipe.Id);
 					
 					controls.Add(
-						new BuildingManageView.Control
-						{
-							Type = isInQueue ? BuildingManageView.Control.Types.RadioButtonEnabled : BuildingManageView.Control.Types.RadioButtonDisabled,
-							LabelText = $"{recipe.Name} [ {(isInQueue ? "ENABLED" : "DISABLED")} ]",
-							Click = () =>
+						new BuildingManageView.Control(
+							isInQueue ? BuildingManageView.Control.Types.RadioButtonEnabled : BuildingManageView.Control.Types.RadioButtonDisabled,
+							$"{recipe.Name} [ {(isInQueue ? "ENABLED" : "DISABLED")} ]".WrapInArray(),
+							click: new Action[]
 							{
-								if (isInQueue) selection.Recipes.Queue.Value = new RecipeComponent.RecipeIteration[0];
-								else selection.Recipes.Queue.Value = new [] { RecipeComponent.RecipeIteration.ForInfinity(recipe) };
-								refresh();
+								() =>
+								{
+									if (isInQueue) selection.Recipes.Queue.Value = new RecipeComponent.RecipeIteration[0];
+									else selection.Recipes.Queue.Value = new [] { RecipeComponent.RecipeIteration.ForInfinity(recipe) };
+									refresh();
+								}
 							}
-						}
+						)
 					);
 				}	
 			}
@@ -273,11 +283,10 @@ namespace Lunra.Hothouse.Presenters
 		void OnBuildingManageSelectionSalvaging(BuildingModel selection)
 		{
 			View.Controls(
-				new BuildingManageView.Control
-				{
-					Type = BuildingManageView.Control.Types.Label,
-					LabelText = "Salvage: TODO"
-				}
+				new BuildingManageView.Control(
+					BuildingManageView.Control.Types.Label,
+					"Salvage: TODO".WrapInArray()
+				)
 			);
 		}
 		#endregion
