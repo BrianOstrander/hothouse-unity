@@ -25,6 +25,8 @@ namespace Lunra.Hothouse.Models
 			
 			Grass = 20,
 			
+			SweetGrass = 30,
+			
 			// FungalBloomSpore = 10,
 			// FungalBloomRaw = 11,
 			// FungalBloomJerky = 12,
