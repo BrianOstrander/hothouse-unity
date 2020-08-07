@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace Lunra.Hothouse.Models
 {
 	public class SweetGrassStockpileDefinition : BuildingDefinition
@@ -15,5 +17,7 @@ namespace Lunra.Hothouse.Models
 		public override InventoryDesire DefaultInventoryDesire => InventoryDesire.Ignored();
 
 		public override string[] Tags => new[] {BuildingTags.Stockpile};
+
+		public override GoalActivity[] Activities => new [] { GetDefaultEatActivity(Inventory.Types.SweetGrass) };
 	}
 }

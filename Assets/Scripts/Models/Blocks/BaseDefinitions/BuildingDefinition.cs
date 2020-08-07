@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
@@ -132,6 +133,7 @@ namespace Lunra.Hothouse.Models
 
 		public override void Instantiate(BuildingModel model) => new BuildingPresenter(Game, model);
 
+		#region Utility
 		protected string GetActionName(
 			Motives motive,
 			string suffix = null
@@ -142,5 +144,35 @@ namespace Lunra.Hothouse.Models
 		}
 
 		protected string GetActionName(string suffix) => Type + "." + suffix;
+
+		protected GoalActivity GetDefaultEatActivity(
+			Inventory.Types type,
+			float comfort = 0.1f,
+			float durationInMinutes = 15f
+		)
+		{
+			if (!DefaultEatModifiers.TryGetValue(type, out var result))
+			{
+				Debug.LogError("Unable to find eat modifier entry of type: " + type);
+				return default;
+			}
+			
+			return new GoalActivity(
+				GetActionName(Motives.Eat, type.ToString().ToLower()),
+				new[]
+				{
+					(Motives.Eat, result),
+					(Motives.Comfort, comfort)
+				},
+				DayTime.FromMinutes(durationInMinutes),
+				Inventory.FromEntry(type, 1)
+			);
+		}
+		
+		protected static readonly Dictionary<Inventory.Types, float> DefaultEatModifiers = new Dictionary<Inventory.Types, float>
+		{
+			{ Inventory.Types.SweetGrass, -0.25f }
+		};
+		#endregion
 	}
 }
