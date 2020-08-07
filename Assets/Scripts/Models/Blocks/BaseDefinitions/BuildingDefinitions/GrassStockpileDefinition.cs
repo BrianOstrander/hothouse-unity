@@ -3,7 +3,8 @@ namespace Lunra.Hothouse.Models
 	public class GrassStockpileDefinition : BuildingDefinition
 	{
 		public override Inventory ConstructionInventory => Inventory.FromEntries(
-			(Inventory.Types.Stalk, 4)
+			(Inventory.Types.Stalk, 4),
+			(Inventory.Types.Grass, 2)
 		);
 
 		public override InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.ByIndividualWeight(

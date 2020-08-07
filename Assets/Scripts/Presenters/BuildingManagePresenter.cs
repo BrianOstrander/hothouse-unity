@@ -59,7 +59,7 @@ namespace Lunra.Hothouse.Presenters
 		void OnGameSimulationUpdate()
 		{
 			if (game.BuildingManage.Selection.Value == null) return;
-			if (lastBuildingState == game.BuildingManage.Selection.Value.BuildingState.Value) return;
+			if (lastBuildingState == game.BuildingManage.Selection.Value.BuildingState.Value && (DateTime.Now - lastBuildingUpdate).TotalSeconds < 1.0) return;
 			
 			OnBuildingManageSelection(game.BuildingManage.Selection.Value);
 		}
