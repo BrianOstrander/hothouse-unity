@@ -80,6 +80,7 @@ namespace Lunra.Hothouse.Models
 			instance
 		) { }
 		
+		[JsonConstructor]
 		InstanceId(
 			Types type,
 			string id,

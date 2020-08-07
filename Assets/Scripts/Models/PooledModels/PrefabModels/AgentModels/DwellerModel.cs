@@ -4,6 +4,7 @@ using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Lunra.Hothouse.Models
 {

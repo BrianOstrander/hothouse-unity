@@ -35,13 +35,13 @@ namespace Lunra.Hothouse.Models
 	
 		#region Serialized
 		[JsonProperty] Dictionary<Motives, int> motiveIndexMap = new Dictionary<Motives, int>();
-		public GoalSnapshot Previous { get; private set; }
+		[JsonProperty] public GoalSnapshot Previous { get; private set; }
 		
 		[JsonProperty] GoalSnapshot current;
 		ListenerProperty<GoalSnapshot> currentListener;
 		[JsonIgnore] public ReadonlyProperty<GoalSnapshot> Current { get; }
 		
-		public Cache[] Caches { get; private set; }
+		[JsonProperty] public Cache[] Caches { get; private set; }
 		#endregion
 		
 		#region Non Serialized

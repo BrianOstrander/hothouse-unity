@@ -49,9 +49,10 @@ namespace Lunra.Hothouse.Models
 			Inventory.FromEntries(entries)
 		);
 
-		public readonly Clamps Clamping;
 		[JsonProperty] readonly int weightMaximum;
 		[JsonProperty] readonly Inventory inventoryMaximum;
+		// Weird newtonsoft stuff...
+		[JsonProperty] public Clamps Clamping { get; private set; }
 
 		InventoryCapacity(
 			Clamps clamping,

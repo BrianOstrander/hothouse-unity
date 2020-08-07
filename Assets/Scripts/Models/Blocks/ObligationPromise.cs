@@ -1,5 +1,6 @@
 using System;
 using Lunra.StyxMvp.Models;
+using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
@@ -19,6 +20,7 @@ namespace Lunra.Hothouse.Models
 		public Obligation Obligation { get; }
 		public InstanceId Target { get; }
 
+		[JsonConstructor]
 		ObligationPromise(
 			Obligation obligation,
 			InstanceId target

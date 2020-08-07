@@ -38,10 +38,15 @@ namespace Lunra.Hothouse.Services
 			);
 			
 			App.S.PushBlocking(Payload.Game.DwellerNames.Initialize);
-			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
 
-			if (Payload.Game.Rooms.AllActive.None()) new GameStateGenerateLevel(this).Push();
-			
+			if (Payload.Game.Rooms.AllActive.None())				
+			{
+				
+				Debug.Log("uhh?");
+				App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
+				new GameStateGenerateLevel(this).Push();
+			}
+
 			App.S.PushBlocking(OnBeginInitializeCache);
 			
 			App.S.Push(OnBeginInitializeServices);
@@ -68,7 +73,7 @@ namespace Lunra.Hothouse.Services
 			new ToolbarPresenter(Payload.Game);
 			new EffectsPresenter(Payload.Game);
 
-			new HintsPresenter(Payload.Game);
+			// new HintsPresenter(Payload.Game);
 			new BuildValidationPresenter(Payload.Game);
 			new GlobalInventoryCounterPresenter(Payload.Game);
 			new JobManagePresenter(Payload.Game);

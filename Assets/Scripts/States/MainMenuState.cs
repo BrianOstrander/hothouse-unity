@@ -4,6 +4,7 @@ using Lunra.Hothouse.Models;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Services
 {
@@ -70,6 +71,24 @@ namespace Lunra.Hothouse.Services
 
 		void GenerateNewGame(Action<Result<GameModel>> done)
 		{
+			App.M.Load<GameModel>(
+				"bfb02839-eb15-450c-aab1-5e8a3c4bef56",
+				result =>
+				{
+					result.Log();
+			
+					Debug.Log(result.TypedModel.Rooms.All.Value.Active.Length);
+					
+					if (result.Status == ResultStatus.Success)
+					{
+						done(Result<GameModel>.Success(result.TypedModel));
+						return;
+					}
+				}
+			);
+			
+			return;
+			
 			var game = App.M.Create<GameModel>(App.M.CreateUniqueId());
 
 			game.LevelGeneration.Seed.Value = DemonUtility.NextInteger;

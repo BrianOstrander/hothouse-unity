@@ -35,7 +35,7 @@ namespace Lunra.Core
 				if (serializerSettings == null)
 				{
 					serializerSettings = new JsonSerializerSettings();
-					serializerSettings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+					serializerSettings.ObjectCreationHandling = ObjectCreationHandling.Auto;
 					serializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
 					foreach (var converter in converters) serializerSettings.Converters.Add(converter);
 					foreach (var converter in addedConverters) serializerSettings.Converters.Add(converter);
@@ -57,7 +57,7 @@ namespace Lunra.Core
 					verboseSerializerSettings = new JsonSerializerSettings();
 					verboseSerializerSettings.TypeNameHandling = TypeNameHandling.All;
 					verboseSerializerSettings.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
-					verboseSerializerSettings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+					verboseSerializerSettings.ObjectCreationHandling = ObjectCreationHandling.Auto;
 					verboseSerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
 					foreach (var converter in converters) verboseSerializerSettings.Converters.Add(converter);
 					foreach (var converter in addedConverters) verboseSerializerSettings.Converters.Add(converter);
@@ -115,7 +115,7 @@ namespace Lunra.Core
 			}
 			catch (Exception e)
 			{
-				Debug.LogError("Problem parsing value: \n\t"+json+"\nReturning default value\n Exception:\n"+e.Message);
+				Debug.LogError($"Encountered the following exception:\n{e.Message}\n\nWhile Parsing: {json}");
 				return defaultValue;
 			}
 		}

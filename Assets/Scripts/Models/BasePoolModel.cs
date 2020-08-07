@@ -1,12 +1,11 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Serialization;
 using Lunra.Core;
-using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
-using Lunra.Hothouse.Presenters;
 using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace Lunra.Hothouse.Models
 {
@@ -15,16 +14,10 @@ namespace Lunra.Hothouse.Models
 	{
 		public class Reservoir
 		{
-			// ReSharper disable once MemberInitializerValueIgnored
-			public readonly M[] Active = new M[0];
-			// ReSharper disable once MemberInitializerValueIgnored
-			[JsonIgnore] public readonly M[] InActive = new M[0];
-
-			public Reservoir()
-			{
-				Active = new M[0];
-				InActive = new M[0];
-			}
+			public static Reservoir Default() => new Reservoir(new M[0], new M[0]);
+			
+			[JsonProperty] public M[] Active { get; private set; }
+			[JsonIgnore] public M[] InActive { get; }
 			
 			public Reservoir(
 				M[] active,
@@ -37,7 +30,7 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		#region Serialized
-		[JsonProperty] Reservoir all = new Reservoir();
+		[JsonProperty] Reservoir all = Reservoir.Default();
 		[JsonIgnore] public ListenerProperty<Reservoir> All { get; }
 		#endregion
 		
