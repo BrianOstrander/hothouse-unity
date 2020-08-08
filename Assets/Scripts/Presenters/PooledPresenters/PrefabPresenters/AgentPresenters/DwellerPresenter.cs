@@ -15,8 +15,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			Model.Goals.Bind();
-
 			Model.Job.Changed += OnDwellerJob;
 			Model.Health.Damaged += OnDwellerHealthDamage;
 			
@@ -26,9 +24,7 @@ namespace Lunra.Hothouse.Presenters
 		}
 
 		protected override void UnBind()
-		{
-			Model.Goals.UnBind();
-			
+		{	
 			Model.Job.Changed -= OnDwellerJob;
 			Model.Health.Damaged -= OnDwellerHealthDamage;
 			

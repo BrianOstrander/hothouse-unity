@@ -73,6 +73,11 @@ namespace Lunra.Hothouse.Models
 			LowRationThreshold = new ListenerProperty<int>(value => lowRationThreshold = value, () => lowRationThreshold);
 			Bed = new ListenerProperty<InstanceId>(value => bed = value, () => bed);
 			Workplace = new ListenerProperty<InstanceId>(value => workplace = value, () => workplace);
+			
+			AppendComponents(
+				Goals,
+				GoalPromises
+			);
 		}
 	}
 }

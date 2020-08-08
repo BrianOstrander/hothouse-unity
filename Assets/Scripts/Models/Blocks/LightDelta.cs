@@ -17,10 +17,10 @@ namespace Lunra.Hothouse.Models
 			Calculated = 20
 		}
 
-		public readonly States State;
-		public readonly DateTime LastUpdate;
-		public readonly string[] RoomIds;
-		public readonly string[] SensitiveIds;
+		public States State { get; }
+		public DateTime LastUpdate { get; }
+		public string[] RoomIds { get; }
+		public string[] SensitiveIds { get; }
 
 		LightDelta(
 			States state,

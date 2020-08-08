@@ -120,10 +120,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						if (delta.IsDone)
 						{
 							// TODO: Need to check if building has been destroyed...
-							destination.Activities.UnReserveActivity(
-								Agent,
-								destination
-							);
+							destination.Activities.UnReserveActivity(Agent);
 						}
 					}
 				);
@@ -196,7 +193,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				bestActivityParent.Activities.ReserveActivity(
 					Agent,
-					bestActivityParent,
 					bestActivity,
 					bestActivityReservationBegin
 				);

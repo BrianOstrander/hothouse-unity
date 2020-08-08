@@ -25,6 +25,13 @@ namespace Lunra.Hothouse.Models
 			Parent = new ListenerProperty<InstanceId>(value => parent = value, () => parent);
 			
 			Inventories = new [] { Inventory };
+			
+			AppendComponents(
+				LightSensitive,
+				Enterable,
+				Inventory,
+				Generator
+			);
 		}
 	}
 }

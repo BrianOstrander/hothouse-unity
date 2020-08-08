@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 
 using Lunra.Core.Converters;
+using Lunra.Core.Resolvers;
 using QuaternionConverter = Lunra.Core.Converters.QuaternionConverter;
 using ColorConverter = Lunra.Core.Converters.ColorConverter;
 
@@ -37,6 +38,7 @@ namespace Lunra.Core
 					serializerSettings = new JsonSerializerSettings();
 					serializerSettings.ObjectCreationHandling = ObjectCreationHandling.Auto;
 					serializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+					serializerSettings.ContractResolver = new NonPublicPropertiesResolver();
 					foreach (var converter in converters) serializerSettings.Converters.Add(converter);
 					foreach (var converter in addedConverters) serializerSettings.Converters.Add(converter);
 				}
@@ -59,6 +61,7 @@ namespace Lunra.Core
 					verboseSerializerSettings.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
 					verboseSerializerSettings.ObjectCreationHandling = ObjectCreationHandling.Auto;
 					verboseSerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+					serializerSettings.ContractResolver = new NonPublicPropertiesResolver();
 					foreach (var converter in converters) verboseSerializerSettings.Converters.Add(converter);
 					foreach (var converter in addedConverters) verboseSerializerSettings.Converters.Add(converter);
 				}

@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Models
 		TagComponent Tags { get; }
 	}
 
-	public class TagComponent : Model
+	public class TagComponent : ComponentModel<ITagModel>
 	{
 		public enum DuplicateBehaviours
 		{
@@ -58,7 +58,6 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region NonSerialized
-		GameModel game;
 		#endregion
 		
 		public TagComponent()
@@ -76,9 +75,9 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public void Bind() => game.SimulationUpdate += OnGameSimulationUpdate;
+		public override void Bind() => Game.SimulationUpdate += OnGameSimulationUpdate;
 
-		public void UnBind() => game.SimulationUpdate -= OnGameSimulationUpdate;
+		public override void UnBind() => Game.SimulationUpdate -= OnGameSimulationUpdate;
 		
 		public bool Contains(string tag) => All.Value.Any(t => t.Tag == tag);
 
@@ -120,17 +119,16 @@ namespace Lunra.Hothouse.Models
 		#region GameModel Events
 		void OnGameSimulationUpdate()
 		{
-			if (game.SimulationTime.Value < NextExpiration.Value) return;
+			if (Game.SimulationTime.Value < NextExpiration.Value) return;
 
 			allListener.Value = All.Value
-				.Where(t => game.SimulationTime.Value < t.Expiration)
+				.Where(t => Game.SimulationTime.Value < t.Expiration)
 				.ToArray();
 		}
 		#endregion
 		
-		public void Reset(GameModel game)
+		public void Reset()
 		{
-			this.game = game;
 			allListener.Value = new Entry[0];
 			nextExpirationListener.Value = DayTime.MaxValue;
 		}

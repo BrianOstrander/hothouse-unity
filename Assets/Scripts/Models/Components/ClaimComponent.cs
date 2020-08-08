@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IClaimOwnershipModel : IModel
+	public interface IClaimOwnershipModel : IParentComponentModel
 	{
 		ClaimComponent Ownership { get; }
 	}
 
-	public class ClaimComponent : Model
+	public class ClaimComponent : ComponentModel<IClaimOwnershipModel>
 	{
 		#region Serialized
 		[JsonProperty] InstanceId[] claimers = new InstanceId[0];

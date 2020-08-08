@@ -12,7 +12,16 @@ namespace Lunra.Hothouse.Models
 		
 		#region NonSerialized
 		#endregion
-		
-		public DebrisModel() { }
+
+		public DebrisModel()
+		{
+			AppendComponents(
+				LightSensitive,
+				Health,
+				Clearable,
+				Obligations,
+				Enterable
+			);
+		}
 	}
 }

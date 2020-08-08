@@ -111,12 +111,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 			
 			if (Workplace.Farm.Plots.None() || (Game.NavigationMesh.CalculationState.Value == NavigationMeshModel.CalculationStates.Completed && Workplace.Farm.LastUpdatedRealTime < Game.NavigationMesh.LastUpdated.Value))
 			{
-				Workplace.Farm.CalculatePlots(Game, Workplace);
+				Workplace.Farm.CalculatePlots();
 				CalculateReadyToSowRatio();
 			}
 			else if (state == States.Idle && CalculateFloraObligationsDelay < (Game.SimulationTime.Value - Workplace.Farm.LastUpdated))
 			{
-				Workplace.Farm.CalculateFloraObligations(Game, Workplace);
+				Workplace.Farm.CalculateFloraObligations();
 				CalculateReadyToSowRatio();
 			}
 		}

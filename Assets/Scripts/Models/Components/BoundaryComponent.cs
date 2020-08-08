@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Models
 		BoundaryComponent Boundary { get; }
 	}
 
-	public class BoundaryComponent : Model
+	public class BoundaryComponent : ComponentModel<IBoundaryModel>
 	{
 		#region Serialized
 		[JsonProperty] float radius;

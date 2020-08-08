@@ -1,5 +1,4 @@
-﻿using System;
-using Lunra.Hothouse.Ai;
+﻿using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
@@ -113,9 +112,9 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
-			Model.InventoryPromises.BreakRemainingPromises(Game);
+			Model.InventoryPromises.BreakRemainingPromises();
 			
-			Model.ObligationPromises.BreakRemainingPromises(Game);
+			Model.ObligationPromises.BreakRemainingPromises();
 			
 			Model.PooledState.Value = PooledStates.InActive;
 		}

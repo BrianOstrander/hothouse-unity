@@ -14,7 +14,7 @@ namespace Lunra.Hothouse.Models
 		ObligationComponent Obligations { get; }
 	}
 
-	public class ObligationComponent : Model
+	public class ObligationComponent : ComponentModel<IObligationModel>
 	{
 		public class State
 		{

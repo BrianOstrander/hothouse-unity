@@ -54,6 +54,10 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 		
+		#region PooledModel Events
+		protected override bool CanShow() => Room.IsRevealed.Value;
+		#endregion
+		
 		#region RoomModel Events
 		void OnRoomIsRevealed(bool isRevealed)
 		{

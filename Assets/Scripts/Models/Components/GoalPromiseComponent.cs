@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Models
 		GoalPromiseComponent GoalPromises { get; }
 	}
 
-	public class GoalPromiseComponent : Model
+	public class GoalPromiseComponent : ComponentModel<IGoalPromiseModel>
 	{
 		#region Serialized
 		[JsonProperty] Stack<GoalActivityReservation> all = new Stack<GoalActivityReservation>();
@@ -28,9 +28,7 @@ namespace Lunra.Hothouse.Models
 			All = new StackProperty<GoalActivityReservation>(all);
 		}
 
-		public void BreakRemainingPromises(
-			GameModel game
-		)
+		public void BreakRemainingPromises()
 		{
 			Debug.Log("BREAK REMAINING RESERVATIOS HEREEEE");
 			// foreach (var promise in All.PeekAll())

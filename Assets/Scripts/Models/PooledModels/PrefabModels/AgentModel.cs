@@ -44,6 +44,13 @@ namespace Lunra.Hothouse.Models
 			{
 				Inventory	
 			};
+			
+			AppendComponents(
+				Health,
+				Inventory,
+				InventoryPromises,
+				ObligationPromises
+			);
 		}
 	}
 }

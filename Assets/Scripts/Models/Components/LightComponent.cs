@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Models
 		LightComponent Light { get; }
 	}
 	
-	public class LightComponent : Model
+	public class LightComponent : ComponentModel<ILightModel>
 	{
 		#region Serialized
 		[JsonProperty] bool isLightEnabled; // TODO: Rename? Unify name?

@@ -10,7 +10,7 @@ namespace Lunra.Hothouse.Models
 		LightSensitiveComponent LightSensitive { get; }
 	}
 
-	public class LightSensitiveComponent : Model
+	public class LightSensitiveComponent : ComponentModel<ILightSensitiveModel>
 	{
 		#region Serialized
 		[JsonProperty] float lightLevel;

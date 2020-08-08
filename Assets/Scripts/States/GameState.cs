@@ -46,6 +46,8 @@ namespace Lunra.Hothouse.Services
 				App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
 				new GameStateGenerateLevel(this).Push();
 			}
+			
+			App.S.Push(Payload.Game.TriggerSimulationInitialize);
 
 			App.S.PushBlocking(OnBeginInitializeCache);
 			
@@ -113,6 +115,11 @@ namespace Lunra.Hothouse.Services
 		#region Idle
 		protected override void Idle()
 		{
+			App.Heartbeat.WaitForSeconds(
+				() => Payload.Game.SimulationMultiplier.Value = 0.1f,
+				3f
+			);
+
 			Payload.Game.CalculateMaximumLighting = OnCalculateMaximumLighting;
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;

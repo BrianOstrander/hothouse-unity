@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -14,7 +12,7 @@ namespace Lunra.Hothouse.Models
 		GoalActivityComponent Activities { get; }
 	}
 
-	public class GoalActivityComponent : Model
+	public class GoalActivityComponent : ComponentModel<IGoalActivityModel>
 	{
 		public struct State
 		{
@@ -126,7 +124,7 @@ namespace Lunra.Hothouse.Models
 		
 		public GoalActivityReservation ReserveActivity(
 			IGoalPromiseModel client,
-			IGoalActivityModel destination,
+
 			GoalActivity activity,
 			DayTime appointmentBegin
 		)
@@ -134,7 +132,7 @@ namespace Lunra.Hothouse.Models
 			var reservation = GoalActivityReservation.New(
 				activity,
 				client,
-				destination,
+				Model,
 				appointmentBegin
 			);
 			
@@ -148,12 +146,12 @@ namespace Lunra.Hothouse.Models
 
 			if (activity.Input.HasValue)
 			{
-				destination.Inventory.AddForbidden(activity.Input.Value);	
+				Model.Inventory.AddForbidden(activity.Input.Value);	
 			}
 			
 			if (activity.Output.HasValue)
 			{
-				destination.Inventory.AddReserved(activity.Output.Value);
+				Model.Inventory.AddReserved(activity.Output.Value);
 			}
 			
 			return reservation;
@@ -184,10 +182,10 @@ namespace Lunra.Hothouse.Models
 		}
 		*/
 
-		public GoalActivity UnReserveActivity(
-			IGoalModel client,
-			IGoalActivityModel destination
-		)
+		public GoalActivity UnReserveActivity(IGoalModel client)
+
+
+
 		{
 			var reservation = client.GoalPromises.All.Pop();
 			var activity = All.Value.First(a => a.Activity.Id == reservation.ActivityId).Activity;
@@ -198,38 +196,38 @@ namespace Lunra.Hothouse.Models
 
 			if (activity.Input.HasValue)
 			{
-				destination.Inventory.RemoveForbidden(activity.Input.Value);
-				destination.Inventory.Remove(activity.Input.Value);
+				Model.Inventory.RemoveForbidden(activity.Input.Value);
+				Model.Inventory.Remove(activity.Input.Value);
 			}
 
 			if (activity.Output.HasValue)
 			{
-				destination.Inventory.RemoveReserved(activity.Output.Value);
-				destination.Inventory.Add(activity.Output.Value);
+				Model.Inventory.RemoveReserved(activity.Output.Value);
+				Model.Inventory.Add(activity.Output.Value);
 			}
 			
 			return activity;
 		}
 
-		public void CalculateRestrictions(
-			IGoalActivityModel model
-		)
+		public void CalculateRestrictions()
+
+
 		{
 			if (All.Value.None()) return;
 			
 			var updatedStates = new List<State>();
 
-			var availableCapacity = calculateAvailableCapacity ? model.Inventory.AvailableCapacity.Value.GetCapacityFor(model.Inventory.Available.Value) : default;
+			var availableCapacity = calculateAvailableCapacity ? Model.Inventory.AvailableCapacity.Value.GetCapacityFor(Model.Inventory.Available.Value) : default;
 
 			foreach (var state in All.Value)
 			{
 				var restriction = Restrictions.None;
 
-				if (!model.Enterable.AnyAvailable())
+				if (!Model.Enterable.AnyAvailable())
 				{
 					restriction |= Restrictions.MissingAvailableEntrances;
 				}
-				if (state.Activity.Input.HasValue && !model.Inventory.Available.Value.Contains(state.Activity.Input.Value))
+				if (state.Activity.Input.HasValue && !Model.Inventory.Available.Value.Contains(state.Activity.Input.Value))
 				{
 					restriction |= Restrictions.MissingInput;
 				}

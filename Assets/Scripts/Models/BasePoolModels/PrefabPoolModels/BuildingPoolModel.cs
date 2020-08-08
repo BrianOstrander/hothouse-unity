@@ -6,6 +6,7 @@ using Lunra.Core;
 using Lunra.Hothouse.Presenters;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -15,8 +16,8 @@ namespace Lunra.Hothouse.Models
 		GameModel game;
 		Dictionary<Type, BuildingDefinition> definitions = new Dictionary<Type, BuildingDefinition>();
 		
-		public BuildingDefinition[] Definitions { get; private set; }
-		public ReadOnlyDictionary<Jobs, string[]> Workplaces { get; private set; }
+		[JsonIgnore] public BuildingDefinition[] Definitions { get; private set; }
+		[JsonIgnore] public ReadOnlyDictionary<Jobs, string[]> Workplaces { get; private set; }
 		
 		public override void Initialize(GameModel game)
 		{

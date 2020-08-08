@@ -10,7 +10,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
-			Game.SimulationUpdate += GameSimulationUpdate;
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
 			Model.Inventory.All.Changed += OnGeneratorInventoryAll;
@@ -22,7 +21,6 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
-			Game.SimulationUpdate -= GameSimulationUpdate;
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
 			Model.Inventory.All.Changed -= OnGeneratorInventoryAll;
@@ -40,11 +38,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.RecalculateEntrances(Model.Transform.Position.Value);
 		}
 		#endregion
-		
-		#region GameModel Events
-		void GameSimulationUpdate() => Model.Generator.Update(Game, Model);
-		#endregion
-		
+
 		#region Navigation Events
 		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
         {
@@ -53,7 +47,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		#region GeneratorModel Events
-		void OnGeneratorInventoryAll(Inventory all) => Model.Generator.CalculateRate(Model);
+		void OnGeneratorInventoryAll(Inventory all) => Model.Generator.CalculateRate();
 
 		void OnGeneratorGeneratorRate(float rate)
 		{

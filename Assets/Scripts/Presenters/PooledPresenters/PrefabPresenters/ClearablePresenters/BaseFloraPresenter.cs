@@ -37,9 +37,6 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.Health.Current.Changed += OnFloraHealthCurrent;
 			Model.IsReproducing.Changed += OnFloraIsReproducing;
-			Model.AgeModifier.Bind(Model);
-			Model.ReproductionModifier.Bind(Model);
-			Model.Tags.Bind();
 		}
 
 		protected override void UnBind()
@@ -52,9 +49,6 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.Health.Current.Changed -= OnFloraHealthCurrent;
 			Model.IsReproducing.Changed -= OnFloraIsReproducing;
-			Model.AgeModifier.UnBind(Model);
-			Model.ReproductionModifier.UnBind(Model);
-			Model.Tags.UnBind();
 		}
 
 		protected override void OnViewPrepare()

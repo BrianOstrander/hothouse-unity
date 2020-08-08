@@ -29,6 +29,8 @@ namespace Lunra.Hothouse.Models
 			PrefabId = new ListenerProperty<string>(value => prefabId = value, () => prefabId);
 			PrefabTags = new ListenerProperty<string[]>(value => prefabTags = value, () => prefabTags);
 			Tag = new ListenerProperty<string>(value => tag = value, () => tag);
+			
+			AppendComponents(RoomTransform);
 		}
 	}
 }

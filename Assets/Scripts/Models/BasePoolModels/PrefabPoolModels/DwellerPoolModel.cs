@@ -161,26 +161,23 @@ namespace Lunra.Hothouse.Models
 
 			const float GoalInsistenceVelocity = 0.25f;
 			
-			model.Goals.Reset(
-				game,
-				new []
-				{
-					(Motives.Eat, GoalInsistenceVelocity),
-					(Motives.Sleep, GoalInsistenceVelocity),
-					(Motives.Comfort, GoalInsistenceVelocity),
-					
-					(Motives.Heal, 0f)
-				},
-				OnCalculateGoal,
-				OnCalculateGoalOverflowEffects
-			);
+			model.Goals.Reset(this);
 			
 			model.GoalPromises.Reset();
 			
 			model.Name.Value = game.DwellerNames.GetName(generator);
 		}
 
-		GoalResult OnCalculateGoal(
+		public (Motives Motive, float InsistenceModifier)[] Velocities => new[]
+		{
+			(Motives.Eat, 0.25f),
+			(Motives.Sleep, 0.25f),
+			(Motives.Comfort, 0.25f),
+
+			(Motives.Heal, 0f)
+		};
+
+		public GoalResult OnCalculateGoal(
 			Motives motive,
 			float insistence
 		)
@@ -190,7 +187,7 @@ namespace Lunra.Hothouse.Models
 			return default;
 		}
 		
-		(Motives Motive, float InsistenceModifier)[] OnCalculateGoalOverflowEffects(
+		public (Motives Motive, float InsistenceModifier)[] OnCalculateGoalOverflowEffects(
 			Motives motive,
 			float simulationTimeAtMaximum
 		)

@@ -49,6 +49,7 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent OpenSaveLocation = new GUIContent("Open save location");
 			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard");
 			public static GUIContent StartNewGame = new GUIContent("Start New Game");
+			public static GUIContent SaveAndLoadGame = new GUIContent("Save & Load Game");
 			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
 			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
 			public static GUIContent OpenAllDoors = new GUIContent("Open All Doors");
@@ -115,16 +116,41 @@ namespace Lunra.Hothouse.Editor
 			{
 				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
 				if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
-				if (GUILayout.Button(Content.StartNewGame))
-				{
-					App.S.RequestState(
-						new MainMenuPayload
-						{
-							Preferences = state.Payload.Preferences
-						}
-					);
-				}
 				
+				GUILayout.BeginHorizontal();
+				{
+					if (GUILayout.Button(Content.StartNewGame))
+					{
+						App.S.RequestState(
+							new MainMenuPayload
+							{
+								Preferences = state.Payload.Preferences
+							}
+						);
+					}
+					
+					if (GUILayout.Button(Content.SaveAndLoadGame))
+					{
+						App.M.Save(
+							game,
+							result =>
+							{
+								result.LogIfNotSuccess();
+								if (result.Status != ResultStatus.Success) return;
+								
+								App.S.RequestState(
+									new MainMenuPayload
+									{
+										AutoLoadGame = game.Id.Value,
+										Preferences = state.Payload.Preferences
+									}
+								);
+							}
+						);
+					}
+				}
+				GUILayout.EndHorizontal();
+
 				GUILayout.BeginHorizontal();
 				{
 					GUIExtensions.PushEnabled(true, true);

@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Models
 		ObligationPromiseComponent ObligationPromises { get; }
 	}
 
-	public class ObligationPromiseComponent : Model
+	public class ObligationPromiseComponent : ComponentModel<IObligationPromiseModel>
 	{
 		#region Serialized
 		[JsonProperty] Stack<ObligationPromise> all = new Stack<ObligationPromise>();
@@ -30,13 +30,11 @@ namespace Lunra.Hothouse.Models
 			All = new StackProperty<ObligationPromise>(all);
 		}
 
-		public void BreakRemainingPromises(
-			GameModel game	
-		)
+		public void BreakRemainingPromises()
 		{
 			foreach (var promise in All.PeekAll())
 			{
-				if (!promise.Target.TryGetInstance<IObligationModel>(game, out var target)) continue;
+				if (!promise.Target.TryGetInstance<IObligationModel>(Game, out var target)) continue;
 
 				target.Obligations.RemoveForbidden(promise.Obligation);
 			}	

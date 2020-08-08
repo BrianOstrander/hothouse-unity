@@ -35,13 +35,19 @@ namespace Lunra.Hothouse.Models
         #endregion
         
         #region Non Serialized
-        [JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
+        [JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent(); // TODO: Why is this not serialized? 
         #endregion
         
         public DoorModel()
         {
             IsOpen = new ListenerProperty<bool>(value => isOpen = value, () => isOpen);
             RoomConnection = new ListenerProperty<Connection>(value => roomConnection = value, () => roomConnection);
+            
+            AppendComponents(
+				Obligations,
+                LightSensitive,
+                Enterable
+            );
         }
 
         public bool IsConnnecting(string roomId) => RoomConnection.Value.RoomId0 == roomId || roomConnection.RoomId1 == roomId;

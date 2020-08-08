@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface ITransformModel : IModel
+	public interface ITransformModel : IParentComponentModel
 	{
 		TransformComponent Transform { get; }
 	}
 
-	public class TransformComponent : Model
+	public class TransformComponent : ComponentModel<ITransformModel>
 	{
 		#region Serialized
 		[JsonProperty] Vector3 position;

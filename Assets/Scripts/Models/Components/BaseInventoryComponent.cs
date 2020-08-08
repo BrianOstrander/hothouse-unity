@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IBaseInventoryComponent : IModel
+	public interface IBaseInventoryComponent : IComponentModel
 	{
 		ReadonlyProperty<Inventory> All { get; }
 		ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] IBaseInventoryComponent[] Inventories { get; }
 	}
 
-	public abstract class BaseInventoryComponent : Model,
+	public abstract class BaseInventoryComponent : ComponentModel<IBaseInventoryModel>,
 		IBaseInventoryComponent
 	{
 		#region Serialized

@@ -18,6 +18,12 @@ namespace Lunra.Hothouse.Models
 		public ItemDropModel()
 		{
 			Inventories = new [] { Inventory };
+			
+			AppendComponents(
+				LightSensitive,
+				Enterable,
+				Inventory
+			);
 		}
 	}
 }

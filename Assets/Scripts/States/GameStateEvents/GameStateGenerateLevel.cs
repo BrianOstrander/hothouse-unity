@@ -66,7 +66,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// );
 			
 			App.S.Push(() => payload.Game.SimulationMultiplier.Value = 1f);
-			App.S.Push(payload.Game.TriggerSimulationInitialize);
 			App.S.Push(OnEnd);
 		}
 

@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Models
 		GeneratorComponent Generator { get; }
 	}
 	
-	public class GeneratorComponent : Model
+	public class GeneratorComponent : ComponentModel<IGeneratorModel>
 	{
 		public enum States
 		{
@@ -46,7 +46,17 @@ namespace Lunra.Hothouse.Models
 				out rateListener
 			);
 		}
-		
+
+		public override void Bind()
+		{
+			Game.SimulationUpdate += OnGameSimulationUpdate;
+		}
+
+		public override void UnBind()
+		{
+			Game.SimulationUpdate -= OnGameSimulationUpdate;
+		}
+
 		public void Reset(
 			FloatRange refillDurationRange,
 			FloatRange expireDurationRange,
@@ -61,12 +71,9 @@ namespace Lunra.Hothouse.Models
 			rateMaximum = items.Sum(i => i.Maximum);
 		}
 
-		public void Update(
-			GameModel game,
-			IGeneratorModel model
-		)
+		void OnGameSimulationUpdate()
 		{
-			if (game.SimulationTime.Value < nextState) return;
+			if (Game.SimulationTime.Value < nextState) return;
 
 			float hoursUntilNextState;
 			
@@ -76,13 +83,13 @@ namespace Lunra.Hothouse.Models
 				case States.WaitingToExpire:
 					hoursUntilNextState = refillDurationRange.Evaluate(DemonUtility.NextFloat);
 					state = States.WaitingToRefill;
-					if (!model.Inventory.Available.Value.IsEmpty) model.Inventory.Remove(model.Inventory.Available.Value);
+					if (!Model.Inventory.Available.Value.IsEmpty) Model.Inventory.Remove(Model.Inventory.Available.Value);
 					break;
 				case States.WaitingToRefill:
 					hoursUntilNextState = expireDurationRange.Evaluate(DemonUtility.NextFloat);
 					state = States.WaitingToExpire;
 
-					var availableMaximum = model.Inventory.AvailableCapacity.Value.GetCapacityFor(model.Inventory.Available.Value);
+					var availableMaximum = Model.Inventory.AvailableCapacity.Value.GetCapacityFor(Model.Inventory.Available.Value);
 					var generated = Inventory.FromEntries(
 						items
 							.Select(i => (i.Type, DemonUtility.GetNextInteger(i.Minimum, i.Maximum + 1)))
@@ -91,7 +98,7 @@ namespace Lunra.Hothouse.Models
 
 					if (availableMaximum.Intersects(generated, out generated))
 					{
-						model.Inventory.Add(generated);
+						Model.Inventory.Add(generated);
 					}
 					
 					break;
@@ -100,10 +107,10 @@ namespace Lunra.Hothouse.Models
 					return;
 			}
 
-			nextState = game.SimulationTime.Value + DayTime.FromHours(hoursUntilNextState);
+			nextState = Game.SimulationTime.Value + DayTime.FromHours(hoursUntilNextState);
 		}
 
-		public void CalculateRate(IGeneratorModel model) => rateListener.Value = model.Inventory.All.Value.TotalWeight / rateMaximum;
+		public void CalculateRate() => rateListener.Value = Model.Inventory.All.Value.TotalWeight / rateMaximum;
 		
 		public override string ToString()
 		{

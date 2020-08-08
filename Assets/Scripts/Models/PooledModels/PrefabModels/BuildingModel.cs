@@ -83,6 +83,23 @@ namespace Lunra.Hothouse.Models
 				}
 				inventoriesByBuildingState.Add(buildState, buildStateInventories);
 			}
+			
+			AppendComponents(
+				Light,
+				LightSensitive,
+				Boundary,
+				Health,
+				Ownership,
+				Inventory,
+				ConstructionInventory,
+				SalvageInventory,
+				Obligations,
+				Recipes,
+				Farm,
+				Activities,
+				Tags,
+				Enterable
+			);
 		}
 	}
 }

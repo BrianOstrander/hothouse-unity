@@ -88,10 +88,6 @@ namespace Lunra.Hothouse.Presenters
 			Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion
-		
-		#region PooledModel Events
-		protected override bool CanShow() => Room.IsRevealed.Value;
-		#endregion
 
 		#region ToolbarModel Events
 		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)

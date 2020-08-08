@@ -10,7 +10,7 @@ namespace Lunra.Hothouse.Models
 		ClearableComponent Clearable { get; }
 	}
 
-	public class ClearableComponent : Model
+	public class ClearableComponent : ComponentModel<IClearableModel>
 	{
 		#region Serialized
 		[JsonProperty] Inventory itemDrops = Inventory.Empty;

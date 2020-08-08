@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace Lunra.Hothouse.Models
 {
 	public class ModifierDefinition
@@ -16,6 +18,7 @@ namespace Lunra.Hothouse.Models
 		public float Value { get; }
 		public Rules Rule { get; }
 		
+		[JsonConstructor]
 		ModifierDefinition(
 			string tag,
 			float value,

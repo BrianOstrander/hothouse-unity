@@ -127,7 +127,7 @@ namespace Lunra.Hothouse.Models
 
 			model.Activities.Reset(Activities);
 			
-			model.Tags.Reset(Game);
+			model.Tags.Reset();
 			foreach (var tag in Tags) model.Tags.AddTag(tag); 
 		}
 

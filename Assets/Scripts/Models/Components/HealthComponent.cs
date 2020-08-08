@@ -11,7 +11,7 @@ namespace Lunra.Hothouse.Models
 		HealthComponent Health { get; }
 	}
 
-	public class HealthComponent : Model
+	public class HealthComponent : ComponentModel<IHealthModel>
 	{
 		#region Serialized
 		[JsonProperty] float current = -1f;

@@ -77,6 +77,17 @@ namespace Lunra.Hothouse.Models
 				ReproductionFailures,
 				ReproductionFailureLimit
 			);
+			
+			AppendComponents(
+				LightSensitive,
+				Health,
+				Clearable,
+				Obligations,
+				Enterable,
+				Tags,
+				AgeModifier,
+				ReproductionModifier
+			);
 		}
 	}
 }

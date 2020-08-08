@@ -14,7 +14,7 @@ namespace Lunra.Hothouse.Models
 		EnterableComponent Enterable { get; }
 	}
 	
-	public class EnterableComponent : Model
+	public class EnterableComponent : ComponentModel<IEnterableModel>
 	{
 		#region Non Serialized
 		Entrance[] entrances = new Entrance[0];

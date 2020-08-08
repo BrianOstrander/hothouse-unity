@@ -30,5 +30,9 @@ namespace Lunra.Hothouse.Models
 			
 			CameraInstance = new ListenerProperty<Camera>(value => cameraInstance = value, () => cameraInstance);
 		}
+
+		public void InitializeComponents() => Components = new[] {Transform};
+
+		public IComponentModel[] Components { get; private set; }
 	}
 }
