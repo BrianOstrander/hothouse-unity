@@ -355,6 +355,7 @@ namespace Lunra.Hothouse.Editor
 					{
 						var analysis = new GameOverAnalysis();
 
+						analysis.Id = game.Id.Value;
 						analysis.Result = game.GameResult.Value;
 
 						analysis.Summary = analysis.Result.Reason;

@@ -159,8 +159,6 @@ namespace Lunra.Hothouse.Models
 			
 			model.InventoryPromises.Reset();
 
-			const float GoalInsistenceVelocity = 0.25f;
-			
 			model.Goals.Reset(this);
 			
 			model.GoalPromises.Reset();

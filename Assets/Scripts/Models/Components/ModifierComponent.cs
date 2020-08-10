@@ -42,9 +42,9 @@ namespace Lunra.Hothouse.Models
 			sumListener.Value = 0f;
 		}
 
-		public void Bind() => Model.Tags.All.Changed += OnTagAll;
+		public override void Bind() => Model.Tags.All.Changed += OnTagAll;
 		
-		public void UnBind() => Model.Tags.All.Changed -= OnTagAll;
+		public override void UnBind() => Model.Tags.All.Changed -= OnTagAll;
 		
 		#region TagModel Events
 		void OnTagAll(TagComponent.Entry[] all)
