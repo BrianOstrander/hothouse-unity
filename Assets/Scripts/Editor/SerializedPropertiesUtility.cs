@@ -268,6 +268,8 @@ namespace Lunra.Hothouse.Editor
 				
 				File.WriteAllText(file, result);
 			}
+			
+			Debug.Log("Done replacing invalid serialized properties");
 		}
 	}
 }
