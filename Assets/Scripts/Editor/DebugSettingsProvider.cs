@@ -56,9 +56,8 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent SimulationSpeedReset = new GUIContent("Reset");
 			public static GUIContent SimulationSpeedIncrease = new GUIContent("->", "Increase");
 			public static GUIContent SimulationSpeedDecrease = new GUIContent("<-", "Decrease");
-			
-			public static GUIContent LogGameOverAnalysis = new GUIContent("Log Game Over Analysis");
-			public static GUIContent AutoRestartOnGameOver = new GUIContent("Auto Restart On Game Over");
+
+			public static GUIContent ValidateSerializedProperties = new GUIContent("Validate Serialized Properties");
 		}
 
 		string lastAutoRevealedRoomsForGameId;
@@ -98,8 +97,7 @@ namespace Lunra.Hothouse.Editor
 				Content.SimulationSpeedReset.text,
 				Content.SimulationSpeedIncrease.text,
 				Content.SimulationSpeedDecrease.text,
-				Content.LogGameOverAnalysis.text,
-				Content.AutoRestartOnGameOver.text
+				Content.ValidateSerializedProperties.text
 			};
 			
 			return provider;
@@ -204,18 +202,15 @@ namespace Lunra.Hothouse.Editor
 				DebugSettings.LogGameOverAnalysis.Draw();
 				DebugSettings.AutoRestartOnGameOver.Draw();
 				DebugSettings.GameOverOnDwellerDeath.Draw();
-				
-				GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
-
-				if (GUILayout.Button("kill any dwellers with a bed"))
-				{
-					foreach (var dweller in game.Dwellers.AllActive.Where(m => !string.IsNullOrEmpty(m.Bed.Value.Id)))
-					{
-						Damage.ApplyGeneric(1000f, dweller);
-					}
-				}
 			}
 			GUIExtensions.PopEnabled();
+			
+			if (GUILayout.Button(Content.ValidateSerializedProperties))
+			{
+				SerializedPropertiesUtility.Validate();
+			}
+			
+			GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 			
 			if (GUILayout.Button("Test surface point gen"))
 			{

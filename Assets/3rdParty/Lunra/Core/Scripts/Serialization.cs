@@ -9,7 +9,6 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 
 using Lunra.Core.Converters;
-using Lunra.Core.Resolvers;
 using QuaternionConverter = Lunra.Core.Converters.QuaternionConverter;
 using ColorConverter = Lunra.Core.Converters.ColorConverter;
 
