@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Linq;
 using Lunra.Core;
@@ -17,10 +18,10 @@ namespace Lunra.Hothouse.Models
 			Calculated = 20
 		}
 
-		public States State { get; }
-		public DateTime LastUpdate { get; }
-		public string[] RoomIds { get; }
-		public string[] SensitiveIds { get; }
+		[JsonProperty] public States State { get; private set; }
+		[JsonProperty] public DateTime LastUpdate { get; private set; }
+		[JsonProperty] public string[] RoomIds { get; private set; }
+		[JsonProperty] public string[] SensitiveIds { get; private set; }
 
 		LightDelta(
 			States state,

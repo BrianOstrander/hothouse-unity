@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
@@ -6,9 +6,9 @@ namespace Lunra.Hothouse.Models
 		IInventoryModel
 	{
 		#region Serialized
-		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
-		public EnterableComponent Enterable { get; } = new EnterableComponent();
-		public InventoryComponent Inventory { get; } = new InventoryComponent();
+		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
+		[JsonProperty] public EnterableComponent Enterable { get; private set; } = new EnterableComponent();
+		[JsonProperty] public InventoryComponent Inventory { get; private set; } = new InventoryComponent();
 		#endregion
 		
 		#region Non Serialized

@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 namespace Lunra.Hothouse.Models
 {
 	public struct GameResult
@@ -11,9 +12,9 @@ namespace Lunra.Hothouse.Models
 			Failure = 20
 		}
 
-		public States State { get; }
-		public string Reason { get; }
-		public DayTime TimeSurvived { get; }
+		[JsonProperty] public States State { get; private set; }
+		[JsonProperty] public string Reason { get; private set; }
+		[JsonProperty] public DayTime TimeSurvived { get; private set; }
 
 		public GameResult(
 			States state,

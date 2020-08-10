@@ -91,13 +91,13 @@ namespace Lunra.Hothouse.Models
 				);
 			}
 			
-			public States State { get; private set; }
-			public Iterations Iteration { get; }
-			public Recipe Recipe { get; }
+			[JsonProperty] public States State { get; private set; }
+			[JsonProperty] public Iterations Iteration { get; private set; }
+			[JsonProperty] public Recipe Recipe { get; private set; }
 
-			public int Count { get; private set; }
-			public int CountTarget { get; }
-			public int DesiredMultiplier { get; }
+			[JsonProperty] public int Count { get; private set; }
+			[JsonProperty] public int CountTarget { get; private set; }
+			[JsonProperty] public int DesiredMultiplier { get; private set; }
 
 			RecipeIteration(
 				States state,

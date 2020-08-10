@@ -22,7 +22,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] string tag;
 		[JsonIgnore] public ListenerProperty<string> Tag { get; }
 		
-		public RoomTransformComponent RoomTransform { get; } = new RoomTransformComponent();
+		[JsonProperty] public RoomTransformComponent RoomTransform { get; private set; } = new RoomTransformComponent();
 
 		public PrefabModel()
 		{

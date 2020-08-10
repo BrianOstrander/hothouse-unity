@@ -17,10 +17,10 @@ namespace Lunra.Hothouse.Models
 	public class FarmComponent : ComponentModel<IFarmModel>
 	{
 		#region Serialized
-		public bool IsFarm { get; private set; }
-		public Vector2 Size { get; private set; }
+		[JsonProperty] public bool IsFarm { get; private set; }
+		[JsonProperty] public Vector2 Size { get; private set; }
 		public string SelectedFloraType { get; set; } // todo make private or something...
-		public FarmPlot[] Plots { get; private set; }
+		[JsonProperty] public FarmPlot[] Plots { get; private set; }
 		#endregion
 		
 		#region Non Serialized 

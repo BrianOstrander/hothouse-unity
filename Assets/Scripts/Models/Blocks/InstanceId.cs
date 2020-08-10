@@ -67,8 +67,8 @@ namespace Lunra.Hothouse.Models
 			Decoration = 110
 		}
 
-		public Types Type { get; }
-		public string Id { get; }
+		[JsonProperty] public Types Type { get; private set; }
+		[JsonProperty] public string Id { get; private set; }
 
 		IModel cachedInstance;
 

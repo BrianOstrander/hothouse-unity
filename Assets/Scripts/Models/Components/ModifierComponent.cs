@@ -11,8 +11,8 @@ namespace Lunra.Hothouse.Models
 	public class ModifierComponent : ComponentModel<ITagModel>
 	{
 		#region Serialized
-		public ModifierDefinition[] Definitions { get; private set; } = new ModifierDefinition[0];
-		public FloatRange Clamping { get; private set; }
+		[JsonProperty] public ModifierDefinition[] Definitions { get; private set; } = new ModifierDefinition[0];
+		[JsonProperty] public FloatRange Clamping { get; private set; }
 
 		[JsonProperty] float sum;
         readonly ListenerProperty<float> sumListener;

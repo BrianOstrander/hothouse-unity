@@ -12,9 +12,9 @@ namespace Lunra.Hothouse.Models
 	{
 		struct GoalCalculationCache
 		{
-			public Motives Motive { get; }
-			public GoalComponent.CalculateGoal CalculateGoal { get; }
-			public GoalComponent.CalculateGoalOverflowEffects CalculateGoalOverflowEffects { get; }
+			[JsonProperty] public Motives Motive { get; private set; }
+			[JsonProperty] public GoalComponent.CalculateGoal CalculateGoal { get; private set; }
+			[JsonProperty] public GoalComponent.CalculateGoalOverflowEffects CalculateGoalOverflowEffects { get; private set; }
 			
 			public GoalCalculationCache(
 				Motives motive,

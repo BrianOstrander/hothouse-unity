@@ -24,8 +24,8 @@ namespace Lunra.Hothouse.Models
 	
 		public class Entry
 		{
-			public string Tag { get; }
-			public DayTime Expiration { get; }
+			[JsonProperty] public string Tag { get; private set; }
+			[JsonProperty] public DayTime Expiration { get; private set; }
 
 			public Entry(
 				string tag,

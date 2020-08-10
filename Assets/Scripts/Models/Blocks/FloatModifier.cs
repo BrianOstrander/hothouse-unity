@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System.Linq;
 using Lunra.Core;
 
@@ -7,8 +8,8 @@ namespace Lunra.Hothouse.Models
 	{
 		public struct KeyDefinition
 		{
-			public string Category { get; }
-			public string Type { get; }
+			[JsonProperty] public string Category { get; private set; }
+			[JsonProperty] public string Type { get; private set; }
 
 			public KeyDefinition
 			(
@@ -29,8 +30,8 @@ namespace Lunra.Hothouse.Models
 		public static FloatModifier Default() => New();
 		public static FloatModifier New(params (KeyDefinition Key, float Value)[] values) => new FloatModifier(values);
 		
-		public (KeyDefinition Key, float Value)[] All { get; }
-		public (string Category, float Value)[] Sums { get; }
+		[JsonProperty] public (KeyDefinition Key, float Value)[] All { get; private set; }
+		[JsonProperty] public (string Category, float Value)[] Sums { get; private set; }
 		
 		FloatModifier(
 			(KeyDefinition Key, float Value)[] all

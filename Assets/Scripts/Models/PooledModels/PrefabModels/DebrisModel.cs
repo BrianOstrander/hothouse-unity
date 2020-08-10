@@ -1,13 +1,14 @@
+using Newtonsoft.Json;
 namespace Lunra.Hothouse.Models
 {
 	public class DebrisModel : PrefabModel, IClearableModel
 	{
 		#region Serialized
-		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
-		public HealthComponent Health { get; } = new HealthComponent();
-		public ClearableComponent Clearable { get; } = new ClearableComponent();
-		public ObligationComponent Obligations { get; } = new ObligationComponent();
-		public EnterableComponent Enterable { get; } = new EnterableComponent();
+		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
+		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
+		[JsonProperty] public ClearableComponent Clearable { get; private set; } = new ClearableComponent();
+		[JsonProperty] public ObligationComponent Obligations { get; private set; } = new ObligationComponent();
+		[JsonProperty] public EnterableComponent Enterable { get; private set; } = new EnterableComponent();
 		#endregion
 		
 		#region NonSerialized

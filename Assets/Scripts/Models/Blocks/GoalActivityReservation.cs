@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using Lunra.StyxMvp.Models;
 
@@ -23,13 +24,13 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		public string ReservationId { get; }
-		public string ActivityId { get; }
-		public string ActivityType { get; }
-		public InstanceId Client { get; }
-		public InstanceId Destination { get; }
-		public DayTime AppointmentBegin { get; }
-		public DayTime AppointmentEnd { get; }
+		[JsonProperty] public string ReservationId { get; private set; }
+		[JsonProperty] public string ActivityId { get; private set; }
+		[JsonProperty] public string ActivityType { get; private set; }
+		[JsonProperty] public InstanceId Client { get; private set; }
+		[JsonProperty] public InstanceId Destination { get; private set; }
+		[JsonProperty] public DayTime AppointmentBegin { get; private set; }
+		[JsonProperty] public DayTime AppointmentEnd { get; private set; }
 
 		GoalActivityReservation(
 			string reservationId,

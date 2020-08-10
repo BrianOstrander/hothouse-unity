@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Lunra.Core;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp.Models;
@@ -39,15 +39,15 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] bool attacksBuildings;
 		[JsonIgnore] public ListenerProperty<bool> AttacksBuildings { get; }
 		
-		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
-		public HealthComponent Health { get; } = new HealthComponent();
-		public ClearableComponent Clearable { get; } = new ClearableComponent();
-		public ObligationComponent Obligations { get; } = new ObligationComponent();
-		public EnterableComponent Enterable { get; } = new EnterableComponent();
-		public TagComponent Tags { get; } = new TagComponent();
+		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
+		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
+		[JsonProperty] public ClearableComponent Clearable { get; private set; } = new ClearableComponent();
+		[JsonProperty] public ObligationComponent Obligations { get; private set; } = new ObligationComponent();
+		[JsonProperty] public EnterableComponent Enterable { get; private set; } = new EnterableComponent();
+		[JsonProperty] public TagComponent Tags { get; private set; } = new TagComponent();
 		
-		public ModifierComponent AgeModifier { get; } = new ModifierComponent();
-		public ModifierComponent ReproductionModifier { get; } = new ModifierComponent();
+		[JsonProperty] public ModifierComponent AgeModifier { get; private set; } = new ModifierComponent();
+		[JsonProperty] public ModifierComponent ReproductionModifier { get; private set; } = new ModifierComponent();
 		#endregion
 		
 		#region Non Serialized

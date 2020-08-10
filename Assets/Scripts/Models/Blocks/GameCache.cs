@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -31,23 +32,23 @@ namespace Lunra.Hothouse.Models
 			return result;
 		}
 		
-		public TimeSpan LastUpdated { get; private set; }
-		public int Population { get; private set; }
+		[JsonProperty] public TimeSpan LastUpdated { get; private set; }
+		[JsonProperty] public int Population { get; private set; }
 		
-		public InventoryComponent GlobalInventory { get; private set; }
-		public Inventory GlobalItemDropsAvailable { get; private set; }
-		public bool AnyItemDropsAvailableForPickup { get; private set; }
-		public string[] UniqueObligationsAvailable { get; private set; }
-		public bool AnyObligationsAvailable { get; private set; }
-		public int LowRationThreshold { get; private set; }
-		public GoalSnapshot GoalsAverage { get; private set; }
-		public float GoalsDiscontentDelta { get; private set; }
-		public (Motives Motive, float DiscontentDelta)[] GoalsDiscontentDeltaByMotive { get; private set; }
-		public DayTime LastPopulationDecrease { get; private set; }
-		public DayTime LastPopulationIncrease { get; private set; }
-		public DayTime LastPopulationChange { get; private set; }
+		[JsonProperty] public InventoryComponent GlobalInventory { get; private set; }
+		[JsonProperty] public Inventory GlobalItemDropsAvailable { get; private set; }
+		[JsonProperty] public bool AnyItemDropsAvailableForPickup { get; private set; }
+		[JsonProperty] public string[] UniqueObligationsAvailable { get; private set; }
+		[JsonProperty] public bool AnyObligationsAvailable { get; private set; }
+		[JsonProperty] public int LowRationThreshold { get; private set; }
+		[JsonProperty] public GoalSnapshot GoalsAverage { get; private set; }
+		[JsonProperty] public float GoalsDiscontentDelta { get; private set; }
+		[JsonProperty] public (Motives Motive, float DiscontentDelta)[] GoalsDiscontentDeltaByMotive { get; private set; }
+		[JsonProperty] public DayTime LastPopulationDecrease { get; private set; }
+		[JsonProperty] public DayTime LastPopulationIncrease { get; private set; }
+		[JsonProperty] public DayTime LastPopulationChange { get; private set; }
 		
-		public ReadOnlyDictionary<Condition.Types, bool> Conditions { get; private set; }
+		[JsonProperty] public ReadOnlyDictionary<Condition.Types, bool> Conditions { get; private set; }
 
 		public GameCache Calculate(GameModel game)
 		{

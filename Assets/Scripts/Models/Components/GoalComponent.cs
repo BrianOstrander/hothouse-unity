@@ -19,7 +19,7 @@ namespace Lunra.Hothouse.Models
 
 		public class Cache
 		{
-			public Motives Motive { get; }
+			[JsonProperty] public Motives Motive { get; private set; }
 			public float Velocity;
 			public float VelocityPredicted;
 			public float SimulatedTimeAtMaximum;

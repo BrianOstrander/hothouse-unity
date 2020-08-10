@@ -50,8 +50,8 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] InstanceId workplace = InstanceId.Null();
 		[JsonIgnore] public ListenerProperty<InstanceId> Workplace { get; }
-		public GoalComponent Goals { get; } = new GoalComponent();
-		public GoalPromiseComponent GoalPromises { get; } = new GoalPromiseComponent();
+		[JsonProperty] public GoalComponent Goals { get; private set; } = new GoalComponent();
+		[JsonProperty] public GoalPromiseComponent GoalPromises { get; private set; } = new GoalPromiseComponent();
 		#endregion
 		
 		#region Non Serialized

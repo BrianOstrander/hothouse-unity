@@ -16,9 +16,9 @@ namespace Lunra.Hothouse.Models
 	{
 		public struct State
 		{
-			public GoalActivity Activity { get; }
-			public Restrictions Restriction { get; }
-			public bool AnyRestrictions { get; }
+			[JsonProperty] public GoalActivity Activity { get; private set; }
+			[JsonProperty] public Restrictions Restriction { get; private set; }
+			[JsonProperty] public bool AnyRestrictions { get; private set; }
 
 			public State(
 				GoalActivity activity,

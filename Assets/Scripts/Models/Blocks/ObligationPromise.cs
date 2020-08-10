@@ -17,8 +17,8 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		public Obligation Obligation { get; }
-		public InstanceId Target { get; }
+		[JsonProperty] public Obligation Obligation { get; private set; }
+		[JsonProperty] public InstanceId Target { get; private set; }
 
 		[JsonConstructor]
 		ObligationPromise(

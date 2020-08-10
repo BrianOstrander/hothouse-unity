@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System.Linq;
 
 namespace Lunra.Hothouse.Models
@@ -5,10 +6,10 @@ namespace Lunra.Hothouse.Models
 	public class Recipe
 	{
 		public string Id => Name;
-		public string Name { get; }
-		public Inventory InputItems { get; }
-		public Inventory OutputItems { get; }
-		public DayTime Duration { get; }
+		[JsonProperty] public string Name { get; private set; }
+		[JsonProperty] public Inventory InputItems { get; private set; }
+		[JsonProperty] public Inventory OutputItems { get; private set; }
+		[JsonProperty] public DayTime Duration { get; private set; }
 
 		public Recipe(
 			string name,

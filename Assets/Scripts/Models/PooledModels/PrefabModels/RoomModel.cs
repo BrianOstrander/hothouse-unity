@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Lunra.Core;
@@ -27,7 +27,7 @@ namespace Lunra.Hothouse.Models
         [JsonIgnore] public ListenerProperty<WallCache[]> Walls { get; }
 
         
-        public BoundaryComponent Boundary { get; } = new BoundaryComponent();
+        [JsonProperty] public BoundaryComponent Boundary { get; private set; } = new BoundaryComponent();
         #endregion
         
         #region Non Serialized

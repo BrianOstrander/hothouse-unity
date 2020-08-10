@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -5,13 +6,13 @@ namespace Lunra.Hothouse.Models
 {
 	public struct GoalActivity
 	{
-		public string Id { get; }
-		public string Type { get; }
-		public (Motives Motive, float InsistenceModifier)[] Modifiers { get; }
-		public DayTime Duration { get; }
-		public Inventory? Input { get; }
-		public Inventory? Output { get; }
-		public bool RequiresOwnership { get; }
+		[JsonProperty] public string Id { get; private set; }
+		[JsonProperty] public string Type { get; private set; }
+		[JsonProperty] public (Motives Motive, float InsistenceModifier)[] Modifiers { get; private set; }
+		[JsonProperty] public DayTime Duration { get; private set; }
+		[JsonProperty] public Inventory? Input { get; private set; }
+		[JsonProperty] public Inventory? Output { get; private set; }
+		[JsonProperty] public bool RequiresOwnership { get; private set; }
 
 		public GoalActivity(
 			string type,

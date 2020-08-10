@@ -29,7 +29,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] PooledStates pooledState = PooledStates.InActive;
 		[JsonIgnore] public ListenerProperty<PooledStates> PooledState { get; }
 
-		public TransformComponent Transform { get; } = new TransformComponent();
+		[JsonProperty] public TransformComponent Transform { get; private set; } = new TransformComponent();
 		#endregion
 		
 		#region Non Serialized

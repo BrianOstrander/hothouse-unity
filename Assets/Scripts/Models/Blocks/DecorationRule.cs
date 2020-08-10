@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,10 @@ namespace Lunra.Hothouse.Models
 			public RoomModel Room;
 			public float WallHeight;
 			public float WallSegmentWidth;
-			public Dictionary<string, int> DecorationTagsOnWall { get; } = new Dictionary<string, int>();
-			public Dictionary<string, int> DecorationTagsInRoom { get; } = new Dictionary<string, int>();
-			public Dictionary<string, int> DecorationTagsRequiredForRoom { get; } = new Dictionary<string, int>();
-			public Dictionary<string, int> DecorationTagsBudgetForRoom { get; } = new Dictionary<string, int>();
+			[JsonProperty] public Dictionary<string, int> DecorationTagsOnWall { get; private set; } = new Dictionary<string, int>();
+			[JsonProperty] public Dictionary<string, int> DecorationTagsInRoom { get; private set; } = new Dictionary<string, int>();
+			[JsonProperty] public Dictionary<string, int> DecorationTagsRequiredForRoom { get; private set; } = new Dictionary<string, int>();
+			[JsonProperty] public Dictionary<string, int> DecorationTagsBudgetForRoom { get; private set; } = new Dictionary<string, int>();
 
 			public void ResetForWall(
 				float wallHeight,
@@ -66,9 +67,9 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		
-		public string Type { get; private set; }
-		protected GameModel Game { get; private set; }
-		protected Demon Generator { get; private set; }
+		[JsonProperty] public string Type { get; private set; }
+		[JsonProperty] protected GameModel Game { get; private set; }
+		[JsonProperty] protected Demon Generator { get; private set; }
 		
 		public virtual void Initialize(GameModel game)
 		{

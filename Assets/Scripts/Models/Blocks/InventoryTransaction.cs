@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 
 namespace Lunra.Hothouse.Models
@@ -34,9 +35,9 @@ namespace Lunra.Hothouse.Models
 			Distribute = 20
 		}
 		
-		public Types Type { get; }
-		public InstanceId Target { get; }
-		public Inventory Items { get; }
+		[JsonProperty] public Types Type { get; private set; }
+		[JsonProperty] public InstanceId Target { get; private set; }
+		[JsonProperty] public Inventory Items { get; private set; }
 
 		
 		InventoryTransaction(

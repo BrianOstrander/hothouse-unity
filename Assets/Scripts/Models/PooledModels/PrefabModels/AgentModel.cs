@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Lunra.Core;
 using Lunra.Hothouse.Ai;
 using Newtonsoft.Json;
@@ -21,10 +21,10 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] NavigationPlan navigationPlan = Models.NavigationPlan.Done();
 		[JsonIgnore] public ListenerProperty<NavigationPlan> NavigationPlan { get; }
 
-		public HealthComponent Health { get; } = new HealthComponent();
-		public AgentInventoryComponent Inventory { get; } = new AgentInventoryComponent();
-		public InventoryPromiseComponent InventoryPromises { get; } = new InventoryPromiseComponent();
-		public ObligationPromiseComponent ObligationPromises { get; } = new ObligationPromiseComponent();
+		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
+		[JsonProperty] public AgentInventoryComponent Inventory { get; private set; } = new AgentInventoryComponent();
+		[JsonProperty] public InventoryPromiseComponent InventoryPromises { get; private set; } = new InventoryPromiseComponent();
+		[JsonProperty] public ObligationPromiseComponent ObligationPromises { get; private set; } = new ObligationPromiseComponent();
 		#endregion
 		
 		#region Non Serialized

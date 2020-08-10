@@ -14,9 +14,9 @@ namespace Lunra.Hothouse.Models
 			NoStack = 20
 		}
 			
-		public string Tag { get; }
-		public float Value { get; }
-		public Rules Rule { get; }
+		[JsonProperty] public string Tag { get; private set; }
+		[JsonProperty] public float Value { get; private set; }
+		[JsonProperty] public Rules Rule { get; private set; }
 		
 		[JsonConstructor]
 		ModifierDefinition(

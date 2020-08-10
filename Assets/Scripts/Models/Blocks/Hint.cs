@@ -76,9 +76,9 @@ namespace Lunra.Hothouse.Models
 			Confirmed = 30
 		}
 
-		public string Id { get; }
-		public HintStates State { get; }
-		public string Message { get; }
+		[JsonProperty] public string Id { get; private set; }
+		[JsonProperty] public HintStates State { get; private set; }
+		[JsonProperty] public string Message { get; private set; }
 		[JsonProperty] readonly Condition activateCondition;
 
 		[JsonProperty] readonly DismissTriggers dismissTrigger;

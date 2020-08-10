@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] int seed;
 		[JsonIgnore] public ListenerProperty<int> Seed { get; }
 		
-		public TimestampModel Log { get; } = new TimestampModel();
+		[JsonProperty] public TimestampModel Log { get; private set; } = new TimestampModel();
 		#endregion
 
 		public LevelGenerationModel()

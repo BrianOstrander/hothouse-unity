@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
@@ -16,28 +16,28 @@ namespace Lunra.Hothouse.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
-		public LevelGenerationModel LevelGeneration { get; } = new LevelGenerationModel();
-		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
-		public ToolbarModel Toolbar { get; } = new ToolbarModel();
-		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();
-		public EffectsModel Effects { get; } = new EffectsModel();
-		public HintsModel Hints { get; } = new HintsModel();
-		public RoomResolverModel RoomResolver { get; } = new RoomResolverModel();
-		public EventLogModel EventLog { get; } = new EventLogModel();
-		public JobManageModel JobManage { get; } = new JobManageModel();
-		public BuildingManageModel BuildingManage { get; } = new BuildingManageModel();
-		public PopulationModel Population { get; } = new PopulationModel();
+		[JsonProperty] public LevelGenerationModel LevelGeneration { get; private set; } = new LevelGenerationModel();
+		[JsonProperty] public WorldCameraModel WorldCamera { get; private set; } = new WorldCameraModel();
+		[JsonProperty] public ToolbarModel Toolbar { get; private set; } = new ToolbarModel();
+		[JsonProperty] public BuildValidationModel BuildValidation { get; private set; } = new BuildValidationModel();
+		[JsonProperty] public EffectsModel Effects { get; private set; } = new EffectsModel();
+		[JsonProperty] public HintsModel Hints { get; private set; } = new HintsModel();
+		[JsonProperty] public RoomResolverModel RoomResolver { get; private set; } = new RoomResolverModel();
+		[JsonProperty] public EventLogModel EventLog { get; private set; } = new EventLogModel();
+		[JsonProperty] public JobManageModel JobManage { get; private set; } = new JobManageModel();
+		[JsonProperty] public BuildingManageModel BuildingManage { get; private set; } = new BuildingManageModel();
+		[JsonProperty] public PopulationModel Population { get; private set; } = new PopulationModel();
 
-		public ItemDropPoolModel ItemDrops { get; } = new ItemDropPoolModel();
-		public RoomPoolModel Rooms { get; } = new RoomPoolModel();
-		public DoorPoolModel Doors { get; } = new DoorPoolModel();
-		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
-		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
-		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
-		public FloraPoolModel Flora { get; } = new FloraPoolModel();
-		public SeekerPoolModel Seekers { get; } = new SeekerPoolModel();
-		public DecorationPoolModel Decorations { get; } = new DecorationPoolModel();
-		public GeneratorPoolModel Generators { get; } = new GeneratorPoolModel();
+		[JsonProperty] public ItemDropPoolModel ItemDrops { get; private set; } = new ItemDropPoolModel();
+		[JsonProperty] public RoomPoolModel Rooms { get; private set; } = new RoomPoolModel();
+		[JsonProperty] public DoorPoolModel Doors { get; private set; } = new DoorPoolModel();
+		[JsonProperty] public DwellerPoolModel Dwellers { get; private set; } = new DwellerPoolModel();
+		[JsonProperty] public DebrisPoolModel Debris { get; private set; } = new DebrisPoolModel();
+		[JsonProperty] public BuildingPoolModel Buildings { get; private set; } = new BuildingPoolModel();
+		[JsonProperty] public FloraPoolModel Flora { get; private set; } = new FloraPoolModel();
+		[JsonProperty] public SeekerPoolModel Seekers { get; private set; } = new SeekerPoolModel();
+		[JsonProperty] public DecorationPoolModel Decorations { get; private set; } = new DecorationPoolModel();
+		[JsonProperty] public GeneratorPoolModel Generators { get; private set; } = new GeneratorPoolModel();
 
 		[JsonProperty] float desireDamageMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> DesireDamageMultiplier { get; }

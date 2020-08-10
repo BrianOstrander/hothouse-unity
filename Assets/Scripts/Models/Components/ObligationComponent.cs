@@ -18,8 +18,8 @@ namespace Lunra.Hothouse.Models
 	{
 		public class State
 		{
-			public Obligation[] Available { get; }
-			public Obligation[] Forbidden { get; }
+			[JsonProperty] public Obligation[] Available { get; private set; }
+			[JsonProperty] public Obligation[] Forbidden { get; private set; }
 
 			public State()
 			{

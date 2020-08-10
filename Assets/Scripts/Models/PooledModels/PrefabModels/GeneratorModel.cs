@@ -10,10 +10,10 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] InstanceId parent = InstanceId.Null();
 		[JsonIgnore] public ListenerProperty<InstanceId> Parent { get; }
 		
-		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
-		public EnterableComponent Enterable { get; } = new EnterableComponent();
-		public InventoryComponent Inventory { get; } = new InventoryComponent();
-		public GeneratorComponent Generator { get; } = new GeneratorComponent();
+		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
+		[JsonProperty] public EnterableComponent Enterable { get; private set; } = new EnterableComponent();
+		[JsonProperty] public InventoryComponent Inventory { get; private set; } = new InventoryComponent();
+		[JsonProperty] public GeneratorComponent Generator { get; private set; } = new GeneratorComponent();
 		#endregion
 
 		#region Non Serialized

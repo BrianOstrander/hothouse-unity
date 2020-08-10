@@ -29,9 +29,9 @@ namespace Lunra.Hothouse.Models
         [JsonProperty] Connection roomConnection;
         [JsonIgnore] public ListenerProperty<Connection> RoomConnection { get; }
 
-        public ObligationComponent Obligations { get; } = new ObligationComponent();
+        [JsonProperty] public ObligationComponent Obligations { get; private set; } = new ObligationComponent();
 
-        public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
+        [JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
         #endregion
         
         #region Non Serialized

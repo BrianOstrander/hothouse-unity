@@ -11,8 +11,8 @@ namespace Lunra.Hothouse.Models
 	{
 		public class Request
 		{
-			public Vector3 Position { get; }
-			public string Id { get; }
+			[JsonProperty] public Vector3 Position { get; private set; }
+			[JsonProperty] public string Id { get; private set; }
 
 			public Request(
 				Vector3 position,
