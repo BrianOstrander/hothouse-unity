@@ -233,7 +233,6 @@ namespace Lunra.Hothouse.Editor
 
 		static void OverwriteFiles(List<Entry> elements)
 		{
-			return;
 			foreach (var file in elements.Select(e => e.File).Distinct())
 			{
 				var replacementsForFile = elements
@@ -242,6 +241,12 @@ namespace Lunra.Hothouse.Editor
 					.ToList();
 				
 				var result = string.Empty;
+
+				void appendLine(string lineToAppend, int lineIndexToAppend)
+				{
+					if (lineIndexToAppend == 0) result = lineToAppend;
+					else result += "\n" + lineToAppend;
+				}
 				
 				var lineIndex = -1;
 
@@ -249,23 +254,19 @@ namespace Lunra.Hothouse.Editor
 				{
 					lineIndex++;
 
-					if (replacementsForFile.First().LineIndex != lineIndex)
+					if (replacementsForFile.None() || replacementsForFile.First().LineIndex != lineIndex)
 					{
-						result += "\n" + line;
+						appendLine(line, lineIndex);
 						continue;
 					}
 
 					var lineReplacement = replacementsForFile.First();
 					replacementsForFile.RemoveAt(0);
 
-					result += "\n" + lineReplacement.SuggestedCorrection;
-
-					if (replacementsForFile.None()) break;
+					appendLine(lineReplacement.SuggestedCorrection, lineIndex);
 				}
 				
-				File.WriteAllText(result, file);
-
-				break;
+				File.WriteAllText(file, result);
 			}
 		}
 	}
