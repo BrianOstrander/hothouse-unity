@@ -108,6 +108,12 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 
+			if (filesWithResults.Length == 0)
+			{
+				EditorUtility.DisplayDialog("Validation Passed", "No invalid serialization properties found", "Ok");
+				return;
+			}
+
 			var dialogResult = EditorUtility.DisplayDialogComplex(
 				"Invalid Serialized Properties",
 				description,
