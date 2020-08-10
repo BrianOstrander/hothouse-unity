@@ -46,14 +46,12 @@ namespace Lunra.Hothouse.Models
 		/// Gets the current DayTime with a Time of zero.
 		/// </summary>
 		/// <value>The time zero.</value>
-		[JsonIgnore]
-		public DayTime TimeZero => new DayTime(Day, 0f);
+		[JsonIgnore] public DayTime TimeZero => new DayTime(Day, 0f);
 		/// <summary>
 		/// Gets the current DayTime with a Day of zero.
 		/// </summary>
 		/// <value>The time zero.</value>
-		[JsonIgnore]
-		public DayTime DayZero => new DayTime(0, Time);
+		[JsonIgnore] public DayTime DayZero => new DayTime(0, Time);
 
 		/// <summary>
 		/// The Day component of this DayTime.
@@ -68,22 +66,19 @@ namespace Lunra.Hothouse.Models
 		/// Gets the total time.
 		/// </summary>
 		/// <value>The total time.</value>
-		[JsonIgnore]
-		public float TotalTime => Day + Time;
+		[JsonIgnore] public float TotalTime => Day + Time;
 
 		/// <summary>
 		/// Gets the years.
 		/// </summary>
 		/// <value>The years.</value>
-		[JsonIgnore]
-		public float TotalYears => TotalTime / DaysInYear;
+		[JsonIgnore] public float TotalYears => TotalTime / DaysInYear;
 
 		/// <summary>
 		/// Gets a value indicating whether this <see cref="T:LunraGames.SpaceFarm.DayTime"/> is zero.
 		/// </summary>
 		/// <value><c>true</c> if is zero; otherwise, <c>false</c>.</value>
-		[JsonIgnore]
-		public bool IsZero => Day == 0 && Mathf.Approximately(0f, Time);
+		[JsonIgnore] public bool IsZero => Day == 0 && Mathf.Approximately(0f, Time);
 
 		public DayTime(DayTime other) : this(other.Day, other.Time) {}
 

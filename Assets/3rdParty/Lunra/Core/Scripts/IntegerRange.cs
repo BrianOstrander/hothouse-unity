@@ -14,25 +14,18 @@ namespace Lunra.Core
 		public static IntegerRange Normal => new IntegerRange(0, 1);
 		public static IntegerRange Constant(int value) => new IntegerRange(value, value);
 
-		[FormerlySerializedAs("x"), SerializeField, JsonProperty]
-		int primary;
-		[FormerlySerializedAs("y"), SerializeField, JsonProperty]
-		int secondary;
+		[FormerlySerializedAs("x"), SerializeField, JsonProperty] int primary;
+		[FormerlySerializedAs("y"), SerializeField, JsonProperty] int secondary;
 
-		[JsonIgnore]
-		public int Primary => primary;
+		[JsonIgnore] public int Primary => primary;
 
-		[JsonIgnore]
-		public int Secondary => secondary;
+		[JsonIgnore] public int Secondary => secondary;
 
-		[JsonIgnore]
-		public int Delta => Secondary - Primary;
+		[JsonIgnore] public int Delta => Secondary - Primary;
 
-		[JsonIgnore]
-		public int Maximum => Mathf.Max(Primary, Secondary);
+		[JsonIgnore] public int Maximum => Mathf.Max(Primary, Secondary);
 		
-		[JsonIgnore]
-		public int Minimum => Mathf.Min(Primary, Secondary);
+		[JsonIgnore] public int Minimum => Mathf.Min(Primary, Secondary);
 		
 		public IntegerRange(int primary, int secondary)
 		{

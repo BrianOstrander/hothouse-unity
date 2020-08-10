@@ -39,7 +39,15 @@ namespace Lunra.Hothouse.Editor
 			AddFilesInDirectory(
 				new DirectoryInfo(Application.dataPath),
 				files,
-				f => f.Extension == ".cs" && f.FullName.Contains("/Models/") && !f.FullName.Contains("/Models/Blocks/BaseDefinition")
+				f =>
+				{
+					if (f.Extension != ".cs") return false;
+					if (!f.FullName.Contains("/Models/")) return false;
+					if (f.FullName.Contains("/Models/Blocks/BaseDefinition")) return false;
+					if (f.FullName.Contains("ModelMediator.cs")) return false;
+
+					return true;
+				}
 			);
 
 			var results = new List<Entry>();
@@ -55,7 +63,15 @@ namespace Lunra.Hothouse.Editor
 			if (0 < suggestionFailuresCount)
 			{
 				message = (message + $" found {suggestionFailuresCount} issues!").WrapColor(Color.red);
+
+				Debug.LogError(message);
+				
+				// Debug Idk handle this here...
+				
+				return;
 			}
+
+			var description = message;
 			
 			foreach (var file in filesWithResults)
 			{
@@ -90,10 +106,26 @@ namespace Lunra.Hothouse.Editor
 					message += "\n";
 				}
 			}
-			
-			Debug.Log(message);
-			
-			EditorGUIUtility.systemCopyBuffer = message;
+
+			var dialogResult = EditorUtility.DisplayDialogComplex(
+				"Invalid Serialized Properties",
+				description,
+				"Overwrite", "Cancel", "Copy Deltas to Clipboard"
+			);
+
+			switch (dialogResult)
+			{
+				case 0:
+					if (EditorUtility.DisplayDialog("Confirm", $"This is a destructive operation, are you sure you still want to overwrite all {filesWithResults.Length} file(s)?", "Yes", "No"))
+					{
+						OverwriteFiles(results);			
+					}
+					break;
+				case 2:
+					EditorGUIUtility.systemCopyBuffer = message;
+					Debug.Log("Copied validation results to clipboard");
+					break;
+			}
 		}
 
 		static void AddFilesInDirectory(
@@ -196,6 +228,44 @@ namespace Lunra.Hothouse.Editor
 				result.SuggestedCorrection = lineResult;
 				
 				results.Add(result);
+			}
+		}
+
+		static void OverwriteFiles(List<Entry> elements)
+		{
+			return;
+			foreach (var file in elements.Select(e => e.File).Distinct())
+			{
+				var replacementsForFile = elements
+					.Where(e => e.File == file)
+					.OrderBy(e => e.LineIndex)
+					.ToList();
+				
+				var result = string.Empty;
+				
+				var lineIndex = -1;
+
+				foreach (var line in File.ReadLines(file))
+				{
+					lineIndex++;
+
+					if (replacementsForFile.First().LineIndex != lineIndex)
+					{
+						result += "\n" + line;
+						continue;
+					}
+
+					var lineReplacement = replacementsForFile.First();
+					replacementsForFile.RemoveAt(0);
+
+					result += "\n" + lineReplacement.SuggestedCorrection;
+
+					if (replacementsForFile.None()) break;
+				}
+				
+				File.WriteAllText(result, file);
+
+				break;
 			}
 		}
 	}

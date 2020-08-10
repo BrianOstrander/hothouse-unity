@@ -14,25 +14,18 @@ namespace Lunra.Core
 		public static FloatRange Normal => new FloatRange(0f, 1f);
 		public static FloatRange Constant(float value) => new FloatRange(value, value);
 
-		[FormerlySerializedAs("x"), SerializeField, JsonProperty]
-		float primary;
-		[FormerlySerializedAs("y"), SerializeField, JsonProperty]
-		float secondary;
+		[FormerlySerializedAs("x"), SerializeField, JsonProperty] float primary;
+		[FormerlySerializedAs("y"), SerializeField, JsonProperty] float secondary;
 
-		[JsonIgnore]
-		public float Primary => primary;
+		[JsonIgnore] public float Primary => primary;
 
-		[JsonIgnore]
-		public float Secondary => secondary;
+		[JsonIgnore] public float Secondary => secondary;
 
-		[JsonIgnore]
-		public float Delta => Secondary - Primary;
+		[JsonIgnore] public float Delta => Secondary - Primary;
 
-		[JsonIgnore]
-		public float Maximum => Mathf.Max(Primary, Secondary);
+		[JsonIgnore] public float Maximum => Mathf.Max(Primary, Secondary);
 		
-		[JsonIgnore]
-		public float Minimum => Mathf.Min(Primary, Secondary);
+		[JsonIgnore] public float Minimum => Mathf.Min(Primary, Secondary);
 		
 		public FloatRange(float primary, float secondary)
 		{

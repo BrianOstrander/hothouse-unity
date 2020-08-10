@@ -48,8 +48,7 @@ namespace Lunra.Hothouse.Models
 				.ToArray();
 		}
 
-		[JsonIgnore]
-		public TimeSpan TotalTime => entries.Length < 2 ? TimeSpan.Zero : (entries.Last().Time - entries.First().Time);
+		[JsonIgnore] public TimeSpan TotalTime => entries.Length < 2 ? TimeSpan.Zero : (entries.Last().Time - entries.First().Time);
 
 		public TimeSpan GetTimeBetween(string message0, string message1)
 		{

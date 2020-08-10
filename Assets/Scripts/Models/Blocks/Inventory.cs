@@ -59,8 +59,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] readonly ReadOnlyDictionary<Types, int> entries;
 		public readonly int TotalWeight;
 
-		[JsonIgnore]
-		public bool IsEmpty => 0 == TotalWeight;
+		[JsonIgnore] public bool IsEmpty => 0 == TotalWeight;
 		[JsonIgnore]
 		public IEnumerable<(Types Type, int Weight)> Entries
 		{

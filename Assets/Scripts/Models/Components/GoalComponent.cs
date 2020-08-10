@@ -111,8 +111,7 @@ namespace Lunra.Hothouse.Models
 		void OnGameSimulationUpdate() => Update(Game.SimulationTimeDelta);
 		#endregion
 
-		[JsonIgnore]
-		public GoalResult this[Motives motive] => Current.Value.Values.FirstOrDefault(v => v.Motive == motive).Value;
+		[JsonIgnore] public GoalResult this[Motives motive] => Current.Value.Values.FirstOrDefault(v => v.Motive == motive).Value;
 
 		public void Apply(
 			params (Motives Motive, float InsistenceModifier)[] modifiers
