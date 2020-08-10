@@ -29,6 +29,7 @@ namespace Lunra.Hothouse.Editor
 			public string SuggestedCorrection;
 			public bool SuggestedCorrectionFound;
 			public string SuggestedCorrectionNotFoundMessage;
+			public bool FileMissingNewtonsoftUsing;
 			
 			public string Message;
 		}
@@ -148,6 +149,7 @@ namespace Lunra.Hothouse.Editor
 		{
 			var lineIndex = -1;
 			var isInsideInterface = false;
+			var hasNewtonsoftUsing = false;
 
 			foreach (var line in File.ReadLines(file.FullName))
 			{
@@ -169,6 +171,8 @@ namespace Lunra.Hothouse.Editor
 				}
 
 				var lineNoWhiteSpace = line.Replace(" ", "");
+
+				if (!hasNewtonsoftUsing && lineNoWhiteSpace.Contains("usingNewtonsoft.Json;")) hasNewtonsoftUsing = true;
 				
 				if (lineNoWhiteSpace.StartsWith("//")) continue;
 				if (lineNoWhiteSpace.Contains("JsonIgnore")) continue;
@@ -207,8 +211,12 @@ namespace Lunra.Hothouse.Editor
 				result.SuggestedCorrectionFound = true;
 
 				var lineResult = line;
-				
-				if (!line.Contains("JsonProperty")) lineResult = lineResult.Replace(visibility, "[JsonProperty] " + visibility);
+
+				if (!line.Contains("JsonProperty"))
+				{
+					lineResult = lineResult.Replace(visibility, "[JsonProperty] " + visibility);
+					if (!hasNewtonsoftUsing) result.FileMissingNewtonsoftUsing = true;
+				}
 				
 				switch (issue)
 				{
@@ -239,6 +247,8 @@ namespace Lunra.Hothouse.Editor
 					.Where(e => e.File == file)
 					.OrderBy(e => e.LineIndex)
 					.ToList();
+
+				var missingNewtonsoftUsing = replacementsForFile.Any(r => r.FileMissingNewtonsoftUsing);
 				
 				var result = string.Empty;
 
@@ -265,6 +275,8 @@ namespace Lunra.Hothouse.Editor
 
 					appendLine(lineReplacement.SuggestedCorrection, lineIndex);
 				}
+
+				if (missingNewtonsoftUsing) result = "using Newtonsoft.Json;\n" + result;
 				
 				File.WriteAllText(file, result);
 			}
