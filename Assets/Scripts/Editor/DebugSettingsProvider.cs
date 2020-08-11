@@ -18,12 +18,20 @@ namespace Lunra.Hothouse.Editor
 {
 	public static class DebugSettings
 	{
+		public enum MainMenuBehaviours
+		{
+			Unknown = 0,
+			None = 10,
+			CreateNewGame = 20,
+			LoadRecentGame = 30
+		}
+		
 		const string KeyPrefix = SettingsProviderStrings.ProjectKeyPrefix + "DebugSettings.";
 
 		public static EditorPrefsBool AutoRevealRooms { get; } = new EditorPrefsBool(KeyPrefix + "AutoRevealRooms");
 		public static EditorPrefsBool LogGameOverAnalysis { get; } = new EditorPrefsBool(KeyPrefix + "LogGameOverAnalysis");
 		public static EditorPrefsBool GameOverOnDwellerDeath { get; } = new EditorPrefsBool(KeyPrefix + "GameOverOnDwellerDeath");
-		public static EditorPrefsBool AutoRestartOnGameOver { get; } = new EditorPrefsBool(KeyPrefix + "AutoRestartOnGameOver");
+		public static EditorPrefsEnum<MainMenuBehaviours> MainMenuBehaviour { get; } = new EditorPrefsEnum<MainMenuBehaviours>(KeyPrefix + "MainMenuBehaviour", MainMenuBehaviours.None);
 		public static EditorPrefsBool SeedOverrideEnabled { get; } = new EditorPrefsBool(KeyPrefix + "SeedOverrideEnabled");
 		public static EditorPrefsInt SeedOverride { get; } = new EditorPrefsInt(KeyPrefix + "SeedOverride");
 	}
@@ -49,7 +57,8 @@ namespace Lunra.Hothouse.Editor
 			public static GUIContent OpenSaveLocation = new GUIContent("Open save location");
 			public static GUIContent SaveAndCopySerializedGameToClipboard = new GUIContent("Save and copy serialized game to clipboard");
 			public static GUIContent StartNewGame = new GUIContent("Start New Game");
-			public static GUIContent SaveAndLoadGame = new GUIContent("Save & Load Game");
+			public static GUIContent ReloadGame = new GUIContent("Reload Game");
+			public static GUIContent SaveAndReloadGame = new GUIContent("Save & Reload Game");
 			public static GUIContent QueueNavigationCalculation = new GUIContent("Queue navigation calculation");
 			public static GUIContent RevealAllRooms = new GUIContent("Reveal All Rooms");
 			public static GUIContent OpenAllDoors = new GUIContent("Open All Doors");
@@ -61,9 +70,10 @@ namespace Lunra.Hothouse.Editor
 		}
 
 		string lastAutoRevealedRoomsForGameId;
-
 		int previousDwellerCount = int.MinValue;
 		Stack<GameOverAnalysis> gameOverAnalyses = new Stack<GameOverAnalysis>();
+		bool hasMainMenuIdleBeenHandled;
+		Action<MainMenuModel> onMainMenuIdle;
 
 		public DebugSettingsProvider(string path, SettingsScope scope = SettingsScope.Project) : base(path, scope)
 		{
@@ -83,7 +93,7 @@ namespace Lunra.Hothouse.Editor
 			{
 				DebugSettings.AutoRevealRooms.LabelName,
 				DebugSettings.LogGameOverAnalysis.LabelName,
-				DebugSettings.AutoRestartOnGameOver.LabelName,
+				DebugSettings.MainMenuBehaviour.LabelName,
 				DebugSettings.SeedOverrideEnabled.LabelName,
 				DebugSettings.SeedOverride.LabelName,
 				
@@ -91,6 +101,7 @@ namespace Lunra.Hothouse.Editor
 				Content.OpenSaveLocation.text,
 				Content.SaveAndCopySerializedGameToClipboard.text,
 				Content.StartNewGame.text,
+				Content.ReloadGame.text,
 				Content.QueueNavigationCalculation.text,
 				Content.RevealAllRooms.text,
 				Content.OpenAllDoors.text,
@@ -108,46 +119,12 @@ namespace Lunra.Hothouse.Editor
 			if (GUILayout.Button(Content.OpenDebugSettingsProvider)) OpenSettingsProviderAsset();
 			if (GUILayout.Button(Content.OpenSaveLocation)) EditorUtility.RevealInFinder(Application.persistentDataPath);
 
-			var isInGame = GameStateEditorUtility.GetGame(out var game, out var state);
+			var isInGame = GameStateEditorUtility.GetGame(out var gameModel, out _);
 			
 			GUIExtensions.PushEnabled(isInGame);
 			{
-				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(game, OnSaveAndCopySerializedGameToClipboard);
-				if (GUILayout.Button(Content.QueueNavigationCalculation)) game.NavigationMesh.QueueCalculation();
-				
-				GUILayout.BeginHorizontal();
-				{
-					if (GUILayout.Button(Content.StartNewGame))
-					{
-						App.S.RequestState(
-							new MainMenuPayload
-							{
-								Preferences = state.Payload.Preferences
-							}
-						);
-					}
-					
-					if (GUILayout.Button(Content.SaveAndLoadGame))
-					{
-						App.M.Save(
-							game,
-							result =>
-							{
-								result.LogIfNotSuccess();
-								if (result.Status != ResultStatus.Success) return;
-								
-								App.S.RequestState(
-									new MainMenuPayload
-									{
-										AutoLoadGame = game.Id.Value,
-										Preferences = state.Payload.Preferences
-									}
-								);
-							}
-						);
-					}
-				}
-				GUILayout.EndHorizontal();
+				if (GUILayout.Button(Content.SaveAndCopySerializedGameToClipboard)) App.M.Save(gameModel, OnSaveAndCopySerializedGameToClipboard);
+				if (GUILayout.Button(Content.QueueNavigationCalculation)) gameModel.NavigationMesh.QueueCalculation();
 
 				GUILayout.BeginHorizontal();
 				{
@@ -157,13 +134,29 @@ namespace Lunra.Hothouse.Editor
 					}
 					GUIExtensions.PopEnabled();
 
-					if (GUILayout.Button(Content.RevealAllRooms)) RevealAllRooms(game);
+					if (GUILayout.Button(Content.RevealAllRooms)) RevealAllRooms(gameModel);
 
 					if (GUILayout.Button(Content.OpenAllDoors))
 					{
-						foreach (var room in game.Rooms.AllActive) room.IsRevealed.Value = true;
-						foreach (var door in game.Doors.AllActive) door.IsOpen.Value = true;
+						foreach (var room in gameModel.Rooms.AllActive) room.IsRevealed.Value = true;
+						foreach (var door in gameModel.Doors.AllActive) door.IsOpen.Value = true;
 					}
+				}
+				GUILayout.EndHorizontal();
+				
+				GUIExtensions.PushEnabled(true, true);
+				{
+					DebugSettings.MainMenuBehaviour.Draw();
+				}
+				GUIExtensions.PopEnabled();
+				
+				GUILayout.BeginHorizontal();
+				{
+					if (GUILayout.Button(Content.StartNewGame)) TriggerMainMenuStartNewGame();
+					
+					if (GUILayout.Button(Content.ReloadGame)) TriggerMainMenuReloadGame(gameModel);
+					
+					if (GUILayout.Button(Content.SaveAndReloadGame)) TriggerMainMenuSaveAndReloadGame(gameModel);
 				}
 				GUILayout.EndHorizontal();
 				
@@ -183,7 +176,7 @@ namespace Lunra.Hothouse.Editor
 					
 					GUIExtensions.PushEnabled(false);
 					{
-						EditorGUILayout.IntField(isInGame ? game.LevelGeneration.Seed.Value : 0);
+						EditorGUILayout.IntField(isInGame ? gameModel.LevelGeneration.Seed.Value : 0);
 					}
 					GUIExtensions.PopEnabled();
 				}
@@ -192,15 +185,14 @@ namespace Lunra.Hothouse.Editor
 				GUILayout.BeginHorizontal();
 				{
 					GUILayout.Label("Simulation Speed", GUILayout.ExpandWidth(false));
-					GUILayout.Label($"{(isInGame ? game.SimulationMultiplier.Value : 0f):N0}x", GUILayout.Width(32f));
-					if (GUILayout.Button(Content.SimulationSpeedReset)) game.SimulationMultiplier.Value = 1f;
-					if (GUILayout.Button(Content.SimulationSpeedDecrease)) game.SimulationMultiplier.Value = Mathf.Max(0f, game.SimulationMultiplier.Value - 1f);
-					if (GUILayout.Button(Content.SimulationSpeedIncrease)) game.SimulationMultiplier.Value++;
+					GUILayout.Label($"{(isInGame ? gameModel.SimulationMultiplier.Value : 0f):N0}x", GUILayout.Width(32f));
+					if (GUILayout.Button(Content.SimulationSpeedReset)) gameModel.SimulationMultiplier.Value = 1f;
+					if (GUILayout.Button(Content.SimulationSpeedDecrease)) gameModel.SimulationMultiplier.Value = Mathf.Max(0f, gameModel.SimulationMultiplier.Value - 1f);
+					if (GUILayout.Button(Content.SimulationSpeedIncrease)) gameModel.SimulationMultiplier.Value++;
 				}
 				GUILayout.EndHorizontal();
 				
 				DebugSettings.LogGameOverAnalysis.Draw();
-				DebugSettings.AutoRestartOnGameOver.Draw();
 				DebugSettings.GameOverOnDwellerDeath.Draw();
 			}
 			GUIExtensions.PopEnabled();
@@ -210,75 +202,8 @@ namespace Lunra.Hothouse.Editor
 				SerializedPropertiesUtility.Validate();
 			}
 			
-			GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
+			// GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 			
-			if (GUILayout.Button("Test surface point gen"))
-			{
-				var gen = new Demon();
-				for (var i = 0; i < 1000; i++)
-				{
-					var pos = gen.NextNormal;
-						
-					Debug.DrawLine(
-						pos + (Vector3.up * 6f),
-						(pos + (Vector3.up * 6f)) + (pos * 0.1f),
-						Color.red,
-						10f
-					);
-				}
-			}
-			
-			if (GUILayout.Button("Test inventory component"))
-			{
-				var testInventory = new InventoryComponent();
-				
-				testInventory.Reset(
-					InventoryPermission.AllForAnyJob(), 
-					InventoryCapacity.ByIndividualWeight(
-						new Inventory(
-							new Dictionary<Inventory.Types, int>
-							{
-								{ Inventory.Types.Scrap, 10 }
-							}
-						)	
-					)
-				);
-				
-				Debug.Log(testInventory);
-
-				testInventory.Add((Inventory.Types.Scrap, 5).ToInventory());
-				
-				Debug.Log("Added 5 Scrap - " + testInventory);
-				
-				// testInventory.Add((Inventory.Types.Scrap, 5).ToInventory());
-				//
-				// Debug.Log("Added 5 Scrap - " + testInventory);
-				
-				testInventory.AddForbidden((Inventory.Types.Scrap, 5).ToInventory());
-				
-				Debug.Log("AddForbidden 5 Scrap - " + testInventory);
-				
-				testInventory.AddReserved((Inventory.Types.Scrap, 5).ToInventory());
-				
-				Debug.Log("AddReserved 5 Scrap - " + testInventory);
-
-				testInventory.RemoveForbidden((Inventory.Types.Scrap, 5).ToInventory());
-				
-				Debug.Log("RemoveForbidden 5 Scrap - " + testInventory);
-				
-				testInventory.RemoveReserved((Inventory.Types.Scrap, 5).ToInventory());
-				
-				Debug.Log("RemoveReserved 5 Scrap - " + testInventory);
-
-				// var gen = new Demon();
-				// for (var i = 0; i < 10; i++)
-				// {
-				// 	
-				// 	
-				// }
-				
-				Debug.Log("------");
-			}
 		}
 		
 		#region Events
@@ -325,87 +250,134 @@ namespace Lunra.Hothouse.Editor
 		
 		void OnUpdate()
 		{
-			if (GameStateEditorUtility.GetGame(out var game, out _) && App.S.CurrentEvent == StateMachine.Events.Idle)
+			if (MainMenuStateEditorUtility.GetMainMenu(out var mainMenuModel, out _) && App.S.CurrentEvent == StateMachine.Events.Idle)
 			{
-				if (DebugSettings.AutoRevealRooms.Value && (string.IsNullOrEmpty(lastAutoRevealedRoomsForGameId) || lastAutoRevealedRoomsForGameId != game.Id.Value))
+				if (!hasMainMenuIdleBeenHandled) OnUpdateMainMenuState(mainMenuModel);
+			}
+			else if (GameStateEditorUtility.GetGame(out var gameModel, out _) && App.S.CurrentEvent == StateMachine.Events.Idle)
+			{
+				hasMainMenuIdleBeenHandled = false;
+				
+				OnUpdateGameState(gameModel);	
+			}
+		}
+
+		void OnUpdateMainMenuState(MainMenuModel mainMenuModel)
+		{
+			hasMainMenuIdleBeenHandled = true;
+			
+			if (onMainMenuIdle == null)
+			{
+				switch (DebugSettings.MainMenuBehaviour.Value)
 				{
-					RevealAllRooms(game);
-				}
-
-				if (game.GameResult.Value.State == GameResult.States.Unknown && DebugSettings.GameOverOnDwellerDeath.Value)
-				{
-					var dwellerCount = game.Dwellers.AllActive.Length;
-
-					if (dwellerCount < previousDwellerCount)
-					{
-						game.GameResult.Value = new GameResult(
-							GameResult.States.Displaying,
-							"DEBUG: Dweller died",
-							game.SimulationTime.Value
-						);
-
-						previousDwellerCount = int.MinValue;
-					}
-					else previousDwellerCount = dwellerCount;
-				}
-
-				if (game.GameResult.Value.State == GameResult.States.Displaying)
-				{
-					if (DebugSettings.LogGameOverAnalysis.Value && (gameOverAnalyses.None() || gameOverAnalyses.Peek().Id != game.Id.Value))
-					{
-						var analysis = new GameOverAnalysis();
-
-						analysis.Id = game.Id.Value;
-						analysis.Result = game.GameResult.Value;
-
-						analysis.Summary = analysis.Result.Reason;
-						analysis.Summary += "\nDweller Deaths:";
-
-						foreach (var logEntry in game.EventLog.Dwellers.PeekAll().Where(e => e.Message.Contains("died")))
-						{
-							analysis.Summary += $"\n - [ {logEntry.SimulationTime} ] {logEntry.Message}";
-						}
-
-						analysis.SurvivalMinimum = analysis.Result.TimeSurvived;
-						analysis.SurvivalMaximum = analysis.Result.TimeSurvived;
-						analysis.SurvivalAverage = analysis.Result.TimeSurvived;
-
-						var count = 1f;
-						
-						foreach (var previousAnalysis in gameOverAnalyses)
-						{
-							if (previousAnalysis.Result.TimeSurvived < analysis.SurvivalMinimum) analysis.SurvivalMinimum = previousAnalysis.Result.TimeSurvived;
-							if (analysis.SurvivalMaximum < previousAnalysis.Result.TimeSurvived) analysis.SurvivalMaximum = previousAnalysis.Result.TimeSurvived;
-							
-							analysis.SurvivalAverage += previousAnalysis.Result.TimeSurvived;
-							count++;
-						}
-
-						analysis.SurvivalAverage = new DayTime(analysis.SurvivalAverage.TotalTime / count);
-
-						analysis.Summary += "\nSurvival Times:";
-						analysis.Summary += "\n - Minimum: \t"+analysis.SurvivalMinimum;
-						analysis.Summary += "\n - Maximum: \t"+analysis.SurvivalMaximum;
-						analysis.Summary += "\n - Average: \t"+analysis.SurvivalAverage;
-						analysis.Summary += "\n";
-						analysis.Summary += "\n - Current: \t"+analysis.Result.TimeSurvived;
-
-						analysis.PlaytimeElapsed = game.PlaytimeElapsed.Value;
-
-						analysis.Summary += $"\nPlaytime Elapsed:\n - {analysis.PlaytimeElapsed:g}";
-						
-						gameOverAnalyses.Push(analysis);
-						
-						Debug.Log(analysis.Summary);
-					}
-					
-					if (DebugSettings.AutoRestartOnGameOver.Value)
-					{
-						game.GameResult.Value = game.GameResult.Value.New(GameResult.States.Failure);
-						previousDwellerCount = int.MinValue;
-					}
+					case DebugSettings.MainMenuBehaviours.None:
+						break;
+					case DebugSettings.MainMenuBehaviours.CreateNewGame:
+						Utility.CreateAndStartNewGame(mainMenuModel);
+						break;
+					case DebugSettings.MainMenuBehaviours.LoadRecentGame:
+						Utility.LoadAndStartRecentGame(mainMenuModel);
+						break;
+					default:
+						Debug.LogError("Unrecognized Main Menu Behaviour: "+DebugSettings.MainMenuBehaviour.Value);
+						break;
 				}
 			}
+			else
+			{
+				var callback = onMainMenuIdle;
+				onMainMenuIdle = null;
+				callback(mainMenuModel);
+			}
+		}
+		
+		void OnUpdateGameState(GameModel gameModel)
+		{
+			if (DebugSettings.AutoRevealRooms.Value && (string.IsNullOrEmpty(lastAutoRevealedRoomsForGameId) || lastAutoRevealedRoomsForGameId != gameModel.Id.Value))
+			{
+				RevealAllRooms(gameModel);
+			}
+
+			if (gameModel.GameResult.Value.State == GameResult.States.Unknown && DebugSettings.GameOverOnDwellerDeath.Value)
+			{
+				var dwellerCount = gameModel.Dwellers.AllActive.Length;
+
+				if (dwellerCount < previousDwellerCount)
+				{
+					gameModel.GameResult.Value = new GameResult(
+						GameResult.States.Displaying,
+						"DEBUG: Dweller died",
+						gameModel.SimulationTime.Value
+					);
+
+					previousDwellerCount = int.MinValue;
+				}
+				else previousDwellerCount = dwellerCount;
+			}
+
+			if (gameModel.GameResult.Value.State == GameResult.States.Displaying)
+			{
+				if (DebugSettings.LogGameOverAnalysis.Value && (gameOverAnalyses.None() || gameOverAnalyses.Peek().Id != gameModel.Id.Value))
+				{
+					var analysis = new GameOverAnalysis();
+
+					analysis.Id = gameModel.Id.Value;
+					analysis.Result = gameModel.GameResult.Value;
+
+					analysis.Summary = analysis.Result.Reason;
+					analysis.Summary += "\nDweller Deaths:";
+
+					foreach (var logEntry in gameModel.EventLog.Dwellers.PeekAll().Where(e => e.Message.Contains("died")))
+					{
+						analysis.Summary += $"\n - [ {logEntry.SimulationTime} ] {logEntry.Message}";
+					}
+
+					analysis.SurvivalMinimum = analysis.Result.TimeSurvived;
+					analysis.SurvivalMaximum = analysis.Result.TimeSurvived;
+					analysis.SurvivalAverage = analysis.Result.TimeSurvived;
+
+					var count = 1f;
+					
+					foreach (var previousAnalysis in gameOverAnalyses)
+					{
+						if (previousAnalysis.Result.TimeSurvived < analysis.SurvivalMinimum) analysis.SurvivalMinimum = previousAnalysis.Result.TimeSurvived;
+						if (analysis.SurvivalMaximum < previousAnalysis.Result.TimeSurvived) analysis.SurvivalMaximum = previousAnalysis.Result.TimeSurvived;
+						
+						analysis.SurvivalAverage += previousAnalysis.Result.TimeSurvived;
+						count++;
+					}
+
+					analysis.SurvivalAverage = new DayTime(analysis.SurvivalAverage.TotalTime / count);
+
+					analysis.Summary += "\nSurvival Times:";
+					analysis.Summary += "\n - Minimum: \t"+analysis.SurvivalMinimum;
+					analysis.Summary += "\n - Maximum: \t"+analysis.SurvivalMaximum;
+					analysis.Summary += "\n - Average: \t"+analysis.SurvivalAverage;
+					analysis.Summary += "\n";
+					analysis.Summary += "\n - Current: \t"+analysis.Result.TimeSurvived;
+
+					analysis.PlaytimeElapsed = gameModel.PlaytimeElapsed.Value;
+
+					analysis.Summary += $"\nPlaytime Elapsed:\n - {analysis.PlaytimeElapsed:g}";
+					
+					gameOverAnalyses.Push(analysis);
+					
+					Debug.Log(analysis.Summary);
+				}
+				
+				// if (DebugSettings.AutoNewGame.Value)
+				// {
+				// 	game.GameResult.Value = game.GameResult.Value.New(GameResult.States.Failure);
+				// 	previousDwellerCount = int.MinValue;
+				// }
+			}
+		}
+
+		void TriggerMainMenu(Action<MainMenuModel> onMainMenuIdleCallback)
+		{
+			onMainMenuIdle = onMainMenuIdleCallback;
+
+			App.S.RequestState<MainMenuPayload>();
 		}
 		
 		void RevealAllRooms(GameModel game)
@@ -425,5 +397,118 @@ namespace Lunra.Hothouse.Editor
 			);
 		}
 		#endregion
+		
+		#region MainMenu Events
+		void TriggerMainMenuStartNewGame() => TriggerMainMenu(Utility.CreateAndStartNewGame);
+		
+		void TriggerMainMenuReloadGame(GameModel gameModel)
+		{
+			var gameId = gameModel.Id.Value;
+			TriggerMainMenu(
+				mainMenuModel =>
+				{
+					App.M.Load<GameModel>(
+						gameId,
+						loadResult =>
+						{
+							loadResult.LogIfNotSuccess();
+							if (loadResult.Status == ResultStatus.Success)
+							{
+								mainMenuModel.StartGame(loadResult.TypedModel);
+							}
+						}
+					);
+				}
+			);
+		}
+		
+		void TriggerMainMenuSaveAndReloadGame(GameModel gameModel)
+		{
+			App.M.Save(
+				gameModel,
+				saveResult =>
+				{
+					saveResult.LogIfNotSuccess();
+					if (saveResult.Status == ResultStatus.Success)
+					{
+						TriggerMainMenuReloadGame(gameModel);
+					}
+				}
+			);
+		}
+		#endregion
+
+		static class Utility
+		{
+			public static void CreateAndStartNewGame(MainMenuModel mainMenuModel)
+			{
+				mainMenuModel.CreateGame(
+					createGameResult =>
+					{
+						createGameResult.LogIfNotSuccess();
+						if (createGameResult.Status == ResultStatus.Success)
+						{
+							App.M.Save(
+								createGameResult.Payload,
+								saveResult =>
+								{
+									saveResult.LogIfNotSuccess();
+									if (saveResult.Status == ResultStatus.Success)
+									{
+										App.M.Load<GameModel>(
+											saveResult.Model,
+											loadResult =>
+											{
+												loadResult.LogIfNotSuccess();
+												if (loadResult.Status == ResultStatus.Success)
+												{
+													mainMenuModel.StartGame(loadResult.TypedModel);
+												}
+											}
+										);
+									}
+								}
+							);
+						}
+					}
+				);
+			}
+			
+			public static void LoadAndStartRecentGame(MainMenuModel mainMenuModel)
+			{
+				App.M.Index<GameModel>(
+					indexResult =>
+					{
+						indexResult.LogIfNotSuccess();
+						if (indexResult.Status == ResultStatus.Success)
+						{
+							var mostRecentCompatibleVersion = indexResult.Models
+								.OrderByDescending(r => r.Modified.Value)
+								.FirstOrDefault(r => r.SupportedVersion.Value);
+
+							if (mostRecentCompatibleVersion == null)
+							{
+								Debug.LogWarning("Unable to find a compatible save, creating a new game instead");
+								CreateAndStartNewGame(mainMenuModel);
+							}
+							else
+							{
+								App.M.Load<GameModel>(
+									mostRecentCompatibleVersion,
+									loadResult =>
+									{
+										loadResult.LogIfNotSuccess();
+										if (loadResult.Status == ResultStatus.Success)
+										{
+											mainMenuModel.StartGame(loadResult.TypedModel);
+										}
+									}
+								);
+							}
+						}
+					}
+				);
+			}
+		}
 	}
 }

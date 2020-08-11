@@ -7,25 +7,25 @@ using UnityEngine;
 namespace Lunra.Hothouse.Services.Editor
 {
 	[InitializeOnLoad]
-	public static class GameStateEditorUtility
+	public static class MainMenuStateEditorUtility
 	{
-		static GameState cachedState;
+		static MainMenuState cachedState;
 		
-		public static bool GetGameState(out GameState state)
+		public static bool GetMainMenuState(out MainMenuState state)
 		{
 			state = null;
 			if (!Application.isPlaying || !App.HasInstance || App.S == null) return false;
-			if (!App.S.Is(typeof(GameState), StateMachine.Events.Begin, StateMachine.Events.Idle)) return false;
+			if (!App.S.Is(typeof(MainMenuState), StateMachine.Events.Begin, StateMachine.Events.Idle)) return false;
 
-			state = cachedState ?? (cachedState = App.S.CurrentHandler as GameState);
+			state = cachedState ?? (cachedState = App.S.CurrentHandler as MainMenuState);
 			return true;
 		}
 
-		public static bool GetGame(out GameModel model, out GameState state)
+		public static bool GetMainMenu(out MainMenuModel model, out MainMenuState state)
 		{
-			if (GetGameState(out state))
+			if (GetMainMenuState(out state))
 			{
-				model = state.Payload.Game;
+				model = state.Payload.MainMenu;
 				return true;
 			}
 
@@ -33,7 +33,7 @@ namespace Lunra.Hothouse.Services.Editor
 			return false;
 		}
 		
-		static GameStateEditorUtility()
+		static MainMenuStateEditorUtility()
 		{
 			EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 		}

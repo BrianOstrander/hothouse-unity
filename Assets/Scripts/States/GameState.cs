@@ -41,12 +41,11 @@ namespace Lunra.Hothouse.Services
 
 			if (Payload.Game.Rooms.AllActive.None())				
 			{
-				
-				Debug.Log("uhh?");
 				App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
 				new GameStateGenerateLevel(this).Push();
 			}
 			
+			// App.S.PushBreak();
 			App.S.Push(Payload.Game.TriggerSimulationInitialize);
 
 			App.S.PushBlocking(OnBeginInitializeCache);
@@ -186,12 +185,7 @@ namespace Lunra.Hothouse.Services
 		{
 			if (Payload.Game.GameResult.Value.State != GameResult.States.Failure) return;
 			
-			App.S.RequestState(
-				new MainMenuPayload
-				{
-					Preferences = Payload.Preferences
-				}
-			);
+			App.S.RequestState<MainMenuPayload>();
 		}
 		#endregion
         

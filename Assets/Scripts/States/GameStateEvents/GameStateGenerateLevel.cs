@@ -481,9 +481,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				Jobs.Laborer,
 				Jobs.Laborer,
-				Jobs.Laborer,
-				Jobs.Laborer,
-				Jobs.Laborer
+				// Jobs.Laborer,
+				// Jobs.Laborer,
+				// Jobs.Laborer
 			};
 
 			for (var i = 0; i < requiredJobs.Length; i++)
