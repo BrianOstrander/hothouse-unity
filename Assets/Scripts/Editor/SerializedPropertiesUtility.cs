@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lunra.Core;
-using Lunra.Editor.Core;
 using UnityEditor;
 using UnityEngine;
 
@@ -30,8 +29,6 @@ namespace Lunra.Hothouse.Editor
 			public bool SuggestedCorrectionFound;
 			public string SuggestedCorrectionNotFoundMessage;
 			public bool FileMissingNewtonsoftUsing;
-			
-			public string Message;
 		}
 		
 		public static void Validate()
