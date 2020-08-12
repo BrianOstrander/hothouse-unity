@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
 using Lunra.NumberDemon;
+using Lunra.StyxMvp;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -165,7 +166,16 @@ namespace Lunra.Hothouse.Models
 			
 			model.ObligationPromises.Reset();
 			model.Tags.Reset();
-			model.Attacks.Reset();
+			model.Attacks.Reset(
+				new Attack(
+					App.M.CreateUniqueId(),
+					"melee_generic",
+					// new FloatRange(0f, model.InteractionRadius.Value),
+					new FloatRange(0f, 4f),
+					1f,
+					DayTime.FromMinutes(1)
+				)	
+			);
 		}
 
 		public (Motives Motive, float InsistenceModifier)[] Velocities => new[]

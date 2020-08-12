@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System.Linq;
 using Lunra.Core;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -35,6 +36,39 @@ namespace Lunra.Hothouse.Models
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			Model.Inventory.All.Changed -= OnParentInventory;
 			Model.Tags.All.Changed -= OnParentTags;
+		}
+
+		public bool TryGetMostEffective(
+			IHealthModel target,
+			out Attack attack,
+			FloatRange? distance = null,
+			DayTime? simulatedTime = null
+		)
+		{
+			var mostEffectiveValue = float.MinValue;
+			attack = null;
+
+			var attackDistance = distance ?? FloatRange.Constant(Model.DistanceTo(target));
+			var attackSimulatedTime = simulatedTime ?? Game.SimulationTime.Value;
+			
+			foreach (var currentAttack in All)
+			{
+				var anyEffectiveness = currentAttack.TryGetEffectiveness(
+					Model,
+					target,
+					attackDistance,
+					attackSimulatedTime,
+					out var effectiveness
+				);
+
+				if (anyEffectiveness && mostEffectiveValue < effectiveness)
+				{
+					mostEffectiveValue = effectiveness;
+					attack = currentAttack;
+				}
+			}
+
+			return 0f < mostEffectiveValue && attack != null;
 		}
 
 		#region GameModel Events

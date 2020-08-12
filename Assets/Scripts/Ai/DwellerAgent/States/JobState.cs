@@ -258,7 +258,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationToWorkplace.Path);
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+					navigationToWorkplace.Path,
+					NavigationPlan.Interrupts.RadiusThreshold,
+					Agent.InteractionRadius.Value
+				);
 			}
 		}
 		
@@ -289,7 +293,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 				);
 			}
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+				navigationResult.Path,
+				NavigationPlan.Interrupts.RadiusThreshold,
+				Agent.InteractionRadius.Value
+			);
 		}
 		
 		#region Child Classes

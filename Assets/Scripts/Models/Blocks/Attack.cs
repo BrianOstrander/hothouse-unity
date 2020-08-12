@@ -32,7 +32,7 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] public string Id { get; private set; }
 		[JsonProperty] public string Name { get; private set; }
-		[JsonProperty] public float Range { get; private set; }
+		[JsonProperty] public FloatRange Range { get; private set; }
 		[JsonProperty] public float Damage { get; private set; }
 		[JsonProperty] public DayTime Duration { get; private set; }
 		[JsonProperty] public DayTime Cooldown { get; private set; }
@@ -50,7 +50,7 @@ namespace Lunra.Hothouse.Models
 		public Attack(
 			string id,
 			string name,
-			float range,
+			FloatRange range,
 			float damage,
 			DayTime duration,
 			DayTime? cooldown = null,
@@ -110,19 +110,21 @@ namespace Lunra.Hothouse.Models
 		}
 
 		public bool TryGetEffectiveness(
-			GameModel game,
 			IAttackModel source,
 			IHealthModel target,
-			out float effectiveness 
+			FloatRange distance,
+			DayTime simulatedTime,
+			out float effectiveness
 		)
 		{
 			effectiveness = float.MinValue;
-			
-			if (State != States.Available) return false; 
-			
-			var distance = source.DistanceTo(target);
 
-			if (Range < distance) return false;
+			if (State != States.Available)
+			{
+				if (State != States.WaitingForCooldown || simulatedTime < CooldownExpired) return false;
+			}
+			
+			if (!Range.Intersects(distance)) return false;
 
 			var simulatedDamage = Models.Damage.Simulate(
 				DamageType,
@@ -132,6 +134,10 @@ namespace Lunra.Hothouse.Models
 			);
 
 			effectiveness = simulatedDamage.AmountAbsorbed;
+
+			// TODO: Take into account travel time...
+			
+			if (0f < Duration.TotalTime) effectiveness /= Duration.TotalTime;
 			
 			return 0f < effectiveness;
 		}

@@ -220,21 +220,24 @@ namespace Lunra.Hothouse.Models
 				IsValid = isValid;
 			}
 
-			public float CalculateNavigationTime(float velocity)
+			public DayTime CalculateNavigationTime(float velocity)
 			{
-				if (!IsValid) return float.MaxValue;
+				if (!IsValid) return DayTime.MaxValue;
+
+				return new DayTime(Path.corners.TotalDistance() / velocity);
+			}
+			
+			public DayTime CalculateNavigationTimeToPathDistance(
+				float velocity,
+				float requiredDistance
+			)
+			{
+				if (!IsValid) return DayTime.MaxValue;
+
+				var distance = Path.corners.TotalDistance();
 				
-				var distance = 0f;
-
-				for (var i = 1; i < Path.corners.Length; i++)
-				{
-					distance += Vector3.Distance(
-						Path.corners[i - 1],
-						Path.corners[i]
-					);
-				}
-
-				return distance / velocity;
+				if (distance < requiredDistance) return DayTime.Zero;
+				return new DayTime((distance - requiredDistance) / velocity);
 			}
 		}
 	}

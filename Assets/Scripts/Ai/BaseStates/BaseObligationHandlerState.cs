@@ -74,7 +74,11 @@ namespace Lunra.Hothouse.Ai
 								out CurrentCache.NavigationResult,
 								Navigation.QueryEntrances(targetParentEnterable)
 							);
-							CurrentCache.NavigationRadiusMaximum = 0.25f; // TODO: Don't hardcode this
+							
+							CurrentCache.NavigationRadiusMaximum = CalculateInteractionRadius(
+								CurrentCache.TargetParent,
+								CurrentCache.NavigationResult
+							);
 							break;
 						default:
 							Debug.LogError("Unrecognized target parent type: "+CurrentCache.Target.GetType().Name);
@@ -83,6 +87,8 @@ namespace Lunra.Hothouse.Ai
 				}
 			}
 		}
+
+		protected virtual float CalculateInteractionRadius(IObligationModel targetParent, Navigation.Result navigationResult) => Agent.InteractionRadius.Value;
 
 		public class ToObligationOnExistingObligation : AgentTransition<S0, S1, GameModel, A>
 		{
@@ -173,7 +179,11 @@ namespace Lunra.Hothouse.Ai
 			
 			public override bool IsTriggered() => SourceState.CurrentCache.IsNavigable;
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(SourceState.CurrentCache.NavigationResult.Path);
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+				SourceState.CurrentCache.NavigationResult.Path,
+				NavigationPlan.Interrupts.RadiusThreshold,
+				Agent.InteractionRadius.Value
+			);
 		}
 
 		protected class ToReturnOnTimeout : AgentTransition<S1, S0, GameModel, A>

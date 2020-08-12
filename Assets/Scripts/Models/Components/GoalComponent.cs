@@ -207,7 +207,7 @@ namespace Lunra.Hothouse.Models
 
 		public bool TryCalculateDiscontent(
 			GoalActivity activity,
-			float deltaTime,
+			DayTime deltaTime,
 			float maximumDiscontent,
 			out float discontentWithActivity
 		)
@@ -219,7 +219,7 @@ namespace Lunra.Hothouse.Models
 			{
 				var value = Current.Value.Values[i];
 				
-				var sampleVelocity = Caches[i].VelocityPredicted * deltaTime * activity.Duration.TotalTime;
+				var sampleVelocity = Caches[i].VelocityPredicted * deltaTime.TotalTime * activity.Duration.TotalTime;
 				
 				var discontentModifier = activity.Modifiers
 					.FirstOrDefault(m => m.Motive == value.Motive)

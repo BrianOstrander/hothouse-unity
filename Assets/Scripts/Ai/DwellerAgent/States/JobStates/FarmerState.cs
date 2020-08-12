@@ -247,7 +247,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				selectedPlot.AttendingFarmer = InstanceId.New(Agent);
 				SourceState.state = States.NavigatingToSow;
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+					navigationResult.Path,
+					NavigationPlan.Interrupts.RadiusThreshold,
+					Agent.InteractionRadius.Value
+				);
 			}
 		}
 		
@@ -342,7 +346,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				selectedPlot.AttendingFarmer = InstanceId.New(Agent);
 				SourceState.state = States.NavigatingToTend;
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+					navigationResult.Path,
+					NavigationPlan.Interrupts.RadiusThreshold,
+					Agent.InteractionRadius.Value
+				);
 			}
 		}
 

@@ -359,7 +359,11 @@ namespace Lunra.Hothouse.Ai
 				return SourceState.cache.IsNavigable && transactionType == SourceState.cache.Transaction.Type;
 			}
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(SourceState.cache.NavigationResult.Path);
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+				SourceState.cache.NavigationResult.Path,
+				NavigationPlan.Interrupts.RadiusThreshold,
+				Agent.InteractionRadius.Value
+			);
 		}
 
 		class ToReturnOnTimeout : AgentTransition<S1, S0, GameModel, A>

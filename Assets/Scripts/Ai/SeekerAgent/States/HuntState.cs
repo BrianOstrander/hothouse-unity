@@ -160,7 +160,10 @@ namespace Lunra.Hothouse.Ai.Seeker
 				return true;
 			}
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+				path,
+				NavigationPlan.Interrupts.RadiusThreshold | NavigationPlan.Interrupts.LineOfSight
+			);
 		}
 	}
 }

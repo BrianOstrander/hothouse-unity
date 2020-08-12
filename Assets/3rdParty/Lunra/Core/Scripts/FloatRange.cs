@@ -36,6 +36,10 @@ namespace Lunra.Core
 		public FloatRange NewPrimary(float primary) { return new FloatRange(primary, Secondary); }
 		public FloatRange NewSecondary(float secondary) { return new FloatRange(Primary, secondary); }
 
+		public bool Contains(float value) => Mathf.Approximately(value, Mathf.Clamp(value, Minimum, Maximum));
+
+		public bool Intersects(FloatRange other) => Contains(other.Minimum) || Contains(other.Maximum);
+		
 		/// <summary>
 		/// Takes a value between 0.0 and 1.0 and returns where that value would
 		/// fall in a range between the Primary and Secondary values.

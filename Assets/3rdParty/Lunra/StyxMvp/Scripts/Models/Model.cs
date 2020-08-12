@@ -30,7 +30,7 @@ namespace Lunra.StyxMvp.Models
 
 		public override string ToString() => this.ToReadableJson();
 
-		[JsonIgnore] public string ShortId => ShortenId(Id.Value);
+		[JsonIgnore] public virtual string ShortId => ShortenId(Id.Value);
 		
 		public static string ShortenId(string id) => StringExtensions.GetNonNullOrEmpty(
 			id == null ? "< null Id >" : (id.Length != 36 ? id : id.Substring(0, 4)),

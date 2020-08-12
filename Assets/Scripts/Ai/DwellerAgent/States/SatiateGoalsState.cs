@@ -152,7 +152,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					
 					var deltaTime = navigationResult.CalculateNavigationTime(Agent.NavigationVelocity.Value);
 					
-					var activityReservationBegin = Game.SimulationTime.Value + new DayTime(deltaTime);
+					var activityReservationBegin = Game.SimulationTime.Value + deltaTime;
 
 					var availableActivities = activityParent.Activities.GetAvailable(activityReservationBegin);
 					
@@ -197,7 +197,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 					bestActivityReservationBegin
 				);
 				
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(bestNavigationResult.Path);
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+					bestNavigationResult.Path,
+					NavigationPlan.Interrupts.RadiusThreshold,
+					Agent.InteractionRadius.Value
+				);
 			}
 		}
 			

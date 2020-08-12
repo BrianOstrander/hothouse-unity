@@ -70,5 +70,7 @@ namespace Lunra.Hothouse.Models
 				Attacks
 			);
 		}
+
+		[JsonIgnore] public override string ShortId => $"{base.ShortId}_{StringExtensions.GetNonNullOrEmpty(Name.Value, (Name.Value == null ? "< null name >" : "< empty name >"))}";
 	}
 }

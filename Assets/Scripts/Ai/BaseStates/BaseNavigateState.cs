@@ -45,12 +45,12 @@ namespace Lunra.Hothouse.Ai
 		bool CalculatePath()
 		{
 			var endPosition = Agent.NavigationPlan.Value.EndPosition;
-			if (!Mathf.Approximately(0f, Agent.NavigationPlan.Value.Threshold))
+			if (!Mathf.Approximately(0f, Agent.NavigationPlan.Value.MaximumThreshold))
 			{
 				var hasSample = NavMesh.SamplePosition(
 					endPosition,
 					out var sampleHit,
-					Agent.NavigationPlan.Value.Threshold,
+					Agent.NavigationPlan.Value.MaximumThreshold,
 					NavMesh.AllAreas
 				);
 				if (hasSample) endPosition = sampleHit.position;
@@ -69,7 +69,7 @@ namespace Lunra.Hothouse.Ai
 				path
 			);
 
-			if (hasPath) Agent.NavigationPlan.Value = NavigationPlan.Navigating(path);
+			if (hasPath) Agent.NavigationPlan.Value = NavigationPlan.Navigating(path, Agent.NavigationPlan.Value.Interrupt, Agent.NavigationPlan.Value.RadiusThreshold, Agent.NavigationPlan.Value.PathThreshold);
 			else Agent.NavigationPlan.Value = NavigationPlan.Invalid(Agent.NavigationPlan.Value);
 
 			return hasPath;
