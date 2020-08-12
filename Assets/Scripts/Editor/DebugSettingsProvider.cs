@@ -202,8 +202,26 @@ namespace Lunra.Hothouse.Editor
 				SerializedPropertiesUtility.Validate();
 			}
 			
-			// GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
-			
+			GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
+
+			if (GUILayout.Button("Validate Promise Components"))
+			{
+				var dweller = gameModel.Dwellers.FirstActive(d => d.IsDebugging);
+
+				var res = "ObPromis on ob: " + dweller.ObligationPromises.Id.Value;
+				res += "\nObPromis in list: " + dweller.Components.First(c => c is ObligationPromiseComponent).Id.Value;
+
+				if (dweller.ObligationPromises.All.TryPeek(out var obPromis))
+				{
+					res += "\n" + obPromis;
+				}
+				else
+				{
+					res += "\nNot found";
+				}
+				
+				Debug.Log(res);
+			}
 		}
 		
 		#region Events
@@ -365,6 +383,8 @@ namespace Lunra.Hothouse.Editor
 					Debug.Log(analysis.Summary);
 				}
 				
+				
+				Debug.LogError("re impliment here");
 				// if (DebugSettings.AutoNewGame.Value)
 				// {
 				// 	game.GameResult.Value = game.GameResult.Value.New(GameResult.States.Failure);

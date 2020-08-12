@@ -19,6 +19,8 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public Rules Rule { get; private set; }
 		
 		[JsonConstructor]
+		ModifierDefinition() {}
+		
 		ModifierDefinition(
 			string tag,
 			float value,

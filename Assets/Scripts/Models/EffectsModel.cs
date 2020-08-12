@@ -26,7 +26,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] bool isEnabled;
 		[JsonIgnore] public ListenerProperty<bool> IsEnabled { get; }
 
-		[JsonProperty] Queue<Request> queued = new Queue<Request>();
+		[JsonProperty] List<Request> queued = new List<Request>();
 		[JsonIgnore] public QueueProperty<Request> Queued { get; }
 		#endregion
 

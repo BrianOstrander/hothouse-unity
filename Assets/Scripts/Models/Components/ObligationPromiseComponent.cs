@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -16,14 +17,15 @@ namespace Lunra.Hothouse.Models
 	public class ObligationPromiseComponent : ComponentModel<IObligationPromiseModel>
 	{
 		#region Serialized
-		[JsonProperty] Stack<ObligationPromise> all = new Stack<ObligationPromise>();
+		[JsonProperty] List<ObligationPromise> all = new List<ObligationPromise>();
 		[JsonIgnore] public StackProperty<ObligationPromise> All { get; }
 		#endregion
 		
 		#region Non Serialized
 		[JsonIgnore] public Action<Obligation> Complete { get; set; } = ActionExtensions.GetEmpty<Obligation>();
-		public bool HasAny() => all.Any();
 		#endregion
+		
+		public bool HasAny() => all.Any();
 
 		public ObligationPromiseComponent()
 		{
@@ -44,6 +46,7 @@ namespace Lunra.Hothouse.Models
 		{
 			All.Clear();
 			Complete = ActionExtensions.GetEmpty<Obligation>();
+			ResetId();
 		}
 
 		public override string ToString()

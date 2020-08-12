@@ -21,6 +21,8 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public InstanceId Target { get; private set; }
 
 		[JsonConstructor]
+		ObligationPromise() {}
+		
 		ObligationPromise(
 			Obligation obligation,
 			InstanceId target

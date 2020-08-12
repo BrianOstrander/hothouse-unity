@@ -17,6 +17,8 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public string Type { get; private set; }
 
 		[JsonConstructor]
+		Obligation() {}
+		
 		Obligation(
 			string type
 		)

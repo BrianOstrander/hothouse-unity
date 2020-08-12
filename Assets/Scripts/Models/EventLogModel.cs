@@ -40,10 +40,10 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		#region Serialized
-		[JsonProperty] Stack<Entry> dwellerEntries = new Stack<Entry>();
+		[JsonProperty] List<Entry> dwellerEntries = new List<Entry>();
 		[JsonIgnore] public StackProperty<Entry> Dwellers { get; }
 		
-		[JsonProperty] Stack<Entry> alerts = new Stack<Entry>();
+		[JsonProperty] List<Entry> alerts = new List<Entry>();
 		[JsonIgnore] public StackProperty<Entry> Alerts { get; }
 		#endregion
 		

@@ -74,13 +74,15 @@ namespace Lunra.Hothouse.Models
 
 		[JsonIgnore] public bool IsNull => Type == Types.Null;
 		
+		[JsonConstructor]
+		InstanceId() {}
+		
 		InstanceId(IModel instance) : this(
 			GetTypeFromInstance(instance),
 			instance.Id.Value,
 			instance
 		) { }
 		
-		[JsonConstructor]
 		InstanceId(
 			Types type,
 			string id,

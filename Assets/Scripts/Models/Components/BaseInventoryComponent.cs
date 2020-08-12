@@ -62,8 +62,6 @@ namespace Lunra.Hothouse.Models
 		public abstract bool Add(Inventory inventory, out Inventory overflow);
 		public abstract bool Remove(Inventory inventory);
 		public abstract bool Remove(Inventory inventory, out Inventory overflow);
-
-		protected void ResetId() => Id.Value = App.M.CreateUniqueId();
 	}
 	
 	public static class BaseInventoryGameModelExtensions

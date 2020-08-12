@@ -9,7 +9,8 @@ namespace Lunra.Hothouse.Models
 	public abstract class AgentModel : PrefabModel,
 		IHealthModel,
 		IAgentInventoryModel,
-		IInventoryPromiseModel
+		IInventoryPromiseModel,
+		IObligationPromiseModel
 	{
 		#region Serialized
 		[JsonProperty] float navigationVelocity;
@@ -25,10 +26,11 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public AgentInventoryComponent Inventory { get; private set; } = new AgentInventoryComponent();
 		[JsonProperty] public InventoryPromiseComponent InventoryPromises { get; private set; } = new InventoryPromiseComponent();
 		[JsonProperty] public ObligationPromiseComponent ObligationPromises { get; private set; } = new ObligationPromiseComponent();
+		
+		[JsonProperty] public bool IsDebugging { get; set; }
 		#endregion
 		
 		#region Non Serialized
-		[JsonIgnore] public bool IsDebugging { get; set; }
 		[JsonIgnore] public AgentContext Context { get; set; }
 		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
 		[JsonIgnore] public IAgentStateMachine StateMachine { get; set; }

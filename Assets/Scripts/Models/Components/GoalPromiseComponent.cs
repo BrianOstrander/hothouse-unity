@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Models
 	public class GoalPromiseComponent : ComponentModel<IGoalPromiseModel>
 	{
 		#region Serialized
-		[JsonProperty] Stack<GoalActivityReservation> all = new Stack<GoalActivityReservation>();
+		[JsonProperty] List<GoalActivityReservation> all = new List<GoalActivityReservation>();
 		[JsonIgnore] public StackProperty<GoalActivityReservation> All { get; }
 		#endregion
 		

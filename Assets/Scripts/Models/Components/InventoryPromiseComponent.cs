@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Models
 	public class InventoryPromiseComponent : ComponentModel<IInventoryPromiseModel>
 	{
 		#region Serialized
-		[JsonProperty] Stack<InventoryTransaction> transactions = new Stack<InventoryTransaction>();
+		[JsonProperty] List<InventoryTransaction> transactions = new List<InventoryTransaction>();
 		[JsonIgnore] public StackProperty<InventoryTransaction> Transactions { get; }
 		#endregion
 		

@@ -114,11 +114,6 @@ namespace Lunra.Hothouse.Services
 		#region Idle
 		protected override void Idle()
 		{
-			App.Heartbeat.WaitForSeconds(
-				() => Payload.Game.SimulationMultiplier.Value = 0.1f,
-				3f
-			);
-
 			Payload.Game.CalculateMaximumLighting = OnCalculateMaximumLighting;
 			
 			App.Heartbeat.Update += OnHeartbeatUpdate;

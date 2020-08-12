@@ -1,3 +1,4 @@
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -41,6 +42,8 @@ namespace Lunra.Hothouse.Models
 			Game = game;
 			Model = model as M;
 		}
+		
+		protected void ResetId() => Id.Value = App.M.CreateUniqueId();
 	}
 	
 	public static class ParentComponentModelExtensions
