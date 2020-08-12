@@ -1,5 +1,6 @@
 ﻿using System;
 using Lunra.Core;
+using Lunra.Hothouse.Models;
 using Lunra.StyxMvp;
 using UnityEngine;
 
@@ -46,6 +47,15 @@ namespace Lunra.Hothouse.Views
 			Age = 0f;
 			IsReproducing = false;
 		}
+		
+#if UNITY_EDITOR
+		protected override void OnCalculateCachedData()
+		{
+			base.OnCalculateCachedData();
+
+			RootGameObject.SetLayerRecursively(LayerMask.NameToLayer(LayerNames.Flora));
+		}
+#endif
 	}
 
 }

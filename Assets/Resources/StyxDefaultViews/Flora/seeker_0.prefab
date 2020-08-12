@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1703901775907037467
+--- !u!1 &4301483449991453174
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,57 +8,26 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 480015546088355995}
-  m_Layer: 0
-  m_Name: entrances
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &480015546088355995
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1703901775907037467}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 1103234351200587422}
-  m_Father: {fileID: 6278881143626287066}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &3717405596534083489
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1103234351200587422}
-  m_Layer: 0
+  - component: {fileID: 5942148280515376422}
+  m_Layer: 12
   m_Name: entrance_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1103234351200587422
+--- !u!4 &5942148280515376422
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3717405596534083489}
+  m_GameObject: {fileID: 4301483449991453174}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 480015546088355995}
+  m_Father: {fileID: 4005603300539202772}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4354538017525623940
@@ -70,7 +39,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 466282901779698963}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: HeightRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +74,7 @@ GameObject:
   - component: {fileID: 1232820218750794464}
   - component: {fileID: 4616648675586794908}
   - component: {fileID: 7399207198658035185}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -186,7 +155,7 @@ GameObject:
   - component: {fileID: 6226743495075974683}
   - component: {fileID: 4521882057685374526}
   - component: {fileID: 2075069771892109282}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Sphere (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -267,7 +236,7 @@ GameObject:
   - component: {fileID: 3293717936585837230}
   - component: {fileID: 7586714974018820690}
   - component: {fileID: 2209683271737408315}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -347,7 +316,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6278881143626287066}
   - component: {fileID: 6075714665180566942}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: seeker_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -366,7 +335,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 466282901779698963}
-  - {fileID: 480015546088355995}
+  - {fileID: 4005603300539202772}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -392,12 +361,43 @@ MonoBehaviour:
   animations: []
   prefabId: seeker_0
   prefabTags: []
-  entrancesRoot: {fileID: 1703901775907037467}
+  entrancesRoot: {fileID: 9001870737629305337}
   entrances:
-  - {fileID: 1103234351200587422}
+  - {fileID: 5942148280515376422}
   meleeRangeBonus: 0
   maximumHeight: 3
   heightRoot: {fileID: 466282901779698963}
   spawnEffectId: flora_generic_spawn
   hurtEffectId: flora_generic_hurt
   deathEffectId: flora_generic_death
+--- !u!1 &9001870737629305337
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4005603300539202772}
+  m_Layer: 12
+  m_Name: entrances
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4005603300539202772
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9001870737629305337}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 5942148280515376422}
+  m_Father: {fileID: 6278881143626287066}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

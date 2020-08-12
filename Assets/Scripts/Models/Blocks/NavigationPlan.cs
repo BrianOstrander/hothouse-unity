@@ -28,34 +28,6 @@ namespace Lunra.Hothouse.Models
 			Done = 60
 		}
 		
-		// public static NavigationPlan Calculating(
-		// 	Vector3 beginPosition,
-		// 	Vector3 endPosition,
-		// 	float threshold = 0f
-		// )
-		// {
-		// 	return new NavigationPlan(
-		// 		new [] { beginPosition, endPosition },
-		// 		beginPosition, 
-		// 		1,
-		// 		States.Calculating,
-		// 		threshold
-		// 	);
-		// }
-		//
-		// public static NavigationPlan Calculating(
-		// 	NavigationPlan navigationPlan
-		// )
-		// {
-		// 	return new NavigationPlan(
-		// 		new [] { navigationPlan.Position, navigationPlan.EndPosition },
-		// 		navigationPlan.Position,
-		// 		1,
-		// 		States.Calculating,
-		// 		navigationPlan.Threshold
-		// 	);
-		// }
-		//
 		public static NavigationPlan Navigating(
 			NavMeshPath path,
 			Interrupts interrupt = Interrupts.None,
