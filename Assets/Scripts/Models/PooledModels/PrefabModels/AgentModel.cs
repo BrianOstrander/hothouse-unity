@@ -20,6 +20,9 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] NavigationPlan navigationPlan = Models.NavigationPlan.Done();
 		[JsonIgnore] public ListenerProperty<NavigationPlan> NavigationPlan { get; }
+		
+		[JsonProperty] float reachRadius;
+		[JsonIgnore] public ListenerProperty<float> InteractionRadius { get; }
 
 		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
 		[JsonProperty] public AgentInventoryComponent Inventory { get; private set; } = new AgentInventoryComponent();
@@ -41,6 +44,7 @@ namespace Lunra.Hothouse.Models
 			NavigationVelocity = new ListenerProperty<float>(value => navigationVelocity = value, () => navigationVelocity);
 			NavigationForceDistanceMaximum = new ListenerProperty<float>(value => navigationForceDistanceMaximum = value, () => navigationForceDistanceMaximum);
 			NavigationPlan = new ListenerProperty<NavigationPlan>(value => navigationPlan = value, () => navigationPlan);
+			InteractionRadius = new ListenerProperty<float>(value => reachRadius = value, () => reachRadius);
 			
 			Inventories = new []
 			{

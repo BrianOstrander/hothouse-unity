@@ -68,8 +68,11 @@ namespace Lunra.Hothouse.Models
 				Mathf.Approximately(0f, currentNew)
 			);
 
-			Damaged(result);
-			currentListener.Value = currentNew;
+			if (!request.Type.HasFlag(Models.Damage.Types.Query))
+			{
+				Damaged(result);
+				currentListener.Value = currentNew;
+			}
 
 			return result;
 		}

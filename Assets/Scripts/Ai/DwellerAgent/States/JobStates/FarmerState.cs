@@ -162,7 +162,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				selectedPlot = SourceState.Workplace.Farm.Plots
 					.FirstOrDefault(
-						p => p.State == FarmPlot.States.ReadyToSow && p.AttendingFarmer.Id == Agent.Id.Value && Vector3.Distance(p.Position, Agent.Transform.Position.Value) < (p.Radius.Minimum + Agent.MeleeRange.Value)
+						p => p.State == FarmPlot.States.ReadyToSow && p.AttendingFarmer.Id == Agent.Id.Value && Vector3.Distance(p.Position, Agent.Transform.Position.Value) < (p.Radius.Minimum + Agent.InteractionRadius.Value)
 					);
 
 				if (selectedPlot == null)
@@ -261,7 +261,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				selectedPlot = SourceState.Workplace.Farm.Plots
 					.FirstOrDefault(
-						p => p.State == FarmPlot.States.Sown && p.AttendingFarmer.Id == Agent.Id.Value && Vector3.Distance(p.Position, Agent.Transform.Position.Value) < (p.Radius.Minimum + Agent.MeleeRange.Value)
+						p => p.State == FarmPlot.States.Sown && p.AttendingFarmer.Id == Agent.Id.Value && Vector3.Distance(p.Position, Agent.Transform.Position.Value) < (p.Radius.Minimum + Agent.InteractionRadius.Value)
 					);
 
 				if (selectedPlot == null)

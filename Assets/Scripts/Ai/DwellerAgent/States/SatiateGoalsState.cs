@@ -90,7 +90,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					return false;
 				}
 
-				if (destination.Enterable.Entrances.Value.None(e => e.State == Entrance.States.Available && Vector3.Distance(e.Position, Agent.Transform.Position.Value) < Agent.MeleeRange.Value))
+				if (destination.Enterable.Entrances.Value.None(e => e.State == Entrance.States.Available && Vector3.Distance(e.Position, Agent.Transform.Position.Value) < Agent.InteractionRadius.Value))
 				{
 					Debug.LogError("Destination found but no entrances available, this is unexpected");
 					return false;

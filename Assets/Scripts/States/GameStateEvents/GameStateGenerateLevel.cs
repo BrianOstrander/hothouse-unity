@@ -480,7 +480,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			var requiredJobs = new []
 			{
 				Jobs.Laborer,
-				Jobs.Laborer,
+				// Jobs.Laborer,
 				// Jobs.Laborer,
 				// Jobs.Laborer,
 				// Jobs.Laborer

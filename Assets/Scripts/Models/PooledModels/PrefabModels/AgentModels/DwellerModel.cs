@@ -18,16 +18,7 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
 		[JsonIgnore] public ListenerProperty<DayTimeFrame> JobShift { get; }
-		
-		[JsonProperty] float meleeRange;
-		[JsonIgnore] public ListenerProperty<float> MeleeRange { get; }
-		
-		[JsonProperty] float meleeCooldown;
-		[JsonIgnore] public ListenerProperty<float> MeleeCooldown { get; }
-		
-		[JsonProperty] float meleeDamage;
-		[JsonIgnore] public ListenerProperty<float> MeleeDamage { get; }
-		
+
 		[JsonProperty] float withdrawalCooldown;
 		[JsonIgnore] public ListenerProperty<float> WithdrawalCooldown { get; }
 		
@@ -64,9 +55,6 @@ namespace Lunra.Hothouse.Models
 			Name = new ListenerProperty<string>(value => name = value, () => name);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
-			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
-			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
-			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);
 			WithdrawalCooldown = new ListenerProperty<float>(value => withdrawalCooldown = value, () => withdrawalCooldown); 
 			DepositCooldown = new ListenerProperty<float>(value => depositCooldown = value, () => depositCooldown);
 			ObligationDistance = new ListenerProperty<float>(value => obligationDistance = value, () => obligationDistance);

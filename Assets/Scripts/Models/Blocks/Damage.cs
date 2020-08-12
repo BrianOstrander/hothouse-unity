@@ -11,8 +11,9 @@ namespace Lunra.Hothouse.Models
 		{
 			None = 0,
 			
-			GoalHurt = 1 << 0, // Motivation Damage
-			Generic = 1 << 1 // Miscellaneous
+			Query = 1 << 0, // Don't actually cause damage
+			GoalHurt = 1 << 1, // Motivation Damage
+			Generic = 1 << 2 // Miscellaneous
 		}
 		
 		public class Request
@@ -96,6 +97,23 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 
+		public static Result Simulate(
+			Types type,
+			float amount,
+			IHealthModel source,
+			IHealthModel target = null
+		)
+		{
+			type |= Types.Query;
+
+			return Apply(
+				type,
+				amount,
+				source,
+				target
+			);
+		}
+		
 		public static Result ApplyGeneric(
 			float amount,
 			IHealthModel source,

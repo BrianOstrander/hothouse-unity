@@ -145,9 +145,7 @@ namespace Lunra.Hothouse.Models
 			// model.JobShift.Value = DayTimeFrame.Maximum;
 			// model.JobShift.Value = DayTimeFrame.Zero;
 			
-			model.MeleeRange.Value = 0.75f;
-			model.MeleeCooldown.Value = 0.5f;
-			model.MeleeDamage.Value = 60f;
+			model.InteractionRadius.Value = 0.75f;
 
 			model.WithdrawalCooldown.Value = 0.5f;
 			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;

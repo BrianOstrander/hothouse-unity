@@ -36,7 +36,7 @@ namespace Lunra.Hothouse.Models
 			Model.Inventory.All.Changed -= OnParentInventory;
 			Model.Tags.All.Changed -= OnParentTags;
 		}
-		
+
 		#region GameModel Events
 		void OnGameSimulationUpdate()
 		{

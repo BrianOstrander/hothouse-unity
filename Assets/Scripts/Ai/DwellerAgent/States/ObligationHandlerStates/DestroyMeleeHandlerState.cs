@@ -39,14 +39,16 @@ namespace Lunra.Hothouse.Ai.Dweller
 				switch (SourceState.CurrentCache.TargetParent)
 				{
 					case IHealthModel healthModel:
-						var result = Damage.Apply(
-							Damage.Types.Generic,
-							Agent.MeleeDamage.Value,
-							Agent,
-							healthModel
-						);
+						
+						Debug.LogWarning("TODO DAMAGE HERE");
+						// var result = Damage.Apply(
+						// 	Damage.Types.Generic,
+						// 	Agent.MeleeDamage.Value,
+						// 	Agent,
+						// 	healthModel
+						// );
 
-						isTargetDestroyed = result.IsTargetDestroyed;
+						// isTargetDestroyed = result.IsTargetDestroyed;
 						break;
 					default:
 						Debug.LogError("Unrecognized target parent type: "+SourceState.CurrentCache.TargetParent.GetType());

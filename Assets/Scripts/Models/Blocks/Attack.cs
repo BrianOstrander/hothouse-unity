@@ -21,13 +21,6 @@ namespace Lunra.Hothouse.Models
 			WaitingForCooldown = 1 << 3,
 			WaitingForTags = 1 << 4
 		}
-		
-		public enum Types
-		{
-			Unknown = 0,
-			Melee = 10,
-			Ranged = 20
-		}
 
 		public enum OutputLocations
 		{
@@ -39,7 +32,7 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] public string Id { get; private set; }
 		[JsonProperty] public string Name { get; private set; }
-		[JsonProperty] public Types Type { get; private set; }
+		[JsonProperty] public float Range { get; private set; }
 		[JsonProperty] public float Damage { get; private set; }
 		[JsonProperty] public DayTime Duration { get; private set; }
 		[JsonProperty] public DayTime Cooldown { get; private set; }
@@ -57,7 +50,7 @@ namespace Lunra.Hothouse.Models
 		public Attack(
 			string id,
 			string name,
-			Types type,
+			float range,
 			float damage,
 			DayTime duration,
 			DayTime? cooldown = null,
@@ -69,7 +62,7 @@ namespace Lunra.Hothouse.Models
 		{
 			Id = id;
 			Name = name;
-			Type = type;
+			Range = range;
 			Damage = damage;
 			Duration = duration;
 			Cooldown = cooldown ?? DayTime.Zero;
@@ -114,6 +107,33 @@ namespace Lunra.Hothouse.Models
 					}
 				}
 			}
+		}
+
+		public bool TryGetEffectiveness(
+			GameModel game,
+			IAttackModel source,
+			IHealthModel target,
+			out float effectiveness 
+		)
+		{
+			effectiveness = float.MinValue;
+			
+			if (State != States.Available) return false; 
+			
+			var distance = source.DistanceTo(target);
+
+			if (Range < distance) return false;
+
+			var simulatedDamage = Models.Damage.Simulate(
+				DamageType,
+				Damage,
+				source,
+				target
+			);
+
+			effectiveness = simulatedDamage.AmountAbsorbed;
+			
+			return 0f < effectiveness;
 		}
 
 		public void Trigger(
