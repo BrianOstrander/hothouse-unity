@@ -518,6 +518,11 @@ namespace Lunra.Hothouse.Editor
 			{
 				appendResult(tagModel.Tags.ToString());
 			}
+			
+			if (model is IAttackModel attackModel)
+			{
+				appendResult(attackModel.Attacks.ToString());
+			}
 
 			append?.Invoke(appendResult);
 

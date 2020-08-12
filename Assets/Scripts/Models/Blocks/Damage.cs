@@ -6,15 +6,13 @@ namespace Lunra.Hothouse.Models
 {
 	public static class Damage
 	{
+		[Flags]
 		public enum Types
 		{
-			Unknown = 0,
+			None = 0,
 			
-			// Miscellaneous 
-			Generic = 10,
-			
-			// Motivation Damage
-			GoalHurt = 100,
+			GoalHurt = 1 << 0, // Motivation Damage
+			Generic = 1 << 1 // Miscellaneous
 		}
 		
 		public class Request

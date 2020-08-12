@@ -166,6 +166,8 @@ namespace Lunra.Hothouse.Models
 			model.Name.Value = game.DwellerNames.GetName(generator);
 			
 			model.ObligationPromises.Reset();
+			model.Tags.Reset();
+			model.Attacks.Reset();
 		}
 
 		public (Motives Motive, float InsistenceModifier)[] Velocities => new[]

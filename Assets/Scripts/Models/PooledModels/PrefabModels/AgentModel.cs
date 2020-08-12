@@ -1,5 +1,3 @@
-using System;
-using Lunra.Core;
 using Lunra.Hothouse.Ai;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
@@ -10,7 +8,8 @@ namespace Lunra.Hothouse.Models
 		IHealthModel,
 		IAgentInventoryModel,
 		IInventoryPromiseModel,
-		IObligationPromiseModel
+		IObligationPromiseModel,
+		ITagModel
 	{
 		#region Serialized
 		[JsonProperty] float navigationVelocity;
@@ -26,7 +25,8 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public AgentInventoryComponent Inventory { get; private set; } = new AgentInventoryComponent();
 		[JsonProperty] public InventoryPromiseComponent InventoryPromises { get; private set; } = new InventoryPromiseComponent();
 		[JsonProperty] public ObligationPromiseComponent ObligationPromises { get; private set; } = new ObligationPromiseComponent();
-		
+		[JsonProperty] public TagComponent Tags { get; private set; } = new TagComponent();
+
 		[JsonProperty] public bool IsDebugging { get; set; }
 		#endregion
 		
@@ -51,7 +51,8 @@ namespace Lunra.Hothouse.Models
 				Health,
 				Inventory,
 				InventoryPromises,
-				ObligationPromises
+				ObligationPromises,
+				Tags
 			);
 		}
 	}
