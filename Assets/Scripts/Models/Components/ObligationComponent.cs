@@ -201,16 +201,4 @@ namespace Lunra.Hothouse.Models
 			return result;
 		}
 	}
-
-	public static class ObligationGameModelExtensions
-	{
-		public static IEnumerable<IObligationModel> GetObligations(
-			this GameModel game
-		)
-		{
-			return game.Doors.AllActive
-				.Concat<IObligationModel>(game.GetClearables())
-				.Concat(game.Buildings.AllActive);
-		}
-	}
 }

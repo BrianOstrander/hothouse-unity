@@ -88,7 +88,7 @@ namespace Lunra.Hothouse.Models
 					.HasCapacityFor(result.GlobalInventory.Available.Value, result.GlobalItemDropsAvailable);
 			}
 
-			result.UniqueObligationsAvailable = game.GetObligations()
+			result.UniqueObligationsAvailable = game.Query<IObligationModel>()
 				.SelectMany(m => m.Obligations.All.Value.Available)
 				.Select(o => o.Type)
 				.Distinct()

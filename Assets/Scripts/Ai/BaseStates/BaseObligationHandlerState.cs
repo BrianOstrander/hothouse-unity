@@ -111,7 +111,7 @@ namespace Lunra.Hothouse.Ai
 				entries.Clear();
 				selection = default;
 
-				foreach (var obligationParent in Game.GetObligations())
+				foreach (var obligationParent in Game.Query<IObligationModel>())
 				{
 					if (!obligationParent.Enterable.AnyAvailable()) continue;
 					if (!obligationParent.Obligations.HasAny()) continue;
