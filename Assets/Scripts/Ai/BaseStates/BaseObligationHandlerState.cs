@@ -179,11 +179,32 @@ namespace Lunra.Hothouse.Ai
 			
 			public override bool IsTriggered() => SourceState.CurrentCache.IsNavigable;
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(
-				SourceState.CurrentCache.NavigationResult.Path,
-				NavigationPlan.Interrupts.RadiusThreshold,
-				Agent.InteractionRadius.Value
-			);
+			public override void Transition()
+			{
+				GetNavigationInterrupts(
+					out var interrupt,
+					out var radiusThreshold,
+					out var pathThreshold
+				);
+				
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+					SourceState.CurrentCache.NavigationResult.Path,
+					interrupt,
+					radiusThreshold,
+					pathThreshold
+				);
+			}
+
+			public virtual void GetNavigationInterrupts(
+				out NavigationPlan.Interrupts interrupt,
+				out float radiusThreshold,
+				out float pathThreshold
+			)
+			{
+				interrupt = NavigationPlan.Interrupts.RadiusThreshold;
+				radiusThreshold = Agent.InteractionRadius.Value;
+				pathThreshold = 0f;
+			}
 		}
 
 		protected class ToReturnOnTimeout : AgentTransition<S1, S0, GameModel, A>
@@ -208,15 +229,18 @@ namespace Lunra.Hothouse.Ai
 			{
 				if (!SourceState.CurrentCache.IsNavigable) return false;
 				if (SourceState.CurrentCache.NavigationRadiusMaximum < Vector3.Distance(Agent.Transform.Position.Value, SourceState.CurrentCache.NavigationResult.Target)) return false;
-
+				
 				return true;
 			}
 			
 			protected abstract bool CanPopObligation { get; }
+			protected bool HasPoppedObligation { get; private set; }
 			protected virtual DayTime TimeoutDuration => DayTime.FromHours(1f);
 
 			public override void Transition()
 			{
+				HasPoppedObligation = false;
+				
 				OnTimeoutBegin();
 				
 				SourceState.TimeoutInstance.ConfigureForInterval(
@@ -226,12 +250,7 @@ namespace Lunra.Hothouse.Ai
 						if (delta.IsDone)
 						{
 							OnTimeoutEnd();
-							if (CanPopObligation)
-							{
-								Agent.ObligationPromises.All.Pop();
-								SourceState.CurrentCache.Target.Trigger(SourceState.CurrentCache.CurrentObligation.Obligation, Agent);
-								Agent.ObligationPromises.Complete(SourceState.CurrentCache.CurrentObligation.Obligation);
-							}
+							TryPopObligation();
 						}
 						else OnTimeoutUpdate(delta.Progress);
 					}
@@ -243,6 +262,18 @@ namespace Lunra.Hothouse.Ai
 			protected virtual void OnTimeoutUpdate(float progress) { }
 
 			protected virtual void OnTimeoutEnd() { }
+
+			protected virtual bool TryPopObligation()
+			{
+				if (HasPoppedObligation) return true;
+				if (!CanPopObligation) return false;
+
+				Agent.ObligationPromises.All.Pop();
+				SourceState.CurrentCache.Target.Trigger(SourceState.CurrentCache.CurrentObligation.Obligation, Agent);
+				Agent.ObligationPromises.Complete(SourceState.CurrentCache.CurrentObligation.Obligation);
+
+				return HasPoppedObligation = true;
+			}
 		}
 		
 		#region Child States

@@ -194,7 +194,7 @@ namespace Lunra.Hothouse.Models
 								var begin = newPosition + (Vector3.up * 0.5f); 
 								var end = EndPosition + (Vector3.up * 0.5f);
 								
-								allInterruptsMatched = Physics.Raycast(
+								allInterruptsMatched = !Physics.Raycast(
 									begin,
 									(end - begin).normalized,
 									Vector3.Distance(begin, end),

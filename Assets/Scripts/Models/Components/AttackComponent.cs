@@ -21,6 +21,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
+		[JsonIgnore] public string LastAttackId { get; set; }
 		#endregion
 
 		public override void Bind()
@@ -122,7 +123,7 @@ namespace Lunra.Hothouse.Models
 
 			foreach (var attack in All)
 			{
-				result += "\n - " + attack;
+				result += $"\n {((attack.State.HasFlag(Attack.States.WaitingForCooldown) && attack.Id == LastAttackId) ? " > " : " - ")} {attack}";
 			}
 			
 			return result;

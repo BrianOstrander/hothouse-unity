@@ -51,16 +51,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] float simulationMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> SimulationMultiplier { get; }
 
-		[JsonProperty] float simulationTimeConversion = 1f;
-		/// <summary>
-		/// Multiply by this by real seconds to get DayTime passed, or DayTime divided by this gets real seconds that
-		/// DayTime represents. 
-		/// </summary>
-		/// <remarks>
-		/// Once set, this probably shouldn't be messed with...
-		/// </remarks>
-		[JsonIgnore] public ListenerProperty<float> SimulationTimeConversion { get; }
-		
 		[JsonProperty] DayTime simulationTime = DayTime.Zero;
 		readonly ListenerProperty<DayTime> simulationTimeListener;
 		[JsonIgnore] public ReadonlyProperty<DayTime> SimulationTime { get; }
@@ -118,8 +108,7 @@ namespace Lunra.Hothouse.Models
 					if (!Mathf.Approximately(0f, value)) lastNonZeroSimulationMultiplierListener.Value = value;
 				}
 			);
-
-			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
+			
 			SimulationTime = new ReadonlyProperty<DayTime>(
 				value => simulationTime = value,
 				() => simulationTime,
@@ -154,7 +143,7 @@ namespace Lunra.Hothouse.Models
 
 		public void StepSimulation(float deltaTime)
 		{
-			SimulationTimeDelta = deltaTime * SimulationTimeConversion.Value;
+			SimulationTimeDelta = deltaTime * DayTime.RealTimeToSimulationTime;
 			simulationTimeListener.Value += new DayTime(SimulationTimeDelta);
 			
 			SimulationPlaytimeElapsed.Value += TimeSpan.FromSeconds(deltaTime);

@@ -103,7 +103,6 @@ namespace Lunra.Hothouse.Services
 			game.LevelGeneration.Seed.Value = DemonUtility.NextInteger;
 			
 			game.DesireDamageMultiplier.Value = 1f;
-			game.SimulationTimeConversion.Value = 1f / 120f; // 1f / [ REAL SECONDS PER DAY HERE ]
 			
 			game.Effects.IsEnabled.Value = true;
 			game.Toolbar.IsEnabled.Value = true;

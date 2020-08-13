@@ -27,21 +27,17 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToReturnOnMissingObligation(),
 				new ToReturnOnTimeout(),
 				
-				new ToTimeoutOnAttackTarget(),
+				new ToTimeoutOnDestroyTarget(),
 				
-				new ToNavigateToTarget()
+				new ToNavigateToDestroyTarget()
 			);
 		}
 
 		public override void Begin()
 		{
-			selectedAttack = null;
-			
 			base.Begin();
-
-			if (CurrentCache.IsTargetNull) return;
 			
-			
+			if (CurrentCache.IsTargetNull) selectedAttack = null;
 		}
 
 		protected override float CalculateInteractionRadius(IObligationModel targetParent, Navigation.Result navigationResult)
@@ -56,7 +52,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			var attackFound = Agent.Attacks.TryGetMostEffective(
 				targetHealthParent,
-				out var attack,
+				out selectedAttack,
 				new FloatRange(
 					Vector3.Distance(targetParent.Transform.Position.Value, navigationResult.Target),
 					targetDistance
@@ -70,28 +66,28 @@ namespace Lunra.Hothouse.Ai.Dweller
 				return base.CalculateInteractionRadius(targetParent, navigationResult);
 			}
 
-			return Mathf.Min(targetDistance, attack.Range.Maximum);
+			return selectedAttack.Range.Maximum;
 		}
 
-		class ToTimeoutOnAttackTarget : ToTimeoutOnTarget
+		class ToTimeoutOnDestroyTarget : ToTimeoutOnTarget
 		{
 			bool isTargetDestroyed;
-			
-			protected override void OnTimeoutEnd()
+
+			protected override DayTime TimeoutDuration => SourceState.selectedAttack.Duration;
+
+			public override bool IsTriggered()
+			{
+				if (!base.IsTriggered()) return false;
+				return SourceState.selectedAttack != null;
+			}
+
+			protected override void OnTimeoutBegin()
 			{
 				switch (SourceState.CurrentCache.TargetParent)
 				{
 					case IHealthModel healthModel:
-						
-						Debug.LogWarning("TODO DAMAGE HERE");
-						// var result = Damage.Apply(
-						// 	Damage.Types.Generic,
-						// 	Agent.MeleeDamage.Value,
-						// 	Agent,
-						// 	healthModel
-						// );
-
-						// isTargetDestroyed = result.IsTargetDestroyed;
+						isTargetDestroyed = SourceState.selectedAttack.Trigger(Game, Agent, healthModel).IsTargetDestroyed;
+						TryPopObligation();
 						break;
 					default:
 						Debug.LogError("Unrecognized target parent type: "+SourceState.CurrentCache.TargetParent.GetType());
@@ -101,6 +97,27 @@ namespace Lunra.Hothouse.Ai.Dweller
 			}
 
 			protected override bool CanPopObligation => isTargetDestroyed;
+		}
+
+		class ToNavigateToDestroyTarget : ToNavigateToTarget
+		{
+			public override void GetNavigationInterrupts(
+				out NavigationPlan.Interrupts interrupt,
+				out float radiusThreshold,
+				out float pathThreshold
+			)
+			{
+				if (SourceState.selectedAttack == null)
+				{
+					Debug.LogError("Tried to navigate but no attack has been selected");
+					base.GetNavigationInterrupts(out interrupt, out radiusThreshold, out pathThreshold);
+					return;
+				}
+
+				interrupt = NavigationPlan.Interrupts.LineOfSight | NavigationPlan.Interrupts.RadiusThreshold;
+				radiusThreshold = SourceState.selectedAttack.Range.Maximum;
+				pathThreshold = 0f;
+			}
 		}
 	}
 }

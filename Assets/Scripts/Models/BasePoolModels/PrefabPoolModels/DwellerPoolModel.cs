@@ -170,11 +170,10 @@ namespace Lunra.Hothouse.Models
 				new Attack(
 					App.M.CreateUniqueId(),
 					"melee_generic",
-					// new FloatRange(0f, model.InteractionRadius.Value),
-					new FloatRange(0f, 4f),
-					1f,
-					DayTime.FromMinutes(1)
-				)	
+					new FloatRange(0f, model.InteractionRadius.Value),
+					5f,
+					DayTime.FromRealSeconds(2f)
+				)
 			);
 		}
 

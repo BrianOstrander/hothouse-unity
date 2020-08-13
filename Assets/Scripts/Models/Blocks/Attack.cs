@@ -142,7 +142,7 @@ namespace Lunra.Hothouse.Models
 			return 0f < effectiveness;
 		}
 
-		public void Trigger(
+		public Damage.Result Trigger(
 			GameModel game,
 			IAttackModel source,
 			IHealthModel target
@@ -179,14 +179,18 @@ namespace Lunra.Hothouse.Models
 				}
 			}
 
-			Models.Damage.Apply(
+			var result = Models.Damage.Apply(
 				DamageType,
 				Damage,
 				source,
 				target
 			);
 
+			source.Attacks.LastAttackId = Id;
+			
 			Update(game, source);
+			
+			return result;
 		}
 
 		public override string ToString()
