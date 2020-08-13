@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -145,6 +146,10 @@ namespace Lunra.Hothouse.Models
 		public M FirstOrDefaultActive() => AllActive.FirstOrDefault();
 		public M FirstOrDefaultActive(string id) => FirstOrDefaultActive(m => m.Id.Value == id);
 		public M FirstOrDefaultActive(Func<M, bool> predicate) => AllActive.FirstOrDefault(predicate);
+		#endregion
+		
+		#region Utility
+		[JsonIgnore] public (Type ModelType, Func<IEnumerable<IPooledModel>> GetModels) PoolQuery => (typeof(M), () => AllActive);
 		#endregion
 	}
 }
