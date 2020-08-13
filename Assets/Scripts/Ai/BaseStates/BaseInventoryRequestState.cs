@@ -245,7 +245,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				var results = new List<Navigation.Query>();
 				
-				foreach (var model in Game.GetInventoryParents())
+				foreach (var model in Game.Query.All<IBaseInventoryModel>())
 				{
 					if (!(parentValidation?.Invoke(model) ?? true)) continue; 
 						

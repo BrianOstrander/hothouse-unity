@@ -84,7 +84,7 @@ namespace Lunra.Hothouse.Models
 		bool isSimulating;
 		[JsonIgnore] public bool IsSimulating => !Mathf.Approximately(0f, SimulationMultiplier.Value);
 		
-		(Type ModelType, Func<IEnumerable<IPooledModel>> GetModels)[] poolQueries;
+		[JsonIgnore] public QueryModel Query { get; }
 		#endregion
 		
 		#region Events
@@ -127,8 +127,7 @@ namespace Lunra.Hothouse.Models
 				out cacheListener
 			);
 
-			poolQueries = new []
-			{
+			Query = new QueryModel(
 				ItemDrops.PoolQuery,
 				Rooms.PoolQuery,
 				Doors.PoolQuery,
@@ -138,8 +137,8 @@ namespace Lunra.Hothouse.Models
 				Flora.PoolQuery,
 				Seekers.PoolQuery,
 				Decorations.PoolQuery,
-				Generators.PoolQuery
-			};
+				Generators.PoolQuery	
+			);
 		}
 
 		public void TriggerSimulationInitialize()
@@ -228,15 +227,6 @@ namespace Lunra.Hothouse.Models
 				);
 			}
 			return result;
-		}
-
-		public IEnumerable<T> Query<T>()
-			where T : IParentComponentModel
-		{
-			return poolQueries
-				.Where(p => typeof(T).IsAssignableFrom(p.ModelType))
-				.SelectMany(p => p.GetModels())
-				.Cast<T>();
 		}
 	}
 }

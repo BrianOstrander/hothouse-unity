@@ -70,7 +70,7 @@ namespace Lunra.Hothouse.Ai
 				var anyDeliveries = false;
 				var anyDistributions = false;
 				
-				foreach (var parent in Game.GetInventoryParents())
+				foreach (var parent in Game.Query.All<IBaseInventoryModel>())
 				{
 					switch (parent)
 					{
