@@ -11,7 +11,7 @@ namespace Lunra.Hothouse.Models
 		{
 			None = 0,
 			
-			Query = 1 << 0, // Don't actually cause damage
+			Simulated = 1 << 0, // Don't actually cause damage
 			GoalHurt = 1 << 1, // Motivation Damage
 			Generic = 1 << 2 // Miscellaneous
 		}
@@ -104,7 +104,7 @@ namespace Lunra.Hothouse.Models
 			IHealthModel target = null
 		)
 		{
-			type |= Types.Query;
+			type |= Types.Simulated;
 
 			return Apply(
 				type,

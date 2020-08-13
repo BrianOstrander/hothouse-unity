@@ -68,7 +68,7 @@ namespace Lunra.Hothouse.Models
 				Mathf.Approximately(0f, currentNew)
 			);
 
-			if (!request.Type.HasFlag(Models.Damage.Types.Query))
+			if (!request.Type.HasFlag(Models.Damage.Types.Simulated))
 			{
 				Damaged(result);
 				currentListener.Value = currentNew;
