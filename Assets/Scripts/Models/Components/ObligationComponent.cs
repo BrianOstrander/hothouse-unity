@@ -36,6 +36,8 @@ namespace Lunra.Hothouse.Models
 				Forbidden = forbidden;
 			}
 		}
+
+		public delegate void ObligationComplete(Obligation obligation, IModel source);
 		
 		#region Serialized
 		[JsonProperty] State all = new State();
@@ -43,7 +45,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region Non Serialized
-		Dictionary<string, List<Action<Obligation, IModel>>> bindings = new Dictionary<string, List<Action<Obligation, IModel>>>();
+		Dictionary<string, List<ObligationComplete>> bindings = new Dictionary<string, List<ObligationComplete>>();
 		#endregion
 
 		public ObligationComponent()
@@ -128,7 +130,7 @@ namespace Lunra.Hothouse.Models
 
 			if (!bindings.TryGetValue(obligation.Type, out var callbacks))
 			{
-				Debug.LogError("No listeners are bound to obligation type: "+obligation.Type);
+				// Debug.LogError("No listeners are bound to obligation type: "+obligation.Type);
 				return false;
 			}
 
@@ -143,35 +145,35 @@ namespace Lunra.Hothouse.Models
 		}
 
 		#region Binding
-		public void Bind(
+		public void AddCallback(
 			Obligation obligation,
-			Action<Obligation, IModel> callback
+			ObligationComplete callback
 		)
 		{
 			if (!bindings.TryGetValue(obligation.Type, out var callbacks))
 			{
 				bindings.Add(
 					obligation.Type,
-					callbacks = new List<Action<Obligation, IModel>>()
+					callbacks = new List<ObligationComplete>()
 				);
 			}
 			
 			callbacks.Add(callback);
 		}
 		
-		public void UnBind(
+		public void RemoveCallback(
 			Obligation obligation,
-			Action<Obligation, IModel> callback
+			ObligationComplete callback
 		)
 		{
 			if (!bindings.TryGetValue(obligation.Type, out var callbacks)) return;
 
 			callbacks.Remove(callback);
 		}
+
+		public void ClearCallbacks() => bindings.Clear();
 		
-		public void UnBindAll() => bindings.Clear();
-		
-		public void UnBindAll(string type)
+		public void ClearCallbacks(string type)
 		{
 			if (!bindings.TryGetValue(type, out var callbacks)) return;
 			callbacks.Clear();
@@ -181,7 +183,7 @@ namespace Lunra.Hothouse.Models
 		public void Reset()
 		{
 			Id.Value = App.M.CreateUniqueId();
-			UnBindAll();
+			ClearCallbacks();
 			All.Value = new State();
 		}
 

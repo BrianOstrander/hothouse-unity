@@ -1,3 +1,4 @@
+using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -20,9 +21,12 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] float meleeRangeBonus;
 		[JsonIgnore] public ListenerProperty<float> MeleeRangeBonus { get; }
+		
+		[JsonProperty] Obligation markedObligation;
+		[JsonIgnore] public ListenerProperty<Obligation> MarkedObligation { get; }
 		#endregion
 		
-		#region NonSerialized 
+		#region NonSerialized
 		#endregion
 		
 		public ClearableComponent()
@@ -30,12 +34,17 @@ namespace Lunra.Hothouse.Models
 			State = new ListenerProperty<ClearableStates>(value => state = value, () => state);
 			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
 			MeleeRangeBonus = new ListenerProperty<float>(value => meleeRangeBonus = value, () => meleeRangeBonus);
+			MarkedObligation = new ListenerProperty<Obligation>(value => markedObligation = value, () => markedObligation);
 		}
 
-		public void Reset(Inventory itemDrops)
+		public void Reset(
+			Inventory itemDrops,
+			Obligation markedObligation = null
+		)
 		{
 			State.Value = ClearableStates.NotMarked;
 			ItemDrops.Value = itemDrops;
+			MarkedObligation.Value = markedObligation ?? ObligationCategories.Destroy.Generic;
 		}
 
 		public override void Bind()
@@ -53,7 +62,6 @@ namespace Lunra.Hothouse.Models
 		{
 			if (interaction.State == Interaction.States.OutOfRange) return;
 			if (State.Value == ClearableStates.Marked) return;
-			// if (Model.Obligations.HasAny(ObligationCategories.Destroy.Melee)) return;
 			
 			var radiusContains = interaction.Value.RadiusContains(Model.Transform.Position.Value);
 
@@ -67,12 +75,9 @@ namespace Lunra.Hothouse.Models
 					break;
 				case Interaction.States.End:
 					State.Value = radiusContains ? ClearableStates.Marked : ClearableStates.NotMarked;
-					// if (radiusContains) Model.Obligations.Add(ObligationCategories.Destroy.Melee);
-					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
 					break;
 				case Interaction.States.Cancel:
 					State.Value = ClearableStates.NotMarked;
-					// Model.Clearable.SelectionState.Value = SelectionStates.NotSelected;
 					break;
 				default:
 					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);

@@ -16,10 +16,6 @@ namespace Lunra.Hothouse.Presenters
 			Model.Clearable.MeleeRangeBonus.Value = View.MeleeRangeBonus;
 			
 			Model.Obligations.All.Changed += OnObligationAll;
-			Model.Obligations.Bind(
-				ObligationCategories.Destroy.Generic,
-				OnObligationDestroyMelee
-			);
 			Model.Health.Current.Changed += OnClearableHealthCurrent;
 			Model.Clearable.State.Changed += OnClearableState;
 			
@@ -29,10 +25,6 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Model.Obligations.All.Changed -= OnObligationAll;
-			Model.Obligations.UnBind(
-				ObligationCategories.Destroy.Generic,
-				OnObligationDestroyMelee
-			);
 			Model.Health.Current.Changed -= OnClearableHealthCurrent;
 			Model.Clearable.State.Changed -= OnClearableState;
 			
@@ -100,10 +92,6 @@ namespace Lunra.Hothouse.Presenters
 					break;
 			}
 		}
-		#endregion
-		
-		#region Miscellanious Model Events
-		protected virtual void OnObligationDestroyMelee(Obligation obligation, IModel source) { }
 		#endregion
 		
 		#region Utility
