@@ -244,7 +244,7 @@ namespace Lunra.Hothouse.Services
 					);	
 			}
 			
-			var allLights = Payload.Game.GetLightsActive()
+			var allLights = Payload.Game.Query.All<ILightModel>(m => m.Light.IsLightActive())
 				.Where(light => rooms.Any(room => room.RoomTransform.Id.Value == light.RoomTransform.Id.Value))
 				.ToList();
 			
@@ -280,14 +280,15 @@ namespace Lunra.Hothouse.Services
 			
 			result.OperatingMaximum = OnCalculateMaximumLighting(
 				request.Position,
-				Payload.Game.GetLightsActive().Where(isLightNotExceptedAndInRoom)
+				Payload.Game.Query.All<ILightModel>(m => m.Light.IsLightActive() && isLightNotExceptedAndInRoom(m))
 			);
 
 			result.ConstructingMaximum = OnCalculateMaximumLighting(
 				request.Position,
-				Payload.Game.GetLights(
+				Payload.Game.Query.All<ILightModel>(
 					l =>
 					{
+						if (!l.Light.IsLight.Value) return false;
 						if (l.Light.IsLightActive()) return false;
 						
 						switch (l.Light.LightState.Value)

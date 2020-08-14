@@ -57,7 +57,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (!game.IsSimulating) return;
 			if (lightUpdate.State != LightDelta.States.Calculated) return;
-			if (game.GetLightsActive().Any(l => l.Light.IsLightActive())) return;
+			if (game.Query.Any<ILightModel>(m => m.Light.IsLightActive())) return;
 
 			game.GameResult.Value = new GameResult(
 				GameResult.States.Displaying,

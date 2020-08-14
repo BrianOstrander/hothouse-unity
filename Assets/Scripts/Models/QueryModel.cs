@@ -35,7 +35,7 @@ namespace Lunra.Hothouse.Models
 		{
 			return All<M>().Where(predicate);
 		}
-
+		
 		public M FirstOrDefault<M>()
 			where M : IModel
 		{
@@ -75,6 +75,18 @@ namespace Lunra.Hothouse.Models
 			where M : IModel
 		{
 			return FirstOrDefault<M>(m => m.Id.Value == id);
+		}
+		
+		public bool Any<M>()
+			where M : IModel
+		{
+			return FirstOrDefault<M>() != null;
+		}
+		
+		public bool Any<M>(Func<M, bool> predicate)
+			where M : IModel
+		{
+			return FirstOrDefault(predicate) != null;
 		}
 	}
 }

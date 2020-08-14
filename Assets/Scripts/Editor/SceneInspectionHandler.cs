@@ -82,7 +82,7 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
 					var yOffset = 0.01f;
-					foreach (var model in gameState.Payload.Game.GetLightsActive().Where(l => l.Light.IsLightActive()))
+					foreach (var model in gameState.Payload.Game.Query.All<ILightModel>(l => l.Light.IsLightActive()))
 					{
 						Handles.DrawSolidDisc(
 							model.Transform.Position.Value + new Vector3(0f, yOffset, 0f),
