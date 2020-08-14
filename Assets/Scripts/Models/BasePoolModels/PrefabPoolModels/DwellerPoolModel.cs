@@ -139,6 +139,7 @@ namespace Lunra.Hothouse.Models
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(100f);
 			model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
+			model.InteractionRadius.Value = 0.75f;
 			
 			// Dweller Properties
 			model.Job.Value = Jobs.None;
@@ -146,7 +147,6 @@ namespace Lunra.Hothouse.Models
 			// model.JobShift.Value = DayTimeFrame.Maximum;
 			// model.JobShift.Value = DayTimeFrame.Zero;
 			
-			model.InteractionRadius.Value = 0.75f;
 
 			model.WithdrawalCooldown.Value = 0.5f;
 			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;
