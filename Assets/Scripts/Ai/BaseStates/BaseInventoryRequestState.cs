@@ -98,7 +98,9 @@ namespace Lunra.Hothouse.Ai
 
 				if (!cache.IsTargetNull)
 				{
-					cache.TargetParent = Game.GetInventoryParent(cache.Target.Id.Value);
+					cache.TargetParent = Game.Query.FirstOrDefault<IBaseInventoryModel>(
+						m => m.Inventories.Any(i => i.Id.Value == cache.Target.Id.Value)
+					);
 
 					switch (cache.TargetParent)
 					{

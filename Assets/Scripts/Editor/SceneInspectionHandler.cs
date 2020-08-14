@@ -95,7 +95,7 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.EndDepthCheck();
 
 				var lightSensitiveOffset = Vector3.up * 4f;
-				foreach (var model in gameState.Payload.Game.GetLightSensitives().Where(isInInspectedRoom))
+				foreach (var model in gameState.Payload.Game.Query.All<ILightSensitiveModel>().Where(isInInspectedRoom))
 				{
 					Debug.DrawLine(
 						model.Transform.Position.Value + lightSensitiveOffset,

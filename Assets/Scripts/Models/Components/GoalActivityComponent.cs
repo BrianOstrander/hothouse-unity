@@ -288,14 +288,4 @@ namespace Lunra.Hothouse.Models
 			return result;
 		}
 	}
-	
-	public static class GoalActivityGameModelExtensions
-	{
-		public static IEnumerable<IGoalActivityModel> GetActivities(
-			this GameModel game	
-		)
-		{
-			return game.Buildings.AllActive;
-		}
-	}
 }

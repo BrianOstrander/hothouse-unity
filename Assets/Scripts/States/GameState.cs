@@ -226,12 +226,12 @@ namespace Lunra.Hothouse.Services
 
 			if (Payload.Game.LastLightUpdate.Value.RoomIds.None() && Payload.Game.LastLightUpdate.Value.SensitiveIds.Any())
 			{
-				lightSensitives = Payload.Game.GetLightSensitives()
+				lightSensitives = Payload.Game.Query.All<ILightSensitiveModel>()
 					.Where(lightSensitive => Payload.Game.LastLightUpdate.Value.SensitiveIds.Contains(lightSensitive.Id.Value));
 			}
 			else
 			{
-				lightSensitives = Payload.Game.GetLightSensitives()
+				lightSensitives = Payload.Game.Query.All<ILightSensitiveModel>()
 					.Where(
 						lightSensitive => rooms.Any(
 							r =>

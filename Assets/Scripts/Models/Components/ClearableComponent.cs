@@ -29,15 +29,4 @@ namespace Lunra.Hothouse.Models
 			MeleeRangeBonus = new ListenerProperty<float>(value => meleeRangeBonus = value, () => meleeRangeBonus);
 		}
 	}
-
-	public static class ClearableGameModelExtensions
-	{
-		public static IEnumerable<IClearableModel> GetClearables(
-			this GameModel game	
-		)
-		{
-			return game.Debris.AllActive
-				.Concat<IClearableModel>(game.Flora.AllActive);
-		}
-	}
 }

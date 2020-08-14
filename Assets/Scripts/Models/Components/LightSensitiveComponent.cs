@@ -39,19 +39,4 @@ namespace Lunra.Hothouse.Models
 			return "Light Level: " + LightLevel.Value.ToString("N2");
 		}
 	}
-	
-	public static class LightSensitiveGameModelExtensions
-	{
-		public static IEnumerable<ILightSensitiveModel> GetLightSensitives(
-			this GameModel game	
-		)
-		{
-			return game
-				.Buildings.AllActive
-				.Concat<ILightSensitiveModel>(game.ItemDrops.AllActive)
-				.Concat(game.Doors.AllActive)
-				.Concat(game.Generators.AllActive)
-				.Concat(game.GetClearables());
-		}
-	}
 }

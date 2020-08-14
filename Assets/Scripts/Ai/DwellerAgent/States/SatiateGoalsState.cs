@@ -138,7 +138,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				var minimumDiscontent = float.MaxValue;
 				
-				foreach (var activityParent in Game.GetActivities())
+				foreach (var activityParent in Game.Query.All<IGoalActivityModel>())
 				{
 					if (!activityParent.Enterable.AnyAvailable()) continue;
 

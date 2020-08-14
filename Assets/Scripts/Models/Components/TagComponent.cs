@@ -149,14 +149,4 @@ namespace Lunra.Hothouse.Models
 			return result;
 		}
 	}
-
-	public static class TagGameModelExtensions
-	{
-		public static IEnumerable<ITagModel> GetTags(
-			this GameModel game	
-		)
-		{
-			return game.Flora.AllActive;
-		}
-	}
 }

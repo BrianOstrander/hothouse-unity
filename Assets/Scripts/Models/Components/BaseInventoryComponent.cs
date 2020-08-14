@@ -66,18 +66,7 @@ namespace Lunra.Hothouse.Models
 	
 	public static class BaseInventoryGameModelExtensions
 	{
-		public static IBaseInventoryModel GetInventoryParent(
-			this GameModel game,
-			string inventoryId
-		)
-		{
-			return game
-				.Query.All<IBaseInventoryModel>()
-				.FirstOrDefault(
-					m => m.Inventories.Any(i => i.Id.Value == inventoryId)
-				);
-		}
-		
+		// TODO: I think query or something should handle this...
 		public static IEnumerable<IBaseInventoryComponent> GetInventories(
 			this GameModel game
 		)
