@@ -1,4 +1,3 @@
-using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -24,6 +23,8 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] Obligation markedObligation;
 		[JsonIgnore] public ListenerProperty<Obligation> MarkedObligation { get; }
+		[JsonProperty] int maximumClearers;
+		[JsonIgnore] public ListenerProperty<int> MaximumClearers { get; }
 		#endregion
 		
 		#region NonSerialized
@@ -35,29 +36,53 @@ namespace Lunra.Hothouse.Models
 			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
 			MeleeRangeBonus = new ListenerProperty<float>(value => meleeRangeBonus = value, () => meleeRangeBonus);
 			MarkedObligation = new ListenerProperty<Obligation>(value => markedObligation = value, () => markedObligation);
+			MaximumClearers = new ListenerProperty<int>(value => maximumClearers = value, () => maximumClearers);
 		}
 
 		public void Reset(
 			Inventory itemDrops,
-			Obligation markedObligation = null
+			Obligation markedObligation = null,
+			int maximumClearers = 1
 		)
 		{
 			State.Value = ClearableStates.NotMarked;
 			ItemDrops.Value = itemDrops;
 			MarkedObligation.Value = markedObligation ?? ObligationCategories.Destroy.Generic;
+			MaximumClearers.Value = maximumClearers;
 		}
 
 		public override void Bind()
 		{
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
+			Model.Health.Current.Changed += OnHealthCurrent;
+			State.Changed += OnState;
 		}
 
 		public override void UnBind()
 		{
 			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
+			Model.Health.Current.Changed -= OnHealthCurrent;
+			State.Changed -= OnState;
 		}
 
 		#region Events
+		void OnState(ClearableStates state)
+		{
+			switch (state)
+			{
+				case ClearableStates.NotMarked:
+					break;
+				case ClearableStates.Highlighted:
+					break;
+				case ClearableStates.Marked:
+					for (var i = 0; i < MaximumClearers.Value; i++) Model.Obligations.Add(MarkedObligation.Value);
+					break;
+				default:
+					Debug.LogError("Unrecognized state: " + state);
+					break;
+			}
+		}
+		
 		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)
 		{
 			if (interaction.State == Interaction.States.OutOfRange) return;
@@ -82,6 +107,21 @@ namespace Lunra.Hothouse.Models
 				default:
 					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
 					break;
+			}
+		}
+
+		void OnHealthCurrent(float health)
+		{
+			if (!Mathf.Approximately(0f, health)) return;
+
+			if (!Model.Clearable.ItemDrops.Value.IsEmpty)
+			{
+				Game.ItemDrops.Activate(
+					Model.RoomTransform.Id.Value,
+					Model.Transform.Position.Value,
+					Quaternion.identity,
+					ItemDrops.Value
+				);
 			}
 		}
 		#endregion

@@ -26,7 +26,6 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
-			Model.Health.Current.Changed += OnAgentHealthCurrent;
 			Model.Health.Damaged += OnAgentHealthDamaged;
 			Model.ObligationPromises.Complete += OnAgentObligationComplete;
 			
@@ -38,7 +37,6 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
-			Model.Health.Current.Changed -= OnAgentHealthCurrent;
 			Model.Health.Damaged -= OnAgentHealthDamaged;
 			Model.ObligationPromises.Complete -= OnAgentObligationComplete;
 			
@@ -91,10 +89,20 @@ namespace Lunra.Hothouse.Presenters
 			base.OnPooledState(pooledState);
 		}
 
-		protected virtual void OnAgentHealthCurrent(float health)
+		public virtual void OnAgentHealthDamaged(Damage.Result result)
 		{
-			if (!Mathf.Approximately(0f, health)) return;
-
+			if (!result.IsTargetDestroyed) return;
+			
+			if (!string.IsNullOrEmpty(View.DeathEffectId))
+			{
+				Game.Effects.Queued.Enqueue(
+					new EffectsModel.Request(
+						Model.Transform.Position.Value,
+						View.DeathEffectId
+					)
+				);
+			}
+			
 			if (!Model.Inventory.All.Value.IsEmpty)
 			{
 				Game.ItemDrops.Activate(
@@ -108,24 +116,6 @@ namespace Lunra.Hothouse.Presenters
 			Model.InventoryPromises.BreakAllPromises();
 			
 			Model.ObligationPromises.BreakAllPromises();
-			
-			Model.PooledState.Value = PooledStates.InActive;
-		}
-
-		public virtual void OnAgentHealthDamaged(Damage.Result result)
-		{
-			if (result.IsTargetDestroyed)
-			{
-				if (!string.IsNullOrEmpty(View.DeathEffectId))
-				{
-					Game.Effects.Queued.Enqueue(
-						new EffectsModel.Request(
-							Model.Transform.Position.Value,
-							View.DeathEffectId
-						)
-					);
-				}
-			}
 		}
 
 		public virtual void OnAgentObligationComplete(Obligation obligation) { }

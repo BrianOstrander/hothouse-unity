@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IHealthModel : IRoomTransformModel
+	public interface IHealthModel : IRoomTransformModel, IPooledModel
 	{
 		HealthComponent Health { get; }
 	}
@@ -39,6 +39,16 @@ namespace Lunra.Hothouse.Models
 			);
 			
 			Maximum = new ListenerProperty<float>(value => maximum = value, () => maximum);
+		}
+
+		public override void Bind()
+		{
+			Damaged += OnDamaged;
+		}
+
+		public override void UnBind()
+		{
+			Damaged -= OnDamaged;
 		}
 
 		public void ResetToMaximum(float? newMaximum = null)
@@ -79,6 +89,13 @@ namespace Lunra.Hothouse.Models
 
 		public void Heal(float amount) => currentListener.Value = Mathf.Min(Current.Value + amount, Maximum.Value);
 
+		#region Events
+		void OnDamaged(Damage.Result result)
+		{
+			if (result.IsTargetDestroyed) Model.PooledState.Value = PooledStates.InActive;
+		}
+		#endregion
+		
 		public override string ToString()
 		{
 			var result = "Health: " + Current.Value + " / " + Maximum.Value;

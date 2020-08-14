@@ -16,8 +16,6 @@ namespace Lunra.Hothouse.Presenters
 			Model.Clearable.MeleeRangeBonus.Value = View.MeleeRangeBonus;
 			
 			Model.Obligations.All.Changed += OnObligationAll;
-			Model.Health.Current.Changed += OnClearableHealthCurrent;
-			Model.Clearable.State.Changed += OnClearableState;
 			
 			base.Bind();
 		}
@@ -25,9 +23,7 @@ namespace Lunra.Hothouse.Presenters
 		protected override void UnBind()
 		{
 			Model.Obligations.All.Changed -= OnObligationAll;
-			Model.Health.Current.Changed -= OnClearableHealthCurrent;
-			Model.Clearable.State.Changed -= OnClearableState;
-			
+
 			base.UnBind();
 		}
 
@@ -56,44 +52,8 @@ namespace Lunra.Hothouse.Presenters
 				View.Deselect();
 			}
 		}
-
-		void OnClearableHealthCurrent(float health)
-		{
-			if (!Mathf.Approximately(0f, health)) return;
-
-			if (!Model.Clearable.ItemDrops.Value.IsEmpty)
-			{
-				Game.ItemDrops.Activate(
-					Model.RoomTransform.Id.Value,
-					Model.Transform.Position.Value,
-					Quaternion.identity,
-					CalculateItemDrops()
-				);
-			}
-
-			Model.PooledState.Value = PooledStates.InActive;
-		}
 		#endregion
 
-		#region ClearableComponent Events
-		void OnClearableState(ClearableStates state)
-		{
-			switch (state)
-			{
-				case ClearableStates.NotMarked:
-					break;
-				case ClearableStates.Highlighted:
-					break;
-				case ClearableStates.Marked:
-					Model.Obligations.Add(ObligationCategories.Destroy.Generic);
-					break;
-				default:
-					Debug.LogError("Unrecognized state: " + state);
-					break;
-			}
-		}
-		#endregion
-		
 		#region Utility
 		protected override bool QueueNavigationCalculation => 0 < Model.Clearable.MeleeRangeBonus.Value;
 		#endregion

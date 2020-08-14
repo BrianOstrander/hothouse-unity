@@ -171,6 +171,8 @@ namespace Lunra.Hothouse.Ai
 		protected class ToReturnOnMissingObligation : AgentTransition<S1, S0, GameModel, A>
 		{
 			public override bool IsTriggered() => SourceState.CurrentCache.IsTargetNull;
+
+			public override void Transition() => Agent.ObligationPromises.BreakPromise();
 		}
 		
 		protected class ToNavigateToTarget : AgentTransition<S1, NavigateState, GameModel, A>
