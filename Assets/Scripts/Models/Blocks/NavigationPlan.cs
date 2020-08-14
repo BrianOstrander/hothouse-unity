@@ -40,6 +40,7 @@ namespace Lunra.Hothouse.Models
 				path.corners?[0] ?? Vector3.zero,
 				1,
 				States.Navigating,
+				null,
 				path.corners.TotalDistance(),
 				0f,
 				interrupt,
@@ -58,6 +59,7 @@ namespace Lunra.Hothouse.Models
 				beginPosition,
 				1,
 				States.NavigatingForced,
+				null,
 				Vector3.Distance(beginPosition, endPosition)
 			);
 		}
@@ -94,6 +96,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public Vector3[] Nodes { get; private set; }
 		[JsonProperty] public Vector3 Position { get; private set; }
 		[JsonProperty] public States State { get; private set; }
+		[JsonProperty] public Vector3? Normal { get; private set; }
 		[JsonProperty] public float DistanceTotal { get; private set; }
 		[JsonProperty] public float DistanceElapsed { get; private set; }
 		
@@ -115,6 +118,7 @@ namespace Lunra.Hothouse.Models
 			Vector3 position,
 			int nextNode,
 			States state,
+			Vector3? normal = null, 
 			float distanceTotal = 0f,
 			float distanceElapsed = 0f,
 			Interrupts interrupt = Interrupts.None,
@@ -126,6 +130,7 @@ namespace Lunra.Hothouse.Models
 			Position = position;
 			this.nextNode = nextNode;
 			State = state;
+			Normal = normal;
 			DistanceTotal = distanceTotal;
 			DistanceElapsed = distanceElapsed;
 			
@@ -149,6 +154,7 @@ namespace Lunra.Hothouse.Models
 			var velocityOriginal = velocity;
 				
 			var newPosition = Position;
+			var newNormal = Normal;
 			var newNextNode = nextNode;
 			var newState = State;
 			var newDistanceElapsed = DistanceElapsed;
@@ -212,12 +218,15 @@ namespace Lunra.Hothouse.Models
 
 				if (allInterruptsMatched) newState = States.Done;
 			}
+
+			newNormal = (newPosition - Position).normalized;
 			
 			return new NavigationPlan(
 				Nodes,
 				newPosition,
 				newNextNode,
 				newState,
+				newNormal == Vector3.zero ? null : newNormal,
 				DistanceTotal,
 				newDistanceElapsed,
 				Interrupt,

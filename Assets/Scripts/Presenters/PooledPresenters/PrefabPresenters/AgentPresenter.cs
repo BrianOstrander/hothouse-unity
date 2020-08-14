@@ -75,6 +75,7 @@ namespace Lunra.Hothouse.Presenters
 		protected virtual void OnAgentNavigationPlan(NavigationPlan navigationPlan)
 		{
 			Model.Transform.Position.Value = navigationPlan.Position;
+			if (navigationPlan.Normal.HasValue) Model.Transform.Rotation.Value = Quaternion.LookRotation(navigationPlan.Normal.Value);
 		}
 
 		protected override void OnPooledState(PooledStates pooledState)
