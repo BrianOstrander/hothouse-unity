@@ -1,4 +1,5 @@
-﻿using Lunra.Hothouse.Models;
+﻿using System;
+using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
@@ -14,8 +15,7 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{			
 			Model.Clearable.MeleeRangeBonus.Value = View.MeleeRangeBonus;
-
-			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
+			
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 	
 			Model.Obligations.All.Changed += OnObligationAll;
@@ -25,13 +25,13 @@ namespace Lunra.Hothouse.Presenters
 			);
 			Model.Health.Current.Changed += OnClearableHealthCurrent;
 			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
+			Model.Clearable.State.Changed += OnClearableState;
 			
 			base.Bind();
 		}
 
 		protected override void UnBind()
 		{
-			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
 			Model.Obligations.All.Changed -= OnObligationAll;
@@ -41,6 +41,7 @@ namespace Lunra.Hothouse.Presenters
 			);
 			Model.Health.Current.Changed -= OnClearableHealthCurrent;
 			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
+			Model.Clearable.State.Changed -= OnClearableState;
 			
 			base.UnBind();
 		}
@@ -89,31 +90,20 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 
-		#region ToolbarModel Events
-		void OnToolbarClearanceTask(Interaction.RoomVector3 interaction)
+		#region ClearableComponent Events
+		void OnClearableState(ClearableStates state)
 		{
-			if (interaction.State == Interaction.States.OutOfRange) return;
-			if (Model.Obligations.HasAny(ObligationCategories.Destroy.Melee)) return;
-			
-			var radiusContains = interaction.Value.RadiusContains(Model.Transform.Position.Value);
-
-			switch (interaction.State)
+			switch (state)
 			{
-				case Interaction.States.Idle:
+				case ClearableStates.NotMarked:
 					break;
-				case Interaction.States.Begin:
-				case Interaction.States.Active:
-					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Highlighted : SelectionStates.NotSelected;
+				case ClearableStates.Highlighted:
 					break;
-				case Interaction.States.End:
-					if (radiusContains) Model.Obligations.Add(ObligationCategories.Destroy.Melee);
-					// Model.Clearable.SelectionState.Value = radiusContains ? SelectionStates.Selected : SelectionStates.NotSelected;
-					break;
-				case Interaction.States.Cancel:
-					// Model.Clearable.SelectionState.Value = SelectionStates.NotSelected;
+				case ClearableStates.Marked:
+					Model.Obligations.Add(ObligationCategories.Destroy.Melee);
 					break;
 				default:
-					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
+					Debug.LogError("Unrecognized state: " + state);
 					break;
 			}
 		}

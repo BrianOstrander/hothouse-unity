@@ -77,11 +77,13 @@ namespace Lunra.Hothouse.Models
 			model.Health.ResetToMaximum(HealthMaximum);
 			model.Enterable.Reset();
 			model.Obligations.Reset();
-			model.Clearable.ItemDrops.Value = new Inventory(
-				ItemDrops.ToDictionary(
-					e => e.Type,
-					e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
-				)
+			model.Clearable.Reset(
+				new Inventory(
+					ItemDrops.ToDictionary(
+						e => e.Type,
+						e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
+					)
+				)	
 			);
 			model.Tags.Reset();
 			

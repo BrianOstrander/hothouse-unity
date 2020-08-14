@@ -1,10 +1,10 @@
 namespace Lunra.Hothouse.Models
 {
-	public enum SelectionStates
+	public enum ClearableStates
 	{
 		Unknown = 0,
-		NotSelected = 10,
+		NotMarked = 10,
 		Highlighted = 20,
-		Selected = 30
+		Marked = 30
 	}
 }
