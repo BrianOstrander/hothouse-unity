@@ -216,8 +216,8 @@ namespace Lunra.Hothouse.Ai
 			public override void Transition()
 			{
 				SourceState.timeouts = 0;
-				Debug.LogWarning("TODO: I think we need to break promises that weren't filled...");
-				Agent.ObligationPromises.All.Pop();
+				
+				Agent.ObligationPromises.BreakPromise();
 			}
 		}
 		

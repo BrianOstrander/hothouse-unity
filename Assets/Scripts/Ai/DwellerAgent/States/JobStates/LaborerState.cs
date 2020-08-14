@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			base.OnInitialize();
 			
 			AddChildStates(
-				new DestroyMeleeHandlerState(),
+				new DestroyGenericHandlerState(),
 				new ConstructAssembleHandlerState(),
 				new DoorOpenHandlerState(),
 				new NavigateState(),
@@ -26,11 +26,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToReturnOnJobChanged(),
 				new ToReturnOnShiftEnd(),
 
-				new DestroyMeleeHandlerState.ToObligationOnExistingObligation(),
+				new DestroyGenericHandlerState.ToObligationOnExistingObligation(),
 				new ConstructAssembleHandlerState.ToObligationOnExistingObligation(),
 				new DoorOpenHandlerState.ToObligationOnExistingObligation(),
 				
-				new DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation(),
+				new DestroyGenericHandlerState.ToObligationHandlerOnAvailableObligation(),
 				new ConstructAssembleHandlerState.ToObligationHandlerOnAvailableObligation(),
 				new DoorOpenHandlerState.ToObligationHandlerOnAvailableObligation(),
 				

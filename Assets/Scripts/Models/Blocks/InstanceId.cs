@@ -8,6 +8,8 @@ namespace Lunra.Hothouse.Models
 {
 	public class InstanceId
 	{
+		// TODO: I think this class can be greatly simplified now that the GameModel.Query object exists...
+		
 		public static InstanceId New<T>(T model)
 			where T : class, IModel
 		{
@@ -45,6 +47,8 @@ namespace Lunra.Hothouse.Models
 					return Types.Inventory;
 				case DecorationModel _:
 					return Types.Decoration;
+				case BubblerModel _:
+					return Types.Bubbler;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -64,7 +68,8 @@ namespace Lunra.Hothouse.Models
 			Debris = 80,
 			ItemDrop = 90,
 			Inventory = 100,
-			Decoration = 110
+			Decoration = 110,
+			Bubbler = 120
 		}
 
 		[JsonProperty] public Types Type { get; private set; }
@@ -157,6 +162,9 @@ namespace Lunra.Hothouse.Models
 					break;
 				case Types.Decoration:
 					cachedInstance = game.Decorations.FirstOrDefaultActive(Id);
+					break;
+				case Types.Bubbler:
+					cachedInstance = game.Bubblers.FirstOrDefaultActive(Id);
 					break;
 				default:
 					Debug.LogError("Unrecognized type: " + Type);

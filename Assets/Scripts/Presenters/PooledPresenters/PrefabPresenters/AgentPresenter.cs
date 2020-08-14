@@ -25,7 +25,6 @@ namespace Lunra.Hothouse.Presenters
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
-			Model.Transform.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
 			Model.Health.Current.Changed += OnAgentHealthCurrent;
 			Model.Health.Damaged += OnAgentHealthDamaged;
@@ -38,7 +37,6 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
-			Model.Transform.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
 			Model.Health.Current.Changed -= OnAgentHealthCurrent;
 			Model.Health.Damaged -= OnAgentHealthDamaged;
@@ -76,11 +74,6 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region AgentModel Events
-		protected virtual void OnAgentPosition(Vector3 position)
-		{
-			View.RootTransform.position = position;
-		}
-
 		protected virtual void OnAgentNavigationPlan(NavigationPlan navigationPlan)
 		{
 			Model.Transform.Position.Value = navigationPlan.Position;
@@ -112,9 +105,9 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
-			Model.InventoryPromises.BreakRemainingPromises();
+			Model.InventoryPromises.BreakAllPromises();
 			
-			Model.ObligationPromises.BreakRemainingPromises();
+			Model.ObligationPromises.BreakAllPromises();
 			
 			Model.PooledState.Value = PooledStates.InActive;
 		}

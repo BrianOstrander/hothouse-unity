@@ -301,7 +301,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		}
 		
 		#region Child Classes
-		protected class DestroyMeleeHandlerState : DestroyMeleeHandlerState<S1> { }
+		protected class DestroyGenericHandlerState : DestroyGenericHandlerState<S1> { }
 		protected class ConstructAssembleHandlerState : ConstructAssembleHandlerState<S1> { }
 		protected class DoorOpenHandlerState : DoorOpenHandlerState<S1> { }
 		

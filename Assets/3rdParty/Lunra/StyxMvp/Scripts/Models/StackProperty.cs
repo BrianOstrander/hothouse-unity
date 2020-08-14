@@ -126,6 +126,9 @@ namespace Lunra.StyxMvp.Models
 		public T Peek(int offset) => stack[offset];
 		public T[] PeekAll() => stack.ToArray();
 
+		public bool Any() => stack.Any();
+		public bool None() => stack.None();
+		
 		public StackProperty(
 			List<T> stack,
 			string name,

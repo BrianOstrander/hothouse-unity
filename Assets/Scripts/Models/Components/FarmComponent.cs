@@ -128,7 +128,7 @@ namespace Lunra.Hothouse.Models
 
 			void tryAddDestroyObligation(FloraModel flora)
 			{
-				if (!flora.Obligations.HasAny(ObligationCategories.Destroy.Melee)) flora.Obligations.Add(ObligationCategories.Destroy.Melee);
+				if (!flora.Obligations.HasAny(ObligationCategories.Destroy.Generic)) flora.Obligations.Add(ObligationCategories.Destroy.Generic);
 			}
 			
 			foreach (var flora in Game.Flora.AllActive.Where(m => plotRooms.Contains(m.RoomTransform.Id.Value)))

@@ -32,14 +32,16 @@ namespace Lunra.Hothouse.Models
 			All = new StackProperty<ObligationPromise>(all);
 		}
 
-		public void BreakRemainingPromises()
+		public void BreakPromise()
 		{
-			foreach (var promise in All.PeekAll())
-			{
-				if (!promise.Target.TryGetInstance<IObligationModel>(Game, out var target)) continue;
-
-				target.Obligations.RemoveForbidden(promise.Obligation);
-			}	
+			if (!All.TryPop(out var promise)) return;
+			if (!promise.Target.TryGetInstance<IObligationModel>(Game, out var target)) return;
+			target.Obligations.RemoveForbidden(promise.Obligation);
+		}
+		
+		public void BreakAllPromises()
+		{
+			while (All.Any()) BreakPromise();
 		}
 
 		public void Reset()

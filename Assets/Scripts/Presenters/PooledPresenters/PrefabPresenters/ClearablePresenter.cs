@@ -1,5 +1,4 @@
-﻿using System;
-using Lunra.Hothouse.Models;
+﻿using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
@@ -16,15 +15,12 @@ namespace Lunra.Hothouse.Presenters
 		{			
 			Model.Clearable.MeleeRangeBonus.Value = View.MeleeRangeBonus;
 			
-			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
-	
 			Model.Obligations.All.Changed += OnObligationAll;
 			Model.Obligations.Bind(
-				ObligationCategories.Destroy.Melee,
+				ObligationCategories.Destroy.Generic,
 				OnObligationDestroyMelee
 			);
 			Model.Health.Current.Changed += OnClearableHealthCurrent;
-			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
 			Model.Clearable.State.Changed += OnClearableState;
 			
 			base.Bind();
@@ -32,15 +28,12 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
-			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
-			
 			Model.Obligations.All.Changed -= OnObligationAll;
 			Model.Obligations.UnBind(
-				ObligationCategories.Destroy.Melee,
+				ObligationCategories.Destroy.Generic,
 				OnObligationDestroyMelee
 			);
 			Model.Health.Current.Changed -= OnClearableHealthCurrent;
-			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
 			Model.Clearable.State.Changed -= OnClearableState;
 			
 			base.UnBind();
@@ -62,7 +55,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.NotVisible) return;
 
-			if (Model.Obligations.HasAny(ObligationCategories.Destroy.Melee))
+			if (Model.Obligations.HasAny(ObligationCategories.Destroy.Generic))
 			{
 				View.Select();
 			}
@@ -100,7 +93,7 @@ namespace Lunra.Hothouse.Presenters
 				case ClearableStates.Highlighted:
 					break;
 				case ClearableStates.Marked:
-					Model.Obligations.Add(ObligationCategories.Destroy.Melee);
+					Model.Obligations.Add(ObligationCategories.Destroy.Generic);
 					break;
 				default:
 					Debug.LogError("Unrecognized state: " + state);
@@ -110,13 +103,6 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region Miscellanious Model Events
-		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
-		{
-			if (calculationState == NavigationMeshModel.CalculationStates.Completed) Model.RecalculateEntrances();
-		}
-
-		void OnLightSensitiveLightLevel(float lightLevel) => Model.RecalculateEntrances();
-
 		protected virtual void OnObligationDestroyMelee(Obligation obligation, IModel source) { }
 		#endregion
 		

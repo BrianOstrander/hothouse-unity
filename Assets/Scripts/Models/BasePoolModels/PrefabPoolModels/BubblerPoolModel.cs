@@ -50,7 +50,7 @@ namespace Lunra.Hothouse.Models
 		{
 			// Agent Properties
 			// TODO: NavigationPlan and others may need to be reset...
-			model.NavigationVelocity.Value = 400f; // How many meters per day they can walk...
+			model.NavigationVelocity.Value = 90f; // How many meters per day they can walk...
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(30f);
@@ -60,6 +60,7 @@ namespace Lunra.Hothouse.Models
 			model.Clearable.Reset(
 				Inventory.Empty	
 			);
+			model.LightSensitive.Reset();
 		}
 	}
 }

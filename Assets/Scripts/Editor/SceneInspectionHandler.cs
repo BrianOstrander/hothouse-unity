@@ -192,7 +192,7 @@ namespace Lunra.Hothouse.Editor
 			
 			if (SceneInspectionSettings.IsInspectingOtherAgents.Value)
 			{
-				foreach (var model in gameState.Payload.Game.Seekers.AllActive.Where(isInInspectedRoom))
+				foreach (var model in gameState.Payload.Game.Query.All<AgentModel>(m => m.GetType() != typeof(DwellerModel) && isInInspectedRoom(m)))
 				{
 					DrawLabel(
 						model

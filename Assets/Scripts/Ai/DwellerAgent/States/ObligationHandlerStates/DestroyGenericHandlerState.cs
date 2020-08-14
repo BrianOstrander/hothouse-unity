@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public class DestroyMeleeHandlerState<S> : ObligationHandlerState<S, DestroyMeleeHandlerState<S>>
+	public class DestroyGenericHandlerState<S> : ObligationHandlerState<S, DestroyGenericHandlerState<S>>
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		static readonly Obligation[] DefaultObligationsHandled =
 		{
-			ObligationCategories.Destroy.Melee
+			ObligationCategories.Destroy.Generic
 		};
 
 		public override Obligation[] ObligationsHandled => DefaultObligationsHandled;
@@ -60,11 +60,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				Game.SimulationTime.Value + CurrentCache.NavigationResult.CalculateNavigationTime(Agent.NavigationVelocity.Value)
 			);
 
-			if (!attackFound)
-			{
-				Debug.LogError($"{Agent.ShortId} asked to attack a {targetParent.GetType().Name}, but no valid attack was available");
-				return base.CalculateInteractionRadius(targetParent, navigationResult);
-			}
+			// This should cause the agent to keep traveling to the obligation location or timeout...
+			if (!attackFound) return -1f;
 
 			return selectedAttack.Range.Maximum;
 		}

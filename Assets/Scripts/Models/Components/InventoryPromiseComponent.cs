@@ -44,7 +44,7 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public void BreakRemainingPromises()
+		public void BreakAllPromises()
 		{
 			foreach (var transaction in Transactions.PeekAll())
 			{

@@ -39,7 +39,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new InventoryRequestState(),
 				new NavigateState(),
 				new BalanceItemState(),
-				new DestroyMeleeHandlerState(),
+				new DestroyGenericHandlerState(),
 				timeoutInstance = new TimeoutState()
 			);
 			
@@ -51,7 +51,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 				new InventoryRequestState.ToInventoryRequestOnPromises(),
 				
-				new DestroyMeleeHandlerState.ToObligationOnExistingObligation(),
+				new DestroyGenericHandlerState.ToObligationOnExistingObligation(),
 				new ToDestroyOvergrownFlora(),
 				
 				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
@@ -130,7 +130,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			CalculateReadyToSowRatio();
 		}
 
-		class ToDestroyOvergrownFlora : DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation
+		class ToDestroyOvergrownFlora : DestroyGenericHandlerState.ToObligationHandlerOnAvailableObligation
 		{
 			bool isDestroyingFarmedFlora;
 			
