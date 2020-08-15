@@ -54,14 +54,14 @@ namespace Lunra.Hothouse.Models
 		public override void Bind()
 		{
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
-			Model.Health.Current.Changed += OnHealthCurrent;
+			Model.Health.Damaged += OnHealthDamaged;
 			State.Changed += OnState;
 		}
 
 		public override void UnBind()
 		{
 			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
-			Model.Health.Current.Changed -= OnHealthCurrent;
+			Model.Health.Damaged -= OnHealthDamaged;
 			State.Changed -= OnState;
 		}
 
@@ -110,10 +110,10 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 
-		void OnHealthCurrent(float health)
+		void OnHealthDamaged(Damage.Result result)
 		{
-			if (!Mathf.Approximately(0f, health)) return;
-
+			if (!result.IsTargetDestroyed) return;
+			
 			if (!Model.Clearable.ItemDrops.Value.IsEmpty)
 			{
 				Game.ItemDrops.Activate(

@@ -80,8 +80,8 @@ namespace Lunra.Hothouse.Models
 
 			if (!request.Type.HasFlag(Models.Damage.Types.Simulated))
 			{
-				Damaged(result);
 				currentListener.Value = currentNew;
+				Damaged(result);
 			}
 
 			return result;

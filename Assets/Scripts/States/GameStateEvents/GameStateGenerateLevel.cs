@@ -49,6 +49,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			App.S.PushBlocking(OnCalculateNavigation);
 			
 			App.S.PushBlocking(OnGenerateFloraSeed);
+			App.S.PushBlocking(OnGenerateNeutrals);
 			App.S.PushBlocking(OnGenerateHostiles);
 			
 			App.S.PushBlocking(OnGenerateDwellers);
@@ -416,6 +417,32 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		}
 		#endregion
 
+		void OnGenerateNeutrals(Action done)
+		{
+			foreach (var room in payload.Game.Rooms.AllActive)
+			{
+				if (room.SpawnDistance.Value == 0) continue;
+
+				TryGenerating(
+					room,
+					generator.GetNextInteger(1, 4),
+					16,
+					position =>
+					{
+						payload.Game.Bubblers.Activate(
+							room.RoomTransform.Id.Value,
+							position,
+							generator
+						);
+
+						return true;
+					}
+				);
+			}
+			
+			done();
+		}
+
 		void OnGenerateHostiles(Action done)
 		{
 			/*
@@ -563,12 +590,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			foreach (var dweller in payload.Game.Dwellers.AllActive) dweller.Transform.Position.Value = bonfire.Transform.Position.Value + (Vector3.back * 2.5f);
 
-			payload.Game.Bubblers.Activate(
-				spawn.Id.Value,
-				position,
-				generator
-			);
-			
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
 			// payload.Game.SimulationMultiplier.Value = 60f;
 			//
