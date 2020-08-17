@@ -47,6 +47,8 @@ namespace Lunra.Hothouse.Models
 					return Types.Decoration;
 				case BubblerModel _:
 					return Types.Bubbler;
+				case SnapCapModel _:
+					return Types.SnapCap;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -62,12 +64,12 @@ namespace Lunra.Hothouse.Models
 			Building = 40,
 			Room = 50,
 			Door = 60,
-			// Seeker = 70,
-			Debris = 80,
-			ItemDrop = 90,
-			Inventory = 100,
-			Decoration = 110,
-			Bubbler = 120
+			Debris = 70,
+			ItemDrop = 80,
+			Inventory = 90,
+			Decoration = 100,
+			Bubbler = 110,
+			SnapCap = 120
 		}
 
 		[JsonProperty] public Types Type { get; private set; }
@@ -160,6 +162,9 @@ namespace Lunra.Hothouse.Models
 					break;
 				case Types.Bubbler:
 					cachedInstance = game.Bubblers.FirstOrDefaultActive(Id);
+					break;
+				case Types.SnapCap:
+					cachedInstance = game.SnapCaps.FirstOrDefaultActive(Id);
 					break;
 				default:
 					Debug.LogError("Unrecognized type: " + Type);

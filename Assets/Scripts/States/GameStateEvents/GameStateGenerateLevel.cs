@@ -445,46 +445,26 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 
 		void OnGenerateHostiles(Action done)
 		{
-			/*
 			foreach (var room in payload.Game.Rooms.AllActive)
 			{
-				// TODO: Abstract this into a shared method...
 				if (room.SpawnDistance.Value == 0) continue;
-				
-				var hostileBudgetRemaining = generator.GetNextInteger(0, 4);
-				var failureBudgetRemaining = hostileBudgetRemaining * 2; // TODO: Don't hardcode this...
 
-				while (0 < hostileBudgetRemaining && 0 < failureBudgetRemaining)
-				{
-					var position = room.Boundary.RandomPoint(generator);
-					if (!position.HasValue)
+				TryGenerating(
+					room,
+					generator.GetNextInteger(0, 2),
+					16,
+					position =>
 					{
-						failureBudgetRemaining--;
-						continue;
+						payload.Game.SnapCaps.Activate(
+							room.RoomTransform.Id.Value,
+							position,
+							generator
+						);
+
+						return true;
 					}
-
-					var sampleSuccess = NavMesh.SamplePosition(
-						position.Value,
-						out var hit,
-						Mathf.Abs(position.Value.y) + 0.1f,
-						NavMesh.AllAreas
-					);
-
-					if (!sampleSuccess || !room.Boundary.Contains(hit.position))
-					{
-						failureBudgetRemaining--;
-						continue;
-					}
-					
-					payload.Game.Seekers.Activate(
-						room.RoomTransform.Id.Value,
-						hit.position
-					);
-
-					hostileBudgetRemaining--;
-				}
+				);
 			}
-			*/
 			
 			done();
 		}
@@ -589,6 +569,15 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// Debugging Begin
 			
 			foreach (var dweller in payload.Game.Dwellers.AllActive) dweller.Transform.Position.Value = bonfire.Transform.Position.Value + (Vector3.back * 2.5f);
+
+			var snap = payload.Game.SnapCaps.Activate(
+				spawn.Id.Value,
+				position
+			);
+
+			snap.IsDebugging = true;
+			
+			
 
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
 			// payload.Game.SimulationMultiplier.Value = 60f;

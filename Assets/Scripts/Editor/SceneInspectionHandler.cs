@@ -368,7 +368,8 @@ namespace Lunra.Hothouse.Editor
 				if (DrawButton(agentModel, new GUIContent("Serialize State")))
 				{
 					EditorGUIUtility.systemCopyBuffer = agentModel.StateMachine.GetSerializedGraph(true);
-					Debug.Log("Serialized ai state copied to clipboard");
+					Debug.Log("Serialized ai state copied to clipboard, opening visualizer...");
+					Application.OpenURL("https://dreampuf.github.io/GraphvizOnline");
 				}
 			}
 			

@@ -69,7 +69,7 @@ namespace Lunra.Hothouse.Ai
 				path
 			);
 
-			if (hasPath) Agent.NavigationPlan.Value = NavigationPlan.Navigating(path, Agent.NavigationPlan.Value.Interrupt, Agent.NavigationPlan.Value.RadiusThreshold, Agent.NavigationPlan.Value.PathThreshold);
+			if (hasPath) Agent.NavigationPlan.Value = NavigationPlan.Navigating(path, Agent.NavigationPlan.Value.Interrupt, Agent.NavigationPlan.Value.RadiusThreshold, Agent.NavigationPlan.Value.PathElapsed);
 			else Agent.NavigationPlan.Value = NavigationPlan.Invalid(Agent.NavigationPlan.Value);
 
 			return hasPath;

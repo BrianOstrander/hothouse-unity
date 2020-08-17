@@ -90,6 +90,7 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.ItemDrops.Initialize(Payload.Game);
 			Payload.Game.Dwellers.Initialize(Payload.Game);
 			Payload.Game.Bubblers.Initialize(Payload.Game);
+			Payload.Game.SnapCaps.Initialize(Payload.Game);
 			Payload.Game.Decorations.Initialize(Payload.Game);
 			Payload.Game.Generators.Initialize(Payload.Game);
 			

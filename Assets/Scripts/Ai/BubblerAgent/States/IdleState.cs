@@ -23,13 +23,6 @@ namespace Lunra.Hothouse.Ai.Bubbler
 			);
 		}
 
-		class ToNavigateTest : AgentTransition<IdleState, NavigateState, GameModel, BubblerModel>
-		{
-			public override bool IsTriggered() => true;
-
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.NavigatingForced(Agent.Transform.Position.Value, Agent.Transform.Position.Value + (Vector3.forward * 4f));
-		}
-
 		class ToTimeoutOnFallthrough : AgentTransition<IdleState, TimeoutState, GameModel, BubblerModel>
 		{
 			public override bool IsTriggered() => true;

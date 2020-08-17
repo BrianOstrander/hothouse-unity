@@ -15,7 +15,7 @@ namespace Lunra.Hothouse.Models
 			None = 0,
 			LineOfSight = 1 << 0,
 			RadiusThreshold = 1 << 1,
-			PathThreshold = 1 << 2
+			PathElapsed = 1 << 2
 		}
 		
 		public enum States
@@ -32,7 +32,7 @@ namespace Lunra.Hothouse.Models
 			NavMeshPath path,
 			Interrupts interrupt = Interrupts.None,
 			float radiusThreshold = 0f,
-			float pathThreshold = 0f
+			float pathElapsed = 0f
 		)
 		{
 			return new NavigationPlan(
@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Models
 				0f,
 				interrupt,
 				radiusThreshold,
-				pathThreshold
+				pathElapsed
 			);
 		}
 		
@@ -105,13 +105,13 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] public Interrupts Interrupt { get; private set; }
 		[JsonProperty] public float RadiusThreshold { get; private set; }
-		[JsonProperty] public float PathThreshold { get; private set; }
+		[JsonProperty] public float PathElapsed { get; private set; }
 		
 		[JsonProperty] readonly int nextNode;
 
 		[JsonIgnore] public Vector3 BeginPosition => Nodes?.FirstOrDefault() ?? Vector3.zero;
 		[JsonIgnore] public Vector3 EndPosition => Nodes?.LastOrDefault() ?? Vector3.zero;
-		[JsonIgnore] public float MaximumThreshold => Mathf.Max(PathThreshold, RadiusThreshold);
+		[JsonIgnore] public float MaximumThreshold => Mathf.Max(PathElapsed, RadiusThreshold);
 		
 		NavigationPlan(
 			Vector3[] nodes,
@@ -123,7 +123,7 @@ namespace Lunra.Hothouse.Models
 			float distanceElapsed = 0f,
 			Interrupts interrupt = Interrupts.None,
 			float radiusThreshold = 0f,
-			float pathThreshold = 0f
+			float pathElapsed = 0f
 		)
 		{
 			Nodes = nodes;
@@ -138,7 +138,7 @@ namespace Lunra.Hothouse.Models
 
 			Interrupt = interrupt;
 			RadiusThreshold = radiusThreshold;
-			PathThreshold = pathThreshold;
+			PathElapsed = pathElapsed;
 		}
 
 		public NavigationPlan Next(float velocity)
@@ -188,8 +188,8 @@ namespace Lunra.Hothouse.Models
 					{
 						switch (interrupt)
 						{
-							case Interrupts.PathThreshold:
-								allInterruptsMatched = newDistanceElapsed <= PathThreshold;
+							case Interrupts.PathElapsed:
+								allInterruptsMatched = PathElapsed <= newDistanceElapsed;
 								break;
 							case Interrupts.RadiusThreshold:
 								allInterruptsMatched = Vector3.Distance(newPosition, EndPosition) <= RadiusThreshold;
@@ -231,7 +231,7 @@ namespace Lunra.Hothouse.Models
 				newDistanceElapsed,
 				Interrupt,
 				RadiusThreshold,
-				PathThreshold
+				PathElapsed
 			);
 		}
 	}

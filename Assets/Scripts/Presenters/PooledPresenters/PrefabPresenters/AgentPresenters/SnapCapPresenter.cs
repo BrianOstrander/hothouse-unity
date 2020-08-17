@@ -1,13 +1,13 @@
-using Lunra.Hothouse.Ai.Bubbler;
+using Lunra.Hothouse.Ai.SnapCap;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
 {
-	public class BubblerPresenter : AgentPresenter<BubblerModel, GenericAgentView, BubblerStateMachine>
+	public class SnapCapPresenter : AgentPresenter<SnapCapModel, GenericAgentView, SnapCapStateMachine>
 	{
-		public BubblerPresenter(GameModel game, BubblerModel model) : base(game, model) { }
+		public SnapCapPresenter(GameModel game, SnapCapModel model) : base(game, model) { }
 
 		protected override void OnPosition(Vector3 position)
 		{
