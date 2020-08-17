@@ -36,7 +36,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public DebrisPoolModel Debris { get; private set; } = new DebrisPoolModel();
 		[JsonProperty] public BuildingPoolModel Buildings { get; private set; } = new BuildingPoolModel();
 		[JsonProperty] public FloraPoolModel Flora { get; private set; } = new FloraPoolModel();
-		[JsonProperty] public SeekerPoolModel Seekers { get; private set; } = new SeekerPoolModel();
 		[JsonProperty] public DecorationPoolModel Decorations { get; private set; } = new DecorationPoolModel();
 		[JsonProperty] public GeneratorPoolModel Generators { get; private set; } = new GeneratorPoolModel();
 
@@ -137,7 +136,6 @@ namespace Lunra.Hothouse.Models
 				Debris.PoolQuery,
 				Buildings.PoolQuery,
 				Flora.PoolQuery,
-				Seekers.PoolQuery,
 				Decorations.PoolQuery,
 				Generators.PoolQuery	
 			);

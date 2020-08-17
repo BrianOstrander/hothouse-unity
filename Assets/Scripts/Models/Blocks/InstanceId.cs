@@ -37,8 +37,6 @@ namespace Lunra.Hothouse.Models
 					return Types.Room;
 				case DoorModel _:
 					return Types.Door;
-				case SeekerModel _:
-					return Types.Seeker;
 				case DebrisModel _:
 					return Types.Debris;
 				case ItemDropModel _:
@@ -64,7 +62,7 @@ namespace Lunra.Hothouse.Models
 			Building = 40,
 			Room = 50,
 			Door = 60,
-			Seeker = 70,
+			// Seeker = 70,
 			Debris = 80,
 			ItemDrop = 90,
 			Inventory = 100,
@@ -147,9 +145,6 @@ namespace Lunra.Hothouse.Models
 					break;
 				case Types.Door:
 					cachedInstance = game.Doors.FirstOrDefaultActive(Id);
-					break;
-				case Types.Seeker:
-					cachedInstance = game.Seekers.FirstOrDefaultActive(Id);
 					break;
 				case Types.Debris:
 					cachedInstance = game.Debris.FirstOrDefaultActive(Id);

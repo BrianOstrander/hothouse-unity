@@ -76,6 +76,7 @@ namespace Lunra.Hothouse.Ai.Bubbler
 
 			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
 		}
-		protected class NavigateState : NavigateState<WanderState<S>> { }
+		
+		protected class NavigateState : BaseNavigateState<WanderState<S>, BubblerModel> { }
 	}
 }

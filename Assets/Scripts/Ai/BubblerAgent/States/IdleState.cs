@@ -37,8 +37,8 @@ namespace Lunra.Hothouse.Ai.Bubbler
 			public override void Transition() => SourceState.timeoutState.ConfigureForNextTimeOfDay(0.25f);
 		}
 		
-		protected class NavigateState : NavigateState<IdleState> { }
-		protected class TimeoutState : TimeoutState<IdleState> { }
+		protected class NavigateState : BaseNavigateState<IdleState, BubblerModel> { }
+		protected class TimeoutState : BaseTimeoutState<IdleState, BubblerModel> { }
 		protected class WanderState : WanderState<IdleState> { }
 	}
 }
