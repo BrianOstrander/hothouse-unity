@@ -18,7 +18,7 @@ namespace Lunra.Hothouse.Models
 		public virtual FloatRange ReproductionDuration => new FloatRange(7f, 14f);
 		public virtual FloatRange ReproductionRadius => new FloatRange(0.5f, 1f);
 		public virtual int ReproductionFailureLimit => 40;
-		public virtual float HealthMaximum => 100f;
+		public virtual float HealthMaximum => 15f;
 		public virtual float SpreadDamage => 0f;
 		public virtual bool AttacksBuildings => false;
 		public virtual (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new (Inventory.Types Type, int Minimum, int Maximum)[0];

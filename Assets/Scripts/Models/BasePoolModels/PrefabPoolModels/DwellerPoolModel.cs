@@ -139,7 +139,7 @@ namespace Lunra.Hothouse.Models
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(100f);
 			model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
-			model.InteractionRadius.Value = 0.75f;
+			model.InteractionRadius.Value = 0.5f;
 			
 			// Dweller Properties
 			model.Job.Value = Jobs.None;

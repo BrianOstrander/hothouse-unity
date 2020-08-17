@@ -48,14 +48,29 @@ namespace Lunra.Hothouse.Ai.Dweller
 				return base.CalculateInteractionRadius(targetParent, navigationResult);
 			}
 
-			var targetDistance = targetParent.DistanceTo(Agent);
+			var targetDistanceMinimum = Vector3.Distance(targetParent.Transform.Position.Value, navigationResult.Target); 
+			var targetDistanceMaximum = targetParent.DistanceTo(Agent);
+
+			if (Agent.InteractionRadius.Value < targetDistanceMinimum && targetParent is IEnterableModel targetEnterableParent)
+			{
+				foreach (var entrance in targetEnterableParent.Enterable.Entrances.Value)
+				{
+					var targetDistanceCurrent = Vector3.Distance(entrance.Position, navigationResult.Target);
+					if (targetDistanceCurrent < targetDistanceMinimum)
+					{
+						targetDistanceMinimum = targetDistanceCurrent;
+						if (targetDistanceMinimum < Agent.InteractionRadius.Value) break;
+					}
+				}
+			}
+			
 
 			var attackFound = Agent.Attacks.TryGetMostEffective(
 				targetHealthParent,
 				out selectedAttack,
 				new FloatRange(
-					Vector3.Distance(targetParent.Transform.Position.Value, navigationResult.Target),
-					targetDistance
+					targetDistanceMinimum,
+					targetDistanceMaximum
 				),
 				Game.SimulationTime.Value + CurrentCache.NavigationResult.CalculateNavigationTime(Agent.NavigationVelocity.Value)
 			);

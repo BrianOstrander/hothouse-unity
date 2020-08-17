@@ -41,7 +41,17 @@ namespace Lunra.Hothouse.Views
 		#endregion
 		
 		#region Reverse Bindings
-		public Transform[] Entrances => entrances;
+		public GameObject EntrancesRoot
+		{
+			get => entrancesRoot;
+			set => entrancesRoot = value;
+		}
+
+		public Transform[] Entrances
+		{
+			get => entrances;
+			set => entrances = value;
+		}
 		public DoorCache[] DoorDefinitions => doorDefinitions;
 		#endregion
 
@@ -124,10 +134,10 @@ namespace Lunra.Hothouse.Views
 			if (doorMovement == null) Debug.LogError("Unable to find door movement");
 			else door = doorMovement.gameObject;
 			
-			if (entrancesRoot != null) DestroyImmediate(entrancesRoot);
+			if (EntrancesRoot != null) DestroyImmediate(EntrancesRoot);
 			
-			entrancesRoot = new GameObject(Constants.DoorEntranceRoot);
-			entrancesRoot.transform.SetParent(RootTransform);
+			EntrancesRoot = new GameObject(Constants.DoorEntranceRoot);
+			EntrancesRoot.transform.SetParent(RootTransform);
 
 			var entrancesList = new List<Transform>();
 			
@@ -139,7 +149,7 @@ namespace Lunra.Hothouse.Views
 				for (var i = 0; i < Constants.EntranceCountPerAnchor; i++)
 				{
 					var entrance = new GameObject("entrance_" + i);
-					entrance.transform.SetParent(entrancesRoot.transform);
+					entrance.transform.SetParent(EntrancesRoot.transform);
 					var progress = i / (Constants.EntranceCountPerAnchor - 1f);
 					entrance.transform.position += (door.Anchor.forward * Constants.EntranceForwardOffset) + Vector3.Lerp(edge0, edge1, progress);
 					entrance.transform.forward = door.Anchor.forward;

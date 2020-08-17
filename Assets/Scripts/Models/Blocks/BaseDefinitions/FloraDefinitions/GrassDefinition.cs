@@ -13,6 +13,6 @@ namespace Lunra.Hothouse.Models
 		public override IntegerRange CountPerCluster => new IntegerRange(20, 30);
 		public override FloatRange ReproductionDuration => new FloatRange(4f, 7f);
 		public override FloatRange ReproductionRadius => new FloatRange(1f, 2f);
-		public override float HealthMaximum => 25f;
+		public override float HealthMaximum => 10f;
 	}
 }

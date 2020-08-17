@@ -17,6 +17,7 @@ namespace Lunra.Hothouse.Views
 		[FormerlySerializedAs("navigationModifierColliders"), SerializeField]
 		Collider[] navigationColliders = new Collider[0];
 		[SerializeField] float navigationCollidersRadius;
+		[SerializeField] GameObject entrancesRoot;
 		[SerializeField] Transform[] entrances = new Transform[0];
 		[SerializeField] LightEntry[] lights = new LightEntry[0];
 		[SerializeField] ParticleSystem[] lightParticles = new ParticleSystem[0];
@@ -52,7 +53,18 @@ namespace Lunra.Hothouse.Views
 		#region Reverse Bindings
 		public bool IsLight => !Mathf.Approximately(0f, lightRange);
 		public float LightRange => lightRange;
-		public Transform[] Entrances => entrances;
+
+		public GameObject EntrancesRoot
+		{
+			get => entrancesRoot;
+			set => entrancesRoot = value;
+		}
+
+		public Transform[] Entrances
+		{
+			get => entrances;
+			set => entrances = value;
+		}
 
 		public bool NavigationCollisionContains(Vector3 position)
 		{
@@ -86,7 +98,7 @@ namespace Lunra.Hothouse.Views
 
 			navigationCollidersRadius = result;
 
-			entrances = transform.GetDescendants(d => d.name.ToLower().Contains("entrance")).ToArray();
+			this.CalculateCachedEntrances();
 		}
 
 		void OnDrawGizmosSelected()
@@ -114,6 +126,11 @@ namespace Lunra.Hothouse.Views
 				Vector3.up,
 				childLight.range
 			);
+			
+			if (Application.isPlaying) return;
+			
+			Gizmos.color = Color.green;
+			foreach (var entrance in entrances) Gizmos.DrawWireCube(entrance.position, Vector3.one * 0.1f);
 		}
 #endif
 	}
