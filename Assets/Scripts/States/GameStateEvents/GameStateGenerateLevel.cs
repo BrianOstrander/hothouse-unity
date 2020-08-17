@@ -102,7 +102,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 		void OnGenerateSpawn(Action done)
 		{
 			var spawnOptions = payload.Game.Rooms.AllActive
-				.Where(r => r.PrefabTags.Value.Contains(PrefabTagCategories.Room.Spawn));
+				.Where(r => r.Tags.Contains(PrefabTagCategories.Room.Spawn));
 			
 			var spawnOptionsPreferred = spawnOptions
 				.Where(r => request.SpawnDoorCountRequired <= r.AdjacentRoomIds.Value.Count);
@@ -349,9 +349,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			{
 				foreach (var decoration in payload.Game.Decorations.AllActive.Where(m => room.RoomContains(m)))
 				{
-					foreach (var tag in decoration.PrefabTags.Value)
+					foreach (var tagEntry in decoration.Tags.All.Value)
 					{
-						switch (tag)
+						switch (tagEntry.Tag)
 						{
 							case DecorationView.Constants.Tags.Sources.Water:
 								if (getDecorationEntrance(decoration, out var position))
@@ -377,9 +377,9 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 								}
 								break;
 							default:
-								if (tag.StartsWith(DecorationView.Constants.Tags.Sources.Prefix))
+								if (tagEntry.Tag.StartsWith(DecorationView.Constants.Tags.Sources.Prefix))
 								{
-									Debug.LogError($"Tag \"{tag}\" begins with \"{DecorationView.Constants.Tags.Sources.Prefix}\" but was not handled");
+									Debug.LogError($"Tag \"{tagEntry.Tag}\" begins with \"{DecorationView.Constants.Tags.Sources.Prefix}\" but was not handled");
 								}
 								break;
 						}

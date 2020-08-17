@@ -52,7 +52,7 @@ namespace Lunra.Hothouse.Models
 				rotation
 			);
 			
-			roomInfo.RegisterTags(result.PrefabTags.Value);
+			roomInfo.RegisterTags(result.Tags.All.Value.Select(e => e.Tag).ToArray());
 
 			return result;
 		}

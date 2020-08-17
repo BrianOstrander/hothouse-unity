@@ -57,7 +57,7 @@ MonoBehaviour:
   animations: []
   prefabId: default
   prefabTags: []
-  deathEffectId: 
+  deathEffectId: dweller_generic_death
   desires:
   - motive: 0
     Filled: {fileID: 4179464800650543372}

@@ -15,6 +15,7 @@ namespace Lunra.Hothouse.Ai.SnapCap
 		Demon generator = new Demon();
 		InstanceId selectedPrey = InstanceId.Null();
 		Attack selectedAttack;
+		bool shouldFlee;
 		
 		public override void OnInitialize()
 		{
@@ -33,6 +34,8 @@ namespace Lunra.Hothouse.Ai.SnapCap
 			);
 			
 			AddTransitions(
+				new ToNavigateToFlee(),
+				
 				new ToReturnOnHuntForbidden(),
 				new ToReturnOnSleep(),
 				
@@ -41,6 +44,11 @@ namespace Lunra.Hothouse.Ai.SnapCap
 				
 				new WanderState.ToWander()
 			);
+		}
+
+		public override void End()
+		{
+			shouldFlee = false;
 		}
 
 		public class ToHuntOnAwake : AgentTransition<S, HuntState<S>, GameModel, SnapCapModel>
@@ -58,6 +66,57 @@ namespace Lunra.Hothouse.Ai.SnapCap
 			public override bool IsTriggered() => !Agent.AwakeTime.Value.Contains(Game.SimulationTime.Value);
 		}
 
+		class ToNavigateToFlee : AgentTransition<HuntState<S>, NavigateState, GameModel, SnapCapModel>
+		{
+			Navigation.Result navigationResult;
+			
+			public override bool IsTriggered()
+			{
+				if (!SourceState.shouldFlee) return false;
+
+				var adjacentRoomIds = Game.Rooms.FirstActive(Agent.RoomTransform.Id.Value).AdjacentRoomIds.Value
+					.Where(kv => kv.Value)
+					.Select(kv => kv.Key)
+					.Append(Agent.RoomTransform.Id.Value);
+
+				var emptiestRoomDwellerCount = int.MaxValue;
+				RoomModel emptiestRoom = null;
+				
+				foreach (var roomId in adjacentRoomIds)
+				{
+					var currentRoom = Game.Rooms.FirstActive(roomId);
+					var currentDwellerCount = Game.Dwellers.AllActive.Count(m => m.IsInRoom(roomId));
+					if (emptiestRoom == null || currentDwellerCount < emptiestRoomDwellerCount)
+					{
+						emptiestRoom = currentRoom;
+						emptiestRoomDwellerCount = currentDwellerCount;
+					}
+				}
+
+				if (emptiestRoom == null) return false;
+
+				foreach (var door in Game.Doors.AllActive.Where(m => m.IsConnnecting(emptiestRoom.RoomTransform.Id.Value)).OrderByDescending(m => m.DistanceTo(Agent)))
+				{
+					var isNavigable = NavigationUtility.CalculateNearest(
+						Agent.Transform.Position.Value,
+						out navigationResult,
+						Navigation.QueryEntrances(door, e => e.IsNavigable)
+					);
+
+					if (isNavigable) return true;
+				}
+				
+				return false;
+			}
+
+			public override void Transition()
+			{
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+					navigationResult.Path
+				);
+			}
+		}
+
 		class ToTimeoutToAttackPrey : AgentTransition<HuntState<S>, TimeoutState, GameModel, SnapCapModel>
 		{
 			IHealthModel selectedPrey;
@@ -73,19 +132,28 @@ namespace Lunra.Hothouse.Ai.SnapCap
 
 			public override void Transition()
 			{
-				SourceState.timeoutState.ConfigureForInterval(SourceState.selectedAttack.Duration);
-				
 				var result = SourceState.selectedAttack.Trigger(
 					Game,
 					Agent,
 					selectedPrey
 				);
 
+				SourceState.timeoutState.ConfigureForInterval(
+					SourceState.selectedAttack.Duration,
+					progress =>
+					{
+						if (progress.IsDone && result.IsTargetDestroyed)
+						{
+							SourceState.shouldFlee = true;
+							Agent.HuntForbiddenExpiration.Value = Game.SimulationTime.Value + DayTime.FromHours(24f);
+						}
+					}
+				);
+				
 				if (result.IsTargetDestroyed)
 				{
 					SourceState.selectedPrey = null;
 					SourceState.selectedAttack = null;
-					Agent.HuntForbiddenExpiration.Value = Game.SimulationTime.Value + DayTime.FromHours(24f);
 				}
 			}
 		}
@@ -106,6 +174,8 @@ namespace Lunra.Hothouse.Ai.SnapCap
 				
 				foreach (var prey in possiblePrey.OrderBy(m => m.DistanceTo(Agent)))
 				{
+					if (Agent.HuntRangeMaximum.Value < Agent.DistanceTo(prey)) break;
+					
 					var isNavigable = NavigationUtility.CalculateNearest(
 						Agent.Transform.Position.Value,
 						out navigationResult,

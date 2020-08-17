@@ -8,6 +8,8 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		[JsonProperty] DayTime huntForbiddenExpiration;
 		[JsonIgnore] public ListenerProperty<DayTime> HuntForbiddenExpiration { get; }
+		[JsonProperty] float huntRangeMaximum;
+		[JsonIgnore] public ListenerProperty<float> HuntRangeMaximum { get; }
 		[JsonProperty] DayTimeFrame awakeTime;
 		[JsonIgnore] public ListenerProperty<DayTimeFrame> AwakeTime { get; }
 		[JsonProperty] float navigationPathMaximum;
@@ -26,6 +28,7 @@ namespace Lunra.Hothouse.Models
 		public SnapCapModel()
 		{
 			HuntForbiddenExpiration = new ListenerProperty<DayTime>(value => huntForbiddenExpiration = value, () => huntForbiddenExpiration);
+			HuntRangeMaximum = new ListenerProperty<float>(value => huntRangeMaximum = value, () => huntRangeMaximum);
 			AwakeTime = new ListenerProperty<DayTimeFrame>(value => awakeTime = value, () => awakeTime);
 			NavigationPathMaximum = new ListenerProperty<float>(value => navigationPathMaximum = value, () => navigationPathMaximum);
 			

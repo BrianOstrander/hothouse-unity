@@ -76,6 +76,13 @@ namespace Lunra.Hothouse.Presenters
 		
 			if (result.IsTargetDestroyed)
 			{
+				Game.Effects.Queued.Enqueue(
+					new EffectsModel.Request(
+						Model.Transform.Position.Value,
+						View.DeathEffectId
+					)
+				);
+				
 				Game.EventLog.Dwellers.Push(
 					new EventLogModel.Entry(
 						(Model.Name.Value + " died from " + affliction).Wrap(

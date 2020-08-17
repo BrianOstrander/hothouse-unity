@@ -14,8 +14,7 @@ namespace Lunra.Hothouse.Models
 		IConstructionModel,
 		IRecipeModel,
 		IFarmModel,
-		IGoalActivityModel,
-		ITagModel
+		IGoalActivityModel
 	{
 		#region Serialized
 		[JsonProperty] string type;
@@ -39,7 +38,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public RecipeComponent Recipes { get; private set; } = new RecipeComponent();
 		[JsonProperty] public FarmComponent Farm { get; private set; } = new FarmComponent();
 		[JsonProperty] public GoalActivityComponent Activities { get; private set; } = new GoalActivityComponent();
-		[JsonProperty] public TagComponent Tags { get; private set; } = new TagComponent();
 		#endregion
 		
 		#region Non Serialized
@@ -97,7 +95,6 @@ namespace Lunra.Hothouse.Models
 				Recipes,
 				Farm,
 				Activities,
-				Tags,
 				Enterable
 			);
 		}

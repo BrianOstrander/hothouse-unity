@@ -71,6 +71,7 @@ namespace Lunra.Hothouse.Models
 			);
 
 			model.HuntForbiddenExpiration.Value = DayTime.Zero;
+			model.HuntRangeMaximum.Value = 6f;
 			model.AwakeTime.Value = new DayTimeFrame(0.75f, 0.25f);
 			model.NavigationPathMaximum.Value = 3f;
 		}

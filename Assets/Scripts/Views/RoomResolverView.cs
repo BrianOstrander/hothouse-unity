@@ -248,7 +248,7 @@ namespace Lunra.Hothouse.Views
 					instance.transform.rotation
 				);
 
-				model.PrefabTags.Value = instance.PrefabTags;
+				model.Tags.AddTags(instance.PrefabTags, DayTime.MaxValue, fromPrefab: true);
 
 				var walls = new WallCache[instance.Walls.Length];
 
@@ -286,7 +286,7 @@ namespace Lunra.Hothouse.Views
 					instance.transform.rotation
 				);
 				
-				model.PrefabTags.Value = instance.PrefabTags;
+				model.Tags.AddTags(instance.PrefabTags, DayTime.MaxValue, fromPrefab: true);
 
 				foreach (var room in rooms.Where(r => model.IsConnnecting(r.Id.Value)))
 				{

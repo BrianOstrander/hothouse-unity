@@ -28,7 +28,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public AgentInventoryComponent Inventory { get; private set; } = new AgentInventoryComponent();
 		[JsonProperty] public InventoryPromiseComponent InventoryPromises { get; private set; } = new InventoryPromiseComponent();
 		[JsonProperty] public ObligationPromiseComponent ObligationPromises { get; private set; } = new ObligationPromiseComponent();
-		[JsonProperty] public TagComponent Tags { get; private set; } = new TagComponent();
 
 		[JsonProperty] public bool IsDebugging { get; set; }
 		#endregion
@@ -55,8 +54,7 @@ namespace Lunra.Hothouse.Models
 				Health,
 				Inventory,
 				InventoryPromises,
-				ObligationPromises,
-				Tags
+				ObligationPromises
 			);
 		}
 	}

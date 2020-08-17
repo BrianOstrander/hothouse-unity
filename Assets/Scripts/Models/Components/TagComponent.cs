@@ -26,14 +26,17 @@ namespace Lunra.Hothouse.Models
 		{
 			[JsonProperty] public string Tag { get; private set; }
 			[JsonProperty] public DayTime Expiration { get; private set; }
+			[JsonProperty] public bool FromPrefab { get; private set; }
 
 			public Entry(
 				string tag,
-				DayTime expiration
+				DayTime expiration,
+				bool fromPrefab
 			)
 			{
 				Tag = tag;
 				Expiration = expiration;
+				FromPrefab = fromPrefab;
 			}
 
 			public override string ToString()
@@ -89,16 +92,35 @@ namespace Lunra.Hothouse.Models
 			AddTag(tag, DayTime.MaxValue, duplicateBehaviour);
 		}
 
+		public void AddTags(
+			string[] tags,
+			DayTime expiration,
+			DuplicateBehaviours duplicateBehaviour = DuplicateBehaviours.Append,
+			bool fromPrefab = false
+		)
+		{
+			foreach (var tag in tags)
+			{
+				AddTag(
+					tag,
+					expiration,
+					duplicateBehaviour,
+					fromPrefab
+				);
+			}
+		}
+
 		public void AddTag(
 			string tag,
 			DayTime expiration,
-			DuplicateBehaviours duplicateBehaviour = DuplicateBehaviours.Append
+			DuplicateBehaviours duplicateBehaviour = DuplicateBehaviours.Append,
+			bool fromPrefab = false
 		)
 		{
 			if (All.Value.None(t => t.Tag == tag) || duplicateBehaviour == DuplicateBehaviours.Append)
 			{
 				allListener.Value = All.Value
-					.Append(new Entry(tag, expiration))
+					.Append(new Entry(tag, expiration, fromPrefab))
 					.OrderBy(t => t.Expiration.TotalTime)
 					.ToArray();
 				
@@ -129,7 +151,10 @@ namespace Lunra.Hothouse.Models
 		
 		public void Reset()
 		{
-			allListener.Value = new Entry[0];
+			allListener.Value = allListener.Value
+				.Where(t => !t.FromPrefab)
+				.ToArray();
+			
 			nextExpirationListener.Value = DayTime.MaxValue;
 		}
 
