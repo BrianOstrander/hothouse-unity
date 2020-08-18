@@ -570,15 +570,6 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			foreach (var dweller in payload.Game.Dwellers.AllActive) dweller.Transform.Position.Value = bonfire.Transform.Position.Value + (Vector3.back * 2.5f);
 
-			var snap = payload.Game.SnapCaps.Activate(
-				spawn.Id.Value,
-				position
-			);
-
-			snap.IsDebugging = true;
-			
-			
-
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
 			// payload.Game.SimulationMultiplier.Value = 60f;
 			//

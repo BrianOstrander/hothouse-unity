@@ -109,6 +109,7 @@ namespace Lunra.Hothouse.Services
 		void OnBeginInitializeServices()
 		{
 			new PopulationService(Payload.Game);
+			new HostileSpawnService(Payload.Game);
 		}
 		#endregion
 

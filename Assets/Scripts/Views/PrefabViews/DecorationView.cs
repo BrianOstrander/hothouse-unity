@@ -17,7 +17,7 @@ namespace Lunra.Hothouse.Views
 			public static class Tags
 			{
 				public const string DecorationWall = "decoration_wall";
-
+				
 				public static class Sources
 				{
 					public const string Prefix = "source_";

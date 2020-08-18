@@ -1,6 +1,9 @@
 using System.Linq;
+using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp.Services;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Services
 {
@@ -8,6 +11,7 @@ namespace Lunra.Hothouse.Services
 	{
 		public HostileSpawnService(GameModel model) : base(model) { }
 
+		Demon generator = new Demon();
 		DayTime? nextSpawn;
 		
 		protected override void Bind()
@@ -25,7 +29,7 @@ namespace Lunra.Hothouse.Services
 		// TODO: Don't hardcode this...
 		void IncrementNextSpawn()
 		{
-			nextSpawn = Model.SimulationTime.Value + new DayTime(2);
+			nextSpawn = Model.SimulationTime.Value + DayTime.FromRealSeconds(120f);
 		}
 
 		#region GameModel Events
@@ -34,12 +38,22 @@ namespace Lunra.Hothouse.Services
 			if (Model.SimulationTime.Value < nextSpawn.Value) return;
 			IncrementNextSpawn();
 
-			var revealedRooms = Model.Rooms.AllActive.Where(m => m.IsRevealed.Value).ToList();
+			var revealedRooms = Model.Rooms.AllActive.Where(m => !m.IsSpawn.Value && m.IsRevealed.Value).ToList();
 
-			if (revealedRooms.Count <= Model.SnapCaps.AllActive.Length) return;
+			if ((revealedRooms.Count * 2) <= Model.SnapCaps.AllActive.Length) return;
+
+			var availableGenerators = Model.Generators.AllActive
+				.Where(m => m.LightSensitive.IsNotLit && m.Enterable.AnyAvailable())
+				.Where(m => revealedRooms.Any(m.ShareRoom));
+
+			if (availableGenerators.None()) return;
+
+			var spawnLocation = generator.GetNextFrom(availableGenerators);
 			
-			// var availableWaterGenerators = Model.Decorations.AllActive
-				// .Where(m => 0f < m.Flow.Value)
+			Model.SnapCaps.Activate(
+				spawnLocation.RoomTransform.Id.Value,
+				spawnLocation.Enterable.Entrances.Value.First(e => e.IsNavigable).Position
+			);
 		}
 		#endregion
 	}

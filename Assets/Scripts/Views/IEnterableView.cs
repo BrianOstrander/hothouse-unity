@@ -24,7 +24,7 @@ namespace Lunra.Hothouse.Views
 
 			const float SampleDelta = 360f / 8f;
 			const float SampleRadius = 100f;
-			const float EntranceDistance = 1.05f;
+			const float EntranceDistance = 1.5f;
 
 			var origin = Vector3.up * 0.1f;
 			
