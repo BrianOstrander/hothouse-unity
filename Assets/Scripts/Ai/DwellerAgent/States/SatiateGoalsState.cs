@@ -8,9 +8,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 	public class SatiateGoalsState<S> : AgentState<GameModel, DwellerModel>
 		where S : AgentState<GameModel, DwellerModel>
 	{
+		const int IdleCountMaximum = 10;
+		
 		public override string Name => "SatiateGoals";
 
 		TimeoutState timeoutState;
+		int idleCount;
 		
 		public override void OnInitialize()
 		{
@@ -25,7 +28,39 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToReturnOnShiftBegin()	
 			);
 		}
-		
+
+		public override void Begin()
+		{
+			idleCount = 0;
+
+			if (Agent.Bed.Value.TryGetInstance<IClaimOwnershipModel>(Game, out var bed) && bed.Ownership.Contains(Agent)) return;
+			
+			Agent.Bed.Value = InstanceId.Null();
+
+			foreach (var possibleBed in Game.Buildings.AllActive.Where(m => m.Tags.Contains(BuildingTags.Bed)))
+			{
+				if (possibleBed.Ownership.IsFull) continue;
+
+				var isNavigable = NavigationUtility.CalculateNearest(
+					Agent.Transform.Position.Value,
+					out _,
+					Navigation.QueryEntrances(possibleBed)
+				);
+
+				if (isNavigable)
+				{
+					possibleBed.Ownership.Add(Agent);
+					Agent.Bed.Value = possibleBed.GetInstanceId();
+					return;
+				}
+			}
+		}
+
+		public override void Idle()
+		{
+			if (Agent.JobShift.Value.Contains(Game.SimulationTime.Value)) idleCount++;
+		}
+
 		public class ToSatiateGoalsOnShiftEnd : AgentTransition<S, SatiateGoalsState<S>, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => !Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
@@ -33,7 +68,12 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		class ToReturnOnShiftBegin : AgentTransition<SatiateGoalsState<S>, S, GameModel, DwellerModel>
 		{
-			public override bool IsTriggered() => Agent.JobShift.Value.Contains(Game.SimulationTime.Value);
+			public override bool IsTriggered()
+			{
+				if (!Agent.JobShift.Value.Contains(Game.SimulationTime.Value)) return false;
+
+				return !Agent.Goals.AnyAtMaximum || IdleCountMaximum <= SourceState.idleCount;
+			}
 		}
 
 		class ToTimeoutOnActivity : AgentTransition<SatiateGoalsState<S>, TimeoutState, GameModel, DwellerModel>
@@ -50,7 +90,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					return false;
 				}
 
-				if (destination.Enterable.Entrances.Value.None(e => e.State == Entrance.States.Available && Vector3.Distance(e.Position, Agent.Transform.Position.Value) < Agent.MeleeRange.Value))
+				if (destination.Enterable.Entrances.Value.None(e => e.State == Entrance.States.Available && Vector3.Distance(e.Position, Agent.Transform.Position.Value) < Agent.InteractionRadius.Value))
 				{
 					Debug.LogError("Destination found but no entrances available, this is unexpected");
 					return false;
@@ -80,10 +120,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						if (delta.IsDone)
 						{
 							// TODO: Need to check if building has been destroyed...
-							destination.Activities.UnReserveActivity(
-								Agent,
-								destination
-							);
+							destination.Activities.UnReserveActivity(Agent);
 						}
 					}
 				);
@@ -100,9 +137,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 			public override bool IsTriggered()
 			{
 				var minimumDiscontent = float.MaxValue;
-				var minimumDiscontentDelta = 0f;
 				
-				foreach (var activityParent in Game.GetActivities())
+				foreach (var activityParent in Game.Query.All<IGoalActivityModel>())
 				{
 					if (!activityParent.Enterable.AnyAvailable()) continue;
 
@@ -116,7 +152,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 					
 					var deltaTime = navigationResult.CalculateNavigationTime(Agent.NavigationVelocity.Value);
 					
-					var activityReservationBegin = Game.SimulationTime.Value + new DayTime(deltaTime);
+					var activityReservationBegin = Game.SimulationTime.Value + deltaTime;
 
 					var availableActivities = activityParent.Activities.GetAvailable(activityReservationBegin);
 					
@@ -124,6 +160,15 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 					foreach (var activity in availableActivities)
 					{
+						if (activity.RequiresOwnership)
+						{
+							if (activityParent is IClaimOwnershipModel activityParentClaimOwnershipModel)
+							{
+								if (!activityParentClaimOwnershipModel.Ownership.Contains(Agent)) continue;
+							}
+							else Debug.LogWarning($"Activity {activity.Id} on {activityParent.ShortId} requires ownership but parent of type {activityParent.GetType().Name} does not implement {nameof(IClaimOwnershipModel)}");
+						}
+						
 						var hasLessDiscontent = Agent.Goals.TryCalculateDiscontent(
 							activity,
 							deltaTime,
@@ -148,12 +193,15 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				bestActivityParent.Activities.ReserveActivity(
 					Agent,
-					bestActivityParent,
 					bestActivity,
 					bestActivityReservationBegin
 				);
 				
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(bestNavigationResult.Path);
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+					bestNavigationResult.Path,
+					NavigationPlan.Interrupts.RadiusThreshold,
+					Agent.InteractionRadius.Value
+				);
 			}
 		}
 			

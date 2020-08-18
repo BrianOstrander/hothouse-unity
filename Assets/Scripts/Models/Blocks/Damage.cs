@@ -1,19 +1,18 @@
+using Newtonsoft.Json;
 using System;
-using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
 	public static class Damage
 	{
+		[Flags]
 		public enum Types
 		{
-			Unknown = 0,
+			None = 0,
 			
-			// Miscellaneous 
-			Generic = 10,
-			
-			// Motivation Damage
-			GoalHurt = 100,
+			Simulated = 1 << 0, // Don't actually cause damage
+			GoalHurt = 1 << 1, // Motivation Damage
+			Generic = 1 << 2 // Miscellaneous
 		}
 		
 		public class Request
@@ -32,13 +31,13 @@ namespace Lunra.Hothouse.Models
 				);
 			}
 			
-			public Types Type { get; }
-			public float Amount { get; }
+			[JsonProperty] public Types Type { get; private set; }
+			[JsonProperty] public float Amount { get; private set; }
 
-			public InstanceId Source { get; }
-			public InstanceId Target { get; }
+			[JsonProperty] public InstanceId Source { get; private set; }
+			[JsonProperty] public InstanceId Target { get; private set; }
 			
-			public bool IsSelfInflicted { get; } 
+			[JsonProperty] public bool IsSelfInflicted { get; private set; } 
 
 			public Request(
 				Types type,
@@ -57,25 +56,25 @@ namespace Lunra.Hothouse.Models
 
 		public class Result
 		{
-			public Types Type { get; }
+			[JsonProperty] public Types Type { get; private set; }
 			/// <summary>
 			/// The amount of damage the source wanted to inflict.
 			/// </summary>
-			public float AmountRequested { get; }
+			[JsonProperty] public float AmountRequested { get; private set; }
 			/// <summary>
 			/// The amount of damage actually applied before the Target died.
 			/// </summary>
-			public float AmountApplied { get; }
+			[JsonProperty] public float AmountApplied { get; private set; }
 			/// <summary>
 			/// The amount of damage absorbed by the Target, regardless of remaining health.
 			/// </summary>
-			public float AmountAbsorbed { get; }
+			[JsonProperty] public float AmountAbsorbed { get; private set; }
 
-			public InstanceId Source { get; }
-			public InstanceId Target { get; }
+			[JsonProperty] public InstanceId Source { get; private set; }
+			[JsonProperty] public InstanceId Target { get; private set; }
 
-			public bool IsSelfInflicted { get; }
-			public bool IsTargetDestroyed { get; }
+			[JsonProperty] public bool IsSelfInflicted { get; private set; }
+			[JsonProperty] public bool IsTargetDestroyed { get; private set; }
 
 			public Result(
 				Request request,
@@ -97,6 +96,23 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 
+		public static Result Simulate(
+			Types type,
+			float amount,
+			IHealthModel source,
+			IHealthModel target = null
+		)
+		{
+			type |= Types.Simulated;
+
+			return Apply(
+				type,
+				amount,
+				source,
+				target
+			);
+		}
+		
 		public static Result ApplyGeneric(
 			float amount,
 			IHealthModel source,

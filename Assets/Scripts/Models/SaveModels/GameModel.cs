@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
@@ -16,43 +16,42 @@ namespace Lunra.Hothouse.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
-		public TimestampModel GenerationLog { get; } = new TimestampModel();
-		public WorldCameraModel WorldCamera { get; } = new WorldCameraModel();
-		public ToolbarModel Toolbar { get; } = new ToolbarModel();
-		public BuildValidationModel BuildValidation { get; } = new BuildValidationModel();
-		public EffectsModel Effects { get; } = new EffectsModel();
-		public HintsModel Hints { get; } = new HintsModel();
-		public RoomResolverModel RoomResolver { get; } = new RoomResolverModel();
-		public EventLogModel EventLog { get; } = new EventLogModel();
-		public JobManageModel JobManage { get; } = new JobManageModel();
+		[JsonProperty] public LevelGenerationModel LevelGeneration { get; private set; } = new LevelGenerationModel();
+		[JsonProperty] public WorldCameraModel WorldCamera { get; private set; } = new WorldCameraModel();
+		[JsonProperty] public ToolbarModel Toolbar { get; private set; } = new ToolbarModel();
+		[JsonProperty] public BuildValidationModel BuildValidation { get; private set; } = new BuildValidationModel();
+		[JsonProperty] public EffectsModel Effects { get; private set; } = new EffectsModel();
+		[JsonProperty] public HintsModel Hints { get; private set; } = new HintsModel();
+		[JsonProperty] public RoomResolverModel RoomResolver { get; private set; } = new RoomResolverModel();
+		[JsonProperty] public EventLogModel EventLog { get; private set; } = new EventLogModel();
+		[JsonProperty] public JobManageModel JobManage { get; private set; } = new JobManageModel();
+		[JsonProperty] public BuildingManageModel BuildingManage { get; private set; } = new BuildingManageModel();
+		[JsonProperty] public PopulationModel Population { get; private set; } = new PopulationModel();
 
-		public ItemDropPoolModel ItemDrops { get; } = new ItemDropPoolModel();
-		public RoomPoolModel Rooms { get; } = new RoomPoolModel();
-		public DoorPoolModel Doors { get; } = new DoorPoolModel();
-		public DwellerPoolModel Dwellers { get; } = new DwellerPoolModel();
-		public DebrisPoolModel Debris { get; } = new DebrisPoolModel();
-		public BuildingPoolModel Buildings { get; } = new BuildingPoolModel();
-		public FloraPoolModel Flora { get; } = new FloraPoolModel();
-		public SeekerPoolModel Seekers { get; } = new SeekerPoolModel();
+		[JsonProperty] public ItemDropPoolModel ItemDrops { get; private set; } = new ItemDropPoolModel();
+		[JsonProperty] public RoomPoolModel Rooms { get; private set; } = new RoomPoolModel();
+		[JsonProperty] public DoorPoolModel Doors { get; private set; } = new DoorPoolModel();
+		[JsonProperty] public DwellerPoolModel Dwellers { get; private set; } = new DwellerPoolModel();
+		[JsonProperty] public BubblerPoolModel Bubblers { get; private set; } = new BubblerPoolModel();
+		[JsonProperty] public SnapCapPoolModel SnapCaps { get; private set; } = new SnapCapPoolModel();
+		[JsonProperty] public DebrisPoolModel Debris { get; private set; } = new DebrisPoolModel();
+		[JsonProperty] public BuildingPoolModel Buildings { get; private set; } = new BuildingPoolModel();
+		[JsonProperty] public FloraPoolModel Flora { get; private set; } = new FloraPoolModel();
+		[JsonProperty] public DecorationPoolModel Decorations { get; private set; } = new DecorationPoolModel();
+		[JsonProperty] public GeneratorPoolModel Generators { get; private set; } = new GeneratorPoolModel();
 
 		[JsonProperty] float desireDamageMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> DesireDamageMultiplier { get; }
+		
+		[JsonProperty] float lastNonZeroSimulationMultiplier = 1f;
+		[JsonIgnore] public ReadonlyProperty<float> LastNonZeroSimulationMultiplier { get; }
+		
 		/// <summary>
 		/// The speed modifier for simulated actions, such as movement, build times, etc
 		/// </summary>
 		[JsonProperty] float simulationMultiplier = 1f;
 		[JsonIgnore] public ListenerProperty<float> SimulationMultiplier { get; }
-		
-		[JsonProperty] float simulationTimeConversion = 1f;
-		/// <summary>
-		/// Multiply by this by real seconds to get DayTime passed, or DayTime divided by this gets real seconds that
-		/// DayTime represents. 
-		/// </summary>
-		/// <remarks>
-		/// Once set, this probably shouldn't be messed with...
-		/// </remarks>
-		[JsonIgnore] public ListenerProperty<float> SimulationTimeConversion { get; }
-		
+
 		[JsonProperty] DayTime simulationTime = DayTime.Zero;
 		readonly ListenerProperty<DayTime> simulationTimeListener;
 		[JsonIgnore] public ReadonlyProperty<DayTime> SimulationTime { get; }
@@ -84,7 +83,9 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ReadonlyProperty<GameCache> Cache { get; }
 		
 		bool isSimulating;
-		[JsonIgnore] public ListenerProperty<bool> IsSimulating { get; }
+		[JsonIgnore] public bool IsSimulating => !Mathf.Approximately(0f, SimulationMultiplier.Value);
+		
+		[JsonIgnore] public QueryModel Query { get; }
 		#endregion
 		
 		#region Events
@@ -95,8 +96,22 @@ namespace Lunra.Hothouse.Models
 		public GameModel()
 		{
 			DesireDamageMultiplier = new ListenerProperty<float>(value => desireDamageMultiplier = value, () => desireDamageMultiplier);
-			SimulationMultiplier = new ListenerProperty<float>(value => simulationMultiplier = value, () => simulationMultiplier);
-			SimulationTimeConversion = new ListenerProperty<float>(value => simulationTimeConversion = value, () => simulationTimeConversion);
+			
+			LastNonZeroSimulationMultiplier = new ReadonlyProperty<float>(
+				value => lastNonZeroSimulationMultiplier = value,
+				() => lastNonZeroSimulationMultiplier,
+				out var lastNonZeroSimulationMultiplierListener
+			);
+			
+			SimulationMultiplier = new ListenerProperty<float>(
+				value => simulationMultiplier = value,
+				() => simulationMultiplier,
+				value =>
+				{
+					if (!Mathf.Approximately(0f, value)) lastNonZeroSimulationMultiplierListener.Value = value;
+				}
+			);
+			
 			SimulationTime = new ReadonlyProperty<DayTime>(
 				value => simulationTime = value,
 				() => simulationTime,
@@ -112,7 +127,20 @@ namespace Lunra.Hothouse.Models
 				() => cache,
 				out cacheListener
 			);
-			IsSimulating = new ListenerProperty<bool>(value => isSimulating = value, () => isSimulating);
+
+			Query = new QueryModel(
+				ItemDrops.PoolQuery,
+				Rooms.PoolQuery,
+				Doors.PoolQuery,
+				Dwellers.PoolQuery,
+				Bubblers.PoolQuery,
+				SnapCaps.PoolQuery,
+				Debris.PoolQuery,
+				Buildings.PoolQuery,
+				Flora.PoolQuery,
+				Decorations.PoolQuery,
+				Generators.PoolQuery	
+			);
 		}
 
 		public void TriggerSimulationInitialize()
@@ -132,7 +160,7 @@ namespace Lunra.Hothouse.Models
 
 		public void StepSimulation(float deltaTime)
 		{
-			SimulationTimeDelta = deltaTime * SimulationTimeConversion.Value;
+			SimulationTimeDelta = deltaTime * DayTime.RealTimeToSimulationTime;
 			simulationTimeListener.Value += new DayTime(SimulationTimeDelta);
 			
 			SimulationPlaytimeElapsed.Value += TimeSpan.FromSeconds(deltaTime);

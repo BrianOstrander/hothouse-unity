@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
+using Lunra.Hothouse.Models;
 using UnityEditor;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Views
 {
-	public interface IClearableView : IPrefabView
+	public interface IClearableView : IPrefabView, IEnterableView
 	{
 		void Highlight();
 		void Select();
@@ -18,6 +21,8 @@ namespace Lunra.Hothouse.Views
 	{
 		#region Serialized
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
+		[SerializeField] GameObject entrancesRoot;
+		[SerializeField] Transform[] entrances = new Transform[0];
 		[SerializeField] float meleeRangeBonus;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
@@ -30,6 +35,18 @@ namespace Lunra.Hothouse.Views
 		
 		#region Reverse Bindings
 		public float MeleeRangeBonus => meleeRangeBonus;
+
+		public GameObject EntrancesRoot
+		{
+			get => entrancesRoot;
+			set => entrancesRoot = value;
+		}
+
+		public Transform[] Entrances
+		{
+			get => entrances;
+			set => entrances = value;
+		}
 		#endregion
 
 		public override void Cleanup()
@@ -46,13 +63,27 @@ namespace Lunra.Hothouse.Views
 		}
 		#endregion
 
+#if UNITY_EDITOR
+		protected override void OnCalculateCachedData()
+		{
+			NormalizeMeshCollidersFromRoot();
+
+			this.CalculateCachedEntrances();
+		}
+
 		void OnDrawGizmosSelected()
 		{
-			if (Mathf.Approximately(0f, MeleeRangeBonus)) return;
+			if (Application.isPlaying) return;
 			
-			Handles.color = Color.green.NewA(0.3f);
-			Handles.DrawWireDisc(transform.position, Vector3.up, meleeRangeBonus);
+			Gizmos.color = Color.green;
+			foreach (var entrance in entrances) Gizmos.DrawWireCube(entrance.position, Vector3.one * 0.1f);
+
+			// if (Mathf.Approximately(0f, MeleeRangeBonus)) return;
+			//
+			// Handles.color = Color.green.NewA(0.3f);
+			// Handles.DrawWireDisc(transform.position, Vector3.up, meleeRangeBonus);
 		}
+#endif
 	}
 
 }

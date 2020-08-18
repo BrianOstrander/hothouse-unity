@@ -4,6 +4,7 @@ using Lunra.Core;
 using Lunra.Hothouse.Ai.Dweller;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.StyxMvp.Models;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -14,6 +15,7 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void Bind()
 		{
+			Model.Job.Changed += OnDwellerJob;
 			Model.Health.Damaged += OnDwellerHealthDamage;
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
@@ -22,7 +24,8 @@ namespace Lunra.Hothouse.Presenters
 		}
 
 		protected override void UnBind()
-		{
+		{	
+			Model.Job.Changed -= OnDwellerJob;
 			Model.Health.Damaged -= OnDwellerHealthDamage;
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
@@ -33,14 +36,56 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region DwellerModel Events
+		void OnDwellerJob(Jobs job)
+		{
+			View.Job = job;
+		}
+		
 		void OnDwellerHealthDamage(Damage.Result result)
 		{
+			var affliction = string.Empty;
+			
+			switch (result.Type)
+			{
+				case Damage.Types.Generic:
+					if (result.IsSelfInflicted) affliction += "self";
+					else if (result.Source.TryGetInstance<IModel>(Game, out var source)) affliction += source.ShortId;
+					else affliction += "unknown";
+					break;
+				case Damage.Types.GoalHurt:
+					var goalsAtMaximum = Model.Goals.Caches
+						.Where(c => 0f < c.SimulatedTimeAtMaximum)
+						.OrderByDescending(c => c.SimulatedTimeAtMaximum)
+						.ToArray();
+
+					for (var i = 0; i < goalsAtMaximum.Length; i++)
+					{
+						affliction += goalsAtMaximum[i].Motive;
+
+						if (1 < goalsAtMaximum.Length)
+						{
+							if (i < (goalsAtMaximum.Length - 1)) affliction += ", ";
+						}
+					}
+					break;
+				default:
+					Debug.LogError("Unrecognized Damage Type: "+result.Type);
+					affliction += "UNKNOWN - " + result.Type;
+					break;
+			}
+		
 			if (result.IsTargetDestroyed)
 			{
-				Game.EventLog.DwellerEntries.Enqueue(
+				Game.Effects.Queued.Enqueue(
+					new EffectsModel.Request(
+						Model.Transform.Position.Value,
+						View.DeathEffectId
+					)
+				);
+				
+				Game.EventLog.Dwellers.Push(
 					new EventLogModel.Entry(
-						StringExtensions.Wrap(
-							Model.Name.Value + " died from " + result.Type,
+						(Model.Name.Value + " died from " + affliction).Wrap(
 							"<color=red>",
 							"</color>"
 						),
@@ -51,10 +96,9 @@ namespace Lunra.Hothouse.Presenters
 			}
 			else
 			{
-				Game.EventLog.DwellerEntries.Enqueue(
+				Game.EventLog.Dwellers.Push(
 					new EventLogModel.Entry(
-						StringExtensions.Wrap(
-							Model.Name.Value + " is suffering from " + result.Type,
+						(Model.Name.Value + " is suffering from " + affliction).Wrap(
 							"<color=yellow>",
 							"</color>"
 						),
@@ -72,10 +116,17 @@ namespace Lunra.Hothouse.Presenters
 		}
 		#endregion
 
+		#region View Events
+		protected override void OnViewPrepare()
+		{
+			base.OnViewPrepare();
+			
+			OnDwellerJob(Model.Job.Value);
+		}
+		#endregion
+
 		void OnGameSimulationUpdate()
 		{
-			Model.Goals.Update(Game.SimulationTimeDelta);
-			
 			var newHealth = 1f - Model.Goals[Motives.Heal].Insistence;
 
 			var healthUpdateDelta = (newHealth - Model.Health.Normalized) * Model.Health.Maximum.Value;
@@ -97,7 +148,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			if (View.NotVisible) return;
 
-			if (obligation.Type.Equals(ObligationCategories.Door.Open)) OnAgentObligationOpenDoor();
+			if (obligation.Is(ObligationCategories.Door.Open)) OnAgentObligationOpenDoor();
 		}
 
 		void OnAgentObligationOpenDoor()

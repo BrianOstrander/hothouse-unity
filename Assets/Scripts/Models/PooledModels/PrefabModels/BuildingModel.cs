@@ -10,7 +10,6 @@ namespace Lunra.Hothouse.Models
 {
 	public class BuildingModel : PrefabModel,
 		ILightModel,
-		IBoundaryModel,
 		IHealthModel,
 		IConstructionModel,
 		IRecipeModel,
@@ -27,18 +26,18 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] FloatRange placementLightRequirement = FloatRange.Zero;
 		[JsonIgnore] public ListenerProperty<FloatRange> PlacementLightRequirement { get; }
 
-		public LightComponent Light { get; } = new LightComponent();
-		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
-		public BoundaryComponent Boundary { get; } = new BoundaryComponent();
-		public HealthComponent Health { get; } = new HealthComponent();
-		public ClaimComponent Ownership { get; } = new ClaimComponent();
-		public InventoryComponent Inventory { get; } = new InventoryComponent();
-		public InventoryComponent ConstructionInventory { get; } = new InventoryComponent();
-		public InventoryComponent SalvageInventory { get; } = new InventoryComponent();
-		public ObligationComponent Obligations { get; } = new ObligationComponent();
-		public RecipeComponent Recipes { get; } = new RecipeComponent();
-		public FarmComponent Farm { get; } = new FarmComponent();
-		public GoalActivityComponent Activities { get; } = new GoalActivityComponent();
+		[JsonProperty] public LightComponent Light { get; private set; } = new LightComponent();
+		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
+		[JsonProperty] public BoundaryComponent Boundary { get; private set; } = new BoundaryComponent();
+		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
+		[JsonProperty] public ClaimComponent Ownership { get; private set; } = new ClaimComponent();
+		[JsonProperty] public InventoryComponent Inventory { get; private set; } = new InventoryComponent();
+		[JsonProperty] public InventoryComponent ConstructionInventory { get; private set; } = new InventoryComponent();
+		[JsonProperty] public InventoryComponent SalvageInventory { get; private set; } = new InventoryComponent();
+		[JsonProperty] public ObligationComponent Obligations { get; private set; } = new ObligationComponent();
+		[JsonProperty] public RecipeComponent Recipes { get; private set; } = new RecipeComponent();
+		[JsonProperty] public FarmComponent Farm { get; private set; } = new FarmComponent();
+		[JsonProperty] public GoalActivityComponent Activities { get; private set; } = new GoalActivityComponent();
 		#endregion
 		
 		#region Non Serialized
@@ -82,6 +81,22 @@ namespace Lunra.Hothouse.Models
 				}
 				inventoriesByBuildingState.Add(buildState, buildStateInventories);
 			}
+			
+			AppendComponents(
+				Light,
+				LightSensitive,
+				Boundary,
+				Health,
+				Ownership,
+				Inventory,
+				ConstructionInventory,
+				SalvageInventory,
+				Obligations,
+				Recipes,
+				Farm,
+				Activities,
+				Enterable
+			);
 		}
 	}
 }

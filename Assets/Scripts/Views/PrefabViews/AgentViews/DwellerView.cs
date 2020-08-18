@@ -41,10 +41,45 @@ namespace Lunra.Hothouse.Views
 		[FormerlySerializedAs("desireParticles")] [SerializeField] DesireParticles[] desires;
 		[SerializeField] Transform throwRoot;
 		[SerializeField] ParticleSystem glowstickParticles;
+		[SerializeField] MeshRenderer meshRenderer;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 		
 		#region Bindings
+		public Jobs Job
+		{
+			set
+			{
+				var color = Color.white;
+				
+				switch (value)
+				{
+					case Jobs.None:
+						break;
+					case Jobs.Laborer:
+						color = Color.red;
+						break;
+					case Jobs.Stockpiler:
+						color = Color.blue;
+						break;
+					case Jobs.Smoker:
+						color = Color.yellow;
+						break;
+					case Jobs.Farmer:
+						color = Color.green;
+						break;
+					default:
+						color = Color.gray;
+						Debug.LogError("Unrecognized Job: "+value);
+						break;
+				}
+
+				var material = new Material(meshRenderer.material);
+				material.color = color;
+
+				meshRenderer.material = material;
+			}
+		}
 		public void PlayDesire(Motives motive, bool filled)
 		{
 			desires.FirstOrDefault(d => d.motive == motive).Play(filled);
@@ -64,6 +99,7 @@ namespace Lunra.Hothouse.Views
 			foreach (var desire in desires) desire.Stop();
 			
 			glowstickParticles.Stop();
+			Job = Jobs.None;
 		}
 
 		void OnDrawGizmosSelected()

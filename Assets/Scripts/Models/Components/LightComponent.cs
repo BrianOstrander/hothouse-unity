@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Models
 		LightComponent Light { get; }
 	}
 	
-	public class LightComponent : Model
+	public class LightComponent : ComponentModel<ILightModel>
 	{
 		#region Serialized
 		[JsonProperty] bool isLightEnabled; // TODO: Rename? Unify name?
@@ -115,25 +115,6 @@ namespace Lunra.Hothouse.Models
 		public override string ToString()
 		{
 			return "Light State: " + (IsLight.Value ? LightState.Value.ToString() : " < Not a Light >");
-		}
-	}
-
-	public static class LightGameModelExtensions
-	{
-		public static IEnumerable<ILightModel> GetLightsActive(
-			this GameModel game	
-		)
-		{
-			return game.GetLights(m => m.Light.IsLightActive());
-		}
-		
-		public static IEnumerable<ILightModel> GetLights(
-			this GameModel game,
-			Func<ILightModel, bool> predicate = null
-		)
-		{
-			predicate = predicate ?? (m => true);
-			return game.Buildings.AllActive.Where(m => m.Light.IsLight.Value && predicate(m));	
 		}
 	}
 }

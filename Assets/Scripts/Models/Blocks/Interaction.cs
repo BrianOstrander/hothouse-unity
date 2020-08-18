@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -20,9 +21,9 @@ namespace Lunra.Hothouse.Models
 			public static DeltaFloat Default() => new DeltaFloat(0f, 0f);
 			public static DeltaFloat New(float value) => new DeltaFloat(value, value);
 			
-			public float Begin { get; }
-			public float End { get; }
-			public float Delta { get; }
+			[JsonProperty] public float Begin { get; private set; }
+			[JsonProperty] public float End { get; private set; }
+			[JsonProperty] public float Delta { get; private set; }
 			
 			public float Current => End;
 
@@ -57,9 +58,9 @@ namespace Lunra.Hothouse.Models
 			public static DeltaVector3 Default() => new DeltaVector3(Vector3.zero, Vector3.zero);
 			public static DeltaVector3 New(Vector3 position) => new DeltaVector3(position, position);
 			
-			public Vector3 Begin { get; }
-			public Vector3 End { get; }
-			public Vector3 Delta { get; }
+			[JsonProperty] public Vector3 Begin { get; private set; }
+			[JsonProperty] public Vector3 End { get; private set; }
+			[JsonProperty] public Vector3 Delta { get; private set; }
 			
 			public Vector3 Current => End;
 
@@ -97,9 +98,9 @@ namespace Lunra.Hothouse.Models
 				DeltaVector3.Default()
 			);
 			
-			public States State { get; }
-			public DeltaVector3 ScreenPosition { get; }
-			public DeltaVector3 ViewportPosition { get; }
+			[JsonProperty] public States State { get; private set; }
+			[JsonProperty] public DeltaVector3 ScreenPosition { get; private set; }
+			[JsonProperty] public DeltaVector3 ViewportPosition { get; private set; }
 
 			public Display(
 				States state,
@@ -131,8 +132,8 @@ namespace Lunra.Hothouse.Models
 			public static GenericFloat Default() => new GenericFloat(States.Idle, new DeltaFloat());
 			public static GenericFloat Point(States state, float value) => new GenericFloat(state, DeltaFloat.New(value));
 			
-			public States State { get; }
-			public DeltaFloat Value { get; }
+			[JsonProperty] public States State { get; private set; }
+			[JsonProperty] public DeltaFloat Value { get; private set; }
 
 			public GenericFloat(
 				States state,
@@ -173,8 +174,8 @@ namespace Lunra.Hothouse.Models
 			public static GenericVector3 Default() => new GenericVector3(States.Idle, new DeltaVector3());
 			public static GenericVector3 Point(States state, Vector3 value) => new GenericVector3(state, DeltaVector3.New(value));
 			
-			public States State { get; }
-			public DeltaVector3 Value { get; }
+			[JsonProperty] public States State { get; private set; }
+			[JsonProperty] public DeltaVector3 Value { get; private set; }
 
 			public GenericVector3(
 				States state,
@@ -215,9 +216,9 @@ namespace Lunra.Hothouse.Models
 			public static RoomVector3 Default() => new RoomVector3(States.Idle, null, new DeltaVector3());
 			public static RoomVector3 Point(States state, string roomId, Vector3 value) => new RoomVector3(state, roomId, DeltaVector3.New(value));
 			
-			public States State { get; }
-			public string RoomId { get; }
-			public DeltaVector3 Value { get; }
+			[JsonProperty] public States State { get; private set; }
+			[JsonProperty] public string RoomId { get; private set; }
+			[JsonProperty] public DeltaVector3 Value { get; private set; }
 
 			public RoomVector3(
 				States state,

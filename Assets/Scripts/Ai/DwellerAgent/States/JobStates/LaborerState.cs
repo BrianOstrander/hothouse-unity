@@ -12,24 +12,30 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void OnInitialize()
 		{
-			AddChildStates(
-				new CleanupState(),
-				new DestroyMeleeHandlerState(),
-				new ConstructAssembleHandlerState(),
-				new NavigateState()
-			);
+			base.OnInitialize();
 			
+			AddChildStates(
+				new DestroyGenericHandlerState(),
+				new ConstructAssembleHandlerState(),
+				new DoorOpenHandlerState(),
+				new NavigateState(),
+				new BalanceItemState()
+			);
+
 			AddTransitions(
 				new ToReturnOnJobChanged(),
 				new ToReturnOnShiftEnd(),
-				
-				new DestroyMeleeHandlerState.ToObligationOnExistingObligation(),
+
+				new DestroyGenericHandlerState.ToObligationOnExistingObligation(),
 				new ConstructAssembleHandlerState.ToObligationOnExistingObligation(),
+				new DoorOpenHandlerState.ToObligationOnExistingObligation(),
 				
-				new DestroyMeleeHandlerState.ToObligationHandlerOnAvailableObligation(),
+				new DestroyGenericHandlerState.ToObligationHandlerOnAvailableObligation(),
 				new ConstructAssembleHandlerState.ToObligationHandlerOnAvailableObligation(),
+				new DoorOpenHandlerState.ToObligationHandlerOnAvailableObligation(),
 				
-				new CleanupState.ToCleanupOnItemsAvailable(),
+				new BalanceItemState.ToBalanceOnAvailableDelivery(),
+				new BalanceItemState.ToBalanceOnAvailableDistribution(),
 				
 				new NavigateToNearestLight()
 			);

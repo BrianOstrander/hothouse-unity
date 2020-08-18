@@ -12,14 +12,14 @@ namespace Lunra.Hothouse.Models
 		GoalComponent Goals { get; }
 	}
 
-	public class GoalComponent : Model
+	public class GoalComponent : ComponentModel<IGoalModel>
 	{
 		const float PredictedVelocityPastWeight = 0.95f;
 		const float PredictedVelocityRecentWeight = 1f - PredictedVelocityPastWeight;
 
 		public class Cache
 		{
-			public Motives Motive { get; }
+			[JsonProperty] public Motives Motive { get; private set; }
 			public float Velocity;
 			public float VelocityPredicted;
 			public float SimulatedTimeAtMaximum;
@@ -35,18 +35,19 @@ namespace Lunra.Hothouse.Models
 	
 		#region Serialized
 		[JsonProperty] Dictionary<Motives, int> motiveIndexMap = new Dictionary<Motives, int>();
-		public GoalSnapshot Previous { get; private set; }
+		[JsonProperty] public GoalSnapshot Previous { get; private set; }
 		
 		[JsonProperty] GoalSnapshot current;
 		ListenerProperty<GoalSnapshot> currentListener;
 		[JsonIgnore] public ReadonlyProperty<GoalSnapshot> Current { get; }
 		
-		public Cache[] Caches { get; private set; }
+		[JsonProperty] public Cache[] Caches { get; private set; }
 		#endregion
 		
 		#region Non Serialized
-		CalculateGoal calculateGoal;
-		CalculateGoalOverflowEffects calculateGoalOverflowEffects;
+		[JsonIgnore] public bool AnyAtMaximum => Caches.Any(c => !Mathf.Approximately(c.SimulatedTimeAtMaximum, 0f));
+
+		DwellerPoolModel definition;
 		#endregion
 
 		public GoalComponent()
@@ -58,29 +59,32 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
+		public override void Initialize(GameModel game, IParentComponentModel model)
+		{
+			base.Initialize(game, model);
+
+			definition = Game.Dwellers;
+		}
+
 		public void Reset(
-			(Motives Motive, float InsistenceModifier)[] velocities,
-			CalculateGoal calculateGoal,
-			CalculateGoalOverflowEffects calculateGoalOverflowEffects
+			DwellerPoolModel definition
 		)
 		{
-			this.calculateGoal = calculateGoal;
-			this.calculateGoalOverflowEffects = calculateGoalOverflowEffects;
-			
+			this.definition = definition;
 			motiveIndexMap.Clear();
-			Caches = new Cache[velocities.Length];
-			(Motives Motive, GoalResult Value)[] values = new (Motives Motive, GoalResult Value)[velocities.Length];
+			Caches = new Cache[definition.Velocities.Length];
+			(Motives Motive, GoalResult Value)[] values = new (Motives Motive, GoalResult Value)[definition.Velocities.Length];
 			
-			for (var i = 0; i < velocities.Length; i++)
+			for (var i = 0; i < definition.Velocities.Length; i++)
 			{
-				var motive = velocities[i].Motive;
+				var motive = definition.Velocities[i].Motive;
 				
 				motiveIndexMap.Add(motive, i);
 				
-				values[i] = (motive, calculateGoal(motive, 0f));
+				values[i] = (motive, definition.OnCalculateGoal(motive, 0f));
 				
 				var cache = new Cache(motive);
-				cache.Velocity = velocities[i].InsistenceModifier;
+				cache.Velocity = definition.Velocities[i].InsistenceModifier;
 
 				Caches[i] = cache;
 			}
@@ -98,9 +102,16 @@ namespace Lunra.Hothouse.Models
 			);
 			Previous = Current.Value;
 		}
+		
+		public override void Bind() => Game.SimulationUpdate += OnGameSimulationUpdate;
 
-		[JsonIgnore]
-		public GoalResult this[Motives motive] => Current.Value.Values.FirstOrDefault(v => v.Motive == motive).Value;
+		public override void UnBind() => Game.SimulationUpdate -= OnGameSimulationUpdate;
+
+		#region GameModel Events
+		void OnGameSimulationUpdate() => Update(Game.SimulationTimeDelta);
+		#endregion
+
+		[JsonIgnore] public GoalResult this[Motives motive] => Current.Value.Values.FirstOrDefault(v => v.Motive == motive).Value;
 
 		public void Apply(
 			params (Motives Motive, float InsistenceModifier)[] modifiers
@@ -127,11 +138,13 @@ namespace Lunra.Hothouse.Models
 			Update(0f, false);
 		}
 
-		public void Update(
+		void Update(
 			float simulationDeltaTime,
 			bool updatePredictions = true
 		)
 		{
+			if (updatePredictions && Mathf.Approximately(simulationDeltaTime, 0f)) return;
+			
 			var totalDiscontent = 0f;
 			var totalInsistence = 0f;
 			
@@ -143,7 +156,7 @@ namespace Lunra.Hothouse.Models
 			{
 				foreach (var cacheEntryWithOverflow in Caches.Where(c => !Mathf.Approximately(0f, c.SimulatedTimeAtMaximum)))
 				{
-					foreach (var modifier in calculateGoalOverflowEffects(cacheEntryWithOverflow.Motive, cacheEntryWithOverflow.SimulatedTimeAtMaximum))
+					foreach (var modifier in definition.OnCalculateGoalOverflowEffects(cacheEntryWithOverflow.Motive, cacheEntryWithOverflow.SimulatedTimeAtMaximum))
 					{
 						overflowModifiers[motiveIndexMap[modifier.Motive]] += modifier.InsistenceModifier;
 					}
@@ -156,7 +169,7 @@ namespace Lunra.Hothouse.Models
 				var baseVelocity = (Caches[i].Velocity + overflowModifiers[i]) * simulationDeltaTime;
 				
 				values[i].Motive = motive;
-				values[i].Value = calculateGoal(
+				values[i].Value = definition.OnCalculateGoal(
 					motive,
 					Mathf.Clamp01(
 						current.Values[i].Value.Insistence + baseVelocity
@@ -194,7 +207,7 @@ namespace Lunra.Hothouse.Models
 
 		public bool TryCalculateDiscontent(
 			GoalActivity activity,
-			float deltaTime,
+			DayTime deltaTime,
 			float maximumDiscontent,
 			out float discontentWithActivity
 		)
@@ -206,19 +219,19 @@ namespace Lunra.Hothouse.Models
 			{
 				var value = Current.Value.Values[i];
 				
-				var sampleVelocity = Caches[i].VelocityPredicted * deltaTime * activity.Duration.TotalTime;
+				var sampleVelocity = Caches[i].VelocityPredicted * deltaTime.TotalTime * activity.Duration.TotalTime;
 				
 				var discontentModifier = activity.Modifiers
 					.FirstOrDefault(m => m.Motive == value.Motive)
 					.InsistenceModifier;
 			
-				discontentWithoutActivity += calculateGoal(
+				discontentWithoutActivity += definition.OnCalculateGoal(
 						value.Motive,
 						value.Value.Insistence + sampleVelocity
 					)
 					.Discontent; 
 				
-				discontentWithActivity += calculateGoal(
+				discontentWithActivity += definition.OnCalculateGoal(
 						value.Motive,
 						value.Value.Insistence + discontentModifier + sampleVelocity
 					)

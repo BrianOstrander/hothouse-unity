@@ -21,15 +21,15 @@ namespace Lunra.Hothouse.Services.Editor
 			return true;
 		}
 
-		public static bool GetGame(out GameModel game, out GameState state)
+		public static bool GetGame(out GameModel model, out GameState state)
 		{
 			if (GetGameState(out state))
 			{
-				game = state.Payload.Game;
+				model = state.Payload.Game;
 				return true;
 			}
 
-			game = null;
+			model = null;
 			return false;
 		}
 		

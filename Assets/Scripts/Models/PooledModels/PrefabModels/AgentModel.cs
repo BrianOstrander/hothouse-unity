@@ -1,5 +1,3 @@
-﻿using System;
-using Lunra.Core;
 using Lunra.Hothouse.Ai;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
@@ -9,7 +7,9 @@ namespace Lunra.Hothouse.Models
 	public abstract class AgentModel : PrefabModel,
 		IHealthModel,
 		IAgentInventoryModel,
-		IInventoryPromiseModel
+		IInventoryPromiseModel,
+		IObligationPromiseModel,
+		ITagModel
 	{
 		#region Serialized
 		[JsonProperty] float navigationVelocity;
@@ -20,17 +20,20 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] NavigationPlan navigationPlan = Models.NavigationPlan.Done();
 		[JsonIgnore] public ListenerProperty<NavigationPlan> NavigationPlan { get; }
+		
+		[JsonProperty] float reachRadius;
+		[JsonIgnore] public ListenerProperty<float> InteractionRadius { get; }
 
-		public HealthComponent Health { get; } = new HealthComponent();
-		public AgentInventoryComponent Inventory { get; } = new AgentInventoryComponent();
-		public InventoryPromiseComponent InventoryPromises { get; } = new InventoryPromiseComponent();
-		public ObligationPromiseComponent ObligationPromises { get; } = new ObligationPromiseComponent();
+		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
+		[JsonProperty] public AgentInventoryComponent Inventory { get; private set; } = new AgentInventoryComponent();
+		[JsonProperty] public InventoryPromiseComponent InventoryPromises { get; private set; } = new InventoryPromiseComponent();
+		[JsonProperty] public ObligationPromiseComponent ObligationPromises { get; private set; } = new ObligationPromiseComponent();
+
+		[JsonProperty] public bool IsDebugging { get; set; }
 		#endregion
 		
 		#region Non Serialized
-		[JsonIgnore] public bool IsDebugging { get; set; }
 		[JsonIgnore] public AgentContext Context { get; set; }
-		[JsonIgnore] public Action<Obligation> ObligationComplete { get; set; } = ActionExtensions.GetEmpty<Obligation>();
 		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
 		[JsonIgnore] public IAgentStateMachine StateMachine { get; set; }
 		#endregion
@@ -40,11 +43,19 @@ namespace Lunra.Hothouse.Models
 			NavigationVelocity = new ListenerProperty<float>(value => navigationVelocity = value, () => navigationVelocity);
 			NavigationForceDistanceMaximum = new ListenerProperty<float>(value => navigationForceDistanceMaximum = value, () => navigationForceDistanceMaximum);
 			NavigationPlan = new ListenerProperty<NavigationPlan>(value => navigationPlan = value, () => navigationPlan);
+			InteractionRadius = new ListenerProperty<float>(value => reachRadius = value, () => reachRadius);
 			
 			Inventories = new []
 			{
 				Inventory	
 			};
+			
+			AppendComponents(
+				Health,
+				Inventory,
+				InventoryPromises,
+				ObligationPromises
+			);
 		}
 	}
 }

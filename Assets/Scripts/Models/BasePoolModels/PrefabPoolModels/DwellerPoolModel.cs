@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
 using Lunra.NumberDemon;
+using Lunra.StyxMvp;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
 	public class DwellerPoolModel : BasePrefabPoolModel<DwellerModel>
 	{
-		
 		struct GoalCalculationCache
 		{
-			public Motives Motive { get; }
-			public GoalComponent.CalculateGoal CalculateGoal { get; }
-			public GoalComponent.CalculateGoalOverflowEffects CalculateGoalOverflowEffects { get; }
+			[JsonProperty] public Motives Motive { get; private set; }
+			[JsonProperty] public GoalComponent.CalculateGoal CalculateGoal { get; private set; }
+			[JsonProperty] public GoalComponent.CalculateGoalOverflowEffects CalculateGoalOverflowEffects { get; private set; }
 			
 			public GoalCalculationCache(
 				Motives motive,
@@ -36,13 +37,14 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		
-		static readonly string[] ValidPrefabIds = new[]
+		static readonly string[] ValidPrefabIds =
 		{
 			"default"
 		};
 
-		Dictionary<Motives, GoalCalculationCache> goalCalculationCache = new Dictionary<Motives, GoalCalculationCache>();
 		GameModel game;
+		Dictionary<Motives, GoalCalculationCache> goalCalculationCache = new Dictionary<Motives, GoalCalculationCache>();
+		Demon generator = new Demon();
 		
 		public override void Initialize(GameModel game)
 		{
@@ -60,7 +62,7 @@ namespace Lunra.Hothouse.Models
 				{
 					return new[]
 					{
-						(Motives.Heal, calculation?.Invoke(simulationTimeAtMaximum) ?? simulationTimeAtMaximum)
+						(Motives.Heal, game.DesireDamageMultiplier.Value * (calculation?.Invoke(simulationTimeAtMaximum) ?? simulationTimeAtMaximum))
 					};
 				};
 			}
@@ -74,13 +76,18 @@ namespace Lunra.Hothouse.Models
 				{
 					case Motives.Sleep:
 						calculateGoal = insistence => Mathf.Pow(insistence + 0.05f, 10f) - 0.01f;
-						calculateGoalOverflowEffects = getHurtOverflowEffects();
+						calculateGoalOverflowEffects = getHurtOverflowEffects(
+							simulationTimeAtMaximum => Mathf.Max(0f, simulationTimeAtMaximum - 10f)
+						);
 						break;
 					case Motives.Eat:
 						calculateGoal = insistence => Mathf.Pow(insistence, 5f) - 0.01f;
 						calculateGoalOverflowEffects = getHurtOverflowEffects(
-							simulationTimeAtMaximum => Mathf.Pow(simulationTimeAtMaximum, 2f)
+							simulationTimeAtMaximum => Mathf.Pow(Mathf.Max(0f, simulationTimeAtMaximum - 16f), 2f)
 						);
+						break;
+					case Motives.Comfort:
+						calculateGoal = insistence => (insistence * 0.2f) - 0.05f;
 						break;
 					case Motives.Heal:
 						calculateGoal = insistence => Mathf.Pow(insistence, 2f);
@@ -104,7 +111,8 @@ namespace Lunra.Hothouse.Models
 
 		public DwellerModel Activate(
 			string roomId,
-			Vector3 position
+			Vector3 position,
+			Demon generator = null
 		)
 		{
 			var result = Activate(
@@ -112,32 +120,33 @@ namespace Lunra.Hothouse.Models
 				roomId,
 				position,
 				RandomRotation,
-				model => Reset(model)
+				model => Reset(model, generator ?? this.generator)
 			);
 			return result;
 		}
 		
 		Quaternion RandomRotation => Quaternion.AngleAxis(DemonUtility.GetNextFloat(0f, 360f), Vector3.up);
 
-		void Reset(DwellerModel model)
+		void Reset(
+			DwellerModel model,
+			Demon generator
+		)
 		{
 			// Agent Properties
 			// TODO: NavigationPlan and others may need to be reset...
-			model.NavigationVelocity.Value = 40f;
+			model.NavigationVelocity.Value = 400f; // How many meters per day they can walk...
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(100f);
 			model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
+			model.InteractionRadius.Value = 0.5f;
 			
 			// Dweller Properties
 			model.Job.Value = Jobs.None;
-			// model.JobShift.Value = new DayTimeFrame(0.25f, 0.75f);
+			model.JobShift.Value = new DayTimeFrame(0f, 0.75f);
 			// model.JobShift.Value = DayTimeFrame.Maximum;
-			model.JobShift.Value = DayTimeFrame.Zero;
+			// model.JobShift.Value = DayTimeFrame.Zero;
 			
-			model.MeleeRange.Value = 0.75f;
-			model.MeleeCooldown.Value = 0.5f;
-			model.MeleeDamage.Value = 60f;
 
 			model.WithdrawalCooldown.Value = 0.5f;
 			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;
@@ -149,24 +158,35 @@ namespace Lunra.Hothouse.Models
 			
 			model.InventoryPromises.Reset();
 
-			const float GoalInsistenceVelocity = 0.25f;
-			
-			model.Goals.Reset(
-				new []
-				{
-					(Motives.Eat, GoalInsistenceVelocity),
-					(Motives.Sleep, GoalInsistenceVelocity),
-					
-					(Motives.Heal, 0f)
-				},
-				OnCalculateGoal,
-				OnCalculateGoalOverflowEffects
-			);
+			model.Goals.Reset(this);
 			
 			model.GoalPromises.Reset();
+			
+			model.Name.Value = game.DwellerNames.GetName(generator);
+			
+			model.ObligationPromises.Reset();
+			model.Tags.Reset();
+			model.Attacks.Reset(
+				new Attack(
+					App.M.CreateUniqueId(),
+					"melee_generic",
+					new FloatRange(0f, model.InteractionRadius.Value),
+					5f,
+					DayTime.FromRealSeconds(2f)
+				)
+			);
 		}
 
-		GoalResult OnCalculateGoal(
+		public (Motives Motive, float InsistenceModifier)[] Velocities => new[]
+		{
+			(Motives.Eat, 0.25f),
+			(Motives.Sleep, 0.25f),
+			(Motives.Comfort, 0.25f),
+
+			(Motives.Heal, 0f)
+		};
+
+		public GoalResult OnCalculateGoal(
 			Motives motive,
 			float insistence
 		)
@@ -176,7 +196,7 @@ namespace Lunra.Hothouse.Models
 			return default;
 		}
 		
-		(Motives Motive, float InsistenceModifier)[] OnCalculateGoalOverflowEffects(
+		public (Motives Motive, float InsistenceModifier)[] OnCalculateGoalOverflowEffects(
 			Motives motive,
 			float simulationTimeAtMaximum
 		)

@@ -14,7 +14,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] float orbitVelocity;
 		[JsonIgnore] public ListenerProperty<float> OrbitVelocity { get; }
 		
-		public TransformComponent Transform { get; } = new TransformComponent();
+		[JsonProperty] public TransformComponent Transform { get; private set; } = new TransformComponent();
 		#endregion
 
 		#region Non Serialized
@@ -30,5 +30,9 @@ namespace Lunra.Hothouse.Models
 			
 			CameraInstance = new ListenerProperty<Camera>(value => cameraInstance = value, () => cameraInstance);
 		}
+
+		public void InitializeComponents() => Components = new[] {Transform};
+
+		[JsonProperty] public IComponentModel[] Components { get; private set; }
 	}
 }

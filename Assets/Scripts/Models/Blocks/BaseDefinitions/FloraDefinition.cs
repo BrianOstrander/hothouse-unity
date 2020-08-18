@@ -11,25 +11,36 @@ namespace Lunra.Hothouse.Models
 	{
 		public string Type { get; private set; }
 		public virtual string[] PrefabIds { get; private set; }
-		public abstract Inventory.Types Seed { get; }
 		protected GameModel Game { get; private set; }
 		protected Demon Generator { get; private set; }
 		
-		public virtual FloatRange AgeDuration => new FloatRange(60f * 5f, 60f * 7f);
-		public virtual FloatRange ReproductionDuration => new FloatRange(60f * 5f, 60f * 7f);
+		public virtual FloatRange AgeDuration => new FloatRange(14f, 20f);
+		public virtual FloatRange ReproductionDuration => new FloatRange(7f, 14f);
 		public virtual FloatRange ReproductionRadius => new FloatRange(0.5f, 1f);
 		public virtual int ReproductionFailureLimit => 40;
-		public virtual float HealthMaximum => 100f;
-		public virtual float SpreadDamage => 50f;
+		public virtual float HealthMaximum => 15f;
+		public virtual float SpreadDamage => 0f;
 		public virtual bool AttacksBuildings => false;
 		public virtual (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new (Inventory.Types Type, int Minimum, int Maximum)[0];
-		public virtual int CountPerRoomMinimum => 0;
-		public virtual int CountPerRoomMaximum => 4;
+		public virtual IntegerRange ClusterPerRoom => new IntegerRange(0, 4);
+		public virtual IntegerRange CountPerCluster => new IntegerRange(6, 12);
 		public virtual float SpawnDistanceNormalizedMinimum => 0f;
-		public virtual int CountPerClusterMinimum => 40;
-		public virtual int CountPerClusterMaximum => 60;
 		public virtual bool RequiredInSpawn => true;
 		public virtual bool AllowedInSpawn => true;
+
+		public virtual ModifierDefinition[] AgeModifiers => new[]
+		{
+			ModifierDefinition.NoStacking(Tags.Farm.Sown, 0.25f),
+			ModifierDefinition.NoStacking(Tags.Farm.Tended, 0.25f),
+			ModifierDefinition.NoStacking(Tags.Water.Applied, 0.5f),
+		};
+		
+		public virtual ModifierDefinition[] ReproductionModifiers => new[]
+		{
+			ModifierDefinition.NoStacking(Tags.Farm.Sown, -0.25f),
+			ModifierDefinition.NoStacking(Tags.Farm.Tended, -0.5f),
+			ModifierDefinition.NoStacking(Tags.Water.Applied, 0.5f),
+		};
 
 		public void Initialize(
 			GameModel game,
@@ -55,7 +66,6 @@ namespace Lunra.Hothouse.Models
 		public virtual void Reset(FloraModel model)
 		{
 			model.Type.Value = Type;
-			model.Seed.Value = Seed;
 			model.Farm.Value = InstanceId.Null();
 			model.Age.Value = Interval.WithMaximum(AgeDuration.Evaluate(DemonUtility.NextFloat));
 			model.ReproductionElapsed.Value = Interval.WithMaximum(ReproductionDuration.Evaluate(DemonUtility.NextFloat));
@@ -67,12 +77,18 @@ namespace Lunra.Hothouse.Models
 			model.Health.ResetToMaximum(HealthMaximum);
 			model.Enterable.Reset();
 			model.Obligations.Reset();
-			model.Clearable.ItemDrops.Value = new Inventory(
-				ItemDrops.ToDictionary(
-					e => e.Type,
-					e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
-				)
+			model.Clearable.Reset(
+				new Inventory(
+					ItemDrops.ToDictionary(
+						e => e.Type,
+						e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
+					)
+				)	
 			);
+			model.Tags.Reset();
+			
+			model.AgeModifier.Reset(AgeModifiers);
+			model.ReproductionModifier.Reset(ReproductionModifiers);
 		}
 
 		public virtual void Instantiate(FloraModel model) => new FloraPresenter(Game, model);

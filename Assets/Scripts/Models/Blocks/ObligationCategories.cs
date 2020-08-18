@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Models
 		{
 			const string Category = "destroy_";
 
-			public static Obligation Melee => Obligation.New(Category + "melee");
+			public static Obligation Generic => Obligation.New(Category + "generic");
 		}
 
 		public static class Construct

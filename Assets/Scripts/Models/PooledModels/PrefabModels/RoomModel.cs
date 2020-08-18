@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Lunra.Core;
@@ -23,8 +23,11 @@ namespace Lunra.Hothouse.Models
         [JsonIgnore] public ListenerProperty<int> RevealDistance { get; }
         [JsonProperty] int[] unpluggedDoors = new int[0];
         [JsonIgnore] public ListenerProperty<int[]> UnPluggedDoors { get; }
+        [JsonProperty] WallCache[] walls = new WallCache[0];
+        [JsonIgnore] public ListenerProperty<WallCache[]> Walls { get; }
+
         
-        public BoundaryComponent Boundary { get; } = new BoundaryComponent();
+        [JsonProperty] public BoundaryComponent Boundary { get; private set; } = new BoundaryComponent();
         #endregion
         
         #region Non Serialized
@@ -44,8 +47,13 @@ namespace Lunra.Hothouse.Models
             IsRevealed = new ListenerProperty<bool>(value => isRevealed = value, () => isRevealed);
             RevealDistance = new ListenerProperty<int>(value => revealDistance = value, () => revealDistance);
             UnPluggedDoors = new ListenerProperty<int[]>(value => unpluggedDoors = value, () => unpluggedDoors);
+            Walls = new ListenerProperty<WallCache[]>(value => walls = value, () => walls);
             
             AdjacentRoomIds = new ListenerProperty<ReadOnlyDictionary<string, bool>>(value => adjacentRoomIds = value, () => adjacentRoomIds);
+            
+            AppendComponents(Boundary);
         }
+
+        public bool RoomContains(IRoomTransformModel possibleOccupant) => RoomTransform.Id.Value == possibleOccupant.RoomTransform.Id.Value;
     }
 }

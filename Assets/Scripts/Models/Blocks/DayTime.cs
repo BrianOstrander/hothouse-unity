@@ -7,7 +7,7 @@ namespace Lunra.Hothouse.Models
 {
 #pragma warning disable CS0661 // Defines == or != operator but does not override Ojbect.GetHashCode()
 #pragma warning disable CS0659 // Overrides Object.Equals(object) but does not override Object.GetHashCode()
-	public struct DayTime : IEquatable<DayTime>
+	public struct DayTime : IEquatable<DayTime>, IComparable<DayTime>
 #pragma warning restore CS0659 // Overrides Object.Equals(object) but does not override Object.GetHashCode()
 #pragma warning restore CS0661 // Defines == or != operator but does not override Ojbect.GetHashCode()
 	{
@@ -30,6 +30,15 @@ namespace Lunra.Hothouse.Models
 		public const float MinutesInHour = 60f;
 		public const float TimeInDay = 1f;
 
+		/// <summary>
+		/// Multiply the current simulation time to get the real time passed.
+		/// </summary>
+		public const float SimulationTimeToRealTime = 120f;
+		/// <summary>
+		/// Multiply by real time to get the simulation time passed.
+		/// </summary>
+		public const float RealTimeToSimulationTime = 1f / SimulationTimeToRealTime;
+
 		public static DayTime Zero => new DayTime();
 		public static DayTime MaxValue => new DayTime(int.MaxValue);
 
@@ -41,19 +50,18 @@ namespace Lunra.Hothouse.Models
 
 		public static DayTime FromHours(float hours) => new DayTime((hours / HoursInDay) * TimeInDay);
 		public static DayTime FromMinutes(float minutes) => FromHours(minutes / MinutesInHour);
+		public static DayTime FromRealSeconds(float seconds) => new DayTime(seconds * RealTimeToSimulationTime);
 
 		/// <summary>
 		/// Gets the current DayTime with a Time of zero.
 		/// </summary>
 		/// <value>The time zero.</value>
-		[JsonIgnore]
-		public DayTime TimeZero => new DayTime(Day, 0f);
+		[JsonIgnore] public DayTime TimeZero => new DayTime(Day, 0f);
 		/// <summary>
 		/// Gets the current DayTime with a Day of zero.
 		/// </summary>
 		/// <value>The time zero.</value>
-		[JsonIgnore]
-		public DayTime DayZero => new DayTime(0, Time);
+		[JsonIgnore] public DayTime DayZero => new DayTime(0, Time);
 
 		/// <summary>
 		/// The Day component of this DayTime.
@@ -68,22 +76,19 @@ namespace Lunra.Hothouse.Models
 		/// Gets the total time.
 		/// </summary>
 		/// <value>The total time.</value>
-		[JsonIgnore]
-		public float TotalTime => Day + Time;
+		[JsonIgnore] public float TotalTime => Day + Time;
 
 		/// <summary>
 		/// Gets the years.
 		/// </summary>
 		/// <value>The years.</value>
-		[JsonIgnore]
-		public float TotalYears => TotalTime / DaysInYear;
+		[JsonIgnore] public float TotalYears => TotalTime / DaysInYear;
 
 		/// <summary>
 		/// Gets a value indicating whether this <see cref="T:LunraGames.SpaceFarm.DayTime"/> is zero.
 		/// </summary>
 		/// <value><c>true</c> if is zero; otherwise, <c>false</c>.</value>
-		[JsonIgnore]
-		public bool IsZero => Day == 0 && Mathf.Approximately(0f, Time);
+		[JsonIgnore] public bool IsZero => Day == 0 && Mathf.Approximately(0f, Time);
 
 		public DayTime(DayTime other) : this(other.Day, other.Time) {}
 
@@ -239,6 +244,13 @@ namespace Lunra.Hothouse.Models
 			if (obj0 > obj1) return true;
 			if (obj0 == obj1) return true;
 			return false;
+		}
+		
+		public int CompareTo(DayTime other)
+		{
+			if (this < other) return -1;
+			if (other < this) return 1;
+			return 0;
 		}
 
 		public bool Equals(DayTime other)

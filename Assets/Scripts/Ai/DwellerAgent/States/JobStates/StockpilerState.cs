@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Hothouse.Models;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
@@ -12,14 +13,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		public override void OnInitialize()
 		{
-			Workplaces = new []
-			{
-				Game.Buildings.GetDefinitionType<DepotSmallDefinition>(),
-				Game.Buildings.GetDefinitionType<StartingWagonDefinition>(),	
-			};
+			base.OnInitialize();
 			
 			AddChildStates(
-				new CleanupState(),
 				new InventoryRequestState(),
 				new NavigateState(),
 				new BalanceItemState()
@@ -35,11 +31,23 @@ namespace Lunra.Hothouse.Ai.Dweller
 				
 				new ToNavigateToWorkplace(),
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery(),
-				new BalanceItemState.ToBalanceOnAvailableDistribution(),
-				
-				new CleanupState.ToCleanupOnItemsAvailable()
+				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => s.Enterable.IsOwner),
+				new BalanceItemState.ToBalanceOnAvailableDistribution(ValidateDistribution)
 			);
+		}
+
+		bool ValidateDistribution(
+			BalanceItemState.ToBalanceOnAvailable.InventoryCache source,
+			BalanceItemState.ToBalanceOnAvailable.InventoryCache destination
+		)
+		{
+			if (source.Enterable.IsOwner) return true;
+			if (!(destination.Enterable.Model is BuildingModel destinationBuildingModel)) return true;
+			if (!destinationBuildingModel.IsBuildingState(BuildingStates.Operating)) return true;
+
+			if (Workplaces.Contains(destinationBuildingModel.Type.Value)) return destination.Enterable.IsOwner;
+
+			return true;
 		}
 	}
 }

@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Presenters
 		where V : class, IPrefabView
 	{
 		protected RoomModel Room { get; private set; }
-		
+
 		public PrefabPresenter(
 			GameModel game,
 			M model
@@ -17,7 +17,10 @@ namespace Lunra.Hothouse.Presenters
 			game,
 			model,
 			App.V.Get<V>(v => v.PrefabId == model.PrefabId.Value)
-		) { }
+		)
+		{
+			Model.Tags.AddTags(View.PrefabTags, DayTime.MaxValue, fromPrefab: true);
+		}
 
 		protected override void Bind()
 		{
@@ -28,7 +31,6 @@ namespace Lunra.Hothouse.Presenters
 				Room.IsRevealed.Changed += OnRoomIsRevealed;
 			}
 
-			Model.PrefabTags.Value = View.PrefabTags;
 			Model.Tag.Value = View.Tag;
 
 			base.Bind();
@@ -52,6 +54,10 @@ namespace Lunra.Hothouse.Presenters
 			View.RoomId = Model.RoomTransform.Id.Value;
 			View.ModelId = Model.Id.Value;
 		}
+		#endregion
+		
+		#region PooledModel Events
+		protected override bool CanShow() => Room.IsRevealed.Value;
 		#endregion
 		
 		#region RoomModel Events

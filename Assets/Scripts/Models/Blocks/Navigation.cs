@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -114,11 +115,11 @@ namespace Lunra.Hothouse.Models
 
 		public struct Query
 		{
-			public Vector3 Origin { get; }
-			public IModel TargetModel { get; }
-			public float MaximumRadius { get; }
-			public Func<Vector3, IEnumerable<Vector3>> GetTargets { get; }
-			public Func<Validation, Result> Validate { get; }
+			[JsonProperty] public Vector3 Origin { get; private set; }
+			[JsonProperty] public IModel TargetModel { get; private set; }
+			[JsonProperty] public float MaximumRadius { get; private set; }
+			[JsonProperty] public Func<Vector3, IEnumerable<Vector3>> GetTargets { get; private set; }
+			[JsonProperty] public Func<Validation, Result> Validate { get; private set; }
 
 			public Query(
 				Vector3 origin,
@@ -162,13 +163,13 @@ namespace Lunra.Hothouse.Models
 
 		public struct Validation
 		{
-			public Vector3 Origin { get; }
-			public IModel TargetModel { get; }
-			public Vector3 Target { get; }
-			public NavMeshPath Path { get; }
+			[JsonProperty] public Vector3 Origin { get; private set; }
+			[JsonProperty] public IModel TargetModel { get; private set; }
+			[JsonProperty] public Vector3 Target { get; private set; }
+			[JsonProperty] public NavMeshPath Path { get; private set; }
 
-			public Vector3 PathBegin { get; }
-			public Vector3 PathEnd { get; }
+			[JsonProperty] public Vector3 PathBegin { get; private set; }
+			[JsonProperty] public Vector3 PathEnd { get; private set; }
 
 			public Validation(
 				Query query,
@@ -201,11 +202,11 @@ namespace Lunra.Hothouse.Models
 		
 		public struct Result
 		{
-			public Vector3 Origin { get; }
-			public IModel TargetModel { get; }
-			public Vector3 Target { get; }
-			public NavMeshPath Path { get; }
-			public bool IsValid { get; }
+			[JsonProperty] public Vector3 Origin { get; private set; }
+			[JsonProperty] public IModel TargetModel { get; private set; }
+			[JsonProperty] public Vector3 Target { get; private set; }
+			[JsonProperty] public NavMeshPath Path { get; private set; }
+			[JsonProperty] public bool IsValid { get; private set; }
 
 			public Result(
 				Validation validation,
@@ -219,21 +220,24 @@ namespace Lunra.Hothouse.Models
 				IsValid = isValid;
 			}
 
-			public float CalculateNavigationTime(float velocity)
+			public DayTime CalculateNavigationTime(float velocity)
 			{
-				if (!IsValid) return float.MaxValue;
+				if (!IsValid) return DayTime.MaxValue;
+
+				return new DayTime(Path.corners.TotalDistance() / velocity);
+			}
+			
+			public DayTime CalculateNavigationTimeToPathDistance(
+				float velocity,
+				float requiredDistance
+			)
+			{
+				if (!IsValid) return DayTime.MaxValue;
+
+				var distance = Path.corners.TotalDistance();
 				
-				var distance = 0f;
-
-				for (var i = 1; i < Path.corners.Length; i++)
-				{
-					distance += Vector3.Distance(
-						Path.corners[i - 1],
-						Path.corners[i]
-					);
-				}
-
-				return distance / velocity;
+				if (distance < requiredDistance) return DayTime.Zero;
+				return new DayTime((distance - requiredDistance) / velocity);
 			}
 		}
 	}

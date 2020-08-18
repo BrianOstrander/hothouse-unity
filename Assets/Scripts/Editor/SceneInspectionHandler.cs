@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
-using Lunra.StyxMvp;
-using Lunra.StyxMvp.Services;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services;
 using Lunra.Hothouse.Services.Editor;
@@ -27,11 +25,14 @@ namespace Lunra.Hothouse.Editor
 			IfMaximumGreaterThanZero = 30,
 			IfNotFull = 40
 		}
+
+		const float SceneCameraRadius = 10f;
 		
 		static GUIStyle labelStyle;
 		
 		static List<string> obligationIdsHandled = new List<string>();
 		static GameState gameState;
+		static Vector3 sceneCameraPosition;
 		
 		static SceneInspectionHandler()
 		{
@@ -63,6 +64,8 @@ namespace Lunra.Hothouse.Editor
 				m => m.RevealDistance.Value
 			);
 
+			sceneCameraPosition = SceneView.currentDrawingSceneView.camera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, SceneCameraRadius));
+
 			bool isInInspectedRoom(IRoomTransformModel model)
 			{
 				if (roomRevealDistances[model.RoomTransform.Id.Value] == 0) return true;
@@ -79,7 +82,7 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.BeginDepthCheck(CompareFunction.Less);
 				{
 					var yOffset = 0.01f;
-					foreach (var model in gameState.Payload.Game.GetLightsActive().Where(l => l.Light.IsLightActive()))
+					foreach (var model in gameState.Payload.Game.Query.All<ILightModel>(l => l.Light.IsLightActive()))
 					{
 						Handles.DrawSolidDisc(
 							model.Transform.Position.Value + new Vector3(0f, yOffset, 0f),
@@ -92,7 +95,7 @@ namespace Lunra.Hothouse.Editor
 				HandlesExtensions.EndDepthCheck();
 
 				var lightSensitiveOffset = Vector3.up * 4f;
-				foreach (var model in gameState.Payload.Game.GetLightSensitives().Where(isInInspectedRoom))
+				foreach (var model in gameState.Payload.Game.Query.All<ILightSensitiveModel>().Where(isInInspectedRoom))
 				{
 					Debug.DrawLine(
 						model.Transform.Position.Value + lightSensitiveOffset,
@@ -130,7 +133,8 @@ namespace Lunra.Hothouse.Editor
 							}
 
 							append(connectionsResult);
-						}
+						},
+						ignoreRenderLimiting: true
 					);
 				}
 			}
@@ -188,7 +192,7 @@ namespace Lunra.Hothouse.Editor
 			
 			if (SceneInspectionSettings.IsInspectingOtherAgents.Value)
 			{
-				foreach (var model in gameState.Payload.Game.Seekers.AllActive.Where(isInInspectedRoom))
+				foreach (var model in gameState.Payload.Game.Query.All<AgentModel>(m => m.GetType() != typeof(DwellerModel) && isInInspectedRoom(m)))
 				{
 					DrawLabel(
 						model
@@ -199,6 +203,16 @@ namespace Lunra.Hothouse.Editor
 			if (SceneInspectionSettings.IsInspectingItemDrops.Value)
 			{
 				foreach (var model in gameState.Payload.Game.ItemDrops.AllActive.Where(isInInspectedRoom))
+				{
+					DrawLabel(
+						model
+					);
+				}
+			}
+			
+			if (SceneInspectionSettings.IsInspectingGenerators.Value)
+			{
+				foreach (var model in gameState.Payload.Game.Generators.AllActive.Where(isInInspectedRoom))
 				{
 					DrawLabel(
 						model
@@ -216,12 +230,37 @@ namespace Lunra.Hothouse.Editor
 				DrawEntranceInspection(model);
 
 				DrawLabel(
-					model
+					model,
+					append =>
+					{
+						if (model.Age.Value.IsDone)
+						{
+							append($"Reproduction: \t{model.ReproductionElapsed.Value.Normalized:N2}");
+							append($"Reproduction {model.ReproductionModifier}");
+						}
+						else
+						{
+							append($"Age: \t{model.Age.Value.Normalized:N2}");
+							append($"Age {model.AgeModifier}");
+						}
+					}
 				);
 					
 				if (model.IsReproducing.Value) continue;
 				Handles.color = Color.red;
 				Handles.DrawWireCube(model.Transform.Position.Value, Vector3.one);
+			}
+			
+			foreach (var model in gameState.Payload.Game.Debris.AllActive.Where(isInInspectedRoom))
+			{
+				if (!SceneInspectionSettings.IsInspectingDebris.Value)
+				{
+					if (!(SceneInspectionSettings.IsInspectingObligations.Value && model.Obligations.HasAny())) continue;
+				}
+				
+				DrawEntranceInspection(model);
+
+				DrawLabel(model);
 			}
 			
 			foreach (var model in gameState.Payload.Game.Doors.AllActive.Where(isInInspectedRoom))
@@ -240,7 +279,8 @@ namespace Lunra.Hothouse.Editor
 						append("RoomId0: " + Model.ShortenId(model.RoomConnection.Value.RoomId0));
 						append("RoomId1: " + Model.ShortenId(model.RoomConnection.Value.RoomId1));
 						append("ConnectedRoomId: " + Model.ShortenId(model.LightSensitive.ConnectedRoomId.Value));		
-					}
+					},
+					ignoreRenderLimiting: true
 				);
 					
 				DrawSelectionButton(
@@ -296,13 +336,16 @@ namespace Lunra.Hothouse.Editor
 		static void DrawLabel(
 			IModel model,
 			Action<Action<string>> append = null,
-			string overrideName = null
+			string overrideName = null,
+			bool ignoreRenderLimiting = false
 		)
 		{
 			var position = Vector3.zero;
 
 			if (model is ITransformModel transformModel) position = transformModel.Transform.Position.Value;
 			else Debug.LogError("Trying to draw a label on a non-transform model");
+
+			if (!ignoreRenderLimiting && SceneCameraRadius < Vector3.Distance(position, sceneCameraPosition)) return;
 			
 			var result = "Id: " + model.ShortId;
 
@@ -325,7 +368,8 @@ namespace Lunra.Hothouse.Editor
 				if (DrawButton(agentModel, new GUIContent("Serialize State")))
 				{
 					EditorGUIUtility.systemCopyBuffer = agentModel.StateMachine.GetSerializedGraph(true);
-					Debug.Log("Serialized ai state copied to clipboard");
+					Debug.Log("Serialized ai state copied to clipboard, opening visualizer...");
+					Application.OpenURL("https://dreampuf.github.io/GraphvizOnline");
 				}
 			}
 			
@@ -347,7 +391,7 @@ namespace Lunra.Hothouse.Editor
 				}
 			}
 			
-			if (model is IClaimOwnershipModel claimOwnershipModel && 0 < claimOwnershipModel.Ownership.MaximumClaimers.Value)
+			if (model is IClaimOwnershipModel claimOwnershipModel && 0 < claimOwnershipModel.Ownership.PermittedClaimers.Value)
 			{
 				appendResult(claimOwnershipModel.Ownership.ToString());
 			}
@@ -378,6 +422,11 @@ namespace Lunra.Hothouse.Editor
 			if (model is IRecipeModel recipeModel && (recipeModel.Recipes.Available.Value.Any() || recipeModel.Recipes.Queue.Value.Any()))
 			{
 				appendResult(recipeModel.Recipes.ToString());
+			}
+
+			if (model is IGeneratorModel generatorModel)
+			{
+				appendResult(generatorModel.Generator.ToString(gameState.Payload.Game.SimulationTime.Value));
 			}
 			
 			if (model is IFarmModel farmModel && farmModel.Farm.IsFarm)
@@ -437,13 +486,22 @@ namespace Lunra.Hothouse.Editor
 							break;
 					}
 
-					Handles.color = farmPlot.AttendingFarmer.IsNull ? farmPlotColor.NewA(0.5f) : farmPlotColor;
+					Handles.color = farmPlotColor.NewA(0.5f);
 
 					Handles.DrawWireDisc(
 						farmPlot.Position,
 						Vector3.up,
 						0.2f
 					);
+
+					if (!farmPlot.AttendingFarmer.IsNull)
+					{
+						Handles.DrawWireDisc(
+							farmPlot.Position,
+							Vector3.up,
+							0.15f
+						);	
+					}
 				}
 			}
 
@@ -457,11 +515,21 @@ namespace Lunra.Hothouse.Editor
 				appendResult(goalActivityModel.Activities.ToString());
 			}
 
+			if (model is ITagModel tagModel)
+			{
+				appendResult(tagModel.Tags.ToString());
+			}
+			
+			if (model is IAttackModel attackModel)
+			{
+				appendResult(attackModel.Attacks.ToString());
+			}
+
 			append?.Invoke(appendResult);
 
 			Handles.Label(
 				position + (Vector3.up * 3f),
-				StringExtensions.Wrap(result, "<color=cyan>", "</color>"),
+				result.Wrap("<color=cyan>", "</color>"),
 				labelStyle
 			);
 		}

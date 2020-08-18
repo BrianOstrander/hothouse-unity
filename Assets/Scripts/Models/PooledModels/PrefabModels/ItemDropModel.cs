@@ -1,24 +1,29 @@
-﻿namespace Lunra.Hothouse.Models
+using Newtonsoft.Json;
+
+namespace Lunra.Hothouse.Models
 {
 	public class ItemDropModel : PrefabModel,
 		IInventoryModel
 	{
 		#region Serialized
-		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
-		public EnterableComponent Enterable { get; } = new EnterableComponent();
-		public InventoryComponent Inventory { get; } = new InventoryComponent();
+		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
+		[JsonProperty] public EnterableComponent Enterable { get; private set; } = new EnterableComponent();
+		[JsonProperty] public InventoryComponent Inventory { get; private set; } = new InventoryComponent();
 		#endregion
 		
 		#region Non Serialized
-		public IBaseInventoryComponent[] Inventories { get; }
+		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
 		#endregion
 
 		public ItemDropModel()
 		{
-			Inventories = new []
-			{
-				Inventory	
-			};
+			Inventories = new [] { Inventory };
+			
+			AppendComponents(
+				LightSensitive,
+				Enterable,
+				Inventory
+			);
 		}
 	}
 }

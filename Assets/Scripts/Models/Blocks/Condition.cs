@@ -58,10 +58,8 @@ namespace Lunra.Hothouse.Models
 			ZeroBeds = 3,
 			
 			// Inventory
-			NoRations = 100,
 			NoStalks = 101,
 			NoScrap = 102,
-			LowRations = 103,
 			
 			// Environment
 			ZeroDoorsOpen = 200,
@@ -154,23 +152,19 @@ namespace Lunra.Hothouse.Models
 				
 				// Building
 				case Types.SingleOperationalFire:
-					return game.GetLightsActive().Count() == 1;
+					return game.Query.All<ILightModel>(m => m.Light.IsLightActive()).Count() == 1;
 				case Types.AnyFireExtinguishing:
-					return game.GetLightsActive().Any(l => l.Light.LightState.Value == LightStates.Extinguishing);
+					return game.Query.Any<ILightModel>(m => m.Light.LightState.Value == LightStates.Extinguishing);
 				case Types.ZeroBeds:
 					return true;
 					// return game.Buildings.AllActive.None(t => t.IsBuildingState(BuildingStates.Operating) && t.IsDesireAvailable(Motives.Sleep));
 				
 				// Inventory
-				case Types.NoRations:
-					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Rations] <= 0;
 				case Types.NoStalks: 
-					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.StalkDry] <= 0;
+					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Stalk] <= 0;
 				case Types.NoScrap: 
 					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Scrap] <= 0;
-				case Types.LowRations:
-					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Rations] <= game.Cache.Value.LowRationThreshold;
-				
+
 				// Environment
 				case Types.ZeroDoorsOpen:
 					return 0 == doorOpenCount();

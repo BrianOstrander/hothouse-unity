@@ -196,5 +196,6 @@ namespace Lunra.Core
 		}
 		
 		public static T[] WrapInArray<T>(this T element) => new [] { element };
+		public static List<T> WrapInList<T>(this T element) => new List<T> { element };
 	}
 }

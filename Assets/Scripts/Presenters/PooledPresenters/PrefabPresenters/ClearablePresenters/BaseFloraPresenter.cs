@@ -51,24 +51,6 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsReproducing.Changed -= OnFloraIsReproducing;
 		}
 
-		protected override Inventory CalculateItemDrops()
-		{
-			var result = base.CalculateItemDrops();
-
-			if (!Model.Farm.Value.IsNull)
-			{
-				var seedCount = result[Model.Seed.Value];
-				result -= (Model.Seed.Value, seedCount);
-
-				if (Game.Cache.Value.SeedsWithCapacity.Contains(Model.Seed.Value))
-				{
-					result += (Model.Seed.Value, Mathf.Max(1, seedCount));
-				}
-			}
-
-			return result;
-		}
-
 		protected override void OnViewPrepare()
 		{
 			base.OnViewPrepare();
@@ -86,7 +68,9 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!Model.Age.Value.IsDone)
 			{
-				Model.Age.Value = Model.Age.Value.Update(Game.SimulationTimeDelta);
+				Model.Age.Value = Model.Age.Value.Update(
+					Mathf.Max((1f + Model.AgeModifier.Sum.Value) * Game.SimulationTimeDelta, 0f)
+				);
 
 				if (View.Visible) View.Age = Model.Age.Value.Normalized;
 				
@@ -97,7 +81,9 @@ namespace Lunra.Hothouse.Presenters
 
 			if (!Model.ReproductionElapsed.Value.IsDone)
 			{
-				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(Game.SimulationTimeDelta);
+				Model.ReproductionElapsed.Value = Model.ReproductionElapsed.Value.Update(
+					Mathf.Max((1f + Model.ReproductionModifier.Sum.Value) * Game.SimulationTimeDelta, 0f)
+				);
 				return;
 			}
 			

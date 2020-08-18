@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsOpen.Changed += OnDoorPrefabIsOpen;
 			Model.LightSensitive.LightLevel.Changed += OnLightLevel;
 
-			Model.Obligations.Bind(ObligationCategories.Door.Open, OnObligationDoorOpen);
+			Model.Obligations.AddCallback(ObligationCategories.Door.Open, OnObligationDoorOpen);
 
 			base.Bind();
 		}
@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Presenters
 			Model.IsOpen.Changed -= OnDoorPrefabIsOpen;
 			Model.LightSensitive.LightLevel.Changed -= OnLightLevel;
 			
-			Model.Obligations.UnBind(ObligationCategories.Door.Open, OnObligationDoorOpen);
+			Model.Obligations.RemoveCallback(ObligationCategories.Door.Open, OnObligationDoorOpen);
 			
 			base.UnBind();
 		}

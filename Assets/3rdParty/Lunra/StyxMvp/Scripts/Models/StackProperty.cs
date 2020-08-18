@@ -41,7 +41,8 @@ namespace Lunra.StyxMvp.Models
 		public event Action<StackProperty<T>> Changed = ActionExtensions.GetEmpty<StackProperty<T>>();
 		public event Action<Delta> ChangedDelta = ActionExtensions.GetEmpty<Delta>();
 		
-		readonly Stack<T> stack;
+		// For some boring reason I don't wanna read about Newtonsoft doesn't like Stacks, so we're using a list instead.
+		readonly List<T> stack;
 
 		public void Clear(
 			object source = default
@@ -64,7 +65,7 @@ namespace Lunra.StyxMvp.Models
 			object source = default
 		)
 		{
-			stack.Push(element);
+			stack.Insert(0, element);
 			Changed(this);
 			ChangedDelta(
 				new Delta(
@@ -92,7 +93,9 @@ namespace Lunra.StyxMvp.Models
 			object source = default
 		)
 		{
-			var result = stack.Pop();
+			var result = stack[0];
+			stack.RemoveAt(0);
+			
 			Changed(this);
 			ChangedDelta(
 				new Delta(
@@ -105,15 +108,29 @@ namespace Lunra.StyxMvp.Models
 			return result;
 		}
 
-		public bool TryPeek(out T element) => stack.TryPeek(out element);
+		public bool TryPeek(out T element) => TryPeek(out element, 0);
 
-		public bool TryPeek(out T element, int offset) => stack.TryPeek(out element, offset);
+		public bool TryPeek(out T element, int offset)
+		{
+			if (offset < stack.Count)
+			{
+				element = stack[offset];
+				return true;
+			}
+
+			element = default;
+			return false;	
+		}
 		
-		public T Peek() => stack.Peek();
-		public T[] PeekAll() => stack.PeekAll();
+		public T Peek() => Peek(0);
+		public T Peek(int offset) => stack[offset];
+		public T[] PeekAll() => stack.ToArray();
 
+		public bool Any() => stack.Any();
+		public bool None() => stack.None();
+		
 		public StackProperty(
-			Stack<T> stack,
+			List<T> stack,
 			string name,
 			params Action<StackProperty<T>>[] listeners
 		)
@@ -125,7 +142,7 @@ namespace Lunra.StyxMvp.Models
 		}
 
 		public StackProperty(
-			Stack<T> stack,
+			List<T> stack,
 			params Action<StackProperty<T>>[] listeners
 		) : this(
 			stack,

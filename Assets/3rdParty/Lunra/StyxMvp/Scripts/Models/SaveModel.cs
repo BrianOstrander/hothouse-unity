@@ -72,8 +72,7 @@ namespace Lunra.StyxMvp.Models
 		/// folder is even created.
 		/// </summary>
 		/// <value>The sibling behaviour.</value>
-		[JsonProperty]
-		public SiblingBehaviours SiblingBehaviour { get; protected set; }
+		[JsonProperty] public SiblingBehaviours SiblingBehaviour { get; protected set; }
 
 		#endregion
 		
@@ -120,8 +119,7 @@ namespace Lunra.StyxMvp.Models
 			}
 		}
 
-		[JsonIgnore]
-		public Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>();
+		[JsonIgnore] public Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>();
 
 		public Texture2D GetTexture(string name)
 		{

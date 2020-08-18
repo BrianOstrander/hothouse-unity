@@ -1,3 +1,4 @@
+using System.Linq;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace Lunra.Hothouse.Models
 		Active = 20
 	}
 
-	public interface IPooledModel : IModel, ITransformModel
+	public interface IPooledModel : ITransformModel
 	{
 		#region Serialized
 		ListenerProperty<PooledStates> PooledState { get; }
@@ -28,12 +29,14 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] PooledStates pooledState = PooledStates.InActive;
 		[JsonIgnore] public ListenerProperty<PooledStates> PooledState { get; }
 
-		public TransformComponent Transform { get; } = new TransformComponent();
+		[JsonProperty] public TransformComponent Transform { get; private set; } = new TransformComponent();
 		#endregion
 		
 		#region Non Serialized
 		bool hasPresenter;
 		[JsonIgnore] public ListenerProperty<bool> HasPresenter { get; }
+		
+		[JsonIgnore] public IComponentModel[] Components { get; private set; } = new IComponentModel[0];
 		#endregion
 
 		public PooledModel()
@@ -41,6 +44,10 @@ namespace Lunra.Hothouse.Models
 			PooledState = new ListenerProperty<PooledStates>(value => pooledState = value, () => pooledState);
 			
 			HasPresenter = new ListenerProperty<bool>(value => hasPresenter = value, () => hasPresenter);
+			
+			AppendComponents(Transform);
 		}
+		
+		protected void AppendComponents(params IComponentModel[] components) => Components = Components.Concat(components).ToArray();
 	}
 }

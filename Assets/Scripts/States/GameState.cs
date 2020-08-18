@@ -38,11 +38,19 @@ namespace Lunra.Hothouse.Services
 			);
 			
 			App.S.PushBlocking(Payload.Game.DwellerNames.Initialize);
-			App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
 
-			if (Payload.Game.Rooms.AllActive.None()) new GameStateGenerateLevel(this).Push();
+			if (Payload.Game.Rooms.AllActive.None())				
+			{
+				App.S.PushBlocking(done => Payload.Game.RoomResolver.Initialize(done));
+				new GameStateGenerateLevel(this).Push();
+			}
 			
+			// App.S.PushBreak();
+			App.S.Push(Payload.Game.TriggerSimulationInitialize);
+
 			App.S.PushBlocking(OnBeginInitializeCache);
+			
+			App.S.Push(OnBeginInitializeServices);
 		}
 
 		void OnBeginLoadScenes(Action done)
@@ -66,10 +74,11 @@ namespace Lunra.Hothouse.Services
 			new ToolbarPresenter(Payload.Game);
 			new EffectsPresenter(Payload.Game);
 
-			new HintsPresenter(Payload.Game);
+			// new HintsPresenter(Payload.Game);
 			new BuildValidationPresenter(Payload.Game);
 			new GlobalInventoryCounterPresenter(Payload.Game);
 			new JobManagePresenter(Payload.Game);
+			new BuildingManagePresenter(Payload.Game);
 
 			new RoomResolverPresenter(Payload.Game);
 			
@@ -80,7 +89,10 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.Flora.Initialize(Payload.Game);
 			Payload.Game.ItemDrops.Initialize(Payload.Game);
 			Payload.Game.Dwellers.Initialize(Payload.Game);
-			Payload.Game.Seekers.Initialize(Payload.Game);
+			Payload.Game.Bubblers.Initialize(Payload.Game);
+			Payload.Game.SnapCaps.Initialize(Payload.Game);
+			Payload.Game.Decorations.Initialize(Payload.Game);
+			Payload.Game.Generators.Initialize(Payload.Game);
 			
 			done();
 		}
@@ -92,6 +104,12 @@ namespace Lunra.Hothouse.Services
 			Payload.Game.InitializeCache(); 
 			
 			done();
+		}
+
+		void OnBeginInitializeServices()
+		{
+			new PopulationService(Payload.Game);
+			new HostileSpawnService(Payload.Game);
 		}
 		#endregion
 
@@ -105,13 +123,12 @@ namespace Lunra.Hothouse.Services
 
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
-
+			
 			// App.Heartbeat.WaitForSeconds(
 			// 	() =>
 			// 	{
-			// 		Debug.Log("Killing wagon...");
-			// 		var wagon = Payload.Game.Buildings.FirstOrDefaultActive(m => m.Type.Value == Buildings.StartingWagon);
-			// 		Damage.ApplyGeneric(999f, wagon);
+			// 		Debug.Log("Selecting building...");
+			// 		Payload.Game.BuildingManage.Selection.Value = Payload.Game.Buildings.AllActive.First();
 			// 	},
 			// 	5f
 			// );
@@ -119,7 +136,25 @@ namespace Lunra.Hothouse.Services
 
 		void OnHeartbeatUpdate()
 		{
-			if (!Payload.Game.IsSimulating.Value) return;
+			if (Input.GetKeyUp(KeyCode.Alpha1))
+			{
+				Payload.Game.SimulationMultiplier.Value = 1f;
+			}
+			else if (Input.GetKeyUp(KeyCode.Alpha2))
+			{
+				Payload.Game.SimulationMultiplier.Value = 4f;
+			}
+			else if (Input.GetKeyUp(KeyCode.Alpha3))
+			{
+				Payload.Game.SimulationMultiplier.Value = 8f;
+			}
+			else if (Input.GetKeyUp(KeyCode.Space))
+			{
+				if (Payload.Game.IsSimulating) Payload.Game.SimulationMultiplier.Value = 0f;
+				else Payload.Game.SimulationMultiplier.Value = Payload.Game.LastNonZeroSimulationMultiplier.Value;
+			}
+			
+			if (!Payload.Game.IsSimulating) return;
 			
 			Payload.Game.StepSimulation(Time.deltaTime);
 			
@@ -145,14 +180,9 @@ namespace Lunra.Hothouse.Services
 
 		void OnHeartbeatLateUpdate()
 		{
-			if (Payload.Game.GameResult.Value.State == GameResult.States.Unknown) return;
+			if (Payload.Game.GameResult.Value.State != GameResult.States.Failure) return;
 			
-			App.S.RequestState(
-				new MainMenuPayload
-				{
-					Preferences = Payload.Preferences
-				}
-			);
+			App.S.RequestState<MainMenuPayload>();
 		}
 		#endregion
         
@@ -198,12 +228,12 @@ namespace Lunra.Hothouse.Services
 
 			if (Payload.Game.LastLightUpdate.Value.RoomIds.None() && Payload.Game.LastLightUpdate.Value.SensitiveIds.Any())
 			{
-				lightSensitives = Payload.Game.GetLightSensitives()
+				lightSensitives = Payload.Game.Query.All<ILightSensitiveModel>()
 					.Where(lightSensitive => Payload.Game.LastLightUpdate.Value.SensitiveIds.Contains(lightSensitive.Id.Value));
 			}
 			else
 			{
-				lightSensitives = Payload.Game.GetLightSensitives()
+				lightSensitives = Payload.Game.Query.All<ILightSensitiveModel>()
 					.Where(
 						lightSensitive => rooms.Any(
 							r =>
@@ -216,7 +246,7 @@ namespace Lunra.Hothouse.Services
 					);	
 			}
 			
-			var allLights = Payload.Game.GetLightsActive()
+			var allLights = Payload.Game.Query.All<ILightModel>(m => m.Light.IsLightActive())
 				.Where(light => rooms.Any(room => room.RoomTransform.Id.Value == light.RoomTransform.Id.Value))
 				.ToList();
 			
@@ -252,14 +282,15 @@ namespace Lunra.Hothouse.Services
 			
 			result.OperatingMaximum = OnCalculateMaximumLighting(
 				request.Position,
-				Payload.Game.GetLightsActive().Where(isLightNotExceptedAndInRoom)
+				Payload.Game.Query.All<ILightModel>(m => m.Light.IsLightActive() && isLightNotExceptedAndInRoom(m))
 			);
 
 			result.ConstructingMaximum = OnCalculateMaximumLighting(
 				request.Position,
-				Payload.Game.GetLights(
+				Payload.Game.Query.All<ILightModel>(
 					l =>
 					{
+						if (!l.Light.IsLight.Value) return false;
 						if (l.Light.IsLightActive()) return false;
 						
 						switch (l.Light.LightState.Value)

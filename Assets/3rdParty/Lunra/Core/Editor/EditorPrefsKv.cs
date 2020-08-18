@@ -28,7 +28,8 @@ namespace Lunra.Editor.Core
 		
 		public GUIContent Label => new GUIContent(LabelName);
 
-		public abstract void Draw(params GUILayoutOption[] options);
+		public abstract T Draw(params GUILayoutOption[] options);
+		public abstract T DrawValue(params GUILayoutOption[] options);
 	}
 
 	public class EditorPrefsString : EditorPrefsKv<string>
@@ -41,7 +42,8 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsString(string key, string defaultValue = null) : base(key, defaultValue) {}
 
-		public override void Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.TextField(Label, Value, options);
+		public override string Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.TextField(Label, Value, options);
+		public override string DrawValue(params GUILayoutOption[] options) => Value = EditorGUILayout.TextField(GUIContent.none, Value, options);
 	}
 
 	public class EditorPrefsBool : EditorPrefsKv<bool>
@@ -54,7 +56,8 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsBool(string key, bool defaultValue = false) : base(key, defaultValue) {}
 
-		public override void Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.Toggle(Label, Value, options);
+		public override bool Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.Toggle(Label, Value, options);
+		public override bool DrawValue(params GUILayoutOption[] options) => Value = EditorGUILayout.Toggle(Value, options);
 	}
 
 	public class EditorPrefsFloat : EditorPrefsKv<float>
@@ -79,7 +82,8 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsFloat(string key, float defaultValue = 0f) : base(key, defaultValue) {}
 
-		public override void Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.FloatField(Label, Value, options);
+		public override float Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.FloatField(Label, Value, options);
+		public override float DrawValue(params GUILayoutOption[] options) => Value = EditorGUILayout.FloatField(Value, options);
 	}
 
 	public class EditorPrefsInt : EditorPrefsKv<int>
@@ -92,7 +96,8 @@ namespace Lunra.Editor.Core
 
 		public EditorPrefsInt(string key, int defaultValue = 0) : base(key, defaultValue) {}
 
-		public override void Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.IntField(Label, Value, options);
+		public override int Draw(params GUILayoutOption[] options) => Value = EditorGUILayout.IntField(Label, Value, options);
+		public override int DrawValue(params GUILayoutOption[] options) => Value = EditorGUILayout.IntField(Value, options);
 	}
 
 	public class EditorPrefsEnum<T> : EditorPrefsKv<T> where T : Enum
@@ -112,6 +117,7 @@ namespace Lunra.Editor.Core
 			if (!typeof(T).IsEnum) Debug.LogError(typeof(T).FullName + " is not an enum.");
 		}
 
-		public override void Draw(params GUILayoutOption[] options) => Value = (T)EditorGUILayout.EnumPopup(Label, Value, options);
+		public override T Draw(params GUILayoutOption[] options) => Value = (T)EditorGUILayout.EnumPopup(Label, Value, options);
+		public override T DrawValue(params GUILayoutOption[] options) => Value = (T)EditorGUILayout.EnumPopup(Value, options);
 	}
 }

@@ -37,6 +37,31 @@ namespace Lunra.Hothouse.Views
 				Anchor = anchor;
 			}
 		}
+		
+		[Serializable]
+		public struct Wall
+		{
+			public int Index;
+			public int DoorIndex;
+			public Transform BeginAnchor;
+			public Transform EndAnchor;
+			public float Height;
+
+			public Wall(
+				int index,
+				int doorIndex,
+				Transform beginAnchor,
+				Transform endAnchor,
+				float height
+			)
+			{
+				Index = index;
+				DoorIndex = doorIndex;
+				BeginAnchor = beginAnchor;
+				EndAnchor = endAnchor;
+				Height = height;
+			}
+		}
 
 		public string PrefabId;
 		public string[] PrefabTags;
@@ -47,6 +72,7 @@ namespace Lunra.Hothouse.Views
 		public Vector2 Size;
 		public Collider[] Colliders;
 		public Connection[] DoorAnchors;
+		public Wall[] Walls;
 		public int DoorAnchorSizeMaximum;
 		
 		public int CollisionCount;
@@ -56,6 +82,7 @@ namespace Lunra.Hothouse.Views
 			string prefabId,
 			ColliderCache[] colliders,
 			DoorCache[] doorAnchors,
+			WallCache[] walls,
 			string[] prefabTags
 		)
 		{
@@ -143,6 +170,38 @@ namespace Lunra.Hothouse.Views
 
 			DoorAnchors = doorAnchorsList.ToArray();
 			DoorAnchorSizeMaximum = doorAnchorsList.Max(d => d.Size);
+
+			var wallsList = new List<Wall>();
+
+			if (walls != null)
+			{
+				foreach (var wallReference in walls)
+				{
+					var wallBegin = new GameObject("Wall_Begin_" + wallsList.Count).transform;
+					var wallEnd = new GameObject("Wall_End_" + wallsList.Count).transform;
+					
+					wallBegin.SetParent(transform);
+					wallEnd.SetParent(transform);
+
+					wallBegin.localPosition = wallReference.Begin;
+					wallBegin.forward = wallReference.Normal;
+
+					wallEnd.localPosition = wallReference.End;
+					wallEnd.forward = wallReference.Normal;
+
+					wallsList.Add(
+						new Wall(
+							wallReference.Index,
+							wallReference.DoorIndex ?? -1,
+							wallBegin,
+							wallEnd,
+							wallReference.Height
+						)
+					);
+				}
+			}
+			
+			Walls = wallsList.ToArray();
 		}
 
 		public void Dock(

@@ -39,6 +39,7 @@ namespace Lunra.Hothouse.Presenters
 					entry.View.PrefabId,
 					entry.View.BoundaryColliders,
 					entry.View.DoorDefinitions,
+					entry.View.WallDefinitions,
 					entry.View.PrefabTags
 				);
 			}

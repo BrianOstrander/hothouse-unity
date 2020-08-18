@@ -10,7 +10,7 @@ namespace Lunra.Hothouse.Models
 		LightSensitiveComponent LightSensitive { get; }
 	}
 
-	public class LightSensitiveComponent : Model
+	public class LightSensitiveComponent : ComponentModel<ILightSensitiveModel>
 	{
 		#region Serialized
 		[JsonProperty] float lightLevel;
@@ -37,19 +37,6 @@ namespace Lunra.Hothouse.Models
 		public override string ToString()
 		{
 			return "Light Level: " + LightLevel.Value.ToString("N2");
-		}
-	}
-	
-	public static class LightSensitiveGameModelExtensions
-	{
-		public static IEnumerable<ILightSensitiveModel> GetLightSensitives(
-			this GameModel game	
-		)
-		{
-			return game.Buildings.AllActive
-				.Concat<ILightSensitiveModel>(game.ItemDrops.AllActive)
-				.Concat(game.Doors.AllActive)
-				.Concat(game.GetClearables());
 		}
 	}
 }

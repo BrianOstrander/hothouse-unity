@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Lunra.Core;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp.Models;
@@ -20,10 +20,10 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] Interval age;
 		[JsonIgnore] public ListenerProperty<Interval> Age { get; }
-
+		
 		[JsonProperty] Interval reproductionElapsed;
 		[JsonIgnore] public ListenerProperty<Interval> ReproductionElapsed { get; }
-		
+
 		[JsonProperty] FloatRange reproductionRadius;
 		[JsonIgnore] public ListenerProperty<FloatRange> ReproductionRadius { get; }
 		
@@ -39,11 +39,14 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] bool attacksBuildings;
 		[JsonIgnore] public ListenerProperty<bool> AttacksBuildings { get; }
 		
-		public LightSensitiveComponent LightSensitive { get; } = new LightSensitiveComponent();
-		public HealthComponent Health { get; } = new HealthComponent();
-		public ClearableComponent Clearable { get; } = new ClearableComponent();
-		public ObligationComponent Obligations { get; } = new ObligationComponent();
-		public EnterableComponent Enterable { get; } = new EnterableComponent(); 
+		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
+		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
+		[JsonProperty] public ClearableComponent Clearable { get; private set; } = new ClearableComponent();
+		[JsonProperty] public ObligationComponent Obligations { get; private set; } = new ObligationComponent();
+		[JsonProperty] public EnterableComponent Enterable { get; private set; } = new EnterableComponent();
+		
+		[JsonProperty] public ModifierComponent AgeModifier { get; private set; } = new ModifierComponent();
+		[JsonProperty] public ModifierComponent ReproductionModifier { get; private set; } = new ModifierComponent();
 		#endregion
 		
 		#region Non Serialized
@@ -72,6 +75,16 @@ namespace Lunra.Hothouse.Models
 				(failures, failureLimit) => failures < failureLimit,
 				ReproductionFailures,
 				ReproductionFailureLimit
+			);
+			
+			AppendComponents(
+				LightSensitive,
+				Health,
+				Clearable,
+				Obligations,
+				Enterable,
+				AgeModifier,
+				ReproductionModifier
 			);
 		}
 	}

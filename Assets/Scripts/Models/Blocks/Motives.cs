@@ -6,7 +6,7 @@ namespace Lunra.Hothouse.Models
 		None = 10,
 		Sleep = 20,
 		Eat = 30,
-		Heal = 40
-		// Warmup = 40
+		Heal = 40,
+		Comfort = 50
 	}
 }

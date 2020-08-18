@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IHealthModel : IRoomTransformModel
+	public interface IHealthModel : IRoomTransformModel, IPooledModel
 	{
 		HealthComponent Health { get; }
 	}
 
-	public class HealthComponent : Model
+	public class HealthComponent : ComponentModel<IHealthModel>
 	{
 		#region Serialized
 		[JsonProperty] float current = -1f;
@@ -41,6 +41,16 @@ namespace Lunra.Hothouse.Models
 			Maximum = new ListenerProperty<float>(value => maximum = value, () => maximum);
 		}
 
+		public override void Bind()
+		{
+			Damaged += OnDamaged;
+		}
+
+		public override void UnBind()
+		{
+			Damaged -= OnDamaged;
+		}
+
 		public void ResetToMaximum(float? newMaximum = null)
 		{
 			if (newMaximum.HasValue) Maximum.Value = newMaximum.Value;
@@ -68,18 +78,28 @@ namespace Lunra.Hothouse.Models
 				Mathf.Approximately(0f, currentNew)
 			);
 
-			Damaged(result);
-			currentListener.Value = currentNew;
+			if (!request.Type.HasFlag(Models.Damage.Types.Simulated))
+			{
+				currentListener.Value = currentNew;
+				Damaged(result);
+			}
 
 			return result;
 		}
 
 		public void Heal(float amount) => currentListener.Value = Mathf.Min(Current.Value + amount, Maximum.Value);
 
+		#region Events
+		void OnDamaged(Damage.Result result)
+		{
+			if (result.IsTargetDestroyed) Model.PooledState.Value = PooledStates.InActive;
+		}
+		#endregion
+		
 		public override string ToString()
 		{
 			var result = "Health: " + Current.Value + " / " + Maximum.Value;
-			if (IsDestroyed) result += " - " + StringExtensions.Wrap("Dead", "<color=red>", "</color>");
+			if (IsDestroyed) result += " - " + "Dead".Wrap("<color=red>", "</color>");
 			return result;
 		}
 	}

@@ -19,20 +19,18 @@ namespace Lunra.Hothouse.Models
 		{
 			Unknown = 0,
 			
-			StalkSeed = 10,
-			StalkRaw = 11,
-			StalkDry = 12,
-			StalkPop = 13,
+			Water = 2,
 			
-			SweetStalkSeed = 20,
-			SweetStalkRaw = 21,
-			SweetStalkBrittle = 22,
+			Stalk = 10,
+			
+			Grass = 20,
+			
+			SweetGrass = 30,
 			
 			// FungalBloomSpore = 10,
 			// FungalBloomRaw = 11,
 			// FungalBloomJerky = 12,
 			
-			Rations = 1000,
 			Scrap = 1001,
 		}
 		
@@ -61,8 +59,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] readonly ReadOnlyDictionary<Types, int> entries;
 		public readonly int TotalWeight;
 
-		[JsonIgnore]
-		public bool IsEmpty => 0 == TotalWeight;
+		[JsonIgnore] public bool IsEmpty => 0 == TotalWeight;
 		[JsonIgnore]
 		public IEnumerable<(Types Type, int Weight)> Entries
 		{

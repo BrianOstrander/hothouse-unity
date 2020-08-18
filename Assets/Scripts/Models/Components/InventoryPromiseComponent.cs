@@ -12,10 +12,10 @@ namespace Lunra.Hothouse.Models
 		InventoryPromiseComponent InventoryPromises { get; }
 	}
 
-	public class InventoryPromiseComponent : Model
+	public class InventoryPromiseComponent : ComponentModel<IInventoryPromiseModel>
 	{
 		#region Serialized
-		[JsonProperty] Stack<InventoryTransaction> transactions = new Stack<InventoryTransaction>();
+		[JsonProperty] List<InventoryTransaction> transactions = new List<InventoryTransaction>();
 		[JsonIgnore] public StackProperty<InventoryTransaction> Transactions { get; }
 		#endregion
 		
@@ -44,13 +44,11 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public void BreakRemainingPromises(
-			GameModel game	
-		)
+		public void BreakAllPromises()
 		{
 			foreach (var transaction in Transactions.PeekAll())
 			{
-				if (!transaction.Target.TryGetInstance<IBaseInventoryComponent>(game, out var target)) continue;
+				if (!transaction.Target.TryGetInstance<IBaseInventoryComponent>(Game, out var target)) continue;
 
 				switch (target)
 				{

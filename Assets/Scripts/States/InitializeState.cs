@@ -11,6 +11,7 @@ namespace Lunra.Hothouse.Services
 {
 	public class InitializePayload : IStatePayload
 	{
+		// TODO: This should probably be bound to some service or something...
 		public PreferencesModel Preferences;
 	}
 
@@ -25,12 +26,7 @@ namespace Lunra.Hothouse.Services
 
 		protected override void Idle()
 		{
-			App.S.RequestState(
-				new MainMenuPayload
-				{
-					Preferences = Payload.Preferences
-				}
-			);
+			App.S.RequestState<MainMenuPayload>();
 			
 			/*
 			var mainCamera = (Payload.HomeStatePayload.MainCamera = new HoloRoomFocusCameraPresenter());
@@ -112,6 +108,7 @@ namespace Lunra.Hothouse.Services
 				return;
 			}
 
+			// TODO: This should probably be bound to some service or something...
 			Payload.Preferences = result.TypedModel;
 			
 			done();

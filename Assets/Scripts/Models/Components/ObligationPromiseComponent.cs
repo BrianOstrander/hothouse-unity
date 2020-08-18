@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
+using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -12,37 +14,41 @@ namespace Lunra.Hothouse.Models
 		ObligationPromiseComponent ObligationPromises { get; }
 	}
 
-	public class ObligationPromiseComponent : Model
+	public class ObligationPromiseComponent : ComponentModel<IObligationPromiseModel>
 	{
 		#region Serialized
-		[JsonProperty] Stack<ObligationPromise> all = new Stack<ObligationPromise>();
+		[JsonProperty] List<ObligationPromise> all = new List<ObligationPromise>();
 		[JsonIgnore] public StackProperty<ObligationPromise> All { get; }
 		#endregion
 		
 		#region Non Serialized
-		public bool HasAny() => all.Any();
+		[JsonIgnore] public Action<Obligation> Complete { get; set; } = ActionExtensions.GetEmpty<Obligation>();
 		#endregion
+		
+		public bool HasAny() => all.Any();
 
 		public ObligationPromiseComponent()
 		{
 			All = new StackProperty<ObligationPromise>(all);
 		}
 
-		public void BreakRemainingPromises(
-			GameModel game	
-		)
+		public void BreakPromise()
 		{
-			foreach (var promise in All.PeekAll())
-			{
-				if (!promise.Target.TryGetInstance<IObligationModel>(game, out var target)) continue;
-
-				target.Obligations.RemoveForbidden(promise.Obligation);
-			}	
+			if (!All.TryPop(out var promise)) return;
+			if (!promise.Target.TryGetInstance<IObligationModel>(Game, out var target)) return;
+			target.Obligations.RemoveForbidden(promise.Obligation);
+		}
+		
+		public void BreakAllPromises()
+		{
+			while (All.Any()) BreakPromise();
 		}
 
 		public void Reset()
 		{
 			All.Clear();
+			Complete = ActionExtensions.GetEmpty<Obligation>();
+			ResetId();
 		}
 
 		public override string ToString()

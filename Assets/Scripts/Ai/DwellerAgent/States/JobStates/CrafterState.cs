@@ -9,9 +9,10 @@ namespace Lunra.Hothouse.Ai.Dweller
 		where S1 : CrafterState<S0, S1>
 	{
 		public override void OnInitialize()
-		{	
+		{
+			base.OnInitialize();
+
 			AddChildStates(
-				new CleanupState(),
 				new InventoryRequestState(),
 				new NavigateState(),
 				new BalanceItemState(),
@@ -31,10 +32,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new CraftRecipeHandlerState.ToObligationOnExistingObligation(),
 				new CraftRecipeHandlerState.ToObligationHandlerOnAvailableObligation(),
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery(true),
-				new BalanceItemState.ToBalanceOnAvailableDistribution(true),
-				
-				new CleanupState.ToCleanupOnItemsAvailable()
+				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
+				new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner)
 			);
 		}
 
@@ -47,7 +46,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				{
 					case RecipeComponent.States.Idle:
 					case RecipeComponent.States.Gathering:
-						Workplace.Recipes.ProcessRecipe(Game, Workplace);
+						Workplace.Recipes.ProcessRecipe();
 						break;
 					case RecipeComponent.States.Ready:
 					case RecipeComponent.States.Crafting:
@@ -57,7 +56,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 						break;
 				}
 			}
-			else Workplace.Recipes.ProcessRecipe(Game, Workplace);
+			else Workplace.Recipes.ProcessRecipe();
 		}
 		
 		class CraftRecipeHandlerState : CraftRecipeHandlerState<S1> { }

@@ -4,11 +4,10 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IPrefabModel : IPooledModel, IRoomTransformModel
+	public interface IPrefabModel : IPooledModel, ITagModel
 	{
 		#region Serialized
 		ListenerProperty<string> PrefabId { get; }
-		ListenerProperty<string[]> PrefabTags { get; }
 		ListenerProperty<string> Tag { get; }
 		#endregion
 	}
@@ -17,18 +16,21 @@ namespace Lunra.Hothouse.Models
 	{
 		[JsonProperty] string prefabId;
 		[JsonIgnore] public ListenerProperty<string> PrefabId { get; }
-		[JsonProperty] string[] prefabTags;
-		[JsonIgnore] public ListenerProperty<string[]> PrefabTags { get; }
 		[JsonProperty] string tag;
 		[JsonIgnore] public ListenerProperty<string> Tag { get; }
 		
-		public RoomTransformComponent RoomTransform { get; } = new RoomTransformComponent();
+		[JsonProperty] public RoomTransformComponent RoomTransform { get; private set; } = new RoomTransformComponent();
+		[JsonProperty] public TagComponent Tags { get; private set; } = new TagComponent();
 
 		public PrefabModel()
 		{
 			PrefabId = new ListenerProperty<string>(value => prefabId = value, () => prefabId);
-			PrefabTags = new ListenerProperty<string[]>(value => prefabTags = value, () => prefabTags);
 			Tag = new ListenerProperty<string>(value => tag = value, () => tag);
+			
+			AppendComponents(
+				RoomTransform,
+				Tags
+			);
 		}
 	}
 }

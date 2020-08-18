@@ -6,14 +6,5 @@ namespace Lunra.Hothouse.Ai.Dweller
 		where S : AgentState<GameModel, DwellerModel>
 	{
 		protected override Jobs Job => Jobs.Smoker;
-		public override void OnInitialize()
-		{
-			Workplaces = new []
-			{
-				Game.Buildings.GetDefinitionType<SmokeRackDefinition>()	
-			};
-			
-			base.OnInitialize();
-		}
 	}
 }

@@ -1,4 +1,5 @@
 using Lunra.Core;
+using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
@@ -13,14 +14,19 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		public string Type { get; }
+		[JsonProperty] public string Type { get; private set; }
 
+		[JsonConstructor]
+		Obligation() {}
+		
 		Obligation(
 			string type
 		)
 		{
 			Type = type;
 		}
+
+		public bool Is(Obligation obligation) => obligation.Type == Type; 
 
 		public override string ToString()
 		{

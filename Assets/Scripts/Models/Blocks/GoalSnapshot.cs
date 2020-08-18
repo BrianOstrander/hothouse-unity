@@ -1,9 +1,10 @@
+using Newtonsoft.Json;
 namespace Lunra.Hothouse.Models
 {
 	public struct GoalSnapshot
 	{
-		public GoalResult Total { get; }
-		public (Motives Motive, GoalResult Value)[] Values { get; }
+		[JsonProperty] public GoalResult Total { get; private set; }
+		[JsonProperty] public (Motives Motive, GoalResult Value)[] Values { get; private set; }
 			
 		public GoalSnapshot(
 			GoalResult total,

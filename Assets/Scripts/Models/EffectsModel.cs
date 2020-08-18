@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -11,8 +9,8 @@ namespace Lunra.Hothouse.Models
 	{
 		public class Request
 		{
-			public Vector3 Position { get; }
-			public string Id { get; }
+			[JsonProperty] public Vector3 Position { get; private set; }
+			[JsonProperty] public string Id { get; private set; }
 
 			public Request(
 				Vector3 position,
@@ -28,7 +26,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] bool isEnabled;
 		[JsonIgnore] public ListenerProperty<bool> IsEnabled { get; }
 
-		[JsonProperty] Queue<Request> queued = new Queue<Request>();
+		[JsonProperty] List<Request> queued = new List<Request>();
 		[JsonIgnore] public QueueProperty<Request> Queued { get; }
 		#endregion
 

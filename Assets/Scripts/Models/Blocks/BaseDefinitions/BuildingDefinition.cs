@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
@@ -19,17 +20,21 @@ namespace Lunra.Hothouse.Models
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
 		public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
-		public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.Ignored();
+		public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
 		public virtual Inventory DefaultInventory => Inventory.Empty;
-		public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.StalkDry, 2);
+		public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.Stalk, 2);
 		public virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
 		public virtual Recipe[] Recipes => new Recipe[0];
 		public virtual bool IsFarm => false;
 		public virtual Vector2 FarmSize => Vector2.zero;
-		public virtual Inventory.Types FarmSeed => Inventory.Types.Unknown;
-		
+		public virtual Type FarmFloraType => null;
+
 		public virtual GoalActivity[] Activities => new GoalActivity[0];
 		
+		public virtual Jobs[] WorkplaceForJobs => new Jobs[0];
+
+		public virtual string[] Tags => new string[0];
+
 		public virtual void Reset(
 			BuildingModel model,
 			BuildingStates state
@@ -48,7 +53,10 @@ namespace Lunra.Hothouse.Models
 			);
 			model.LightSensitive.Reset();
 			
-			model.Ownership.Reset(MaximumOwners);
+			model.Ownership.Reset(
+				MaximumOwners,
+				WorkplaceForJobs
+			);
 			
 			model.Inventory.Reset(
 				DefaultInventoryPermission,
@@ -79,7 +87,7 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			model.ConstructionInventory.Reset(
-				InventoryPermission.DepositForJobs(Jobs.Stockpiler), 
+				InventoryPermission.DepositForJobs(Jobs.Stockpiler, Jobs.Laborer), 
 				InventoryCapacity.ByIndividualWeight(ConstructionInventory),
 				constructionInventoryDesired
 			);
@@ -95,7 +103,7 @@ namespace Lunra.Hothouse.Models
 			model.Obligations.Reset();
 			
 			model.Recipes.Reset(Recipes);
-
+			
 			/*
 			if (Recipes.Any())
 			{
@@ -106,18 +114,26 @@ namespace Lunra.Hothouse.Models
 				};
 			}
 			*/
+
+			var farmFloraType = Game.Flora.Definitions.FirstOrDefault(d => d.GetType() == FarmFloraType)?.Type;
 			
+			if (IsFarm && string.IsNullOrEmpty(farmFloraType)) Debug.LogError($"{Type} is a farm, but no seed of type {FarmFloraType} could be found");
+
 			model.Farm.Reset(
 				IsFarm,
 				FarmSize,
-				FarmSeed
-			);
+				farmFloraType
+			);	
 
 			model.Activities.Reset(Activities);
+			
+			model.Tags.Reset();
+			foreach (var tag in Tags) model.Tags.AddTag(tag); 
 		}
 
 		public override void Instantiate(BuildingModel model) => new BuildingPresenter(Game, model);
 
+		#region Utility
 		protected string GetActionName(
 			Motives motive,
 			string suffix = null
@@ -128,5 +144,35 @@ namespace Lunra.Hothouse.Models
 		}
 
 		protected string GetActionName(string suffix) => Type + "." + suffix;
+
+		protected GoalActivity GetDefaultEatActivity(
+			Inventory.Types type,
+			float comfort = 0.1f,
+			float durationInMinutes = 15f
+		)
+		{
+			if (!DefaultEatModifiers.TryGetValue(type, out var result))
+			{
+				Debug.LogError("Unable to find eat modifier entry of type: " + type);
+				return default;
+			}
+			
+			return new GoalActivity(
+				GetActionName(Motives.Eat, type.ToString().ToLower()),
+				new[]
+				{
+					(Motives.Eat, result),
+					(Motives.Comfort, comfort)
+				},
+				DayTime.FromMinutes(durationInMinutes),
+				Inventory.FromEntry(type, 1)
+			);
+		}
+		
+		protected static readonly Dictionary<Inventory.Types, float> DefaultEatModifiers = new Dictionary<Inventory.Types, float>
+		{
+			{ Inventory.Types.SweetGrass, -0.25f }
+		};
+		#endregion
 	}
 }

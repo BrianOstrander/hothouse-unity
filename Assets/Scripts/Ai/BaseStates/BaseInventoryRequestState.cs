@@ -98,7 +98,9 @@ namespace Lunra.Hothouse.Ai
 
 				if (!cache.IsTargetNull)
 				{
-					cache.TargetParent = Game.GetInventoryParent(cache.Target.Id.Value);
+					cache.TargetParent = Game.Query.FirstOrDefault<IBaseInventoryModel>(
+						m => m.Inventories.Any(i => i.Id.Value == cache.Target.Id.Value)
+					);
 
 					switch (cache.TargetParent)
 					{
@@ -235,7 +237,7 @@ namespace Lunra.Hothouse.Ai
 						break;
 				}
 
-				SourceState.timeoutState.ConfigureForInterval(Interval.WithMaximum(0.01f)); // TODO: Don't hardcode this...
+				SourceState.timeoutState.ConfigureForInterval(DayTime.FromHours(0.5f)); // TODO: Don't hardcode this...
 			}
 
 			Navigation.Query[] GetNavigationQueries(
@@ -245,7 +247,7 @@ namespace Lunra.Hothouse.Ai
 			{
 				var results = new List<Navigation.Query>();
 				
-				foreach (var model in Game.GetInventoryParents())
+				foreach (var model in Game.Query.All<IBaseInventoryModel>())
 				{
 					if (!(parentValidation?.Invoke(model) ?? true)) continue; 
 						
@@ -359,7 +361,11 @@ namespace Lunra.Hothouse.Ai
 				return SourceState.cache.IsNavigable && transactionType == SourceState.cache.Transaction.Type;
 			}
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(SourceState.cache.NavigationResult.Path);
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+				SourceState.cache.NavigationResult.Path,
+				NavigationPlan.Interrupts.RadiusThreshold,
+				Agent.InteractionRadius.Value
+			);
 		}
 
 		class ToReturnOnTimeout : AgentTransition<S1, S0, GameModel, A>

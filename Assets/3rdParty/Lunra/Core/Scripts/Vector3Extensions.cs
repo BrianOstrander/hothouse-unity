@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Lunra.Core
@@ -78,6 +79,21 @@ namespace Lunra.Core
 			byte[] b = BitConverter.GetBytes(f);
 			int i = BitConverter.ToInt32(b, 0);
 			return Convert.ToString(i, 2);
+		}
+
+		public static float TotalDistance(this IEnumerable<Vector3> elements)
+		{
+			var result = 0f;
+			Vector3? previous = null;
+			
+			foreach (var element in elements)
+			{
+				if (previous.HasValue) result += Vector3.Distance(previous.Value, element);
+				previous = element;
+			}
+
+			return result;
+			
 		}
 	}
 }

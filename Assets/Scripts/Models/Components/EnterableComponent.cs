@@ -9,12 +9,12 @@ using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IEnterableModel : ILightSensitiveModel
+	public interface IEnterableModel : IRoomTransformModel
 	{
 		EnterableComponent Enterable { get; }
 	}
 	
-	public class EnterableComponent : Model
+	public class EnterableComponent : ComponentModel<IEnterableModel>
 	{
 		#region Non Serialized
 		Entrance[] entrances = new Entrance[0];
@@ -25,12 +25,27 @@ namespace Lunra.Hothouse.Models
 		{
 			Entrances = new ListenerProperty<Entrance[]>(value => entrances = value, () => entrances);
 		}
-		
-		
 
-		public bool AnyAvailable() => Entrances.Value.Any(e => e.State == Entrance.States.Available);
+		public override void Bind()
+		{
+			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
+		}
+		
+		public override void UnBind()
+		{
+			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
+		}
+
+		#region Events
+		void OnNavigationMeshCalculationState(NavigationMeshModel.CalculationStates calculationState)
+		{
+			if (calculationState == NavigationMeshModel.CalculationStates.Completed) Model.RecalculateEntrances();
+		}
+		#endregion
 		
 		public void Reset() => Entrances.Value = new Entrance[0];
+		
+		public bool AnyAvailable() => Entrances.Value.Any(e => e.State == Entrance.States.Available);
 	}
 
 	public static class IEnterableExtensions
@@ -77,25 +92,11 @@ namespace Lunra.Hothouse.Models
 							e.Position,
 							e.Forward,
 							isNavigable,
-							isNavigable && model.LightSensitive.IsLit ? Entrance.States.Available : Entrance.States.NotAvailable
+							isNavigable ? Entrance.States.Available : Entrance.States.NotAvailable
 						);
 					}
 				)
 				.ToArray();
-		}
-	}
-
-	public static class EnterableGameModelExtensions
-	{
-		public static IEnumerable<IEnterableModel> GetEnterables(
-			this GameModel game
-		)
-		{
-			return game.Buildings.AllActive
-				.Concat<IEnterableModel>(game.Debris.AllActive)
-				.Concat(game.Doors.AllActive)
-				.Concat(game.Flora.AllActive)
-				.Concat(game.ItemDrops.AllActive);
 		}
 	}
 }

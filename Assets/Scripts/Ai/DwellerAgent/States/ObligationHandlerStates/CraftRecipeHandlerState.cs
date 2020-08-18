@@ -36,7 +36,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 		{
 			IRecipeModel workplace;
 
-			protected override float TimeoutDuration
+			protected override DayTime TimeoutDuration
 			{
 				get
 				{
@@ -56,7 +56,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				if (Agent.Workplace.Value.TryGetInstance(Game, out workplace))
 				{
-					workplace.Recipes.ProcessRecipe(Game, workplace);
+					workplace.Recipes.ProcessRecipe();
 				}
 				else Debug.LogError("Unable to find workplace, this is unexpected");
 			}
@@ -65,7 +65,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 			{
 				if (workplace != null)
 				{
-					workplace.Recipes.ProcessRecipe(Game, workplace);
+					workplace.Recipes.ProcessRecipe();
 				}
 				else Debug.LogError("Unable to find workplace, this is unexpected");
 			}

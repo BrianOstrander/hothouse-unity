@@ -1,3 +1,5 @@
+using System.Linq;
+using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services.Editor;
@@ -15,7 +17,9 @@ namespace Lunra.Hothouse.Editor
 		public static EditorPrefsBool IsInspectingEntrances = new EditorPrefsBool(KeyPrefix + "IsInspectingEntrances");
 		public static EditorPrefsBool IsInspectingDwellers = new EditorPrefsBool(KeyPrefix + "IsInspectingDwellers");
 		public static EditorPrefsBool IsInspectingOtherAgents = new EditorPrefsBool(KeyPrefix + "IsInspectingOtherAgents");
+		public static EditorPrefsBool IsInspectingGenerators = new EditorPrefsBool(KeyPrefix + "IsInspectingGenerators");
 		public static EditorPrefsBool IsInspectingFlora = new EditorPrefsBool(KeyPrefix + "IsInspectingFlora");
+		public static EditorPrefsBool IsInspectingDebris = new EditorPrefsBool(KeyPrefix + "IsInspectingDebris");
 		public static EditorPrefsBool IsInspectingItemDrops = new EditorPrefsBool(KeyPrefix + "IsInspectingItemDrops");
 		public static EditorPrefsBool IsInspectingLightLevels = new EditorPrefsBool(KeyPrefix + "IsInspectingLightLevels");
 		public static EditorPrefsBool IsInspectingObligations = new EditorPrefsBool(KeyPrefix + "IsInspectingObligations");
@@ -47,7 +51,9 @@ namespace Lunra.Hothouse.Editor
 						SceneInspectionSettings.IsInspectingBuildings.Draw();
 						SceneInspectionSettings.IsInspectingDwellers.Draw();
 						SceneInspectionSettings.IsInspectingOtherAgents.Draw();
+						SceneInspectionSettings.IsInspectingGenerators.Draw();
 						SceneInspectionSettings.IsInspectingFlora.Draw();
+						SceneInspectionSettings.IsInspectingDebris.Draw();
 						SceneInspectionSettings.IsInspectingItemDrops.Draw();
 						SceneInspectionSettings.IsInspectingRooms.Draw();
 						SceneInspectionSettings.IsInspectingDoors.Draw();
@@ -86,6 +92,15 @@ namespace Lunra.Hothouse.Editor
 						{
 							GUILayout.Label("Dweller [ " + dweller.ShortId + " ] : " + dweller.Name.Value + " - " + dweller.Job.Value, EditorStyles.boldLabel);
 							
+							if (GUILayout.Button("Satisfy", GUILayout.ExpandWidth(false)))
+							{
+								dweller.Goals.Apply(
+									EnumExtensions.GetValues(Motives.Unknown, Motives.None)
+										.Select(m => (m, -1f))
+										.ToArray()
+								);
+							}
+							
 							if (GUILayout.Button("Hurt", GUILayout.ExpandWidth(false)))
 							{
 								Damage.ApplyGeneric(
@@ -99,6 +114,36 @@ namespace Lunra.Hothouse.Editor
 									9999f,
 									dweller
 								);
+							}
+						}
+						GUILayout.EndHorizontal();
+
+						var addRemoveButtonWidth = GUILayout.Width(48f);
+						
+						GUILayout.BeginHorizontal();
+						{
+							GUILayout.Label("Add");
+							
+							foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
+							{
+								if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
+								{
+									dweller.Goals.Apply((motive, 0.5f));
+								}	
+							}
+						}
+						GUILayout.EndHorizontal();
+						
+						GUILayout.BeginHorizontal();
+						{
+							GUILayout.Label("Remove");
+							
+							foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
+							{
+								if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
+								{
+									dweller.Goals.Apply((motive, -0.5f));
+								}	
 							}
 						}
 						GUILayout.EndHorizontal();
@@ -125,7 +170,9 @@ namespace Lunra.Hothouse.Editor
 				SceneInspectionSettings.IsInspectingEntrances.LabelName,
 				SceneInspectionSettings.IsInspectingDwellers.LabelName,
 				SceneInspectionSettings.IsInspectingOtherAgents.LabelName,
+				SceneInspectionSettings.IsInspectingGenerators.LabelName,
 				SceneInspectionSettings.IsInspectingFlora.LabelName,
+				SceneInspectionSettings.IsInspectingDebris.LabelName,
 				SceneInspectionSettings.IsInspectingItemDrops.LabelName,
 				SceneInspectionSettings.IsInspectingLightLevels.LabelName,
 				SceneInspectionSettings.IsInspectingObligations.LabelName,

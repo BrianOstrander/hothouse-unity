@@ -36,8 +36,7 @@ namespace Lunra.Hothouse.Presenters
 
 			Model.HasPresenter.Value = true;
 
-			// I don't think I need this...
-			//if (string.IsNullOrEmpty(Model.Id.Value)) Model.Id.Value = Guid.NewGuid().ToString();
+			Model.InitializeComponents(Game);
 		
 			Model.PooledState.Changed += OnPooledState;
 			
@@ -48,8 +47,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Model.Transform.Position.Changed += OnPosition;
 			Model.Transform.Rotation.Changed += OnRotation;
-			
-			Initialize();
+
+			Model.BindComponents();
 			
 			if (Game.IsSimulationInitialized) SimulationInitialize();
 			else Game.SimulationInitialize += SimulationInitialize;
@@ -60,14 +59,11 @@ namespace Lunra.Hothouse.Presenters
 			Model.Transform.Position.Changed -= OnPosition;
 			Model.Transform.Rotation.Changed -= OnRotation;
 			
+			Model.UnBindComponents();
+			
 			Game.SimulationInitialize -= SimulationInitialize;
 		}
-		
-		void Initialize()
-		{
-			OnInitialized();
-		}
-		
+
 		void SimulationInitialize()
 		{
 			OnSimulationInitialized();
@@ -104,7 +100,6 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region Events
-		protected virtual void OnInitialized() { }
 		protected virtual void OnSimulationInitialized() { }
 		#endregion
 		

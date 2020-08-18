@@ -1,5 +1,4 @@
-﻿using System;
-using Lunra.Hothouse.Ai;
+﻿using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
@@ -26,11 +25,9 @@ namespace Lunra.Hothouse.Presenters
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
-			Model.Transform.Position.Changed += OnAgentPosition;
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
-			Model.Health.Current.Changed += OnAgentHealthCurrent;
 			Model.Health.Damaged += OnAgentHealthDamaged;
-			Model.ObligationComplete += OnAgentObligationComplete;
+			Model.ObligationPromises.Complete += OnAgentObligationComplete;
 			
 			base.Bind();
 		}
@@ -39,11 +36,9 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
-			Model.Transform.Position.Changed -= OnAgentPosition;
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
-			Model.Health.Current.Changed -= OnAgentHealthCurrent;
 			Model.Health.Damaged -= OnAgentHealthDamaged;
-			Model.ObligationComplete -= OnAgentObligationComplete;
+			Model.ObligationPromises.Complete -= OnAgentObligationComplete;
 			
 			base.UnBind();
 		}
@@ -77,14 +72,10 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region AgentModel Events
-		protected virtual void OnAgentPosition(Vector3 position)
-		{
-			View.RootTransform.position = position;
-		}
-
 		protected virtual void OnAgentNavigationPlan(NavigationPlan navigationPlan)
 		{
 			Model.Transform.Position.Value = navigationPlan.Position;
+			if (navigationPlan.Normal.HasValue) Model.Transform.Rotation.Value = Quaternion.LookRotation(navigationPlan.Normal.Value);
 		}
 
 		protected override void OnPooledState(PooledStates pooledState)
@@ -99,10 +90,20 @@ namespace Lunra.Hothouse.Presenters
 			base.OnPooledState(pooledState);
 		}
 
-		protected virtual void OnAgentHealthCurrent(float health)
+		public virtual void OnAgentHealthDamaged(Damage.Result result)
 		{
-			if (!Mathf.Approximately(0f, health)) return;
-
+			if (!result.IsTargetDestroyed) return;
+			
+			if (!string.IsNullOrEmpty(View.DeathEffectId))
+			{
+				Game.Effects.Queued.Enqueue(
+					new EffectsModel.Request(
+						Model.Transform.Position.Value,
+						View.DeathEffectId
+					)
+				);
+			}
+			
 			if (!Model.Inventory.All.Value.IsEmpty)
 			{
 				Game.ItemDrops.Activate(
@@ -113,27 +114,9 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
-			Model.InventoryPromises.BreakRemainingPromises(Game);
+			Model.InventoryPromises.BreakAllPromises();
 			
-			Model.ObligationPromises.BreakRemainingPromises(Game);
-			
-			Model.PooledState.Value = PooledStates.InActive;
-		}
-
-		public virtual void OnAgentHealthDamaged(Damage.Result result)
-		{
-			if (result.IsTargetDestroyed)
-			{
-				if (!string.IsNullOrEmpty(View.DeathEffectId))
-				{
-					Game.Effects.Queued.Enqueue(
-						new EffectsModel.Request(
-							Model.Transform.Position.Value,
-							View.DeathEffectId
-						)
-					);
-				}
-			}
+			Model.ObligationPromises.BreakAllPromises();
 		}
 
 		public virtual void OnAgentObligationComplete(Obligation obligation) { }

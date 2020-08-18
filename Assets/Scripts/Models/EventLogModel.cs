@@ -15,6 +15,15 @@ namespace Lunra.Hothouse.Models
 
 			public Entry(
 				string message,
+				DayTime simulationTime
+			) : this(
+				message,
+				simulationTime,
+				InstanceId.Null()
+			) { }
+			
+			public Entry(
+				string message,
 				DayTime simulationTime,
 				InstanceId source
 			)
@@ -31,8 +40,11 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		#region Serialized
-		[JsonProperty] Queue<Entry> dwellerEntries = new Queue<Entry>();
-		[JsonIgnore] public QueueProperty<Entry> DwellerEntries { get; }
+		[JsonProperty] List<Entry> dwellerEntries = new List<Entry>();
+		[JsonIgnore] public StackProperty<Entry> Dwellers { get; }
+		
+		[JsonProperty] List<Entry> alerts = new List<Entry>();
+		[JsonIgnore] public StackProperty<Entry> Alerts { get; }
 		#endregion
 		
 		#region Non Serialized
@@ -40,13 +52,20 @@ namespace Lunra.Hothouse.Models
 
 		public EventLogModel()
 		{
-			DwellerEntries = new QueueProperty<Entry>(dwellerEntries);
+			Dwellers = new StackProperty<Entry>(dwellerEntries);
+			Alerts = new StackProperty<Entry>(alerts);
 		}
 
 		public override string ToString()
 		{
 			var result = "Dweller:";
-			foreach (var entry in DwellerEntries.PeekAll())
+			foreach (var entry in Dwellers.PeekAll())
+			{
+				result += "\n - " + entry;
+			}
+			
+			result += "\nAlerts:";
+			foreach (var entry in Alerts.PeekAll())
 			{
 				result += "\n - " + entry;
 			}

@@ -8,6 +8,8 @@ namespace Lunra.Hothouse.Models
 {
 	public class InstanceId
 	{
+		// TODO: I think this class can be greatly simplified now that the GameModel.Query object exists...
+		
 		public static InstanceId New<T>(T model)
 			where T : class, IModel
 		{
@@ -35,14 +37,18 @@ namespace Lunra.Hothouse.Models
 					return Types.Room;
 				case DoorModel _:
 					return Types.Door;
-				case SeekerModel _:
-					return Types.Seeker;
 				case DebrisModel _:
 					return Types.Debris;
 				case ItemDropModel _:
 					return Types.ItemDrop;
 				case BaseInventoryComponent _:
 					return Types.Inventory;
+				case DecorationModel _:
+					return Types.Decoration;
+				case BubblerModel _:
+					return Types.Bubbler;
+				case SnapCapModel _:
+					return Types.SnapCap;
 				default:
 					Debug.LogError("Unrecognized model type: "+model.GetType());
 					return Types.Unknown;
@@ -58,18 +64,23 @@ namespace Lunra.Hothouse.Models
 			Building = 40,
 			Room = 50,
 			Door = 60,
-			Seeker = 70,
-			Debris = 80,
-			ItemDrop = 90,
-			Inventory = 100
+			Debris = 70,
+			ItemDrop = 80,
+			Inventory = 90,
+			Decoration = 100,
+			Bubbler = 110,
+			SnapCap = 120
 		}
 
-		public Types Type { get; }
-		public string Id { get; }
+		[JsonProperty] public Types Type { get; private set; }
+		[JsonProperty] public string Id { get; private set; }
 
 		IModel cachedInstance;
 
 		[JsonIgnore] public bool IsNull => Type == Types.Null;
+		
+		[JsonConstructor]
+		InstanceId() {}
 		
 		InstanceId(IModel instance) : this(
 			GetTypeFromInstance(instance),
@@ -137,9 +148,6 @@ namespace Lunra.Hothouse.Models
 				case Types.Door:
 					cachedInstance = game.Doors.FirstOrDefaultActive(Id);
 					break;
-				case Types.Seeker:
-					cachedInstance = game.Seekers.FirstOrDefaultActive(Id);
-					break;
 				case Types.Debris:
 					cachedInstance = game.Debris.FirstOrDefaultActive(Id);
 					break;
@@ -148,6 +156,15 @@ namespace Lunra.Hothouse.Models
 					break;
 				case Types.Inventory:
 					cachedInstance = GetFirstOrDefault(game.GetInventories(), Id);
+					break;
+				case Types.Decoration:
+					cachedInstance = game.Decorations.FirstOrDefaultActive(Id);
+					break;
+				case Types.Bubbler:
+					cachedInstance = game.Bubblers.FirstOrDefaultActive(Id);
+					break;
+				case Types.SnapCap:
+					cachedInstance = game.SnapCaps.FirstOrDefaultActive(Id);
 					break;
 				default:
 					Debug.LogError("Unrecognized type: " + Type);

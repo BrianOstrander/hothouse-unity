@@ -1,14 +1,16 @@
 ﻿using System;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
+using Lunra.NumberDemon;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Services;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Services
 {
 	public class MainMenuPayload : IStatePayload
 	{
-		public PreferencesModel Preferences;
+		public MainMenuModel MainMenu = new MainMenuModel();
 	}
 
 	public class MainMenuState : State<MainMenuPayload>
@@ -23,6 +25,9 @@ namespace Lunra.Hothouse.Services
 		#region Begin
 		protected override void Begin()
 		{
+			Payload.MainMenu.StartGame += OnMainMenuStartGame;
+			Payload.MainMenu.CreateGame = OnCreateGame;
+			
 			App.S.PushBlocking(
 				done => App.Scenes.Request(SceneRequest.Load(result => done(), Scenes))	
 			);
@@ -32,24 +37,24 @@ namespace Lunra.Hothouse.Services
 		#region Idle
 		protected override void Idle()
 		{
-			GenerateNewGame(
-				result =>
-				{
-					if (result.Status != ResultStatus.Success)
-					{
-						result.Log("Generating new game did not succeed!");
-						return;
-					}
-					
-					App.S.RequestState(
-						new GamePayload
-						{
-							Preferences = Payload.Preferences,
-							Game = result.Payload
-						}
-					);
-				}
-			);
+			// GenerateNewGame(
+			// 	result =>
+			// 	{
+			// 		if (result.Status != ResultStatus.Success)
+			// 		{
+			// 			result.Log("Generating new game did not succeed!");
+			// 			return;
+			// 		}
+			// 		
+			// 		App.S.RequestState(
+			// 			new GamePayload
+			// 			{
+			// 				Preferences = Payload.Preferences,
+			// 				Game = result.Payload
+			// 			}
+			// 		);
+			// 	}
+			// );
 			
 		}
 		#endregion
@@ -57,6 +62,9 @@ namespace Lunra.Hothouse.Services
 		#region End
 		protected override void End()
 		{
+			Payload.MainMenu.StartGame -= OnMainMenuStartGame;
+			Payload.MainMenu.CreateGame -= OnCreateGame;
+			
 			App.S.PushBlocking(
 				done => App.P.UnRegisterAll(done)
 			);
@@ -67,12 +75,34 @@ namespace Lunra.Hothouse.Services
 		}
 		#endregion
 
-		void GenerateNewGame(Action<Result<GameModel>> done)
+		#region Events
+		void OnCreateGame(Action<Result<GameModel>> done)
 		{
+			// if (!string.IsNullOrEmpty(Payload.AutoLoadGame))
+			// {
+			// 	App.M.Load<GameModel>(
+			// 		Payload.AutoLoadGame,
+			// 		result =>
+			// 		{
+			// 			result.Log();
+			//
+			// 			Debug.Log(result.TypedModel.Rooms.All.Value.Active.Length);
+			//
+			// 			if (result.Status == ResultStatus.Success)
+			// 			{
+			// 				done(Result<GameModel>.Success(result.TypedModel));
+			// 				return;
+			// 			}
+			// 		}
+			// 	);
+			// 	return;
+			// }
+
 			var game = App.M.Create<GameModel>(App.M.CreateUniqueId());
 
+			game.LevelGeneration.Seed.Value = DemonUtility.NextInteger;
+			
 			game.DesireDamageMultiplier.Value = 1f;
-			game.SimulationTimeConversion.Value = 1f / 10f;
 			
 			game.Effects.IsEnabled.Value = true;
 			game.Toolbar.IsEnabled.Value = true;
@@ -83,126 +113,7 @@ namespace Lunra.Hothouse.Services
 			
 			game.RoomResolver.RoomCountMinimum.Value = 4;
 			game.RoomResolver.RoomCountMaximum.Value = 8;
-			
-			/*
-			void initializeRoom(RoomModel room)
-			{
-				room.Id.Value = room.RoomTransform.Id.Value;
-			}
-			
-			var room0 = game.Rooms.Activate(
-				"default_spawn",
-				"room_0",
-				Vector3.zero,
-				Quaternion.identity,
-				initializeRoom
-			);
 
-			room0.IsExplored.Value = true;
-			
-			var room1 = game.Rooms.Activate(
-				"default_spawn",
-				"room_1",
-				new Vector3(0f, 0f, -15.74f * 2f),
-				Quaternion.AngleAxis(180f, Vector3.up),
-				initializeRoom
-			);
-
-			game.Doors.Activate(
-				room0.Id.Value,
-				room1.Id.Value,
-				new Vector3(0f, -0.02f, -15.74f),
-				Quaternion.identity
-			);
-	
-			// FLORA
-			
-			game.Flora.ActivateAdult(
-				FloraSpecies.Grass,
-				room0.Id.Value,
-				new Vector3(7f, 0f, -4f)
-			);
-			
-			game.Flora.ActivateAdult(
-				FloraSpecies.Grass,
-				room0.Id.Value,
-				new Vector3(10f, 0f, -4f)
-			);
-			
-			game.Flora.ActivateAdult(
-				FloraSpecies.Grass,
-				room0.Id.Value,
-				new Vector3(4f, 0f, -4f)
-			);
-			
-			game.Flora.ActivateAdult(
-				FloraSpecies.Wheat,
-				room0.Id.Value,
-				new Vector3(-4f, 0f, -5f)
-			);
-			
-			game.Flora.ActivateAdult(
-				FloraSpecies.Wheat,
-				room0.Id.Value,
-				new Vector3(-6f, 0f, -5f)
-			);
-
-			// game.Flora.ActivateAdult(
-			// 	FloraSpecies.Shroom,
-			// 	room1.Id.Value,
-			// 	new Vector3(0f, -0.02f, -20.74f)
-			// );
-
-			// DEBRIS
-			
-			game.Debris.Activate(
-				room0.Id.Value, 
-				new Vector3(0, 0f, -6f)
-			);
-			
-			game.Debris.Activate(
-				room0.Id.Value,
-				new Vector3(1, 0f, -5f)
-			);
-
-			// DWELLERS
-			
-			var dweller0 = game.Dwellers.Activate(
-				room0.Id.Value,
-				new Vector3(-4f, -0.8386866f, 3f)
-			);
-			dweller0.Id.Value = "0";
-			dweller0.Job.Value = Jobs.Clearer;
-			// dweller0.IsDebugging = true;
-			
-			var dweller1 = game.Dwellers.Activate(
-				room0.Id.Value,
-				new Vector3(-4f, -0.8386866f, 3f)
-			);
-			dweller1.Id.Value = "1";
-			dweller1.Job.Value = Jobs.Construction;
-			// dweller1.IsDebugging = true;
-			
-			// BUILDINGS
-			
-			game.Buildings.Activate(
-				Buildings.Bonfire,
-				room0.Id.Value,
-				new Vector3(2f, -0.8386866f, 6f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-			
-			game.Buildings.Activate(
-				Buildings.StartingWagon,
-				room0.Id.Value,
-				new Vector3(0f, -0.8386866f, 4f),
-				Quaternion.identity,
-				BuildingStates.Operating
-			);
-			
-			*/
-			
 			// HINTS			
 
 			game.Hints.HintCollections.Value = new[]
@@ -258,14 +169,6 @@ namespace Lunra.Hothouse.Services
 				HintCollection.NewDelay(0.5f),
 				HintCollection.New(
 					Hint.NewDismissedOnCondition(
-						"Finally, something edible, mark them for gathering...",
-						Condition.Any(Condition.Types.ConstantTrue),
-						Condition.None(Condition.Types.NoRations)
-					)
-				),
-				HintCollection.NewDelay(0.5f),
-				HintCollection.New(
-					Hint.NewDismissedOnCondition(
 						"Your dwellers grow weary, build a bedroll so they have a place to rest...",
 						Condition.Any(Condition.Types.ConstantTrue),
 						Condition.None(Condition.Types.ZeroBeds)
@@ -315,9 +218,18 @@ namespace Lunra.Hothouse.Services
 			
 			// DEBUGGING
 			
-			// game.DesireDamageMultiplier.Value = 1f;
-			
 			done(Result<GameModel>.Success(game));
 		}
+		
+		void OnMainMenuStartGame(GameModel game)
+		{
+			App.S.RequestState(
+				new GamePayload
+				{
+					Game = game
+				}
+			);
+		}
+		#endregion
 	}
 }

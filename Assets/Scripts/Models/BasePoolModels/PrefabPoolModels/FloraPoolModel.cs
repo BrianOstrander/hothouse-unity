@@ -5,6 +5,7 @@ using Lunra.Core;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
 using Lunra.StyxMvp;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -15,7 +16,7 @@ namespace Lunra.Hothouse.Models
 		Dictionary<Type, FloraDefinition> definitions = new Dictionary<Type, FloraDefinition>();
 		Demon generator = new Demon();
 		
-		public FloraDefinition[] Definitions { get; private set; }
+		[JsonIgnore] public FloraDefinition[] Definitions { get; private set; }
 		
 		public override void Initialize(GameModel game)
 		{

@@ -1,13 +1,14 @@
+using Newtonsoft.Json;
 using Lunra.Core;
 
 namespace Lunra.Hothouse.Models
 {
 	public struct GoalResult
 	{
-		public float Insistence { get; }
-		public float Discontent { get; }
-		public FloatRange DiscontentRange { get; }
-		public float DiscontentNormal { get; }
+		[JsonProperty] public float Insistence { get; private set; }
+		[JsonProperty] public float Discontent { get; private set; }
+		[JsonProperty] public FloatRange DiscontentRange { get; private set; }
+		[JsonProperty] public float DiscontentNormal { get; private set; }
 
 		public GoalResult(
 			float insistence,

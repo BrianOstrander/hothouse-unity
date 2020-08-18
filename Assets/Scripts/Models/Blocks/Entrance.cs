@@ -6,7 +6,7 @@ namespace Lunra.Hothouse.Models
 	public struct Entrance
 	{
 		// TODO: This shouldn't be hardcoded...
-		public const float RangeMaximum = 0.1f;
+		public const float RangeMaximum = 0.25f;
 		public const int DefaultMask = NavMesh.AllAreas;
 		
 		public enum States

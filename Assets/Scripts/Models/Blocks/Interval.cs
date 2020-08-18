@@ -25,8 +25,7 @@ namespace Lunra.Hothouse.Models
 		public readonly float Normalized;
 		public readonly bool IsDone;
 
-		[JsonIgnore]
-		public float InverseNormalized => 1f - Normalized;
+		[JsonIgnore] public float InverseNormalized => 1f - Normalized;
 
 		[JsonIgnore] public float Remaining => IsDone ? 0f : Maximum - Current;
 		

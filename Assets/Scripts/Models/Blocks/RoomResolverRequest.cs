@@ -78,9 +78,13 @@ namespace Lunra.Hothouse.Models
 		public int RoomCountMinimum;
 		public int RoomCountMaximum;
 		public int SpawnDoorCountRequired;
-
+		
 		public RoomPoolModel.ActivateRoom ActivateRoom;
 		public DoorPoolModel.ActivateDoor ActivateDoor;
+
+		public float RoomClutterMinimum;
+		public int RoomWallDecorationsMinimum;
+		public int RoomWallDecorationsMaximum;
 		
 		public int RoomCountTarget;
 
@@ -100,6 +104,10 @@ namespace Lunra.Hothouse.Models
 			
 			ActivateRoom = activateRoom;
 			ActivateDoor = activateDoor;
+
+			RoomClutterMinimum = 0.5f;
+			RoomWallDecorationsMinimum = 16;
+			RoomWallDecorationsMaximum = 32;
 			
 			RoomCountTarget = Generator.GetNextInteger(RoomCountMinimum, RoomCountMaximum);
 		}

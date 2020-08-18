@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IBaseInventoryComponent : IModel
+	public interface IBaseInventoryComponent : IComponentModel
 	{
 		ReadonlyProperty<Inventory> All { get; }
 		ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
@@ -21,10 +21,10 @@ namespace Lunra.Hothouse.Models
 	
 	public interface IBaseInventoryModel : IRoomTransformModel
 	{
-		IBaseInventoryComponent[] Inventories { get; }
+		[JsonIgnore] IBaseInventoryComponent[] Inventories { get; }
 	}
 
-	public abstract class BaseInventoryComponent : Model,
+	public abstract class BaseInventoryComponent : ComponentModel<IBaseInventoryModel>,
 		IBaseInventoryComponent
 	{
 		#region Serialized
@@ -62,39 +62,18 @@ namespace Lunra.Hothouse.Models
 		public abstract bool Add(Inventory inventory, out Inventory overflow);
 		public abstract bool Remove(Inventory inventory);
 		public abstract bool Remove(Inventory inventory, out Inventory overflow);
-
-		protected void ResetId() => Id.Value = App.M.CreateUniqueId();
 	}
 	
 	public static class BaseInventoryGameModelExtensions
 	{
-		public static IEnumerable<IBaseInventoryModel> GetInventoryParents(
-			this GameModel game
-		)
-		{
-			return game.Dwellers.AllActive
-				.Concat<IBaseInventoryModel>(game.Buildings.AllActive)
-				.Concat(game.ItemDrops.AllActive);
-		}
-		
-		public static IBaseInventoryModel GetInventoryParent(
-			this GameModel game,
-			string inventoryId
-		)
-		{
-			return game.Dwellers.AllActive
-				.Concat<IBaseInventoryModel>(game.Buildings.AllActive)
-				.Concat(game.ItemDrops.AllActive)
-				.FirstOrDefault(
-					m => m.Inventories.Any(i => i.Id.Value == inventoryId)
-				);
-		}
-		
+		// TODO: I think query or something should handle this...
 		public static IEnumerable<IBaseInventoryComponent> GetInventories(
 			this GameModel game
 		)
 		{
-			return game.GetInventoryParents().SelectMany(m => m.Inventories);
+			return game
+				.Query.All<IBaseInventoryModel>()
+				.SelectMany(m => m.Inventories);
 		}
 	}
 }

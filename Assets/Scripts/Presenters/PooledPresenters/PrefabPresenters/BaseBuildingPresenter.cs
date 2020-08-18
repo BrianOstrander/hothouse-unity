@@ -57,11 +57,11 @@ namespace Lunra.Hothouse.Presenters
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
-			Model.Obligations.Bind(
+			Model.Obligations.AddCallback(
 				ObligationCategories.Construct.Assemble,
 				OnObligationsConstructAssemble
 			);
-			Model.Obligations.Bind(
+			Model.Obligations.AddCallback(
 				ObligationCategories.Craft.Recipe,
 				OnObligationsCraftRecipe
 			);
@@ -92,11 +92,11 @@ namespace Lunra.Hothouse.Presenters
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
-			Model.Obligations.UnBind(
+			Model.Obligations.RemoveCallback(
 				ObligationCategories.Construct.Assemble,
 				OnObligationsConstructAssemble
 			);
-			Model.Obligations.UnBind(
+			Model.Obligations.RemoveCallback(
 				ObligationCategories.Craft.Recipe,
 				OnObligationsCraftRecipe
 			);
@@ -242,7 +242,7 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.BuildingState.Value != BuildingStates.Operating) return;
 
 			Model.RecalculateEntrances();
-			Model.Activities.CalculateRestrictions(Model);
+			Model.Activities.CalculateRestrictions();
 		}
 		#endregion
 
@@ -290,7 +290,7 @@ namespace Lunra.Hothouse.Presenters
 
 		void OnBuildingAvailableInventory(Inventory availableInventory)
 		{
-			Model.Activities.CalculateRestrictions(Model);
+			Model.Activities.CalculateRestrictions();
 		}
 
 		void OnBuildingState(BuildingStates buildingState)

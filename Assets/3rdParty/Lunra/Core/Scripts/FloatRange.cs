@@ -14,25 +14,18 @@ namespace Lunra.Core
 		public static FloatRange Normal => new FloatRange(0f, 1f);
 		public static FloatRange Constant(float value) => new FloatRange(value, value);
 
-		[FormerlySerializedAs("x"), SerializeField, JsonProperty]
-		float primary;
-		[FormerlySerializedAs("y"), SerializeField, JsonProperty]
-		float secondary;
+		[FormerlySerializedAs("x"), SerializeField, JsonProperty] float primary;
+		[FormerlySerializedAs("y"), SerializeField, JsonProperty] float secondary;
 
-		[JsonIgnore]
-		public float Primary => primary;
+		[JsonIgnore] public float Primary => primary;
 
-		[JsonIgnore]
-		public float Secondary => secondary;
+		[JsonIgnore] public float Secondary => secondary;
 
-		[JsonIgnore]
-		public float Delta => Secondary - Primary;
+		[JsonIgnore] public float Delta => Secondary - Primary;
 
-		[JsonIgnore]
-		public float Maximum => Mathf.Max(Primary, Secondary);
+		[JsonIgnore] public float Maximum => Mathf.Max(Primary, Secondary);
 		
-		[JsonIgnore]
-		public float Minimum => Mathf.Min(Primary, Secondary);
+		[JsonIgnore] public float Minimum => Mathf.Min(Primary, Secondary);
 		
 		public FloatRange(float primary, float secondary)
 		{
@@ -43,6 +36,10 @@ namespace Lunra.Core
 		public FloatRange NewPrimary(float primary) { return new FloatRange(primary, Secondary); }
 		public FloatRange NewSecondary(float secondary) { return new FloatRange(Primary, secondary); }
 
+		public bool Contains(float value) => Mathf.Approximately(value, Mathf.Clamp(value, Minimum, Maximum));
+
+		public bool Intersects(FloatRange other) => Contains(other.Minimum) || Contains(other.Maximum);
+		
 		/// <summary>
 		/// Takes a value between 0.0 and 1.0 and returns where that value would
 		/// fall in a range between the Primary and Secondary values.

@@ -6,57 +6,51 @@ using Lunra.Hothouse.Ai;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IFarmModel : IInventoryModel, IClaimOwnershipModel
+	public interface IFarmModel : IInventoryModel, IClaimOwnershipModel, IBoundaryModel
 	{
 		FarmComponent Farm { get; }
 	}
 
-	public class FarmComponent : Model
+	public class FarmComponent : ComponentModel<IFarmModel>
 	{
 		#region Serialized
-		public bool IsFarm { get; private set; }
-		public Vector2 Size { get; private set; }
-		public Inventory.Types SelectedSeed { get; set; } // todo make private or something...
-		public FarmPlot[] Plots { get; private set; }
+		[JsonProperty] public bool IsFarm { get; private set; }
+		[JsonProperty] public Vector2 Size { get; private set; }
+		public string SelectedFloraType { get; set; } // todo make private or something...
+		[JsonProperty] public FarmPlot[] Plots { get; private set; }
 		#endregion
 		
 		#region Non Serialized 
-		[JsonIgnore] public DateTime LastUpdated { get; private set; } 
+		[JsonIgnore] public DateTime LastUpdatedRealTime { get; private set; }
+		[JsonIgnore] public DayTime LastUpdated { get; private set; }
+
+		public void SetLastUpdated(DayTime lastUpdated)
+		{
+			LastUpdatedRealTime = DateTime.Now;
+			LastUpdated = lastUpdated;
+		}
 		#endregion
 
-		public FarmComponent()
-		{
-			
-		}
+		public void CalculatePlots()
 
-		public void CalculatePlots(
-			GameModel game,
-			IFarmModel model
-		)
+
+
 		{
-			LastUpdated = DateTime.Now;
+			SetLastUpdated(Game.SimulationTime.Value);
 			var plotsList = new List<FarmPlot>();
 
-			if (SelectedSeed == Inventory.Types.Unknown)
+			if (string.IsNullOrEmpty(SelectedFloraType))
 			{
 				Plots = plotsList.ToArray();
 				return;
 			}
 			
-			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(
-				Inventory.FromEntry(
-					SelectedSeed,
-					model.Inventory.AllCapacity.Value.GetMaximumFor(SelectedSeed)
-				)
-			);
+			var definition = Game.Flora.Definitions.First(d => d.Type == SelectedFloraType);
 
-			var definition = game.Flora.Definitions.First(d => d.Seed == SelectedSeed);
-
-			var spacing = definition.ReproductionRadius.Minimum;
+			var spacing = definition.ReproductionRadius.Maximum;
 			var rowCount = Mathf.FloorToInt((Size.x / spacing));
 			var columnCount = Mathf.FloorToInt((Size.y / spacing));
 
@@ -65,9 +59,9 @@ namespace Lunra.Hothouse.Models
 
 			var adjustedSize = new Vector3(Size.x - spacing, 0, Size.y - spacing);
 			
-			var origin = (model.Transform.Rotation.Value * (adjustedSize * -0.5f)) + model.Transform.Position.Value;
-			var columnNormal = model.Transform.Rotation.Value * Vector3.right;
-			var rowNormal = model.Transform.Rotation.Value * Vector3.forward;
+			var origin = (Model.Transform.Rotation.Value * (adjustedSize * -0.5f)) + Model.Transform.Position.Value;
+			var columnNormal = Model.Transform.Rotation.Value * Vector3.right;
+			var rowNormal = Model.Transform.Rotation.Value * Vector3.forward;
 			
 			for (var y = 0f; y < columnCount; y++)
 			{
@@ -83,6 +77,8 @@ namespace Lunra.Hothouse.Models
 					);
 
 					plotsList.Add(plot);
+					
+					if (Vector3.Distance(plot.Position, Model.Transform.Position.Value) < Model.Boundary.Radius.Value) continue;
 					
 					var isNavigable = NavigationUtility.CalculateNearestFloor(
 							plot.Position,
@@ -100,7 +96,7 @@ namespace Lunra.Hothouse.Models
 					isNavigable = NavigationUtility.CalculateNearest(
 						plot.Position,
 						out _,
-						Navigation.QueryEntrances(model)
+						Navigation.QueryEntrances(Model)
 					);
 					
 					if (!isNavigable) continue;
@@ -110,19 +106,19 @@ namespace Lunra.Hothouse.Models
 			}
 
 			Plots = plotsList.ToArray();
-			
-			CalculateFloraObligations(
-				game,
-				model
-			);
+
+			CalculateFloraObligations();
+
+
+
 		}
 		
-		public void CalculateFloraObligations(
-			GameModel game,
-			IFarmModel model
-		)
+		public void CalculateFloraObligations()
+
+
+
 		{
-			LastUpdated = DateTime.Now;
+			SetLastUpdated(Game.SimulationTime.Value);
 			
 			var plotRooms = Plots
 				.Select(p => p.RoomId)
@@ -132,10 +128,10 @@ namespace Lunra.Hothouse.Models
 
 			void tryAddDestroyObligation(FloraModel flora)
 			{
-				if (!flora.Obligations.HasAny(ObligationCategories.Destroy.Melee)) flora.Obligations.Add(ObligationCategories.Destroy.Melee);
+				if (!flora.Obligations.HasAny(ObligationCategories.Destroy.Generic)) flora.Obligations.Add(ObligationCategories.Destroy.Generic);
 			}
 			
-			foreach (var flora in game.Flora.AllActive.Where(m => plotRooms.Contains(m.RoomTransform.Id.Value)))
+			foreach (var flora in Game.Flora.AllActive.Where(m => plotRooms.Contains(m.RoomTransform.Id.Value)))
 			{
 				if (flora.Farm.Value.IsNull)
 				{
@@ -153,15 +149,15 @@ namespace Lunra.Hothouse.Models
 						}
 					}
 				}
-				else if (flora.Farm.Value.Id == model.Id.Value && flora.Age.Value.IsDone)
+				else if (flora.Farm.Value.Id == Model.Id.Value && flora.Age.Value.IsDone)
 				{
 					tryAddDestroyObligation(flora);
 				}
 			}
 
-			foreach (var otherFarm in game.Buildings.AllActive.Where(m => m.IsBuildingState(BuildingStates.Operating) && m.Farm.IsFarm))
+			foreach (var otherFarm in Game.Buildings.AllActive.Where(m => m.IsBuildingState(BuildingStates.Operating) && m.Farm.IsFarm))
 			{
-				if (otherFarm.Id.Value == model.Id.Value) continue;
+				if (otherFarm.Id.Value == Model.Id.Value) continue;
 				if (!plotRooms.Contains(otherFarm.RoomTransform.Id.Value)) continue;
 				
 				foreach (var otherPlot in otherFarm.Farm.Plots.Where(p => p.State != FarmPlot.States.Invalid))
@@ -181,12 +177,16 @@ namespace Lunra.Hothouse.Models
 						if (!blockedPlots.Contains(plot.Id))
 						{
 							plot.State = FarmPlot.States.ReadyToSow;
+							plot.Flora = InstanceId.Null();
+							plot.AttendingFarmer = InstanceId.Null();
 						}
 						break;
 					case FarmPlot.States.Sown:
-						if (!plot.Flora.TryGetInstance<FloraModel>(game, out _))
+						if (!plot.Flora.TryGetInstance<FloraModel>(Game, out _))
 						{
 							plot.State = FarmPlot.States.ReadyToSow;
+							plot.Flora = InstanceId.Null();
+							plot.AttendingFarmer = InstanceId.Null();
 						}
 						break;
 					case FarmPlot.States.Invalid:
@@ -197,10 +197,21 @@ namespace Lunra.Hothouse.Models
 						break;
 				}
 				
-				if (!plot.AttendingFarmer.IsNull && model.Ownership.Claimers.Value.None(o => o.Id == plot.AttendingFarmer.Id))
+				if (!plot.AttendingFarmer.IsNull && Model.Ownership.Claimers.Value.None(o => o.Id == plot.AttendingFarmer.Id))
 				{
 					plot.AttendingFarmer = InstanceId.Null();
 				}
+			}
+		}
+
+		public void RemoveAttendingFarmer(
+			string attendingFarmerId
+		)
+		{
+			foreach (var plot in Plots)
+			{
+				if (plot.AttendingFarmer.IsNull) continue;
+				if (plot.AttendingFarmer.Id == attendingFarmerId) plot.AttendingFarmer = InstanceId.Null();
 			}
 		}
 
@@ -224,15 +235,15 @@ namespace Lunra.Hothouse.Models
 		public void Reset(
 			bool isFarm,
 			Vector2 size,
-			Inventory.Types selectedSeed
+			string selectedFloraType
 		)
 		{
 			IsFarm = isFarm;
 			Size = size;
-			SelectedSeed = selectedSeed;
+			SelectedFloraType = selectedFloraType;
 			Plots = new FarmPlot[0];
 			
-			LastUpdated = DateTime.MinValue;
+			SetLastUpdated(DayTime.Zero);
 		}
 
 		public override string ToString()

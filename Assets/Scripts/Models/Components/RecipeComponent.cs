@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Models
 		RecipeComponent Recipes { get; }
 	}
 
-	public class RecipeComponent : Model
+	public class RecipeComponent : ComponentModel<IRecipeModel>
 	{
 		public enum States
 		{
@@ -91,13 +91,13 @@ namespace Lunra.Hothouse.Models
 				);
 			}
 			
-			public States State { get; private set; }
-			public Iterations Iteration { get; }
-			public Recipe Recipe { get; }
+			[JsonProperty] public States State { get; private set; }
+			[JsonProperty] public Iterations Iteration { get; private set; }
+			[JsonProperty] public Recipe Recipe { get; private set; }
 
-			public int Count { get; private set; }
-			public int CountTarget { get; }
-			public int DesiredMultiplier { get; }
+			[JsonProperty] public int Count { get; private set; }
+			[JsonProperty] public int CountTarget { get; private set; }
+			[JsonProperty] public int DesiredMultiplier { get; private set; }
 
 			RecipeIteration(
 				States state,
@@ -223,17 +223,21 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public void ProcessRecipe(GameModel game, IRecipeModel model) => TryProcessRecipe(game, model, out _);
+		public void ProcessRecipe() => TryProcessRecipe(out _);
 		
 		public bool TryGetCurrent(out RecipeIteration current)
 		{
+			if (CurrentIndex.Value.HasValue && Queue.Value.Length <= CurrentIndex.Value.Value)
+			{
+				current = null;
+				return false;
+			}
+			
 			current = CurrentIndex.Value.HasValue ? Queue.Value[CurrentIndex.Value.Value] : null;
 			return CurrentIndex.Value.HasValue;
 		}
 		
 		bool TryProcessRecipe(
-			GameModel game,
-			IRecipeModel model,
 			out RecipeIteration result	
 		)
 		{
@@ -246,10 +250,10 @@ namespace Lunra.Hothouse.Models
 					var noneFound = true;
 					for (var i = 0; i < Queue.Value.Length; i++)
 					{
-						if (Queue.Value[i].IsDone(game)) continue;
+						if (Queue.Value[i].IsDone(Game)) continue;
 						
 						result = Queue.Value[i];
-						model.Inventory.Desired.Value = InventoryDesire.UnCalculated(result.Recipe.InputItems);
+						Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(result.Recipe.InputItems);
 						result.Process(States.Gathering);
 						currentIndexListener.Value = i;
 						noneFound = false;
@@ -260,20 +264,21 @@ namespace Lunra.Hothouse.Models
 					{
 						result = RecipeIteration.Default();
 						currentIndexListener.Value = null;
+						Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
 					}
 					break;
 				case States.Gathering:
-					if (model.Inventory.Available.Value.Intersects(result.Recipe.InputItems))
+					if (Model.Inventory.Available.Value.Intersects(result.Recipe.InputItems))
 					{
-						var isOutputCapacityAvailable = model.Inventory.AvailableCapacity.Value
-							.GetCapacityFor(model.Inventory.Available.Value)
+						var isOutputCapacityAvailable = Model.Inventory.AvailableCapacity.Value
+							.GetCapacityFor(Model.Inventory.Available.Value)
 							.Contains(result.Recipe.OutputItems);
 
 						if (isOutputCapacityAvailable)
 						{
-							model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
-							model.Inventory.Remove(result.Recipe.InputItems);
-							model.Obligations.Add(ObligationCategories.Craft.Recipe);
+							Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
+							Model.Inventory.Remove(result.Recipe.InputItems);
+							Model.Obligations.Add(ObligationCategories.Craft.Recipe);
 							result.Process(States.Ready);
 						}
 					}
@@ -282,7 +287,7 @@ namespace Lunra.Hothouse.Models
 					result.Process(States.Crafting);
 					break;
 				case States.Crafting:
-					model.Inventory.Add(result.Recipe.OutputItems);
+					Model.Inventory.Add(result.Recipe.OutputItems);
 					result.Process(States.Idle);
 					break;
 				default:

@@ -4,10 +4,11 @@ using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Lunra.Hothouse.Models
 {
-	public class DwellerModel : AgentModel, IGoalModel, IGoalPromiseModel
+	public class DwellerModel : AgentModel, IGoalModel, IAttackModel
 	{
 		#region Serialized
 		[JsonProperty] string name;
@@ -17,16 +18,7 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
 		[JsonIgnore] public ListenerProperty<DayTimeFrame> JobShift { get; }
-		
-		[JsonProperty] float meleeRange;
-		[JsonIgnore] public ListenerProperty<float> MeleeRange { get; }
-		
-		[JsonProperty] float meleeCooldown;
-		[JsonIgnore] public ListenerProperty<float> MeleeCooldown { get; }
-		
-		[JsonProperty] float meleeDamage;
-		[JsonIgnore] public ListenerProperty<float> MeleeDamage { get; }
-		
+
 		[JsonProperty] float withdrawalCooldown;
 		[JsonIgnore] public ListenerProperty<float> WithdrawalCooldown { get; }
 		
@@ -49,8 +41,10 @@ namespace Lunra.Hothouse.Models
 		
 		[JsonProperty] InstanceId workplace = InstanceId.Null();
 		[JsonIgnore] public ListenerProperty<InstanceId> Workplace { get; }
-		public GoalComponent Goals { get; } = new GoalComponent();
-		public GoalPromiseComponent GoalPromises { get; } = new GoalPromiseComponent();
+		
+		[JsonProperty] public GoalComponent Goals { get; private set; } = new GoalComponent();
+		[JsonProperty] public GoalPromiseComponent GoalPromises { get; private set; } = new GoalPromiseComponent();
+		[JsonProperty] public AttackComponent Attacks { get; private set; } = new AttackComponent();
 		#endregion
 		
 		#region Non Serialized
@@ -61,9 +55,6 @@ namespace Lunra.Hothouse.Models
 			Name = new ListenerProperty<string>(value => name = value, () => name);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
-			MeleeRange = new ListenerProperty<float>(value => meleeRange = value, () => meleeRange);
-			MeleeCooldown = new ListenerProperty<float>(value => meleeCooldown = value, () => meleeCooldown);
-			MeleeDamage = new ListenerProperty<float>(value => meleeDamage = value, () => meleeDamage);
 			WithdrawalCooldown = new ListenerProperty<float>(value => withdrawalCooldown = value, () => withdrawalCooldown); 
 			DepositCooldown = new ListenerProperty<float>(value => depositCooldown = value, () => depositCooldown);
 			ObligationDistance = new ListenerProperty<float>(value => obligationDistance = value, () => obligationDistance);
@@ -72,6 +63,14 @@ namespace Lunra.Hothouse.Models
 			LowRationThreshold = new ListenerProperty<int>(value => lowRationThreshold = value, () => lowRationThreshold);
 			Bed = new ListenerProperty<InstanceId>(value => bed = value, () => bed);
 			Workplace = new ListenerProperty<InstanceId>(value => workplace = value, () => workplace);
+			
+			AppendComponents(
+				Goals,
+				GoalPromises,
+				Attacks
+			);
 		}
+
+		[JsonIgnore] public override string ShortId => $"{base.ShortId}_{StringExtensions.GetNonNullOrEmpty(Name.Value, (Name.Value == null ? "< null name >" : "< empty name >"))}";
 	}
 }

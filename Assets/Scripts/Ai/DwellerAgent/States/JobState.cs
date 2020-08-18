@@ -6,11 +6,6 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Ai.Dweller
 {
-	public interface IJobState
-	{
-		
-	}
-	
 	public abstract class JobState<S0, S1> : AgentState<GameModel, DwellerModel>
 		where S0 : AgentState<GameModel, DwellerModel>
 		where S1 : JobState<S0, S1>
@@ -33,13 +28,18 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 		protected abstract Jobs Job { get; }
 
-		protected virtual string[] Workplaces { get; set; } = EmptyWorkplaces;
+		protected string[] Workplaces { get; private set; } = EmptyWorkplaces;
 
 		protected bool IsCurrentJob => Job == Agent.Job.Value;
 
 		protected BuildingModel Workplace { get; private set; }
 		WorkplaceNavigationCache workplaceNavigation;
-		
+
+		public override void OnInitialize()
+		{
+			if (Game.Buildings.Workplaces.TryGetValue(Job, out var workplaces)) Workplaces = workplaces;
+		}
+
 		public override void Begin()
 		{
 			workplaceNavigation = null;
@@ -106,9 +106,16 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			return isNavigable;
 		}
+
+		protected void ReleaseWorkplace(IClaimOwnershipModel workplace = null)
+		{
+			if (workplace != null || Agent.Workplace.Value.TryGetInstance(Game, out workplace)) workplace.Ownership.Remove(Agent);
+			if (!Agent.Workplace.Value.IsNull) Agent.Workplace.Value = InstanceId.Null();
+		}
 		
 		public class ToJobOnShiftBegin : AgentTransition<S0, S1, GameModel, DwellerModel>
 		{
+			bool releaseCurrentWorkplace;
 			IClaimOwnershipModel workplaceTarget;
 			
 			public override bool IsTriggered()
@@ -116,6 +123,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				if (!TargetState.IsCurrentJob) return false;
 				if (!Agent.JobShift.Value.Contains(Game.SimulationTime.Value)) return false;
 
+				releaseCurrentWorkplace = false;
 				workplaceTarget = null;
 				
 				if (TargetState.Workplaces.None()) return true;
@@ -133,9 +141,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 							);
 
 							if (isCurrentWorkplaceNavigable) return true;
-							
-							workplace.Ownership.Remove(Agent);
-							Agent.Workplace.Value = InstanceId.Null();
+
+							releaseCurrentWorkplace = true;
 						}
 						else
 						{
@@ -169,6 +176,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
+				if (releaseCurrentWorkplace) TargetState.ReleaseWorkplace();
+				
 				if (workplaceTarget == null) return;
 				
 				Agent.Workplace.Value = InstanceId.New(workplaceTarget);
@@ -179,6 +188,8 @@ namespace Lunra.Hothouse.Ai.Dweller
 		protected class ToReturnOnJobChanged : AgentTransition<S1, S0, GameModel, DwellerModel>
 		{
 			public override bool IsTriggered() => !SourceState.IsCurrentJob;
+
+			public override void Transition() => SourceState.ReleaseWorkplace();
 		}
 
 		protected class ToReturnOnShiftEnd : AgentTransition<S1, S0, GameModel, DwellerModel>
@@ -198,11 +209,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				return false;
 			}
 
-			public override void Transition()
-			{
-				if (!Agent.Workplace.Value.IsNull) Agent.Workplace.Value = InstanceId.Null();
-				SourceState.Workplace?.Ownership.Remove(Agent);
-			}
+			public override void Transition() => SourceState.ReleaseWorkplace(SourceState.Workplace);
 		}
 
 		protected class ToReturnOnWorkplaceIsNotNavigable : AgentTransition<S1, S0, GameModel, DwellerModel>
@@ -228,11 +235,7 @@ namespace Lunra.Hothouse.Ai.Dweller
 				return false;
 			}
 
-			public override void Transition()
-			{
-				if (!Agent.Workplace.Value.IsNull) Agent.Workplace.Value = InstanceId.Null();
-				SourceState.Workplace?.Ownership.Remove(Agent);
-			}
+			public override void Transition() => SourceState.ReleaseWorkplace(SourceState.Workplace);
 		}
 		
 		protected class ToNavigateToWorkplace : AgentTransition<S1, NavigateState, GameModel, DwellerModel>
@@ -255,7 +258,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			public override void Transition()
 			{
-				Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationToWorkplace.Path);
+				Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+					navigationToWorkplace.Path,
+					NavigationPlan.Interrupts.RadiusThreshold,
+					Agent.InteractionRadius.Value
+				);
 			}
 		}
 		
@@ -286,14 +293,17 @@ namespace Lunra.Hothouse.Ai.Dweller
 				);
 			}
 
-			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(navigationResult.Path);
+			public override void Transition() => Agent.NavigationPlan.Value = NavigationPlan.Navigating(
+				navigationResult.Path,
+				NavigationPlan.Interrupts.RadiusThreshold,
+				Agent.InteractionRadius.Value
+			);
 		}
 		
 		#region Child Classes
-		protected class CleanupState : CleanupItemDropsState<S1, CleanupState> { }
-		
-		protected class DestroyMeleeHandlerState : DestroyMeleeHandlerState<S1> { }
+		protected class DestroyGenericHandlerState : DestroyGenericHandlerState<S1> { }
 		protected class ConstructAssembleHandlerState : ConstructAssembleHandlerState<S1> { }
+		protected class DoorOpenHandlerState : DoorOpenHandlerState<S1> { }
 		
 		protected class InventoryRequestState : InventoryRequestState<S1> { }
 		

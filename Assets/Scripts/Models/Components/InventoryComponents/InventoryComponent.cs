@@ -21,7 +21,7 @@ namespace Lunra.Hothouse.Models
 	{
 		#region Serialized
 		[JsonProperty] InventoryPermission permission = InventoryPermission.AllForAnyJob();
-		[JsonProperty] public ListenerProperty<InventoryPermission> Permission { get; }
+		[JsonProperty] public ListenerProperty<InventoryPermission> Permission { get; private set; }
 
 		[JsonProperty] Inventory available = Inventory.Empty;
 		readonly ListenerProperty<Inventory> availableListener;

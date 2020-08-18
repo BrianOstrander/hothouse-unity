@@ -1,13 +1,15 @@
+using Lunra.Core;
+
 namespace Lunra.Hothouse.Models
 {
 	public class StalkDefinition : FloraDefinition
 	{
-		public override Inventory.Types Seed => Inventory.Types.StalkSeed;
-
 		public override (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new[]
 		{
-			(Inventory.Types.StalkSeed, 0, 2),
-			(Inventory.Types.StalkRaw, 1, 1)
+			(StalkRaw: Inventory.Types.Stalk, 1, 1)
 		};
+		
+		public override IntegerRange ClusterPerRoom => new IntegerRange(0, 12);
+		public override IntegerRange CountPerCluster => new IntegerRange(10, 30);
 	}
 }
