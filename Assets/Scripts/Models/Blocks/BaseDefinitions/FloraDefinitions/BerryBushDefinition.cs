@@ -2,11 +2,11 @@ using Lunra.Core;
 
 namespace Lunra.Hothouse.Models
 {
-	public class SweetGrassDefinition : FloraDefinition
+	public class BerryBushDefinition : FloraDefinition
 	{
 		public override (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new[]
 		{
-			(SweetStalkRaw: Inventory.Types.SweetGrass, 4, 6)
+			(SweetStalkRaw: Inventory.Types.Berries, 4, 6)
 		};
 
 		public override IntegerRange ClusterPerRoom => new IntegerRange(0, 3);

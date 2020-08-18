@@ -58,7 +58,7 @@ namespace Lunra.Hothouse.Models
 			model.InteractionRadius.Value = 0.75f;
 			
 			model.Clearable.Reset(
-				Inventory.FromEntry(Inventory.Types.SweetGrass, 6),
+				Inventory.FromEntry(Inventory.Types.Berries, 6),
 				maximumClearers: 3
 			);
 			model.LightSensitive.Reset();

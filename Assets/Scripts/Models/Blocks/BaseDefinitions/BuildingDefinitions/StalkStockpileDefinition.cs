@@ -3,7 +3,7 @@ namespace Lunra.Hothouse.Models
 	public class StalkStockpileDefinition : BuildingDefinition
 	{
 		public override Inventory ConstructionInventory => Inventory.FromEntries(
-			(Inventory.Types.Stalk, 4),
+			(Inventory.Types.Stalk, 3),
 			(Inventory.Types.Grass, 2)
 		);
 		

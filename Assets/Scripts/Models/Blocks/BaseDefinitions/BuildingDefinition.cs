@@ -28,12 +28,10 @@ namespace Lunra.Hothouse.Models
 		public virtual bool IsFarm => false;
 		public virtual Vector2 FarmSize => Vector2.zero;
 		public virtual Type FarmFloraType => null;
-
 		public virtual GoalActivity[] Activities => new GoalActivity[0];
-		
 		public virtual Jobs[] WorkplaceForJobs => new Jobs[0];
-
 		public virtual string[] Tags => new string[0];
+		public virtual Type[] BuildingsRequired => new Type[0];
 
 		public virtual void Reset(
 			BuildingModel model,
@@ -171,7 +169,7 @@ namespace Lunra.Hothouse.Models
 		
 		protected static readonly Dictionary<Inventory.Types, float> DefaultEatModifiers = new Dictionary<Inventory.Types, float>
 		{
-			{ Inventory.Types.SweetGrass, -0.25f }
+			{ Inventory.Types.Berries, -0.25f }
 		};
 		#endregion
 	}

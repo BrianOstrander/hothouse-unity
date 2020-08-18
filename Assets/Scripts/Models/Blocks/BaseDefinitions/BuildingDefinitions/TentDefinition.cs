@@ -1,9 +1,10 @@
 namespace Lunra.Hothouse.Models
 {
-	public class BedrollDefinition : BuildingDefinition
+	public class TentDefinition : BuildingDefinition
 	{
 		public override Inventory ConstructionInventory => Inventory.FromEntries(
-			(Inventory.Types.Grass, 2)
+			(Inventory.Types.Stalk, 4),
+			(Inventory.Types.Grass, 6)
 		);
 
 		public override GoalActivity[] Activities => new[]
@@ -12,9 +13,9 @@ namespace Lunra.Hothouse.Models
 				GetActionName(Motives.Sleep),
 				new []
 				{
-					(Motives.Sleep, -0.5f),
-					(Motives.Comfort, -0.1f),
-					(Motives.Heal, -0.5f)
+					(Motives.Sleep, -0.65f),
+					(Motives.Comfort, -0.2f),
+					(Motives.Heal, -0.75f)
 				},
 				DayTime.FromHours(8f),
 				requiresOwnership: true

@@ -2,6 +2,10 @@ namespace Lunra.Hothouse.Models
 {
 	public class BonfireLightDefinition : LightBuildingDefinition
 	{
+		public override Inventory ConstructionInventory => Inventory.FromEntries(
+			(Inventory.Types.Stalk, 3)
+		);
+		
 		public override GoalActivity[] Activities => new[]
 		{
 			new GoalActivity(

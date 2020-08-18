@@ -17,21 +17,21 @@ namespace Lunra.Hothouse.Models
 	{
 		public enum Types
 		{
-			Unknown = 0,
+			Unknown,
 			
-			Water = 2,
-			
-			Stalk = 10,
-			
-			Grass = 20,
-			
-			SweetGrass = 30,
-			
-			// FungalBloomSpore = 10,
-			// FungalBloomRaw = 11,
-			// FungalBloomJerky = 12,
-			
-			Scrap = 1001,
+			Water,
+			Stalk,
+			Grass,
+			Berries,
+			Scrap,
+			BerryPie,
+			Bread,
+			Flour,
+			Fiber,
+			FiberTunic,
+			ToolSharp,
+			ToolBlunt,
+			ToolSling
 		}
 		
 		public static Inventory Empty => new Inventory(new Dictionary<Types, int>());
