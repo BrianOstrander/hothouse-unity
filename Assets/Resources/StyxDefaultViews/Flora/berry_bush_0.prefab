@@ -840,7 +840,7 @@ GameObject:
   - component: {fileID: 6278881143626287066}
   - component: {fileID: 6075714665180566942}
   m_Layer: 12
-  m_Name: sweet_grass_0
+  m_Name: berry_bush_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -882,7 +882,7 @@ MonoBehaviour:
     ShowDuration: 0
     CloseDuration: 0
   animations: []
-  prefabId: sweet_grass_0
+  prefabId: berry_bush_0
   prefabTags: []
   entrancesRoot: {fileID: 8338001688434624909}
   entrances:
