@@ -120,6 +120,7 @@ namespace Lunra.Hothouse.Models
 		public bool HasAny(Obligation obligation) => HasAvailable(obligation) || HasForbidden(obligation);
 		public bool HasForbidden(Obligation obligation) => All.Value.Forbidden.Any(o => o.Type == obligation.Type);
 		public bool HasAvailable(Obligation obligation) => All.Value.Available.Any(o => o.Type == obligation.Type);
+		public int CountForbidden(Obligation obligation) => All.Value.Forbidden.Count(o => o.Type == obligation.Type);
 
 		public bool Trigger(
 			Obligation obligation,

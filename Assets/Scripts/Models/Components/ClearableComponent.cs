@@ -53,6 +53,7 @@ namespace Lunra.Hothouse.Models
 
 		public override void Bind()
 		{
+			Game.Toolbar.CancelTask.Changed += OnToolbarCancelTask;
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
 			Model.Health.Damaged += OnHealthDamaged;
 			State.Changed += OnState;
@@ -60,6 +61,7 @@ namespace Lunra.Hothouse.Models
 
 		public override void UnBind()
 		{
+			Game.Toolbar.CancelTask.Changed -= OnToolbarCancelTask;
 			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
 			Model.Health.Damaged -= OnHealthDamaged;
 			State.Changed -= OnState;
@@ -71,6 +73,20 @@ namespace Lunra.Hothouse.Models
 			switch (state)
 			{
 				case ClearableStates.NotMarked:
+
+					if (Model.Obligations.HasAny(MarkedObligation.Value))
+					{
+						foreach (var obligationPromiseParent in Game.Query.All<IObligationPromiseModel>(m => m.ObligationPromises.HasAny()))
+						{
+							if (obligationPromiseParent.ObligationPromises.All.TryPeek(out var currentPromise))
+							{
+								if (currentPromise.Obligation.Is(MarkedObligation.Value)) obligationPromiseParent.ObligationPromises.BreakPromise(); 
+							}
+						}
+						
+						while (Model.Obligations.HasAny(MarkedObligation.Value)) Model.Obligations.RemoveAny(MarkedObligation.Value);
+					}
+					
 					break;
 				case ClearableStates.Highlighted:
 					break;
@@ -79,6 +95,33 @@ namespace Lunra.Hothouse.Models
 					break;
 				default:
 					Debug.LogError("Unrecognized state: " + state);
+					break;
+			}
+		}
+		
+		void OnToolbarCancelTask(Interaction.RoomVector3 interaction)
+		{
+			if (interaction.State == Interaction.States.OutOfRange) return;
+			if (State.Value == ClearableStates.NotMarked) return;
+			
+			var radiusContains = interaction.Value.RadiusContains(Model.Transform.Position.Value);
+
+			switch (interaction.State)
+			{
+				case Interaction.States.Idle:
+					break;
+				case Interaction.States.Begin:
+				case Interaction.States.Active:
+					State.Value = radiusContains ? ClearableStates.Highlighted : ClearableStates.Marked;
+					break;
+				case Interaction.States.End:
+					State.Value = radiusContains ? ClearableStates.NotMarked : ClearableStates.Marked;
+					break;
+				case Interaction.States.Cancel:
+					State.Value = ClearableStates.Marked;
+					break;
+				default:
+					Debug.LogError("Unrecognized Interaction.State: "+interaction.State);
 					break;
 			}
 		}

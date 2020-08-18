@@ -25,10 +25,15 @@ namespace Lunra.Hothouse.Presenters
 				taskLabels = new Dictionary<string, string>();
 
 				taskLabels.Add(
+					GetGenericTaskId(ToolbarModel.Tasks.Cancel),
+					"Cancel"
+				);
+				
+				taskLabels.Add(
 					GetGenericTaskId(ToolbarModel.Tasks.Clearance),
 					"Gather"
 				);
-
+				
 				foreach (var building in game.Buildings.Definitions)
 				{
 					taskLabels.Add(
@@ -54,6 +59,12 @@ namespace Lunra.Hothouse.Presenters
 				{
 					switch (task)
 					{
+						case ToolbarModel.Tasks.Cancel:
+							taskActions.Add(
+								GetGenericTaskId(task),
+								() => OnGenericSelectionClick(task)
+							);
+							break;
 						case ToolbarModel.Tasks.Clearance:
 							taskActions.Add(
 								GetGenericTaskId(task),
@@ -96,6 +107,11 @@ namespace Lunra.Hothouse.Presenters
 
 			toolbar.IsEnabled.Changed += OnToolbarIsEnabled;
 			toolbar.Task.Changed += OnToolbarTask;
+			
+			new RadialCursorPresenter(
+				game,
+				toolbar.CancelTask
+			);
 			
 			new RadialCursorPresenter(
 				game,
@@ -170,6 +186,9 @@ namespace Lunra.Hothouse.Presenters
 		{
 			switch (toolbar.Task.Value)
 			{
+				case ToolbarModel.Tasks.Cancel:
+					toolbar.CancelTask.Value = interaction;
+					break;
 				case ToolbarModel.Tasks.Clearance:
 					toolbar.ClearanceTask.Value = interaction;
 					break;
@@ -187,6 +206,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			switch (toolbar.Task.Value)
 			{
+				case ToolbarModel.Tasks.Cancel:
 				case ToolbarModel.Tasks.Clearance:
 					break;
 				case ToolbarModel.Tasks.Construction:
@@ -245,6 +265,7 @@ namespace Lunra.Hothouse.Presenters
 
 			switch (task)
 			{
+				case ToolbarModel.Tasks.Cancel:
 				case ToolbarModel.Tasks.Clearance:
 					task = task == toolbar.Task.Value ? ToolbarModel.Tasks.None : task;
 					break;

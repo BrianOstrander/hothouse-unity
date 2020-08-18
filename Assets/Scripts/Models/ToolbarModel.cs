@@ -9,8 +9,9 @@ namespace Lunra.Hothouse.Models
 		{
 			Unknown = 0,
 			None = 10,
-			Clearance = 20,
-			Construction = 30
+			Cancel = 20,
+			Clearance = 30,
+			Construction = 40
 		}
 		
 		#region Serialized
@@ -26,6 +27,8 @@ namespace Lunra.Hothouse.Models
 		BuildingModel building;
 		[JsonIgnore] public ListenerProperty<BuildingModel> Building { get; }
 		
+		Interaction.RoomVector3 cancelTask;
+		[JsonIgnore] public ListenerProperty<Interaction.RoomVector3> CancelTask { get; }
 		Interaction.RoomVector3 clearanceTask;
 		[JsonIgnore] public ListenerProperty<Interaction.RoomVector3> ClearanceTask { get; }
 		
@@ -41,6 +44,7 @@ namespace Lunra.Hothouse.Models
 			
 			Task = new ListenerProperty<Tasks>(value => task = value, () => task);
 			Building = new ListenerProperty<BuildingModel>(value => building = value, () => building);
+			CancelTask = new ListenerProperty<Interaction.RoomVector3>(value => cancelTask = value, () => cancelTask);
 			ClearanceTask = new ListenerProperty<Interaction.RoomVector3>(value => clearanceTask = value, () => clearanceTask);
 			ConstructionTranslation = new ListenerProperty<Interaction.RoomVector3>(value => constructionTranslation = value, () => constructionTranslation);
 			ConstructionRotation = new ListenerProperty<Interaction.GenericFloat>(value => constructionRotation = value, () => constructionRotation);
