@@ -42,9 +42,8 @@ namespace Lunra.Hothouse.Models
 			Inventory.FromEntries(entries)
 		);
 
-		[JsonProperty] public int WeightMaximum { get; private set; }
-		[JsonProperty] public Inventory InventoryMaximum { get; private set; }
-		// Weird newtonsoft stuff...
+		[JsonProperty] readonly int weightMaximum;
+		[JsonProperty] readonly Inventory inventoryMaximum;
 		[JsonProperty] public Clamps Clamping { get; private set; }
 
 		InventoryCapacity(
@@ -54,8 +53,8 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			Clamping = clamping;
-			this.WeightMaximum = weightMaximum;
-			this.InventoryMaximum = inventoryMaximum;
+			this.weightMaximum = weightMaximum;
+			this.inventoryMaximum = inventoryMaximum;
 		}
 
 		public bool IsFull(Inventory inventory)
@@ -65,9 +64,9 @@ namespace Lunra.Hothouse.Models
 				case Clamps.None:
 					return true;
 				case Clamps.TotalWeight:
-					return WeightMaximum <= inventory.TotalWeight;
+					return weightMaximum <= inventory.TotalWeight;
 				case Clamps.IndividualWeight:
-					return InventoryMaximum.Entries.All(i => i.Weight <= inventory[i.Type]);
+					return inventoryMaximum.Entries.All(i => i.Weight <= inventory[i.Type]);
 				default:
 					Debug.LogError("Unrecognized clamp: "+Clamping);
 					return true;
@@ -131,9 +130,9 @@ namespace Lunra.Hothouse.Models
 				case Clamps.None:
 					return Inventory.Empty;
 				case Clamps.IndividualWeight:
-					return InventoryMaximum;
+					return inventoryMaximum;
 				case Clamps.TotalWeight:
-					var currentWeightMaximum = WeightMaximum;
+					var currentWeightMaximum = weightMaximum;
 					return new Inventory(
 						EnumExtensions.GetValues(Inventory.Types.Unknown).ToDictionary(
 							type => type,
@@ -153,9 +152,9 @@ namespace Lunra.Hothouse.Models
 				case Clamps.None:
 					return 0;
 				case Clamps.IndividualWeight:
-					return InventoryMaximum[type];
+					return inventoryMaximum[type];
 				case Clamps.TotalWeight:
-					return WeightMaximum;
+					return weightMaximum;
 				default:
 					Debug.LogError("Unrecognized clamp: "+Clamping);
 					return int.MaxValue;
@@ -175,7 +174,7 @@ namespace Lunra.Hothouse.Models
 				case Clamps.None:
 					return Inventory.Empty;
 				case Clamps.TotalWeight:
-					var weightRemaining = WeightMaximum - inventory.TotalWeight;
+					var weightRemaining = weightMaximum - inventory.TotalWeight;
 					if (weightRemaining <= 0) return Inventory.Empty;
 					return new Inventory(
 						EnumExtensions.GetValues(Inventory.Types.Unknown).ToDictionary(
@@ -185,7 +184,7 @@ namespace Lunra.Hothouse.Models
 					);
 				case Clamps.IndividualWeight:
 					var individualWeightResult = new Dictionary<Inventory.Types, int>();
-					foreach (var entryMaximum in InventoryMaximum.Entries)
+					foreach (var entryMaximum in inventoryMaximum.Entries)
 					{
 						individualWeightResult.Add(entryMaximum.Type, Mathf.Max(0, entryMaximum.Weight - inventory[entryMaximum.Type]));
 					}
@@ -215,9 +214,9 @@ namespace Lunra.Hothouse.Models
 				case Clamps.None:
 					return 0;
 				case Clamps.TotalWeight:
-					return Mathf.Max(0, WeightMaximum - inventory.TotalWeight);
+					return Mathf.Max(0, weightMaximum - inventory.TotalWeight);
 				case Clamps.IndividualWeight:
-					return Mathf.Max(0, InventoryMaximum[type] - inventory[type]); 
+					return Mathf.Max(0, inventoryMaximum[type] - inventory[type]); 
 				default:
 					Debug.LogError("Unrecognized clamp: "+Clamping);
 					return int.MaxValue;
@@ -259,7 +258,7 @@ namespace Lunra.Hothouse.Models
 					var currentWeight = 0;
 					foreach (var entry in inventory.Entries)
 					{
-						var weightRemaining = WeightMaximum - currentWeight;
+						var weightRemaining = weightMaximum - currentWeight;
 						if (0 < weightRemaining)
 						{
 							var weightToAdd = Mathf.Min(entry.Weight, weightRemaining);
@@ -273,7 +272,7 @@ namespace Lunra.Hothouse.Models
 				case Clamps.IndividualWeight:
 					foreach (var entry in inventory.Entries)
 					{
-						var currentWeightMaximum = InventoryMaximum[entry.Type];
+						var currentWeightMaximum = inventoryMaximum[entry.Type];
 						clampedResult.Add(entry.Type, Mathf.Min(entry.Weight, currentWeightMaximum));
 						overflowResult.Add(entry.Type, Mathf.Max(0, entry.Weight - currentWeightMaximum));
 					}
@@ -343,7 +342,7 @@ namespace Lunra.Hothouse.Models
 			switch (Clamping)
 			{
 				case Clamps.TotalWeight:
-					var weightExtraRemaining = Mathf.Max(0, WeightMaximum - inventory0.TotalWeight);
+					var weightExtraRemaining = Mathf.Max(0, weightMaximum - inventory0.TotalWeight);
 					foreach (var type in Inventory.ValidTypes)
 					{
 						if (0 < weightExtraRemaining)
@@ -363,7 +362,7 @@ namespace Lunra.Hothouse.Models
 				case Clamps.IndividualWeight:
 					foreach (var type in Inventory.ValidTypes)
 					{
-						var currentWeightMaximum = InventoryMaximum[type];
+						var currentWeightMaximum = inventoryMaximum[type];
 						var weightToAdd = inventory0[type] + inventory1[type];
 						clampedResult.Add(type, Mathf.Min(weightToAdd, currentWeightMaximum));
 						overflowResult.Add(type, Mathf.Max(0, weightToAdd - currentWeightMaximum));
@@ -388,10 +387,10 @@ namespace Lunra.Hothouse.Models
 			switch (Clamping)
 			{
 				case Clamps.TotalWeight:
-					result += "\nWeightMaximum : " + WeightMaximum;
+					result += "\nWeightMaximum : " + weightMaximum;
 					break;
 				case Clamps.IndividualWeight:
-					result += "\nInventoryMaximum : " + InventoryMaximum;
+					result += "\nInventoryMaximum : " + inventoryMaximum;
 					break;
 			}
 
