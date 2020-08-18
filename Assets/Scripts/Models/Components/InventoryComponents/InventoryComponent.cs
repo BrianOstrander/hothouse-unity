@@ -160,8 +160,6 @@ namespace Lunra.Hothouse.Models
 
 			switch (ReservedCapacity.Value.Clamping)
 			{
-				case InventoryCapacity.Clamps.Unlimited:
-					return;
 				case InventoryCapacity.Clamps.TotalWeight:
 					reservedCapacityListener.Value = InventoryCapacity.ByTotalWeight(ReservedCapacity.Value.GetMaximum().TotalWeight + inventory.TotalWeight);
 					break;
@@ -183,8 +181,6 @@ namespace Lunra.Hothouse.Models
 
 			switch (ReservedCapacity.Value.Clamping)
 			{
-				case InventoryCapacity.Clamps.Unlimited:
-					return;
 				case InventoryCapacity.Clamps.TotalWeight:
 					reservedCapacityListener.Value = InventoryCapacity.ByTotalWeight(ReservedCapacity.Value.GetMaximum().TotalWeight - inventory.TotalWeight);
 					break;
@@ -386,9 +382,6 @@ namespace Lunra.Hothouse.Models
 				case InventoryCapacity.Clamps.None:
 					reservedCapacityListener.Value = InventoryCapacity.None();
 					break;
-				case InventoryCapacity.Clamps.Unlimited:
-					reservedCapacityListener.Value = InventoryCapacity.Unlimited();		
-					break;
 				case InventoryCapacity.Clamps.TotalWeight:
 					reservedCapacityListener.Value = InventoryCapacity.ByTotalWeight(0);
 					break;
@@ -474,7 +467,6 @@ namespace Lunra.Hothouse.Models
 			switch (AllCapacity.Value.Clamping)
 			{
 				case InventoryCapacity.Clamps.None:
-				case InventoryCapacity.Clamps.Unlimited:
 					if (capacityClampingNotMatched)
 					{
 						availableCapacityListener.Value = AllCapacity.Value;

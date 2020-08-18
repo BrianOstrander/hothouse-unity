@@ -14,7 +14,6 @@ namespace Lunra.Hothouse.Models
 		{
 			Unknown = 0,
 			None = 10,
-			Unlimited = 20,
 			TotalWeight = 30,
 			IndividualWeight = 40
 		}
@@ -24,13 +23,7 @@ namespace Lunra.Hothouse.Models
 			0,
 			Inventory.Empty
 		);
-		
-		public static InventoryCapacity Unlimited() => new InventoryCapacity(
-			Clamps.Unlimited,
-			0,
-			Inventory.Empty
-		);
-		
+
 		public static InventoryCapacity ByTotalWeight(int weightMaximum) => new InventoryCapacity(
 			Clamps.TotalWeight,
 			weightMaximum,
@@ -71,8 +64,6 @@ namespace Lunra.Hothouse.Models
 			{
 				case Clamps.None:
 					return true;
-				case Clamps.Unlimited:
-					return false;
 				case Clamps.TotalWeight:
 					return weightMaximum <= inventory.TotalWeight;
 				case Clamps.IndividualWeight:
@@ -139,8 +130,6 @@ namespace Lunra.Hothouse.Models
 			{
 				case Clamps.None:
 					return Inventory.Empty;
-				case Clamps.Unlimited:
-					return Inventory.MaximumValue;
 				case Clamps.IndividualWeight:
 					return inventoryMaximum;
 				case Clamps.TotalWeight:
@@ -163,8 +152,6 @@ namespace Lunra.Hothouse.Models
 			{
 				case Clamps.None:
 					return 0;
-				case Clamps.Unlimited:
-					return int.MaxValue;
 				case Clamps.IndividualWeight:
 					return inventoryMaximum[type];
 				case Clamps.TotalWeight:
@@ -187,8 +174,6 @@ namespace Lunra.Hothouse.Models
 			{
 				case Clamps.None:
 					return Inventory.Empty;
-				case Clamps.Unlimited:
-					return inventory - Inventory.MaximumValue;
 				case Clamps.TotalWeight:
 					var weightRemaining = weightMaximum - inventory.TotalWeight;
 					if (weightRemaining <= 0) return Inventory.Empty;
@@ -229,8 +214,6 @@ namespace Lunra.Hothouse.Models
 			{
 				case Clamps.None:
 					return 0;
-				case Clamps.Unlimited:
-					return int.MaxValue - inventory[type];
 				case Clamps.TotalWeight:
 					return Mathf.Max(0, weightMaximum - inventory.TotalWeight);
 				case Clamps.IndividualWeight:
@@ -265,10 +248,6 @@ namespace Lunra.Hothouse.Models
 					clamped = Inventory.Empty;
 					overflow = inventory;
 					return !overflow.IsEmpty;
-				case Clamps.Unlimited:
-					clamped = inventory;
-					overflow = Inventory.Empty;
-					return false;
 			}
 
 			var clampedResult = new Dictionary<Inventory.Types, int>();
@@ -356,10 +335,6 @@ namespace Lunra.Hothouse.Models
 					clamped = Inventory.Empty;
 					overflow = inventory0 + inventory1;
 					return !overflow.IsEmpty;
-				case Clamps.Unlimited:
-					clamped = inventory0 + inventory1;
-					overflow = Inventory.Empty;
-					return false;
 			}
 			
 			var clampedResult = new Dictionary<Inventory.Types, int>();
