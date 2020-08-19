@@ -267,6 +267,22 @@ namespace Lunra.Hothouse.Editor
 				itemStoreDeserialized.Initialize();
 				
 				Debug.Log(itemStoreDeserialized.First(0).ToString(Item.Formats.IncludeProperties));
+
+				itemStore.Cleanup(out var cleanedUpItems);
+
+				Debug.Log($"cleaned up {cleanedUpItems.Length} item(s)");
+				
+				Debug.Log(itemStore);
+				
+				itemStore.New(
+					( "some_bool_key0", true),
+					( Satchel.Constants.IgnoreCleanup.Key, true)
+				);
+				
+				itemStore.Cleanup();
+				
+				Debug.Log(itemStore.ToString(true, true));
+
 				// item0.Set("some_int_key0", true);
 
 

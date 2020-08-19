@@ -488,6 +488,12 @@ namespace Lunra.Satchel
 			return true;
 		}
 
+		/// <summary>
+		/// Used, ideally only, by the ItemStore to update this value upon destruction.
+		/// </summary>
+		/// <param name="lastUpdated"></param>
+		public void ForceUpdateTime(DateTime lastUpdated) => LastUpdated = lastUpdated;
+
 		public override string ToString() => ToString(Formats.Default);
 		
 		public string ToString(Formats format)

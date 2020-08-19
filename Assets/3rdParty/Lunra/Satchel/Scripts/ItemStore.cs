@@ -155,24 +155,41 @@ namespace Lunra.Satchel
 		public Item[] Where(Func<Item, bool> predicate) => items.Select(kv => kv.Value).Where(predicate).ToArray();
 		public Item[] ToArray() => items.Select(kv => kv.Value).ToArray();
 
-		// public bool Cleanup(out Item[] removed)
-		// {
-		// 	removed = items
-		// 		.Where(kv => !kv.Value.TryGet(Constants.IgnoreCleanup, out var isIgnored) || !isIgnored)
-		// 		.Select(kv => kv.Value)
-		// 		.ToArray();
-		//
-		// 	if (removed.None()) return false;
-		// 	
-		// 	foreach (var item in removed) items.Remove(item.Id);
-		// 	
-		// 	
-		// }
-		//
-		// public bool Cleanup()
-		// {
-		// 	var any
-		// }
+		public bool Cleanup(out Item[] removed)
+		{
+			removed = items
+				.Where(kv => !kv.Value.TryGet(Constants.IgnoreCleanup, out var isIgnored) || !isIgnored)
+				.Select(kv => kv.Value)
+				.ToArray();
+		
+			if (removed.None()) return false;
+
+			var updateTime = DateTime.Now;
+			var updates = new[] {Item.Event.Types.Item | Item.Event.Types.Destroyed}; 
+			var emptyPropertyUpdates = new Dictionary<string, (Item.Property Property, Item.Event.Types Update)>().ToReadonlyDictionary();
+			
+			var itemEventsList = new List<Item.Event>();
+
+			foreach (var item in removed)
+			{
+				items.Remove(item.Id);
+				item.ForceUpdateTime(updateTime);
+				itemEventsList.Add(
+					new Item.Event(
+						item.Id,
+						updateTime,
+						updates,
+						emptyPropertyUpdates
+					)	
+				);
+			}
+
+			return TryUpdate(
+				itemEventsList.ToArray()
+			);
+		}
+
+		public bool Cleanup() => Cleanup(out _);
 		
 		#region Events
 		bool TryUpdate(
