@@ -255,23 +255,22 @@ namespace Lunra.Satchel
 			[JsonProperty] public ulong Id { get; private set; }
 			[JsonProperty] public DateTime UpdateTime { get; private set; }
 			[JsonProperty] public Types[] Updates { get; private set; }
-			[JsonProperty] public ReadOnlyDictionary<string, (Property Property, Types Update)> Properties { get; private set; }
+			[JsonProperty] public ReadOnlyDictionary<string, (Property Property, Types Update)> PropertyEvents { get; private set; }
 
 			public Event(
 				ulong id,
 				DateTime updateTime,
 				Types[] updates,
-				ReadOnlyDictionary<string, (Property Property, Types Update)> properties
+				ReadOnlyDictionary<string, (Property Property, Types Update)> propertyEvents
 			)
 			{
 				Id = id;
 				UpdateTime = updateTime;
 				Updates = updates;
-				Properties = properties;
+				PropertyEvents = propertyEvents;
 			}
 
 			public override string ToString() => ToString(false);
-			public string ToStringVerbose() => ToString(true); 
 			
 			public string ToString(bool verbose)
 			{
@@ -279,15 +278,15 @@ namespace Lunra.Satchel
 
 				foreach (var type in Updates) result += " " + ReadableUpdateType(type);
 
-				if (Properties.Any())
+				if (PropertyEvents.Any())
 				{
-					result += $" | {Properties.Count} Property Update(s)";
+					result += $" | {PropertyEvents.Count} Property Update(s)";
 
 					if (!verbose) return result;
 				}
 				else return result;
 
-				foreach (var kv in Properties)
+				foreach (var kv in PropertyEvents)
 				{
 					result += $"\n\t - {kv.Value.Property.ToString(kv.Key, suffix: " | " + ReadableUpdateType(kv.Value.Update))}";
 				}
@@ -295,7 +294,7 @@ namespace Lunra.Satchel
 				return result;
 			}
 
-			static string ReadableUpdateType(Types type)
+			public static string ReadableUpdateType(Types type)
 			{
 				var result = string.Empty;
 

@@ -234,7 +234,7 @@ namespace Lunra.Hothouse.Editor
 
 				itemStore.Updated += updateEvent =>
 				{
-					var res = updateEvent.ToStringVerbose();
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
 					res += "\n-------- All Items --------\n";
 					res += itemStore.ToString(true, true);
 					
