@@ -1,63 +1,121 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Lunra.Satchel
 {
 	public class ItemStore
 	{
-		public enum UpdateTypes
-		{
-			Unknown = 0,
-			ItemNew = 10,
-			ItemUpdated = 20
-		}
-		
 		[JsonProperty] Dictionary<ulong, Item> items = new Dictionary<ulong, Item>();
 		[JsonProperty] ulong currentId;
 		[JsonProperty] DateTime lastUpdated;
-		[JsonProperty] UpdateTypes lastUpdatedType;
 
-		public event Action<DateTime, UpdateTypes, Item> Updated;
+		public event Action<Item.Event> Updated;
 		
 		public void Initialize()
 		{
-			
+			foreach (var kv in items) kv.Value.Initialize(OnUpdated);
 		}
 
-		public Item New(
-			Action<Item> initialize = null
-		)
+		(Item Item, Action Done) Create()
 		{
 			var itemId = currentId;
 			currentId++;
 			
-			var result = new Item(itemId);
+			var item = new Item(itemId);
 			
-			initialize?.Invoke(result);
-			
-			items.Add(itemId, result);
+			return (
+				item,
+				() =>
+				{
+					items.Add(item.Id, item);
 
-			result.Initialize(this, OnUpdated);
-			
-			return result;
+					item.Initialize(OnUpdated);
+				}
+			);
 		}
+		
+		public Item New()
+		{
+			var result = Create();
 
-		public bool TryGet(
-			ulong id,
-			out Item item
+			result.Done();
+
+			return result.Item;
+		}
+		
+		public Item New(
+			Action<Item> initialize
 		)
 		{
-			return items.TryGetValue(id, out item);
+			var result = Create();
+
+			initialize(result.Item);
+			
+			result.Done();
+
+			return result.Item;
+		}
+		
+		public Item New(params (string Key, object Value)[] propertyKeyValues)
+		{
+			var result = Create();
+
+			result.Item.Set(propertyKeyValues);
+			
+			result.Done();
+
+			return result.Item;
 		}
 
-		public Item Get(ulong id) => items[id];
+		public Item First(ulong id) => items[id];
+		public Item First(Func<Item, bool> predicate) => items.First(kv => predicate(kv.Value)).Value;
+		
+		public Item FirstOrFallback(ulong id, Item fallback = null) => items.TryGetValue(id, out var value) ? value : fallback;
 
-		void OnUpdated(DateTime time, UpdateTypes type, Item item)
+		public Item FirstOrFallback(Func<Item, bool> predicate, Item fallback = null)
 		{
-			lastUpdated = time;
-			lastUpdatedType = type;
-			Updated?.Invoke(time, type, item);
+			try
+			{
+				return First(predicate);
+			}
+			catch (InvalidOperationException)
+			{
+				return fallback;
+			}
+		}
+
+		public Item FirstOrDefault(ulong id) => FirstOrFallback(id);
+		public Item FirstOrDefault(Func<Item, bool> predicate) => FirstOrFallback(predicate);
+
+		public Item[] Where(Func<Item, bool> predicate) => items.Select(kv => kv.Value).Where(predicate).ToArray();
+
+		#region Events
+		void OnUpdated(Item.Event update)
+		{
+			lastUpdated = update.UpdateTime;
+			Updated?.Invoke(update);
+		}
+		#endregion
+
+		public override string ToString() => ToString(false, false);
+		
+		public string ToString(
+			bool verbose,
+			bool includeProperties
+		)
+		{
+			var result = $"ItemStore Contains {items.Count} Item(s) | Last Updated {lastUpdated}";
+			if (!verbose) return result;
+
+			foreach (var item in items)
+			{
+				result += $"\n\t{item.Value.ToString(includeProperties ? Item.Formats.ExcludePrefix | Item.Formats.IncludeProperties | Item.Formats.ExtraPropertyIndent : Item.Formats.ExcludePrefix)}";
+			}
+
+			return result;
 		}
 	}
 }

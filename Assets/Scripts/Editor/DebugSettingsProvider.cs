@@ -12,6 +12,7 @@ using Lunra.Satchel;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
@@ -226,29 +227,59 @@ namespace Lunra.Hothouse.Editor
 
 			if (GUILayout.Button("Test Satchel"))
 			{
-				var refKey = new ItemKey<string>("some_string_val");
 				var itemStore = new ItemStore();
+				itemStore.Initialize();
+				
+				var refKey = new ItemKey<string>("some_string_key0");
 
-				itemStore.Updated += (itemStoreUpdateTime, itemStoreUpdateType, itemStoreUpdatedItem) =>
+				itemStore.Updated += updateEvent =>
 				{
-					Debug.Log($"{itemStoreUpdateTime} : {itemStoreUpdateType}\n{itemStoreUpdatedItem}");
+					var res = updateEvent.ToStringVerbose();
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+					
+					Debug.Log(res);
 				};
 				
 				var item0 = itemStore.New(
 					i =>
 					{
-						i.Set("some_int_val", 69);
+						i.Set("some_int_key0", 69);
+						i.Set(refKey, "some string val");
 					}
 				);
-
-				Debug.Log(item0.Get<int>("some_int_val"));
-				Debug.Log(item0.Get(refKey));
-				Debug.Log(item0.Get(refKey, "some default string value"));
-
-				item0.Set(refKey, "a value");
 				
-				Debug.Log(item0.Get(refKey));
-				Debug.Log(item0.Get(refKey, "some default string value"));
+				var item1 = itemStore.New(
+					( "some_bool_key0", true),
+					( "some_bool_key1", false),
+					( "some_bool_overwrite0", true),
+					( "some_bool_overwrite0", false)
+				);
+
+				item0.Set("some_int_key0", 420);
+
+				item0.Set(refKey, "A new string");
+
+				var itemStoreSerialized = itemStore.Serialize(false, Formatting.Indented);
+				Debug.Log(itemStoreSerialized);
+
+				var itemStoreDeserialized = Serialization.DeserializeJson<ItemStore>(itemStoreSerialized);
+				itemStoreDeserialized.Initialize();
+				
+				Debug.Log(itemStoreDeserialized.First(0).ToString(Item.Formats.IncludeProperties));
+				// item0.Set("some_int_key0", true);
+
+
+
+				//
+				// Debug.Log(item0.Get<int>("some_int_key0"));
+				// Debug.Log(item0.Get(refKey));
+				// Debug.Log(item0.Get(refKey, "some default string value"));
+				//
+				// item0.Set(refKey, "a value");
+				//
+				// Debug.Log(item0.Get(refKey));
+				// Debug.Log(item0.Get(refKey, "some default string value"));
 
 				// var item1 = itemStore.New();
 			}
