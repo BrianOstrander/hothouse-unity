@@ -216,7 +216,11 @@ namespace Lunra.Satchel
 
 			public override string ToString() => ToString("< Unknown Key >");
 
-			public string ToString(string key, string suffix = null)
+			public string ToString(
+				string key,
+				bool includeType = false,
+				string suffix = null
+			)
 			{
 				string serializedValue;
 
@@ -228,8 +232,10 @@ namespace Lunra.Satchel
 					case Types.String: serializedValue = StringValue; break;
 					default: serializedValue = $"< Unrecognized Type {Type} >"; break;
 				}
+
+				var result = includeType ? $"{Type.ToString()[0]} : " : string.Empty;
 				
-				return $"[ {Type.ToString()[0],-4} : {key,-32} {serializedValue,-32} {StringExtensions.GetNonNullOrEmpty(suffix, string.Empty),-32}";
+				return result + $"{key,-32} | {serializedValue,-32} {StringExtensions.GetNonNullOrEmpty(suffix, string.Empty),-32}";
 			}
 		}
 
@@ -283,7 +289,7 @@ namespace Lunra.Satchel
 
 				foreach (var kv in Properties)
 				{
-					result += $"\n\t - {kv.Value.Property.ToString(kv.Key, " | " + ReadableUpdateType(kv.Value.Update))}";
+					result += $"\n\t - {kv.Value.Property.ToString(kv.Key, suffix: " | " + ReadableUpdateType(kv.Value.Update))}";
 				}
 
 				return result;
