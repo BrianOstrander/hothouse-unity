@@ -8,6 +8,7 @@ using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services;
 using Lunra.Hothouse.Services.Editor;
 using Lunra.NumberDemon;
+using Lunra.Satchel;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
@@ -221,6 +222,35 @@ namespace Lunra.Hothouse.Editor
 				}
 				
 				Debug.Log(res);
+			}
+
+			if (GUILayout.Button("Test Satchel"))
+			{
+				var refKey = new ItemKey<string>("some_string_val");
+				var itemStore = new ItemStore();
+
+				itemStore.Updated += (itemStoreUpdateTime, itemStoreUpdateType, itemStoreUpdatedItem) =>
+				{
+					Debug.Log($"{itemStoreUpdateTime} : {itemStoreUpdateType}\n{itemStoreUpdatedItem}");
+				};
+				
+				var item0 = itemStore.New(
+					i =>
+					{
+						i.Set("some_int_val", 69);
+					}
+				);
+
+				Debug.Log(item0.Get<int>("some_int_val"));
+				Debug.Log(item0.Get(refKey));
+				Debug.Log(item0.Get(refKey, "some default string value"));
+
+				item0.Set(refKey, "a value");
+				
+				Debug.Log(item0.Get(refKey));
+				Debug.Log(item0.Get(refKey, "some default string value"));
+
+				// var item1 = itemStore.New();
 			}
 		}
 		

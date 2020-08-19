@@ -197,5 +197,15 @@ namespace Lunra.Core
 		
 		public static T[] WrapInArray<T>(this T element) => new [] { element };
 		public static List<T> WrapInList<T>(this T element) => new List<T> { element };
+
+		public static TValue TryGetValueOrFallback<TKey, TValue>(
+			this IDictionary<TKey, TValue> source,
+			TKey key,
+			TValue fallback = default
+		)
+		{
+			if (source.TryGetValue(key, out var value)) return value;
+			return fallback;
+		}
 	}
 }
