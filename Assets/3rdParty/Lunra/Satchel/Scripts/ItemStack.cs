@@ -1,3 +1,4 @@
+/*
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -6,11 +7,17 @@ namespace Lunra.Satchel
 	public struct ItemStack
 	{
 		[JsonProperty] public ulong Id { get; private set; }
+		[JsonProperty] public ulong ItemId { get; private set; }
 		[JsonProperty] public int Count { get; private set; }
 
-		public ItemStack(ulong id, int count)
+		public ItemStack(
+			ulong id,
+			ulong itemId,
+			int count
+		)
 		{
 			Id = id;
+			ItemId = itemId;
 			Count = count;
 		}
 		
@@ -30,3 +37,4 @@ namespace Lunra.Satchel
 		public static ItemStack operator --(ItemStack itemStack) => itemStack.GetCount(itemStack.Count - 1);
 	}
 }
+*/

@@ -56,8 +56,6 @@ namespace Lunra.Satchel
 			[JsonProperty] public float FloatValue { get; private set; }
 			[JsonProperty] public string StringValue { get; private set; }
 
-			[JsonIgnore] public bool IsUnknown => Type == Types.Unknown;
-			
 			public Property(
 				Types type,
 				bool boolValue = false,
@@ -306,7 +304,8 @@ namespace Lunra.Satchel
 		
 		[JsonProperty] public ulong Id { get; private set; }
 		[JsonProperty] public DateTime LastUpdated { get; private set; }
-		[JsonProperty] public bool IsInitialized { get; private set; }
+		
+		[JsonProperty] bool isInitialized;
 		[JsonProperty] Dictionary<string, Property> properties = new Dictionary<string, Property>();
 
 		Action<Event> itemStoreUpdated;
@@ -317,9 +316,9 @@ namespace Lunra.Satchel
 		{
 			this.itemStoreUpdated = itemStoreUpdated;
 
-			if (!IsInitialized)
+			if (!isInitialized)
 			{
-				IsInitialized = true;
+				isInitialized = true;
 				
 				var eventPropertyUpdates = properties
 					.ToReadonlyDictionary(
@@ -327,10 +326,11 @@ namespace Lunra.Satchel
 						kv => (kv.Value, Event.Types.Property | Event.Types.New)
 					);
 
+				LastUpdated = DateTime.Now;
 				itemStoreUpdated(
 					new Event(
 						Id,
-						DateTime.Now,
+						LastUpdated,
 						eventPropertyUpdates.Any() ? new[] {Event.Types.Item | Event.Types.New, Event.Types.Property | Event.Types.New} : new[] {Event.Types.Item | Event.Types.New},
 						eventPropertyUpdates
 					)
@@ -429,13 +429,14 @@ namespace Lunra.Satchel
 			Event.Types update
 		)
 		{
-			if (!IsInitialized) return false;
+			if (!isInitialized) return false;
 			if (update == Event.Types.None) return false;
 
+			LastUpdated = DateTime.Now;
 			itemStoreUpdated(
 				new Event(
 					Id,
-					DateTime.Now,
+					LastUpdated,
 					update.WrapInArray(),
 					new ReadOnlyDictionary<string, (Property Property, Event.Types Update)>(
 						new Dictionary<string, (Property Property, Event.Types Update)>
@@ -453,7 +454,7 @@ namespace Lunra.Satchel
 			params (string Key, Property Property, Event.Types Update)[] propertyUpdates 
 		)
 		{
-			if (!IsInitialized) return false;
+			if (!isInitialized) return false;
 			if (propertyUpdates.None()) return false;
 			
 			var eventUpdates = Event.Types.None;
@@ -469,10 +470,11 @@ namespace Lunra.Satchel
 
 			if (eventUpdates == Event.Types.None) return false;
 			
+			LastUpdated = DateTime.Now;
 			itemStoreUpdated(
 				new Event(
 					Id,
-					DateTime.Now,
+					LastUpdated,
 					eventUpdates.WrapInArray(),
 					eventPropertyUpdates.ToReadonlyDictionary()
 				)
