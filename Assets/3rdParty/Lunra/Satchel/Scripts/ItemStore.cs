@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Lunra.Satchel
 {
@@ -13,9 +12,20 @@ namespace Lunra.Satchel
 		[JsonProperty] DateTime lastUpdated;
 
 		public event Action<Item.Event> Updated;
+
+		IItemModifier[] modifiers;
 		
-		public void Initialize()
+		public void Initialize(
+			params IItemModifier[] modifiers
+		)
 		{
+			this.modifiers = new []
+				{
+					new CallbackItemModifier(i => i.Set(Constants.InstanceCount, 0))
+				}
+				.Concat(modifiers)
+				.ToArray();
+			
 			foreach (var kv in items) kv.Value.Initialize(OnUpdated);
 		}
 
@@ -30,6 +40,11 @@ namespace Lunra.Satchel
 				item,
 				() =>
 				{
+					foreach (var modifier in modifiers)
+					{
+						if (modifier.IsValid(item)) modifier.Apply(item);
+					}
+					
 					items.Add(item.Id, item);
 
 					item.Initialize(OnUpdated);
@@ -91,6 +106,7 @@ namespace Lunra.Satchel
 		public Item FirstOrDefault(Func<Item, bool> predicate) => FirstOrFallback(predicate);
 
 		public Item[] Where(Func<Item, bool> predicate) => items.Select(kv => kv.Value).Where(predicate).ToArray();
+		public Item[] ToArray() => items.Select(kv => kv.Value).ToArray();
 
 		#region Events
 		void OnUpdated(Item.Event update)
