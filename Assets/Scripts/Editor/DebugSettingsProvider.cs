@@ -258,6 +258,10 @@ namespace Lunra.Hothouse.Editor
 				item0.Set("some_int_key1", 420);
 				
 				Debug.Log($"Can stack {item0.Id} and {item2.Id} : {itemStore.CanStack(item0, item2)}");
+
+				item0.Set(Constants.InstanceCount, 10);
+				
+				Debug.Log($"Can stack {item0.Id} and {item2.Id} : {itemStore.CanStack(item0, item2)}");
 			}
 		}
 		

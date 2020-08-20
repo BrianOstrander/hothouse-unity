@@ -59,17 +59,27 @@ namespace Lunra.Satchel
 
 		public event Action<Event> Updated;
 
+		string[] keysIgnoredForStacking;
 		IItemModifier[] modifiers;
-		
+
 		public void Initialize(
-			params IItemModifier[] modifiers
+			string[] keysIgnoredForStacking = null,
+			IItemModifier[] modifiers = null
 		)
 		{
+			this.keysIgnoredForStacking = new[]
+				{
+					Constants.InstanceCount.Key
+				}
+				.Concat(keysIgnoredForStacking ?? new string[0])
+				.Distinct()
+				.ToArray();
+			
 			this.modifiers = new []
 				{
 					new CallbackItemModifier(i => i.Set(Constants.InstanceCount, 0))
 				}
-				.Concat(modifiers)
+				.Concat(modifiers ?? new IItemModifier[0])
 				.ToArray();
 			
 			foreach (var kv in items) kv.Value.Initialize(i => TryUpdate(i));
@@ -144,6 +154,9 @@ namespace Lunra.Satchel
 			foreach (var targetKey in targetKeys)
 			{
 				if (!sourceKeys.Contains(targetKey)) return false;
+				
+				if (keysIgnoredForStacking.Contains(targetKey)) continue;
+				
 				if (!Item.IsPropertyEqual(item0, item1, targetKey)) return false;
 			}
 
