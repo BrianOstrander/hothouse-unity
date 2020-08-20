@@ -245,10 +245,10 @@ namespace Lunra.Satchel
 
 				switch (Type)
 				{
-					case Types.Bool: serializedValue = BoolValue.ToString(); break;
+					case Types.Bool: serializedValue = BoolValue.ToString().ToLower(); break;
 					case Types.Int: serializedValue = IntValue.ToString(); break;
 					case Types.Float: serializedValue = FloatValue.ToString("N4"); break;
-					case Types.String: serializedValue = StringValue; break;
+					case Types.String: serializedValue = $"\"{StringValue}\""; break;
 					default: serializedValue = $"< Unrecognized Type {Type} >"; break;
 				}
 
