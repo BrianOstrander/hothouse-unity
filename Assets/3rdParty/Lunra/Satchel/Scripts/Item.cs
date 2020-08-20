@@ -214,6 +214,25 @@ namespace Lunra.Satchel
 				return false;
 			}
 
+			public bool IsEqualTo(Property property)
+			{
+				if (Type != property.Type) return false;
+				switch (Type)
+				{
+					case Types.Bool:
+						return BoolValue == property.BoolValue;
+					case Types.Int:
+						return IntValue == property.IntValue;
+					case Types.Float:
+						return Mathf.Approximately(FloatValue, property.FloatValue);
+					case Types.String:
+						return StringValue == property.StringValue;
+					default:
+						Debug.LogError("Unrecognized Type: "+Type);
+						return true;
+				}
+			}
+
 			public override string ToString() => ToString("< Unknown Key >");
 
 			public string ToString(
@@ -486,6 +505,23 @@ namespace Lunra.Satchel
 			);
 
 			return true;
+		}
+
+		public string[] GetPropertyKeys(
+			params Item[] items	
+		)
+		{
+			var results = properties.Keys.ToList();
+
+			foreach (var item in items)
+			{
+				foreach (var property in item.properties.Keys)
+				{
+					if (!results.Contains(property)) results.Add(property);
+				}
+			}
+
+			return results.ToArray();
 		}
 
 		/// <summary>
