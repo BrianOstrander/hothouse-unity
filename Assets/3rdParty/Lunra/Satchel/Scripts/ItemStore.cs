@@ -96,7 +96,7 @@ namespace Lunra.Satchel
 			foreach (var kv in items) kv.Value.Initialize(i => TryUpdate(i));
 		}
 
-		Item Create(Action<Item> initialize)
+		Item Define(Action<Item> initialize)
 		{
 			var itemId = currentId;
 			currentId++;
@@ -117,14 +117,14 @@ namespace Lunra.Satchel
 			return item;
 		}
 
-		public Item New(params (string Key, object Value)[] propertyKeyValues) => Create(item => item.Set(propertyKeyValues));
+		public Item New(params (string Key, object Value)[] propertyKeyValues) => Define(item => item.Set(propertyKeyValues));
 		
 		public Item New(
 			Item source,
 			params (string Key, object Value)[] propertyKeyValues
 		)
 		{
-			return Create(
+			return Define(
 				item =>
 				{
 					item.CloneProperties(
@@ -159,11 +159,9 @@ namespace Lunra.Satchel
 			return true;
 		}
 
-		public bool CanStack(ItemStack stack0, ItemStack stack1) => CanStack(First(stack0.ItemId), First(stack1.ItemId));
+		public bool CanStack(ItemStack stack0, ItemStack stack1) => CanStack(First(stack0.Id), First(stack1.Id));
 
-		public void SetInstanceCount(ulong id, int count) => First(id).Set(Constants.InstanceCount, count);
-
-		public ItemStack NewStack(ulong id, int count)
+		public ItemStack Create(ulong id, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Negative counts are not supported for stacks");
 
@@ -177,28 +175,30 @@ namespace Lunra.Satchel
 			return result;
 		}
 
-		public ItemStack NewStack(Item item, int count) => NewStack(item.Id, count);
+		public ItemStack Create(Item item, int count) => Create(item.Id, count);
 
-		public void DestroyStack(ItemStack stack)
+		public void Destroy(ulong id, int count)
 		{
-			if (stack.Count == 0) return;
-			if (stack.Count < 0) throw new ArgumentOutOfRangeException(nameof(stack), "Negative counts are not supported for stacks");
+			if (count == 0) return;
+			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Negative counts are not supported for stacks");
 			
-			var item = First(stack.ItemId);
+			var item = First(id);
 			var itemInstanceCount = item.Get(Constants.InstanceCount);
 			var newInstanceCount = itemInstanceCount;
 
-			if (itemInstanceCount < stack.Count)
+			if (itemInstanceCount < count)
 			{
-				Debug.LogError($"Instance count {itemInstanceCount} is less than stack count {stack.Count}, this is unexpected");
+				Debug.LogError($"Instance count {itemInstanceCount} is less than stack count {count}, this is unexpected");
 				newInstanceCount = 0;
 			}
-			else newInstanceCount -= stack.Count;
+			else newInstanceCount -= count;
 
 			if (itemInstanceCount == newInstanceCount) return;
 
 			item.Set(Constants.InstanceCount, newInstanceCount);
 		}
+
+		public void Destroy(ItemStack stack) => Destroy(stack.Id, stack.Count);
 		
 		public Item First(ulong id) => items[id];
 		public Item First(Func<Item, bool> predicate) => items.First(kv => predicate(kv.Value)).Value;

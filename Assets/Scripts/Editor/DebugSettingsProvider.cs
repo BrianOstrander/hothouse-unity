@@ -241,7 +241,7 @@ namespace Lunra.Hothouse.Editor
 					( "some_int_key0", 69)
 				);
 
-				var stack = itemStore.NewStack(item0, 10);
+				var stack = itemStore.Create(item0, 10);
 
 				var item1 = itemStore.New(item0);
 				var item2 = itemStore.New(item0, ("some_int_key0", 70));
@@ -268,9 +268,9 @@ namespace Lunra.Hothouse.Editor
 					( "some_int_key0", 69)
 				);
 
-				var stack = itemStore.NewStack(item0, 10);
+				var stack = itemStore.Create(item0, 10);
 				
-				itemStore.DestroyStack(stack);
+				itemStore.Destroy(stack);
 			}
 			
 			if (GUILayout.Button("Test Satchel 2"))

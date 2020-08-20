@@ -5,23 +5,28 @@ namespace Lunra.Satchel
 {
 	public struct ItemStack
 	{
-		[JsonProperty] public ulong ItemId { get; private set; }
+		/// <summary>
+		/// The Id of the Item this stack contains.
+		/// </summary>
+		[JsonProperty] public ulong Id { get; private set; }
 		[JsonProperty] public int Count { get; private set; }
 
+		[JsonIgnore] public bool IsEmpty => Count == 0;
+
 		public ItemStack(
-			ulong itemId,
+			ulong id,
 			int count
 		)
 		{
-			ItemId = itemId;
-			Count = count;
+			Id = id;
+			Count = Mathf.Max(0, count);
 		}
 		
-		public ItemStack NewCount(int count) => new ItemStack(ItemId, Mathf.Max(0, count));
+		public ItemStack NewCount(int count) => new ItemStack(Id, count);
 
-		public bool Is(ulong itemId) => itemId == ItemId;
-		public bool Is(ulong itemId, int count) => itemId == ItemId && count == Count;
-		public bool Is(ItemStack itemStack) => Is(itemStack.ItemId, itemStack.Count);
+		public bool Is(ulong id) => id == Id;
+		public bool IsEqualTo(ulong id, int count) => id == Id && count == Count;
+		public bool IsEqualTo(ItemStack itemStack) => IsEqualTo(itemStack.Id, itemStack.Count);
 
 		public static ItemStack operator +(ItemStack itemStack, int count) => itemStack.NewCount(itemStack.Count + count);
 		public static ItemStack operator -(ItemStack itemStack, int count) => itemStack.NewCount(itemStack.Count - count);
