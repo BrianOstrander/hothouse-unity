@@ -332,6 +332,8 @@ namespace Lunra.Satchel
 		[JsonProperty] bool isInitialized;
 		[JsonProperty] Dictionary<string, Property> properties = new Dictionary<string, Property>();
 
+		[JsonIgnore] public string[] PropertyKeys => properties.Keys.ToArray();
+		
 		Action<Event> itemStoreUpdated;
 
 		public Item(ulong id) => Id = id;
@@ -506,30 +508,24 @@ namespace Lunra.Satchel
 
 			return true;
 		}
-
-		public string[] GetPropertyKeys(
-			params Item[] items	
-		)
-		{
-			var results = properties.Keys.ToList();
-
-			foreach (var item in items)
-			{
-				foreach (var property in item.properties.Keys)
-				{
-					if (!results.Contains(property)) results.Add(property);
-				}
-			}
-
-			return results.ToArray();
-		}
-
+		
 		/// <summary>
 		/// Used, ideally only, by the ItemStore to update this value upon destruction.
 		/// </summary>
 		/// <param name="lastUpdated"></param>
 		public void ForceUpdateTime(DateTime lastUpdated) => LastUpdated = lastUpdated;
 
+		public static bool IsPropertyEqual(Item item0, Item item1, string key)
+		{
+			var found0 = item0.properties.TryGetValue(key, out var property0);
+			var found1 = item1.properties.TryGetValue(key, out var property1);
+
+			if (found0 != found1) return false;
+			if (found0 == false) return true;
+
+			return property0.IsEqualTo(property1);
+		}
+		
 		public override string ToString() => ToString(Formats.Default);
 		
 		public string ToString(Formats format)

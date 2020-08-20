@@ -131,6 +131,25 @@ namespace Lunra.Satchel
 			return result.Item;
 		}
 
+		public bool CanStack(Item item0, Item item1)
+		{
+			if (item0.Id == item1.Id) return true;
+			
+			var targetKeys = item0.PropertyKeys;
+			var sourceKeys = item1.PropertyKeys;
+
+			if (targetKeys.Length != sourceKeys.Length) return false;
+			if (targetKeys.Length == 0) return true;
+
+			foreach (var targetKey in targetKeys)
+			{
+				if (!sourceKeys.Contains(targetKey)) return false;
+				if (!Item.IsPropertyEqual(item0, item1, targetKey)) return false;
+			}
+
+			return true;
+		}
+
 		public Item First(ulong id) => items[id];
 		public Item First(Func<Item, bool> predicate) => items.First(kv => predicate(kv.Value)).Value;
 		

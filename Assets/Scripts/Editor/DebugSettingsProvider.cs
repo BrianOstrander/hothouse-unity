@@ -230,8 +230,6 @@ namespace Lunra.Hothouse.Editor
 				var itemStore = new ItemStore();
 				itemStore.Initialize();
 				
-				var refKey = new ItemKey<string>("some_string_key0");
-
 				itemStore.Updated += updateEvent =>
 				{
 					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
@@ -242,62 +240,24 @@ namespace Lunra.Hothouse.Editor
 				};
 				
 				var item0 = itemStore.New(
-					i =>
-					{
-						i.Set("some_int_key0", 69);
-						i.Set(refKey, "some string val");
-					}
+					( "some_int_key0", 69)
 				);
 				
 				var item1 = itemStore.New(
-					( "some_bool_key0", true),
-					( "some_bool_key1", false),
-					( "some_bool_overwrite0", true),
-					( "some_bool_overwrite0", false)
-				);
-
-				item0.Set("some_int_key0", 420);
-
-				item0.Set(refKey, "A new string");
-
-				var itemStoreSerialized = itemStore.Serialize(false, Formatting.Indented);
-				Debug.Log(itemStoreSerialized);
-
-				var itemStoreDeserialized = Serialization.DeserializeJson<ItemStore>(itemStoreSerialized);
-				itemStoreDeserialized.Initialize();
-				
-				Debug.Log(itemStoreDeserialized.First(0).ToString(Item.Formats.IncludeProperties));
-
-				itemStore.Cleanup(out var cleanedUpItems);
-
-				Debug.Log($"cleaned up {cleanedUpItems.Length} item(s)");
-				
-				Debug.Log(itemStore);
-				
-				itemStore.New(
-					( "some_bool_key0", true),
-					( Satchel.Constants.IgnoreCleanup.Key, true)
+					( "some_int_key0", 69)
 				);
 				
-				itemStore.Cleanup();
+				var item2 = itemStore.New(
+					( "some_int_key0", 69),
+					( "some_int_key1", 420)
+				);
+
+				Debug.Log($"Can stack {item0.Id} and {item1.Id} : {itemStore.CanStack(item0, item1)}");
+				Debug.Log($"Can stack {item0.Id} and {item2.Id} : {itemStore.CanStack(item0, item2)}");
+
+				item0.Set("some_int_key1", 420);
 				
-				Debug.Log(itemStore.ToString(true, true));
-
-				// item0.Set("some_int_key0", true);
-
-
-
-				//
-				// Debug.Log(item0.Get<int>("some_int_key0"));
-				// Debug.Log(item0.Get(refKey));
-				// Debug.Log(item0.Get(refKey, "some default string value"));
-				//
-				// item0.Set(refKey, "a value");
-				//
-				// Debug.Log(item0.Get(refKey));
-				// Debug.Log(item0.Get(refKey, "some default string value"));
-
-				// var item1 = itemStore.New();
+				Debug.Log($"Can stack {item0.Id} and {item2.Id} : {itemStore.CanStack(item0, item2)}");
 			}
 		}
 		
