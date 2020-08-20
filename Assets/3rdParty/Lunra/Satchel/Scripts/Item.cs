@@ -214,6 +214,29 @@ namespace Lunra.Satchel
 				return false;
 			}
 
+			public bool TryGetRawValue(out object value)
+			{
+				switch (Type)
+				{
+					case Types.Bool:
+						value = BoolValue;
+						return true;
+					case Types.Int:
+						value = IntValue;
+						return true;
+					case Types.Float:
+						value = FloatValue;
+						return true;
+					case Types.String:
+						value = StringValue;
+						return true;
+					default:
+						value = null;
+						Debug.LogError($"Unrecognized Type {Type}");
+						return false;
+				}
+			}
+
 			public bool IsEqualTo(Property property)
 			{
 				if (Type != property.Type) return false;
@@ -508,6 +531,24 @@ namespace Lunra.Satchel
 
 			return true;
 		}
+
+		public void CloneProperties(
+			Item source,
+			params string[] ignoredKeys
+		)
+		{
+			var propertyKeyValues = new List<(string Key, object Value)>();
+			
+			foreach (var property in source.properties)
+			{
+				if (ignoredKeys.Contains(property.Key)) continue;
+				if (property.Value.TryGetRawValue(out var value)) propertyKeyValues.Add((property.Key, value));
+			}
+
+			if (propertyKeyValues.None()) return;
+			
+			Set(propertyKeyValues.ToArray());
+		}
 		
 		/// <summary>
 		/// Used, ideally only, by the ItemStore to update this value upon destruction.
@@ -517,6 +558,12 @@ namespace Lunra.Satchel
 
 		public static bool IsPropertyEqual(Item item0, Item item1, string key)
 		{
+			if (item0 == null) throw new ArgumentNullException(nameof(item0));
+			if (item1 == null) throw new ArgumentNullException(nameof(item1));
+			if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
+			
+			if (item0.Id == item1.Id) return true;
+			
 			var found0 = item0.properties.TryGetValue(key, out var property0);
 			var found1 = item1.properties.TryGetValue(key, out var property1);
 

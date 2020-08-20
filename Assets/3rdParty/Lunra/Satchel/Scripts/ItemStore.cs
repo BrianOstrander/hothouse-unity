@@ -60,19 +60,29 @@ namespace Lunra.Satchel
 
 		public event Action<Event> Updated;
 
-		string[] keysIgnoredForStacking;
+		string[] ignoredKeysForStacking;
+		string[] ignoredKeysCloning;
 		IItemModifier[] modifiers;
 
 		public void Initialize(
-			string[] keysIgnoredForStacking = null,
+			string[] ignoredKeysForStacking = null,
+			string[] ignoredKeysCloning = null,
 			IItemModifier[] modifiers = null
 		)
 		{
-			this.keysIgnoredForStacking = new[]
+			this.ignoredKeysForStacking = new[]
 				{
 					Constants.InstanceCount.Key
 				}
-				.Concat(keysIgnoredForStacking ?? new string[0])
+				.Concat(ignoredKeysForStacking ?? new string[0])
+				.Distinct()
+				.ToArray();
+			
+			this.ignoredKeysCloning = new[]
+				{
+					Constants.InstanceCount.Key
+				}
+				.Concat(ignoredKeysCloning ?? new string[0])
 				.Distinct()
 				.ToArray();
 			
@@ -86,60 +96,45 @@ namespace Lunra.Satchel
 			foreach (var kv in items) kv.Value.Initialize(i => TryUpdate(i));
 		}
 
-		(Item Item, Action Done) Create()
+		Item Create(Action<Item> initialize)
 		{
 			var itemId = currentId;
 			currentId++;
 			
 			var item = new Item(itemId);
+
+			initialize(item);
 			
-			return (
-				item,
-				() =>
-				{
-					foreach (var modifier in modifiers)
-					{
-						if (modifier.IsValid(item)) modifier.Apply(item);
-					}
+			foreach (var modifier in modifiers)
+			{
+				if (modifier.IsValid(item)) modifier.Apply(item);
+			}
 					
-					items.Add(item.Id, item);
+			items.Add(item.Id, item);
 
-					item.Initialize(i => TryUpdate(i));
-				}
-			);
+			item.Initialize(i => TryUpdate(i));
+
+			return item;
 		}
-		
-		public Item New()
-		{
-			var result = Create();
 
-			result.Done();
-
-			return result.Item;
-		}
+		public Item New(params (string Key, object Value)[] propertyKeyValues) => Create(item => item.Set(propertyKeyValues));
 		
 		public Item New(
-			Action<Item> initialize
+			Item source,
+			params (string Key, object Value)[] propertyKeyValues
 		)
 		{
-			var result = Create();
-
-			initialize(result.Item);
+			return Create(
+				item =>
+				{
+					item.CloneProperties(
+						source,
+						ignoredKeysCloning
+					);
 			
-			result.Done();
-
-			return result.Item;
-		}
-		
-		public Item New(params (string Key, object Value)[] propertyKeyValues)
-		{
-			var result = Create();
-
-			result.Item.Set(propertyKeyValues);
-			
-			result.Done();
-
-			return result.Item;
+					item.Set(propertyKeyValues);
+				}
+			);
 		}
 
 		public bool CanStack(Item item0, Item item1)
@@ -156,7 +151,7 @@ namespace Lunra.Satchel
 			{
 				if (!sourceKeys.Contains(targetKey)) return false;
 				
-				if (keysIgnoredForStacking.Contains(targetKey)) continue;
+				if (ignoredKeysForStacking.Contains(targetKey)) continue;
 				
 				if (!Item.IsPropertyEqual(item0, item1, targetKey)) return false;
 			}
