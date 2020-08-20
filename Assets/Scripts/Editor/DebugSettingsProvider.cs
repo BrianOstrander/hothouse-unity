@@ -7,12 +7,10 @@ using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services;
 using Lunra.Hothouse.Services.Editor;
-using Lunra.NumberDemon;
 using Lunra.Satchel;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
-using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
@@ -225,7 +223,30 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
-			if (GUILayout.Button("Test Satchel"))
+			if (GUILayout.Button("Test Satchel 0"))
+			{
+				var itemStore = new ItemStore();
+				itemStore.Initialize();
+				
+				itemStore.Updated += updateEvent =>
+				{
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+					
+					Debug.Log(res);
+				};
+				
+				var item0 = itemStore.New(
+					( "some_int_key0", 69)
+				);
+
+				var stack = itemStore.NewStack(item0, 10);
+				
+				itemStore.DestroyStack(stack);
+			}
+			
+			if (GUILayout.Button("Test Satchel 1"))
 			{
 				var itemStore = new ItemStore();
 				itemStore.Initialize();

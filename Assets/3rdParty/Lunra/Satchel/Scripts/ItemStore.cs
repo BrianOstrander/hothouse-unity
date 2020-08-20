@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Lunra.Satchel
 {
@@ -163,6 +164,47 @@ namespace Lunra.Satchel
 			return true;
 		}
 
+		public bool CanStack(ItemStack stack0, ItemStack stack1) => CanStack(First(stack0.ItemId), First(stack1.ItemId));
+
+		public void SetInstanceCount(ulong id, int count) => First(id).Set(Constants.InstanceCount, count);
+
+		public ItemStack NewStack(ulong id, int count)
+		{
+			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Negative counts are not supported for stacks");
+
+			var item = First(id);
+			var result = new ItemStack(id, count);
+
+			if (count == 0) return result;
+
+			item.Set(Constants.InstanceCount, count + item.Get(Constants.InstanceCount));
+
+			return result;
+		}
+
+		public ItemStack NewStack(Item item, int count) => NewStack(item.Id, count);
+
+		public void DestroyStack(ItemStack stack)
+		{
+			if (stack.Count == 0) return;
+			if (stack.Count < 0) throw new ArgumentOutOfRangeException(nameof(stack), "Negative counts are not supported for stacks");
+			
+			var item = First(stack.ItemId);
+			var itemInstanceCount = item.Get(Constants.InstanceCount);
+			var newInstanceCount = itemInstanceCount;
+
+			if (itemInstanceCount < stack.Count)
+			{
+				Debug.LogError($"Instance count {itemInstanceCount} is less than stack count {stack.Count}, this is unexpected");
+				newInstanceCount = 0;
+			}
+			else newInstanceCount -= stack.Count;
+
+			if (itemInstanceCount == newInstanceCount) return;
+
+			item.Set(Constants.InstanceCount, newInstanceCount);
+		}
+		
 		public Item First(ulong id) => items[id];
 		public Item First(Func<Item, bool> predicate) => items.First(kv => predicate(kv.Value)).Value;
 		
