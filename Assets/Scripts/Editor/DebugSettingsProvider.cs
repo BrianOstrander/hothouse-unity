@@ -223,6 +223,35 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
+			if (GUILayout.Button("Test Satchel 0a"))
+			{
+				var itemStore = new ItemStore();
+				itemStore.Initialize();
+				
+				itemStore.Updated += updateEvent =>
+				{
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+					
+					Debug.Log(res);
+				};
+				
+				var itemInventory0 = new ItemInventory().Initialize(itemStore);
+				
+				var item0 = itemStore.New(
+					( "some_int_key0", 10)
+				);
+
+				var stack = itemStore.Create(item0, 10);
+
+				var item1 = itemStore.New(item0);
+				var item2 = itemStore.New(item0, ("some_int_key0", 70));
+				var item3 = itemStore.New(item0, ("some_int_key1", 420));
+				
+				Debug.Log(itemStore.CanStack(item0, item1));
+			}
+			
 			if (GUILayout.Button("Test Satchel 0"))
 			{
 				var itemStore = new ItemStore();

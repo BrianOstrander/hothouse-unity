@@ -89,6 +89,29 @@ namespace Lunra.Satchel
 				}
 			}
 			
+			public bool TryGetRawValue(out object value)
+			{
+				switch (Type)
+				{
+					case Types.Bool:
+						value = BoolValue;
+						return true;
+					case Types.Int:
+						value = IntValue;
+						return true;
+					case Types.Float:
+						value = FloatValue;
+						return true;
+					case Types.String:
+						value = StringValue;
+						return true;
+					default:
+						value = null;
+						Debug.LogError($"Unrecognized Type {Type}");
+						return false;
+				}
+			}
+			
 			public bool TryGet<T>(out T value)
 			{
 				value = default;
@@ -101,6 +124,7 @@ namespace Lunra.Satchel
 							value = boolValue;
 							return true;
 						}
+						else Debug.LogError($"Unrecognized type {typeof(T).Name}");
 						break;
 					case Types.Int:
 						if (IntValue is T intValue)
@@ -108,6 +132,7 @@ namespace Lunra.Satchel
 							value = intValue;
 							return true;
 						}
+						else Debug.LogError($"Unrecognized type {typeof(T).Name}");
 						break;
 					case Types.Float:
 						if (FloatValue is T floatValue)
@@ -115,6 +140,7 @@ namespace Lunra.Satchel
 							value = floatValue;
 							return true;
 						}
+						else Debug.LogError($"Unrecognized type {typeof(T).Name}");
 						break;
 					case Types.String:
 						if (StringValue is T stringValue)
@@ -122,6 +148,7 @@ namespace Lunra.Satchel
 							value = stringValue;
 							return true;
 						}
+						else Debug.LogError($"Unrecognized type {typeof(T).Name}");
 						break;
 					default:
 						Debug.LogError("Unrecognized property type: "+Type);
@@ -212,29 +239,6 @@ namespace Lunra.Satchel
 				isUpdated = false;
 				isReplacement = false;
 				return false;
-			}
-
-			public bool TryGetRawValue(out object value)
-			{
-				switch (Type)
-				{
-					case Types.Bool:
-						value = BoolValue;
-						return true;
-					case Types.Int:
-						value = IntValue;
-						return true;
-					case Types.Float:
-						value = FloatValue;
-						return true;
-					case Types.String:
-						value = StringValue;
-						return true;
-					default:
-						value = null;
-						Debug.LogError($"Unrecognized Type {Type}");
-						return false;
-				}
 			}
 
 			public bool IsEqualTo(Property property)
