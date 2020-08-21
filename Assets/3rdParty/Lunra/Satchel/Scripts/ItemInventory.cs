@@ -185,11 +185,11 @@ namespace Lunra.Satchel
 				}
 				else
 				{
-					if (TryGetOverflow(modification.Value.Item, modificationResult, out var overflowResult))
+					if (TryGetOverflow(modification.Value.Item, modificationResult, out var overflowClampedResult))
 					{
-						if (0 < overflowResult) Debug.LogError($"Unexpected overflow less than or equal to zero: {overflowResult}");
-						clampedList.Add((modification.Value.Item, modificationResult - overflowResult));
-						modificationResult = overflowResult;
+						if (overflowClampedResult < 1) Debug.LogError($"Unexpected overflow less than or equal to zero: {overflowClampedResult}");
+						clampedList.Add((modification.Value.Item, modificationResult - overflowClampedResult));
+						modificationResult = overflowClampedResult;
 					}
 				}
 				
@@ -248,9 +248,9 @@ namespace Lunra.Satchel
 			return triggerUpdate != null || clamped.Any();
 		}
 
-		protected virtual bool TryGetOverflow(Item item, int count, out int result)
+		protected virtual bool TryGetOverflow(Item item, int count, out int clampedCount)
 		{
-			result = count;
+			clampedCount = count;
 			return false;
 		}
 
@@ -267,8 +267,6 @@ namespace Lunra.Satchel
 			out (Item Item, int Count)[] clamped
 		)
 		{
-			Debug.LogError("TODO: IMP REMOVING FROM SELF, CURRENTLY JUST ADDS");
-			
 			var modifications = new Dictionary<ulong, (Item Item, int Count)>();
 			foreach (var stack in stacks)
 			{

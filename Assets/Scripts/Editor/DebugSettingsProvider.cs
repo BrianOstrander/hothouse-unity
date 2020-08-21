@@ -261,9 +261,11 @@ namespace Lunra.Hothouse.Editor
 
 				itemInventory0.Modify(
 					(item0, 25).WrapInArray(),
-					out var negClamp,
+					out var addClamp,
 					out _
 				);
+				
+				Debug.Log(addClamp.Aggregate("addClamp", (r, c) => $"{r}\n\t{c.Item.ToString(c.Count)}"));
 
 				// Debug.Log("-----------");
 				// Debug.Log("0" + itemInventory0);
@@ -277,9 +279,9 @@ namespace Lunra.Hothouse.Editor
 					itemStack0.WrapInArray(),
 					out var clamped
 				);
-
+				
 				Debug.Log(clamped.Aggregate("clamped", (r, c) => $"{r}\n\t{c.Item.ToString(c.Count)}"));
-
+				
 				Debug.Log(itemInventory0.Serialize(formatting: Formatting.Indented) + "\n"+itemInventory1.Serialize(formatting: Formatting.Indented));
 			}
 			
