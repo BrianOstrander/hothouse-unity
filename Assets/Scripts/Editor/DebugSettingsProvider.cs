@@ -260,7 +260,7 @@ namespace Lunra.Hothouse.Editor
 				var itemStack0 = itemStore.Create(item0, 20);
 
 				itemInventory0.Modify(
-					(item0, 25).WrapInArray(),
+					(item0, 10).WrapInArray(),
 					out var addClamp,
 					out _
 				);

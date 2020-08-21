@@ -178,12 +178,17 @@ namespace Lunra.Satchel
 				var existingCount = modification.Value.ExistingCount ?? 0;
 				var modificationResult = existingCount + modification.Value.Count;
 
-				if (modificationResult < 0)
+				if (modificationResult < existingCount)
 				{
-					clampedList.Add((modification.Value.Item, modificationResult));
-					modificationResult = 0;
+					if (TryGetUnderflow(modification.Value.Item, modificationResult, out var underflowClampedResult))
+					{
+						if (underflowClampedResult < modificationResult) Debug.LogError($"Unexpected underflow less than original result: {modificationResult} -> {underflowClampedResult}");
+						if (underflowClampedResult < 0) Debug.LogError($"Unexpected underflow clamp less than zero: {underflowClampedResult}");
+						clampedList.Add((modification.Value.Item, modificationResult - underflowClampedResult));
+						modificationResult = underflowClampedResult;
+					}
 				}
-				else
+				else 
 				{
 					if (TryGetOverflow(modification.Value.Item, modificationResult, out var overflowClampedResult))
 					{
@@ -248,6 +253,18 @@ namespace Lunra.Satchel
 			return triggerUpdate != null || clamped.Any();
 		}
 
+		protected virtual bool TryGetUnderflow(Item item, int count, out int clampedCount)
+		{
+			if (0 <= count)
+			{
+				clampedCount = count;
+				return false;
+			}
+
+			clampedCount = 0;
+			return true;
+		}
+		
 		protected virtual bool TryGetOverflow(Item item, int count, out int clampedCount)
 		{
 			clampedCount = count;
