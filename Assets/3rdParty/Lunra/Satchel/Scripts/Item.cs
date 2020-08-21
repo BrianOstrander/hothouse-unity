@@ -560,6 +560,10 @@ namespace Lunra.Satchel
 		/// <param name="lastUpdated"></param>
 		public void ForceUpdateTime(DateTime lastUpdated) => LastUpdated = lastUpdated;
 
+		public bool Is(ulong id) => id == Id;
+
+		public bool Is(Item item) => Is(item.Id);
+		
 		public static bool IsPropertyEqual(Item item0, Item item1, string key)
 		{
 			if (item0 == null) throw new ArgumentNullException(nameof(item0));

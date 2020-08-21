@@ -11,6 +11,7 @@ using Lunra.Satchel;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
@@ -223,6 +224,63 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
+			if (GUILayout.Button("Test Satchel 0b"))
+			{
+				var itemStore = new ItemStore();
+				itemStore.Initialize();
+				
+				itemStore.Updated += updateEvent =>
+				{
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+					
+					Debug.Log(res);
+				};
+				
+				var itemInventory0 = new ItemInventory().Initialize(itemStore);
+				var itemInventory1 = new ItemInventory().Initialize(itemStore);
+
+				itemInventory0.Updated += itemInventoryEvent =>
+				{
+					var res = $"Inventory0 Update: {itemInventoryEvent.ToString(ItemInventory.Event.Formats.IncludeStacks)}\n{itemInventory0}";
+					Debug.Log(res);
+				};
+				
+				itemInventory1.Updated += itemInventoryEvent =>
+				{
+					var res = $"Inventory1 Update: {itemInventoryEvent.ToString(ItemInventory.Event.Formats.IncludeStacks)}\n{itemInventory1}";
+					Debug.Log(res);
+				};
+				
+				var item0 = itemStore.New(
+					( "some_int_key0", 10)
+				);
+
+				var itemStack0 = itemStore.Create(item0, 25);
+
+				itemInventory0.Modify(
+					(item0, 25).WrapInArray(),
+					out _,
+					out _
+				);
+				
+				Debug.Log(itemInventory0.Stacks.Count);
+				Debug.Log(itemInventory0.Serialize(formatting: Formatting.Indented) + "\n"+itemInventory1.Serialize(formatting: Formatting.Indented));
+
+				var hasOverflow = itemInventory0.TransferTo(
+					itemInventory1,
+					itemStack0.WrapInArray(),
+					out var clamped
+				);
+				
+				// Debug.Log("-----------");
+				// Debug.Log(itemInventory0);
+				// Debug.Log(itemInventory1);
+
+				Debug.Log(itemInventory0.Serialize(formatting: Formatting.Indented) + "\n"+itemInventory1.Serialize(formatting: Formatting.Indented));
+			}
+			
 			if (GUILayout.Button("Test Satchel 0a"))
 			{
 				var itemStore = new ItemStore();

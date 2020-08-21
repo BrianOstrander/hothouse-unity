@@ -133,7 +133,7 @@ namespace Lunra.Satchel
 		/// <param name="clamped"></param>
 		/// <param name="triggerUpdate"></param>
 		/// <returns>True if any modifications were made or any clamping occured</returns>
-		protected bool Modify(
+		public bool Modify( // TODO: MAKE PROTECTED
 			(Item Item, int Count)[] modifications,
 			out (Item Item, int Count)[] clamped,
 			out Action<DateTime> triggerUpdate
@@ -204,16 +204,20 @@ namespace Lunra.Satchel
 			foreach (var modificationEvent in events)
 			{
 				int? indexToRemove = null;
+				var found = false;
 				for (var i = 0; i < stacks.Count; i++)
 				{
 					if (stacks[i].Is(modificationEvent.Key))
 					{
 						if (modificationEvent.Value.NewCount == 0) indexToRemove = i;
 						else stacks[i] = stacks[i].NewCount(modificationEvent.Value.NewCount);
+						found = true;
 						break;
 					}
 				}
+
 				if (indexToRemove.HasValue) stacks.RemoveAt(indexToRemove.Value);
+				else if (!found) stacks.Add(new ItemStack(modificationEvent.Key, modificationEvent.Value.NewCount));
 			}
 
 			clamped = clampedList.ToArray();
@@ -242,14 +246,94 @@ namespace Lunra.Satchel
 			return false;
 		}
 
-		// public bool TransferTo(
-		// 	ItemInventory target,
-		// 	ItemStack[] stacks,
-		// 	out (Item Item, int Count)[] clamped
-		// )
-		// {
-		// 	
-		// }
+		/// <summary>
+		/// Transfers from this inventory to another. If any clamping occurred, this returns true.
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="stacks"></param>
+		/// <param name="clamped"></param>
+		/// <returns>True if clamping occurs.</returns>
+		public bool TransferTo(
+			ItemInventory target,
+			ItemStack[] stacks,
+			out (Item Item, int Count)[] clamped
+		)
+		{
+			Debug.LogError("TODO: IMP REMOVING FROM SELF, CURRENTLY JUST ADDS");
+			
+			clamped = new (Item Item, int Count)[0];
+			
+			var modifications = new Dictionary<ulong, (Item Item, int Count)>();
+			foreach (var stack in stacks)
+			{
+				var item = itemStore.FirstOrDefault(stack.Id);
+				if (item == null)
+				{
+					Debug.LogError($"Unable to find item with Id {stack.Id}");
+					continue;
+				}
+
+				if (modifications.TryGetValue(item.Id, out var existingValue))
+				{
+					existingValue.Count += stack.Count;
+					modifications[item.Id] = existingValue;
+				}
+				else modifications[item.Id] = (item, stack.Count);
+			}
+
+			if (modifications.None()) return false;
+
+			var selfWithdrawalModified = Modify(
+				modifications.Values.ToArray(),
+				out var selfWithdrawalClamped,
+				out var selfWithdrawalTriggerUpdate
+			);
+
+			if (!selfWithdrawalModified) return false;
+			if (selfWithdrawalTriggerUpdate == null) return false; // No update to trigger means no items were removed...
+
+			foreach (var clampEntry in selfWithdrawalClamped)
+			{
+				if (-1 < clampEntry.Count)
+				{
+					Debug.LogError($"Unexpected zero or positive value for clamped entry for item Id {clampEntry.Item.Id}");
+					continue;
+				}
+
+				if (modifications.TryGetValue(clampEntry.Item.Id, out var existingValue))
+				{
+					existingValue.Count += clampEntry.Count;
+					if (existingValue.Count == 0) modifications.Remove(clampEntry.Item.Id);
+					else modifications[clampEntry.Item.Id] = existingValue;
+				}
+				else Debug.LogError($"Unexpected missing modification of item Id {clampEntry.Item.Id}");
+			}
+
+			if (modifications.None())
+			{
+				// Confusing, but basically if we tried to pull only items we don't have out of this inventory, then
+				// all items would get clamped leaving nothing to transfer to the other inventory -- thus no change in
+				// either inventories. However, we should have already caught this by checking if
+				// selfWithdrawalTriggerUpdate is equal to null.
+				Debug.LogError("Unexpected empty modification list, this should not occur");
+				return false;
+			}
+
+			var targetDepositModified = target.Modify(
+				modifications.Values.ToArray(),
+				out clamped,
+				out var targetDepositTriggerUpdate
+			);
+
+			var updateTime = DateTime.Now;
+			selfWithdrawalTriggerUpdate(updateTime);
+			
+			if (!targetDepositModified) return true;
+
+			targetDepositTriggerUpdate(updateTime);
+			
+			return clamped.Any();
+		}
 
 		public bool TryOperation<T>(
 			string key,
