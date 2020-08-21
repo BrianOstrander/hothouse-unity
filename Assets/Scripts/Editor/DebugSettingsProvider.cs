@@ -257,26 +257,28 @@ namespace Lunra.Hothouse.Editor
 					( "some_int_key0", 10)
 				);
 
-				var itemStack0 = itemStore.Create(item0, 25);
+				var itemStack0 = itemStore.Create(item0, 20);
 
 				itemInventory0.Modify(
 					(item0, 25).WrapInArray(),
-					out _,
+					out var negClamp,
 					out _
 				);
-				
-				Debug.Log(itemInventory0.Stacks.Count);
-				Debug.Log(itemInventory0.Serialize(formatting: Formatting.Indented) + "\n"+itemInventory1.Serialize(formatting: Formatting.Indented));
 
+				// Debug.Log("-----------");
+				// Debug.Log("0" + itemInventory0);
+				// Debug.Log("1" + itemInventory1);
+				// Debug.Log("-----------");
+				
+				Debug.Log(itemInventory0.Serialize(formatting: Formatting.Indented) + "\n"+itemInventory1.Serialize(formatting: Formatting.Indented));
+				
 				var hasOverflow = itemInventory0.TransferTo(
 					itemInventory1,
 					itemStack0.WrapInArray(),
 					out var clamped
 				);
-				
-				// Debug.Log("-----------");
-				// Debug.Log(itemInventory0);
-				// Debug.Log(itemInventory1);
+
+				Debug.Log(clamped.Aggregate("clamped", (r, c) => $"{r}\n\t{c.Item.ToString(c.Count)}"));
 
 				Debug.Log(itemInventory0.Serialize(formatting: Formatting.Indented) + "\n"+itemInventory1.Serialize(formatting: Formatting.Indented));
 			}

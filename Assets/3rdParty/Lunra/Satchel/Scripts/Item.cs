@@ -15,8 +15,7 @@ namespace Lunra.Satchel
 		{
 			Default = 0,
 			IncludeProperties = 1 << 0,
-			ExcludePrefix = 1 << 1,
-			ExtraPropertyIndent = 1 << 2
+			ExtraPropertyIndent = 1 << 1
 		}
 		
 		public struct Property
@@ -582,10 +581,16 @@ namespace Lunra.Satchel
 		}
 		
 		public override string ToString() => ToString(Formats.Default);
+
+		public string ToString(int count) => ToString(Formats.Default, count);
 		
-		public string ToString(Formats format)
+		public string ToString(Formats format, int? count = null)
 		{
-			var result = format.HasFlag(Formats.ExcludePrefix) ? $"[ {Id} ]" : $"Item Id: {Id}";
+			var result = $"[ {Id} ]";
+
+			if (count.HasValue) result += $" | Count: {count.Value}";
+
+			result += $" | {(isInitialized ? "Initialized" : "Not Initialized")} | {LastUpdated}";
 
 			if (format.HasFlag(Formats.IncludeProperties))
 			{

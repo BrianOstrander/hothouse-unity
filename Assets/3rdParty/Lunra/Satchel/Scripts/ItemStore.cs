@@ -325,7 +325,7 @@ namespace Lunra.Satchel
 
 			foreach (var item in items)
 			{
-				result += $"\n\t{item.Value.ToString(includeProperties ? Item.Formats.ExcludePrefix | Item.Formats.IncludeProperties | Item.Formats.ExtraPropertyIndent : Item.Formats.ExcludePrefix)}";
+				result += $"\n\t{item.Value.ToString(includeProperties ? Item.Formats.IncludeProperties | Item.Formats.ExtraPropertyIndent : Item.Formats.Default)}";
 			}
 
 			return result;

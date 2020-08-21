@@ -10,6 +10,14 @@ namespace Lunra.Satchel
 {
 	public class ItemInventory
 	{
+		[Flags]
+		public enum Formats
+		{
+			Default = 0,
+			IncludeItems = 1 << 0,
+			IncludeItemProperties = 1 << 1
+		}
+		
 		public struct Event
 		{
 			[Flags]
@@ -130,7 +138,7 @@ namespace Lunra.Satchel
 		/// non-null.
 		/// </remarks>
 		/// <param name="modifications"></param>
-		/// <param name="clamped"></param>
+		/// <param name="clamped">Negative numbers for underflow, positive for overflow</param>
 		/// <param name="triggerUpdate"></param>
 		/// <returns>True if any modifications were made or any clamping occured</returns>
 		public bool Modify( // TODO: MAKE PROTECTED
@@ -165,7 +173,6 @@ namespace Lunra.Satchel
 			var eventUpdates = Event.Types.None;
 			var events = new Dictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
 			
-			
 			foreach (var modification in distinctModifications)
 			{
 				var existingCount = modification.Value.ExistingCount ?? 0;
@@ -180,6 +187,7 @@ namespace Lunra.Satchel
 				{
 					if (TryGetOverflow(modification.Value.Item, modificationResult, out var overflowResult))
 					{
+						if (0 < overflowResult) Debug.LogError($"Unexpected overflow less than or equal to zero: {overflowResult}");
 						clampedList.Add((modification.Value.Item, modificationResult - overflowResult));
 						modificationResult = overflowResult;
 					}
@@ -261,8 +269,6 @@ namespace Lunra.Satchel
 		{
 			Debug.LogError("TODO: IMP REMOVING FROM SELF, CURRENTLY JUST ADDS");
 			
-			clamped = new (Item Item, int Count)[0];
-			
 			var modifications = new Dictionary<ulong, (Item Item, int Count)>();
 			foreach (var stack in stacks)
 			{
@@ -281,16 +287,25 @@ namespace Lunra.Satchel
 				else modifications[item.Id] = (item, stack.Count);
 			}
 
-			if (modifications.None()) return false;
+			if (modifications.None())
+			{
+				clamped = new (Item Item, int Count)[0];
+				return false;
+			}
 
 			var selfWithdrawalModified = Modify(
-				modifications.Values.ToArray(),
+				// Sign flipped since we are subtracting items
+				modifications.Values.Select(m => (m.Item, -m.Count)).ToArray(),
 				out var selfWithdrawalClamped,
 				out var selfWithdrawalTriggerUpdate
 			);
 
-			if (!selfWithdrawalModified) return false;
-			if (selfWithdrawalTriggerUpdate == null) return false; // No update to trigger means no items were removed...
+			// No update to trigger means no items were removed...
+			if (!selfWithdrawalModified || selfWithdrawalTriggerUpdate == null)
+			{
+				clamped = selfWithdrawalClamped;
+				return false;
+			}
 
 			foreach (var clampEntry in selfWithdrawalClamped)
 			{
@@ -316,21 +331,59 @@ namespace Lunra.Satchel
 				// either inventories. However, we should have already caught this by checking if
 				// selfWithdrawalTriggerUpdate is equal to null.
 				Debug.LogError("Unexpected empty modification list, this should not occur");
+				clamped = selfWithdrawalClamped;
 				return false;
 			}
 
+			var targetDepositModifications = modifications.Values.ToArray(); 
+			
 			var targetDepositModified = target.Modify(
-				modifications.Values.ToArray(),
-				out clamped,
+				targetDepositModifications,
+				out var targetDepositClamped,
 				out var targetDepositTriggerUpdate
 			);
 
 			var updateTime = DateTime.Now;
 			selfWithdrawalTriggerUpdate(updateTime);
-			
-			if (!targetDepositModified) return true;
 
-			targetDepositTriggerUpdate(updateTime);
+			// No room was available and nothing got clamped...
+			if (!targetDepositModified)
+			{
+				// Confusing, again, but it's not valid to have some modifications sent and no clamping or update
+				// trigger returned.
+				Debug.LogError("Unexpected lack of deposit modifications or clamping, this should not occur");
+				clamped = targetDepositClamped;
+				return true;
+			}
+
+			// No update trigger means no items were added, but clamping occurred...
+			targetDepositTriggerUpdate?.Invoke(updateTime);
+
+			var clampedDictionary = new Dictionary<ulong, (Item Item, int Count)>();
+
+			// Any elements of selfWithdrawalClamped become overflow for this operation, since we didn't have anywhere
+			// to pull it from to begin with...
+			foreach (var remainingClamps in selfWithdrawalClamped.Concat(targetDepositClamped))
+			{
+				// Negative clamps from withdrawal count as overflow and clamps from deposit should already be positive... 
+				var overflowCount = Mathf.Abs(remainingClamps.Count);
+				if (overflowCount == 0)
+				{
+					Debug.LogError("Unexpected zero value for clamped item with id "+remainingClamps.Item.Id);
+					continue;
+				}
+
+				if (clampedDictionary.TryGetValue(remainingClamps.Item.Id, out var existingValue))
+				{
+					existingValue.Count += overflowCount;
+					clampedDictionary[remainingClamps.Item.Id] = existingValue;
+				}
+				else clampedDictionary[remainingClamps.Item.Id] = (remainingClamps.Item, overflowCount);
+			}
+			
+			clamped = clampedDictionary
+				.Select(kv => (kv.Value.Item, kv.Value.Count))
+				.ToArray();
 			
 			return clamped.Any();
 		}
@@ -507,5 +560,20 @@ namespace Lunra.Satchel
 			
 			Updated?.Invoke(inventoryEvent);
 		}
+
+		public override string ToString() => ToString(Formats.IncludeItems);
+
+		public string ToString(Formats format)
+		{
+			var result = $"Item Inventory Contains {Stacks.Count} Stacks | {(isInitialized ? "Initialized" : "Not Initialized")} | {lastUpdated}";
+
+			if (format == Formats.Default) return result;
+
+			var stackFormat = format.HasFlag(Formats.IncludeItemProperties) ? Item.Formats.IncludeProperties | Item.Formats.ExtraPropertyIndent : Item.Formats.Default;
+			
+			foreach (var stack in Stacks) result += $"\n\t{stack.ToString(itemStore, stackFormat)}";
+
+			return result;
+		}
 	}
-}
+} 

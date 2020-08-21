@@ -37,5 +37,15 @@ namespace Lunra.Satchel
 		
 		public static ItemStack operator ++(ItemStack itemStack) => itemStack.NewCount(itemStack.Count + 1);
 		public static ItemStack operator --(ItemStack itemStack) => itemStack.NewCount(itemStack.Count - 1);
+
+		public override string ToString() => $"[ {Id} ] : {Count}";
+
+		public string ToString(Item item, Item.Formats format = Item.Formats.Default)
+		{
+			if (item == null) return ToString() + " | < Null Item >";
+
+			return item.ToString(format, Count);
+		}
+		public string ToString(ItemStore itemStore, Item.Formats format = Item.Formats.Default) => ToString(itemStore?.FirstOrDefault(Id), format);
 	}
 }
