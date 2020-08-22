@@ -8,7 +8,7 @@ namespace Lunra.Core
 {
 	public static class ReflectionUtility
 	{
-		public static Type[] GetTypesWithAttribute<A, T>()
+		public static Type[] GetTypesWithAttribute<A, T>(bool suppressWarnings = false)
 		{
 			var results = new List<Type>();
 
@@ -18,7 +18,7 @@ namespace Lunra.Core
 				if (type.GetCustomAttributes(typeof(A), true).None()) continue;
 				if (!typeof(T).IsAssignableFrom(type))
 				{
-					Debug.LogError("The class \"" + type.FullName + "\" tries to include the \"" + typeof(A).Name + "\" attribute without inheriting from the \"" + typeof(T).FullName + "\" class");
+					if (!suppressWarnings) Debug.LogWarning("The class \"" + type.FullName + "\" tries to include the \"" + typeof(A).Name + "\" attribute without inheriting from the \"" + typeof(T).FullName + "\" class");
 					continue;
 				}
 				

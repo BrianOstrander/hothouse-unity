@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
 using Newtonsoft.Json;
@@ -57,12 +58,14 @@ namespace Lunra.Satchel
 		[JsonProperty] Dictionary<ulong, Item> items = new Dictionary<ulong, Item>();
 		[JsonProperty] ulong currentId;
 		[JsonProperty] DateTime lastUpdated;
-
-		public event Action<Event> Updated;
-
+		
 		string[] ignoredKeysForStacking;
 		string[] ignoredKeysCloning;
 		IItemModifier[] modifiers;
+		
+		[JsonIgnore] public ValidationStore Validation { get; private set; }
+		
+		public event Action<Event> Updated;
 
 		public void Initialize(
 			string[] ignoredKeysForStacking = null,
@@ -92,6 +95,8 @@ namespace Lunra.Satchel
 				}
 				.Concat(modifiers ?? new IItemModifier[0])
 				.ToArray();
+
+			Validation = new ValidationStore().Initialize(this);
 			
 			foreach (var kv in items) kv.Value.Initialize(i => TryUpdate(i));
 		}

@@ -228,6 +228,8 @@ namespace Lunra.Hothouse.Editor
 			{
 				var itemStore = new ItemStore();
 				itemStore.Initialize();
+
+				Debug.Log(itemStore.Validation.All.Aggregate("Validators", (r, e) => $"{r}\n{e.Key:F}\n\t{e}"));
 				
 				itemStore.Updated += updateEvent =>
 				{
