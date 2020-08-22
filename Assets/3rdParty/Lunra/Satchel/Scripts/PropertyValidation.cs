@@ -6,6 +6,111 @@ namespace Lunra.Satchel
 {
 	public class PropertyValidation
 	{
+		public static class Default
+		{
+			public static class Bool
+			{
+				public static PropertyValidation EqualTo(string key, bool value) => new PropertyValidation(
+					key,
+					Types.Bool | Types.EqualTo,
+					new [] { value }
+				);
+			}
+			
+			public static class Int
+			{
+				public static PropertyValidation EqualTo(string key, int value) => new PropertyValidation(
+					key,
+					Types.Int | Types.EqualTo,
+					intOperands: new [] { value }
+				);
+				
+				public static PropertyValidation LessThan(string key, int value) => new PropertyValidation(
+					key,
+					Types.Int | Types.LessThan,
+					intOperands: new [] { value }
+				);
+				
+				public static PropertyValidation GreaterThan(string key, int value) => new PropertyValidation(
+					key,
+					Types.Int | Types.GreaterThan,
+					intOperands: new [] { value }
+				);
+				
+				public static PropertyValidation LessThanOrEqualTo(string key, int value) => new PropertyValidation(
+					key,
+					Types.Int | Types.LessThan | Types.EqualTo,
+					intOperands: new [] { value }
+				);
+				
+				public static PropertyValidation GreaterThanOrEqualTo(string key, int value) => new PropertyValidation(
+					key,
+					Types.Int | Types.GreaterThan | Types.EqualTo,
+					intOperands: new [] { value }
+				);
+			}
+			
+			public static class Float
+			{
+				public static PropertyValidation EqualTo(string key, float value) => new PropertyValidation(
+					key,
+					Types.Float | Types.EqualTo,
+					floatOperands: new [] { value }
+				);
+				
+				public static PropertyValidation LessThan(string key, float value) => new PropertyValidation(
+					key,
+					Types.Float | Types.LessThan,
+					floatOperands: new [] { value }
+				);
+				
+				public static PropertyValidation GreaterThan(string key, float value) => new PropertyValidation(
+					key,
+					Types.Float | Types.GreaterThan,
+					floatOperands: new [] { value }
+				);
+				
+				public static PropertyValidation LessThanOrEqualTo(string key, float value) => new PropertyValidation(
+					key,
+					Types.Float | Types.LessThan | Types.EqualTo,
+					floatOperands: new [] { value }
+				);
+				
+				public static PropertyValidation GreaterThanOrEqualTo(string key, float value) => new PropertyValidation(
+					key,
+					Types.Float | Types.GreaterThan | Types.EqualTo,
+					floatOperands: new [] { value }
+				);
+			}
+			
+			public static class String
+			{
+				public static PropertyValidation EqualTo(string key, string value) => new PropertyValidation(
+					key,
+					Types.String | Types.EqualTo,
+					stringOperands: new [] { value }
+				);
+				
+				public static PropertyValidation Contains(string key, string value) => new PropertyValidation(
+					key,
+					Types.String | Types.Contains,
+					stringOperands: new [] { value }
+				);
+				
+				public static PropertyValidation StartsWith(string key, string value) => new PropertyValidation(
+					key,
+					Types.String | Types.StartsWith,
+					stringOperands: new [] { value }
+				);
+				
+				public static PropertyValidation EndsWith(string key, string value) => new PropertyValidation(
+					key,
+					Types.String | Types.EndsWith,
+					stringOperands: new [] { value }
+				);
+			}
+		}
+		
 		[Flags]
 		public enum Types
 		{
@@ -35,8 +140,8 @@ namespace Lunra.Satchel
 		}
 		
 		#region Serialized
-		[JsonProperty] public Types Type { get; private set; }
 		[JsonProperty] public string Key { get; private set; }
+		[JsonProperty] public Types Type { get; private set; }
 
 		[JsonProperty] public bool[] BoolOperands { get; private set; }
 		[JsonProperty] public int[] IntOperands { get; private set; }
@@ -50,18 +155,20 @@ namespace Lunra.Satchel
 		#endregion
 
 		public PropertyValidation(
+			string key,
 			Types type,
-			bool[] boolOperands,
-			int[] intOperands,
-			float[] floatOperands,
-			string[] stringOperands
+			bool[] boolOperands = null,
+			int[] intOperands = null,
+			float[] floatOperands = null,
+			string[] stringOperands = null
 		)
 		{
+			Key = key;
 			Type = type;
-			BoolOperands = boolOperands;
-			IntOperands = intOperands;
-			FloatOperands = floatOperands;
-			StringOperands = stringOperands;
+			BoolOperands = boolOperands ?? new bool[0];
+			IntOperands = intOperands ?? new int[0];
+			FloatOperands = floatOperands ?? new float[0];
+			StringOperands = stringOperands ?? new string[0];
 		}
 
 		public PropertyValidation Initialize(ItemStore itemStore)
@@ -82,10 +189,29 @@ namespace Lunra.Satchel
 		
 		public Results Validate(Item item)
 		{
-			if (Type.HasFlag(Types.Bool)) return validation(this, item, item.Get<bool>(Key));
-			if (Type.HasFlag(Types.Int)) return validation(this, item, item.Get<int>(Key));
-			if (Type.HasFlag(Types.Float)) return validation(this, item, item.Get<float>(Key));
-			if (Type.HasFlag(Types.String)) return validation(this, item, item.Get<string>(Key));
+			if (Type.HasFlag(Types.Bool))
+			{
+				if (item.TryGet(Key, out bool value)) return validation(this, item, value);
+				return Results.InValid;
+			}
+
+			if (Type.HasFlag(Types.Int))
+			{
+				if (item.TryGet(Key, out int value)) return validation(this, item, value);
+				return Results.InValid;
+			}
+
+			if (Type.HasFlag(Types.Float))
+			{
+				if (item.TryGet(Key, out float value)) return validation(this, item, value);
+				return Results.InValid;
+			}
+
+			if (Type.HasFlag(Types.String))
+			{
+				if (item.TryGet(Key, out string value)) return validation(this, item, value);
+				return Results.InValid;
+			}
 			
 			Debug.LogError($"Unrecognized Type {Type:F}");
 			

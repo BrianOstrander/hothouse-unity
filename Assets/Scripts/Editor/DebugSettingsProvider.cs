@@ -224,6 +224,203 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
+			if (GUILayout.Button("Test Satchel 0c"))
+			{
+				var itemStore = new ItemStore();
+				itemStore.Initialize();
+
+				itemStore.Updated += updateEvent =>
+				{
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+
+					Debug.Log(res);
+				};
+
+				var itemInventory0 = new ItemInventory().Initialize(itemStore);
+				var itemInventory1 = new ItemInventory().Initialize(itemStore);
+
+				itemInventory0.Updated += itemInventoryEvent =>
+				{
+					var res = $"Inventory0 Update: {itemInventoryEvent.ToString(ItemInventory.Event.Formats.IncludeStacks)}\n{itemInventory0}";
+					Debug.Log(res);
+				};
+
+				itemInventory1.Updated += itemInventoryEvent =>
+				{
+					var res = $"Inventory1 Update: {itemInventoryEvent.ToString(ItemInventory.Event.Formats.IncludeStacks)}\n{itemInventory1}";
+					Debug.Log(res);
+				};
+				
+				var filterBoolValue = true;
+				var filterBoolKey = "some_bool_key0";
+				
+				var filterIntValue = 10;
+				var filterIntKey = "some_int_key0";
+				
+				var filterFloatValue = 10f;
+				var filterFloatKey = "some_float_key0";
+				
+				var filterStringValue = "ro";
+				var filterStringKey = "some_string_key0";
+				
+				var item0 = itemStore.New(
+					(filterBoolKey, true),
+					(filterIntKey, 10),
+					(filterFloatKey, 10f),
+					(filterStringKey, "rofl")
+				);
+
+				var filters = new Dictionary<string, ItemFilter>
+				{
+					// Bool
+					{
+						$"{filterBoolKey} EqualTo {filterBoolValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, filterBoolValue)
+							)
+							.Build(itemStore)
+					},
+					// Int
+					{
+						$"{filterIntKey} EqualTo {filterIntValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterIntKey} LessThan {filterIntValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Int.LessThan(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterIntKey} GreaterThan {filterIntValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Int.GreaterThan(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterIntKey} LessThanOrEqualTo {filterIntValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Int.LessThanOrEqualTo(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterIntKey} GreaterThanOrEqualTo {filterIntValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Int.GreaterThanOrEqualTo(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					// Float
+					{
+						$"{filterFloatKey} EqualTo {filterFloatValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Float.EqualTo(filterFloatKey, filterFloatValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterFloatKey} LessThan {filterFloatValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Float.LessThan(filterFloatKey, filterFloatValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterFloatKey} GreaterThan {filterFloatValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Float.GreaterThan(filterFloatKey, filterFloatValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterFloatKey} LessThanOrEqualTo {filterFloatValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Float.LessThanOrEqualTo(filterFloatKey, filterFloatValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterFloatKey} GreaterThanOrEqualTo {filterFloatValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Float.GreaterThanOrEqualTo(filterFloatKey, filterFloatValue)
+							)
+							.Build(itemStore)
+					},
+					// String
+					{
+						$"{filterStringKey} EqualTo {filterStringValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.String.EqualTo(filterStringKey, filterStringValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterStringKey} Contains {filterStringValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.String.Contains(filterStringKey, filterStringValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterStringKey} StartsWith {filterStringValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.String.StartsWith(filterStringKey, filterStringValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						$"{filterStringKey} EndsWith {filterStringValue}",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.String.EndsWith(filterStringKey, filterStringValue)
+							)
+							.Build(itemStore)
+					},
+				};
+
+				var filterRes = "filter results:";
+
+				foreach (var kv in filters)
+				{
+					filterRes += $"\n{kv.Key} : {kv.Value.Validate(item0)}";
+				}
+
+				Debug.Log(filterRes);
+
+
+				// var itemStack0 = itemStore.Create(item0, 20);
+
+				// var clamped = itemInventory0.Modify(
+				// 	(item0, 20).WrapInArray(),
+				// 	out var addClamp,
+				// 	out _
+				// );
+				//
+				// Debug.Log(itemInventory0);
+			}
+
 			if (GUILayout.Button("Test Satchel 0b"))
 			{
 				var itemStore = new ItemStore();
