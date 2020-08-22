@@ -36,6 +36,7 @@ namespace Lunra.Satchel
 		
 		#region Serialized
 		[JsonProperty] public Types Type { get; private set; }
+		[JsonProperty] public string Key { get; private set; }
 
 		[JsonProperty] public bool[] BoolOperands { get; private set; }
 		[JsonProperty] public int[] IntOperands { get; private set; }
@@ -45,6 +46,7 @@ namespace Lunra.Satchel
 		
 		#region Non Serialized
 		ItemStore itemStore;
+		ValidationStore.ValidateDelegate validation;
 		#endregion
 
 		public PropertyValidation(
@@ -65,35 +67,30 @@ namespace Lunra.Satchel
 		public PropertyValidation Initialize(ItemStore itemStore)
 		{
 			this.itemStore = itemStore;
+
+			var nonInvertedType = Type;
+			if (nonInvertedType.HasFlag(Types.Invert)) nonInvertedType ^= Types.Invert;
+
+			if (itemStore.Validation.All.TryGetValue(nonInvertedType, out var result))
+			{
+				validation = result;
+			}
+			else Debug.LogError($"Could not find validation for {nonInvertedType:F}");
+			
 			return this;
 		}
 		
-		public Results Validate(
-			Item item,
-			string key,
-			object value
-		)
+		public Results Validate(Item item)
 		{
-			switch (value)
-			{
-				case bool boolValue: 
-					return OnValidate(item, key, boolValue);
-				case int intValue: 
-					return OnValidate(item, key, intValue);
-				case float floatValue: 
-					return OnValidate(item, key, floatValue);
-				case string stringValue: 
-					return OnValidate(item, key, stringValue);
-				default:
-					// Debug.LogError($"Unrecognized value type: {typeof(T).Name}");
-					return Results.Ignored;
-			}
+			if (Type.HasFlag(Types.Bool)) return validation(this, item, item.Get<bool>(Key));
+			if (Type.HasFlag(Types.Int)) return validation(this, item, item.Get<int>(Key));
+			if (Type.HasFlag(Types.Float)) return validation(this, item, item.Get<float>(Key));
+			if (Type.HasFlag(Types.String)) return validation(this, item, item.Get<string>(Key));
+			
+			Debug.LogError($"Unrecognized Type {Type:F}");
+			
+			return Results.Ignored;
 		}
-
-		protected virtual Results OnValidate(Item item, string key, bool value) => Results.Ignored;
-		protected virtual Results OnValidate(Item item, string key, int value) => Results.Ignored;
-		protected virtual Results OnValidate(Item item, string key, float value) => Results.Ignored;
-		protected virtual Results OnValidate(Item item, string key, string value) => Results.Ignored;
 		
 		bool TryGetNextOperandFromArray<A, O>(
 			A[] source,
@@ -223,5 +220,7 @@ namespace Lunra.Satchel
 
 			return foundAll;
 		}
+
+		public override string ToString() => $"Property Validation {Type:F}";
 	}
 }

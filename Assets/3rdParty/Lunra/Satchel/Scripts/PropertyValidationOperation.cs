@@ -16,21 +16,18 @@ namespace Lunra.Satchel
 			public ItemStore ItemStore { get; }
 			public PropertyValidation Validation { get; }
 			public Item Item { get; }
-			public string Key { get; }
 			public T Value { get; }
 
 			public RequestPayload(
 				ItemStore itemStore,
 				PropertyValidation validation,
 				Item item,
-				string key,
 				T value
 			)
 			{
 				ItemStore = itemStore;
 				Validation = validation;
 				Item = item;
-				Key = key;
 				Value = value;
 			}
 		}
@@ -96,7 +93,6 @@ namespace Lunra.Satchel
 		public PropertyValidation.Results Validate(
 			PropertyValidation validation,
 			Item item,
-			string key,
 			T value
 		)
 		{
@@ -104,12 +100,11 @@ namespace Lunra.Satchel
 				itemStore,
 				validation,
 				item,
-				key,
 				value
 			);
 
 			if (IsIgnored(request)) return PropertyValidation.Results.Ignored;
-			return IsValid(request) ? PropertyValidation.Results.Valid : PropertyValidation.Results.InValid;
+			return (IsValid(request) && !validation.Type.HasFlag(PropertyValidation.Types.Invert)) ? PropertyValidation.Results.Valid : PropertyValidation.Results.InValid;
 		}
 
 		protected virtual bool IsIgnored(RequestPayload request) => false;
