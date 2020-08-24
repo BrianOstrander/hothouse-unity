@@ -223,6 +223,172 @@ namespace Lunra.Hothouse.Editor
 				
 				Debug.Log(res);
 			}
+			
+			if (GUILayout.Button("Test Satchel 0d"))
+			{
+				var itemStore = new ItemStore();
+				itemStore.Initialize();
+
+				itemStore.Updated += updateEvent =>
+				{
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+
+					Debug.Log(res);
+				};
+
+				var itemInventory0 = new ItemInventory().Initialize(itemStore);
+				var itemInventory1 = new ItemInventory().Initialize(itemStore);
+
+				itemInventory0.Updated += itemInventoryEvent =>
+				{
+					var res = $"Inventory0 Update: {itemInventoryEvent.ToString(ItemInventory.Event.Formats.IncludeStacks)}\n{itemInventory0}";
+					Debug.Log(res);
+				};
+
+				itemInventory1.Updated += itemInventoryEvent =>
+				{
+					var res = $"Inventory1 Update: {itemInventoryEvent.ToString(ItemInventory.Event.Formats.IncludeStacks)}\n{itemInventory1}";
+					Debug.Log(res);
+				};
+				
+				var filterBoolValue = true;
+				var filterBoolKey = "some_bool_key0";
+				
+				var filterIntValue = 10;
+				var filterIntKey = "some_int_key0";
+				
+				var filterFloatValue = 10f;
+				var filterFloatKey = "some_float_key0";
+				
+				var filterStringValue = "ro";
+				var filterStringKey = "some_string_key0";
+				
+				var item0 = itemStore.New(
+					(filterBoolKey, true),
+					(filterIntKey, 10),
+					(filterFloatKey, 10f),
+					(filterStringKey, "rofl")
+				);
+
+				var filters = new Dictionary<string, ItemFilter>
+				{
+					{
+						"0 Should be true",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, filterBoolValue),
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						"1 Should be false",
+						ItemFilterBuilder
+							.RequiringNone(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, filterBoolValue),
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						"2 Should be true",
+						ItemFilterBuilder
+							.RequiringAny(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, filterBoolValue),
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						"3 Should be true",
+						ItemFilterBuilder
+							.RequiringAny(
+							)
+							.Build(itemStore)
+					},
+					{
+						"4 Should be false",
+						ItemFilterBuilder
+							.RequiringAll(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
+							)
+							.Build(itemStore)
+					},
+					{
+						"5 Should be true",
+						ItemFilterBuilder
+							.RequiringNone(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
+							)
+							.Build(itemStore)
+					},
+					{
+						"6 Should be false",
+						ItemFilterBuilder
+							.RequiringAny(
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
+							)
+							.Build(itemStore)
+					},
+					{
+						"7 Should be false",
+						ItemFilterBuilder
+							.RequiringNone(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
+							)
+							.ConcatAny(
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
+							)
+							.Build(itemStore)
+					},
+					{
+						"8 Should be true",
+						ItemFilterBuilder
+							.RequiringNone(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
+							)
+							.ConcatAny(
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
+							)
+							.Build(itemStore)
+					},
+					{
+						"9 Should be true",
+						ItemFilterBuilder
+							.RequiringNone(
+								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
+								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
+							)
+							.Build(itemStore)
+					},
+				};
+
+				var filterRes = "filter results:";
+
+				foreach (var kv in filters)
+				{
+					filterRes += $"\n{kv.Key} : {kv.Value.Validate(item0)}";
+				}
+
+				Debug.Log(filterRes);
+
+
+				// var itemStack0 = itemStore.Create(item0, 20);
+
+				// var clamped = itemInventory0.Modify(
+				// 	(item0, 20).WrapInArray(),
+				// 	out var addClamp,
+				// 	out _
+				// );
+				//
+				// Debug.Log(itemInventory0);
+			}
 
 			if (GUILayout.Button("Test Satchel 0c"))
 			{

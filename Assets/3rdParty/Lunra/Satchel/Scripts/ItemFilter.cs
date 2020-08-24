@@ -39,7 +39,7 @@ namespace Lunra.Satchel
 			{
 				if (validation.Validate(item) == PropertyValidation.Results.InValid) return false;
 			}
-			
+
 			foreach (var validation in None)
 			{
 				if (validation.Validate(item) == PropertyValidation.Results.Valid) return false;
