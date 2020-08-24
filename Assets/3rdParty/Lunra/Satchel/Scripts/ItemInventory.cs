@@ -141,7 +141,7 @@ namespace Lunra.Satchel
 		/// <param name="clamped">Negative numbers for underflow, positive for overflow</param>
 		/// <param name="triggerUpdate"></param>
 		/// <returns>True if any modifications were made or any clamping occured</returns>
-		public bool Modify( // TODO: MAKE PROTECTED
+		public bool Modify( // TODO: MAKE PROTECTED OR PRIVATE
 			(Item Item, int Count)[] modifications,
 			out (Item Item, int Count)[] clamped,
 			out Action<DateTime> triggerUpdate
