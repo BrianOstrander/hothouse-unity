@@ -223,7 +223,124 @@ namespace Lunra.Hothouse.Editor
 				
 				Debug.Log(res);
 			}
-			
+
+			if (GUILayout.Button("Test Satchel 0e"))
+			{
+				var itemStore = new ItemStore();
+				itemStore.Initialize();
+
+				itemStore.Updated += updateEvent =>
+				{
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+
+					Debug.Log(res);
+				};
+
+				var itemInventory0 = new ItemInventory().Initialize(itemStore);
+				var itemInventory1 = new ItemInventory().Initialize(itemStore);
+
+				itemInventory0.Updated += itemInventoryEvent =>
+				{
+					var res = $"Inventory0 Update: {itemInventoryEvent.ToString(ItemInventory.Event.Formats.IncludeStacks)}\n{itemInventory0}";
+					Debug.Log(res);
+				};
+
+				itemInventory1.Updated += itemInventoryEvent =>
+				{
+					var res = $"Inventory1 Update: {itemInventoryEvent.ToString(ItemInventory.Event.Formats.IncludeStacks)}\n{itemInventory1}";
+					Debug.Log(res);
+				};
+
+				var filterIntKey = "some_int_key0";
+
+				var item0 = itemStore.New(
+					(filterIntKey, 10)
+				);
+				
+				var item1 = itemStore.New(
+					(filterIntKey, 5)
+				);
+
+				void modify(
+					ItemInventory targetInventory,
+					params (Item Item, int Count)[] items
+				)
+				{
+					var didModify = targetInventory.Modify(
+						items,
+						out var clampResult,
+						out var triggerUpdate
+					);
+
+					if (didModify)
+					{
+						if (clampResult.Any())
+						{
+							Debug.Log(clampResult.Aggregate("ClampedModify", (r, e) => $"{r}\n{e.Item.ToString(e.Count)}"));
+						}
+						triggerUpdate?.Invoke(DateTime.Now);
+					}
+
+					Debug.Log("modify result:\n" + targetInventory);
+				}
+				
+				void updateConstraint(
+					ItemInventory targetInventory,
+					ItemConstraint constraint
+				)
+				{
+					var didClampingOccur = targetInventory.UpdateConstraint(
+						constraint,
+						out var clampResult
+					);
+
+					if (didClampingOccur)
+					{
+						if (clampResult.Any())
+						{
+							Debug.Log(clampResult.Aggregate("ClampedUpdateConstraint", (r, e) => $"{r}\n{e}"));
+						}
+					}
+
+					Debug.Log("updateConstraint result:\n" + targetInventory);
+				}
+				
+				modify(
+					itemInventory0,
+					(item0, 20),
+					(item1, 20)
+				);
+				
+				updateConstraint(
+					itemInventory0,
+					ItemConstraint.ByCount(50)
+				);
+				
+				updateConstraint(
+					itemInventory0,
+					ItemConstraint.ByFilter(
+						ItemFilterBuilder
+							.Begin(itemStore)
+							.RequireAny(
+								PropertyValidation.Default.Int.GreaterThanOrEqualTo(filterIntKey, int.MinValue)	
+							)
+					)
+				);
+				
+				updateConstraint(
+					itemInventory0,
+					ItemConstraint.ByFilter(
+						ItemFilterBuilder
+							.Begin(itemStore)
+							.RequireAny(
+								PropertyValidation.Default.Int.GreaterThanOrEqualTo(filterIntKey, 6)	
+							)
+					)
+				);
+			}
+
 			if (GUILayout.Button("Test Satchel 0d"))
 			{
 				var itemStore = new ItemStore();
@@ -277,95 +394,95 @@ namespace Lunra.Hothouse.Editor
 					{
 						"0 Should be true",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, filterBoolValue),
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						"1 Should be false",
 						ItemFilterBuilder
-							.RequiringNone(
+							.Begin(itemStore)
+							.RequireNone(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, filterBoolValue),
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						"2 Should be true",
 						ItemFilterBuilder
-							.RequiringAny(
+							.Begin(itemStore)
+							.RequireAny(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, filterBoolValue),
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						"3 Should be true",
 						ItemFilterBuilder
-							.RequiringAny(
+							.Begin(itemStore)
+							.RequireAny(
 							)
-							.Build(itemStore)
 					},
 					{
 						"4 Should be false",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
 							)
-							.Build(itemStore)
 					},
 					{
 						"5 Should be true",
 						ItemFilterBuilder
-							.RequiringNone(
+							.Begin(itemStore)
+							.RequireNone(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
 							)
-							.Build(itemStore)
 					},
 					{
 						"6 Should be false",
 						ItemFilterBuilder
-							.RequiringAny(
+							.Begin(itemStore)
+							.RequireAny(
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
 							)
-							.Build(itemStore)
 					},
 					{
 						"7 Should be false",
 						ItemFilterBuilder
-							.RequiringNone(
+							.Begin(itemStore)
+							.RequireNone(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
 							)
-							.ConcatAny(
+							.RequireAny(
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
 							)
-							.Build(itemStore)
 					},
 					{
 						"8 Should be true",
 						ItemFilterBuilder
-							.RequiringNone(
+							.Begin(itemStore)
+							.RequireNone(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
 							)
-							.ConcatAny(
+							.RequireAny(
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						"9 Should be true",
 						ItemFilterBuilder
-							.RequiringNone(
+							.Begin(itemStore)
+							.RequireNone(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, !filterBoolValue),
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue + 10)
 							)
-							.Build(itemStore)
 					},
 				};
 
@@ -444,125 +561,125 @@ namespace Lunra.Hothouse.Editor
 					{
 						$"{filterBoolKey} EqualTo {filterBoolValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Bool.EqualTo(filterBoolKey, filterBoolValue)
 							)
-							.Build(itemStore)
 					},
 					// Int
 					{
 						$"{filterIntKey} EqualTo {filterIntValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Int.EqualTo(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterIntKey} LessThan {filterIntValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Int.LessThan(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterIntKey} GreaterThan {filterIntValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Int.GreaterThan(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterIntKey} LessThanOrEqualTo {filterIntValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Int.LessThanOrEqualTo(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterIntKey} GreaterThanOrEqualTo {filterIntValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Int.GreaterThanOrEqualTo(filterIntKey, filterIntValue)
 							)
-							.Build(itemStore)
 					},
 					// Float
 					{
 						$"{filterFloatKey} EqualTo {filterFloatValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Float.EqualTo(filterFloatKey, filterFloatValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterFloatKey} LessThan {filterFloatValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Float.LessThan(filterFloatKey, filterFloatValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterFloatKey} GreaterThan {filterFloatValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Float.GreaterThan(filterFloatKey, filterFloatValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterFloatKey} LessThanOrEqualTo {filterFloatValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Float.LessThanOrEqualTo(filterFloatKey, filterFloatValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterFloatKey} GreaterThanOrEqualTo {filterFloatValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.Float.GreaterThanOrEqualTo(filterFloatKey, filterFloatValue)
 							)
-							.Build(itemStore)
 					},
 					// String
 					{
 						$"{filterStringKey} EqualTo {filterStringValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.String.EqualTo(filterStringKey, filterStringValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterStringKey} Contains {filterStringValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.String.Contains(filterStringKey, filterStringValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterStringKey} StartsWith {filterStringValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.String.StartsWith(filterStringKey, filterStringValue)
 							)
-							.Build(itemStore)
 					},
 					{
 						$"{filterStringKey} EndsWith {filterStringValue}",
 						ItemFilterBuilder
-							.RequiringAll(
+							.Begin(itemStore)
+							.RequireAll(
 								PropertyValidation.Default.String.EndsWith(filterStringKey, filterStringValue)
 							)
-							.Build(itemStore)
 					},
 				};
 

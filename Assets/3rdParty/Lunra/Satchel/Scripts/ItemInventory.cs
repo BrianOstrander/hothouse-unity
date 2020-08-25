@@ -110,6 +110,7 @@ namespace Lunra.Satchel
 		#region Serialized
 		[JsonProperty] List<ItemStack> stacks = new List<ItemStack>();
 		[JsonProperty] DateTime lastUpdated;
+		[JsonProperty] public ItemConstraint Constraint { get; private set; } = ItemConstraint.Ignored();
 		#endregion
 
 		#region Non Serialized
@@ -403,6 +404,134 @@ namespace Lunra.Satchel
 			return clamped.Any();
 		}
 
+		public bool UpdateConstraint(
+			ItemConstraint constraint,
+			out ItemStack[] clamped
+		)
+		{
+			Constraint = constraint;
+			if (Constraint.IsIgnored)
+			{
+				clamped = new ItemStack[0];
+				return false;
+			}
+
+			var results = new List<(Item Item, ItemStack PersistentStack, ItemStack OverflowStack, int CountLimit)>();
+			
+			var originalTotalCount = 0;
+			var totalCount = 0;
+			
+			foreach (var referenceStack in Stacks)
+			{
+				var persistentStack = referenceStack;
+
+				originalTotalCount += referenceStack.Count;
+				
+				var item = itemStore.FirstOrDefault(persistentStack.Id);
+				if (item == null)
+				{
+					Debug.LogError("Unable to find an item with Id: "+persistentStack.Id);
+					continue;
+				}
+				
+				int? countLimitMinimum = null;
+
+				foreach (var entry in Constraint.Entries)
+				{
+					if (entry.Filter.Validate(item))
+					{
+						countLimitMinimum = countLimitMinimum.HasValue ? Mathf.Min(countLimitMinimum.Value, entry.CountLimit) : entry.CountLimit;
+					}
+				}
+
+				countLimitMinimum = countLimitMinimum ?? Constraint.DefaultCountLimit;
+
+				if (0 < countLimitMinimum)
+				{
+					if (countLimitMinimum < persistentStack.Count) persistentStack = persistentStack.NewCount(countLimitMinimum.Value);
+
+					totalCount += persistentStack.Count;
+				}
+				else persistentStack = persistentStack.NewEmpty();
+				
+				results.Add(
+					(
+						item,
+						persistentStack,
+						persistentStack.NewCount(referenceStack.Count - persistentStack.Count),
+						countLimitMinimum.Value
+					)
+				);
+			}
+			
+			var replacementResults = new List<(Item Item, ItemStack PersistentStack, ItemStack OverflowStack, int CountLimit)>();
+			
+			if (Constraint.CountLimit < totalCount)
+			{
+				var sortedResults = results
+					.Where(r => 0 < r.PersistentStack.Count)
+					.OrderBy(r => r.PersistentStack.Count)
+					.ToList();
+	
+				foreach (var referenceResult in sortedResults)
+				{
+					var replacementResult = referenceResult;
+					
+					var countOverflow = totalCount - Constraint.CountLimit;
+					var countToSubtract = Mathf.Min(referenceResult.PersistentStack.Count, countOverflow);
+					
+					replacementResult.PersistentStack -= countToSubtract;
+					replacementResult.OverflowStack += countToSubtract;
+					totalCount -= countToSubtract;
+					replacementResults.Add(replacementResult);
+
+					if (countOverflow - countToSubtract == 0) break;
+				}
+
+				if (replacementResults.Any())
+				{
+					var oldResults = results;
+					results = replacementResults;
+
+					foreach (var oldResult in oldResults)
+					{
+						if (results.None(r => r.PersistentStack.Is(oldResult.Item))) results.Add(oldResult);
+					}
+				}
+			}
+
+			if (originalTotalCount == totalCount)
+			{
+				clamped = new ItemStack[0];
+				return false;
+			}
+
+			var selfWithdrawalModified = Modify(
+				// Sign flipped since we are subtracting items
+				results
+					.Where(r => 0 < r.OverflowStack.Count)
+					.Select(r => (r.Item, -r.OverflowStack.Count))
+					.ToArray(),
+				out _,
+				out var selfWithdrawalTriggerUpdate
+			);
+
+			if (!selfWithdrawalModified)
+			{
+				clamped = new ItemStack[0];
+				Debug.LogError("Constraint update expected modification, but none occured");
+				return false;
+			}
+
+			clamped = results
+				.Where(r => 0 < r.OverflowStack.Count)
+				.Select(r => r.OverflowStack)
+				.ToArray();
+			
+			selfWithdrawalTriggerUpdate(DateTime.Now);
+			return true;
+		}
+
 		public bool TryOperation<T>(
 			string key,
 			Func<OperationRequest<T>, OperationResult<T>> operation,
@@ -588,6 +717,8 @@ namespace Lunra.Satchel
 			
 			foreach (var stack in Stacks) result += $"\n\t{stack.ToString(itemStore, stackFormat)}";
 
+			result += "\n" + Constraint;
+			
 			return result;
 		}
 	}

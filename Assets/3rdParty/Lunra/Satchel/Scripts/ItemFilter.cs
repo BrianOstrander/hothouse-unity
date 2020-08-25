@@ -1,4 +1,5 @@
 using System;
+using Lunra.Core;
 using Newtonsoft.Json;
 
 namespace Lunra.Satchel
@@ -9,8 +10,6 @@ namespace Lunra.Satchel
 		[JsonProperty] public PropertyValidation[] None { get; private set; }
 		[JsonProperty] public PropertyValidation[] Any { get; private set; }
 
-		ItemStore itemStore;
-		
 		public ItemFilter(
 			PropertyValidation[] all,
 			PropertyValidation[] none,
@@ -24,7 +23,7 @@ namespace Lunra.Satchel
 
 		public ItemFilter Initialize(ItemStore itemStore)
 		{
-			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
+			if (itemStore == null) throw new ArgumentNullException(nameof(itemStore));
 
 			foreach (var validation in All) validation.Initialize(itemStore);
 			foreach (var validation in None) validation.Initialize(itemStore);
@@ -54,6 +53,39 @@ namespace Lunra.Satchel
 			}
 
 			return noAnyValidations;
+		}
+
+		public override string ToString() => $"Item Filter: All [ {All.Length} ] | None [ {None.Length} ] | Any [ {Any.Length} ]";
+		
+		public string ToStringVerbose()
+		{
+			var result = ToString();
+			
+			result += "\n\tAll : ";
+
+			if (All.None()) result += "None";
+			else
+			{
+				foreach (var validation in All) result += $"\n\t - {validation}";
+			}
+			
+			result += "\n\tNone : ";
+			
+			if (None.None()) result += "None";
+			else
+			{
+				foreach (var validation in None) result += $"\n\t - {validation}";
+			}
+			
+			result += "\n\tAny : ";
+			
+			if (Any.None()) result += "None";
+			else
+			{
+				foreach (var validation in Any) result += $"\n\t - {validation}";
+			}
+
+			return result;
 		}
 	}
 }

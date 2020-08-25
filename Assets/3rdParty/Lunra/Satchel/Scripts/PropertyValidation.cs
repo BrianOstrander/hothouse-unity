@@ -150,7 +150,6 @@ namespace Lunra.Satchel
 		#endregion
 		
 		#region Non Serialized
-		ItemStore itemStore;
 		ValidationStore.ValidateDelegate validation;
 		#endregion
 
@@ -173,7 +172,7 @@ namespace Lunra.Satchel
 
 		public PropertyValidation Initialize(ItemStore itemStore)
 		{
-			this.itemStore = itemStore;
+			if (itemStore == null) throw new ArgumentNullException(nameof(itemStore));
 
 			var nonInvertedType = Type;
 			if (nonInvertedType.HasFlag(Types.Invert)) nonInvertedType ^= Types.Invert;

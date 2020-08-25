@@ -23,6 +23,7 @@ namespace Lunra.Satchel
 		}
 		
 		public ItemStack NewCount(int count) => new ItemStack(Id, count);
+		public ItemStack NewEmpty() => new ItemStack(Id, 0);
 
 		public bool Is(ulong id) => id == Id;
 		public bool Is(Item item) => item.Id == Id;
