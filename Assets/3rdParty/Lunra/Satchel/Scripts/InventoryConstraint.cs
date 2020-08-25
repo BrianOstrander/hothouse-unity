@@ -9,6 +9,14 @@ namespace Lunra.Satchel
 {
 	public class InventoryConstraint
 	{
+		[Flags]
+		public enum Events
+		{
+			None = 0,
+			Modified = 1 << 0,
+			Overflow = 1 << 1 
+		}
+		
 		public static InventoryConstraint Ignored() => new InventoryConstraint(int.MaxValue, int.MaxValue);
 
 		public static InventoryConstraint ByFilter(
@@ -87,20 +95,39 @@ namespace Lunra.Satchel
 		/// </summary>
 		/// <remarks>
 		/// Stacks do not need to be in a unique list, but early indexes will be prioritized for inclusion over later
-		/// indexes.
+		/// indexes. This checks if the constraint is ignored, and simply consolidates the stacks if possible.
 		/// </remarks>
 		/// <param name="stacks">Duplicate tolerant collection of stacks ordered by inclusion priority.</param>
-		/// <param name="result">Result of constraint application.</param>
+		/// <param name="modified">Result of constraint application.</param>
 		/// <param name="overflow">Overflow from constraint application.</param>
 		/// <returns><c>true</c> if overflow occured, <c>false</c> otherwise.</returns>
-		public bool Apply(
+		public Events Apply(
 			Stack[] stacks,
-			out Stack[] result,
+			out Stack[] modified,
 			out Stack[] overflow
 		)
 		{
 			var sorted = new Dictionary<ulong, (Item Item, int Count, int Overflow, int Limit)>();
 
+			if (IsIgnored)
+			{
+				foreach (var stack in stacks)
+				{
+					if (stack.Count == 0) continue;
+					
+					if (sorted.TryGetValue(stack.Id, out var sortedEntry)) sortedEntry.Count += stack.Count;
+					else sortedEntry.Count = stack.Count;
+					
+					sorted[stack.Id] = sortedEntry;
+				}
+
+				modified = sorted
+					.Select(s => new Stack(s.Key, s.Value.Count))
+					.ToArray();
+				overflow = new Stack[0];
+				return stacks.SequenceEqual(modified) ? Events.None : Events.Modified;
+			}
+			
 			var countTotal = 0;
 			var anyOverflow = false;
 			
@@ -179,7 +206,7 @@ namespace Lunra.Satchel
 				sorted[stack.Id] = sortedEntry;
 			}
 
-			result = sorted
+			modified = sorted
 				.Where(s => s.Value.Item != null && 0 < s.Value.Count)
 				.Select(s => new Stack(s.Key, s.Value.Count))
 				.ToArray();
@@ -193,7 +220,8 @@ namespace Lunra.Satchel
 			}
 			else overflow = new Stack[0];
 
-			return anyOverflow;
+			var result = stacks.SequenceEqual(modified) ? Events.None : Events.Modified;
+			return anyOverflow ? result | Events.Overflow : result;
 		}
 
 		public override string ToString()

@@ -245,15 +245,16 @@ namespace Lunra.Hothouse.Editor
 				{
 					var res = stacks.Aggregate("Original:", (r, e) => $"{r}\n\t{e}");
 					
-					var anyOverflow = constraint.Apply(
+					var result = constraint.Apply(
 						stacks,
-						out var result,
+						out var modified,
 						out var overflow
 					);
 
-					res += result.Aggregate("\nResult:", (r, e) => $"{r}\n\t{e}");
-
-					if (anyOverflow)
+					if (result.HasFlag(InventoryConstraint.Events.Modified)) res += modified.Aggregate("\nResult:", (r, e) => $"{r}\n\t{e}");
+					else res += "\nResult: None";
+					
+					if (result.HasFlag(InventoryConstraint.Events.Overflow))
 					{
 						res = "[ Overflow Occured ]\n" + res;
 						res += overflow.Aggregate("\nOverflow:", (r, e) => $"{r}\n\t{e}");
