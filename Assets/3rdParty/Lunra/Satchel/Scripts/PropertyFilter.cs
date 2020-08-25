@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Satchel
 {
-	public class ItemFilter
+	public class PropertyFilter
 	{
 		[JsonProperty] public PropertyValidation[] All { get; private set; }
 		[JsonProperty] public PropertyValidation[] None { get; private set; }
@@ -12,7 +12,7 @@ namespace Lunra.Satchel
 
 		bool isInitialized;
 		
-		public ItemFilter(
+		public PropertyFilter(
 			PropertyValidation[] all,
 			PropertyValidation[] none,
 			PropertyValidation[] any
@@ -23,7 +23,7 @@ namespace Lunra.Satchel
 			Any = any ?? throw new ArgumentNullException(nameof(any));
 		}
 
-		public ItemFilter Initialize(ItemStore itemStore)
+		public PropertyFilter Initialize(ItemStore itemStore)
 		{
 			if (itemStore == null) throw new ArgumentNullException(nameof(itemStore));
 			

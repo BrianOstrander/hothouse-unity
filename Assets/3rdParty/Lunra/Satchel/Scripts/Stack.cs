@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Lunra.Satchel
 {
-	public struct ItemStack
+	public struct Stack
 	{
 		/// <summary>
 		/// The Id of the Item this stack contains.
@@ -13,7 +13,7 @@ namespace Lunra.Satchel
 
 		[JsonIgnore] public bool IsEmpty => Count == 0;
 
-		public ItemStack(
+		public Stack(
 			ulong id,
 			int count
 		)
@@ -22,22 +22,22 @@ namespace Lunra.Satchel
 			Count = Mathf.Max(0, count);
 		}
 		
-		public ItemStack NewCount(int count) => new ItemStack(Id, count);
-		public ItemStack NewEmpty() => new ItemStack(Id, 0);
+		public Stack NewCount(int count) => new Stack(Id, count);
+		public Stack NewEmpty() => new Stack(Id, 0);
 
 		public bool Is(ulong id) => id == Id;
 		public bool Is(Item item) => item.Id == Id;
 		public bool IsEqualTo(Item item, int count) => item.Id == Id && count == Count;
 		public bool IsEqualTo(ulong id, int count) => id == Id && count == Count;
-		public bool IsEqualTo(ItemStack itemStack) => IsEqualTo(itemStack.Id, itemStack.Count);
+		public bool IsEqualTo(Stack stack) => IsEqualTo(stack.Id, stack.Count);
 
-		public static ItemStack operator +(ItemStack itemStack, int count) => itemStack.NewCount(itemStack.Count + count);
-		public static ItemStack operator -(ItemStack itemStack, int count) => itemStack.NewCount(itemStack.Count - count);
-		public static ItemStack operator *(ItemStack itemStack, int count) => itemStack.NewCount(itemStack.Count * count);
-		public static ItemStack operator /(ItemStack itemStack, int count) => itemStack.NewCount(itemStack.Count / count);
+		public static Stack operator +(Stack stack, int count) => stack.NewCount(stack.Count + count);
+		public static Stack operator -(Stack stack, int count) => stack.NewCount(stack.Count - count);
+		public static Stack operator *(Stack stack, int count) => stack.NewCount(stack.Count * count);
+		public static Stack operator /(Stack stack, int count) => stack.NewCount(stack.Count / count);
 		
-		public static ItemStack operator ++(ItemStack itemStack) => itemStack.NewCount(itemStack.Count + 1);
-		public static ItemStack operator --(ItemStack itemStack) => itemStack.NewCount(itemStack.Count - 1);
+		public static Stack operator ++(Stack stack) => stack.NewCount(stack.Count + 1);
+		public static Stack operator --(Stack stack) => stack.NewCount(stack.Count - 1);
 
 		public override string ToString() => $"[ {Id} ] : {Count}";
 

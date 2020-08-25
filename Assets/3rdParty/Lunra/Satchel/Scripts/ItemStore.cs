@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
 using Newtonsoft.Json;
@@ -55,15 +54,20 @@ namespace Lunra.Satchel
 			}
 		}
 		
+		#region Serialized
 		[JsonProperty] Dictionary<ulong, Item> items = new Dictionary<ulong, Item>();
 		[JsonProperty] ulong currentId;
 		[JsonProperty] DateTime lastUpdated;
+		#endregion
 		
+		#region Non Serialized
 		string[] ignoredKeysForStacking;
 		string[] ignoredKeysCloning;
 		IItemModifier[] modifiers;
 		
 		[JsonIgnore] public ValidationStore Validation { get; private set; }
+		[JsonIgnore] public BuilderUtility Builder { get; private set; }
+		#endregion
 		
 		public event Action<Event> Updated;
 
@@ -97,6 +101,7 @@ namespace Lunra.Satchel
 				.ToArray();
 
 			Validation = new ValidationStore().Initialize(this);
+			Builder = new BuilderUtility(this);
 			
 			foreach (var kv in items) kv.Value.Initialize(this, i => TryUpdate(i));
 		}
@@ -167,14 +172,14 @@ namespace Lunra.Satchel
 			return true;
 		}
 
-		public bool CanStack(ItemStack stack0, ItemStack stack1) => CanStack(First(stack0.Id), First(stack1.Id));
+		public bool CanStack(Stack stack0, Stack stack1) => CanStack(First(stack0.Id), First(stack1.Id));
 
-		public ItemStack NewStack(ulong id, int count)
+		public Stack NewStack(ulong id, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Negative counts are not supported for stacks");
 
 			var item = First(id);
-			var result = new ItemStack(id, count);
+			var result = new Stack(id, count);
 
 			if (count == 0) return result;
 
@@ -183,7 +188,7 @@ namespace Lunra.Satchel
 			return result;
 		}
 
-		public ItemStack NewStack(Item item, int count) => NewStack(item.Id, count);
+		public Stack NewStack(Item item, int count) => NewStack(item.Id, count);
 
 		public void Destroy(ulong id, int count)
 		{
@@ -206,7 +211,7 @@ namespace Lunra.Satchel
 			item.Set(Constants.InstanceCount, newInstanceCount);
 		}
 
-		public void Destroy(ItemStack stack) => Destroy(stack.Id, stack.Count);
+		public void Destroy(Stack stack) => Destroy(stack.Id, stack.Count);
 
 		public bool TryGet(ulong id, out Item item) => items.TryGetValue(id, out item);
 
@@ -258,7 +263,7 @@ namespace Lunra.Satchel
 
 			var updateTime = DateTime.Now;
 			var updates = new[] {Item.Event.Types.Item | Item.Event.Types.Destroyed}; 
-			var emptyPropertyUpdates = new Dictionary<string, (Item.Property Property, Item.Event.Types Update)>().ToReadonlyDictionary();
+			var emptyPropertyUpdates = new Dictionary<string, (Property Property, Item.Event.Types Update)>().ToReadonlyDictionary();
 			
 			var itemEventsList = new List<Item.Event>();
 

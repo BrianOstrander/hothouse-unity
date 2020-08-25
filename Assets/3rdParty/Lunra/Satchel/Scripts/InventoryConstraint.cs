@@ -7,12 +7,12 @@ using UnityEngine;
 
 namespace Lunra.Satchel
 {
-	public class ItemConstraint
+	public class InventoryConstraint
 	{
-		public static ItemConstraint Ignored() => new ItemConstraint(int.MaxValue, int.MaxValue);
+		public static InventoryConstraint Ignored() => new InventoryConstraint(int.MaxValue, int.MaxValue);
 
-		public static ItemConstraint ByFilter(
-			params ItemFilter[] filters
+		public static InventoryConstraint ByFilter(
+			params PropertyFilter[] filters
 		)
 		{
 			return ByFilter(
@@ -21,68 +21,42 @@ namespace Lunra.Satchel
 			);
 		}
 		
-		public static ItemConstraint ByFilter(
+		public static InventoryConstraint ByFilter(
 			int countLimit,
-			params ItemFilter[] filters
+			params PropertyFilter[] filters
 		)
 		{
-			return new ItemConstraint(
+			return new InventoryConstraint(
 				countLimit,
 				0,
 				filters
-					.Select(f => new Restriction(f))
+					.Select(f => new InventoryFilter(f))
 					.ToArray()
 			);
 		}
 		
-		public static ItemConstraint ByCount(
+		public static InventoryConstraint ByCount(
 			int countLimit
 		)
 		{
-			return new ItemConstraint(
+			return new InventoryConstraint(
 				countLimit,
 				countLimit
 			);
 		}
 
-		public struct Restriction
-		{
-			[JsonProperty] public ItemFilter Filter { get; private set; }
-			[JsonProperty] public int CountLimit { get; private set; }
-
-			public Restriction(
-				ItemFilter filter,
-				int countLimit = int.MaxValue
-			)
-			{
-				Filter = filter ?? throw new ArgumentNullException(nameof(filter));
-				
-				if (countLimit < 0) throw new ArgumentOutOfRangeException(nameof(countLimit), "Must be greater than or equal to zero");
-				
-				CountLimit = countLimit;
-			}
-
-			public override string ToString()
-			{
-				var result = $"Count Limit: {CountLimit}";
-				result += "\n" + Filter.ToStringVerbose();
-
-				return result;
-			}
-		}
-
 		[JsonProperty] public int Limit { get; private set; }
 		[JsonProperty] public int LimitDefault { get; private set; }
-		[JsonProperty] public Restriction[] Restrictions { get; private set; }
+		[JsonProperty] public InventoryFilter[] Restrictions { get; private set; }
 		[JsonProperty]  public bool IsIgnored { get; private set; }
 
 		bool isInitialized;
 		ItemStore itemStore;
 		
-		public ItemConstraint(
+		public InventoryConstraint(
 			int limit,
 			int limitDefault,
-			params Restriction[] restrictions
+			params InventoryFilter[] restrictions
 		)
 		{
 			if (limit < 0) throw new ArgumentOutOfRangeException(nameof(limit), "Must be greater than or equal to zero");
@@ -95,7 +69,7 @@ namespace Lunra.Satchel
 			IsIgnored = Limit == int.MaxValue && LimitDefault == int.MaxValue && Restrictions.None();
 		}
 		
-		public ItemConstraint Initialize(ItemStore itemStore)
+		public InventoryConstraint Initialize(ItemStore itemStore)
 		{
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
 
@@ -120,9 +94,9 @@ namespace Lunra.Satchel
 		/// <param name="overflow">Overflow from constraint application.</param>
 		/// <returns><c>true</c> if overflow occured, <c>false</c> otherwise.</returns>
 		public bool Apply(
-			ItemStack[] stacks,
-			out ItemStack[] result,
-			out ItemStack[] overflow
+			Stack[] stacks,
+			out Stack[] result,
+			out Stack[] overflow
 		)
 		{
 			var sorted = new Dictionary<ulong, (Item Item, int Count, int Overflow, int Limit)>();
@@ -207,17 +181,17 @@ namespace Lunra.Satchel
 
 			result = sorted
 				.Where(s => s.Value.Item != null && 0 < s.Value.Count)
-				.Select(s => new ItemStack(s.Key, s.Value.Count))
+				.Select(s => new Stack(s.Key, s.Value.Count))
 				.ToArray();
 
 			if (anyOverflow)
 			{
 				overflow = sorted
 					.Where(s => s.Value.Item != null && 0 < s.Value.Overflow)
-					.Select(s => new ItemStack(s.Key, s.Value.Overflow))
+					.Select(s => new Stack(s.Key, s.Value.Overflow))
 					.ToArray();
 			}
-			else overflow = new ItemStack[0];
+			else overflow = new Stack[0];
 
 			return anyOverflow;
 		}

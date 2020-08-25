@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Lunra.Satchel
 {
-	public class ItemInventory
+	public class Inventory
 	{
 		[Flags]
 		public enum Formats
@@ -108,20 +108,20 @@ namespace Lunra.Satchel
 		}
 		
 		#region Serialized
-		[JsonProperty] List<ItemStack> stacks = new List<ItemStack>();
+		[JsonProperty] List<Stack> stacks = new List<Stack>();
 		[JsonProperty] DateTime lastUpdated;
-		[JsonProperty] public ItemConstraint Constraint { get; private set; } = ItemConstraint.Ignored();
+		[JsonProperty] public InventoryConstraint Constraint { get; private set; } = InventoryConstraint.Ignored();
 		[JsonProperty] public int Count { get; private set; }
 		#endregion
 
 		#region Non Serialized
 		bool isInitialized;
 		ItemStore itemStore;
-		[JsonIgnore] public ReadOnlyCollection<ItemStack> Stacks { get; private set; }
+		[JsonIgnore] public ReadOnlyCollection<Stack> Stacks { get; private set; }
 		public event Action<Event> Updated;
 		#endregion
 
-		public ItemInventory Initialize(ItemStore itemStore)
+		public Inventory Initialize(ItemStore itemStore)
 		{
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
 			
@@ -238,7 +238,7 @@ namespace Lunra.Satchel
 				}
 
 				if (indexToRemove.HasValue) stacks.RemoveAt(indexToRemove.Value);
-				else if (!found) stacks.Add(new ItemStack(modificationEvent.Key, modificationEvent.Value.NewCount));
+				else if (!found) stacks.Add(new Stack(modificationEvent.Key, modificationEvent.Value.NewCount));
 			}
 
 			clamped = clampedList.ToArray();
@@ -287,8 +287,8 @@ namespace Lunra.Satchel
 		/// <param name="clamped"></param>
 		/// <returns>True if clamping occurs.</returns>
 		public bool TransferTo(
-			ItemInventory target,
-			ItemStack[] stacks,
+			Inventory target,
+			Stack[] stacks,
 			out (Item Item, int Count)[] clamped
 		)
 		{
@@ -412,19 +412,19 @@ namespace Lunra.Satchel
 		}
 
 		public bool UpdateConstraint(
-			ItemConstraint constraint,
-			out ItemStack[] clamped
+			InventoryConstraint constraint,
+			out Stack[] clamped
 		)
 		{
 			Constraint = constraint;
 			Constraint.Initialize(itemStore);
 			if (Constraint.IsIgnored)
 			{
-				clamped = new ItemStack[0];
+				clamped = new Stack[0];
 				return false;
 			}
 
-			var results = new List<(Item Item, ItemStack PersistentStack, ItemStack OverflowStack, int CountLimit)>();
+			var results = new List<(Item Item, Stack PersistentStack, Stack OverflowStack, int CountLimit)>();
 			
 			var originalTotalCount = 0;
 			var totalCount = 0;
@@ -472,7 +472,7 @@ namespace Lunra.Satchel
 				);
 			}
 			
-			var replacementResults = new List<(Item Item, ItemStack PersistentStack, ItemStack OverflowStack, int CountLimit)>();
+			var replacementResults = new List<(Item Item, Stack PersistentStack, Stack OverflowStack, int CountLimit)>();
 			
 			if (Constraint.Limit < totalCount)
 			{
@@ -510,7 +510,7 @@ namespace Lunra.Satchel
 
 			if (originalTotalCount == totalCount)
 			{
-				clamped = new ItemStack[0];
+				clamped = new Stack[0];
 				return false;
 			}
 
@@ -526,7 +526,7 @@ namespace Lunra.Satchel
 
 			if (!selfWithdrawalModified)
 			{
-				clamped = new ItemStack[0];
+				clamped = new Stack[0];
 				Debug.LogError("Constraint update expected modification, but none occured");
 				return false;
 			}
@@ -573,7 +573,7 @@ namespace Lunra.Satchel
 		}
 
 		public bool TryOperation<T>(
-			ItemKey<T> key,
+			PropertyKey<T> key,
 			Func<OperationRequest<T>, OperationResult<T>> operation,
 			out T result,
 			out int count
@@ -585,10 +585,10 @@ namespace Lunra.Satchel
 		);
 
 		public bool TrySum(string key, out float result) => TryOperation(key, o => o.Continues(o.Result + o.Value), out result, out _);
-		public bool TrySum(ItemKey<float> key, out float result) => TrySum(key.Key, out result);
+		public bool TrySum(PropertyKey<float> key, out float result) => TrySum(key.Key, out result);
 
 		public bool TrySum(string key, out int result) => TryOperation(key, o => o.Continues(o.Result + o.Value), out result, out _);
-		public bool TrySum(ItemKey<float> key, out int result) => TrySum(key.Key, out result);
+		public bool TrySum(PropertyKey<float> key, out int result) => TrySum(key.Key, out result);
 
 		public bool TryAllEqual<T>(
 			string key,
