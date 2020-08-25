@@ -4,6 +4,13 @@ namespace Lunra.Satchel
 {
 	public abstract class FloatOperation : PropertyValidationOperation<float> {}
 	
+	public class DefinedFloatOperation : FloatOperation
+	{
+		public override PropertyValidation.Types OperationType => PropertyValidation.Types.Defined;
+		protected override bool IsValid(RequestPayload request) => request.IsDefined;
+		protected override bool IsUnDefinedValidationsPermitted(RequestPayload request) => true;
+	}
+	
 	public class EqualToFloatOperation : FloatOperation
 	{
 		public override PropertyValidation.Types OperationType => PropertyValidation.Types.EqualTo;

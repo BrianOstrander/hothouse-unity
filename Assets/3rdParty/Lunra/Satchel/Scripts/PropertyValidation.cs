@@ -10,6 +10,11 @@ namespace Lunra.Satchel
 		{
 			public static class Bool
 			{
+				public static PropertyValidation Defined(string key) => new PropertyValidation(
+					key,
+					Types.Bool | Types.Defined
+				);
+				
 				public static PropertyValidation EqualTo(string key, bool value) => new PropertyValidation(
 					key,
 					Types.Bool | Types.EqualTo,
@@ -19,6 +24,11 @@ namespace Lunra.Satchel
 			
 			public static class Int
 			{
+				public static PropertyValidation Defined(string key) => new PropertyValidation(
+					key,
+					Types.Int | Types.Defined
+				);
+				
 				public static PropertyValidation EqualTo(string key, int value) => new PropertyValidation(
 					key,
 					Types.Int | Types.EqualTo,
@@ -52,6 +62,11 @@ namespace Lunra.Satchel
 			
 			public static class Float
 			{
+				public static PropertyValidation Defined(string key) => new PropertyValidation(
+					key,
+					Types.Float | Types.Defined
+				);
+				
 				public static PropertyValidation EqualTo(string key, float value) => new PropertyValidation(
 					key,
 					Types.Float | Types.EqualTo,
@@ -85,6 +100,11 @@ namespace Lunra.Satchel
 			
 			public static class String
 			{
+				public static PropertyValidation Defined(string key) => new PropertyValidation(
+					key,
+					Types.String | Types.Defined
+				);
+				
 				public static PropertyValidation EqualTo(string key, string value) => new PropertyValidation(
 					key,
 					Types.String | Types.EqualTo,
@@ -122,13 +142,15 @@ namespace Lunra.Satchel
 			
 			Invert = 1 << 4,
 			
-			EqualTo = 1 << 5,
-			LessThan = 1 << 6,
-			GreaterThan = 1 << 7,
+			Defined = 1 << 5,
+			EqualTo = 1 << 6,
 			
-			Contains = 1 << 8,
-			StartsWith = 1 << 9,
-			EndsWith = 1 << 10,
+			LessThan = 1 << 7,
+			GreaterThan = 1 << 8,
+			
+			Contains = 1 << 9,
+			StartsWith = 1 << 10,
+			EndsWith = 1 << 11,
 		}
 		
 		public enum Results
@@ -150,6 +172,7 @@ namespace Lunra.Satchel
 		#endregion
 		
 		#region Non Serialized
+		bool isInitialized;
 		ValidationStore.ValidateDelegate validation;
 		#endregion
 
@@ -174,6 +197,10 @@ namespace Lunra.Satchel
 		{
 			if (itemStore == null) throw new ArgumentNullException(nameof(itemStore));
 
+			if (isInitialized) return this;
+
+			isInitialized = true;
+			
 			var nonInvertedType = Type;
 			if (nonInvertedType.HasFlag(Types.Invert)) nonInvertedType ^= Types.Invert;
 
@@ -190,26 +217,26 @@ namespace Lunra.Satchel
 		{
 			if (Type.HasFlag(Types.Bool))
 			{
-				if (item.TryGet(Key, out bool value)) return validation(this, item, value);
-				return Results.InValid;
+				var isDefined = item.TryGet(Key, out bool value);
+				return validation(this, item, value, isDefined);
 			}
 
 			if (Type.HasFlag(Types.Int))
 			{
-				if (item.TryGet(Key, out int value)) return validation(this, item, value);
-				return Results.InValid;
+				var isDefined = item.TryGet(Key, out int value);
+				return validation(this, item, value, isDefined);
 			}
 
 			if (Type.HasFlag(Types.Float))
 			{
-				if (item.TryGet(Key, out float value)) return validation(this, item, value);
-				return Results.InValid;
+				var isDefined = item.TryGet(Key, out float value);
+				return validation(this, item, value, isDefined);
 			}
 
 			if (Type.HasFlag(Types.String))
 			{
-				if (item.TryGet(Key, out string value)) return validation(this, item, value);
-				return Results.InValid;
+				var isDefined = item.TryGet(Key, out string value);
+				return validation(this, item, value, isDefined);
 			}
 			
 			Debug.LogError($"Unrecognized Type {Type:F}");

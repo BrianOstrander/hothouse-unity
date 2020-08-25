@@ -2,6 +2,13 @@ namespace Lunra.Satchel
 {
 	public abstract class IntOperation : PropertyValidationOperation<int> {}
 	
+	public class DefinedIntOperation : IntOperation
+	{
+		public override PropertyValidation.Types OperationType => PropertyValidation.Types.Defined;
+		protected override bool IsValid(RequestPayload request) => request.IsDefined;
+		protected override bool IsUnDefinedValidationsPermitted(RequestPayload request) => true;
+	}
+	
 	public class EqualToIntOperation : IntOperation
 	{
 		public override PropertyValidation.Types OperationType => PropertyValidation.Types.EqualTo;

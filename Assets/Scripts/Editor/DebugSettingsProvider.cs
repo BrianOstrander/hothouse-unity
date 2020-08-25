@@ -224,6 +224,72 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
+			if (GUILayout.Button("Test Satchel 0f"))
+			{
+				var itemStore = new ItemStore();
+				itemStore.Initialize();
+
+				// itemStore.Updated += updateEvent =>
+				// {
+				// 	var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+				// 	res += "\n-------- All Items --------\n";
+				// 	res += itemStore.ToString(true, true);
+				//
+				// 	Debug.Log(res);
+				// };
+				
+				void applyConstraint(
+					ItemConstraint constraint,
+					params ItemStack[] stacks
+				)
+				{
+					var res = stacks.Aggregate("Original:", (r, e) => $"{r}\n\t{e}");
+					
+					var anyOverflow = constraint.Apply(
+						stacks,
+						out var result,
+						out var overflow
+					);
+
+					res += result.Aggregate("\nResult:", (r, e) => $"{r}\n\t{e}");
+
+					if (anyOverflow)
+					{
+						res = "[ Overflow Occured ]\n" + res;
+						res += overflow.Aggregate("\nOverflow:", (r, e) => $"{r}\n\t{e}");
+					}
+					else res = "[ No Overflow ]\n" + res;
+
+					Debug.Log(res);
+				}
+
+				var filterIntKey = "some_int_key0";
+
+				var item0 = itemStore.New(
+					(filterIntKey, 0)
+				);
+				
+				var item1 = itemStore.New(
+					(filterIntKey, 1)
+				);
+
+				applyConstraint(
+					ItemConstraintBuilder
+						.Begin(itemStore)
+						.WithLimitOf(10)
+						.WithLimitDefaultOf(5)
+						.Permit(
+							ItemFilterBuilder
+								.Begin(itemStore)
+								.RequireAll(
+									PropertyValidation.Default.Int.EqualTo(filterIntKey, 0)
+								)
+						),
+					item0.NewStack(10),
+					item1.NewStack(10)
+				);
+			}
+			
 			if (GUILayout.Button("Test Satchel 0e"))
 			{
 				var itemStore = new ItemStore();
@@ -739,7 +805,7 @@ namespace Lunra.Hothouse.Editor
 					( "some_int_key0", 10)
 				);
 
-				var itemStack0 = itemStore.Create(item0, 20);
+				var itemStack0 = itemStore.NewStack(item0, 20);
 
 				itemInventory0.Modify(
 					(item0, 10).WrapInArray(),
@@ -787,7 +853,7 @@ namespace Lunra.Hothouse.Editor
 					( "some_int_key0", 10)
 				);
 
-				var stack = itemStore.Create(item0, 10);
+				var stack = itemStore.NewStack(item0, 10);
 
 				var item1 = itemStore.New(item0);
 				var item2 = itemStore.New(item0, ("some_int_key0", 70));
@@ -814,7 +880,7 @@ namespace Lunra.Hothouse.Editor
 					( "some_int_key0", 69)
 				);
 
-				var stack = itemStore.Create(item0, 10);
+				var stack = itemStore.NewStack(item0, 10);
 
 				var item1 = itemStore.New(item0);
 				var item2 = itemStore.New(item0, ("some_int_key0", 70));
@@ -841,7 +907,7 @@ namespace Lunra.Hothouse.Editor
 					( "some_int_key0", 69)
 				);
 
-				var stack = itemStore.Create(item0, 10);
+				var stack = itemStore.NewStack(item0, 10);
 				
 				itemStore.Destroy(stack);
 			}

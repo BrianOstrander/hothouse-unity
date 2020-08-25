@@ -4,6 +4,13 @@ namespace Lunra.Satchel
 	{
 		public abstract class StringOperation : PropertyValidationOperation<string> {}
 		
+		public class DefinedStringOperation : StringOperation
+		{
+			public override PropertyValidation.Types OperationType => PropertyValidation.Types.Defined;
+			protected override bool IsValid(RequestPayload request) => request.IsDefined;
+			protected override bool IsUnDefinedValidationsPermitted(RequestPayload request) => true;
+		}
+		
 		public class EqualToStringOperation : StringOperation
 		{
 			public override PropertyValidation.Types OperationType => PropertyValidation.Types.EqualTo;

@@ -352,20 +352,29 @@ namespace Lunra.Satchel
 			}
 		}
 		
+		#region Serialized
 		[JsonProperty] public ulong Id { get; private set; }
 		[JsonProperty] public DateTime LastUpdated { get; private set; }
 		
 		[JsonProperty] bool isInitialized;
 		[JsonProperty] Dictionary<string, Property> properties = new Dictionary<string, Property>();
+		#endregion
 
+		#region Non Serialized
 		[JsonIgnore] public string[] PropertyKeys => properties.Keys.ToArray();
-		
+
+		ItemStore itemStore;
 		Action<Event> itemStoreUpdated;
+		#endregion
 
 		public Item(ulong id) => Id = id;
 
-		public void Initialize(Action<Event> itemStoreUpdated)
+		public void Initialize(
+			ItemStore itemStore,
+			Action<Event> itemStoreUpdated
+		)
 		{
+			this.itemStore = itemStore;
 			this.itemStoreUpdated = itemStoreUpdated;
 
 			if (!isInitialized)
@@ -552,6 +561,8 @@ namespace Lunra.Satchel
 			
 			Set(propertyKeyValues.ToArray());
 		}
+
+		public ItemStack NewStack(int count = 0) => itemStore.NewStack(this, count);
 		
 		/// <summary>
 		/// Used, ideally only, by the ItemStore to update this value upon destruction.

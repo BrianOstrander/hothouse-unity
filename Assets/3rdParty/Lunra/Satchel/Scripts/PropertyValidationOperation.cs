@@ -17,18 +17,21 @@ namespace Lunra.Satchel
 			public PropertyValidation Validation { get; }
 			public Item Item { get; }
 			public T Value { get; }
+			public bool IsDefined { get; }
 
 			public RequestPayload(
 				ItemStore itemStore,
 				PropertyValidation validation,
 				Item item,
-				T value
+				T value,
+				bool isDefined
 			)
 			{
 				ItemStore = itemStore;
 				Validation = validation;
 				Item = item;
 				Value = value;
+				IsDefined = isDefined;
 			}
 		}
 
@@ -70,6 +73,7 @@ namespace Lunra.Satchel
 					case PropertyValidation.Types.Invert:
 						if (OperationType.HasFlag(type)) Debug.LogError($"Operations should not define type {type}");
 						break;
+					case PropertyValidation.Types.Defined:
 					case PropertyValidation.Types.EqualTo:
 					case PropertyValidation.Types.LessThan:
 					case PropertyValidation.Types.GreaterThan:
@@ -93,21 +97,30 @@ namespace Lunra.Satchel
 		public PropertyValidation.Results Validate(
 			PropertyValidation validation,
 			Item item,
-			T value
+			T value,
+			bool isDefined
 		)
 		{
 			var request = new RequestPayload(
 				itemStore,
 				validation,
 				item,
-				value
+				value,
+				isDefined
 			);
 
 			if (IsIgnored(request)) return PropertyValidation.Results.Ignored;
-			return (IsValid(request) && !validation.Type.HasFlag(PropertyValidation.Types.Invert)) ? PropertyValidation.Results.Valid : PropertyValidation.Results.InValid;
+
+			if (request.IsDefined || IsUnDefinedValidationsPermitted(request))
+			{
+				return (IsValid(request) && !validation.Type.HasFlag(PropertyValidation.Types.Invert)) ? PropertyValidation.Results.Valid : PropertyValidation.Results.InValid;	
+			}
+
+			return PropertyValidation.Results.InValid;
 		}
 
 		protected virtual bool IsIgnored(RequestPayload request) => false;
+		protected virtual bool IsUnDefinedValidationsPermitted(RequestPayload request) => false; 
 		protected abstract bool IsValid(RequestPayload request);
 
 		public override string ToString() => $"{ValueType}.{OperationType:F} | {typeof(T).Name} | {GetType().Name}";

@@ -8,7 +8,7 @@ namespace Lunra.Satchel
 {
 	public class ValidationStore
 	{
-		public delegate PropertyValidation.Results ValidateDelegate(PropertyValidation validation, Item item, object value);
+		public delegate PropertyValidation.Results ValidateDelegate(PropertyValidation validation, Item item, object value, bool isDefined);
 		
 		ItemStore itemStore;
 
@@ -47,9 +47,9 @@ namespace Lunra.Satchel
 						}
 						else
 						{
-							all[propertyValidationOperationInstance.Type] = (validation, item, value) =>
+							all[propertyValidationOperationInstance.Type] = (validation, item, value, isDefined) =>
 							{
-								if (value is T typedValue) return propertyValidationOperationInstance.Validate(validation, item, typedValue);
+								if (value is T typedValue) return propertyValidationOperationInstance.Validate(validation, item, typedValue, isDefined);
 								Debug.LogError($"Provided a value of type {(value == null ? "null" : value.GetType().Name)} when expecting {typeof(T).Name}");
 								return PropertyValidation.Results.Ignored;
 							};

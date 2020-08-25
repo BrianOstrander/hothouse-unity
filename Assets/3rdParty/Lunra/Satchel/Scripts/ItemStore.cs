@@ -98,7 +98,7 @@ namespace Lunra.Satchel
 
 			Validation = new ValidationStore().Initialize(this);
 			
-			foreach (var kv in items) kv.Value.Initialize(i => TryUpdate(i));
+			foreach (var kv in items) kv.Value.Initialize(this, i => TryUpdate(i));
 		}
 
 		Item Define(Action<Item> initialize)
@@ -117,7 +117,10 @@ namespace Lunra.Satchel
 					
 			items.Add(item.Id, item);
 
-			item.Initialize(i => TryUpdate(i));
+			item.Initialize(
+				this,
+				i => TryUpdate(i)
+			);
 
 			return item;
 		}
@@ -166,7 +169,7 @@ namespace Lunra.Satchel
 
 		public bool CanStack(ItemStack stack0, ItemStack stack1) => CanStack(First(stack0.Id), First(stack1.Id));
 
-		public ItemStack Create(ulong id, int count)
+		public ItemStack NewStack(ulong id, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Negative counts are not supported for stacks");
 
@@ -180,7 +183,7 @@ namespace Lunra.Satchel
 			return result;
 		}
 
-		public ItemStack Create(Item item, int count) => Create(item.Id, count);
+		public ItemStack NewStack(Item item, int count) => NewStack(item.Id, count);
 
 		public void Destroy(ulong id, int count)
 		{
@@ -204,6 +207,22 @@ namespace Lunra.Satchel
 		}
 
 		public void Destroy(ItemStack stack) => Destroy(stack.Id, stack.Count);
+
+		public bool TryGet(ulong id, out Item item) => items.TryGetValue(id, out item);
+
+		public bool TryGet(Func<Item, bool> predicate, out Item item)
+		{
+			try
+			{
+				item = First(predicate);
+				return true;
+			}
+			catch (InvalidOperationException)
+			{
+				item = default;
+				return false;
+			}
+		}
 		
 		public Item First(ulong id) => items[id];
 		public Item First(Func<Item, bool> predicate) => items.First(kv => predicate(kv.Value)).Value;

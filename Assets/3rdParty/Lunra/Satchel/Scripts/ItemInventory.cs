@@ -111,6 +111,7 @@ namespace Lunra.Satchel
 		[JsonProperty] List<ItemStack> stacks = new List<ItemStack>();
 		[JsonProperty] DateTime lastUpdated;
 		[JsonProperty] public ItemConstraint Constraint { get; private set; } = ItemConstraint.Ignored();
+		[JsonProperty] public int Count { get; private set; }
 		#endregion
 
 		#region Non Serialized
@@ -122,11 +123,16 @@ namespace Lunra.Satchel
 
 		public ItemInventory Initialize(ItemStore itemStore)
 		{
+			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
+			
 			if (isInitialized) return this;
 			
 			isInitialized = true;
+			
 			this.itemStore = itemStore;
 			Stacks = stacks.AsReadOnly();
+
+			Constraint.Initialize(itemStore);
 
 			return this;
 		}
@@ -148,6 +154,7 @@ namespace Lunra.Satchel
 			out Action<DateTime> triggerUpdate
 		)
 		{
+			// Ensure unique items -- avoids duplicate entries of items
 			var distinctModifications = new Dictionary<ulong, (Item Item, int Count, int? ExistingCount)>();
 			foreach (var modification in modifications)
 			{
@@ -410,6 +417,7 @@ namespace Lunra.Satchel
 		)
 		{
 			Constraint = constraint;
+			Constraint.Initialize(itemStore);
 			if (Constraint.IsIgnored)
 			{
 				clamped = new ItemStack[0];
@@ -436,7 +444,7 @@ namespace Lunra.Satchel
 				
 				int? countLimitMinimum = null;
 
-				foreach (var entry in Constraint.Entries)
+				foreach (var entry in Constraint.Restrictions)
 				{
 					if (entry.Filter.Validate(item))
 					{
@@ -444,7 +452,7 @@ namespace Lunra.Satchel
 					}
 				}
 
-				countLimitMinimum = countLimitMinimum ?? Constraint.DefaultCountLimit;
+				countLimitMinimum = countLimitMinimum ?? Constraint.LimitDefault;
 
 				if (0 < countLimitMinimum)
 				{
@@ -466,7 +474,7 @@ namespace Lunra.Satchel
 			
 			var replacementResults = new List<(Item Item, ItemStack PersistentStack, ItemStack OverflowStack, int CountLimit)>();
 			
-			if (Constraint.CountLimit < totalCount)
+			if (Constraint.Limit < totalCount)
 			{
 				var sortedResults = results
 					.Where(r => 0 < r.PersistentStack.Count)
@@ -477,7 +485,7 @@ namespace Lunra.Satchel
 				{
 					var replacementResult = referenceResult;
 					
-					var countOverflow = totalCount - Constraint.CountLimit;
+					var countOverflow = totalCount - Constraint.Limit;
 					var countToSubtract = Mathf.Min(referenceResult.PersistentStack.Count, countOverflow);
 					
 					replacementResult.PersistentStack -= countToSubtract;
