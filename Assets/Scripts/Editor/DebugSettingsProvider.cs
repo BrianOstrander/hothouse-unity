@@ -379,9 +379,11 @@ namespace Lunra.Hothouse.Editor
 				// 	item0.NewStack(10),
 				// 	item1.NewStack(10)
 				// );
+
+				inventory0.Clear();
+				
 				Debug.Log(inventory0);
 				Debug.Log(itemStore);
-				Debug.Log(itemStore.Serialize(formatting: Formatting.Indented));
 			}
 		}
 		

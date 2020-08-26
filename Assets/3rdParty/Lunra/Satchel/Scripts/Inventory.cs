@@ -532,7 +532,7 @@ namespace Lunra.Satchel
 			var destroyed = Stacks.ToArray();
 			Remove(destroyed, out _);
 
-			return (itemStore.Destroy(destroyed));
+			return itemStore.Destroy(destroyed);
 		}
 
 		public bool TryOperation<T>(
