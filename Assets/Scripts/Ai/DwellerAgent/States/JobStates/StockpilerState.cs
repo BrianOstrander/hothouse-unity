@@ -16,9 +16,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 			base.OnInitialize();
 			
 			AddChildStates(
-				new InventoryRequestState(),
-				new NavigateState(),
-				new BalanceItemState()
+				// new InventoryRequestState(),
+				new NavigateState()
+				// new BalanceItemState()
 			);
 
 			AddTransitions(
@@ -27,15 +27,16 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToReturnOnWorkplaceMissing(),
 				new ToReturnOnWorkplaceIsNotNavigable(),
 
-				new InventoryRequestState.ToInventoryRequestOnPromises(),
+				// new InventoryRequestState.ToInventoryRequestOnPromises(),
 				
-				new ToNavigateToWorkplace(),
+				new ToNavigateToWorkplace()
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => s.Enterable.IsOwner),
-				new BalanceItemState.ToBalanceOnAvailableDistribution(ValidateDistribution)
+				// new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => s.Enterable.IsOwner),
+				// new BalanceItemState.ToBalanceOnAvailableDistribution(ValidateDistribution)
 			);
 		}
 
+		/*
 		bool ValidateDistribution(
 			BalanceItemState.ToBalanceOnAvailable.InventoryCache source,
 			BalanceItemState.ToBalanceOnAvailable.InventoryCache destination
@@ -49,5 +50,6 @@ namespace Lunra.Hothouse.Ai.Dweller
 
 			return true;
 		}
+		*/
 	}
 }

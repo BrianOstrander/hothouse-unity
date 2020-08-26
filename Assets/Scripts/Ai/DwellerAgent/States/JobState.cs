@@ -305,11 +305,11 @@ namespace Lunra.Hothouse.Ai.Dweller
 		protected class ConstructAssembleHandlerState : ConstructAssembleHandlerState<S1> { }
 		protected class DoorOpenHandlerState : DoorOpenHandlerState<S1> { }
 		
-		protected class InventoryRequestState : InventoryRequestState<S1> { }
+		// protected class InventoryRequestState : InventoryRequestState<S1> { }
 		
 		protected class NavigateState : NavigateState<S1> { }
 		
-		protected class BalanceItemState : BalanceItemState<S1> { } 
+		// protected class BalanceItemState : BalanceItemState<S1> { } 
 		
 		protected class TimeoutState : TimeoutState<S1> { }
 		// protected class ObligationState : ObligationState<S1> { }

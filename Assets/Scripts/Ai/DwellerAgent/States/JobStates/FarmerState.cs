@@ -36,9 +36,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 			generator = new Demon();
 
 			AddChildStates(
-				new InventoryRequestState(),
+				// new InventoryRequestState(),
 				new NavigateState(),
-				new BalanceItemState(),
+				// new BalanceItemState(),
 				new DestroyGenericHandlerState(),
 				timeoutInstance = new TimeoutState()
 			);
@@ -49,13 +49,13 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new ToReturnOnWorkplaceMissing(),
 				new ToReturnOnWorkplaceIsNotNavigable(),
 
-				new InventoryRequestState.ToInventoryRequestOnPromises(),
+				// new InventoryRequestState.ToInventoryRequestOnPromises(),
 				
 				new DestroyGenericHandlerState.ToObligationOnExistingObligation(),
 				new ToDestroyOvergrownFlora(),
 				
-				new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
-				new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner),
+				// new BalanceItemState.ToBalanceOnAvailableDelivery((s, d) => d.Enterable.IsOwner),
+				// new BalanceItemState.ToBalanceOnAvailableDistribution((s, d) => s.Enterable.IsOwner),
 				
 				new ToTimeoutOnSow(),
 				new ToNavigateToSow(),
