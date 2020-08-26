@@ -332,7 +332,7 @@ namespace Lunra.Hothouse.Editor
 				// 	(filterIntKey, 1)
 				// );
 
-				var inventory0 = new Inventory().Initialize(itemStore);
+				var inventory0 = itemStore.Builder.Inventory();
 
 				var filterIntKey = "some_int_key0";
 				
