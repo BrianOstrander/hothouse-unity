@@ -17,6 +17,15 @@ namespace Lunra.Satchel
 			IncludeItems = 1 << 0,
 			IncludeItemProperties = 1 << 1
 		}
+
+		[Flags]
+		public enum ModificationResults
+		{
+			None = 0,
+			Modified = 1 << 0,
+			Overflow = 1 << 1,
+			Underflow = 1 << 2
+		}
 		
 		public struct Event
 		{
@@ -137,20 +146,175 @@ namespace Lunra.Satchel
 			return this;
 		}
 
-		// public bool Add(
-		// 	Stack[] stacks,
-		// 	out Stack[] overflow
-		// )
-		// {
-		// 	var anyOverflow = Constraint.Apply(
-		// 		Stacks
-		// 			.Concat(stacks)
-		// 			.ToArray(),
-		// 		out var result,
-		// 		out overflow
-		// 	);
-		// }
+		public ModificationResults Add(
+			Stack[] additions,
+			out Stack[] overflow
+		)
+		{
+			var result = ModificationResults.None;
+			
+			var constraintResult = Constraint.Apply(
+				Stacks
+					.Concat(additions)
+					.ToArray(),
+				out var modified,
+				out overflow
+			);
+
+			if (constraintResult.HasFlag(InventoryConstraint.Events.Modified) || !Stacks.ScrambleEqual(modified))
+			{
+				result |= ModificationResults.Modified;
+				
+				var stackEvents = new Dictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
+				var oldStacks = Stacks.ToArray();
+				stacks.Clear();
+				
+				foreach (var modification in modified)
+				{
+					var oldCount = oldStacks.FirstOrDefault(s => s.Is(modification.Id)).Count;
+
+					stacks.Add(new Stack(modification.Id, modification.Count));
+					
+					if (modification.Count == oldCount) continue;
+					
+					stackEvents.Add(
+						modification.Id,
+						(
+							oldCount,
+							modification.Count,
+							modification.Count - oldCount,
+							Event.Types.Addition
+						)
+					);
+				}
+				
+				TriggerUpdate(
+					new Event(
+						DateTime.Now,
+						Event.Types.Addition,
+						stackEvents.ToReadonlyDictionary()
+					)	
+				);
+			}
+
+			if (constraintResult.HasFlag(InventoryConstraint.Events.Overflow)) result |= ModificationResults.Overflow;
+
+			return result;
+		}
 		
+		public ModificationResults Remove(
+			Stack[] removals,
+			out Stack[] underflow
+		)
+		{
+			var result = ModificationResults.None;
+			
+			Dictionary<ulong, (int Count, int RemovedCount, int Underflow)> consolidated = Stacks
+				.ToDictionary(
+					stack => stack.Id,
+					stack => (stack.Count, 0, 0)
+				);
+
+			var anyRemovals = false;
+			
+			foreach (var stack in removals)
+			{
+				if (stack.Count == 0) continue;
+				
+				if (consolidated.TryGetValue(stack.Id, out var entry))
+				{
+					if (stack.Count <= entry.Count)
+					{
+						entry.Count -= stack.Count;
+						entry.RemovedCount += entry.Count;
+					}
+					else
+					{
+						var countUnderflow = Mathf.Abs(entry.Count - stack.Count);
+						var countRemoved = stack.Count - countUnderflow;
+						entry.Count -= countRemoved;
+						entry.RemovedCount += countRemoved;
+						entry.Underflow += countUnderflow;
+					}
+
+					anyRemovals = true;
+				}
+				else
+				{
+					entry = (0, 0, stack.Count);
+				}
+
+				consolidated[stack.Id] = entry;
+			}
+
+			var underflowList = new List<Stack>();
+
+			void updateUnderflow(
+				ulong key,
+				int underflowCount
+			)
+			{
+				if (0 < underflowCount) underflowList.Add(new Stack(key, underflowCount));
+			}
+			
+			if (anyRemovals)
+			{
+				result |= ModificationResults.Modified;
+				
+				stacks.Clear();
+				var stackEvents = new Dictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
+				foreach (var kv in consolidated)
+				{
+					if (0 < kv.Value.Count) stacks.Add(new Stack(kv.Key, kv.Value.Count));
+					if (0 < kv.Value.RemovedCount) stackEvents.Add(kv.Key, (kv.Value.Count + kv.Value.RemovedCount, kv.Value.Count, -kv.Value.RemovedCount, Event.Types.Subtraction));
+					updateUnderflow(kv.Key, kv.Value.Underflow);
+				}
+				
+				TriggerUpdate(
+					new Event(
+						DateTime.Now,
+						Event.Types.Subtraction,
+						stackEvents.ToReadonlyDictionary()
+					)
+				);
+			}
+			else
+			{
+				foreach (var kv in consolidated) updateUnderflow(kv.Key, kv.Value.Underflow);
+			}
+
+			underflow = underflowList.ToArray();
+		
+			if (underflow.Any()) result |= ModificationResults.Underflow;
+
+			return result;
+		}
+
+		public ModificationResults UpdateConstraint(
+			InventoryConstraint constraint,
+			out Stack[] overflow
+		)
+		{
+			Constraint = constraint;
+
+			var constraintResult = Constraint.Apply(
+				Stacks.ToArray(),
+				out _,
+				out overflow
+			);
+
+			var result = ModificationResults.None;
+			
+			if (constraintResult.HasFlag(InventoryConstraint.Events.Modified))
+			{
+				result |= ModificationResults.Modified | ModificationResults.Overflow;
+				
+				var removeResult = Remove(overflow, out _);
+				if (removeResult != ModificationResults.Modified) Debug.LogError($"Unexpected remove result: {removeResult:F}");
+			}
+
+			return result;
+		}
 
 		public bool TryOperation<T>(
 			string key,

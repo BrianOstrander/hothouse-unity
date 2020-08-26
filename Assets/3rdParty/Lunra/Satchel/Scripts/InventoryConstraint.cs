@@ -125,7 +125,7 @@ namespace Lunra.Satchel
 					.Select(s => new Stack(s.Key, s.Value.Count))
 					.ToArray();
 				overflow = new Stack[0];
-				return stacks.SequenceEqual(modified) ? Events.None : Events.Modified;
+				return stacks.ScrambleEqual(modified) ? Events.None : Events.Modified;
 			}
 			
 			var countTotal = 0;
@@ -220,7 +220,7 @@ namespace Lunra.Satchel
 			}
 			else overflow = new Stack[0];
 
-			var result = stacks.SequenceEqual(modified) ? Events.None : Events.Modified;
+			var result = stacks.ScrambleEqual(modified) ? Events.None : Events.Modified;
 			return anyOverflow ? result | Events.Overflow : result;
 		}
 

@@ -14,6 +14,7 @@ using Lunra.StyxMvp.Services;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
+using Inventory = Lunra.Satchel.Inventory;
 
 namespace Lunra.Hothouse.Editor
 {
@@ -238,30 +239,69 @@ namespace Lunra.Hothouse.Editor
 				// 	Debug.Log(res);
 				// };
 				
-				void applyConstraint(
-					InventoryConstraint constraint,
+				void modify(
+					bool isAdd,
+					Inventory inventory,
 					params Stack[] stacks
 				)
 				{
-					var res = stacks.Aggregate("Original:", (r, e) => $"{r}\n\t{e}");
-					
-					var result = constraint.Apply(
-						stacks,
-						out var modified,
-						out var overflow
-					);
+					var res = $"---- Original ----\n{inventory}\n---- [ {(isAdd ? "ADD" : "REMOVE")} ] ----";
 
-					if (result.HasFlag(InventoryConstraint.Events.Modified)) res += modified.Aggregate("\nResult:", (r, e) => $"{r}\n\t{e}");
-					else res += "\nResult: None";
+					res += stacks.Aggregate("\n", (r, c) => $"{r}\n\t{c}");
 					
-					if (result.HasFlag(InventoryConstraint.Events.Overflow))
+					Inventory.ModificationResults result;
+					Stack[] clamped;
+					
+					if (isAdd)
 					{
-						res = "[ Overflow Occured ]\n" + res;
-						res += overflow.Aggregate("\nOverflow:", (r, e) => $"{r}\n\t{e}");
+						result = inventory.Add(
+							stacks,
+							out clamped
+						);
 					}
-					else res = "[ No Overflow ]\n" + res;
+					else
+					{
+						result = inventory.Remove(
+							stacks,
+							out clamped
+						);
+					}
+
+					if (result.HasFlag(Inventory.ModificationResults.Modified)) res += $"\n---- RESULT ----\n{inventory}\n";
+					else res += "\n---- NO MODIFICATION ----";
+
+					var anyClamping = false;
+					if (result.HasFlag(Inventory.ModificationResults.Overflow))
+					{
+						anyClamping = true;
+						res += "\n---- OVERFLOW ----";
+					}
+					else if (result.HasFlag(Inventory.ModificationResults.Underflow))
+					{
+						anyClamping = true;
+						res += "\n---- UNDERFLOW ----";
+					}
+					else res += "\n---- NO CLAMPING ----";
+					
+					if (anyClamping) res += clamped.Aggregate("\n", (r, c) => $"{r}\n\t{c}");
 
 					Debug.Log(res);
+				}
+
+				void addModify(
+					Inventory inventory,
+					params Stack[] stacks
+				)
+				{
+					modify(true, inventory, stacks);
+				}
+
+				void removeModify(
+					Inventory inventory,
+					params Stack[] stacks
+				)
+				{
+					modify(false, inventory, stacks);
 				}
 
 				var filterIntKey = "some_int_key0";
@@ -274,17 +314,31 @@ namespace Lunra.Hothouse.Editor
 					(filterIntKey, 1)
 				);
 
-				applyConstraint(
+				var inventory0 = new Inventory().Initialize(itemStore);
+
+				inventory0.UpdateConstraint(
 					itemStore.Builder
 						.BeginConstraint()
-						.WithLimitDefaultOfZero()
+						.WithLimitOf(15)
 						.Restrict(
 							itemStore.Builder
 								.BeginFilter()
+								.WithLimitOf(5)
 								.RequireAny(
 									PropertyValidation.Default.Int.Defined(filterIntKey)	
 								)
 						),
+					out _
+				);
+
+				addModify(
+					inventory0,
+					item0.NewStack(10),
+					item1.NewStack(10)
+				);
+				
+				removeModify(
+					inventory0,
 					item0.NewStack(10),
 					item1.NewStack(10)
 				);

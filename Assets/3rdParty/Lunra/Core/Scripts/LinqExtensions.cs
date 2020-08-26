@@ -152,6 +152,23 @@ namespace Lunra.Core
 			return source.Union(Enumerable.Repeat(element, 1));
 		}
 
+		// There's a whole discussion on how this may be non-optimal with null entries, check here: https://stackoverflow.com/a/3670089
+		public static bool ScrambleEqual<T>(this IEnumerable<T> source, IEnumerable<T> other)
+		{
+			var tracker = new Dictionary<T, int>();
+			foreach (var element in source)
+			{
+				if (tracker.ContainsKey(element)) tracker[element]++;
+				else tracker.Add(element, 1);
+			}
+			foreach (var element in other)
+			{
+				if (tracker.ContainsKey(element)) tracker[element]--;
+				else return false;
+			}
+			return tracker.Values.All(c => c == 0);
+		}
+		
 		public static IEnumerable<T> DistinctBy<T, K>(
 			this IEnumerable<T> elements,
 			Func<T, K> keySelector
@@ -161,7 +178,7 @@ namespace Lunra.Core
 				.Select(g => g.First());
 		}
 
-	public static ReadOnlyDictionary<TKey, TElement> ToReadonlyDictionary<TKey, TElement>(
+		public static ReadOnlyDictionary<TKey, TElement> ToReadonlyDictionary<TKey, TElement>(
 			this Dictionary<TKey, TElement> source
 		)
 		{
