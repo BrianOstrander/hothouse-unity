@@ -10,6 +10,8 @@ namespace Lunra.Satchel
 {
 	public class Item
 	{
+		public const ulong UndefinedId = 0uL;
+		
 		[Flags]
 		public enum Formats
 		{
@@ -132,6 +134,9 @@ namespace Lunra.Satchel
 				);
 			}
 		}
+
+		public bool IsDefined<T>(string key) => TryGet<T>(key, out _);
+		public bool IsDefined<T>(PropertyKey<T> key) => TryGet(key, out _);
 		
 		public bool TryGet<T>(string key, out T value)
 		{
@@ -296,8 +301,9 @@ namespace Lunra.Satchel
 			Set(propertyKeyValues.ToArray());
 		}
 
-		public Stack NewStack(int count = 0) => itemStore.NewStack(this, count);
-		
+		public Stack StackOfZero() => StackOf(0);
+		public Stack StackOf(int count) => new Stack(Id, count);
+
 		/// <summary>
 		/// Used, ideally only, by the ItemStore to update this value upon destruction.
 		/// </summary>
@@ -323,6 +329,13 @@ namespace Lunra.Satchel
 			if (found0 == false) return true;
 
 			return property0.IsEqualTo(property1);
+		}
+
+		public bool CanStack(Item other)
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(CanStack));
+
+			return itemStore.CanStack(this, other);
 		}
 		
 		public override string ToString() => ToString(Formats.Default);

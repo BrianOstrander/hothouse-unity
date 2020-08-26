@@ -14,15 +14,13 @@ namespace Lunra.Satchel
 		Action<Item> apply;
 		
 		public CallbackItemModifier(
-			Func<Item, bool> isValid,
-			Action<Item> apply
+			Action<Item> apply,
+			Func<Item, bool> isValid = null
 		)
 		{
-			this.isValid = isValid;
 			this.apply = apply ?? throw new ArgumentNullException(nameof(apply));
+			this.isValid = isValid;
 		}
-		
-		public CallbackItemModifier(Action<Item> apply) : this(null, apply) { }
 
 		public bool IsValid(Item item) => isValid == null || isValid(item);
 

@@ -178,6 +178,47 @@ namespace Lunra.Core
 				.Select(g => g.First());
 		}
 
+		/// <summary>
+		/// Resolves a collection of items to a dictionary with the ability to handle duplicate key values.
+		/// </summary>
+		/// <remarks>
+		/// By default, it will take the last value specified for a key.
+		/// </remarks>
+		/// <param name="source"></param>
+		/// <param name="keySelector"></param>
+		/// <param name="valueSelector"></param>
+		/// <param name="duplicateResolver"></param>
+		/// <typeparam name="TSource"></typeparam>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		public static Dictionary<TKey, TValue> ResolveToDictionary<TSource, TKey, TValue>(
+			this IEnumerable<TSource> source,
+			Func<TSource, TKey> keySelector,
+			Func<TSource, TValue> valueSelector,
+			Func<(TKey Key, TValue ExistingValue, TValue DuplicateValue), TValue> duplicateResolver = null
+		)
+		{
+			if (keySelector == null) throw new ArgumentNullException(nameof(keySelector));
+			if (valueSelector == null) throw new ArgumentNullException(nameof(valueSelector));
+			duplicateResolver = duplicateResolver ?? (request => request.DuplicateValue);
+			
+			var result = new Dictionary<TKey, TValue>();
+
+			foreach (var element in source)
+			{
+				var key = keySelector(element);
+				var value = valueSelector(element);
+
+				if (result.TryGetValue(key, out var existingValue)) value = duplicateResolver((key, existingValue, value));
+
+				result[key] = value;
+			}
+
+			return result;
+		}
+
 		public static ReadOnlyDictionary<TKey, TElement> ToReadonlyDictionary<TKey, TElement>(
 			this Dictionary<TKey, TElement> source
 		)

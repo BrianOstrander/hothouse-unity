@@ -151,6 +151,8 @@ namespace Lunra.Satchel
 			out Stack[] overflow
 		)
 		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Add));
+			
 			var result = ModificationResults.None;
 			
 			var constraintResult = Constraint.Apply(
@@ -207,6 +209,8 @@ namespace Lunra.Satchel
 			out Stack[] underflow
 		)
 		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Remove));
+			
 			var result = ModificationResults.None;
 			
 			Dictionary<ulong, (int Count, int RemovedCount, int Underflow)> consolidated = Stacks
@@ -289,12 +293,215 @@ namespace Lunra.Satchel
 
 			return result;
 		}
+		
+		public bool New(
+			int count,
+			out (Item Item, int Count) additions,
+			params (string Key, object Value)[] propertyKeyValues
+		)
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
+			
+			var result = NewNonDestructive(
+				count,
+				out var item,
+				out var additionsStack,
+				out var overflowStack,
+				propertyKeyValues
+			);
 
-		public ModificationResults UpdateConstraint(
+			if (result.HasFlag(ModificationResults.Overflow)) itemStore.Destroy(overflowStack);
+
+			additions = (item, additionsStack.Count);
+			
+			return additionsStack.IsNotEmpty;
+		}
+		
+		public ModificationResults NewNonDestructive(
+			int count,
+			out Item item,
+			out Stack additions,
+			out Stack overflow,
+			params (string Key, object Value)[] propertyKeyValues
+		)
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
+			
+			item = itemStore.Define(
+				i =>
+				{
+					i.Set(propertyKeyValues);
+					i.Set(Constants.InstanceCount, count);
+				}
+			);
+
+			return OnNew(
+				count,
+				item,
+				out additions,
+				out overflow
+			);
+		}
+		
+		public bool Clone(
+			int count,
+			Item reference,
+			out (Item Item, int Count) additions,
+			params (string Key, object Value)[] propertyKeyValues
+		)
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Clone));
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
+			if (reference == null) throw new ArgumentNullException(nameof(reference));
+
+			var result = CloneNonDestructive(
+				count,
+				reference,
+				out var item,
+				out var additionsStack,
+				out var overflowStack,
+				propertyKeyValues
+			);
+			
+			if (result.HasFlag(ModificationResults.Overflow)) itemStore.Destroy(overflowStack);
+
+			additions = (item, additionsStack.Count);
+			
+			return additionsStack.IsNotEmpty;
+		}
+
+		public ModificationResults CloneNonDestructive(
+			int count,
+			Item reference,
+			out Item item,
+			out Stack additions,
+			out Stack overflow,
+			params (string Key, object Value)[] propertyKeyValues
+		)
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
+			if (reference == null) throw new ArgumentNullException(nameof(reference));
+			
+			item = itemStore.Define(
+				reference,
+				i =>
+				{
+					i.Set(propertyKeyValues);
+					i.Set(Constants.InstanceCount, count);
+				}
+			);
+			
+			return OnNew(
+				count,
+				item,
+				out additions,
+				out overflow
+			);
+		}
+		
+		ModificationResults OnNew(
+			int count,
+			Item item,
+			out Stack additions,
+			out Stack overflow
+		)
+		{
+			additions = item.StackOf(count);
+			
+			var result = Add(
+				additions.WrapInArray(),
+				out var overflowArray
+			);
+
+			if (result.HasFlag(ModificationResults.Overflow))
+			{
+				if (overflowArray.Length != 1) throw new Exception("More than one overflow stack was returned");
+				overflow = overflowArray.First();
+				if (overflow.IsNot(item)) throw new Exception($"Expected overflow of item {item} but got an item of id {overflow.Id} instead");
+
+				additions -= overflow.Count;
+			}
+			else overflow = item.StackOfZero();
+
+			return result;
+		}
+		
+		public ModificationResults Destroy(
+			Stack[] destroyed,
+			out Stack[] underflow
+		)
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Destroy));
+
+			if (destroyed.None())
+			{
+				underflow = new Stack[0];
+				return ModificationResults.None;
+			}
+			
+			var result = Remove(
+				destroyed,
+				out underflow
+			);
+
+			if (!result.HasFlag(ModificationResults.Modified))
+			{
+				// None of the specified stacks were present...
+				return result;
+			}
+
+			if (!result.HasFlag(ModificationResults.Underflow))
+			{
+				// All of the specified stacks were present and removed...
+				itemStore.Destroy(destroyed);
+				return result;
+			}
+			
+			// Only some of the specified stacks were present and removed, some overflowed...
+			var consolidated = destroyed.ResolveToDictionary(
+				s => s.Id,
+				s => s.Count,
+				r => r.ExistingValue + r.DuplicateValue
+			);
+
+			// Underflow is removed, since it never existed and should not get destroyed...
+			foreach (var stack in underflow) consolidated[stack.Id] -= stack.Count;
+
+			itemStore.Destroy(
+				consolidated
+					.Select(c => new Stack(c.Key, c.Value))
+					.ToArray()
+			);
+
+			return result;
+		}
+
+		public bool UpdateConstraint(
+			InventoryConstraint constraint
+		)
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(UpdateConstraint));
+			
+			var result = UpdateConstraintNonDestructive(
+				constraint,
+				out var overflow
+			);
+
+			if (result.HasFlag(ModificationResults.Overflow)) itemStore.Destroy(overflow);
+
+			return result.HasFlag(ModificationResults.Modified);
+		}
+		
+		public ModificationResults UpdateConstraintNonDestructive(
 			InventoryConstraint constraint,
 			out Stack[] overflow
 		)
 		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(UpdateConstraintNonDestructive));
+			
 			Constraint = constraint;
 
 			var constraintResult = Constraint.Apply(
@@ -316,6 +523,18 @@ namespace Lunra.Satchel
 			return result;
 		}
 
+		public bool Clear()
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Clear));
+
+			if (Stacks.None()) return false;
+			
+			var destroyed = Stacks.ToArray();
+			Remove(destroyed, out _);
+
+			return (itemStore.Destroy(destroyed));
+		}
+
 		public bool TryOperation<T>(
 			string key,
 			Func<OperationRequest<T>, OperationResult<T>> operation,
@@ -323,6 +542,8 @@ namespace Lunra.Satchel
 			out int count
 		)
 		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(TryOperation));
+			
 			result = default;
 			count = 0;
 			
@@ -372,6 +593,8 @@ namespace Lunra.Satchel
 			out bool result
 		)
 		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(TryAllEqual));
+			
 			result = false;
 			var anyOperations = false;
 			
@@ -430,6 +653,8 @@ namespace Lunra.Satchel
 			out bool result
 		)
 		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(TryAnyEqual));
+			
 			result = false;
 			var anyOperations = false;
 			
@@ -489,7 +714,7 @@ namespace Lunra.Satchel
 			Updated?.Invoke(inventoryEvent);
 		}
 
-		public override string ToString() => ToString(Formats.IncludeItems);
+		public override string ToString() => ToString(Formats.IncludeItems | Formats.IncludeItemProperties);
 
 		public string ToString(Formats format)
 		{

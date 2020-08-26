@@ -56,7 +56,7 @@ namespace Lunra.Satchel
 		
 		#region Serialized
 		[JsonProperty] Dictionary<ulong, Item> items = new Dictionary<ulong, Item>();
-		[JsonProperty] ulong currentId;
+		[JsonProperty] ulong currentId = Item.UndefinedId + 1uL;
 		[JsonProperty] DateTime lastUpdated;
 		#endregion
 		
@@ -87,7 +87,8 @@ namespace Lunra.Satchel
 			
 			this.ignoredKeysCloning = new[]
 				{
-					Constants.InstanceCount.Key
+					Constants.InstanceCount.Key,
+					Constants.Destroyed.Key
 				}
 				.Concat(ignoredKeysCloning ?? new string[0])
 				.Distinct()
@@ -95,7 +96,13 @@ namespace Lunra.Satchel
 			
 			this.modifiers = new []
 				{
-					new CallbackItemModifier(i => i.Set(Constants.InstanceCount, 0))
+					new CallbackItemModifier(
+						i => i.Set(Constants.InstanceCount, 0),
+						i => !i.IsDefined(Constants.InstanceCount)
+					),
+					new CallbackItemModifier(
+						i => i.Set(Constants.Destroyed, false)
+					)
 				}
 				.Concat(modifiers ?? new IItemModifier[0])
 				.ToArray();
@@ -106,14 +113,22 @@ namespace Lunra.Satchel
 			foreach (var kv in items) kv.Value.Initialize(this, i => TryUpdate(i));
 		}
 
-		Item Define(Action<Item> initialize)
+		/// <summary>
+		/// Defines a new item with a unique id and initializes it.
+		/// </summary>
+		/// <remarks>
+		/// Ideally this should only be called by instances of the <c>Inventory</c> class when creating new stacks. 
+		/// </remarks>
+		/// <param name="initialize"></param>
+		/// <returns></returns>
+		public Item Define(Action<Item> initialize = null)
 		{
 			var itemId = currentId;
 			currentId++;
 			
 			var item = new Item(itemId);
 
-			initialize(item);
+			initialize?.Invoke(item);
 			
 			foreach (var modifier in modifiers)
 			{
@@ -130,22 +145,29 @@ namespace Lunra.Satchel
 			return item;
 		}
 
-		public Item New(params (string Key, object Value)[] propertyKeyValues) => Define(item => item.Set(propertyKeyValues));
-		
-		public Item New(
-			Item source,
-			params (string Key, object Value)[] propertyKeyValues
+		/// <summary>
+		/// Defines a new item cloned from a reference with a unique id and initializes it.
+		/// </summary>
+		/// <remarks>
+		/// Ideally this should only be called by instances of the <c>Inventory</c> class when creating new stacks. 
+		/// </remarks>
+		/// <param name="reference">The item to clone.</param>
+		/// <param name="initialize"></param>
+		/// <returns></returns>
+		public Item Define(
+			Item reference,
+			Action<Item> initialize = null
 		)
 		{
 			return Define(
 				item =>
 				{
 					item.CloneProperties(
-						source,
+						reference,
 						ignoredKeysCloning
 					);
 			
-					item.Set(propertyKeyValues);
+					initialize?.Invoke(item);
 				}
 			);
 		}
@@ -174,45 +196,167 @@ namespace Lunra.Satchel
 
 		public bool CanStack(Stack stack0, Stack stack1) => CanStack(First(stack0.Id), First(stack1.Id));
 
-		public Stack NewStack(ulong id, int count)
+		/// <summary>
+		/// Destroys specified stacks from the item store, cleaning up any with an instance count of zero, unless the
+		/// <c>IgnoreCleanup</c> flag is set to <c>true</c>.
+		/// </summary>
+		/// <param name="stacks"></param>
+		/// <returns><c>true</c> if changes occured, <c>false</c> otherwise.</returns>
+		public bool Destroy(params Stack[] stacks)
 		{
-			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Negative counts are not supported for stacks");
+			if (stacks.None()) return false;
 
-			var item = First(id);
-			var result = new Stack(id, count);
-
-			if (count == 0) return result;
-
-			item.Set(Constants.InstanceCount, count + item.Get(Constants.InstanceCount));
-
-			return result;
-		}
-
-		public Stack NewStack(Item item, int count) => NewStack(item.Id, count);
-
-		public void Destroy(ulong id, int count)
-		{
-			if (count == 0) return;
-			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Negative counts are not supported for stacks");
+			var consolidated = new Dictionary<ulong, (Item Item, int InstanceCount, int OldInstanceCount, Item.Event.Types ItemUpdates, Item.Event.Types PropertyUpdates, bool IgnoreCleanup)>();
 			
-			var item = First(id);
-			var itemInstanceCount = item.Get(Constants.InstanceCount);
-			var newInstanceCount = itemInstanceCount;
+			var totalItemUpdates = Item.Event.Types.Item;
+			var totalPropertyUpdates = Item.Event.Types.Property;
 
-			if (itemInstanceCount < count)
+			foreach (var stack in stacks)
 			{
-				Debug.LogError($"Instance count {itemInstanceCount} is less than stack count {count}, this is unexpected");
-				newInstanceCount = 0;
+				if (stack.IsEmpty) continue;
+				
+				if (!consolidated.TryGetValue(stack.Id, out var entry))
+				{
+					if (items.TryGetValue(stack.Id, out var item))
+					{
+						var instanceCount = item.Get(Constants.InstanceCount);
+
+						if (instanceCount < 0)
+						{
+							Debug.LogError($"Unexpected negative instance count of {instanceCount} for {item}");
+							instanceCount = 0;
+						}
+						
+						entry = (
+							item,
+							instanceCount,
+							instanceCount,
+							Item.Event.Types.Item,
+							Item.Event.Types.Property,
+							item.Get(Constants.IgnoreCleanup)
+						);
+					}
+					else
+					{
+						Debug.LogError($"Unrecognized item id: {stack.Id}");
+						entry = (
+							null,
+							0,
+							0,
+							Item.Event.Types.Item,
+							Item.Event.Types.Property,
+							false
+						);
+					}
+				}
+
+				entry.InstanceCount -= stack.Count;
+
+				if (entry.Item != null && entry.InstanceCount != entry.OldInstanceCount)
+				{
+					entry.PropertyUpdates |= Item.Event.Types.Updated;
+					totalPropertyUpdates |= Item.Event.Types.Updated;
+					
+					if (entry.InstanceCount <= 0 && !entry.IgnoreCleanup)
+					{
+						entry.ItemUpdates |= Item.Event.Types.Destroyed;
+						totalItemUpdates |= Item.Event.Types.Destroyed;
+					}
+				}
+				
+				consolidated[stack.Id] = entry;
 			}
-			else newInstanceCount -= count;
 
-			if (itemInstanceCount == newInstanceCount) return;
+			var totalUpdates = new List<Item.Event.Types>();
+			
+			if (totalItemUpdates != Item.Event.Types.Item) totalUpdates.Add(totalItemUpdates);
+			if (totalPropertyUpdates != Item.Event.Types.Property) totalUpdates.Add(totalPropertyUpdates);
 
-			item.Set(Constants.InstanceCount, newInstanceCount);
+			// No stacks were destroyed or instance counts modified...
+			if (totalUpdates.None()) return false;
+
+			var updateTime = DateTime.Now;
+			var itemEventsList = new List<Item.Event>();
+
+			foreach (var entry in consolidated)
+			{
+				if (entry.Value.Item == null) continue;
+
+				var instanceCount = Mathf.Max(0, entry.Value.InstanceCount);
+
+				if (instanceCount == entry.Value.OldInstanceCount)
+				{
+					Debug.LogError($"Cannot destroy any instances of {entry.Value.Item}, there are none left to destroy.");
+					continue;
+				}
+
+				var propertyEvents = new Dictionary<string, (Property Property, Item.Event.Types Update)>();
+				Item.Event.Types[] updates;
+				
+				const Item.Event.Types ExpectedPropertyUpdate = Item.Event.Types.Property | Item.Event.Types.Updated;
+				
+				entry.Value.Item.Set(
+					Constants.InstanceCount.Key,
+					Mathf.Max(0, entry.Value.InstanceCount),
+					out var instanceCountPropertyUpdate,
+					true
+				);
+				
+				if (instanceCountPropertyUpdate.Update != ExpectedPropertyUpdate)
+				{
+					Debug.LogError($"Expected {ExpectedPropertyUpdate:F} for {Constants.InstanceCount} but got {instanceCountPropertyUpdate.Update:F} instead");
+				}
+
+				if (instanceCount == 0)
+				{
+					updates = new [] {Item.Event.Types.Item | Item.Event.Types.Destroyed, Item.Event.Types.Property | Item.Event.Types.Updated}; 
+					
+					entry.Value.Item.Set(
+						Constants.Destroyed.Key,
+						true,
+						out var destroyedPropertyUpdate,
+						true
+					);
+					
+					if (destroyedPropertyUpdate.Update != ExpectedPropertyUpdate)
+					{
+						Debug.LogError($"Expected {ExpectedPropertyUpdate:F} for {Constants.Destroyed} but got {destroyedPropertyUpdate.Update:F} instead");
+					}
+					
+					items.Remove(entry.Value.Item.Id);
+					
+					propertyEvents.Add(
+						Constants.Destroyed.Key,
+						destroyedPropertyUpdate
+					);
+				}
+				else
+				{
+					updates = new [] {Item.Event.Types.Property | Item.Event.Types.Updated};
+				}
+				
+				propertyEvents.Add(
+					Constants.InstanceCount.Key,
+					instanceCountPropertyUpdate
+				);
+
+				entry.Value.Item.ForceUpdateTime(updateTime);
+				
+				itemEventsList.Add(
+					new Item.Event(
+						entry.Value.Item.Id,
+						updateTime,
+						updates,
+						propertyEvents.ToReadonlyDictionary()
+					)
+				);
+			}
+
+			return TryUpdate(
+				itemEventsList.ToArray()
+			);
 		}
-
-		public void Destroy(Stack stack) => Destroy(stack.Id, stack.Count);
-
+		
 		public bool TryGet(ulong id, out Item item) => items.TryGetValue(id, out item);
 
 		public bool TryGet(Func<Item, bool> predicate, out Item item)
@@ -252,43 +396,12 @@ namespace Lunra.Satchel
 		public Item[] Where(Func<Item, bool> predicate) => items.Select(kv => kv.Value).Where(predicate).ToArray();
 		public Item[] ToArray() => items.Select(kv => kv.Value).ToArray();
 
-		public bool Cleanup(out Item[] removed)
-		{
-			removed = items
-				.Where(kv => !kv.Value.TryGet(Constants.IgnoreCleanup, out var isIgnored) || !isIgnored)
-				.Select(kv => kv.Value)
-				.ToArray();
-		
-			if (removed.None()) return false;
-
-			var updateTime = DateTime.Now;
-			var updates = new[] {Item.Event.Types.Item | Item.Event.Types.Destroyed}; 
-			var emptyPropertyUpdates = new Dictionary<string, (Property Property, Item.Event.Types Update)>().ToReadonlyDictionary();
-			
-			var itemEventsList = new List<Item.Event>();
-
-			foreach (var item in removed)
-			{
-				items.Remove(item.Id);
-				item.ForceUpdateTime(updateTime);
-				itemEventsList.Add(
-					new Item.Event(
-						item.Id,
-						updateTime,
-						updates,
-						emptyPropertyUpdates
-					)	
-				);
-			}
-
-			return TryUpdate(
-				itemEventsList.ToArray()
-			);
-		}
-
-		public bool Cleanup() => Cleanup(out _);
-		
 		#region Events
+		/// <summary>
+		/// Triggers an update if changes occured.
+		/// </summary>
+		/// <param name="itemEvents"></param>
+		/// <returns><c>true</c> if changes occured, <c>false</c> otherwise.</returns>
 		bool TryUpdate(
 			params Item.Event[] itemEvents
 		)
@@ -342,7 +455,7 @@ namespace Lunra.Satchel
 		}
 		#endregion
 
-		public override string ToString() => ToString(false, false);
+		public override string ToString() => ToString(true, true);
 		
 		public string ToString(
 			bool verbose,

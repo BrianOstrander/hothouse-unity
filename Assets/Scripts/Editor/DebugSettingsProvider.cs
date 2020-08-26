@@ -225,19 +225,38 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
+			if (GUILayout.Button("Test ToDictionary with duplicate keys"))
+			{
+				var forDict = new (int key, string value)[]
+				{
+					(0, "0a"),
+					(0, "0b"),
+					(1, "1_"),
+					(2, "2_"),
+				};
+
+				var dict = forDict.ResolveToDictionary(
+					e => e.key,
+						e => e.value,
+					r => r.ExistingValue
+				);
+
+				Debug.Log(dict.Aggregate(string.Empty, (r, e) => $"{r}\n{e.Key} : {e.Value}"));
+			}
+
 			if (GUILayout.Button("Test Satchel 0f"))
 			{
 				var itemStore = new ItemStore();
 				itemStore.Initialize();
 
-				// itemStore.Updated += updateEvent =>
-				// {
-				// 	var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
-				// 	res += "\n-------- All Items --------\n";
-				// 	res += itemStore.ToString(true, true);
-				//
-				// 	Debug.Log(res);
-				// };
+				itemStore.Updated += updateEvent =>
+				{
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+				
+					Debug.Log(res);
+				};
 				
 				void modify(
 					bool isAdd,
@@ -304,44 +323,65 @@ namespace Lunra.Hothouse.Editor
 					modify(false, inventory, stacks);
 				}
 
-				var filterIntKey = "some_int_key0";
 
-				var item0 = itemStore.New(
-					(filterIntKey, 0)
-				);
-				
-				var item1 = itemStore.New(
-					(filterIntKey, 1)
-				);
+				// var item0 = itemStore.New(
+				// 	(filterIntKey, 0)
+				// );
+				//
+				// var item1 = itemStore.New(
+				// 	(filterIntKey, 1)
+				// );
 
 				var inventory0 = new Inventory().Initialize(itemStore);
 
+				var filterIntKey = "some_int_key0";
+				
+				inventory0.New(
+					10,
+					out var stack0,
+					(filterIntKey, 0)
+				);
+				
+				inventory0.New(
+					10,
+					out var stack1,
+					(filterIntKey, 1)
+				);
+				
+				
+				
+				// inventory0.new(
+				// 	10,
+				// );
+				
 				inventory0.UpdateConstraint(
 					itemStore.Builder
 						.BeginConstraint()
-						.WithLimitOf(15)
-						.Restrict(
-							itemStore.Builder
-								.BeginFilter()
-								.WithLimitOf(5)
-								.RequireAny(
-									PropertyValidation.Default.Int.Defined(filterIntKey)	
-								)
-						),
-					out _
+						.WithLimitOf(5)
+						// .Restrict(
+						// 	itemStore.Builder
+						// 		.BeginFilter()
+						// 		.WithLimitOf(5)
+						// 		.RequireAny(
+						// 			PropertyValidation.Default.Int.Defined(filterIntKey)	
+						// 		)
+						// ),
 				);
 
-				addModify(
-					inventory0,
-					item0.NewStack(10),
-					item1.NewStack(10)
-				);
-				
-				removeModify(
-					inventory0,
-					item0.NewStack(10),
-					item1.NewStack(10)
-				);
+				// addModify(
+				// 	inventory0,
+				// 	item0.NewStack(10),
+				// 	item1.NewStack(10)
+				// );
+				//
+				// removeModify(
+				// 	inventory0,
+				// 	item0.NewStack(10),
+				// 	item1.NewStack(10)
+				// );
+				Debug.Log(inventory0);
+				Debug.Log(itemStore);
+				Debug.Log(itemStore.Serialize(formatting: Formatting.Indented));
 			}
 		}
 		
