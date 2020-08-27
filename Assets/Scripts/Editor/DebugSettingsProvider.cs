@@ -225,23 +225,41 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
-			if (GUILayout.Button("Test ToDictionary with duplicate keys"))
+			if (GUILayout.Button("item proc"))
 			{
-				var forDict = new (int key, string value)[]
+				var itemStore = new ItemStore().Initialize();
+				
+				itemStore.Updated += updateEvent =>
 				{
-					(0, "0a"),
-					(0, "0b"),
-					(1, "1_"),
-					(2, "2_"),
+					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+				
+					Debug.Log(res);
 				};
+				
+				var inventory0 = itemStore.Builder.Inventory();
 
-				var dict = forDict.ResolveToDictionary(
-					e => e.key,
-						e => e.value,
-					r => r.ExistingValue
+				var filterIntKey = "some_int_key0";
+				
+				inventory0.New(
+					10,
+					out _,
+					(filterIntKey, 0)
+				);
+				
+				inventory0.New(
+					10,
+					out _,
+					(filterIntKey, 1)
 				);
 
-				Debug.Log(dict.Aggregate(string.Empty, (r, e) => $"{r}\n{e.Key} : {e.Value}"));
+				var processor = new ProcessorStore().Initialize(itemStore);
+				
+				Debug.Log("------- Process start -------");
+				
+				processor.Process();
+				processor.Process();
 			}
 
 			if (GUILayout.Button("Test Satchel 0f"))

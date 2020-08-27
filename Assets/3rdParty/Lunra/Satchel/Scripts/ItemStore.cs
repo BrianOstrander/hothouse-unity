@@ -71,7 +71,7 @@ namespace Lunra.Satchel
 		
 		public event Action<Event> Updated;
 
-		public void Initialize(
+		public ItemStore Initialize(
 			string[] ignoredKeysForStacking = null,
 			string[] ignoredKeysCloning = null,
 			IItemModifier[] modifiers = null
@@ -111,6 +111,8 @@ namespace Lunra.Satchel
 			Builder = new BuilderUtility(this);
 			
 			foreach (var kv in items) kv.Value.Initialize(this, i => TryUpdate(i));
+
+			return this;
 		}
 
 		/// <summary>
@@ -392,9 +394,21 @@ namespace Lunra.Satchel
 
 		public Item FirstOrDefault(ulong id) => FirstOrFallback(id);
 		public Item FirstOrDefault(Func<Item, bool> predicate) => FirstOrFallback(predicate);
-
 		public Item[] Where(Func<Item, bool> predicate) => items.Select(kv => kv.Value).Where(predicate).ToArray();
 		public Item[] ToArray() => items.Select(kv => kv.Value).ToArray();
+
+		/// <summary>
+		/// For iterating over all items when you don't need to access the actual list.
+		/// </summary>
+		/// <param name="iterator"></param>
+		public void Iterate(Action<Item> iterator)
+		{
+			foreach (var kv in items)
+			{
+				try { iterator(kv.Value); }
+				catch (Exception e) { Debug.LogException(e); }
+			}
+		}
 
 		#region Events
 		/// <summary>

@@ -9,6 +9,7 @@ namespace Lunra.Satchel
 		[JsonProperty] public PropertyValidation[] All { get; private set; }
 		[JsonProperty] public PropertyValidation[] None { get; private set; }
 		[JsonProperty] public PropertyValidation[] Any { get; private set; }
+		[JsonProperty] public bool AlwaysValid { get; private set; }
 
 		bool isInitialized;
 		
@@ -21,6 +22,8 @@ namespace Lunra.Satchel
 			All = all ?? throw new ArgumentNullException(nameof(all));
 			None = none ?? throw new ArgumentNullException(nameof(none));
 			Any = any ?? throw new ArgumentNullException(nameof(any));
+
+			AlwaysValid = All.None() && None.None() && Any.None();
 		}
 
 		public PropertyFilter Initialize(ItemStore itemStore)
@@ -40,6 +43,8 @@ namespace Lunra.Satchel
 
 		public bool Validate(Item item)
 		{
+			if (AlwaysValid) return true;
+			
 			foreach (var validation in All)
 			{
 				if (validation.Validate(item) == PropertyValidation.Results.InValid) return false;

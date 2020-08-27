@@ -7,13 +7,20 @@ namespace Lunra.Satchel
 	{
 		ItemStore itemStore;
 		int limit = int.MaxValue;
-		List<PropertyValidation> all = new List<PropertyValidation>();
-		List<PropertyValidation> none = new List<PropertyValidation>();
-		List<PropertyValidation> any = new List<PropertyValidation>();
+		PropertyFilterBuilder propertyFilterBuilder;
 
+		/// <summary>
+		/// An item filter builder.
+		/// </summary>
+		/// <remarks>
+		/// Use the builder in an initialized <c>ItemStore<c> as a shortcut.
+		/// </remarks>
+		/// <param name="itemStore"></param>
 		public InventoryFilterBuilder(ItemStore itemStore)
 		{
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
+			
+			propertyFilterBuilder = new PropertyFilterBuilder(itemStore);
 		}
 		
 		public InventoryFilterBuilder WithLimitOfZero() => WithLimitOf(0);
@@ -29,19 +36,19 @@ namespace Lunra.Satchel
 		
 		public InventoryFilterBuilder RequireAll(params PropertyValidation[] validations)
 		{
-			all.AddRange(validations);
+			propertyFilterBuilder.RequireAll(validations);
 			return this;
 		}
 		
 		public InventoryFilterBuilder RequireNone(params PropertyValidation[] validations)
 		{
-			none.AddRange(validations);
+			propertyFilterBuilder.RequireNone(validations);
 			return this;
 		}
 		
 		public InventoryFilterBuilder RequireAny(params PropertyValidation[] validations)
 		{
-			any.AddRange(validations);
+			propertyFilterBuilder.RequireAny(validations);
 			return this;
 		}
 
@@ -50,7 +57,7 @@ namespace Lunra.Satchel
 			if (itemStore == null) throw new ArgumentNullException(nameof(itemStore));
 
 			return new InventoryFilter(
-				new PropertyFilter(all.ToArray(), none.ToArray(), any.ToArray()).Initialize(itemStore),
+				propertyFilterBuilder.Done(),
 				limit
 			);
 		}
