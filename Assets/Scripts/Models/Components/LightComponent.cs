@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -27,8 +28,8 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ListenerProperty<bool> IsLightCalculationsEnabled { get; }
 		[JsonProperty] LightStates lightState;
 		[JsonIgnore] public ListenerProperty<LightStates> LightState { get; }
-		[JsonProperty] Inventory lightFuel;
-		[JsonIgnore] public ListenerProperty<Inventory> LightFuel { get; }
+		[JsonProperty] Stack[] lightFuel;
+		[JsonIgnore] public ListenerProperty<Stack[]> LightFuel { get; }
 		[JsonProperty] Interval lightFuelInterval;
 		[JsonIgnore] public ListenerProperty<Interval> LightFuelInterval { get; }
 		[JsonProperty] bool isLightRefueling;
@@ -47,7 +48,7 @@ namespace Lunra.Hothouse.Models
 		{
 			IsLightCalculationsEnabled = new ListenerProperty<bool>(value => isLightEnabled = value, () => isLightEnabled);
 			LightState = new ListenerProperty<LightStates>(value => lightState = value, () => lightState);
-			LightFuel = new ListenerProperty<Inventory>(value => lightFuel = value, () => lightFuel);
+			LightFuel = new ListenerProperty<Stack[]>(value => lightFuel = value, () => lightFuel);
 			LightFuelInterval = new ListenerProperty<Interval>(value => lightFuelInterval = value, () => lightFuelInterval);
 			IsLightRefueling = new ListenerProperty<bool>(value => isLightRefueling = value, () => isLightRefueling);
 			
@@ -98,7 +99,7 @@ namespace Lunra.Hothouse.Models
 		public bool IsLightNotActive() => !IsLightActive();
 
 		public void Reset(
-			Inventory lightFuel,
+			Stack[] lightFuel,
 			Interval lightFuelInterval,
 			LightStates lightState
 		)

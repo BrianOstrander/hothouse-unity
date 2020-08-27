@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System.Linq;
+using Lunra.Satchel;
 
 namespace Lunra.Hothouse.Models
 {
@@ -7,14 +8,14 @@ namespace Lunra.Hothouse.Models
 	{
 		public string Id => Name;
 		[JsonProperty] public string Name { get; private set; }
-		[JsonProperty] public Inventory InputItems { get; private set; }
-		[JsonProperty] public Inventory OutputItems { get; private set; }
+		[JsonProperty] public Stack[] InputItems { get; private set; }
+		[JsonProperty] public Stack[] OutputItems { get; private set; }
 		[JsonProperty] public DayTime Duration { get; private set; }
 
 		public Recipe(
 			string name,
-			Inventory inputItems,
-			Inventory outputItems,
+			Stack[] inputItems,
+			Stack[] outputItems,
 			DayTime duration
 		)
 		{
@@ -30,17 +31,11 @@ namespace Lunra.Hothouse.Models
 
 			result += "\n\tInput:";
 
-			foreach (var entry in InputItems.Entries.Where(e => 0 < e.Weight))
-			{
-				result += "\n\t\t" + entry.Type + "\t" + entry.Weight;
-			}
+			result += "TODO";
 
 			result += "\n\tOutput:";
-			
-			foreach (var entry in OutputItems.Entries.Where(e => 0 < e.Weight))
-			{
-				result += "\n\t\t" + entry.Type + "\t" + entry.Weight;
-			}
+
+			result += "TODO";
 
 			result += "\n\tDuration: ";
 

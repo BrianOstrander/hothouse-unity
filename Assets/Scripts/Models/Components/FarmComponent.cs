@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IFarmModel : IInventoryModel, IClaimOwnershipModel, IBoundaryModel
+	public interface IFarmModel : IInventoryModel, IClaimOwnershipModel, IBoundaryModel, IEnterableModel
 	{
 		FarmComponent Farm { get; }
 	}

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Satchel;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -16,9 +17,10 @@ namespace Lunra.Hothouse.Models
 			
 			result.LastUpdated = TimeSpan.Zero;
 			result.Population = 0;
-			result.GlobalItemDropsAvailable = Inventory.Empty;
+			result.GlobalItemDropsAvailable = new Stack[0];
 			result.GlobalInventory = new InventoryComponent();
-			result.GlobalInventory.Reset(InventoryPermission.AllForAnyJob(), InventoryCapacity.None());
+			// result.GlobalInventory.Reset(InventoryPermission.AllForAnyJob(), InventoryCapacity.None());
+			Debug.LogError("TODO: Permission rebinding");
 			result.AnyItemDropsAvailableForPickup = false;
 			result.UniqueObligationsAvailable = new string[0];
 			result.AnyObligationsAvailable = false;
@@ -36,7 +38,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public int Population { get; private set; }
 		
 		[JsonProperty] public InventoryComponent GlobalInventory { get; private set; }
-		[JsonProperty] public Inventory GlobalItemDropsAvailable { get; private set; }
+		[JsonProperty] public Stack[] GlobalItemDropsAvailable { get; private set; }
 		[JsonProperty] public bool AnyItemDropsAvailableForPickup { get; private set; }
 		[JsonProperty] public string[] UniqueObligationsAvailable { get; private set; }
 		[JsonProperty] public bool AnyObligationsAvailable { get; private set; }
@@ -53,7 +55,10 @@ namespace Lunra.Hothouse.Models
 		public GameCache Calculate(GameModel game)
 		{
 			var result = Default();
-
+			
+			Debug.LogError("TODO: Calc all this");
+			return result;
+			/*
 			result.LastUpdated = game.PlaytimeElapsed.Value;
 
 			var globalInventoryAll = Inventory.Empty;
@@ -199,6 +204,7 @@ namespace Lunra.Hothouse.Models
 				);
 			
 			return result;
+			*/
 		}
 	}
 }

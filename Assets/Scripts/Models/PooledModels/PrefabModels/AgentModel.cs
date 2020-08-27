@@ -6,8 +6,7 @@ namespace Lunra.Hothouse.Models
 {
 	public abstract class AgentModel : PrefabModel,
 		IHealthModel,
-		IAgentInventoryModel,
-		IInventoryPromiseModel,
+		IInventoryModel,
 		IObligationPromiseModel,
 		ITagModel
 	{
@@ -25,8 +24,7 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public ListenerProperty<float> InteractionRadius { get; }
 
 		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
-		[JsonProperty] public AgentInventoryComponent Inventory { get; private set; } = new AgentInventoryComponent();
-		[JsonProperty] public InventoryPromiseComponent InventoryPromises { get; private set; } = new InventoryPromiseComponent();
+		[JsonProperty] public InventoryComponent Inventory { get; private set; } = new InventoryComponent();
 		[JsonProperty] public ObligationPromiseComponent ObligationPromises { get; private set; } = new ObligationPromiseComponent();
 
 		[JsonProperty] public bool IsDebugging { get; set; }
@@ -53,7 +51,6 @@ namespace Lunra.Hothouse.Models
 			AppendComponents(
 				Health,
 				Inventory,
-				InventoryPromises,
 				ObligationPromises
 			);
 		}

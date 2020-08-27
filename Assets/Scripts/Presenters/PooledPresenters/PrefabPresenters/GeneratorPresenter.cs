@@ -1,5 +1,6 @@
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.Satchel;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -12,7 +13,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
-			Model.Inventory.All.Changed += OnGeneratorInventoryAll;
+			// Model.Inventory.All.Changed += OnGeneratorInventoryAll;
+			Debug.LogError("TODO: Bind Inventory");
 			Model.Generator.Rate.Changed += OnGeneratorGeneratorRate;
 			Model.LightSensitive.LightLevel.Changed += OnGeneratorLightSensitiveLightLevel;
 			
@@ -23,7 +25,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			Model.Inventory.All.Changed -= OnGeneratorInventoryAll;
+			// Model.Inventory.All.Changed -= OnGeneratorInventoryAll;
+			Debug.LogError("TODO: UnBind Inventory");
 			Model.Generator.Rate.Changed -= OnGeneratorGeneratorRate;
 			Model.LightSensitive.LightLevel.Changed -= OnGeneratorLightSensitiveLightLevel;
 		
@@ -47,7 +50,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		#region GeneratorModel Events
-		void OnGeneratorInventoryAll(Inventory all) => Model.Generator.CalculateRate();
+		void OnGeneratorInventoryAll(Inventory.Event delta) => Model.Generator.CalculateRate();
 
 		void OnGeneratorGeneratorRate(float rate)
 		{

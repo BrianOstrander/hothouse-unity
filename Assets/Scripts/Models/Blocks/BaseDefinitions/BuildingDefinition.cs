@@ -14,16 +14,16 @@ namespace Lunra.Hothouse.Models
 
 		public virtual float HealthMaximum => 100f;
 		public virtual FloatRange PlacementLightRequirement => new FloatRange(0.001f, 1f);
-		public virtual Inventory LightFuel => Inventory.Empty;
+		// public virtual Inventory LightFuel => Inventory.Empty;
 		public virtual Interval LightFuelInterval => Interval.Zero();
 		public virtual LightStates LightState => LightStates.Unknown;
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
-		public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
-		public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
-		public virtual Inventory DefaultInventory => Inventory.Empty;
-		public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.Stalk, 2);
-		public virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
+		// public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
+		// public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
+		// public virtual Inventory DefaultInventory => Inventory.Empty;
+		// public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.Stalk, 2);
+		// public virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
 		public virtual Recipe[] Recipes => new Recipe[0];
 		public virtual bool IsFarm => false;
 		public virtual Vector2 FarmSize => Vector2.zero;
@@ -44,11 +44,13 @@ namespace Lunra.Hothouse.Models
 			model.BuildingState.Value = state;
 			
 			model.Health.ResetToMaximum(HealthMaximum);
-			model.Light.Reset(
-				LightFuel,
-				LightFuelInterval,
-				LightState
-			);
+			// model.Light.Reset(
+			// 	LightFuel,
+			// 	LightFuelInterval,
+			// 	LightState
+			// );
+			Debug.LogError("TODO: Light reset");
+			
 			model.LightSensitive.Reset();
 			
 			model.Ownership.Reset(
@@ -56,6 +58,7 @@ namespace Lunra.Hothouse.Models
 				WorkplaceForJobs
 			);
 			
+			/*
 			model.Inventory.Reset(
 				DefaultInventoryPermission,
 				DefaultInventoryCapacity,
@@ -97,6 +100,8 @@ namespace Lunra.Hothouse.Models
 			);
 
 			model.SalvageInventory.Add(SalvageInventory);
+			*/
+			Debug.LogError("TODO: Inventory, all of it lol");
 			
 			model.Obligations.Reset();
 			
@@ -143,6 +148,7 @@ namespace Lunra.Hothouse.Models
 
 		protected string GetActionName(string suffix) => Type + "." + suffix;
 
+		/*
 		protected GoalActivity GetDefaultEatActivity(
 			Inventory.Types type,
 			float comfort = 0.1f,
@@ -171,6 +177,7 @@ namespace Lunra.Hothouse.Models
 		{
 			{ Inventory.Types.Berries, -0.25f }
 		};
+		*/
 		#endregion
 	}
 }

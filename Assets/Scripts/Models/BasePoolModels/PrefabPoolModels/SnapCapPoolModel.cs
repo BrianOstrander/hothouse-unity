@@ -51,13 +51,14 @@ namespace Lunra.Hothouse.Models
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(80f);
-			model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
+			Debug.LogError("TODO: Inventory reset");
+			// model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
 			model.InteractionRadius.Value = 0.75f;
 			
-			model.Clearable.Reset(
-				Inventory.FromEntry(Inventory.Types.Berries, 6),
-				maximumClearers: 3
-			);
+			// model.Clearable.Reset(
+			// 	Inventory.FromEntry(Inventory.Types.Berries, 6),
+			// 	maximumClearers: 3
+			// );
 			model.LightSensitive.Reset();
 			
 			model.Attacks.Reset(

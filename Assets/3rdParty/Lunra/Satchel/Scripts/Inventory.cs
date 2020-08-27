@@ -46,16 +46,19 @@ namespace Lunra.Satchel
 
 			[JsonProperty] public DateTime UpdateTime { get; private set; }
 			[JsonProperty] public Types Updates { get; private set; }
+			[JsonProperty] public bool IsEmpty { get; private set; }
 			[JsonProperty] public ReadOnlyDictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Types Type)> StackEvents { get; private set; }
 			
 			public Event(
 				DateTime updateTime,
 				Types updates,
+				bool isEmpty,
 				ReadOnlyDictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Types Type)> stackEvents
 			)
 			{
 				UpdateTime = updateTime;
 				Updates = updates;
+				IsEmpty = isEmpty;
 				StackEvents = stackEvents;
 			}
 
@@ -194,6 +197,7 @@ namespace Lunra.Satchel
 					new Event(
 						DateTime.Now,
 						Event.Types.Addition,
+						Stacks.None(),
 						stackEvents.ToReadonlyDictionary()
 					)	
 				);
@@ -278,6 +282,7 @@ namespace Lunra.Satchel
 					new Event(
 						DateTime.Now,
 						Event.Types.Subtraction,
+						Stacks.None(),
 						stackEvents.ToReadonlyDictionary()
 					)
 				);

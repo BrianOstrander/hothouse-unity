@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Lunra.Satchel;
 
 namespace Lunra.Hothouse.Models
 {
@@ -10,16 +11,16 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public string Type { get; private set; }
 		[JsonProperty] public (Motives Motive, float InsistenceModifier)[] Modifiers { get; private set; }
 		[JsonProperty] public DayTime Duration { get; private set; }
-		[JsonProperty] public Inventory? Input { get; private set; }
-		[JsonProperty] public Inventory? Output { get; private set; }
+		[JsonProperty] public Stack[] Input { get; private set; }
+		[JsonProperty] public Stack[] Output { get; private set; }
 		[JsonProperty] public bool RequiresOwnership { get; private set; }
 
 		public GoalActivity(
 			string type,
 			(Motives Motive, float InsistenceModifier)[] modifiers,
 			DayTime? duration = null,
-			Inventory? input = null,
-			Inventory? output = null,
+			Stack[] input = null,
+			Stack[] output = null,
 			bool requiresOwnership = false
 		)
 		{

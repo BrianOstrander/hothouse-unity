@@ -41,7 +41,8 @@ namespace Lunra.Hothouse.Presenters
 				// ILightModel Bindings
 				Game.SimulationUpdate += OnLightSimulationUpdate;
 				Model.Light.LightState.Changed += OnLightState;
-				Model.Inventory.All.Changed += OnLightBuildingInventory;
+				// Model.Inventory.All.Changed += OnLightBuildingInventory;
+				Debug.LogError("TODO: Light Handling Bind - prolly wanna move this logic to the component instead");
 				Model.BuildingState.Changed += OnLightBuildingState;
 			}
 
@@ -51,9 +52,10 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed += OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
-			Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
-			Model.SalvageInventory.All.Changed += OnBuildingSalvageInventory;
-			Model.Inventory.Available.Changed += OnBuildingAvailableInventory;
+			// Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
+			// Model.SalvageInventory.All.Changed += OnBuildingSalvageInventory;
+			// Model.Inventory.Available.Changed += OnBuildingAvailableInventory;
+			Debug.LogError("TODO: Bind Construct/Salvage/Inventory - should probably be handled by a component or something instead...");
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
@@ -77,7 +79,8 @@ namespace Lunra.Hothouse.Presenters
 			// ILightModel UnBindings
 			Game.SimulationUpdate -= OnLightSimulationUpdate;
 			Model.Light.LightState.Changed -= OnLightState;
-			Model.Inventory.All.Changed -= OnLightBuildingInventory;
+			// Model.Inventory.All.Changed -= OnLightBuildingInventory;
+			Debug.LogError("TODO: Light Handling UnBind - see bind for details");
 			Model.BuildingState.Changed -= OnLightBuildingState;
 			
 			// Misc UnBindings
@@ -86,9 +89,10 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed -= OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
-			Model.SalvageInventory.All.Changed -= OnBuildingSalvageInventory;
-			Model.Inventory.Available.Changed -= OnBuildingAvailableInventory;
+			// Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
+			// Model.SalvageInventory.All.Changed -= OnBuildingSalvageInventory;
+			// Model.Inventory.Available.Changed -= OnBuildingAvailableInventory;
+			Debug.LogError("TODO: UnBind Construct/Salvage/Inventory - should probably be handled by a component or something instead...");
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
@@ -106,7 +110,8 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnSimulationInitialized()
 		{
-			OnBuildingAvailableInventory(Model.Inventory.All.Value);
+			Debug.LogError("TODO: Available inventory or something");
+			// OnBuildingAvailableInventory(Model.Inventory.All.Value);
 		}
 		
 		#region LightSourceModel Events
@@ -123,7 +128,8 @@ namespace Lunra.Hothouse.Presenters
 
 				if (canRefuel)
 				{
-					Model.Inventory.Remove(Model.Light.LightFuel.Value);
+					// Model.Inventory.Remove(Model.Light.LightFuel.Value);
+					Debug.LogError("TODO: Removing of fuel");
 					Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Restarted();
 					if (View.Visible) View.LightFuelNormal = 1f;
 					return;
@@ -165,16 +171,16 @@ namespace Lunra.Hothouse.Presenters
 			}
 		}
 
-		protected virtual void OnLightBuildingInventory(Inventory inventory)
-		{
-			if (Model.Light.LightState.Value != LightStates.Extinguishing) return;
-			if (!Model.Inventory.Available.Value.Contains(Model.Light.LightFuel.Value)) return;
-			
-			Model.Inventory.Remove(Model.Light.LightFuel.Value);
-			Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Restarted();
-			if (View.Visible) View.LightFuelNormal = 1f;
-			Model.Light.LightState.Value = LightStates.Fueled;
-		}
+		// protected virtual void OnLightBuildingInventory(Inventory inventory)
+		// {
+		// 	if (Model.Light.LightState.Value != LightStates.Extinguishing) return;
+		// 	if (!Model.Inventory.Available.Value.Contains(Model.Light.LightFuel.Value)) return;
+		// 	
+		// 	Model.Inventory.Remove(Model.Light.LightFuel.Value);
+		// 	Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Restarted();
+		// 	if (View.Visible) View.LightFuelNormal = 1f;
+		// 	Model.Light.LightState.Value = LightStates.Fueled;
+		// }
 		
 		void OnLightBuildingState(BuildingStates buildingState)
 		{
@@ -265,33 +271,33 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region BuildingModel Events
-		void OnBuildingConstructionInventory(Inventory constructionInventory)
-		{
-			if (constructionInventory.IsEmpty || Model.ConstructionInventory.AllCapacity.Value.IsNotFull(constructionInventory)) return;
-
-			switch (Model.BuildingState.Value)
-			{
-				case BuildingStates.Constructing:
-					Model.Obligations.Add(ObligationCategories.Construct.Assemble);
-					// Model.BuildingState.Value = BuildingStates.Operating;
-					break;
-				default:
-					Debug.LogError("Tried to fill construction recipe while building is in invalid state: "+Model.BuildingState.Value);
-					break;
-			}
-		}
-
-		void OnBuildingSalvageInventory(Inventory salvageInventory)
-		{
-			if (Model.BuildingState.Value != BuildingStates.Salvaging || !salvageInventory.IsEmpty) return;
-
-			Model.PooledState.Value = PooledStates.InActive;
-		}
-
-		void OnBuildingAvailableInventory(Inventory availableInventory)
-		{
-			Model.Activities.CalculateRestrictions();
-		}
+		// void OnBuildingConstructionInventory(Inventory constructionInventory)
+		// {
+		// 	if (constructionInventory.IsEmpty || Model.ConstructionInventory.AllCapacity.Value.IsNotFull(constructionInventory)) return;
+		//
+		// 	switch (Model.BuildingState.Value)
+		// 	{
+		// 		case BuildingStates.Constructing:
+		// 			Model.Obligations.Add(ObligationCategories.Construct.Assemble);
+		// 			// Model.BuildingState.Value = BuildingStates.Operating;
+		// 			break;
+		// 		default:
+		// 			Debug.LogError("Tried to fill construction recipe while building is in invalid state: "+Model.BuildingState.Value);
+		// 			break;
+		// 	}
+		// }
+		//
+		// void OnBuildingSalvageInventory(Inventory salvageInventory)
+		// {
+		// 	if (Model.BuildingState.Value != BuildingStates.Salvaging || !salvageInventory.IsEmpty) return;
+		//
+		// 	Model.PooledState.Value = PooledStates.InActive;
+		// }
+		//
+		// void OnBuildingAvailableInventory(Inventory availableInventory)
+		// {
+		// 	Model.Activities.CalculateRestrictions();
+		// }
 
 		void OnBuildingState(BuildingStates buildingState)
 		{
@@ -321,7 +327,7 @@ namespace Lunra.Hothouse.Presenters
 
 					if (buildingState == BuildingStates.Constructing)
 					{
-						if (Model.ConstructionInventory.IsFull())
+						if (Model.Inventory.IsFull())
 						{
 							Model.Obligations.Add(ObligationCategories.Construct.Assemble);
 						}

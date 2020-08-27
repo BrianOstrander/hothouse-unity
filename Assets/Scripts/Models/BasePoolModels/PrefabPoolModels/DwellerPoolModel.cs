@@ -138,7 +138,7 @@ namespace Lunra.Hothouse.Models
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(100f);
-			model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
+			// model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
 			model.InteractionRadius.Value = 0.5f;
 			
 			// Dweller Properties
@@ -155,8 +155,9 @@ namespace Lunra.Hothouse.Models
 			model.LowRationThreshold.Value = 1;
 			model.ObligationDistance.Value = 0.75f;
 			model.ObligationMinimumConcentrationDuration.Value = 0.5f;
-			
-			model.InventoryPromises.Reset();
+
+			Debug.LogError("TODO: Inventory reset");
+			// model.InventoryPromises.Reset();
 
 			model.Goals.Reset(this);
 			

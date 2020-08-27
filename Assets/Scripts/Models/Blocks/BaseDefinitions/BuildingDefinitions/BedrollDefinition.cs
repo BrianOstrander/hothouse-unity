@@ -2,10 +2,6 @@ namespace Lunra.Hothouse.Models
 {
 	public class BedrollDefinition : BuildingDefinition
 	{
-		public override Inventory ConstructionInventory => Inventory.FromEntries(
-			(Inventory.Types.Grass, 2)
-		);
-
 		public override GoalActivity[] Activities => new[]
 		{
 			new GoalActivity(

@@ -122,9 +122,9 @@ namespace Lunra.Hothouse.Presenters
 			}
 			
 			var inventoryResult = string.Empty;
-			foreach (var inventoryType in selection.ConstructionInventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
+			foreach (var inventoryType in selection.Inventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
 			{
-				inventoryResult += $"\n\t {inventoryType}: \t{selection.ConstructionInventory.All.Value[inventoryType]} \t/ {selection.ConstructionInventory.AllCapacity.Value.GetMaximumFor(inventoryType)}";
+				inventoryResult += $"\n\t {inventoryType}: \t{selection.Inventory.All.Value[inventoryType]} \t/ {selection.Inventory.AllCapacity.Value.GetMaximumFor(inventoryType)}";
 			}
 
 			if (!string.IsNullOrEmpty(inventoryResult))

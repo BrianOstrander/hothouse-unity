@@ -2,6 +2,7 @@
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.Satchel;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Presenters
@@ -14,7 +15,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 			
-			Model.Inventory.All.Changed += OnItemDropInventory;
+			// Model.Inventory.All.Changed += OnItemDropInventory;
+			Debug.LogError("TODO: Bind Inventory");
 			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
 			
 			base.Bind();
@@ -24,7 +26,8 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			Model.Inventory.All.Changed -= OnItemDropInventory;
+			// Model.Inventory.All.Changed -= OnItemDropInventory;
+			Debug.LogError("TODO: UnBind Inventory");
 			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
 			
 			base.UnBind();
@@ -35,15 +38,15 @@ namespace Lunra.Hothouse.Presenters
 			base.OnViewPrepare();
 
 			var item = Model.Inventory.All.Value.Entries.OrderByDescending(i => i.Weight).FirstOrDefault();
-			View.SetEntry(item.Weight, item.Type);
+			View.SetEntry(item.Weight);
 			
 			Model.RecalculateEntrances(Model.Transform.Position.Value);
 		}
 		
 		#region ItemDropModel Events
-		void OnItemDropInventory(Inventory inventory)
+		void OnItemDropInventory(Inventory.Event delta)
 		{
-			if (inventory.IsEmpty) Game.ItemDrops.InActivate(Model);
+			if (delta.IsEmpty) Game.ItemDrops.InActivate(Model);
 		}
 		#endregion
 

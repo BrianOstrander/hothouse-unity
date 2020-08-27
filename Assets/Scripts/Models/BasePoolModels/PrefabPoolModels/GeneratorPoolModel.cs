@@ -1,6 +1,7 @@
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
+using Lunra.Satchel;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -23,7 +24,7 @@ namespace Lunra.Hothouse.Models
 			Quaternion rotation,
 			FloatRange refillDurationRange,
 			FloatRange expireDurationRange,
-			params (Inventory.Types Type, int Minimum, int Maximum)[] items
+			params (Item Item, int Minimum, int Maximum)[] items
 		)
 		{
 			var result = Activate(
@@ -48,23 +49,15 @@ namespace Lunra.Hothouse.Models
 			DecorationModel parent,
 			FloatRange refillDurationRange,
 			FloatRange expireDurationRange,
-			params (Inventory.Types Type, int Minimum, int Maximum)[] items
+			params (Item Item, int Minimum, int Maximum)[] items
 		)
 		{
 			model.Parent.Value = InstanceId.New(parent);
 		
 			model.LightSensitive.Reset();
 			model.Enterable.Reset();
-			model.Inventory.Reset(
-				InventoryPermission.WithdrawalForJobs(Jobs.Stockpiler),
-				InventoryCapacity.ByIndividualWeight(
-					Inventory.FromEntries(
-						items.Select(i => (i.Type, i.Maximum)).ToArray()	
-					)	
-				)
-			);
-
-			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
+			
+			Debug.LogError("TODO: Handle inventory resetting");
 			
 			model.Generator.Reset(
 				refillDurationRange,

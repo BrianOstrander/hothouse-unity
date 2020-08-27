@@ -161,9 +161,11 @@ namespace Lunra.Hothouse.Models
 				
 				// Inventory
 				case Types.NoStalks: 
-					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Stalk] <= 0;
+					throw new NotImplementedException("uhg");
+					// return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Stalk] <= 0;
 				case Types.NoScrap: 
-					return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Scrap] <= 0;
+					throw new NotImplementedException("uhg2");
+					// return game.Cache.Value.GlobalInventory.All.Value[Inventory.Types.Scrap] <= 0;
 
 				// Environment
 				case Types.ZeroDoorsOpen:

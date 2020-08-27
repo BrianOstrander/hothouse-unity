@@ -356,14 +356,15 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 							case DecorationView.Constants.Tags.Sources.Water:
 								if (getDecorationEntrance(decoration, out var position))
 								{
-									payload.Game.Generators.Activate(
-										decoration,
-										position,
-										decoration.Transform.Rotation.Value,
-										new FloatRange(8f, 24f),
-										new FloatRange(8f, 12f),
-										(Inventory.Types.Water, 1, 2)
-									);
+									// payload.Game.Generators.Activate(
+									// 	decoration,
+									// 	position,
+									// 	decoration.Transform.Rotation.Value,
+									// 	new FloatRange(8f, 24f),
+									// 	new FloatRange(8f, 12f),
+									// 	(Inventory.Types.Water, 1, 2)
+									// );
+									Debug.LogError("TODO: Handle Generator Generation");
 								}
 								else
 								{

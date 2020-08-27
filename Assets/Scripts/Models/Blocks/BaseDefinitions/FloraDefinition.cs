@@ -3,6 +3,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
 using Lunra.NumberDemon;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -21,7 +22,7 @@ namespace Lunra.Hothouse.Models
 		public virtual float HealthMaximum => 15f;
 		public virtual float SpreadDamage => 0f;
 		public virtual bool AttacksBuildings => false;
-		public virtual (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new (Inventory.Types Type, int Minimum, int Maximum)[0];
+		// public virtual (Inventory.Types Type, int Minimum, int Maximum)[] ItemDrops => new (Inventory.Types Type, int Minimum, int Maximum)[0];
 		public virtual IntegerRange ClusterPerRoom => new IntegerRange(0, 4);
 		public virtual IntegerRange CountPerCluster => new IntegerRange(6, 12);
 		public virtual float SpawnDistanceNormalizedMinimum => 0f;
@@ -77,14 +78,16 @@ namespace Lunra.Hothouse.Models
 			model.Health.ResetToMaximum(HealthMaximum);
 			model.Enterable.Reset();
 			model.Obligations.Reset();
-			model.Clearable.Reset(
-				new Inventory(
-					ItemDrops.ToDictionary(
-						e => e.Type,
-						e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
-					)
-				)	
-			);
+			
+			Debug.LogError("TODO: Clearable drops");
+			// model.Clearable.Reset(
+			// 	new Inventory(
+			// 		ItemDrops.ToDictionary(
+			// 			e => e.Type,
+			// 			e => DemonUtility.GetNextInteger(e.Minimum, e.Maximum + 1)
+			// 		)
+			// 	)	
+			// );
 			model.Tags.Reset();
 			
 			model.AgeModifier.Reset(AgeModifiers);

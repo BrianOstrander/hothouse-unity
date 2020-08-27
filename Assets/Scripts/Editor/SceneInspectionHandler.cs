@@ -157,10 +157,12 @@ namespace Lunra.Hothouse.Editor
 							switch (model.BuildingState.Value)
 							{
 								case BuildingStates.Constructing:
-									append("Construction " + model.ConstructionInventory);
+									// append("Construction " + model.ConstructionInventory);
+									append("Construction: TODO");
 									break;
 								case BuildingStates.Salvaging:
-									append("Salvage " + model.SalvageInventory);
+									// append("Salvage " + model.SalvageInventory);
+									append("Salvage: TODO");
 									break;
 							}
 						}
@@ -298,41 +300,6 @@ namespace Lunra.Hothouse.Editor
 			);
 		}
 
-		static string GetInventory(
-			string label,
-			Inventory inventory,
-			InventoryCapacity? capacity = null,
-			InventoryVisibilities inventoryVisibilities = InventoryVisibilities.IfNotEmpty
-		)
-		{
-			var result = string.Empty;
-
-			foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
-			{
-				var value = inventory[type];
-				var valueMaximum = capacity?.GetMaximumFor(type);
-				
-				switch (inventoryVisibilities)
-				{
-					case InventoryVisibilities.Always:
-						break;
-					case InventoryVisibilities.IfNotEmpty:
-						if (value == 0) continue;
-						break;
-					case InventoryVisibilities.IfMaximumGreaterThanZero:
-						if ((!valueMaximum.HasValue || valueMaximum.Value == 0) && value == 0) continue;
-						break;
-					case InventoryVisibilities.IfNotFull:
-						if (valueMaximum.HasValue && valueMaximum.Value == value) continue;
-						break;
-				}
-				
-				result += "\n  " + type + " : " + value + (valueMaximum.HasValue ? (" / " + valueMaximum.Value) : string.Empty);
-			}
-
-			return string.IsNullOrEmpty(result) ? result : ("\n" + label + ":" + result);
-		}
-
 		static void DrawLabel(
 			IModel model,
 			Action<Action<string>> append = null,
@@ -414,10 +381,10 @@ namespace Lunra.Hothouse.Editor
 				appendResult("Inventory " + inventoryModel.Inventory);
 			}
 
-			if (model is IInventoryPromiseModel inventoryPromiseModel)
-			{
-				appendResult(inventoryPromiseModel.InventoryPromises.ToString());
-			}
+			// if (model is IInventoryPromiseModel inventoryPromiseModel)
+			// {
+			// 	appendResult(inventoryPromiseModel.InventoryPromises.ToString());
+			// }
 
 			if (model is IRecipeModel recipeModel && (recipeModel.Recipes.Available.Value.Any() || recipeModel.Recipes.Queue.Value.Any()))
 			{

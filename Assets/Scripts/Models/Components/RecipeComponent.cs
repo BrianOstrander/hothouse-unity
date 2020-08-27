@@ -152,8 +152,9 @@ namespace Lunra.Hothouse.Models
 					case Iterations.Infinite:
 						return false;
 					case Iterations.Desired:
-						return game.Cache.Value.GlobalInventory.Available.Value
-							.Contains(Recipe.OutputItems * DesiredMultiplier);
+						throw new NotImplementedException("Dunno, multiplying stacks needs to happen here I guess");
+						// return game.Cache.Value.GlobalInventory.Available.Value
+						// 	.Contains(Recipe.OutputItems * DesiredMultiplier);
 					default:
 						Debug.LogError("Unrecognized Reload Option: " + Iteration);
 						return true;
@@ -253,7 +254,8 @@ namespace Lunra.Hothouse.Models
 						if (Queue.Value[i].IsDone(Game)) continue;
 						
 						result = Queue.Value[i];
-						Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(result.Recipe.InputItems);
+						// Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(result.Recipe.InputItems);
+						Debug.LogError("TODO: Desire inventory setting...");
 						result.Process(States.Gathering);
 						currentIndexListener.Value = i;
 						noneFound = false;
@@ -264,7 +266,8 @@ namespace Lunra.Hothouse.Models
 					{
 						result = RecipeIteration.Default();
 						currentIndexListener.Value = null;
-						Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
+						// Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
+						Debug.LogError("TODO: Desire inventory setting...");
 					}
 					break;
 				case States.Gathering:
@@ -276,8 +279,9 @@ namespace Lunra.Hothouse.Models
 
 						if (isOutputCapacityAvailable)
 						{
-							Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
-							Model.Inventory.Remove(result.Recipe.InputItems);
+							// Model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
+							// Model.Inventory.Remove(result.Recipe.InputItems);
+							Debug.LogError("TODO: Desire inventory setting...");
 							Model.Obligations.Add(ObligationCategories.Craft.Recipe);
 							result.Process(States.Ready);
 						}
@@ -287,7 +291,8 @@ namespace Lunra.Hothouse.Models
 					result.Process(States.Crafting);
 					break;
 				case States.Crafting:
-					Model.Inventory.Add(result.Recipe.OutputItems);
+					// Model.Inventory.Add(result.Recipe.OutputItems);
+					Debug.LogError("TODO: Desire inventory setting...");
 					result.Process(States.Idle);
 					break;
 				default:

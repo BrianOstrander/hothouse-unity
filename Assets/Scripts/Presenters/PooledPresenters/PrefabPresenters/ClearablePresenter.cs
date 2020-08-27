@@ -1,5 +1,6 @@
 ﻿using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
 
@@ -27,7 +28,7 @@ namespace Lunra.Hothouse.Presenters
 			base.UnBind();
 		}
 
-		protected virtual Inventory CalculateItemDrops() => Model.Clearable.ItemDrops.Value;
+		protected virtual Stack[] CalculateItemDrops() => Model.Clearable.ItemDrops.Value;
 
 		protected override void OnViewPrepare()
 		{

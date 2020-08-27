@@ -1,3 +1,6 @@
+using System.Linq;
+using Lunra.Core;
+using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -14,9 +17,9 @@ namespace Lunra.Hothouse.Models
 		#region Serialized
 		[JsonProperty] ClearableStates state;
 		[JsonIgnore] public ListenerProperty<ClearableStates> State { get; }
-		
-		[JsonProperty] Inventory itemDrops = Inventory.Empty;
-		[JsonIgnore] public ListenerProperty<Inventory> ItemDrops { get; }
+
+		[JsonProperty] Stack[] itemDrops = new Stack[0];
+		[JsonIgnore] public ListenerProperty<Stack[]> ItemDrops { get; }
 		
 		[JsonProperty] float meleeRangeBonus;
 		[JsonIgnore] public ListenerProperty<float> MeleeRangeBonus { get; }
@@ -33,14 +36,14 @@ namespace Lunra.Hothouse.Models
 		public ClearableComponent()
 		{
 			State = new ListenerProperty<ClearableStates>(value => state = value, () => state);
-			ItemDrops = new ListenerProperty<Inventory>(value => itemDrops = value, () => itemDrops);
+			ItemDrops = new ListenerProperty<Stack[]>(value => itemDrops = value, () => itemDrops);
 			MeleeRangeBonus = new ListenerProperty<float>(value => meleeRangeBonus = value, () => meleeRangeBonus);
 			MarkedObligation = new ListenerProperty<Obligation>(value => markedObligation = value, () => markedObligation);
 			MaximumClearers = new ListenerProperty<int>(value => maximumClearers = value, () => maximumClearers);
 		}
 
 		public void Reset(
-			Inventory itemDrops,
+			Stack[] itemDrops,
 			Obligation markedObligation = null,
 			int maximumClearers = 1
 		)
@@ -157,7 +160,7 @@ namespace Lunra.Hothouse.Models
 		{
 			if (!result.IsTargetDestroyed) return;
 			
-			if (!Model.Clearable.ItemDrops.Value.IsEmpty)
+			if (Model.Clearable.ItemDrops.Value.Any())
 			{
 				Game.ItemDrops.Activate(
 					Model.RoomTransform.Id.Value,

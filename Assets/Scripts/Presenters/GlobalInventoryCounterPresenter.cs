@@ -52,22 +52,23 @@ namespace Lunra.Hothouse.Presenters
 			
 			result += "\nPopulation: " + cache.Population + "\n";
 
-			foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
-			{
-				var color = "white";
-
-				var count = cache.GlobalInventory.Available.Value[type];
-				var maximum = cache.GlobalInventory.AllCapacity.Value.GetMaximumFor(type);
-				
-				switch (type)
-				{
-					default:
-						if (count == 0) color = "yellow";
-						break;
-				}
-				
-				result += (type + ": " + count + " / " + maximum + "\n").Wrap("<color="+color+">", "</color>");
-			}
+			Debug.LogError("TODO: Handle collecting of inventory available to player");
+			// foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
+			// {
+			// 	var color = "white";
+			//
+			// 	var count = cache.GlobalInventory.Available.Value[type];
+			// 	var maximum = cache.GlobalInventory.AllCapacity.Value.GetMaximumFor(type);
+			// 	
+			// 	switch (type)
+			// 	{
+			// 		default:
+			// 			if (count == 0) color = "yellow";
+			// 			break;
+			// 	}
+			// 	
+			// 	result += (type + ": " + count + " / " + maximum + "\n").Wrap("<color="+color+">", "</color>");
+			// }
 			
 			void appendDiscontent(string title, float discontentNormal)
 			{

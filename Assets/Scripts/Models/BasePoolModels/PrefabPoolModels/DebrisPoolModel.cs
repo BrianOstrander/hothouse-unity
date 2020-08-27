@@ -51,14 +51,15 @@ namespace Lunra.Hothouse.Models
 			model.Health.ResetToMaximum(10f);
 			model.Obligations.Reset();
 			model.Enterable.Reset();
-			model.Clearable.Reset(
-				new Inventory(
-					new Dictionary<Inventory.Types, int>
-					{
-						{ Inventory.Types.Scrap, 1 }
-					}
-				)	
-			);
+			// model.Clearable.Reset(
+			// 	new Inventory(
+			// 		new Dictionary<Inventory.Types, int>
+			// 		{
+			// 			{ Inventory.Types.Scrap, 1 }
+			// 		}
+			// 	)	
+			// );
+			Debug.LogError("TODO: Clearable reset");
 		}
 	}
 }

@@ -11,7 +11,6 @@ namespace Lunra.Hothouse.Models
 	public class BuildingModel : PrefabModel,
 		ILightModel,
 		IHealthModel,
-		IConstructionModel,
 		IRecipeModel,
 		IFarmModel,
 		IGoalActivityModel
@@ -32,8 +31,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public HealthComponent Health { get; private set; } = new HealthComponent();
 		[JsonProperty] public ClaimComponent Ownership { get; private set; } = new ClaimComponent();
 		[JsonProperty] public InventoryComponent Inventory { get; private set; } = new InventoryComponent();
-		[JsonProperty] public InventoryComponent ConstructionInventory { get; private set; } = new InventoryComponent();
-		[JsonProperty] public InventoryComponent SalvageInventory { get; private set; } = new InventoryComponent();
 		[JsonProperty] public ObligationComponent Obligations { get; private set; } = new ObligationComponent();
 		[JsonProperty] public RecipeComponent Recipes { get; private set; } = new RecipeComponent();
 		[JsonProperty] public FarmComponent Farm { get; private set; } = new FarmComponent();
@@ -67,13 +64,9 @@ namespace Lunra.Hothouse.Models
 						buildStateInventories = emptyInventories;
 						break;
 					case BuildingStates.Constructing:
-						buildStateInventories = new IBaseInventoryComponent[] { ConstructionInventory };
-						break;
 					case BuildingStates.Operating:
-						buildStateInventories = new IBaseInventoryComponent[] { Inventory };
-						break;
 					case BuildingStates.Salvaging:
-						buildStateInventories = new IBaseInventoryComponent[] { SalvageInventory };
+						buildStateInventories = new IBaseInventoryComponent[] { Inventory };
 						break;
 					default:
 						Debug.LogError("Unrecognized BuildState: "+buildState);
@@ -89,8 +82,6 @@ namespace Lunra.Hothouse.Models
 				Health,
 				Ownership,
 				Inventory,
-				ConstructionInventory,
-				SalvageInventory,
 				Obligations,
 				Recipes,
 				Farm,

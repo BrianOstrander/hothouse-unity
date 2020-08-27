@@ -54,13 +54,15 @@ namespace Lunra.Hothouse.Models
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(30f);
-			model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
+			// model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
 			model.InteractionRadius.Value = 0.75f;
 			
-			model.Clearable.Reset(
-				Inventory.FromEntry(Inventory.Types.Berries, 6),
-				maximumClearers: 3
-			);
+			// model.Clearable.Reset(
+			// 	Inventory.FromEntry(Inventory.Types.Berries, 6),
+			// 	maximumClearers: 3
+			// );
+			Debug.LogError("TODO: Clearable reset");
+			
 			model.LightSensitive.Reset();
 		}
 	}

@@ -4,10 +4,11 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IGoalActivityModel : IInventoryModel
+	public interface IGoalActivityModel : IInventoryModel, IEnterableModel
 	{
 		GoalActivityComponent Activities { get; }
 	}
@@ -76,7 +77,8 @@ namespace Lunra.Hothouse.Models
 				.Select(a => new State(a, Restrictions.NotCalculated))
 				.ToArray();
 
-			calculateAvailableCapacity = All.Value.Any(a => a.Activity.Output.HasValue);
+			Debug.LogError("TODO: Calculate capacity");
+			// calculateAvailableCapacity = All.Value.Any(a => a.Activity.Output.HasValue);
 			
 			reservationsListener.Value = new GoalActivityReservation[0];
 		}
@@ -144,15 +146,16 @@ namespace Lunra.Hothouse.Models
 				.OrderBy(r => r.AppointmentBegin.TotalTime) // Not sure if ordering works on these... need to check...
 				.ToArray();
 
-			if (activity.Input.HasValue)
-			{
-				Model.Inventory.AddForbidden(activity.Input.Value);	
-			}
-			
-			if (activity.Output.HasValue)
-			{
-				Model.Inventory.AddReserved(activity.Output.Value);
-			}
+			Debug.LogError("TODO: IO stuff");
+			// if (activity.Input.HasValue)
+			// {
+			// 	Model.Inventory.AddForbidden(activity.Input.Value);	
+			// }
+			//
+			// if (activity.Output.HasValue)
+			// {
+			// 	Model.Inventory.AddReserved(activity.Output.Value);
+			// }
 			
 			return reservation;
 		}
@@ -183,9 +186,6 @@ namespace Lunra.Hothouse.Models
 		*/
 
 		public GoalActivity UnReserveActivity(IGoalModel client)
-
-
-
 		{
 			var reservation = client.GoalPromises.All.Pop();
 			var activity = All.Value.First(a => a.Activity.Id == reservation.ActivityId).Activity;
@@ -194,25 +194,26 @@ namespace Lunra.Hothouse.Models
 				.Where(r => r.ReservationId != reservation.ReservationId)
 				.ToArray();
 
-			if (activity.Input.HasValue)
-			{
-				Model.Inventory.RemoveForbidden(activity.Input.Value);
-				Model.Inventory.Remove(activity.Input.Value);
-			}
-
-			if (activity.Output.HasValue)
-			{
-				Model.Inventory.RemoveReserved(activity.Output.Value);
-				Model.Inventory.Add(activity.Output.Value);
-			}
+			Debug.LogError("TODO: IO Stuff");
+			// if (activity.Input.HasValue)
+			// {
+			// 	Model.Inventory.RemoveForbidden(activity.Input.Value);
+			// 	Model.Inventory.Remove(activity.Input.Value);
+			// }
+			//
+			// if (activity.Output.HasValue)
+			// {
+			// 	Model.Inventory.RemoveReserved(activity.Output.Value);
+			// 	Model.Inventory.Add(activity.Output.Value);
+			// }
 			
 			return activity;
 		}
 
 		public void CalculateRestrictions()
-
-
 		{
+			Debug.LogError("TODO: Calculate if activities have available input and stuff...");
+			/*
 			if (All.Value.None()) return;
 			
 			var updatedStates = new List<State>();
@@ -253,6 +254,7 @@ namespace Lunra.Hothouse.Models
 				.Where(a => updatedStates.None(u => u.Activity.Id == a.Activity.Id))
 				.Concat(updatedStates)
 				.ToArray();
+				*/
 		}
 
 		public override string ToString()

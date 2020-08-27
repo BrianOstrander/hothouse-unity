@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
 
@@ -37,8 +38,8 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] public DayTime Duration { get; private set; }
 		[JsonProperty] public DayTime Cooldown { get; private set; }
 		[JsonProperty] public Damage.Types DamageType { get; private set; }
-		[JsonProperty] public Inventory InputItems { get; private set; }
-		[JsonProperty] public ReadOnlyDictionary<OutputLocations, Inventory> OutputItems { get; private set; }
+		[JsonProperty] public Stack[] InputItems { get; private set; }
+		[JsonProperty] public ReadOnlyDictionary<OutputLocations, Stack[]> OutputItems { get; private set; }
 		[JsonProperty] public ReadOnlyDictionary<string, bool> RequiredTags { get; private set; }
 		
 		[JsonProperty] public States State { get; private set; }
@@ -55,8 +56,8 @@ namespace Lunra.Hothouse.Models
 			DayTime duration,
 			DayTime? cooldown = null,
 			Damage.Types damageType = Models.Damage.Types.Generic,
-			Inventory? inputItems = null,
-			ReadOnlyDictionary<OutputLocations, Inventory> outputItems = null,
+			Stack[] inputItems = null,
+			ReadOnlyDictionary<OutputLocations, Stack[]> outputItems = null,
 			ReadOnlyDictionary<string, bool> requiredTags = null
 		)
 		{
@@ -67,13 +68,13 @@ namespace Lunra.Hothouse.Models
 			Duration = duration;
 			Cooldown = cooldown ?? DayTime.Zero;
 			DamageType = damageType;
-			InputItems = inputItems ?? Inventory.Empty;
-			OutputItems = outputItems ?? new ReadOnlyDictionary<OutputLocations, Inventory>(new Dictionary<OutputLocations, Inventory>());
+			InputItems = inputItems ?? new Stack[0];
+			OutputItems = outputItems ?? new ReadOnlyDictionary<OutputLocations, Stack[]>(new Dictionary<OutputLocations, Stack[]>());
 			RequiredTags = requiredTags ?? new ReadOnlyDictionary<string, bool>(new Dictionary<string, bool>());
 			
 			State = States.WaitingForInitialize;
 			IsCooldownRequired = DayTime.Zero < Duration || DayTime.Zero < Cooldown;
-			IsParentInventoryRequired = !InputItems.IsEmpty || OutputItems.Any(kv => kv.Key == OutputLocations.ParentInventory);
+			IsParentInventoryRequired = InputItems.Any() || OutputItems.Any(kv => kv.Key == OutputLocations.ParentInventory);
 			IsTagsRequired = RequiredTags.Any();
 		}
 
@@ -86,7 +87,7 @@ namespace Lunra.Hothouse.Models
 
 			if (IsParentInventoryRequired)
 			{
-				if (!InputItems.IsEmpty && !model.Inventory.All.Value.Contains(InputItems)) State |= States.WaitingForInput;
+				if (InputItems.Any() && !model.Inventory.All.Value.Contains(InputItems)) State |= States.WaitingForInput;
 
 				if (OutputItems.TryGetValue(OutputLocations.ParentInventory, out var output))
 				{
@@ -150,14 +151,16 @@ namespace Lunra.Hothouse.Models
 		{
 			CooldownExpired = Duration + Cooldown + game.SimulationTime.Value;
 
-			if (!InputItems.IsEmpty) source.Inventory.Remove(InputItems);
+			// if (InputItems.Any()) source.Inventory.Remove(InputItems);
+			Debug.LogError("TODO: remove input items");
 
 			foreach (var output in OutputItems)
 			{
 				switch (output.Key)
 				{
 					case OutputLocations.ParentInventory:
-						source.Inventory.Add(output.Value);
+						// source.Inventory.Add(output.Value);
+						Debug.LogError("TODO: add output items");
 						break;
 					case OutputLocations.ParentDrop:
 						game.ItemDrops.Activate(

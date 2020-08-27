@@ -1,5 +1,6 @@
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
+using Lunra.Satchel;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -19,7 +20,7 @@ namespace Lunra.Hothouse.Models
 		public ItemDropModel Activate(
 			IRoomTransformModel origin,
 			Quaternion rotation,
-			Inventory inventory
+			Stack[] inventory
 		)
 		{
 			return Activate(
@@ -34,7 +35,7 @@ namespace Lunra.Hothouse.Models
 			string roomId,
 			Vector3 position,
 			Quaternion rotation,
-			Inventory inventory
+			Stack[] inventory
 		)
 		{
 			var result = Activate(
@@ -50,16 +51,17 @@ namespace Lunra.Hothouse.Models
 		
 		void Reset(
 			ItemDropModel model,
-			Inventory inventory
+			Stack[] inventory
 		)
 		{
 			model.Enterable.Reset();
-			model.Inventory.Reset(
-				InventoryPermission.WithdrawalForJobs(EnumExtensions.GetValues(Jobs.Unknown)),
-				InventoryCapacity.ByIndividualWeight(inventory)
-			);
-			model.Inventory.Add(inventory);
-			model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
+			// model.Inventory.Reset(
+			// 	InventoryPermission.WithdrawalForJobs(EnumExtensions.GetValues(Jobs.Unknown)),
+			// 	InventoryCapacity.ByIndividualWeight(inventory)
+			// );
+			// model.Inventory.Add(inventory);
+			// model.Inventory.Desired.Value = InventoryDesire.UnCalculated(Inventory.Empty);
+			Debug.LogError("TODO: Handle Inventory");
 		}
 	}
 }

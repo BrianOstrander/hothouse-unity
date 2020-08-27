@@ -1,6 +1,7 @@
 using System;
 using Lunra.Core;
 using Lunra.NumberDemon;
+using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 
@@ -12,8 +13,8 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] string type;
 		[JsonIgnore] public ListenerProperty<string> Type { get; }
 		
-		[JsonProperty] Inventory.Types seed;
-		[JsonIgnore] public ListenerProperty<Inventory.Types> Seed { get; }
+		[JsonProperty] Stack seed;
+		[JsonIgnore] public ListenerProperty<Stack> Seed { get; }
 		
 		[JsonProperty] InstanceId farm;
 		[JsonIgnore] public ListenerProperty<InstanceId> Farm { get; }
@@ -59,7 +60,7 @@ namespace Lunra.Hothouse.Models
 		public FloraModel()
 		{
 			Type = new ListenerProperty<string>(value => type = value, () => type);
-			Seed = new ListenerProperty<Inventory.Types>(value => seed = value, () => seed);
+			Seed = new ListenerProperty<Stack>(value => seed = value, () => seed);
 			Farm = new ListenerProperty<InstanceId>(value => farm = value, () => farm);
 			Age = new ListenerProperty<Interval>(value => age = value, () => age);
 			ReproductionElapsed = new ListenerProperty<Interval>(value => reproductionElapsed = value, () => reproductionElapsed);

@@ -114,7 +114,9 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
-			Model.InventoryPromises.BreakAllPromises();
+			// Model.InventoryPromises.BreakAllPromises();
+			
+			Debug.LogError("TODO: Inventory promise breaking here");
 			
 			Model.ObligationPromises.BreakAllPromises();
 		}

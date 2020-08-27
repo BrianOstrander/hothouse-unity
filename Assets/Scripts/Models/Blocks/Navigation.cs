@@ -21,7 +21,8 @@ namespace Lunra.Hothouse.Models
 				case IEnterableModel modelEnterable:
 					query = QueryEntrances(modelEnterable);
 					break;
-				case IAgentInventoryModel modelAgent:
+				case IInventoryModel modelAgent:
+					Debug.LogError("TODO: This used to be agaent inventory or something");
 					query = QueryOrigin(modelAgent);
 					break;
 				default:

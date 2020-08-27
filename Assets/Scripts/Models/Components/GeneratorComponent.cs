@@ -2,13 +2,14 @@ using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.NumberDemon;
+using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IGeneratorModel : IInventoryModel
+	public interface IGeneratorModel : IInventoryModel, IEnterableModel
 	{
 		GeneratorComponent Generator { get; }
 	}
@@ -26,7 +27,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] States state;
 		[JsonProperty] FloatRange refillDurationRange;
 		[JsonProperty] FloatRange expireDurationRange;
-		[JsonProperty] (Inventory.Types Type, int Minimum, int Maximum)[] items;
+		[JsonProperty] (Item Item, int Minimum, int Maximum)[] items;
 		[JsonProperty] DayTime nextState;
 		[JsonProperty] float rateMaximum;
 
@@ -60,7 +61,7 @@ namespace Lunra.Hothouse.Models
 		public void Reset(
 			FloatRange refillDurationRange,
 			FloatRange expireDurationRange,
-			params (Inventory.Types Type, int Minimum, int Maximum)[] items
+			params (Item Item, int Minimum, int Maximum)[] items
 		)
 		{
 			state = States.Unknown;
@@ -89,17 +90,18 @@ namespace Lunra.Hothouse.Models
 					hoursUntilNextState = expireDurationRange.Evaluate(DemonUtility.NextFloat);
 					state = States.WaitingToExpire;
 
-					var availableMaximum = Model.Inventory.AvailableCapacity.Value.GetCapacityFor(Model.Inventory.Available.Value);
-					var generated = Inventory.FromEntries(
-						items
-							.Select(i => (i.Type, DemonUtility.GetNextInteger(i.Minimum, i.Maximum + 1)))
-							.ToArray()
-					);
-
-					if (availableMaximum.Intersects(generated, out generated))
-					{
-						Model.Inventory.Add(generated);
-					}
+					Debug.LogError("TODO: Handle item generation");
+					// var availableMaximum = Model.Inventory.AvailableCapacity.Value.GetCapacityFor(Model.Inventory.Available.Value);
+					// var generated = Inventory.FromEntries(
+					// 	items
+					// 		.Select(i => (i.Type, DemonUtility.GetNextInteger(i.Minimum, i.Maximum + 1)))
+					// 		.ToArray()
+					// );
+					//
+					// if (availableMaximum.Intersects(generated, out generated))
+					// {
+					// 	Model.Inventory.Add(generated);
+					// }
 					
 					break;
 				default:

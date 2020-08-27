@@ -13,7 +13,6 @@ namespace Lunra.Hothouse.Views
 		struct ItemEntry
 		{
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
-			public Inventory.Types Type;
 			public Mesh Mesh;
 			public Material Material;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
@@ -30,9 +29,9 @@ namespace Lunra.Hothouse.Views
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
 		#endregion
 
-		public void SetEntry(int count, Inventory.Types type)
+		public void SetEntry(int count)
 		{
-			var entry = itemEntries.FirstOrFallback(e => e.Type == type, itemEntryDefault);
+			var entry = itemEntries.FirstOrFallback(itemEntryDefault);
 
 			meshFilter.mesh = entry.Mesh;
 			meshRenderer.material = entry.Material;
@@ -42,7 +41,7 @@ namespace Lunra.Hothouse.Views
 		{
 			base.Cleanup();
 			
-			SetEntry(0, Inventory.Types.Unknown);
+			SetEntry(0);
 		}
 	}
 

@@ -1,11 +1,12 @@
 using Newtonsoft.Json;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Satchel;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IAttackModel : IAgentInventoryModel, IHealthModel, ITagModel
+	public interface IAttackModel : IInventoryModel, IHealthModel, ITagModel
 	{
 		AttackComponent Attacks { get; }
 	}
@@ -27,7 +28,8 @@ namespace Lunra.Hothouse.Models
 		public override void Bind()
 		{
 			Game.SimulationUpdate += OnGameSimulationUpdate;
-			Model.Inventory.All.Changed += OnParentInventory;
+			// Model.Inventory.All.Changed += OnParentInventory;
+			Debug.LogError("TODO: Bind inventory");
 			Model.Tags.All.Changed += OnParentTags;
 			
 		}
@@ -35,7 +37,8 @@ namespace Lunra.Hothouse.Models
 		public override void UnBind()
 		{
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
-			Model.Inventory.All.Changed -= OnParentInventory;
+			// Model.Inventory.All.Changed -= OnParentInventory;
+			Debug.LogError("TODO: UnBind inventory");
 			Model.Tags.All.Changed -= OnParentTags;
 		}
 
@@ -85,7 +88,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Parent Events
-		void OnParentInventory(Inventory inventory)
+		void OnParentInventory(Inventory.Event delta)
 		{
 			if (!anyParentInventoryRequired) return;
 
