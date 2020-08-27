@@ -200,7 +200,7 @@ namespace Lunra.Satchel
 
 		public Item Set<T>(PropertyKey<T> key, T value) => Set(key.Key, value);
 
-		public Item Set(params (string Key, object Value)[] propertyKeyValues)
+		public Item Set(params PropertyKeyValue[] propertyKeyValues)
 		{
 			if (propertyKeyValues.None()) return this;
 			
@@ -208,9 +208,8 @@ namespace Lunra.Satchel
 
 			foreach (var kv in propertyKeyValues)
 			{
-				Set(
-					kv.Key,
-					kv.Value,
+				kv.Apply(
+					this,
 					out var result,
 					true
 				);
@@ -288,12 +287,12 @@ namespace Lunra.Satchel
 			params string[] ignoredKeys
 		)
 		{
-			var propertyKeyValues = new List<(string Key, object Value)>();
+			var propertyKeyValues = new List<PropertyKeyValue>();
 			
 			foreach (var property in source.properties)
 			{
 				if (ignoredKeys.Contains(property.Key)) continue;
-				if (property.Value.TryGetRawValue(out var value)) propertyKeyValues.Add((property.Key, value));
+				propertyKeyValues.Add(new PropertyKeyValue(property.Key, property.Value));
 			}
 
 			if (propertyKeyValues.None()) return;

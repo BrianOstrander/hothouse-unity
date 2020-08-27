@@ -21,10 +21,26 @@ namespace Lunra.Satchel
 			out Property property
 		)
 		{
-			if (value is bool boolValue) property = new Property(Types.Bool, boolValue);
-			else if (value is int intValue) property = new Property(Types.Int, intValue: intValue);
-			else if (value is float floatValue) property = new Property(Types.Float, floatValue: floatValue);
-			else if (value is string stringValue) property = new Property(Types.String, stringValue: stringValue);
+			if (typeof(T) == typeof(bool))
+			{
+				if (value is bool boolValue) property = new Property(Types.Bool, boolValue);
+				else property = new Property(Types.Bool);
+			}
+			else if (typeof(T) == typeof(int))
+			{
+				if (value is int intValue) property = new Property(Types.Int, intValue: intValue);
+				else property = new Property(Types.Int);
+			}
+			else if (typeof(T) == typeof(float))
+			{
+				if (value is float floatValue) property = new Property(Types.Float, floatValue: floatValue);
+				else property = new Property(Types.Float);
+			}
+			else if (typeof(T) == typeof(string))
+			{
+				if (value is string stringValue) property = new Property(Types.String, stringValue: stringValue);
+				else property = new Property(Types.String);
+			}
 			else
 			{
 				Debug.LogError("Unrecognized value type "+typeof(T));
@@ -74,30 +90,7 @@ namespace Lunra.Satchel
 					return false;
 			}
 		}
-			
-		public bool TryGetRawValue(out object value)
-		{
-			switch (Type)
-			{
-				case Types.Bool:
-					value = BoolValue;
-					return true;
-				case Types.Int:
-					value = IntValue;
-					return true;
-				case Types.Float:
-					value = FloatValue;
-					return true;
-				case Types.String:
-					value = StringValue;
-					return true;
-				default:
-					value = null;
-					Debug.LogError($"Unrecognized Type {Type}");
-					return false;
-			}
-		}
-			
+		
 		public bool TryGet<T>(out T value)
 		{
 			value = default;
@@ -202,21 +195,20 @@ namespace Lunra.Satchel
 					newResult = Result<Property>.Failure($"Expected new value of type {Type}, but it was a {value.GetType().Name}");
 					break;
 				case Types.String:
-					if (value is string stringValue)
-					{
-						newResult = Result<Property>.Success(
-							new Property(
-								Type,
-								stringValue: stringValue
-							)
-						);
-						isUpdated = stringValue != StringValue;
-						isReplacement = isUpdated;
-						return true;
-					}
-						
-					newResult = Result<Property>.Failure($"Expected new value of type {Type}, but it was a {value.GetType().Name}");
-					break;
+					// Since strings are nullable, we need some special handling if we try to set it to null.
+					// TODO: Handle when nonstring values get sent to this, right now it will assume you meant null...
+					
+					if (!(value is string stringValue)) stringValue = null;
+					
+					newResult = Result<Property>.Success(
+						new Property(
+							Type,
+							stringValue: stringValue
+						)
+					);
+					isUpdated = stringValue != StringValue;
+					isReplacement = isUpdated;
+					return true;
 				default:
 					newResult = Result<Property>.Failure($"Unrecognized property type {Type}");
 					break;
@@ -261,13 +253,15 @@ namespace Lunra.Satchel
 				case Types.Bool: serializedValue = BoolValue.ToString().ToLower(); break;
 				case Types.Int: serializedValue = IntValue.ToString(); break;
 				case Types.Float: serializedValue = FloatValue.ToString("N4"); break;
-				case Types.String: serializedValue = $"\"{StringValue}\""; break;
+				case Types.String:
+					serializedValue = StringValue == null ? "null" : $"\"{StringValue}\""; 
+					break;
 				default: serializedValue = $"< Unrecognized Type {Type} >"; break;
 			}
 
 			var result = includeType ? $"{Type.ToString()[0]} : " : String.Empty;
 				
-			return result + $"{key,-32} | {serializedValue,-32} {StringExtensions.GetNonNullOrEmpty(suffix, String.Empty),-32}";
+			return result + $"{key,-48} | {serializedValue,-32} {StringExtensions.GetNonNullOrEmpty(suffix, String.Empty),-32}";
 		}
 	}
 }

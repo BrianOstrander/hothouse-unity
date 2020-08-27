@@ -302,7 +302,7 @@ namespace Lunra.Satchel
 		public bool New(
 			int count,
 			out (Item Item, int Count) additions,
-			params (string Key, object Value)[] propertyKeyValues
+			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
 			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
@@ -328,7 +328,7 @@ namespace Lunra.Satchel
 			out Item item,
 			out Stack additions,
 			out Stack overflow,
-			params (string Key, object Value)[] propertyKeyValues
+			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
 			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
@@ -354,7 +354,7 @@ namespace Lunra.Satchel
 			int count,
 			Item reference,
 			out (Item Item, int Count) additions,
-			params (string Key, object Value)[] propertyKeyValues
+			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
 			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Clone));
@@ -383,7 +383,7 @@ namespace Lunra.Satchel
 			out Item item,
 			out Stack additions,
 			out Stack overflow,
-			params (string Key, object Value)[] propertyKeyValues
+			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
 			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
@@ -482,6 +482,12 @@ namespace Lunra.Satchel
 			);
 
 			return result;
+		}
+
+		public ItemBuilder Build()
+		{
+			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Build));
+			return new ItemBuilder(itemStore, this);
 		}
 
 		public bool UpdateConstraint(

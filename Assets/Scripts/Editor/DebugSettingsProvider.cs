@@ -11,6 +11,7 @@ using Lunra.Satchel;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 using Inventory = Lunra.Satchel.Inventory;
@@ -237,25 +238,20 @@ namespace Lunra.Hothouse.Editor
 					Debug.Log(res);
 				};
 				
+				var filterIntKey = new PropertyKey<int>("some_int_key0");
+				
 				var inventory0 = itemStore.Builder.Inventory();
 
-				var filterIntKey = "some_int_key0";
+				inventory0
+					.Build()
+					.WithProperties(
+						ItemDefaults.Resource.Stalk
+					)
+					.Done(10);
 				
-				inventory0.New(
-					10,
-					out _,
-					(filterIntKey, 0)
-				);
+				Debug.Log(itemStore.Serialize(formatting: Formatting.Indented));
 				
-				inventory0.New(
-					10,
-					out _,
-					(filterIntKey, 1)
-				);
-
-				Debug.Log("------- Process start -------");
-				
-				itemStore.Processor.Process();
+				//itemStore.Processor.Process();
 			}
 
 			if (GUILayout.Button("Test Satchel 0f"))
@@ -348,18 +344,18 @@ namespace Lunra.Hothouse.Editor
 
 				var inventory0 = itemStore.Builder.Inventory();
 
-				var filterIntKey = "some_int_key0";
+				var filterIntKey = new PropertyKey<int>("some_int_key0");
 				
 				inventory0.New(
 					10,
 					out var stack0,
-					(filterIntKey, 0)
+					filterIntKey.Pair(0)
 				);
 				
 				inventory0.New(
 					10,
 					out var stack1,
-					(filterIntKey, 1)
+					filterIntKey.Pair(1)
 				);
 				
 				

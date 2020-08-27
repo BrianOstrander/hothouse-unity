@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Lunra.Core
@@ -36,11 +37,39 @@ namespace Lunra.Core
 			Color color
 		) => value.Wrap($"<color=#{color.ToHtmlRgba()}>", "</color>");
 
+		/// <summary>
+		/// Converts camelCase or PascalCase to lower_snake_case.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
 		public static string ToSnakeCase(this string value)
 		{
 			return string.Concat(
 				value.Select((c, i) => 0 < i && char.IsUpper(c) ? "_" + c : c.ToString())
 			).ToLower();
+		}
+		
+		/// <summary>
+		/// Converts an arbitrary number of camelCase or PascalCase entries to lower.snake_case.
+		/// </summary>
+		/// <param name="elements"></param>
+		/// <returns></returns>
+		public static string ToPunctualSnakeCase(
+			this IEnumerable<string> elements
+		)
+		{
+			var result = string.Empty;
+			var isFirst = true;
+
+			foreach (var element in elements)
+			{
+				if (isFirst) isFirst = false;
+				else result += ".";
+
+				result += element.ToSnakeCase();
+			}
+
+			return result;
 		}
 		
 		public static Color ToColor(this string value)
