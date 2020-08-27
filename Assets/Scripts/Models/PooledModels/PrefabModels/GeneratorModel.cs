@@ -17,14 +17,11 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region Non Serialized
-		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
 		#endregion
 
 		public GeneratorModel()
 		{
 			Parent = new ListenerProperty<InstanceId>(value => parent = value, () => parent);
-			
-			Inventories = new [] { Inventory };
 			
 			AppendComponents(
 				LightSensitive,

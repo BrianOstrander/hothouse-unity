@@ -39,9 +39,6 @@ namespace Lunra.Hothouse.Models
 		
 		#region Non Serialized
 		[JsonIgnore] public EnterableComponent Enterable { get; } = new EnterableComponent();
-
-		Dictionary<BuildingStates, IBaseInventoryComponent[]> inventoriesByBuildingState = new Dictionary<BuildingStates, IBaseInventoryComponent[]>();
-		[JsonIgnore] public IBaseInventoryComponent[] Inventories => inventoriesByBuildingState[BuildingState.Value];
 		#endregion
 
 		public bool IsBuildingState(BuildingStates buildingState) => BuildingState.Value == buildingState;
@@ -52,29 +49,6 @@ namespace Lunra.Hothouse.Models
 			BuildingState = new ListenerProperty<BuildingStates>(value => buildingState = value, () => buildingState);
 			PlacementLightRequirement = new ListenerProperty<FloatRange>(value => placementLightRequirement = value, () => placementLightRequirement);
 		
-			var emptyInventories = new IBaseInventoryComponent[0];
-			foreach (var buildState in EnumExtensions.GetValues<BuildingStates>())
-			{
-				IBaseInventoryComponent[] buildStateInventories;
-				switch (buildState)
-				{
-					case BuildingStates.Unknown:
-					case BuildingStates.Placing:
-					case BuildingStates.Decaying:
-						buildStateInventories = emptyInventories;
-						break;
-					case BuildingStates.Constructing:
-					case BuildingStates.Operating:
-					case BuildingStates.Salvaging:
-						buildStateInventories = new IBaseInventoryComponent[] { Inventory };
-						break;
-					default:
-						Debug.LogError("Unrecognized BuildState: "+buildState);
-						continue;
-				}
-				inventoriesByBuildingState.Add(buildState, buildStateInventories);
-			}
-			
 			AppendComponents(
 				Light,
 				LightSensitive,

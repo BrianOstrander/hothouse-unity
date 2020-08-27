@@ -13,13 +13,10 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
-		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
 		#endregion
 
 		public ItemDropModel()
 		{
-			Inventories = new [] { Inventory };
-			
 			AppendComponents(
 				LightSensitive,
 				Enterable,

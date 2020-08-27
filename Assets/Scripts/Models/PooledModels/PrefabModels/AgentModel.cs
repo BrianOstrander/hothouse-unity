@@ -32,7 +32,6 @@ namespace Lunra.Hothouse.Models
 		
 		#region Non Serialized
 		[JsonIgnore] public AgentContext Context { get; set; }
-		[JsonIgnore] public IBaseInventoryComponent[] Inventories { get; }
 		[JsonIgnore] public IAgentStateMachine StateMachine { get; set; }
 		#endregion
 		
@@ -42,11 +41,6 @@ namespace Lunra.Hothouse.Models
 			NavigationForceDistanceMaximum = new ListenerProperty<float>(value => navigationForceDistanceMaximum = value, () => navigationForceDistanceMaximum);
 			NavigationPlan = new ListenerProperty<NavigationPlan>(value => navigationPlan = value, () => navigationPlan);
 			InteractionRadius = new ListenerProperty<float>(value => reachRadius = value, () => reachRadius);
-			
-			Inventories = new []
-			{
-				Inventory	
-			};
 			
 			AppendComponents(
 				Health,

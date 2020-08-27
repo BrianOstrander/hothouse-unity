@@ -8,20 +8,11 @@ namespace Lunra.Hothouse.Models
 {
 	public interface IBaseInventoryComponent : IComponentModel
 	{
-		ReadonlyProperty<Inventory> All { get; }
-		ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
-		
-		bool Add(Inventory inventory, out Inventory overflow);
-		bool Remove(Inventory inventory);
-		bool Remove(Inventory inventory, out Inventory overflow);
-
-		bool IsFull();
-		bool IsNotFull();
 	}
 	
 	public interface IBaseInventoryModel : IRoomTransformModel
 	{
-		[JsonIgnore] IBaseInventoryComponent[] Inventories { get; }
+		
 	}
 
 	public abstract class BaseInventoryComponent : ComponentModel<IBaseInventoryModel>,
