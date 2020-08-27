@@ -11,7 +11,6 @@ using Lunra.Satchel;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Lunra.StyxMvp.Services;
-using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 using Inventory = Lunra.Satchel.Inventory;
@@ -254,12 +253,9 @@ namespace Lunra.Hothouse.Editor
 					(filterIntKey, 1)
 				);
 
-				var processor = new ProcessorStore().Initialize(itemStore);
-				
 				Debug.Log("------- Process start -------");
 				
-				processor.Process();
-				processor.Process();
+				itemStore.Processor.Process();
 			}
 
 			if (GUILayout.Button("Test Satchel 0f"))

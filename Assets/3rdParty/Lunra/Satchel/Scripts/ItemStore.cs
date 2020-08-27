@@ -65,8 +65,9 @@ namespace Lunra.Satchel
 		string[] ignoredKeysCloning;
 		IItemModifier[] modifiers;
 		
-		[JsonIgnore] public ValidationStore Validation { get; private set; }
 		[JsonIgnore] public BuilderUtility Builder { get; private set; }
+		[JsonIgnore] public ValidationStore Validation { get; private set; }
+		[JsonIgnore] public ProcessorStore Processor { get; private set; }
 		#endregion
 		
 		public event Action<Event> Updated;
@@ -107,8 +108,9 @@ namespace Lunra.Satchel
 				.Concat(modifiers ?? new IItemModifier[0])
 				.ToArray();
 
-			Validation = new ValidationStore().Initialize(this);
 			Builder = new BuilderUtility(this);
+			Validation = new ValidationStore().Initialize(this);
+			Processor = new ProcessorStore().Initialize(this);
 			
 			foreach (var kv in items) kv.Value.Initialize(this, i => TryUpdate(i));
 
