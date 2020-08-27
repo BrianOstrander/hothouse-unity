@@ -35,12 +35,12 @@ namespace Lunra.Satchel
 			return this;
 		}
 
-		public void Process()
+		public void Process(float deltaTime)
 		{
-			itemStore.Iterate(OnProcess);
+			itemStore.Iterate(i => OnProcess(i, deltaTime));
 		}
 
-		void OnProcess(Item item)
+		void OnProcess(Item item, float deltaTime)
 		{
 			if (item.Get(Constants.Destroyed)) return;
 
@@ -60,7 +60,7 @@ namespace Lunra.Satchel
 
 					try
 					{
-						processor.Process(item);
+						processor.Process(item, deltaTime);
 					}
 					catch (Exception e)
 					{

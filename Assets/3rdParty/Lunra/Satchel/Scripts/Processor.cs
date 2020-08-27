@@ -1,3 +1,6 @@
+using Lunra.Hothouse.Models;
+using UnityEngine;
+
 namespace Lunra.Satchel
 {
 	[Processor]
@@ -21,6 +24,6 @@ namespace Lunra.Satchel
 
 		public virtual bool IsValid(Item item) => Filter.Validate(item);
 
-		public abstract void Process(Item item);
+		public abstract void Process(Item item, float deltaTime);
 	}
 }

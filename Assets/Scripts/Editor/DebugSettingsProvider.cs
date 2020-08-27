@@ -250,7 +250,11 @@ namespace Lunra.Hothouse.Editor
 					.Done(10);
 				
 				Debug.Log(itemStore.Serialize(formatting: Formatting.Indented));
-				
+
+				for (var i = 0; i < 600; i++)
+				{
+					itemStore.Processor.Process(1f / 60f);
+				}
 				//itemStore.Processor.Process();
 			}
 
