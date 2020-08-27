@@ -41,7 +41,7 @@ namespace Lunra.Hothouse.Models
 					return Types.Debris;
 				case ItemDropModel _:
 					return Types.ItemDrop;
-				case BaseInventoryComponent _:
+				case InventoryComponent _:
 					return Types.Inventory;
 				case DecorationModel _:
 					return Types.Decoration;
@@ -155,7 +155,7 @@ namespace Lunra.Hothouse.Models
 					cachedInstance = game.ItemDrops.FirstOrDefaultActive(Id);
 					break;
 				case Types.Inventory:
-					cachedInstance = GetFirstOrDefault(game.GetInventories(), Id);
+					cachedInstance = game.Query.FirstOrDefault<IInventoryModel>(Id);
 					break;
 				case Types.Decoration:
 					cachedInstance = game.Decorations.FirstOrDefaultActive(Id);

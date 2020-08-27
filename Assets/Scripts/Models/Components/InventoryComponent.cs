@@ -6,74 +6,12 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IBaseInventoryComponent : IComponentModel
-	{
-	}
-	
-	public interface IBaseInventoryModel : IRoomTransformModel
-	{
-		
-	}
-
-	public abstract class BaseInventoryComponent : ComponentModel<IBaseInventoryModel>,
-		IBaseInventoryComponent
-	{
-		#region Serialized
-		[JsonProperty] Inventory all = Inventory.Empty;
-		protected readonly ListenerProperty<Inventory> AllListener;
-		[JsonIgnore] public ReadonlyProperty<Inventory> All { get; }
-		
-		[JsonProperty] InventoryCapacity allCapacity = InventoryCapacity.None();
-		protected readonly ListenerProperty<InventoryCapacity> AllCapacityListener;
-		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
-		#endregion
-		
-		#region Non Serialized
-		#endregion
-
-		public BaseInventoryComponent()
-		{
-			All = new ReadonlyProperty<Inventory>(
-				value => all = value,
-				() => all,
-				out AllListener
-			);
-			AllCapacity = new ReadonlyProperty<InventoryCapacity>(
-				value => allCapacity = value,
-				() => allCapacity,
-				out AllCapacityListener
-			);
-		}
-
-		public bool IsFull() => AllCapacity.Value.IsFull(All.Value);
-		public bool IsNotFull() => !IsFull();
-		public float GetNormalizedFull() => 1f - (AllCapacity.Value.GetCapacityFor(All.Value).TotalWeight / (float) AllCapacity.Value.GetMaximum().TotalWeight);
-
-		public abstract bool Add(Inventory inventory);
-		public abstract bool Add(Inventory inventory, out Inventory overflow);
-		public abstract bool Remove(Inventory inventory);
-		public abstract bool Remove(Inventory inventory, out Inventory overflow);
-	}
-	
-	public static class BaseInventoryGameModelExtensions
-	{
-		// TODO: I think query or something should handle this...
-		public static IEnumerable<IBaseInventoryComponent> GetInventories(
-			this GameModel game
-		)
-		{
-			return game
-				.Query.All<IBaseInventoryModel>()
-				.SelectMany(m => m.Inventories);
-		}
-	}
-	
-	public interface IInventoryModel : IBaseInventoryModel
+	public interface IInventoryModel : IRoomTransformModel
 	{
 		InventoryComponent Inventory { get; }
 	}
 	
-	public class InventoryComponent : BaseInventoryComponent
+	public class InventoryComponent : ComponentModel<IInventoryModel>
 	{
 		#region Serialized
 		[JsonProperty] InventoryPermission permission = InventoryPermission.AllForAnyJob();
@@ -100,11 +38,21 @@ namespace Lunra.Hothouse.Models
 
 		[JsonProperty] InventoryDesire desired = InventoryDesire.Ignored();
 		[JsonIgnore] public ListenerProperty<InventoryDesire> Desired { get; }
+		
+		[JsonProperty] Inventory all = Inventory.Empty;
+		protected readonly ListenerProperty<Inventory> AllListener;
+		[JsonIgnore] public ReadonlyProperty<Inventory> All { get; }
+		
+		[JsonProperty] InventoryCapacity allCapacity = InventoryCapacity.None();
+		protected readonly ListenerProperty<InventoryCapacity> AllCapacityListener;
+		[JsonIgnore] public ReadonlyProperty<InventoryCapacity> AllCapacity { get; }
 		#endregion
 		
 		#region Non Serialized
 		#endregion
 
+		public bool IsFull() => AllCapacity.Value.IsFull(All.Value);
+		
 		public InventoryComponent()
 		{
 			Permission = new ListenerProperty<InventoryPermission>(value => permission = value, () => permission);
@@ -250,24 +198,6 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		#region Transactions
-		public InventoryTransaction RequestDeliver(Inventory inventory)
-		{
-			var isValid = TryRequestDeliver(
-				inventory,
-				out var transaction,
-				out var overflow
-			);
-
-			if (!isValid)
-			{
-				Debug.Break();
-				throw new Exception(nameof(RequestDeliver) + " transaction invalid on " + ShortId + " for items:\n" + inventory);
-			}
-			if (!overflow.IsEmpty) throw new Exception(nameof(RequestDeliver) + " transaction returned overflow on " + ShortId + " for items:\n" + inventory);
-
-			return transaction;
-		}
-		
 		bool TryRequestDeliver(
 			Inventory inventory,
 			out InventoryTransaction transaction,
@@ -296,321 +226,29 @@ namespace Lunra.Hothouse.Models
 
 			return true;
 		}
-		
-		public void CompleteDeliver(
-			InventoryTransaction transaction,
-			bool addIntersection = true
-		)
-		{
-			var isValid = TryCompleteDeliver(
-				transaction,
-				out var overflow,
-				addIntersection
-			);
 
-			if (!isValid) throw new Exception(nameof(CompleteDeliver) + " transaction invalid on " + ShortId);
-			if (!overflow.IsEmpty) throw new Exception(nameof(CompleteDeliver) + " transaction returned overflow on " + ShortId);
-		}
-
-		bool TryCompleteDeliver(
-			InventoryTransaction transaction,
-			out Inventory overflow,
-			bool addIntersection = true
-		)
-		{
-			var isIntersecting = ReservedCapacity.Value.GetMaximum().Intersects(
-				transaction.Items,
-				out var intersection
-			);
-
-			overflow = transaction.Items - intersection;
-
-			if (!isIntersecting) return false;
-			
-			RemoveReserved(intersection);
-			if (addIntersection) Add(intersection);
-			return true;
-		}
-		
-		public InventoryTransaction RequestDistribution(Inventory inventory)
-		{
-			var isValid = TryRequestDistribution(
-				inventory,
-				out var transaction,
-				out var overflow
-			);
-
-			if (!isValid) throw new Exception(nameof(RequestDistribution) + " transaction invalid on " + ShortId + " for items:\n" + inventory);
-			if (!overflow.IsEmpty) throw new Exception(nameof(RequestDistribution) + " transaction returned overflow on " + ShortId + " for items:\n" + inventory);
-
-			return transaction;
-		}
-
-		bool TryRequestDistribution(
-			Inventory inventory,
-			out InventoryTransaction transaction,
-			out Inventory overflow
-		)
-		{
-			transaction = default;
-
-			var isIntersecting = Available.Value.Intersects(
-				inventory,
-				out var intersection
-			);
-
-			overflow = inventory - intersection;
-
-			if (!isIntersecting) return false;
-
-			inventory -= overflow;
-			
-			AddForbidden(inventory);
-			
-			transaction = InventoryTransaction.New(
-				InventoryTransaction.Types.Distribute,
-				this,
-				inventory
-			);
-			
-			return true;
-		}
-		
-		public void CompleteDistribution(
-			InventoryTransaction transaction,
-			bool removeIntersection = true
-		)
-		{
-			var isValid = TryCompleteDistribution(
-				transaction,
-				out var overflow,
-				removeIntersection
-			);
-
-			if (!isValid) throw new Exception(nameof(CompleteDistribution) + " transaction invalid on " + ShortId);
-			if (!overflow.IsEmpty) throw new Exception(nameof(CompleteDistribution) + " transaction returned overflow on " + ShortId);
-		}
-		
-		bool TryCompleteDistribution(
-			InventoryTransaction transaction,
-			out Inventory overflow,
-			bool removeIntersection = true
-		)
-		{
-			var isIntersecting = Forbidden.Value.Intersects(
-				transaction.Items,
-				out var intersection
-			);
-
-			overflow = transaction.Items - intersection;
-
-			if (!isIntersecting) return false;
-			
-			RemoveForbidden(intersection);
-			if (removeIntersection) Remove(intersection);
-			return true;
-		}
 		#endregion
 		
 		public void Reset(
-			InventoryPermission permission,
-			InventoryCapacity capacity,
-			InventoryDesire? desired = null
+			InventoryPermission permission
 		)
 		{
 			ResetId();
 			
 			Permission.Value = permission;
-			
-			AllListener.Value = Inventory.Empty;
-			availableListener.Value = Inventory.Empty;
-			forbiddenListener.Value = Inventory.Empty;
-			AllCapacityListener.Value = capacity;
-			availableCapacityListener.Value = capacity;
-
-			Desired.SetValue(
-				desired ?? InventoryDesire.Ignored(),
-				this
-			);
-			
-			switch (capacity.Clamping)
-			{
-				case InventoryCapacity.Clamps.None:
-					reservedCapacityListener.Value = InventoryCapacity.None();
-					break;
-				case InventoryCapacity.Clamps.TotalWeight:
-					reservedCapacityListener.Value = InventoryCapacity.ByTotalWeight(0);
-					break;
-				case InventoryCapacity.Clamps.IndividualWeight:
-					reservedCapacityListener.Value = InventoryCapacity.ByIndividualWeight(Inventory.Empty);
-					break;
-				default:
-					Debug.LogError("Unrecognized clamping: "+capacity.Clamping);
-					break;
-			}
-
-			Recalculate();
+			Debug.LogError("TODO: More reset logic");
 		}
 
 		public override string ToString()
 		{
 			var result = "Inventory Component [ " + ShortId + " ]:";
-			var resultEntries = string.Empty;
-			foreach (var itemType in Inventory.ValidTypes)
-			{
-				var allCapacityForItem = AllCapacity.Value.GetMaximumFor(itemType);
-				
-				if (allCapacityForItem == 0) continue;
-				
-				
-				var allForItem = All.Value[itemType];
-				var availableForItem = Available.Value[itemType];
-				var forbiddenForItem = Forbidden.Value[itemType];
-				var reservedForItem = ReservedCapacity.Value.GetMaximumFor(itemType);
-				
-				resultEntries += "\n - " + itemType;
-
-				if (0 < allForItem || 0 < availableForItem || 0 < forbiddenForItem || 0 < reservedForItem)
-				{
-					resultEntries += "\n\tStored: \t\t\t" + All.Value[itemType];
-					resultEntries += "\n\tAvailable: \t\t" + Available.Value[itemType];
-					resultEntries += "\n\tForbidden: \t\t" + Forbidden.Value[itemType];
-					resultEntries += "\n\tReserved Capacity: \t" + ReservedCapacity.Value.GetMaximumFor(itemType);
-				}
-				
-				resultEntries += "\n\tStored Capacity: \t" + allCapacityForItem;
-				
-				var availableCapacityForItem = AvailableCapacity.Value.GetMaximumFor(itemType);
-
-				if (allCapacityForItem != availableCapacityForItem) resultEntries += "\n\tAvailable Capacity: \t" + availableCapacityForItem;
-			}
-
-			result += (string.IsNullOrEmpty(resultEntries) ? "Empty" : resultEntries);
-
-			string itemsToString(Inventory inventory)
-			{
-				if (inventory.IsEmpty) return "\t\tEmpty";
-
-				var itemsToStringResult = string.Empty;
-
-				foreach (var item in inventory.Entries.Where(e => 0 < e.Weight))
-				{
-					itemsToStringResult += "\n\t" + item.Type + "\t\t" + item.Weight;
-				}
-
-				return itemsToStringResult;
-			}
-			
-			if (Desired.Value.AnyInventoriesNotEmpty)
-			{
-				result += "\n - Desired Storage:" + itemsToString(Desired.Value.Storage);
-				result += "\n - Desired Delivery:" + itemsToString(Desired.Value.Delivery);
-				result += "\n - Desired Distribution:" + itemsToString(Desired.Value.Distribution);
-			}
-
 			return result;
 		}
 
 		#region Utility
 		void Recalculate()
 		{
-			var currentAvailable = All.Value - Forbidden.Value;
-
-			if (currentAvailable != Available.Value) availableListener.Value = currentAvailable;
-
-			var capacityClampingNotMatched = AvailableCapacity.Value.Clamping != AllCapacity.Value.Clamping; 
 			
-			switch (AllCapacity.Value.Clamping)
-			{
-				case InventoryCapacity.Clamps.None:
-					if (capacityClampingNotMatched)
-					{
-						availableCapacityListener.Value = AllCapacity.Value;
-					}
-					break;
-				case InventoryCapacity.Clamps.TotalWeight:
-					if (capacityClampingNotMatched || AvailableCapacity.Value.GetMaximum().TotalWeight != CalculateAvailableCapacity().TotalWeight)
-					{
-						availableCapacityListener.Value = InventoryCapacity.ByTotalWeight(AllCapacity.Value.GetMaximum().TotalWeight);
-					}
-					break;
-				case InventoryCapacity.Clamps.IndividualWeight:
-					var currentAvailableCapacity = CalculateAvailableCapacity();
-					if (capacityClampingNotMatched || AvailableCapacity.Value.GetMaximum() != currentAvailableCapacity)
-					{
-						availableCapacityListener.Value = InventoryCapacity.ByIndividualWeight(currentAvailableCapacity);	
-					}
-					break;
-				default:
-					Debug.LogError("Unrecognized clamping: "+AllCapacity.Value.Clamping);
-					break;
-			}
-
-			if (Desired.Value.IsActive)
-			{
-				RecalculateDesired();
-
-				if (Available.Value.Intersects(Desired.Value.Storage, out var availableStorageIntersection))
-				{
-					availableWithoutDesireListener.Value = Available.Value - availableStorageIntersection;
-				}
-				else availableWithoutDesireListener.Value = Available.Value;
-			}
-			else
-			{
-				availableWithoutDesireListener.Value = Available.Value;
-			}
-		}
-
-		void RecalculateDesired()
-		{
-			var allIncoming = Available.Value + ReservedCapacity.Value.GetMaximum();
-			
-			Inventory desiredDelivery;
-			Inventory desiredDistribution;
-
-			if (Desired.Value.Storage.Intersects(allIncoming, out var deliveryIntersection))
-			{
-				desiredDelivery = Desired.Value.Storage - deliveryIntersection;
-			}
-			else
-			{
-				desiredDelivery = Desired.Value.Storage;
-			}
-
-			AllCapacity.Value
-				.GetCapacityFor(All.Value)
-				.Intersects(desiredDelivery, out desiredDelivery);
-
-			if (Desired.Value.Storage.Intersects(Available.Value, out var availableDesiredIntersection))
-			{
-				desiredDistribution = Available.Value - availableDesiredIntersection;
-			}
-			else
-			{
-				desiredDistribution = Available.Value;
-			}
-
-			Desired.SetValue(
-				InventoryDesire.New(
-					Desired.Value.Storage,
-					desiredDelivery,
-					desiredDistribution
-				),
-				this
-			);
-		}
-
-		Inventory CalculateAvailableCapacity() => AllCapacity.Value.GetMaximum() - (ReservedCapacity.Value.GetMaximum() + Forbidden.Value);
-		#endregion
-		
-		#region Events
-		void OnDesired(
-			InventoryDesire desire,
-			object source
-		)
-		{
-			if (source != this) RecalculateDesired();
 		}
 		#endregion
 	}
