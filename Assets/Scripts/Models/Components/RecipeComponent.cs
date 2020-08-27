@@ -271,6 +271,7 @@ namespace Lunra.Hothouse.Models
 					}
 					break;
 				case States.Gathering:
+					/*
 					if (Model.Inventory.Available.Value.Intersects(result.Recipe.InputItems))
 					{
 						var isOutputCapacityAvailable = Model.Inventory.AvailableCapacity.Value
@@ -286,6 +287,8 @@ namespace Lunra.Hothouse.Models
 							result.Process(States.Ready);
 						}
 					}
+					*/
+					Debug.LogError("Gathering logic or something");
 					break;
 				case States.Ready:
 					result.Process(States.Crafting);

@@ -120,12 +120,13 @@ namespace Lunra.Hothouse.Presenters
 					)
 				);
 			}
-			
-			var inventoryResult = string.Empty;
-			foreach (var inventoryType in selection.Inventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
-			{
-				inventoryResult += $"\n\t {inventoryType}: \t{selection.Inventory.All.Value[inventoryType]} \t/ {selection.Inventory.AllCapacity.Value.GetMaximumFor(inventoryType)}";
-			}
+
+			var inventoryResult = "TODO: Inventory here";
+			// var inventoryResult = string.Empty;
+			// foreach (var inventoryType in selection.Inventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
+			// {
+			// 	inventoryResult += $"\n\t {inventoryType}: \t{selection.Inventory.All.Value[inventoryType]} \t/ {selection.Inventory.AllCapacity.Value.GetMaximumFor(inventoryType)}";
+			// }
 
 			if (!string.IsNullOrEmpty(inventoryResult))
 			{
@@ -236,11 +237,13 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 
-			var inventoryResult = string.Empty;
-			foreach (var inventoryType in selection.Inventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
-			{
-				inventoryResult += $"\n\t {inventoryType}: \t{selection.Inventory.All.Value[inventoryType]} \t/ {selection.Inventory.AllCapacity.Value.GetMaximumFor(inventoryType)}";
-			}
+			var inventoryResult = "TODO: Inventory here";
+			
+			// var inventoryResult = string.Empty;
+			// foreach (var inventoryType in selection.Inventory.AllCapacity.Value.GetMaximum().Entries.Where(e => 0 < e.Weight).Select(e => e.Type))
+			// {
+			// 	inventoryResult += $"\n\t {inventoryType}: \t{selection.Inventory.All.Value[inventoryType]} \t/ {selection.Inventory.AllCapacity.Value.GetMaximumFor(inventoryType)}";
+			// }
 
 			if (!string.IsNullOrEmpty(inventoryResult))
 			{

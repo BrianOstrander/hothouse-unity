@@ -37,8 +37,9 @@ namespace Lunra.Hothouse.Presenters
 		{
 			base.OnViewPrepare();
 
-			var item = Model.Inventory.All.Value.Entries.OrderByDescending(i => i.Weight).FirstOrDefault();
-			View.SetEntry(item.Weight);
+			Debug.LogError("TODO: Set inventory weight stuff");
+			// var item = Model.Inventory.All.Value.Entries.OrderByDescending(i => i.Weight).FirstOrDefault();
+			// View.SetEntry(item.Weight);
 			
 			Model.RecalculateEntrances(Model.Transform.Position.Value);
 		}

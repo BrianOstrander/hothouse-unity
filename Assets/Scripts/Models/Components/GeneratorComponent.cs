@@ -84,7 +84,8 @@ namespace Lunra.Hothouse.Models
 				case States.WaitingToExpire:
 					hoursUntilNextState = refillDurationRange.Evaluate(DemonUtility.NextFloat);
 					state = States.WaitingToRefill;
-					if (!Model.Inventory.Available.Value.IsEmpty) Model.Inventory.Remove(Model.Inventory.Available.Value);
+					Debug.LogError("TODO: Remove on expire");
+					// if (!Model.Inventory.Available.Value.IsEmpty) Model.Inventory.Remove(Model.Inventory.Available.Value);
 					break;
 				case States.WaitingToRefill:
 					hoursUntilNextState = expireDurationRange.Evaluate(DemonUtility.NextFloat);
@@ -112,7 +113,7 @@ namespace Lunra.Hothouse.Models
 			nextState = Game.SimulationTime.Value + DayTime.FromHours(hoursUntilNextState);
 		}
 
-		public void CalculateRate() => rateListener.Value = Model.Inventory.All.Value.TotalWeight / rateMaximum;
+		public void CalculateRate() => Debug.LogError("TODO: Calculate rate or whatever"); //rateListener.Value = Model.Inventory.All.Value.TotalWeight / rateMaximum;
 		
 		public override string ToString()
 		{

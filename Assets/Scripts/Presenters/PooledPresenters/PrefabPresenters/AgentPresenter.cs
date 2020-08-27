@@ -104,15 +104,16 @@ namespace Lunra.Hothouse.Presenters
 				);
 			}
 			
-			if (!Model.Inventory.All.Value.IsEmpty)
-			{
-				Game.ItemDrops.Activate(
-					Model.RoomTransform.Id.Value,
-					Model.Transform.Position.Value,
-					Quaternion.identity,
-					Model.Inventory.All.Value
-				);
-			}
+			Debug.LogError("TODO: Check if inventory is empty for dropping");
+			// if (!Model.Inventory.All.Value.IsEmpty)
+			// {
+			// 	Game.ItemDrops.Activate(
+			// 		Model.RoomTransform.Id.Value,
+			// 		Model.Transform.Position.Value,
+			// 		Quaternion.identity,
+			// 		Model.Inventory.All.Value
+			// 	);
+			// }
 
 			// Model.InventoryPromises.BreakAllPromises();
 			

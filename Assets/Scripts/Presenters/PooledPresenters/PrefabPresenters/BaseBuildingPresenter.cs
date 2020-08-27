@@ -124,7 +124,9 @@ namespace Lunra.Hothouse.Presenters
 
 			if (Model.Light.LightFuelInterval.Value.IsDone)
 			{
-				var canRefuel = Model.Inventory.Available.Value.Contains(Model.Light.LightFuel.Value);
+				// var canRefuel = Model.Inventory.Available.Value.Contains(Model.Light.LightFuel.Value);
+				Debug.LogError("TODO: Some refuel testing logic here");
+				var canRefuel = false;
 
 				if (canRefuel)
 				{
@@ -327,10 +329,11 @@ namespace Lunra.Hothouse.Presenters
 
 					if (buildingState == BuildingStates.Constructing)
 					{
-						if (Model.Inventory.IsFull())
-						{
-							Model.Obligations.Add(ObligationCategories.Construct.Assemble);
-						}
+						Debug.LogError("TODO: Some kinda cleanup logic here");
+						// if (Model.Inventory.IsFull())
+						// {
+						// 	Model.Obligations.Add(ObligationCategories.Construct.Assemble);
+						// }
 						// else
 						// {
 						// 	foreach (var constructionItem in Model.ConstructionInventory.AvailableCapacity.Value.GetMaximum().Entries)

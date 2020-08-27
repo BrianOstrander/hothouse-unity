@@ -87,11 +87,13 @@ namespace Lunra.Hothouse.Models
 
 			if (IsParentInventoryRequired)
 			{
-				if (InputItems.Any() && !model.Inventory.All.Value.Contains(InputItems)) State |= States.WaitingForInput;
+				Debug.LogError("TODO: Check if inventory has input required");
+				// if (InputItems.Any() && !model.Inventory.All.Value.Contains(InputItems)) State |= States.WaitingForInput;
 
 				if (OutputItems.TryGetValue(OutputLocations.ParentInventory, out var output))
 				{
-					if (!model.Inventory.AllCapacity.Value.GetCapacityFor(model.Inventory.All.Value).Contains(output)) State |= States.WaitingForOutput;
+					Debug.LogError("TODO: Output capacity testing");
+					// if (!model.Inventory.AllCapacity.Value.GetCapacityFor(model.Inventory.All.Value).Contains(output)) State |= States.WaitingForOutput;
 				}
 			}
 
