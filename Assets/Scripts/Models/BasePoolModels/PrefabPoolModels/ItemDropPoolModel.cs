@@ -54,6 +54,11 @@ namespace Lunra.Hothouse.Models
 			params Stack[] inventory
 		)
 		{
+			game.Items.Iterate(
+				item => item.Set(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.Output),
+				inventory
+			);
+			
 			model.Enterable.Reset();
 			model.Inventory.Reset(game.Items);
 

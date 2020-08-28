@@ -24,13 +24,12 @@ namespace Lunra.Hothouse.Models
 						Keys.Resource.Id.Pair(id.ToSnakeCase()),
 						Keys.Resource.InventoryId.Pair(),
 					
-						Keys.Resource.Logistics.Type.Pair(Enumerations.Resource.Logistics.Types.None),
-						Keys.Resource.Logistics.State.Pair(Enumerations.Resource.Logistics.States.None),
+						Keys.Resource.Logistics.Type.Pair(Values.Resource.Logistics.Types.None),
+						Keys.Resource.Logistics.State.Pair(Values.Resource.Logistics.States.None),
 						Keys.Resource.Logistics.Available.Pair(-1),
 						Keys.Resource.Logistics.Promised.Pair(-1),
 					
 						Keys.Resource.Decay.Enabled.Pair(true),
-						Keys.Resource.Decay.ForbidDestruction.Pair(),
 						Keys.Resource.Decay.Maximum.Pair(DefaultDecayMaximum),
 						Keys.Resource.Decay.Current.Pair(DefaultDecayMaximum),
 						Keys.Resource.Decay.Previous.Pair(DefaultDecayMaximum),
@@ -75,7 +74,6 @@ namespace Lunra.Hothouse.Models
 					static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Keys), nameof(Decay), suffix);
 				
 					public static readonly PropertyKey<bool> Enabled = Create<bool>(nameof(Enabled));
-					public static readonly PropertyKey<bool> ForbidDestruction = Create<bool>(nameof(ForbidDestruction));
 					public static readonly PropertyKey<float> Maximum = Create<float>(nameof(Maximum));
 					public static readonly PropertyKey<float> Current = Create<float>(nameof(Current));
 					public static readonly PropertyKey<float> Previous = Create<float>(nameof(Previous));
@@ -85,7 +83,7 @@ namespace Lunra.Hothouse.Models
 			}	
 		}
 
-		public static class Enumerations
+		public static class Values
 		{
 			public static class Resource
 			{
@@ -102,10 +100,12 @@ namespace Lunra.Hothouse.Models
 					public static class States
 					{
 						public static readonly string None = nameof(None).ToSnakeCase();
+						public static readonly string Distribute = nameof(Distribute).ToSnakeCase();
+						public static readonly string Desire = nameof(Desire).ToSnakeCase();
 						public static readonly string Input = nameof(Input).ToSnakeCase();
 						public static readonly string Output = nameof(Output).ToSnakeCase();
 						public static readonly string Transit = nameof(Transit).ToSnakeCase();
-						public static readonly string Consumed = nameof(Consumed).ToSnakeCase();
+						public static readonly string Forbidden = nameof(Forbidden).ToSnakeCase();
 					}
 				}
 			}

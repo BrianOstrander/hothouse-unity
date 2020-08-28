@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Services
 
 		protected override PropertyFilter GetFilter() => ItemStore.Builder
 			.BeginPropertyFilter()
-			.RequireAll(PropertyValidation.Default.Bool.EqualTo(Items.Keys.Resource.Decay.Enabled.Key, true));
+			.RequireAll(PropertyValidation.Default.Bool.EqualTo(Items.Keys.Resource.Decay.Enabled, true));
 
 		public override void Process(Item item, float deltaTime)
 		{
@@ -21,27 +21,38 @@ namespace Lunra.Hothouse.Services
 
 			if (CheckForDestruction(item, current)) return;
 
-			var rate = item.Get(Items.Keys.Resource.Decay.Rate);
+			// The following looks a bit weird, but stops us from doing calculations we don't need when decay is at
+			// zero but we can't destroy this item -- for example, when it is in transit or in use by logistics.
 			
-			// TODO: Additional rate modifiers calculated here, probably obtained from inventory...
+			var rateSinceLastTime = 0f;
 
-			rate *= deltaTime;
+			var isAlreadyAtZero = Mathf.Approximately(0f, current) && Mathf.Approximately(0f, item.Get(Items.Keys.Resource.Decay.Previous));
+			
+			if (!isAlreadyAtZero)
+			{
+				var rate = item.Get(Items.Keys.Resource.Decay.Rate);
+			
+				// TODO: Additional rate modifiers calculated here, probably obtained from inventory...
 
-			var previous = current;
-			current = Mathf.Max(0f, current - rate);
+				rate *= deltaTime;
 
-			var rateSinceLastTime = Mathf.Abs(current - previous) / deltaTime;
+				var previous = current;
+				current = Mathf.Max(0f, current - rate);
 
+				rateSinceLastTime = Mathf.Abs(current - previous) / deltaTime;
+
+				item.Set(Items.Keys.Resource.Decay.Previous, previous);
+				item.Set(Items.Keys.Resource.Decay.Current, current);
+
+				// We can skip the final rate prediction set if we get destroyed...
+				if (CheckForDestruction(item, current)) return;
+			}
+			
 			item.Set(
 				Items.Keys.Resource.Decay.RatePredicted,
 				(PredictedRatePastWeight * item.Get(Items.Keys.Resource.Decay.RatePredicted))
 				+ (PredictedRateRecentWeight * rateSinceLastTime)
 			);
-
-			item.Set(Items.Keys.Resource.Decay.Previous, previous);
-			item.Set(Items.Keys.Resource.Decay.Current, current);
-
-			CheckForDestruction(item, current);
 		}
 
 		bool CheckForDestruction(
@@ -51,8 +62,15 @@ namespace Lunra.Hothouse.Services
 		{ 
 			if (Mathf.Approximately(0f, current))
 			{
-				OnDestruction(item);
-				return true;
+				var logisticsState = item.Get(Items.Keys.Resource.Logistics.State);
+
+				if (logisticsState == Items.Values.Resource.Logistics.States.Distribute || logisticsState == Items.Values.Resource.Logistics.States.None)
+				{
+					OnDestruction(item);
+					return true;				
+				}
+
+				return false;
 			}
 
 			return false;

@@ -433,12 +433,28 @@ namespace Lunra.Satchel
 		/// For iterating over all items when you don't need to access the actual list.
 		/// </summary>
 		/// <param name="iterator"></param>
-		public void Iterate(Action<Item> iterator)
+		public void IterateAll(Action<Item> iterator)
 		{
 			foreach (var kv in items)
 			{
 				try { iterator(kv.Value); }
 				catch (Exception e) { Debug.LogException(e); }
+			}
+		}
+		
+		public void Iterate(
+			Action<Item> iterator,
+			params Stack[] stacks
+		)
+		{
+			foreach (var id in stacks.Select(s => s.Id).Distinct())
+			{
+				if (TryGet(id, out var item))
+				{
+					try { iterator(item); }
+					catch (Exception e) { Debug.LogException(e); }
+				}
+				else Debug.LogError($"Unable to find item with Id {id}");
 			}
 		}
 
