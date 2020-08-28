@@ -10,8 +10,6 @@ namespace Lunra.Satchel
 {
 	public class Item
 	{
-		public const ulong UndefinedId = 0uL;
-		
 		[Flags]
 		public enum Formats
 		{
@@ -33,13 +31,13 @@ namespace Lunra.Satchel
 				Destroyed = 1 << 4
 			}
 			
-			[JsonProperty] public ulong Id { get; private set; }
+			[JsonProperty] public long Id { get; private set; }
 			[JsonProperty] public DateTime UpdateTime { get; private set; }
 			[JsonProperty] public Types[] Updates { get; private set; }
 			[JsonProperty] public ReadOnlyDictionary<string, (Property Property, Types Update)> PropertyEvents { get; private set; }
 
 			public Event(
-				ulong id,
+				long id,
 				DateTime updateTime,
 				Types[] updates,
 				ReadOnlyDictionary<string, (Property Property, Types Update)> propertyEvents
@@ -89,7 +87,7 @@ namespace Lunra.Satchel
 		}
 		
 		#region Serialized
-		[JsonProperty] public ulong Id { get; private set; }
+		[JsonProperty] public long Id { get; private set; }
 		[JsonProperty] public DateTime LastUpdated { get; private set; }
 		
 		[JsonProperty] bool isInitialized;
@@ -103,7 +101,7 @@ namespace Lunra.Satchel
 		Action<Event> itemStoreUpdated;
 		#endregion
 
-		public Item(ulong id) => Id = id;
+		public Item(long id) => Id = id;
 
 		public void Initialize(
 			ItemStore itemStore,
@@ -309,7 +307,7 @@ namespace Lunra.Satchel
 		/// <param name="lastUpdated"></param>
 		public void ForceUpdateTime(DateTime lastUpdated) => LastUpdated = lastUpdated;
 
-		public bool Is(ulong id) => id == Id;
+		public bool Is(long id) => id == Id;
 
 		public bool Is(Item item) => Is(item.Id);
 		

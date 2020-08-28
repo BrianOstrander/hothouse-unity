@@ -47,13 +47,13 @@ namespace Lunra.Satchel
 			[JsonProperty] public DateTime UpdateTime { get; private set; }
 			[JsonProperty] public Types Updates { get; private set; }
 			[JsonProperty] public bool IsEmpty { get; private set; }
-			[JsonProperty] public ReadOnlyDictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Types Type)> StackEvents { get; private set; }
+			[JsonProperty] public ReadOnlyDictionary<long, (int OldCount, int NewCount, int DeltaCount, Types Type)> StackEvents { get; private set; }
 			
 			public Event(
 				DateTime updateTime,
 				Types updates,
 				bool isEmpty,
-				ReadOnlyDictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Types Type)> stackEvents
+				ReadOnlyDictionary<long, (int OldCount, int NewCount, int DeltaCount, Types Type)> stackEvents
 			)
 			{
 				UpdateTime = updateTime;
@@ -176,7 +176,7 @@ namespace Lunra.Satchel
 			{
 				result |= ModificationResults.Modified;
 				
-				var stackEvents = new Dictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
+				var stackEvents = new Dictionary<long, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
 				var oldStacks = Stacks.ToArray();
 				stacks.Clear();
 				
@@ -230,7 +230,7 @@ namespace Lunra.Satchel
 			
 			var result = ModificationResults.None;
 			
-			Dictionary<ulong, (int Count, int RemovedCount, int Underflow)> consolidated = Stacks
+			Dictionary<long, (int Count, int RemovedCount, int Underflow)> consolidated = Stacks
 				.ToDictionary(
 					stack => stack.Id,
 					stack => (stack.Count, 0, 0)
@@ -271,7 +271,7 @@ namespace Lunra.Satchel
 			var underflowList = new List<Stack>();
 
 			void updateUnderflow(
-				ulong key,
+				long key,
 				int underflowCount
 			)
 			{
@@ -283,7 +283,7 @@ namespace Lunra.Satchel
 				result |= ModificationResults.Modified;
 				
 				stacks.Clear();
-				var stackEvents = new Dictionary<ulong, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
+				var stackEvents = new Dictionary<long, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
 				foreach (var kv in consolidated)
 				{
 					if (0 < kv.Value.Count) stacks.Add(new Stack(kv.Key, kv.Value.Count));

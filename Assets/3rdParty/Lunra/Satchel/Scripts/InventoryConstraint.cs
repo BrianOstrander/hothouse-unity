@@ -107,7 +107,7 @@ namespace Lunra.Satchel
 			out Stack[] overflow
 		)
 		{
-			var sorted = new Dictionary<ulong, (Item Item, int Count, int Overflow, int Limit)>();
+			var sorted = new Dictionary<long, (Item Item, int Count, int Overflow, int Limit)>();
 
 			if (IsIgnored)
 			{

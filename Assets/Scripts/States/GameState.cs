@@ -66,7 +66,7 @@ namespace Lunra.Hothouse.Services
 
 		void OnBeginInstantiateItems(Action done)
 		{
-			Payload.Game.Items.Initialize();
+			Payload.Game.Items.Initialize(Payload.Game.Ids);
 
 			done();
 		}

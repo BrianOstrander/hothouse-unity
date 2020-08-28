@@ -17,6 +17,7 @@ namespace Lunra.Hothouse.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
+		[JsonProperty] public IdCounter Ids { get; private set; } = new IdCounter();
 		[JsonProperty] public ItemStore Items { get; private set; } = new ItemStore();
 		
 		[JsonProperty] public LevelGenerationModel LevelGeneration { get; private set; } = new LevelGenerationModel();

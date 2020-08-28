@@ -55,8 +55,7 @@ namespace Lunra.Satchel
 		}
 		
 		#region Serialized
-		[JsonProperty] Dictionary<ulong, Item> items = new Dictionary<ulong, Item>();
-		[JsonProperty] ulong currentId = Item.UndefinedId + 1uL;
+		[JsonProperty] Dictionary<long, Item> items = new Dictionary<long, Item>();
 		[JsonProperty] DateTime lastUpdated;
 		#endregion
 		
@@ -65,6 +64,7 @@ namespace Lunra.Satchel
 		string[] ignoredKeysCloning;
 		IItemModifier[] modifiers;
 		
+		[JsonIgnore] public IdCounter IdCounter { get; private set; }
 		[JsonIgnore] public BuilderUtility Builder { get; private set; }
 		[JsonIgnore] public ValidationStore Validation { get; private set; }
 		[JsonIgnore] public ProcessorStore Processor { get; private set; }
@@ -73,11 +73,14 @@ namespace Lunra.Satchel
 		public event Action<Event> Updated;
 
 		public ItemStore Initialize(
+			IdCounter idCounter,
 			string[] ignoredKeysForStacking = null,
 			string[] ignoredKeysCloning = null,
 			IItemModifier[] modifiers = null
 		)
 		{
+			IdCounter = idCounter ?? throw new ArgumentNullException(nameof(idCounter));
+			
 			this.ignoredKeysForStacking = new[]
 				{
 					Constants.InstanceCount.Key
@@ -127,10 +130,7 @@ namespace Lunra.Satchel
 		/// <returns></returns>
 		public Item Define(Action<Item> initialize = null)
 		{
-			var itemId = currentId;
-			currentId++;
-			
-			var item = new Item(itemId);
+			var item = new Item(IdCounter.Next());
 
 			initialize?.Invoke(item);
 			
@@ -210,7 +210,7 @@ namespace Lunra.Satchel
 		{
 			if (stacks.None()) return false;
 
-			var consolidated = new Dictionary<ulong, (Item Item, int InstanceCount, int OldInstanceCount, Item.Event.Types ItemUpdates, Item.Event.Types PropertyUpdates, bool IgnoreCleanup)>();
+			var consolidated = new Dictionary<long, (Item Item, int InstanceCount, int OldInstanceCount, Item.Event.Types ItemUpdates, Item.Event.Types PropertyUpdates, bool IgnoreCleanup)>();
 			
 			var totalItemUpdates = Item.Event.Types.Item;
 			var totalPropertyUpdates = Item.Event.Types.Property;
@@ -361,7 +361,7 @@ namespace Lunra.Satchel
 			);
 		}
 		
-		public bool TryGet(ulong id, out Item item) => items.TryGetValue(id, out item);
+		public bool TryGet(long id, out Item item) => items.TryGetValue(id, out item);
 
 		public bool TryGet(Func<Item, bool> predicate, out Item item)
 		{
@@ -377,10 +377,10 @@ namespace Lunra.Satchel
 			}
 		}
 		
-		public Item First(ulong id) => items[id];
+		public Item First(long id) => items[id];
 		public Item First(Func<Item, bool> predicate) => items.First(kv => predicate(kv.Value)).Value;
 		
-		public Item FirstOrFallback(ulong id, Item fallback = null) => items.TryGetValue(id, out var value) ? value : fallback;
+		public Item FirstOrFallback(long id, Item fallback = null) => items.TryGetValue(id, out var value) ? value : fallback;
 
 		public Item FirstOrFallback(Func<Item, bool> predicate, Item fallback = null)
 		{
@@ -394,7 +394,7 @@ namespace Lunra.Satchel
 			}
 		}
 
-		public Item FirstOrDefault(ulong id) => FirstOrFallback(id);
+		public Item FirstOrDefault(long id) => FirstOrFallback(id);
 		public Item FirstOrDefault(Func<Item, bool> predicate) => FirstOrFallback(predicate);
 		public Item[] Where(Func<Item, bool> predicate) => items.Select(kv => kv.Value).Where(predicate).ToArray();
 		public Item[] ToArray() => items.Select(kv => kv.Value).ToArray();

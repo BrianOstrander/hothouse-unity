@@ -227,7 +227,7 @@ namespace Lunra.Hothouse.Editor
 
 			if (GUILayout.Button("item proc"))
 			{
-				var itemStore = new ItemStore().Initialize();
+				var itemStore = new ItemStore().Initialize(new IdCounter());
 				
 				itemStore.Updated += updateEvent =>
 				{
@@ -261,7 +261,7 @@ namespace Lunra.Hothouse.Editor
 			if (GUILayout.Button("Test Satchel 0f"))
 			{
 				var itemStore = new ItemStore();
-				itemStore.Initialize();
+				itemStore.Initialize(new IdCounter());
 
 				itemStore.Updated += updateEvent =>
 				{

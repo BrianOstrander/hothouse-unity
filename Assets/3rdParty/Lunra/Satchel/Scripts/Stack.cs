@@ -1,4 +1,5 @@
 using System;
+using Lunra.Core;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -9,14 +10,14 @@ namespace Lunra.Satchel
 		/// <summary>
 		/// The Id of the Item this stack contains.
 		/// </summary>
-		[JsonProperty] public ulong Id { get; private set; }
+		[JsonProperty] public long Id { get; private set; }
 		[JsonProperty] public int Count { get; private set; }
 
 		[JsonIgnore] public bool IsEmpty => Count == 0;
 		[JsonIgnore] public bool IsNotEmpty => !IsEmpty;
 
 		public Stack(
-			ulong id,
+			long id,
 			int count
 		)
 		{
@@ -29,10 +30,10 @@ namespace Lunra.Satchel
 		public Stack NewCount(int count) => new Stack(Id, count);
 		public Stack NewEmpty() => new Stack(Id, 0);
 
-		public bool Is(ulong id) => id == Id;
+		public bool Is(long id) => id == Id;
 		public bool Is(Item item) => item.Id == Id;
 
-		public bool IsNot(ulong id) => !Is(id);
+		public bool IsNot(long id) => !Is(id);
 		public bool IsNot(Item item) => !Is(item);
 
 		public bool Equals(Stack other) => Id == other.Id && Count == other.Count;
@@ -62,7 +63,7 @@ namespace Lunra.Satchel
 		public static Stack operator ++(Stack stack) => stack.NewCount(stack.Count + 1);
 		public static Stack operator --(Stack stack) => stack.NewCount(stack.Count - 1);
 
-		public static implicit operator Stack((Item Item, int Count) source) => new Stack(source.Item?.Id ?? Item.UndefinedId, source.Count);
+		public static implicit operator Stack((Item Item, int Count) source) => new Stack(source.Item?.Id ?? IdCounter.UndefinedId, source.Count);
 
 		public override string ToString() => $"[ {Id} ] : {Count}";
 
