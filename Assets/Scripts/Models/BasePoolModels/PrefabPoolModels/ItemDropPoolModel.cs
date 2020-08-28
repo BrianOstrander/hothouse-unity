@@ -55,7 +55,7 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			game.Items.Iterate(
-				item => item.Set(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.Output),
+				item => item.Set(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.Distribute),
 				inventory
 			);
 			
