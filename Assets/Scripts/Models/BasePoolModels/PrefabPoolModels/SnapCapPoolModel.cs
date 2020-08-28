@@ -51,7 +51,7 @@ namespace Lunra.Hothouse.Models
 			model.IsDebugging = false;
 			model.NavigationForceDistanceMaximum.Value = 4f;
 			model.Health.ResetToMaximum(80f);
-			Debug.LogError("TODO: Inventory reset");
+			Debug.LogWarning("TODO: Inventory reset");
 			// model.Inventory.Reset(InventoryCapacity.ByTotalWeight(2));
 			model.InteractionRadius.Value = 0.75f;
 			

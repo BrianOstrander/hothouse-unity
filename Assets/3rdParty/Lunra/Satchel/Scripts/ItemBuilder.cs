@@ -12,11 +12,11 @@ namespace Lunra.Satchel
 
 		public ItemBuilder(
 			ItemStore itemStore,
-			Inventory inventory
+			Inventory inventory = null
 		)
 		{
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
-			this.inventory = inventory ?? throw new ArgumentNullException(nameof(inventory));
+			this.inventory = inventory;
 		}
 
 		public ItemBuilder WithProperties(
@@ -40,22 +40,33 @@ namespace Lunra.Satchel
 			return this;
 		}
 
-		public bool Done(int count)
-		{
-			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be greater than zero");
-			return Done(count, out _);
-		}
-		
-		public bool Done(
+		public Stack Done(int count) => Done(count, out _);
+
+		public Stack Done(
 			int count,
-			out (Item Item, int Count) additions
+			out Item item
 		)
 		{
-			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be greater than zero");
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Must be greater than zero");
+
+			var propertyKeyValues = properties.Values.ToArray();
+			
+			if (inventory == null)
+			{
+				item = itemStore.Define(
+					i =>
+					{
+						i.Set(propertyKeyValues);
+						i.Set(Constants.InstanceCount, count);
+					}
+				);
+				return item.StackOf(count);
+			}
+			
 			return inventory.New(
 				count,
-				out additions,
-				properties.Values.ToArray()
+				out item,
+				propertyKeyValues
 			);
 		}
 	}

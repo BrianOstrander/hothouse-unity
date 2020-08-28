@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Lunra.Core;
 using Lunra.Hothouse.Services;
+using Lunra.Satchel;
 using Newtonsoft.Json;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
@@ -16,6 +17,8 @@ namespace Lunra.Hothouse.Models
 	public class GameModel : SaveModel
 	{
 		#region Serialized
+		[JsonProperty] public ItemStore Items { get; private set; } = new ItemStore();
+		
 		[JsonProperty] public LevelGenerationModel LevelGeneration { get; private set; } = new LevelGenerationModel();
 		[JsonProperty] public WorldCameraModel WorldCamera { get; private set; } = new WorldCameraModel();
 		[JsonProperty] public ToolbarModel Toolbar { get; private set; } = new ToolbarModel();

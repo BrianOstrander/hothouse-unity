@@ -59,7 +59,7 @@ namespace Lunra.Hothouse.Models
 			// 		}
 			// 	)	
 			// );
-			Debug.LogError("TODO: Clearable reset");
+			Debug.LogWarning("TODO: Clearable reset");
 		}
 	}
 }

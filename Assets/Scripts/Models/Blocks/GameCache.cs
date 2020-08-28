@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Models
 			result.GlobalItemDropsAvailable = new Stack[0];
 			result.GlobalInventory = new InventoryComponent();
 			// result.GlobalInventory.Reset(InventoryPermission.AllForAnyJob(), InventoryCapacity.None());
-			Debug.LogError("TODO: Permission rebinding");
+			Debug.LogWarning("TODO: Permission rebinding");
 			result.AnyItemDropsAvailableForPickup = false;
 			result.UniqueObligationsAvailable = new string[0];
 			result.AnyObligationsAvailable = false;
@@ -56,7 +56,7 @@ namespace Lunra.Hothouse.Models
 		{
 			var result = Default();
 			
-			Debug.LogError("TODO: Calc all this");
+			Debug.LogWarning("TODO: Calc all this");
 			return result;
 			/*
 			result.LastUpdated = game.PlaytimeElapsed.Value;

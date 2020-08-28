@@ -31,6 +31,7 @@ namespace Lunra.Hothouse.Services
 		protected override void Begin()
 		{
 			App.S.PushBlocking(OnBeginLoadScenes);
+			App.S.PushBlocking(OnBeginInstantiateItems);
 			App.S.PushBlocking(OnBeginInstantiatePresenters);
 			App.S.PushBlocking(
 				OnBeginInitializeNavigationMesh,
@@ -61,6 +62,13 @@ namespace Lunra.Hothouse.Services
 					Scenes
 				)
 			);
+		}
+
+		void OnBeginInstantiateItems(Action done)
+		{
+			Payload.Game.Items.Initialize();
+
+			done();
 		}
 
 		void OnBeginInstantiatePresenters(Action done)
@@ -123,7 +131,7 @@ namespace Lunra.Hothouse.Services
 
 			Payload.Game.SimulationMultiplier.Changed += OnGameSimulationMultiplier;
 			OnGameSimulationMultiplier(Payload.Game.SimulationMultiplier.Value);
-			
+
 			// App.Heartbeat.WaitForSeconds(
 			// 	() =>
 			// 	{

@@ -49,7 +49,7 @@ namespace Lunra.Hothouse.Models
 			// 	LightFuelInterval,
 			// 	LightState
 			// );
-			Debug.LogError("TODO: Light reset");
+			Debug.LogWarning("TODO: Light reset");
 			
 			model.LightSensitive.Reset();
 			
@@ -101,7 +101,7 @@ namespace Lunra.Hothouse.Models
 
 			model.SalvageInventory.Add(SalvageInventory);
 			*/
-			Debug.LogError("TODO: Inventory, all of it lol");
+			Debug.LogWarning("TODO: Inventory, all of it lol");
 			
 			model.Obligations.Reset();
 			

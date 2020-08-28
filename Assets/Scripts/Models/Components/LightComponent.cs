@@ -71,7 +71,8 @@ namespace Lunra.Hothouse.Models
 						IsLightCalculationsEnabled.Value = false;
 						break;
 					default:
-						Debug.LogError("Unrecognized LightState: " + LightState.Value);
+						// TODO THIS SHOULD BE A ERROR EVENTUALLY
+						Debug.LogWarning("Unrecognized LightState: " + LightState.Value);
 						break;
 				}
 			}
@@ -91,7 +92,8 @@ namespace Lunra.Hothouse.Models
 				case LightStates.Extinguished:
 					return false;
 				default:
-					Debug.LogError("Unrecognized LightState: "+LightState.Value);
+					// TODO THIS SHOULD BE A ERROR EVENTUALLY
+					Debug.LogWarning("Unrecognized LightState: "+LightState.Value);
 					return false;
 			}
 		}

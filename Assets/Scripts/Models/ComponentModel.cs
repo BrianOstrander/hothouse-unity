@@ -14,6 +14,7 @@ namespace Lunra.Hothouse.Models
 		void Bind();
 		void UnBind();
 
+		// TODO: This should be renamed possible and called upon the activation of a model too
 		void Initialize(
 			GameModel game,
 			IParentComponentModel model
@@ -34,11 +35,13 @@ namespace Lunra.Hothouse.Models
 		public virtual void Bind() { }
 		public virtual void UnBind() { }
 
+		// TODO: This should be renamed possible and called upon the activation of a model too
 		public virtual void Initialize(
 			GameModel game,
 			IParentComponentModel model
 		)
 		{
+			// TODO: POSSIBLE CHECK IF INITIALIZED ALREADY
 			Game = game;
 			Model = model as M;
 		}
@@ -48,6 +51,7 @@ namespace Lunra.Hothouse.Models
 	
 	public static class ParentComponentModelExtensions
 	{
+		// TODO: This should be renamed possible and called upon the activation of a model too
 		public static void InitializeComponents(
 			this IParentComponentModel model,
 			GameModel game

@@ -77,7 +77,7 @@ namespace Lunra.Hothouse.Models
 				.Select(a => new State(a, Restrictions.NotCalculated))
 				.ToArray();
 
-			Debug.LogError("TODO: Calculate capacity");
+			Debug.LogWarning("TODO: Calculate capacity");
 			// calculateAvailableCapacity = All.Value.Any(a => a.Activity.Output.HasValue);
 			
 			reservationsListener.Value = new GoalActivityReservation[0];
@@ -146,7 +146,7 @@ namespace Lunra.Hothouse.Models
 				.OrderBy(r => r.AppointmentBegin.TotalTime) // Not sure if ordering works on these... need to check...
 				.ToArray();
 
-			Debug.LogError("TODO: IO stuff");
+			Debug.LogWarning("TODO: IO stuff");
 			// if (activity.Input.HasValue)
 			// {
 			// 	Model.Inventory.AddForbidden(activity.Input.Value);	
@@ -194,7 +194,7 @@ namespace Lunra.Hothouse.Models
 				.Where(r => r.ReservationId != reservation.ReservationId)
 				.ToArray();
 
-			Debug.LogError("TODO: IO Stuff");
+			Debug.LogWarning("TODO: IO Stuff");
 			// if (activity.Input.HasValue)
 			// {
 			// 	Model.Inventory.RemoveForbidden(activity.Input.Value);
@@ -212,7 +212,7 @@ namespace Lunra.Hothouse.Models
 
 		public void CalculateRestrictions()
 		{
-			Debug.LogError("TODO: Calculate if activities have available input and stuff...");
+			Debug.LogWarning("TODO: Calculate if activities have available input and stuff...");
 			/*
 			if (All.Value.None()) return;
 			

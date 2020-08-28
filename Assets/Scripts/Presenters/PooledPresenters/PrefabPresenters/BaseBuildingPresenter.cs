@@ -42,7 +42,7 @@ namespace Lunra.Hothouse.Presenters
 				Game.SimulationUpdate += OnLightSimulationUpdate;
 				Model.Light.LightState.Changed += OnLightState;
 				// Model.Inventory.All.Changed += OnLightBuildingInventory;
-				Debug.LogError("TODO: Light Handling Bind - prolly wanna move this logic to the component instead");
+				Debug.LogWarning("TODO: Light Handling Bind - prolly wanna move this logic to the component instead");
 				Model.BuildingState.Changed += OnLightBuildingState;
 			}
 
@@ -55,7 +55,7 @@ namespace Lunra.Hothouse.Presenters
 			// Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
 			// Model.SalvageInventory.All.Changed += OnBuildingSalvageInventory;
 			// Model.Inventory.Available.Changed += OnBuildingAvailableInventory;
-			Debug.LogError("TODO: Bind Construct/Salvage/Inventory - should probably be handled by a component or something instead...");
+			Debug.LogWarning("TODO: Bind Construct/Salvage/Inventory - should probably be handled by a component or something instead...");
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
@@ -80,7 +80,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationUpdate -= OnLightSimulationUpdate;
 			Model.Light.LightState.Changed -= OnLightState;
 			// Model.Inventory.All.Changed -= OnLightBuildingInventory;
-			Debug.LogError("TODO: Light Handling UnBind - see bind for details");
+			Debug.LogWarning("TODO: Light Handling UnBind - see bind for details");
 			Model.BuildingState.Changed -= OnLightBuildingState;
 			
 			// Misc UnBindings
@@ -92,7 +92,7 @@ namespace Lunra.Hothouse.Presenters
 			// Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
 			// Model.SalvageInventory.All.Changed -= OnBuildingSalvageInventory;
 			// Model.Inventory.Available.Changed -= OnBuildingAvailableInventory;
-			Debug.LogError("TODO: UnBind Construct/Salvage/Inventory - should probably be handled by a component or something instead...");
+			Debug.LogWarning("TODO: UnBind Construct/Salvage/Inventory - should probably be handled by a component or something instead...");
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
@@ -110,7 +110,7 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void OnSimulationInitialized()
 		{
-			Debug.LogError("TODO: Available inventory or something");
+			Debug.LogWarning("TODO: Available inventory or something");
 			// OnBuildingAvailableInventory(Model.Inventory.All.Value);
 		}
 		
@@ -125,7 +125,7 @@ namespace Lunra.Hothouse.Presenters
 			if (Model.Light.LightFuelInterval.Value.IsDone)
 			{
 				// var canRefuel = Model.Inventory.Available.Value.Contains(Model.Light.LightFuel.Value);
-				Debug.LogError("TODO: Some refuel testing logic here");
+				Debug.LogWarning("TODO: Some refuel testing logic here");
 				var canRefuel = false;
 
 				if (canRefuel)
@@ -148,7 +148,8 @@ namespace Lunra.Hothouse.Presenters
 						Model.Light.LightFuelInterval.Value = Model.Light.LightFuelInterval.Value.Restarted();
 						return;
 					default:
-						Debug.LogError("Unrecognized LightState: "+Model.Light.LightState.Value);
+						// TODO SHOULD BE A ERROR EVENTUALLY
+						Debug.LogWarning("Unrecognized LightState: "+Model.Light.LightState.Value);
 						return;
 				}
 			}
@@ -422,7 +423,8 @@ namespace Lunra.Hothouse.Presenters
 							case LightStates.Extinguishing: View.LightFuelNormal = Model.Light.LightFuelInterval.Value.InverseNormalized; break; 
 							case LightStates.Extinguished: View.LightFuelNormal = 0f; break;
 							default:
-								Debug.LogError("Unrecognized LightState: "+Model.Light.LightState.Value+" on "+Model.Id.Value);
+								// TODO THIS SHOULD BE A ERROR EVENTUALLY
+								Debug.LogWarning("Unrecognized LightState: "+Model.Light.LightState.Value+" on "+Model.Id.Value);
 								break;
 						}
 						break;

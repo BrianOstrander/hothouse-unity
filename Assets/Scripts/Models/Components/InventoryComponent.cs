@@ -1,7 +1,4 @@
-using System;
-using System.Linq;
-using Lunra.StyxMvp.Models;
-using Newtonsoft.Json;
+using Lunra.Satchel;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -14,44 +11,38 @@ namespace Lunra.Hothouse.Models
 	public class InventoryComponent : ComponentModel<IInventoryModel>
 	{
 		#region Serialized
-		[JsonProperty] InventoryPermission permission = InventoryPermission.AllForAnyJob();
-		[JsonProperty] public ListenerProperty<InventoryPermission> Permission { get; private set; }
-		
-		// [JsonProperty] Inventory all = Inventory.Empty;
-		// protected readonly ListenerProperty<Inventory> AllListener;
-		// [JsonIgnore] public ReadonlyProperty<Inventory> All { get; }
+		public Inventory Container { get; private set; } = new Inventory();
 		#endregion
 		
 		#region Non Serialized
 		#endregion
 
-		public InventoryComponent()
+		public override void UnBind()
 		{
-			Permission = new ListenerProperty<InventoryPermission>(value => permission = value, () => permission);
-			Debug.LogError("TODO: Set up All");
+			// I think this is the correct place to destroy any items, should ensure they are properly cleaned up...
+			Container.Destroy();
 		}
 
-		public void Reset(
-			InventoryPermission permission
-		)
+		public override void Initialize(GameModel game, IParentComponentModel model)
+		{
+			base.Initialize(game, model);
+
+			Container.Initialize(game.Items);
+		}
+
+		public void Reset(ItemStore itemStore)
 		{
 			ResetId();
-			
-			Permission.Value = permission;
-			Debug.LogError("TODO: More reset logic");
+
+			// TODO: This should eventually only be handled by initialize
+			Container.Initialize(itemStore);
 		}
 
 		public override string ToString()
 		{
-			var result = "Inventory Component [ " + ShortId + " ]:";
+			var result = "Inventory Component [ " + ShortId + " ]:\n";
+			result += Container.ToString(Inventory.Formats.IncludeItems | Inventory.Formats.IncludeItemProperties);
 			return result;
 		}
-
-		#region Utility
-		void Recalculate()
-		{
-			
-		}
-		#endregion
 	}
 }

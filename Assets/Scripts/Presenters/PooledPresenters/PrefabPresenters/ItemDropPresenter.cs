@@ -16,7 +16,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 			
 			// Model.Inventory.All.Changed += OnItemDropInventory;
-			Debug.LogError("TODO: Bind Inventory");
+			Debug.LogWarning("TODO: Bind Inventory");
 			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
 			
 			base.Bind();
@@ -27,7 +27,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
 			// Model.Inventory.All.Changed -= OnItemDropInventory;
-			Debug.LogError("TODO: UnBind Inventory");
+			Debug.LogWarning("TODO: UnBind Inventory");
 			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
 			
 			base.UnBind();
@@ -37,7 +37,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			base.OnViewPrepare();
 
-			Debug.LogError("TODO: Set inventory weight stuff");
+			Debug.LogWarning("TODO: Set inventory weight stuff");
 			// var item = Model.Inventory.All.Value.Entries.OrderByDescending(i => i.Weight).FirstOrDefault();
 			// View.SetEntry(item.Weight);
 			

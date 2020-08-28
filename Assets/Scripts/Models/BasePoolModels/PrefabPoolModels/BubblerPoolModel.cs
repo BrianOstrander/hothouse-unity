@@ -61,7 +61,7 @@ namespace Lunra.Hothouse.Models
 			// 	Inventory.FromEntry(Inventory.Types.Berries, 6),
 			// 	maximumClearers: 3
 			// );
-			Debug.LogError("TODO: Clearable reset");
+			Debug.LogWarning("TODO: Clearable reset");
 			
 			model.LightSensitive.Reset();
 		}

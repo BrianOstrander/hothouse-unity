@@ -29,7 +29,7 @@ namespace Lunra.Hothouse.Models
 		{
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 			// Model.Inventory.All.Changed += OnParentInventory;
-			Debug.LogError("TODO: Bind inventory");
+			Debug.LogWarning("TODO: Bind inventory");
 			Model.Tags.All.Changed += OnParentTags;
 			
 		}
@@ -38,7 +38,7 @@ namespace Lunra.Hothouse.Models
 		{
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			// Model.Inventory.All.Changed -= OnParentInventory;
-			Debug.LogError("TODO: UnBind inventory");
+			Debug.LogWarning("TODO: UnBind inventory");
 			Model.Tags.All.Changed -= OnParentTags;
 		}
 

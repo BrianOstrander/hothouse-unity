@@ -156,7 +156,7 @@ namespace Lunra.Hothouse.Models
 			model.ObligationDistance.Value = 0.75f;
 			model.ObligationMinimumConcentrationDuration.Value = 0.5f;
 
-			Debug.LogError("TODO: Inventory reset");
+			Debug.LogWarning("TODO: Inventory reset");
 			// model.InventoryPromises.Reset();
 
 			model.Goals.Reset(this);

@@ -11,6 +11,7 @@ namespace Lunra.Satchel
 		public InventoryConstraintBuilder BeginConstraint() => new InventoryConstraintBuilder(itemStore);
 		public InventoryFilterBuilder BeginInventoryFilter() => new InventoryFilterBuilder(itemStore);
 		public PropertyFilterBuilder BeginPropertyFilter() => new PropertyFilterBuilder(itemStore);
+		public ItemBuilder BeginItem() => new ItemBuilder(itemStore);
 		
 		public Inventory Inventory() => new Inventory().Initialize(itemStore);
 	}

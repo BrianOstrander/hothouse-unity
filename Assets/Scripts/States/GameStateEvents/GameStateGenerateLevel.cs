@@ -364,7 +364,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 									// 	new FloatRange(8f, 12f),
 									// 	(Inventory.Types.Water, 1, 2)
 									// );
-									Debug.LogError("TODO: Handle Generator Generation");
+									Debug.LogWarning("TODO: Handle Generator Generation");
 								}
 								else
 								{
@@ -571,6 +571,16 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			foreach (var dweller in payload.Game.Dwellers.AllActive) dweller.Transform.Position.Value = bonfire.Transform.Position.Value + (Vector3.back * 2.5f);
 
+			payload.Game.ItemDrops.Activate(
+				spawn.Id.Value,
+				Vector3.zero,
+				Quaternion.identity,
+				payload.Game.Items.Builder
+					.BeginItem()
+					.WithProperties(ItemDefaults.Resource.Stalk)
+					.Done(10)
+			);
+			
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
 			// payload.Game.SimulationMultiplier.Value = 60f;
 			//

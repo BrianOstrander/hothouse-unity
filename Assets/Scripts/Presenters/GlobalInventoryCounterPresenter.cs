@@ -16,6 +16,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			this.game = game;
 
+			game.SimulationUpdate += OnGameSimulationUpdate;
 			game.Cache.Changed += OnGameCache;
 
 			game.Toolbar.IsEnabled.Changed += OnToolbarIsEnabled;
@@ -25,6 +26,7 @@ namespace Lunra.Hothouse.Presenters
 
 		protected override void UnBind()
 		{
+			game.SimulationUpdate -= OnGameSimulationUpdate;
 			game.Cache.Changed -= OnGameCache;
 			
 			game.Toolbar.IsEnabled.Changed -= OnToolbarIsEnabled;
@@ -42,6 +44,11 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region GameModel Events
+		void OnGameSimulationUpdate()
+		{
+			game.Items.Processor.Process(game.SimulationTimeDelta);
+		}
+		
 		void OnGameCache(GameCache cache)
 		{
 			if (View.NotVisible) return;
@@ -52,7 +59,7 @@ namespace Lunra.Hothouse.Presenters
 			
 			result += "\nPopulation: " + cache.Population + "\n";
 
-			Debug.LogError("TODO: Handle collecting of inventory available to player");
+			Debug.LogWarning("TODO: Handle collecting of inventory available to player");
 			// foreach (var type in EnumExtensions.GetValues(Inventory.Types.Unknown))
 			// {
 			// 	var color = "white";

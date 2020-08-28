@@ -127,7 +127,7 @@ namespace Lunra.Satchel
 		#endregion
 
 		#region Non Serialized
-		bool isInitialized;
+		[JsonIgnore] public bool IsInitialized { get; private set; }
 		ItemStore itemStore;
 		[JsonIgnore] public ReadOnlyCollection<Stack> Stacks { get; private set; }
 		public event Action<Event> Updated;
@@ -137,9 +137,9 @@ namespace Lunra.Satchel
 		{
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
 			
-			if (isInitialized) return this;
+			if (IsInitialized) return this;
 			
-			isInitialized = true;
+			IsInitialized = true;
 			
 			this.itemStore = itemStore;
 			Stacks = stacks.AsReadOnly();
@@ -149,12 +149,19 @@ namespace Lunra.Satchel
 			return this;
 		}
 
+		public void Add(Stack[] additions)
+		{
+			var result = Add(additions, out _);
+			
+			if (result.HasFlag(ModificationResults.Overflow)) Debug.LogError("Unhandled overflow can cause item leaks");
+		}
+
 		public ModificationResults Add(
 			Stack[] additions,
 			out Stack[] overflow
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Add));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Add));
 			
 			var result = ModificationResults.None;
 			
@@ -208,12 +215,19 @@ namespace Lunra.Satchel
 			return result;
 		}
 		
+		public void Remove(Stack[] removals)
+		{
+			var result = Remove(removals, out _);
+			
+			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow may cause unexpected problems");
+		}
+		
 		public ModificationResults Remove(
 			Stack[] removals,
 			out Stack[] underflow
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Remove));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Remove));
 			
 			var result = ModificationResults.None;
 			
@@ -299,18 +313,18 @@ namespace Lunra.Satchel
 			return result;
 		}
 		
-		public bool New(
+		public Stack New(
 			int count,
-			out (Item Item, int Count) additions,
+			out Item item,
 			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
 			
 			var result = NewNonDestructive(
 				count,
-				out var item,
+				out item,
 				out var additionsStack,
 				out var overflowStack,
 				propertyKeyValues
@@ -318,9 +332,7 @@ namespace Lunra.Satchel
 
 			if (result.HasFlag(ModificationResults.Overflow)) itemStore.Destroy(overflowStack);
 
-			additions = (item, additionsStack.Count);
-			
-			return additionsStack.IsNotEmpty;
+			return additionsStack;
 		}
 		
 		public ModificationResults NewNonDestructive(
@@ -331,7 +343,7 @@ namespace Lunra.Satchel
 			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
 			
 			item = itemStore.Define(
@@ -350,21 +362,21 @@ namespace Lunra.Satchel
 			);
 		}
 		
-		public bool Clone(
+		public Stack Clone(
 			int count,
 			Item reference,
-			out (Item Item, int Count) additions,
+			out Item item,
 			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Clone));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Clone));
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
 			if (reference == null) throw new ArgumentNullException(nameof(reference));
 
 			var result = CloneNonDestructive(
 				count,
 				reference,
-				out var item,
+				out item,
 				out var additionsStack,
 				out var overflowStack,
 				propertyKeyValues
@@ -372,9 +384,7 @@ namespace Lunra.Satchel
 			
 			if (result.HasFlag(ModificationResults.Overflow)) itemStore.Destroy(overflowStack);
 
-			additions = (item, additionsStack.Count);
-			
-			return additionsStack.IsNotEmpty;
+			return additionsStack;
 		}
 
 		public ModificationResults CloneNonDestructive(
@@ -386,7 +396,7 @@ namespace Lunra.Satchel
 			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
 			if (reference == null) throw new ArgumentNullException(nameof(reference));
 			
@@ -433,13 +443,15 @@ namespace Lunra.Satchel
 
 			return result;
 		}
+
+		public ModificationResults Destroy() => Destroy(Stacks.ToArray(), out _);
 		
 		public ModificationResults Destroy(
 			Stack[] destroyed,
 			out Stack[] underflow
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Destroy));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Destroy));
 
 			if (destroyed.None())
 			{
@@ -486,7 +498,7 @@ namespace Lunra.Satchel
 
 		public ItemBuilder Build()
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Build));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Build));
 			return new ItemBuilder(itemStore, this);
 		}
 
@@ -494,7 +506,7 @@ namespace Lunra.Satchel
 			InventoryConstraint constraint
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(UpdateConstraint));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(UpdateConstraint));
 			
 			var result = UpdateConstraintNonDestructive(
 				constraint,
@@ -511,7 +523,7 @@ namespace Lunra.Satchel
 			out Stack[] overflow
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(UpdateConstraintNonDestructive));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(UpdateConstraintNonDestructive));
 			
 			Constraint = constraint;
 
@@ -536,7 +548,7 @@ namespace Lunra.Satchel
 
 		public bool Clear()
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(Clear));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Clear));
 
 			if (Stacks.None()) return false;
 			
@@ -553,7 +565,7 @@ namespace Lunra.Satchel
 			out int count
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(TryOperation));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(TryOperation));
 			
 			result = default;
 			count = 0;
@@ -604,7 +616,7 @@ namespace Lunra.Satchel
 			out bool result
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(TryAllEqual));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(TryAllEqual));
 			
 			result = false;
 			var anyOperations = false;
@@ -664,7 +676,7 @@ namespace Lunra.Satchel
 			out bool result
 		)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(TryAnyEqual));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(TryAnyEqual));
 			
 			result = false;
 			var anyOperations = false;
@@ -729,7 +741,7 @@ namespace Lunra.Satchel
 
 		public string ToString(Formats format)
 		{
-			var result = $"Item Inventory Contains {Stacks.Count} Stacks | {(isInitialized ? "Initialized" : "Not Initialized")} | {lastUpdated}";
+			var result = $"Item Inventory Contains {Stacks.Count} Stacks | {(IsInitialized ? "Initialized" : "Not Initialized")} | {lastUpdated}";
 
 			if (format == Formats.Default) return result;
 

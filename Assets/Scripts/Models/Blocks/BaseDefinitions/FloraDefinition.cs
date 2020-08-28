@@ -79,7 +79,7 @@ namespace Lunra.Hothouse.Models
 			model.Enterable.Reset();
 			model.Obligations.Reset();
 			
-			Debug.LogError("TODO: Clearable drops");
+			Debug.LogWarning("TODO: Clearable drops");
 			// model.Clearable.Reset(
 			// 	new Inventory(
 			// 		ItemDrops.ToDictionary(
