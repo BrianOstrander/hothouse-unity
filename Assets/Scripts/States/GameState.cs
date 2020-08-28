@@ -118,6 +118,7 @@ namespace Lunra.Hothouse.Services
 		{
 			new PopulationService(Payload.Game);
 			new HostileSpawnService(Payload.Game);
+			new LogisticsService(Payload.Game);
 		}
 		#endregion
 

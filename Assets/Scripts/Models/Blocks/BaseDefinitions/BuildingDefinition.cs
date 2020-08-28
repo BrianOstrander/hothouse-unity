@@ -19,6 +19,7 @@ namespace Lunra.Hothouse.Models
 		public virtual LightStates LightState => LightStates.Unknown;
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
+		public virtual StackRecipe[] Inventory => new StackRecipe[0];
 		// public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
 		// public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
 		// public virtual Inventory DefaultInventory => Inventory.Empty;
@@ -101,7 +102,19 @@ namespace Lunra.Hothouse.Models
 
 			model.SalvageInventory.Add(SalvageInventory);
 			*/
-			Debug.LogWarning("TODO: Inventory, all of it lol");
+			//Debug.LogWarning("TODO: Inventory, all of it lol");
+			
+			model.Inventory.Reset(Game.Items);
+
+			foreach (var recipe in Inventory)
+			{
+				model.Inventory.Container.New(
+					recipe.Count,
+					out _,
+					recipe.Properties
+				);
+			}
+			
 			
 			model.Obligations.Reset();
 			

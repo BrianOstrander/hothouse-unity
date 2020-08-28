@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
-using Lunra.Hothouse.Presenters;
 using Lunra.Hothouse.Views;
 using Lunra.StyxMvp;
 using Newtonsoft.Json;

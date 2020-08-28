@@ -17,17 +17,16 @@ namespace Lunra.Hothouse.Models
 				)
 				{
 					const float DefaultDecayRate = 1f; // Per real second at 1x speed
-					const float DefaultDecayMaximum = DayTime.RealTimeToSimulationTime * DefaultDecayRate * (5f); // Real seconds to decay
+					const float DefaultDecayMaximum = DayTime.RealTimeToSimulationTime * DefaultDecayRate * (60f * 10f); // Real seconds to decay
 				
 					var result = new []
 					{
 						Keys.Resource.Id.Pair(id.ToSnakeCase()),
 						Keys.Resource.InventoryId.Pair(),
 					
-						Keys.Resource.Logistics.Type.Pair(Values.Resource.Logistics.Types.None),
 						Keys.Resource.Logistics.State.Pair(Values.Resource.Logistics.States.None),
-						Keys.Resource.Logistics.Available.Pair(-1),
-						Keys.Resource.Logistics.Promised.Pair(-1),
+						// Keys.Resource.Logistics.ResourceId.Pair(),
+						// Keys.Resource.Logistics.Fulfillment.Pair(-1),
 					
 						Keys.Resource.Decay.Enabled.Pair(true),
 						Keys.Resource.Decay.Maximum.Pair(DefaultDecayMaximum),
@@ -54,7 +53,7 @@ namespace Lunra.Hothouse.Models
 		
 			public static class Resource
 			{
-				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Keys), suffix);
+				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Resource), suffix);
 
 				public static readonly PropertyKey<string> Id = Create<string>(nameof(Id));
 				public static readonly PropertyKey<string> InventoryId = Create<string>(nameof(InventoryId));
@@ -63,10 +62,7 @@ namespace Lunra.Hothouse.Models
 				{
 					static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Keys), nameof(Logistics), suffix);
 				
-					public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
 					public static readonly PropertyKey<string> State = Create<string>(nameof(State));
-					public static readonly PropertyKey<int> Available = Create<int>(nameof(Available));
-					public static readonly PropertyKey<int> Promised = Create<int>(nameof(Promised));
 				}
 			
 				public static class Decay
@@ -80,7 +76,15 @@ namespace Lunra.Hothouse.Models
 					public static readonly PropertyKey<float> Rate = Create<float>(nameof(Rate));
 					public static readonly PropertyKey<float> RatePredicted = Create<float>(nameof(RatePredicted));
 				}
-			}	
+			}
+
+			public static class Capacity
+			{
+				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Capacity), suffix);
+				
+				public static readonly PropertyKey<string> ResourceId = Create<string>(nameof(ResourceId));
+				public static readonly PropertyKey<int> Fulfillment = Create<int>(nameof(Fulfillment));
+			}
 		}
 
 		public static class Values
@@ -89,19 +93,10 @@ namespace Lunra.Hothouse.Models
 			{
 				public static class Logistics
 				{
-					public static class Types
-					{
-						public static readonly string None = nameof(None).ToSnakeCase();
-						public static readonly string Construction = nameof(Construction).ToSnakeCase();
-						public static readonly string Recipe = nameof(Recipe).ToSnakeCase();
-						public static readonly string Goal = nameof(Goal).ToSnakeCase();
-					}
-			
 					public static class States
 					{
 						public static readonly string None = nameof(None).ToSnakeCase();
-						public static readonly string Distribute = nameof(Distribute).ToSnakeCase();
-						public static readonly string Desire = nameof(Desire).ToSnakeCase();
+						public static readonly string Distribute = nameof(Distribute).ToSnakeCase(); // TODO I THINK THIS SHOULDN'T EXIST AND SHOULD BE HANDLED BY CAPACITY
 						public static readonly string Input = nameof(Input).ToSnakeCase();
 						public static readonly string Output = nameof(Output).ToSnakeCase();
 						public static readonly string Transit = nameof(Transit).ToSnakeCase();
