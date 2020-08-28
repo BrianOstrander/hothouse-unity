@@ -19,7 +19,7 @@ namespace Lunra.Hothouse.Services
 		{
 			var current = item.Get(ItemKeys.Resource.Decay.Current);
 
-			if (CheckForDecay(item, current)) return;
+			if (CheckForDestruction(item, current)) return;
 
 			var rate = item.Get(ItemKeys.Resource.Decay.Rate);
 			
@@ -41,26 +41,33 @@ namespace Lunra.Hothouse.Services
 			item.Set(ItemKeys.Resource.Decay.Previous, previous);
 			item.Set(ItemKeys.Resource.Decay.Current, current);
 
-			CheckForDecay(item, current);
+			CheckForDestruction(item, current);
 		}
 
-		bool CheckForDecay(
+		bool CheckForDestruction(
 			Item item,
 			float current
 		)
 		{ 
 			if (Mathf.Approximately(0f, current))
 			{
-				OnDecayed(item);
+				OnDestruction(item);
 				return true;
 			}
 
 			return false;
 		}
 
-		void OnDecayed(Item item)
+		void OnDestruction(Item item)
 		{
-			
+			var inventoryId = item.Get(Constants.InventoryId);
+			if (!ItemStore.Inventories.TryGetValue(inventoryId, out var inventory))
+			{
+				Debug.LogError($"Unable to get find an inventory with an Id of {inventoryId}");
+				return;
+			}
+
+			inventory.Destroy(item);
 		}
 
 		public override bool BreakProcessing(Item item) => item.Get(Constants.Destroyed);

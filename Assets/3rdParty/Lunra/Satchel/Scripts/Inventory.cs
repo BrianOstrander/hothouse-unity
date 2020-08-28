@@ -484,6 +484,22 @@ namespace Lunra.Satchel
 
 		public ModificationResults DestroyAll() => Destroy(Stacks.ToArray(), out _);
 
+		public ModificationResults Destroy(params Item[] destroyed)
+		{
+			var destroyedIds = destroyed
+				.Select(i => i.Id)
+				.Distinct()
+				.ToArray();
+
+			if (destroyedIds.None()) return ModificationResults.None;
+			
+			var destroyedStacks = Stacks
+				.Where(s => destroyedIds.Contains(s.Id))
+				.ToArray();
+
+			return destroyedStacks.None() ? ModificationResults.None : Destroy(destroyedStacks);
+		}
+		
 		public ModificationResults Destroy(params Stack[] destroyed)
 		{
 			var result = Destroy(destroyed, out _);
