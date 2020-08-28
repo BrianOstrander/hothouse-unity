@@ -1,28 +1,27 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using UnityEngine;
 using System;
 
 namespace Lunra.Core.Converters
 {
-	public class QuaternionConverter : JsonConverter
+	public class NullableVector3Converter : JsonConverter
 	{
 		[Serializable]
-		struct SimpleQuaternion
+		class SimpleVector3
 		{
 			public float x;
 			public float y;
 			public float z;
-			public float w;
 
-			public override string ToString () => $"( {x}, {y}, {z}, {w} )";
+			public override string ToString () => $"( {x}, {y}, {z} )";
 		}
 
-		public override bool CanConvert (Type objectType) => objectType == typeof(Quaternion);
+		public override bool CanConvert (Type objectType) => objectType == typeof(Vector3?);
 
 		public override void WriteJson (JsonWriter writer, object value, JsonSerializer serializer)
 		{
-			var quaternion = (Quaternion)value;
-			var simple = new SimpleQuaternion { x = quaternion.x, y = quaternion.y, z = quaternion.z , w = quaternion.w };
+			var vector3 = (Vector3?)value;
+			var simple = vector3.HasValue ? new SimpleVector3 { x = vector3.Value.x, y = vector3.Value.y, z = vector3.Value.z } : null;
 			var settings = Serialization.SettingsFromSerializer(serializer);
 			settings.TypeNameHandling = TypeNameHandling.None;
 			writer.WriteRawValue(JsonConvert.SerializeObject(simple, settings));
@@ -30,8 +29,9 @@ namespace Lunra.Core.Converters
 
 		public override object ReadJson (JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
 		{
-			var simple = serializer.Deserialize<SimpleQuaternion>(reader);
-			return new Quaternion(simple.x, simple.y, simple.z, simple.w);
+			var simple = serializer.Deserialize<SimpleVector3>(reader);
+			if (simple == null) return null;
+			return new Vector3(simple.x, simple.y, simple.z);
 		}
 	}
 }

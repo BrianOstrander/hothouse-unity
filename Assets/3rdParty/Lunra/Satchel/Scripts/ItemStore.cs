@@ -58,6 +58,8 @@ namespace Lunra.Satchel
 		#region Serialized
 		[JsonProperty] Dictionary<long, Item> items = new Dictionary<long, Item>();
 		[JsonProperty] DateTime lastUpdated;
+		[JsonProperty] List<long> itemDestructionQueued = new List<long>();
+		
 		#endregion
 		
 		#region Non Serialized
@@ -87,8 +89,7 @@ namespace Lunra.Satchel
 			
 			this.ignoredKeysForStacking = new[]
 				{
-					Constants.InstanceCount.Key,
-					Constants.InventoryId.Key
+					Constants.InstanceCount.Key
 				}
 				.Concat(ignoredKeysForStacking ?? new string[0])
 				.Distinct()
@@ -97,7 +98,6 @@ namespace Lunra.Satchel
 			this.ignoredKeysCloning = new[]
 				{
 					Constants.InstanceCount.Key,
-					Constants.InventoryId.Key,
 					Constants.Destroyed.Key
 				}
 				.Concat(ignoredKeysCloning ?? new string[0])
@@ -109,10 +109,6 @@ namespace Lunra.Satchel
 					new CallbackItemModifier(
 						i => i.Set(Constants.InstanceCount, 0),
 						i => !i.IsDefined(Constants.InstanceCount)
-					),
-					new CallbackItemModifier(
-						i => i.Set(Constants.InventoryId, IdCounter.UndefinedId),
-						i => !i.IsDefined(Constants.InventoryId)
 					),
 					new CallbackItemModifier(
 						i => i.Set(Constants.Destroyed, false)
@@ -357,29 +353,15 @@ namespace Lunra.Satchel
 					{
 						Debug.LogError($"Expected {ExpectedPropertyUpdate:F} for {Constants.Destroyed} but got {destroyedPropertyUpdate.Update:F} instead");
 					}
-					
-					items.Remove(entry.Value.Item.Id);
+
+					itemDestructionQueued.Add(entry.Value.Item.Id);
 					
 					propertyEvents.Add(
 						Constants.Destroyed.Key,
 						destroyedPropertyUpdate
 					);
 					
-					entry.Value.Item.Set(
-						Constants.InventoryId.Key,
-						IdCounter.UndefinedId,
-						out var inventoryIdPropertyUpdate,
-						true
-					);
-
-					// Only updates if this was ever in an inventory.
-					if (inventoryIdPropertyUpdate.Update == (Item.Event.Types.Property | Item.Event.Types.Updated))
-					{
-						propertyEvents.Add(
-							Constants.InventoryId.Key,
-							inventoryIdPropertyUpdate
-						);
-					}
+					entry.Value.Item.ForceUpdateInventoryId(IdCounter.UndefinedId);
 				}
 				else
 				{
@@ -392,6 +374,7 @@ namespace Lunra.Satchel
 				);
 
 				entry.Value.Item.ForceUpdateTime(updateTime);
+				entry.Value.Item.ForceUpdateInventoryId(IdCounter.UndefinedId);
 				
 				itemEventsList.Add(
 					new Item.Event(
@@ -456,6 +439,15 @@ namespace Lunra.Satchel
 			{
 				try { iterator(kv.Value); }
 				catch (Exception e) { Debug.LogException(e); }
+			}
+		}
+
+		public void Cleanup()
+		{
+			while (itemDestructionQueued.Any())
+			{
+				items.Remove(itemDestructionQueued[0]);
+				itemDestructionQueued.RemoveAt(0);
 			}
 		}
 
@@ -525,11 +517,11 @@ namespace Lunra.Satchel
 			// If we don't get the item that means it was destroyed, which is okay... I think?
 			if (TryGet(itemId, out var item))
 			{
-				if (item.TryGet(Constants.InventoryId, out var inventoryId) && inventoryId != IdCounter.UndefinedId)
-				{
-					if (inventoryCallbacks.TryGetValue(inventoryId, out var inventoryCallback)) inventoryCallback?.Invoke(eventResult);
-					else Debug.LogError($"No inventory registered for Id {inventoryId}");
-				}
+				// if (item.TryGet(Constants.InventoryId, out var inventoryId) && inventoryId != IdCounter.UndefinedId)
+				// {
+				// 	if (inventoryCallbacks.TryGetValue(inventoryId, out var inventoryCallback)) inventoryCallback?.Invoke(eventResult);
+				// 	else Debug.LogError($"No inventory registered for Id {inventoryId}");
+				// }
 			}
 
 			return true;

@@ -1,29 +1,22 @@
 ﻿using Newtonsoft.Json;
 using UnityEngine;
 using System;
-using Lunra.Core;
 
 namespace Lunra.Core.Converters
 {
 	public class Vector3Converter : JsonConverter
 	{
 		[Serializable]
-		class SimpleVector3
+		struct SimpleVector3
 		{
 			public float x;
 			public float y;
 			public float z;
 
-			public override string ToString ()
-			{
-				return "( "+x+", "+y+", "+z+" )";
-			}
+			public override string ToString () => $"( {x}, {y}, {z} )";
 		}
 
-		public override bool CanConvert (Type objectType)
-		{
-			return objectType == typeof(Vector3);
-		}
+		public override bool CanConvert (Type objectType) => objectType == typeof(Vector3);
 
 		public override void WriteJson (JsonWriter writer, object value, JsonSerializer serializer)
 		{

@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using UnityEngine;
 using System;
 
 namespace Lunra.Core.Converters
 {
-	public class RectConverter : JsonConverter
+	public class NullableRectConverter : JsonConverter
 	{
 		[Serializable]
-		struct SimpleRect
+		class SimpleRect
 		{
 			public float x;
 			public float y;
@@ -17,12 +17,12 @@ namespace Lunra.Core.Converters
 			public override string ToString () => $"( {x}, {y}, {width}, {height} )";
 		}
 
-		public override bool CanConvert (Type objectType) => objectType == typeof(Rect);
+		public override bool CanConvert (Type objectType) => objectType == typeof(Rect?);
 
 		public override void WriteJson (JsonWriter writer, object value, JsonSerializer serializer)
 		{
-			var rect = (Rect)value;
-			var simple = new SimpleRect { x = rect.x, y = rect.y, width = rect.width, height = rect.height };
+			var rect = (Rect?)value;
+			var simple = rect.HasValue ? new SimpleRect { x = rect.Value.x, y = rect.Value.y, width = rect.Value.width, height = rect.Value.height } : null;
 			var settings = Serialization.SettingsFromSerializer(serializer);
 			settings.TypeNameHandling = TypeNameHandling.None;
 			writer.WriteRawValue(JsonConvert.SerializeObject(simple, settings));
@@ -31,6 +31,7 @@ namespace Lunra.Core.Converters
 		public override object ReadJson (JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
 		{
 			var simple = serializer.Deserialize<SimpleRect>(reader);
+			if (simple == null) return null;
 			return new Rect(simple.x, simple.y, simple.width, simple.height);
 		}
 	}

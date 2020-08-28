@@ -222,6 +222,20 @@ namespace Lunra.Satchel
 					stacks.Add(new Stack(modification.Id, modification.Count));
 					
 					if (modification.Count == oldCount) continue;
+
+					if (oldCount == 0)
+					{
+						if (itemStore.TryGet(modification.Id, out var modificationItem))
+						{
+							if (!(modificationItem.InventoryId == IdCounter.UndefinedId || modificationItem.InventoryId == Id))
+							{
+								Debug.LogError($"Item already has an unrecognized InventoryId assigned to it of {modificationItem.InventoryId}, unexpected behaviour may occur");	
+							}
+							
+							modificationItem.ForceUpdateInventoryId(Id);
+						}
+						else Debug.LogError($"Could not find item with Id {modification.Id}");
+					}
 					
 					stackEvents.Add(
 						modification.Id,
@@ -387,7 +401,6 @@ namespace Lunra.Satchel
 				{
 					i.Set(propertyKeyValues);
 					i.Set(Constants.InstanceCount, count);
-					i.Set(Constants.InventoryId, Id);
 				}
 			);
 
@@ -443,7 +456,6 @@ namespace Lunra.Satchel
 				{
 					i.Set(propertyKeyValues);
 					i.Set(Constants.InstanceCount, count);
-					i.Set(Constants.InventoryId, Id);
 				}
 			);
 			
@@ -462,6 +474,8 @@ namespace Lunra.Satchel
 			out Stack overflow
 		)
 		{
+			item.ForceUpdateInventoryId(Id);
+
 			additions = item.StackOf(count);
 			
 			var result = Add(

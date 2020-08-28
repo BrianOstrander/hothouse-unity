@@ -23,11 +23,17 @@ namespace Lunra.Core
 			new Vector4Converter(),
 			new QuaternionConverter(),
 			new ColorConverter(),
+			new NullableVector2Converter(),
+			new NullableVector3Converter(),
+			new NullableVector4Converter(), 
+			new NullableQuaternionConverter(), 
+			new NullableColorConverter(), 
 			new StringEnumConverter()
 		};
 
 		static JsonSerializerSettings serializerSettings;
 
+		
 		static JsonSerializerSettings SerializerSettings 
 		{
 			get

@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using UnityEngine;
 using System;
 
 namespace Lunra.Core.Converters
 {
-	public class ColorConverter : JsonConverter
+	public class NullableColorConverter : JsonConverter
 	{
 		[Serializable]
-		struct SimpleColor
+		class SimpleColor
 		{
 			public float r;
 			public float g;
@@ -17,12 +17,12 @@ namespace Lunra.Core.Converters
 			public override string ToString () => $"( {r}, {g}, {b}, {a} )";
 		}
 
-		public override bool CanConvert (Type objectType) => objectType == typeof(Color);
+		public override bool CanConvert (Type objectType) => objectType == typeof(Color?);
 
 		public override void WriteJson (JsonWriter writer, object value, JsonSerializer serializer)
 		{
-			var color = (Color)value;
-			var simple = new SimpleColor { r = color.r, g = color.g, b = color.b, a = color.a };
+			var color = (Color?)value;
+			var simple = color.HasValue ? new SimpleColor { r = color.Value.r, g = color.Value.g, b = color.Value.b, a = color.Value.a } : null;
 			var settings = Serialization.SettingsFromSerializer(serializer);
 			settings.TypeNameHandling = TypeNameHandling.None;
 			writer.WriteRawValue(JsonConvert.SerializeObject(simple, settings));
@@ -31,6 +31,7 @@ namespace Lunra.Core.Converters
 		public override object ReadJson (JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
 		{
 			var simple = serializer.Deserialize<SimpleColor>(reader);
+			if (simple == null) return null;
 			return new Color(simple.r, simple.g, simple.b, simple.a);
 		}
 	}
