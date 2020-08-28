@@ -123,7 +123,6 @@ namespace Lunra.Satchel
 		[JsonProperty] List<Stack> stacks = new List<Stack>();
 		[JsonProperty] DateTime lastUpdated;
 		[JsonProperty] public InventoryConstraint Constraint { get; private set; } = InventoryConstraint.Ignored();
-		[JsonProperty] public int Count { get; private set; }
 		#endregion
 
 		#region Non Serialized
