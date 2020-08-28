@@ -28,6 +28,9 @@ namespace Lunra.Satchel
 				case Property.Types.Int:
 					item.Set(Key, Property.IntValue);
 					break;
+				case Property.Types.Long:
+					item.Set(Key, Property.LongValue);
+					break;
 				case Property.Types.Float:
 					item.Set(Key, Property.FloatValue);
 					break;
@@ -60,6 +63,14 @@ namespace Lunra.Satchel
 					item.Set(
 						Key,
 						Property.IntValue,
+						out result,
+						suppressUpdates
+					);
+					break;
+				case Property.Types.Long:
+					item.Set(
+						Key,
+						Property.LongValue,
 						out result,
 						suppressUpdates
 					);

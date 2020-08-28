@@ -26,6 +26,7 @@ namespace Lunra.Satchel
 
 			InitializeValidators<bool>();
 			InitializeValidators<int>();
+			InitializeValidators<long>();
 			InitializeValidators<float>();
 			InitializeValidators<string>();
 

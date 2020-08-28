@@ -60,6 +60,44 @@ namespace Lunra.Satchel
 				);
 			}
 			
+			public static class Long
+			{
+				public static PropertyValidation Defined(string key) => new PropertyValidation(
+					key,
+					Types.Long | Types.Defined
+				);
+				
+				public static PropertyValidation EqualTo(string key, long value) => new PropertyValidation(
+					key,
+					Types.Long | Types.EqualTo,
+					longOperands: new [] { value }
+				);
+				
+				public static PropertyValidation LessThan(string key, long value) => new PropertyValidation(
+					key,
+					Types.Long | Types.LessThan,
+					longOperands: new [] { value }
+				);
+				
+				public static PropertyValidation GreaterThan(string key, long value) => new PropertyValidation(
+					key,
+					Types.Long | Types.GreaterThan,
+					longOperands: new [] { value }
+				);
+				
+				public static PropertyValidation LessThanOrEqualTo(string key, long value) => new PropertyValidation(
+					key,
+					Types.Long | Types.LessThan | Types.EqualTo,
+					longOperands: new [] { value }
+				);
+				
+				public static PropertyValidation GreaterThanOrEqualTo(string key, long value) => new PropertyValidation(
+					key,
+					Types.Long | Types.GreaterThan | Types.EqualTo,
+					longOperands: new [] { value }
+				);
+			}
+			
 			public static class Float
 			{
 				public static PropertyValidation Defined(string key) => new PropertyValidation(
@@ -137,20 +175,21 @@ namespace Lunra.Satchel
 			None = 0,
 			Bool = 1 << 0,
 			Int = 1 << 1,
-			Float = 1 << 2,
-			String = 1 << 3,
+			Long = 1 << 2,
+			Float = 1 << 3,
+			String = 1 << 4,
 			
-			Invert = 1 << 4,
+			Invert = 1 << 5,
 			
-			Defined = 1 << 5,
-			EqualTo = 1 << 6,
+			Defined = 1 << 6,
+			EqualTo = 1 << 7,
 			
-			LessThan = 1 << 7,
-			GreaterThan = 1 << 8,
+			LessThan = 1 << 8,
+			GreaterThan = 1 << 9,
 			
-			Contains = 1 << 9,
-			StartsWith = 1 << 10,
-			EndsWith = 1 << 11,
+			Contains = 1 << 10,
+			StartsWith = 1 << 11,
+			EndsWith = 1 << 12,
 		}
 		
 		public enum Results
@@ -167,6 +206,7 @@ namespace Lunra.Satchel
 
 		[JsonProperty] public bool[] BoolOperands { get; private set; }
 		[JsonProperty] public int[] IntOperands { get; private set; }
+		[JsonProperty] public long[] LongOperands { get; private set; }
 		[JsonProperty] public float[] FloatOperands { get; private set; }
 		[JsonProperty] public string[] StringOperands { get; private set; }
 		#endregion
@@ -181,6 +221,7 @@ namespace Lunra.Satchel
 			Types type,
 			bool[] boolOperands = null,
 			int[] intOperands = null,
+			long[] longOperands = null,
 			float[] floatOperands = null,
 			string[] stringOperands = null
 		)
@@ -189,6 +230,7 @@ namespace Lunra.Satchel
 			Type = type;
 			BoolOperands = boolOperands ?? new bool[0];
 			IntOperands = intOperands ?? new int[0];
+			LongOperands = longOperands ?? new long[0];
 			FloatOperands = floatOperands ?? new float[0];
 			StringOperands = stringOperands ?? new string[0];
 		}
@@ -224,6 +266,12 @@ namespace Lunra.Satchel
 			if (Type.HasFlag(Types.Int))
 			{
 				var isDefined = item.TryGet(Key, out int value);
+				return validation(this, item, value, isDefined);
+			}
+			
+			if (Type.HasFlag(Types.Long))
+			{
+				var isDefined = item.TryGet(Key, out long value);
 				return validation(this, item, value, isDefined);
 			}
 
@@ -279,6 +327,7 @@ namespace Lunra.Satchel
 		bool TryGetNextOperand<O>(
 			ref int boolCount,
 			ref int intCount,
+			ref int longCount,
 			ref int floatCount,
 			ref int stringCount,
 			out O operand
@@ -298,6 +347,15 @@ namespace Lunra.Satchel
 				return TryGetNextOperandFromArray(
 					IntOperands,
 					ref intCount,
+					out operand
+				);
+			}
+			
+			if (typeof(O) == typeof(long))
+			{
+				return TryGetNextOperandFromArray(
+					LongOperands,
+					ref longCount,
 					out operand
 				);
 			}
@@ -332,12 +390,14 @@ namespace Lunra.Satchel
 		{
 			var boolCount = -1;
 			var intCount = -1;
+			var longCount = -1;
 			var floatCount = -1;
 			var stringCount = -1;
 
 			return TryGetNextOperand(
 				ref boolCount,
 				ref intCount,
+				ref longCount,
 				ref floatCount,
 				ref stringCount,
 				out operand
@@ -351,12 +411,14 @@ namespace Lunra.Satchel
 		{
 			var boolCount = -1;
 			var intCount = -1;
+			var longCount = -1;
 			var floatCount = -1;
 			var stringCount = -1;
 
 			var foundAll = TryGetNextOperand(
 				ref boolCount,
 				ref intCount,
+				ref longCount,
 				ref floatCount,
 				ref stringCount,
 				out operand0
@@ -365,6 +427,7 @@ namespace Lunra.Satchel
 			foundAll &= TryGetNextOperand(
 				ref boolCount,
 				ref intCount,
+				ref longCount,
 				ref floatCount,
 				ref stringCount,
 				out operand1

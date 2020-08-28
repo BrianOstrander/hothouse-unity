@@ -12,8 +12,9 @@ namespace Lunra.Satchel
 			Unknown = 0,
 			Bool = 10,
 			Int = 20,
-			Float = 30,
-			String = 40
+			Long = 30,
+			Float = 40,
+			String = 50
 		}
 			
 		public static bool TryNew<T>(
@@ -30,6 +31,11 @@ namespace Lunra.Satchel
 			{
 				if (value is int intValue) property = new Property(Types.Int, intValue: intValue);
 				else property = new Property(Types.Int);
+			}
+			else if (typeof(T) == typeof(long))
+			{
+				if (value is long longValue) property = new Property(Types.Long, longValue: longValue);
+				else property = new Property(Types.Long);
 			}
 			else if (typeof(T) == typeof(float))
 			{
@@ -55,6 +61,7 @@ namespace Lunra.Satchel
 			
 		[JsonProperty] public bool BoolValue { get; private set; }
 		[JsonProperty] public int IntValue { get; private set; }
+		[JsonProperty] public long LongValue { get; private set; }
 		[JsonProperty] public float FloatValue { get; private set; }
 		[JsonProperty] public string StringValue { get; private set; }
 
@@ -62,6 +69,7 @@ namespace Lunra.Satchel
 			Types type,
 			bool boolValue = false,
 			int intValue = 0,
+			long longValue = 0L,
 			float floatValue = 0f,
 			string stringValue = null
 		)
@@ -69,6 +77,7 @@ namespace Lunra.Satchel
 			Type = type;
 			BoolValue = boolValue;
 			IntValue = intValue;
+			LongValue = longValue;
 			FloatValue = floatValue;
 			StringValue = stringValue;
 		}
@@ -81,6 +90,8 @@ namespace Lunra.Satchel
 					return typeof(T) == typeof(bool);
 				case Types.Int:
 					return typeof(T) == typeof(int);
+				case Types.Long:
+					return typeof(T) == typeof(long);
 				case Types.Float:
 					return typeof(T) == typeof(float);
 				case Types.String:
@@ -109,6 +120,14 @@ namespace Lunra.Satchel
 					if (IntValue is T intValue)
 					{
 						value = intValue;
+						return true;
+					}
+					else Debug.LogError($"Unrecognized type {typeof(T).Name}");
+					break;
+				case Types.Long:
+					if (LongValue is T longValue)
+					{
+						value = longValue;
 						return true;
 					}
 					else Debug.LogError($"Unrecognized type {typeof(T).Name}");
@@ -178,6 +197,22 @@ namespace Lunra.Satchel
 						
 					newResult = Result<Property>.Failure($"Expected new value of type {Type}, but it was a {value.GetType().Name}");
 					break;
+				case Types.Long:
+					if (value is long longValue)
+					{
+						newResult = Result<Property>.Success(
+							new Property(
+								Type,
+								longValue: longValue
+							)
+						);
+						isUpdated = longValue != LongValue;
+						isReplacement = isUpdated;
+						return true;
+					}
+						
+					newResult = Result<Property>.Failure($"Expected new value of type {Type}, but it was a {value.GetType().Name}");
+					break;
 				case Types.Float:
 					if (value is float floatValue)
 					{
@@ -228,6 +263,8 @@ namespace Lunra.Satchel
 					return BoolValue == property.BoolValue;
 				case Types.Int:
 					return IntValue == property.IntValue;
+				case Types.Long:
+					return LongValue == property.LongValue;
 				case Types.Float:
 					return Mathf.Approximately(FloatValue, property.FloatValue);
 				case Types.String:
@@ -252,6 +289,7 @@ namespace Lunra.Satchel
 			{
 				case Types.Bool: serializedValue = BoolValue.ToString().ToLower(); break;
 				case Types.Int: serializedValue = IntValue.ToString(); break;
+				case Types.Long: serializedValue = LongValue + "L"; break;
 				case Types.Float: serializedValue = FloatValue.ToString("N4"); break;
 				case Types.String:
 					serializedValue = StringValue == null ? "null" : $"\"{StringValue}\""; 

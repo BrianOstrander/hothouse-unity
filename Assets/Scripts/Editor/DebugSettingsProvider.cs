@@ -238,24 +238,20 @@ namespace Lunra.Hothouse.Editor
 					Debug.Log(res);
 				};
 				
-				var filterIntKey = new PropertyKey<int>("some_int_key0");
+				var filterLongKey = new PropertyKey<long>("some_int_key0");
 				
 				var inventory0 = itemStore.Builder.Inventory();
 
 				inventory0
 					.Build()
 					.WithProperties(
-						ItemDefaults.Resource.Stalk
+						ItemDefaults.Resource.Stalk,
+						filterLongKey.Pair(69L)
 					)
 					.Done(10);
 				
 				Debug.Log(itemStore.Serialize(formatting: Formatting.Indented));
 
-				for (var i = 0; i < 600; i++)
-				{
-					itemStore.Processor.Process(1f / 60f);
-				}
-				//itemStore.Processor.Process();
 			}
 
 			if (GUILayout.Button("Test Satchel 0f"))

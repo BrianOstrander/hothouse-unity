@@ -43,6 +43,7 @@ namespace Lunra.Satchel
 			{
 				if (typeof(T) == typeof(bool)) return PropertyValidation.Types.Bool;
 				if (typeof(T) == typeof(int)) return PropertyValidation.Types.Int;
+				if (typeof(T) == typeof(long)) return PropertyValidation.Types.Long;
 				if (typeof(T) == typeof(float)) return PropertyValidation.Types.Float;
 				if (typeof(T) == typeof(string)) return PropertyValidation.Types.String;
 				Debug.LogError($"Unrecognized type: {typeof(T).Name}");
@@ -65,6 +66,7 @@ namespace Lunra.Satchel
 				{
 					case PropertyValidation.Types.Bool:
 					case PropertyValidation.Types.Int:
+					case PropertyValidation.Types.Long:
 					case PropertyValidation.Types.Float:
 					case PropertyValidation.Types.String:
 						if (OperationType.HasFlag(type)) Debug.LogError($"OperationType has invalid type: {type}");
