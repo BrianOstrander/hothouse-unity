@@ -55,7 +55,6 @@ namespace Lunra.Satchel
 					catch (Exception e)
 					{
 						throw new Exception($"Processor {processor.GetType().Name} encountered an exception on {nameof(processor.IsValid)} for item {item}", e);
-						continue;
 					}
 
 					try
@@ -65,6 +64,15 @@ namespace Lunra.Satchel
 					catch (Exception e)
 					{
 						throw new Exception($"Processor {processor.GetType().Name} encountered an exception on {nameof(processor.Process)} for item {item}", e);
+					}
+					
+					try
+					{
+						if (processor.IsDestructionPossible() && item.Get(Constants.Destroyed)) break;
+					}
+					catch (Exception e)
+					{
+						throw new Exception($"Processor {processor.GetType().Name} encountered an exception on {nameof(processor.IsDestructionPossible)} for item {item}", e);
 					}
 				}
 				catch (Exception e)

@@ -13,10 +13,13 @@ namespace Lunra.Hothouse.Services
 			.BeginPropertyFilter()
 			.RequireAll(PropertyValidation.Default.Bool.EqualTo(ItemKeys.Resource.Decay.Enabled.Key, true));
 
+		public override bool IsDestructionPossible() => true;
+
 		public override void Process(Item item, float deltaTime)
 		{
 			var current = item.Get(ItemKeys.Resource.Decay.Current);
-			if (Mathf.Approximately(0f, current)) return;
+
+			if (CheckForDecay(item, current)) return;
 
 			var rate = item.Get(ItemKeys.Resource.Decay.Rate);
 			
@@ -37,6 +40,27 @@ namespace Lunra.Hothouse.Services
 
 			item.Set(ItemKeys.Resource.Decay.Previous, previous);
 			item.Set(ItemKeys.Resource.Decay.Current, current);
+
+			CheckForDecay(item, current);
+		}
+
+		bool CheckForDecay(
+			Item item,
+			float current
+		)
+		{ 
+			if (Mathf.Approximately(0f, current))
+			{
+				OnDecayed(item);
+				return true;
+			}
+
+			return false;
+		}
+
+		void OnDecayed(Item item)
+		{
+			
 		}
 	}
 }

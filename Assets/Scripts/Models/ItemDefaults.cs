@@ -15,9 +15,9 @@ namespace Lunra.Hothouse.Models
 			)
 			{
 				const float DefaultDecayRate = 1f; // Per real second at 1x speed
-				const float DefaultDecayMaximum = DayTime.RealTimeToSimulationTime * DefaultDecayRate * (60f * 1f); // About a minute
+				const float DefaultDecayMaximum = DayTime.RealTimeToSimulationTime * DefaultDecayRate * (5f); // Real seconds to decay
 				
-				var result = new PropertyKeyValue[]
+				var result = new []
 				{
 					ItemKeys.Resource.Id.Pair(id.ToSnakeCase()),
 					ItemKeys.Resource.InventoryId.Pair(),
