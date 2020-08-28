@@ -83,7 +83,8 @@ namespace Lunra.Satchel
 			
 			this.ignoredKeysForStacking = new[]
 				{
-					Constants.InstanceCount.Key
+					Constants.InstanceCount.Key,
+					Constants.InventoryId.Key
 				}
 				.Concat(ignoredKeysForStacking ?? new string[0])
 				.Distinct()
@@ -92,6 +93,7 @@ namespace Lunra.Satchel
 			this.ignoredKeysCloning = new[]
 				{
 					Constants.InstanceCount.Key,
+					Constants.InventoryId.Key,
 					Constants.Destroyed.Key
 				}
 				.Concat(ignoredKeysCloning ?? new string[0])
@@ -103,6 +105,10 @@ namespace Lunra.Satchel
 					new CallbackItemModifier(
 						i => i.Set(Constants.InstanceCount, 0),
 						i => !i.IsDefined(Constants.InstanceCount)
+					),
+					new CallbackItemModifier(
+						i => i.Set(Constants.InventoryId, IdCounter.UndefinedId),
+						i => !i.IsDefined(Constants.InventoryId)
 					),
 					new CallbackItemModifier(
 						i => i.Set(Constants.Destroyed, false)
@@ -333,6 +339,22 @@ namespace Lunra.Satchel
 						Constants.Destroyed.Key,
 						destroyedPropertyUpdate
 					);
+					
+					entry.Value.Item.Set(
+						Constants.InventoryId.Key,
+						IdCounter.UndefinedId,
+						out var inventoryIdPropertyUpdate,
+						true
+					);
+
+					// Only updates if this was ever in an inventory.
+					if (inventoryIdPropertyUpdate.Update == (Item.Event.Types.Property | Item.Event.Types.Updated))
+					{
+						propertyEvents.Add(
+							Constants.InventoryId.Key,
+							inventoryIdPropertyUpdate
+						);
+					}
 				}
 				else
 				{

@@ -8,12 +8,12 @@ namespace Lunra.Hothouse.Services
 	{
 		const float PredictedRatePastWeight = 0.95f;
 		const float PredictedRateRecentWeight = 1f - PredictedRatePastWeight;
-		
+
+		public override int Priority => ProcessorPriorities.ResourceDecay;
+
 		protected override PropertyFilter GetFilter() => ItemStore.Builder
 			.BeginPropertyFilter()
 			.RequireAll(PropertyValidation.Default.Bool.EqualTo(ItemKeys.Resource.Decay.Enabled.Key, true));
-
-		public override bool IsDestructionPossible() => true;
 
 		public override void Process(Item item, float deltaTime)
 		{
@@ -62,5 +62,7 @@ namespace Lunra.Hothouse.Services
 		{
 			
 		}
+
+		public override bool BreakProcessing(Item item) => item.Get(Constants.Destroyed);
 	}
 }

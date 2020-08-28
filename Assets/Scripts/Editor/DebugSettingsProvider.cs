@@ -250,6 +250,18 @@ namespace Lunra.Hothouse.Editor
 					)
 					.Done(10);
 				
+				var inventory1 = itemStore.Builder.Inventory();
+
+				var item1 = inventory1
+					.Build()
+					.WithProperties(
+						ItemDefaults.Resource.Stalk,
+						filterLongKey.Pair(420L)
+					)
+					.Done(10);
+
+				inventory1.Destroy(item1);
+				
 				Debug.Log(itemStore.Serialize(formatting: Formatting.Indented));
 
 			}

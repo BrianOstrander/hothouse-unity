@@ -68,11 +68,11 @@ namespace Lunra.Satchel
 					
 					try
 					{
-						if (processor.IsDestructionPossible() && item.Get(Constants.Destroyed)) break;
+						if (processor.BreakProcessing(item)) break;
 					}
 					catch (Exception e)
 					{
-						throw new Exception($"Processor {processor.GetType().Name} encountered an exception on {nameof(processor.IsDestructionPossible)} for item {item}", e);
+						throw new Exception($"Processor {processor.GetType().Name} encountered an exception on {nameof(processor.BreakProcessing)} for item {item}", e);
 					}
 				}
 				catch (Exception e)

@@ -153,11 +153,13 @@ namespace Lunra.Satchel
 			return this;
 		}
 
-		public void Add(Stack[] additions)
+		public ModificationResults Add(Stack[] additions)
 		{
 			var result = Add(additions, out _);
 			
 			if (result.HasFlag(ModificationResults.Overflow)) Debug.LogError("Unhandled overflow can cause item leaks");
+
+			return result;
 		}
 
 		public ModificationResults Add(
@@ -219,11 +221,13 @@ namespace Lunra.Satchel
 			return result;
 		}
 		
-		public void Remove(Stack[] removals)
+		public ModificationResults Remove(Stack[] removals)
 		{
 			var result = Remove(removals, out _);
 			
 			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow may cause unexpected problems");
+
+			return result;
 		}
 		
 		public ModificationResults Remove(
@@ -355,6 +359,7 @@ namespace Lunra.Satchel
 				{
 					i.Set(propertyKeyValues);
 					i.Set(Constants.InstanceCount, count);
+					i.Set(Constants.InventoryId, Id);
 				}
 			);
 
@@ -410,6 +415,7 @@ namespace Lunra.Satchel
 				{
 					i.Set(propertyKeyValues);
 					i.Set(Constants.InstanceCount, count);
+					i.Set(Constants.InventoryId, Id);
 				}
 			);
 			
@@ -449,6 +455,15 @@ namespace Lunra.Satchel
 		}
 
 		public ModificationResults Destroy() => Destroy(Stacks.ToArray(), out _);
+
+		public ModificationResults Destroy(params Stack[] destroyed)
+		{
+			var result = Destroy(destroyed, out _);
+			
+			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow on destruction may cause unexpected problems");
+			
+			return result;
+		}
 		
 		public ModificationResults Destroy(
 			Stack[] destroyed,
