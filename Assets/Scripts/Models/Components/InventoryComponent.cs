@@ -20,8 +20,7 @@ namespace Lunra.Hothouse.Models
 		public override void UnBind()
 		{
 			// I think this is the correct place to destroy any items, should ensure they are properly cleaned up...
-			Container.Destroy();
-			Container = null;
+			Container.Reset();
 		}
 
 		public override void Initialize(GameModel game, IParentComponentModel model)

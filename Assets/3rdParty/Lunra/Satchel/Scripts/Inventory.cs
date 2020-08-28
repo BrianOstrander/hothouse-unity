@@ -132,28 +132,56 @@ namespace Lunra.Satchel
 		ItemStore itemStore;
 		[JsonIgnore] public ReadOnlyCollection<Stack> Stacks { get; private set; }
 		public event Action<Event> Updated;
+		public event Action<ItemStore.Event> UpdatedItem;
 		#endregion
 
-		public Inventory(long id) => Id = id;
+		public Inventory(long id)
+		{
+			if (id == IdCounter.UndefinedId) throw new Exception($"Id {id} is an invalid and undefined value");
+			Id = id;
+		}
 
 		public Inventory Initialize(ItemStore itemStore)
 		{
-			if (Id == IdCounter.UndefinedId) throw new Exception($"Id {Id} is an invalid and undefined value");
-			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
-			
 			if (IsInitialized) return this;
+			
+			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
+
+			if (Id == IdCounter.UndefinedId) Id = itemStore.IdCounter.Next();
 			
 			IsInitialized = true;
 			
-			this.itemStore = itemStore;
 			Stacks = stacks.AsReadOnly();
 
 			Constraint.Initialize(itemStore);
 
+			itemStore.Register(this, TriggerItemUpdate);
+
 			return this;
 		}
 
-		public ModificationResults Add(Stack[] additions)
+		/// <summary>
+		/// This is similar to creating a whole new inventory, by destroying any remaining items, changing its id, and
+		/// unregistering itself from the item store. It will need to be reinitialized after calling this.
+		/// </summary>
+		public void Reset()
+		{
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Reset));
+			
+			DestroyAll();
+			itemStore.UnRegister(this);
+			
+			Id = IdCounter.UndefinedId;
+			itemStore = null;
+			IsInitialized = false;
+			Stacks = null;
+			Constraint = InventoryConstraint.Ignored();
+
+			Updated = null;
+			UpdatedItem = null;
+		}
+
+		public ModificationResults Add(params Stack[] additions)
 		{
 			var result = Add(additions, out _);
 			
@@ -221,7 +249,7 @@ namespace Lunra.Satchel
 			return result;
 		}
 		
-		public ModificationResults Remove(Stack[] removals)
+		public ModificationResults Remove(params Stack[] removals)
 		{
 			var result = Remove(removals, out _);
 			
@@ -256,7 +284,7 @@ namespace Lunra.Satchel
 					if (stack.Count <= entry.Count)
 					{
 						entry.Count -= stack.Count;
-						entry.RemovedCount += entry.Count;
+						entry.RemovedCount += stack.Count;
 					}
 					else
 					{
@@ -454,7 +482,7 @@ namespace Lunra.Satchel
 			return result;
 		}
 
-		public ModificationResults Destroy() => Destroy(Stacks.ToArray(), out _);
+		public ModificationResults DestroyAll() => Destroy(Stacks.ToArray(), out _);
 
 		public ModificationResults Destroy(params Stack[] destroyed)
 		{
@@ -470,7 +498,7 @@ namespace Lunra.Satchel
 			out Stack[] underflow
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Destroy));
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(DestroyAll));
 
 			if (destroyed.None())
 			{
@@ -754,6 +782,12 @@ namespace Lunra.Satchel
 			lastUpdated = inventoryEvent.UpdateTime;
 			
 			Updated?.Invoke(inventoryEvent);
+		}
+
+		void TriggerItemUpdate(ItemStore.Event itemEvent)
+		{
+			lastUpdated = itemEvent.UpdateTime;
+			UpdatedItem?.Invoke(itemEvent);
 		}
 
 		public override string ToString() => ToString(Formats.IncludeItems | Formats.IncludeItemProperties);

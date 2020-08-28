@@ -231,7 +231,8 @@ namespace Lunra.Hothouse.Editor
 				
 				itemStore.Updated += updateEvent =>
 				{
-					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					var res = "\n-------- ItemStore Update --------\n";
+					res += updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
 					res += "\n-------- All Items --------\n";
 					res += itemStore.ToString(true, true);
 				
@@ -241,26 +242,36 @@ namespace Lunra.Hothouse.Editor
 				var filterLongKey = new PropertyKey<long>("some_int_key0");
 				
 				var inventory0 = itemStore.Builder.Inventory();
+				
+				inventory0.Updated += updateInventoryEvent =>
+				{
+					var res = "\n-------- Inventory0 Update --------\n";
+					res += updateInventoryEvent.ToString(Inventory.Event.Formats.IncludeStacks);
+				
+					Debug.Log(res);
+				};
 
-				inventory0
+				inventory0.UpdatedItem += updateItemEvent =>
+				{
+					var res = "\n-------- Inventory0 Item Update --------\n";
+					res += updateItemEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+				
+					Debug.Log(res);
+				};
+				
+				var item0 = inventory0
 					.Build()
 					.WithProperties(
 						ItemDefaults.Resource.Stalk,
 						filterLongKey.Pair(69L)
 					)
 					.Done(10);
+
+				// itemStore.First(item0.Id).Set(filterLongKey, 420);
 				
-				var inventory1 = itemStore.Builder.Inventory();
-
-				var item1 = inventory1
-					.Build()
-					.WithProperties(
-						ItemDefaults.Resource.Stalk,
-						filterLongKey.Pair(420L)
-					)
-					.Done(10);
-
-				inventory1.Destroy(item1);
+				inventory0.Destroy(item0);
 				
 				Debug.Log(itemStore.Serialize(formatting: Formatting.Indented));
 

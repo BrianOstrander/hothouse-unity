@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
 using Newtonsoft.Json;
@@ -63,11 +64,14 @@ namespace Lunra.Satchel
 		string[] ignoredKeysForStacking;
 		string[] ignoredKeysCloning;
 		IItemModifier[] modifiers;
+		Dictionary<long, Inventory> inventories;
+		Dictionary<long, Action<Event>> inventoryCallbacks;
 		
 		[JsonIgnore] public IdCounter IdCounter { get; private set; }
 		[JsonIgnore] public BuilderUtility Builder { get; private set; }
 		[JsonIgnore] public ValidationStore Validation { get; private set; }
 		[JsonIgnore] public ProcessorStore Processor { get; private set; }
+		[JsonIgnore] public ReadOnlyDictionary<long, Inventory> Inventories { get; private set; }
 		#endregion
 		
 		public event Action<Event> Updated;
@@ -117,6 +121,9 @@ namespace Lunra.Satchel
 				.Concat(modifiers ?? new IItemModifier[0])
 				.ToArray();
 
+			Inventories = new ReadOnlyDictionary<long, Inventory>(inventories = new Dictionary<long, Inventory>());
+			inventoryCallbacks = new Dictionary<long, Action<Event>>();
+			
 			Builder = new BuilderUtility(this);
 			Validation = new ValidationStore().Initialize(this);
 			Processor = new ProcessorStore().Initialize(this);
@@ -124,6 +131,24 @@ namespace Lunra.Satchel
 			foreach (var kv in items) kv.Value.Initialize(this, i => TryUpdate(i));
 
 			return this;
+		}
+
+		public void Register(
+			Inventory inventory,
+			Action<Event> update
+		)
+		{
+			if (inventory.Id == IdCounter.UndefinedId) throw new Exception("Cannot register an inventory with an undefined Id");
+			
+			inventories.Add(inventory.Id, inventory);
+			inventoryCallbacks.Add(inventory.Id, update);
+		}
+		
+		public void UnRegister(Inventory inventory)
+		{
+			if (inventory.Id == IdCounter.UndefinedId) throw new Exception("Cannot unregister an inventory with an undefined Id");
+			inventories.Remove(inventory.Id);
+			inventoryCallbacks.Remove(inventory.Id);
 		}
 
 		/// <summary>
@@ -451,9 +476,17 @@ namespace Lunra.Satchel
 			var eventTypeItem = Item.Event.Types.Item;
 
 			var itemEventsList = new List<Item.Event>();
+
+			var itemId = IdCounter.UndefinedId;
 			
 			foreach (var itemEvent in itemEvents)
 			{
+				if (itemId != itemEvent.Id)
+				{
+					if (itemId == IdCounter.UndefinedId) itemId = itemEvent.Id;
+					else Debug.LogError($"Expecting another item update for item Id {itemId}, but got one for {itemEvent.Id} instead, this is unexpected");
+				}
+				
 				var currentEventTypeProperty = Item.Event.Types.Property;
 				var currentEventTypeItem = Item.Event.Types.Item;
 				
@@ -480,14 +513,24 @@ namespace Lunra.Satchel
 			if (eventTypeList.None()) return false;
 			
 			lastUpdated = updateTime;
-			
-			Updated?.Invoke(
-				new Event(
-					updateTime,
-					eventTypeList.ToArray(),
-					itemEventsList.ToArray()
-				)
+
+			var eventResult = new Event(
+				updateTime,
+				eventTypeList.ToArray(),
+				itemEventsList.ToArray()
 			);
+			
+			Updated?.Invoke(eventResult);
+
+			// If we don't get the item that means it was destroyed, which is okay... I think?
+			if (TryGet(itemId, out var item))
+			{
+				if (item.TryGet(Constants.InventoryId, out var inventoryId) && inventoryId != IdCounter.UndefinedId)
+				{
+					if (inventoryCallbacks.TryGetValue(inventoryId, out var inventoryCallback)) inventoryCallback?.Invoke(eventResult);
+					else Debug.LogError($"No inventory registered for Id {inventoryId}");
+				}
+			}
 
 			return true;
 		}
