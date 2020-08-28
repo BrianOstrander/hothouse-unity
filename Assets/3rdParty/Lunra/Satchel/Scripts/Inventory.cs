@@ -122,6 +122,8 @@ namespace Lunra.Satchel
 		#region Serialized
 		[JsonProperty] List<Stack> stacks = new List<Stack>();
 		[JsonProperty] DateTime lastUpdated;
+
+		[JsonProperty] public long Id { get; private set; }
 		[JsonProperty] public InventoryConstraint Constraint { get; private set; } = InventoryConstraint.Ignored();
 		#endregion
 
@@ -132,8 +134,11 @@ namespace Lunra.Satchel
 		public event Action<Event> Updated;
 		#endregion
 
+		public Inventory(long id) => Id = id;
+
 		public Inventory Initialize(ItemStore itemStore)
 		{
+			if (Id == IdCounter.UndefinedId) throw new Exception($"Id {Id} is an invalid and undefined value");
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
 			
 			if (IsInitialized) return this;

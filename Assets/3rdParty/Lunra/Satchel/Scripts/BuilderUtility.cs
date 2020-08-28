@@ -13,6 +13,6 @@ namespace Lunra.Satchel
 		public PropertyFilterBuilder BeginPropertyFilter() => new PropertyFilterBuilder(itemStore);
 		public ItemBuilder BeginItem() => new ItemBuilder(itemStore);
 		
-		public Inventory Inventory() => new Inventory().Initialize(itemStore);
+		public Inventory Inventory() => new Inventory(itemStore.IdCounter.Next()).Initialize(itemStore);
 	}
 }
