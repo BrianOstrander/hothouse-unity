@@ -577,7 +577,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Quaternion.identity,
 				payload.Game.Items.Builder
 					.BeginItem()
-					.WithProperties(ItemConstants.Build.Resource.Stalk)
+					.WithProperties(Items.Instantiate.Resource.Stalk)
 					.Done(10)
 			);
 			

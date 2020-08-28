@@ -5,9 +5,9 @@ using Lunra.Satchel;
 
 namespace Lunra.Hothouse.Models
 {
-	public static class ItemConstants // rename to utility or something
+	public static class Items // rename to utility or something
 	{
-		public static class Build
+		public static class Instantiate
 		{
 			public static class Resource
 			{

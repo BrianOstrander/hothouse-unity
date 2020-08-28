@@ -264,7 +264,7 @@ namespace Lunra.Hothouse.Editor
 				var item0 = inventory0
 					.Build()
 					.WithProperties(
-						ItemConstants.Build.Resource.Stalk,
+						Items.Instantiate.Resource.Stalk,
 						filterLongKey.Pair(69L)
 					)
 					.Done(10);

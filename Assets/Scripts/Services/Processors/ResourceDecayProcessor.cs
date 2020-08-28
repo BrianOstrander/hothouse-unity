@@ -13,15 +13,15 @@ namespace Lunra.Hothouse.Services
 
 		protected override PropertyFilter GetFilter() => ItemStore.Builder
 			.BeginPropertyFilter()
-			.RequireAll(PropertyValidation.Default.Bool.EqualTo(ItemConstants.Keys.Resource.Decay.Enabled.Key, true));
+			.RequireAll(PropertyValidation.Default.Bool.EqualTo(Items.Keys.Resource.Decay.Enabled.Key, true));
 
 		public override void Process(Item item, float deltaTime)
 		{
-			var current = item.Get(ItemConstants.Keys.Resource.Decay.Current);
+			var current = item.Get(Items.Keys.Resource.Decay.Current);
 
 			if (CheckForDestruction(item, current)) return;
 
-			var rate = item.Get(ItemConstants.Keys.Resource.Decay.Rate);
+			var rate = item.Get(Items.Keys.Resource.Decay.Rate);
 			
 			// TODO: Additional rate modifiers calculated here, probably obtained from inventory...
 
@@ -33,13 +33,13 @@ namespace Lunra.Hothouse.Services
 			var rateSinceLastTime = Mathf.Abs(current - previous) / deltaTime;
 
 			item.Set(
-				ItemConstants.Keys.Resource.Decay.RatePredicted,
-				(PredictedRatePastWeight * item.Get(ItemConstants.Keys.Resource.Decay.RatePredicted))
+				Items.Keys.Resource.Decay.RatePredicted,
+				(PredictedRatePastWeight * item.Get(Items.Keys.Resource.Decay.RatePredicted))
 				+ (PredictedRateRecentWeight * rateSinceLastTime)
 			);
 
-			item.Set(ItemConstants.Keys.Resource.Decay.Previous, previous);
-			item.Set(ItemConstants.Keys.Resource.Decay.Current, current);
+			item.Set(Items.Keys.Resource.Decay.Previous, previous);
+			item.Set(Items.Keys.Resource.Decay.Current, current);
 
 			CheckForDestruction(item, current);
 		}
