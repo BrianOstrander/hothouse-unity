@@ -90,10 +90,38 @@ namespace Lunra.Hothouse.Models
 			
 			public static class Reservation
 			{
+				public static PropertyKeyValue[] OfInput(
+					string resourceId,
+					long capacityId,
+					params PropertyKeyValue[] overrides
+				)
+				{
+					return Of(
+						resourceId,
+						capacityId,
+						Values.Reservation.States.Input,
+						overrides
+					);
+				}
+				
+				public static PropertyKeyValue[] OfOutput(
+					string resourceId,
+					long capacityId,
+					params PropertyKeyValue[] overrides
+				)
+				{
+					return Of(
+						resourceId,
+						capacityId,
+						Values.Reservation.States.Output,
+						overrides
+					);
+				}
+				
 				static PropertyKeyValue[] Of(
 					string resourceId,
+					long capacityId,
 					string state,
-					bool promised,
 					params PropertyKeyValue[] overrides
 				)
 				{
@@ -102,8 +130,9 @@ namespace Lunra.Hothouse.Models
 						new []
 						{
 							Keys.Reservation.ResourceId.Pair(resourceId),
+							Keys.Reservation.CapacityId.Pair(capacityId),
 							Keys.Reservation.State.Pair(state),
-							Keys.Reservation.IsPromised.Pair(promised)
+							Keys.Reservation.IsPromised.Pair()
 						},
 						overrides
 					);
@@ -166,6 +195,7 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Reservation), suffix);
 				
 				public static readonly PropertyKey<string> ResourceId = Create<string>(nameof(ResourceId));
+				public static readonly PropertyKey<long> CapacityId = Create<long>(nameof(CapacityId));
 				public static readonly PropertyKey<string> State = Create<string>(nameof(State));
 				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 			}

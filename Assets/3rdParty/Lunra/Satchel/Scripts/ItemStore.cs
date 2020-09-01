@@ -73,6 +73,7 @@ namespace Lunra.Satchel
 		[JsonIgnore] public BuilderUtility Builder { get; private set; }
 		[JsonIgnore] public ValidationStore Validation { get; private set; }
 		[JsonIgnore] public ProcessorStore Processor { get; private set; }
+		[JsonIgnore] public ReadOnlyDictionary<long, Item> Items { get; private set; }
 		[JsonIgnore] public ReadOnlyDictionary<long, Inventory> Inventories { get; private set; }
 		#endregion
 		
@@ -117,6 +118,7 @@ namespace Lunra.Satchel
 				.Concat(modifiers ?? new IItemModifier[0])
 				.ToArray();
 
+			Items = new ReadOnlyDictionary<long, Item>(items);
 			Inventories = new ReadOnlyDictionary<long, Inventory>(inventories = new Dictionary<long, Inventory>());
 			inventoryCallbacks = new Dictionary<long, Action<Event>>();
 			
@@ -432,6 +434,9 @@ namespace Lunra.Satchel
 		/// <summary>
 		/// For iterating over all items when you don't need to access the actual list.
 		/// </summary>
+		/// <remarks>
+		/// Adding or removing items while iterating here will cause an exception.
+		/// </remarks>
 		/// <param name="iterator"></param>
 		public void IterateAll(Action<Item> iterator)
 		{

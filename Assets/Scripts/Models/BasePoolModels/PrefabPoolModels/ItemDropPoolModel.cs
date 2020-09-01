@@ -74,14 +74,14 @@ namespace Lunra.Hothouse.Models
 
 							if (existingResourceIds.Add(resourceId))
 							{
-								model.Inventory.Container.Add(
-									stack,
-									model.Inventory.Container
-										.Build()
-										.WithProperties(
-											Items.Instantiate.Capacity.OfZero(resourceId)
-										)
-								);
+								// model.Inventory.Container.Add(
+								// 	stack,
+								// 	model.Inventory.Container
+								// 		.Build()
+								// 		.WithProperties(
+								// 			Items.Instantiate.Capacity.OfZero(resourceId)
+								// 		)
+								// );
 							}
 							else model.Inventory.Container.Add(stack);
 						}

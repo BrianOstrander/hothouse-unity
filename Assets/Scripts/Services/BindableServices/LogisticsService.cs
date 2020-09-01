@@ -175,30 +175,56 @@ namespace Lunra.Hothouse.Services
 					}
 				}
 				
-				if (resourceTotalCount == capacityTargetCount)
+				var delta = capacityTargetCount - resourceTotalCount;
+				
+				if (delta == 0)
 				{
 					capacity.Item.Set(
 						Items.Keys.Capacity.Desire.Pair(Items.Values.Capacity.Desires.None),
 						Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
 					);
 				}
-				else if (resourceTotalCount < capacityTargetCount)
+				else if (0 < delta)
 				{
+					// We want more
+					
 					capacity.Item.Set(
 						Items.Keys.Capacity.Desire.Pair(Items.Values.Capacity.Desires.Fulfill),
 						Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
 					);
-					
-					// TODO: Break into unpromised input stacks
+
+					inventory.Add(
+						inventory
+							.Build()
+							.WithProperties(
+								Items.Instantiate.Reservation.OfInput(
+									capacityResourceId,
+									capacity.Item.Id
+								)
+							)
+							.Done(delta)
+					);
 				}
-				else if (capacityTargetCount < resourceTotalCount)
+				else
 				{
+					// We want less
+					
 					capacity.Item.Set(
 						Items.Keys.Capacity.Desire.Pair(Items.Values.Capacity.Desires.Distribute),
 						Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
 					);
 					
-					// TODO: Break into unpromised output stacks
+					inventory.Add(
+						inventory
+							.Build()
+							.WithProperties(
+								Items.Instantiate.Reservation.OfOutput(
+									capacityResourceId,
+									capacity.Item.Id
+								)
+							)
+							.Done(Mathf.Abs(delta))
+					);
 				}
 			}
 			
