@@ -295,139 +295,51 @@ namespace Lunra.Hothouse.Editor
 
 				itemStore.Updated += updateEvent =>
 				{
-					var res = updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					var res = "\n-------- itemStore.Updated --------\n"; 
+					res += updateEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
 					res += "\n-------- All Items --------\n";
 					res += itemStore.ToString(true, true);
 				
 					Debug.Log(res);
 				};
 				
-				void modify(
-					bool isAdd,
-					Inventory inventory,
-					params Stack[] stacks
-				)
-				{
-					var res = $"---- Original ----\n{inventory}\n---- [ {(isAdd ? "ADD" : "REMOVE")} ] ----";
-
-					res += stacks.Aggregate("\n", (r, c) => $"{r}\n\t{c}");
-					
-					Inventory.ModificationResults result;
-					Stack[] clamped;
-					
-					if (isAdd)
-					{
-						result = inventory.Add(
-							stacks,
-							out clamped
-						);
-					}
-					else
-					{
-						result = inventory.Remove(
-							stacks,
-							out clamped
-						);
-					}
-
-					if (result.HasFlag(Inventory.ModificationResults.Modified)) res += $"\n---- RESULT ----\n{inventory}\n";
-					else res += "\n---- NO MODIFICATION ----";
-
-					var anyClamping = false;
-					if (result.HasFlag(Inventory.ModificationResults.Overflow))
-					{
-						anyClamping = true;
-						res += "\n---- OVERFLOW ----";
-					}
-					else if (result.HasFlag(Inventory.ModificationResults.Underflow))
-					{
-						anyClamping = true;
-						res += "\n---- UNDERFLOW ----";
-					}
-					else res += "\n---- NO CLAMPING ----";
-					
-					if (anyClamping) res += clamped.Aggregate("\n", (r, c) => $"{r}\n\t{c}");
-
-					Debug.Log(res);
-				}
-
-				void addModify(
-					Inventory inventory,
-					params Stack[] stacks
-				)
-				{
-					modify(true, inventory, stacks);
-				}
-
-				void removeModify(
-					Inventory inventory,
-					params Stack[] stacks
-				)
-				{
-					modify(false, inventory, stacks);
-				}
-
-
-				// var item0 = itemStore.New(
-				// 	(filterIntKey, 0)
-				// );
-				//
-				// var item1 = itemStore.New(
-				// 	(filterIntKey, 1)
-				// );
-
 				var inventory0 = itemStore.Builder.Inventory();
+				
+				inventory0.Updated += updateInventoryEvent =>
+				{
+					var res = "\n-------- inventory0.Updated --------\n";
+					res += updateInventoryEvent.ToString(Inventory.Event.Formats.IncludeStacks);
+				
+					Debug.Log(res);
+				};
+
+				inventory0.UpdatedItem += updateItemEvent =>
+				{
+					var res = "\n-------- inventory0.UpdatedItem --------\n";
+					res += updateItemEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+				
+					Debug.Log(res);
+				};
 
 				var filterIntKey = new PropertyKey<int>("some_int_key0");
 				
-				inventory0.New(
+				var stack0 = inventory0.New(
 					10,
-					out var stack0,
-					filterIntKey.Pair(0)
-				);
-				
-				inventory0.New(
-					10,
-					out var stack1,
-					filterIntKey.Pair(1)
-				);
-				
-				
-				
-				// inventory0.new(
-				// 	10,
-				// );
-				
-				inventory0.UpdateConstraint(
-					itemStore.Builder
-						.BeginConstraint()
-						.WithLimitOf(5)
-						// .Restrict(
-						// 	itemStore.Builder
-						// 		.BeginFilter()
-						// 		.WithLimitOf(5)
-						// 		.RequireAny(
-						// 			PropertyValidation.Default.Int.Defined(filterIntKey)	
-						// 		)
-						// ),
+					out var item0,
+					filterIntKey.Pair()
 				);
 
-				// addModify(
-				// 	inventory0,
-				// 	item0.NewStack(10),
-				// 	item1.NewStack(10)
-				// );
-				//
-				// removeModify(
-				// 	inventory0,
-				// 	item0.NewStack(10),
-				// 	item1.NewStack(10)
-				// );
+				inventory0.Increment(stack0);
+				// inventory0.New(stack0);
 
-				inventory0.Clear();
+				item0.Set(filterIntKey, 69);
+
+				inventory0.Destroy(stack0);
 				
-				Debug.Log(inventory0);
 				Debug.Log(itemStore);
+				Debug.Log(inventory0);
 			}
 		}
 		

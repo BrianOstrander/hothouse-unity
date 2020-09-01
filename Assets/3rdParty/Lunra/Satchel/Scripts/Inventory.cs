@@ -23,8 +23,7 @@ namespace Lunra.Satchel
 		{
 			None = 0,
 			Modified = 1 << 0,
-			Overflow = 1 << 1,
-			Underflow = 1 << 2
+			Underflow = 1 << 1
 		}
 		
 		public struct Event
@@ -124,7 +123,6 @@ namespace Lunra.Satchel
 		[JsonProperty] DateTime lastUpdated;
 
 		[JsonProperty] public long Id { get; private set; }
-		[JsonProperty] public InventoryConstraint Constraint { get; private set; } = InventoryConstraint.Ignored();
 		#endregion
 
 		#region Non Serialized
@@ -153,8 +151,6 @@ namespace Lunra.Satchel
 			
 			Stacks = stacks.AsReadOnly();
 
-			Constraint.Initialize(itemStore);
-
 			itemStore.Register(this, TriggerItemUpdate);
 
 			return this;
@@ -175,92 +171,103 @@ namespace Lunra.Satchel
 			itemStore = null;
 			IsInitialized = false;
 			Stacks = null;
-			Constraint = InventoryConstraint.Ignored();
 
 			Updated = null;
 			UpdatedItem = null;
 		}
+		
+		public ModificationResults Increment(params Stack[] increments) => OnAdd(true, increments);
 
-		public ModificationResults Add(params Stack[] additions)
-		{
-			var result = Add(additions, out _);
-			
-			if (result.HasFlag(ModificationResults.Overflow)) Debug.LogError("Unhandled overflow can cause item leaks");
-
-			return result;
-		}
-
-		public ModificationResults Add(
-			Stack[] additions,
-			out Stack[] overflow
+		public ModificationResults Add(params Stack[] additions) => OnAdd(false, additions);
+		
+		ModificationResults OnAdd(
+			bool incrementOnly,
+			params Stack[] additions
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Add));
-			
-			var result = ModificationResults.None;
-			
-			var constraintResult = Constraint.Apply(
-				Stacks
-					.Concat(additions)
-					.ToArray(),
-				out var modified,
-				out overflow
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(OnAdd));
+			if (additions.None()) return ModificationResults.None;
+
+			var modifications = Stacks.ToDictionary(
+				s => s.Id,
+				s => s.Count
 			);
 
-			if (constraintResult.HasFlag(InventoryConstraint.Events.Modified) || !Stacks.ScrambleEqual(modified))
+			var anyAddition = false;
+			
+			foreach (var addition in additions)
 			{
-				result |= ModificationResults.Modified;
-				
-				var stackEvents = new Dictionary<long, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
-				var oldStacks = Stacks.ToArray();
-				stacks.Clear();
-				
-				foreach (var modification in modified)
+				if (addition.Count == 0) continue;
+
+				if (!modifications.TryGetValue(addition.Id, out var count) && incrementOnly)
 				{
-					var oldCount = oldStacks.FirstOrDefault(s => s.Is(modification.Id)).Count;
-
-					stacks.Add(new Stack(modification.Id, modification.Count));
-					
-					if (modification.Count == oldCount) continue;
-
-					if (oldCount == 0)
-					{
-						if (itemStore.TryGet(modification.Id, out var modificationItem))
-						{
-							if (!(modificationItem.InventoryId == IdCounter.UndefinedId || modificationItem.InventoryId == Id))
-							{
-								Debug.LogError($"Item already has an unrecognized InventoryId assigned to it of {modificationItem.InventoryId}, unexpected behaviour may occur");	
-							}
-							
-							modificationItem.ForceUpdateInventoryId(Id);
-						}
-						else Debug.LogError($"Could not find item with Id {modification.Id}");
-					}
-					
-					stackEvents.Add(
-						modification.Id,
-						(
-							oldCount,
-							modification.Count,
-							modification.Count - oldCount,
-							Event.Types.Addition
-						)
-					);
+					Debug.LogError($"Attempted to increment item [ {addition.Id} ], but it was not present in this inventory");
+					continue;
 				}
 				
-				TriggerUpdate(
-					new Event(
-						DateTime.Now,
-						Event.Types.Addition,
-						Stacks.None(),
-						stackEvents.ToReadonlyDictionary()
-					)	
-				);
+				anyAddition = true;
+
+				modifications[addition.Id] = count + addition.Count;
 			}
 
-			if (constraintResult.HasFlag(InventoryConstraint.Events.Overflow)) result |= ModificationResults.Overflow;
+			if (!anyAddition) return ModificationResults.None;
+			
+			var stackEvents = new Dictionary<long, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
+			var oldStacks = Stacks.ToArray();
+			stacks.Clear();
+				
+			foreach (var modification in modifications.Select(m => new Stack(m.Key, m.Value)))
+			{
+				var oldCount = oldStacks.FirstOrDefault(s => s.Is(modification.Id)).Count;
 
-			return result;
+				stacks.Add(modification);
+					
+				if (modification.Count == oldCount) continue;
+
+				if (oldCount == 0)
+				{
+					if (itemStore.TryGet(modification.Id, out var modificationItem))
+					{
+						if (incrementOnly)
+						{
+							if (modificationItem.InventoryId != Id)
+							{
+								Debug.LogError($"Incrementing item [ {modification.Id} ] in inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
+							}
+							
+							Debug.LogError("TODO INCREAMENT INSTANCE COUNT OR WHATNOT LOL");
+						}
+						else if (modificationItem.InventoryId != IdCounter.UndefinedId && modificationItem.InventoryId != Id)
+						{
+							Debug.LogError($"Adding item [ {modification.Id} ] to inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
+						}
+							
+						modificationItem.ForceUpdateInventoryId(Id);
+					}
+					else Debug.LogError($"Could not find item with Id {modification.Id}");
+				}
+					
+				stackEvents.Add(
+					modification.Id,
+					(
+						oldCount,
+						modification.Count,
+						modification.Count - oldCount,
+						Event.Types.Addition
+					)
+				);
+			}
+				
+			TriggerUpdate(
+				new Event(
+					DateTime.Now,
+					Event.Types.Addition,
+					Stacks.None(),
+					stackEvents.ToReadonlyDictionary()
+				)	
+			);
+
+			return ModificationResults.Modified;
 		}
 		
 		public ModificationResults Remove(params Stack[] removals)
@@ -362,7 +369,7 @@ namespace Lunra.Satchel
 
 			return result;
 		}
-		
+
 		public Stack New(
 			int count,
 			out Item item,
@@ -370,30 +377,6 @@ namespace Lunra.Satchel
 		)
 		{
 			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
-			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
-			
-			var result = NewNonDestructive(
-				count,
-				out item,
-				out var additionsStack,
-				out var overflowStack,
-				propertyKeyValues
-			);
-
-			if (result.HasFlag(ModificationResults.Overflow)) itemStore.Destroy(overflowStack);
-
-			return additionsStack;
-		}
-		
-		public ModificationResults NewNonDestructive(
-			int count,
-			out Item item,
-			out Stack additions,
-			out Stack overflow,
-			params PropertyKeyValue[] propertyKeyValues
-		)
-		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
 			
 			item = itemStore.Define(
@@ -406,9 +389,7 @@ namespace Lunra.Satchel
 
 			return OnNew(
 				count,
-				item,
-				out additions,
-				out overflow
+				item
 			);
 		}
 		
@@ -422,33 +403,6 @@ namespace Lunra.Satchel
 			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Clone));
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
 			if (reference == null) throw new ArgumentNullException(nameof(reference));
-
-			var result = CloneNonDestructive(
-				count,
-				reference,
-				out item,
-				out var additionsStack,
-				out var overflowStack,
-				propertyKeyValues
-			);
-			
-			if (result.HasFlag(ModificationResults.Overflow)) itemStore.Destroy(overflowStack);
-
-			return additionsStack;
-		}
-
-		public ModificationResults CloneNonDestructive(
-			int count,
-			Item reference,
-			out Item item,
-			out Stack additions,
-			out Stack overflow,
-			params PropertyKeyValue[] propertyKeyValues
-		)
-		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(CloneNonDestructive));
-			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
-			if (reference == null) throw new ArgumentNullException(nameof(reference));
 			
 			item = itemStore.Define(
 				reference,
@@ -461,37 +415,20 @@ namespace Lunra.Satchel
 			
 			return OnNew(
 				count,
-				item,
-				out additions,
-				out overflow
+				item
 			);
 		}
 		
-		ModificationResults OnNew(
+		Stack OnNew(
 			int count,
-			Item item,
-			out Stack additions,
-			out Stack overflow
+			Item item
 		)
 		{
 			item.ForceUpdateInventoryId(Id);
 
-			additions = item.StackOf(count);
+			var result = item.StackOf(count);
 			
-			var result = Add(
-				additions.WrapInArray(),
-				out var overflowArray
-			);
-
-			if (result.HasFlag(ModificationResults.Overflow))
-			{
-				if (overflowArray.Length != 1) throw new Exception("More than one overflow stack was returned");
-				overflow = overflowArray.First();
-				if (overflow.IsNot(item)) throw new Exception($"Expected overflow of item {item} but got an item of id {overflow.Id} instead");
-
-				additions -= overflow.Count;
-			}
-			else overflow = item.StackOfZero();
+			Add(result);
 
 			return result;
 		}
@@ -578,51 +515,7 @@ namespace Lunra.Satchel
 			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Build));
 			return new ItemBuilder(itemStore, this);
 		}
-
-		public bool UpdateConstraint(
-			InventoryConstraint constraint
-		)
-		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(UpdateConstraint));
-			
-			var result = UpdateConstraintNonDestructive(
-				constraint,
-				out var overflow
-			);
-
-			if (result.HasFlag(ModificationResults.Overflow)) itemStore.Destroy(overflow);
-
-			return result.HasFlag(ModificationResults.Modified);
-		}
 		
-		public ModificationResults UpdateConstraintNonDestructive(
-			InventoryConstraint constraint,
-			out Stack[] overflow
-		)
-		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(UpdateConstraintNonDestructive));
-			
-			Constraint = constraint;
-
-			var constraintResult = Constraint.Apply(
-				Stacks.ToArray(),
-				out _,
-				out overflow
-			);
-
-			var result = ModificationResults.None;
-			
-			if (constraintResult.HasFlag(InventoryConstraint.Events.Modified))
-			{
-				result |= ModificationResults.Modified | ModificationResults.Overflow;
-				
-				var removeResult = Remove(overflow, out _);
-				if (removeResult != ModificationResults.Modified) Debug.LogError($"Unexpected remove result: {removeResult:F}");
-			}
-
-			return result;
-		}
-
 		public bool Clear()
 		{
 			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Clear));
@@ -832,8 +725,6 @@ namespace Lunra.Satchel
 			
 			foreach (var stack in Stacks) result += $"\n\t{stack.ToString(itemStore, stackFormat)}";
 
-			result += "\n" + Constraint;
-			
 			return result;
 		}
 	}

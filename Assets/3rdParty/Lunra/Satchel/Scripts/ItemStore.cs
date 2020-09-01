@@ -381,6 +381,7 @@ namespace Lunra.Satchel
 				itemEventsList.Add(
 					new Item.Event(
 						entry.Value.Item.Id,
+						entry.Value.Item.InventoryId,
 						updateTime,
 						updates,
 						propertyEvents.ToReadonlyDictionary()
@@ -493,18 +494,11 @@ namespace Lunra.Satchel
 			var eventTypeProperty = Item.Event.Types.Property;
 			var eventTypeItem = Item.Event.Types.Item;
 
+			var itemEventsByInventoryId = new Dictionary<long, (Item.Event.Types PropertyUpdates, Item.Event.Types ItemUpdates, List<Item.Event> ItemEvents)>();
 			var itemEventsList = new List<Item.Event>();
 
-			var itemId = IdCounter.UndefinedId;
-			
 			foreach (var itemEvent in itemEvents)
 			{
-				if (itemId != itemEvent.Id)
-				{
-					if (itemId == IdCounter.UndefinedId) itemId = itemEvent.Id;
-					else Debug.LogError($"Expecting another item update for item Id {itemId}, but got one for {itemEvent.Id} instead, this is unexpected");
-				}
-				
 				var currentEventTypeProperty = Item.Event.Types.Property;
 				var currentEventTypeItem = Item.Event.Types.Item;
 				
@@ -513,7 +507,7 @@ namespace Lunra.Satchel
 					if (itemEventUpdate.HasFlag(Item.Event.Types.Property)) currentEventTypeProperty |= itemEventUpdate;
 					else if (itemEventUpdate.HasFlag(Item.Event.Types.Item)) currentEventTypeItem |= itemEventUpdate;
 				}
-				
+
 				if (currentEventTypeProperty == Item.Event.Types.Property && currentEventTypeItem == Item.Event.Types.Item) continue;
 				
 				if (updateTime < itemEvent.UpdateTime) updateTime = itemEvent.UpdateTime;
@@ -521,6 +515,21 @@ namespace Lunra.Satchel
 				eventTypeItem |= currentEventTypeItem;
 				
 				itemEventsList.Add(itemEvent);
+
+				if (itemEvent.InventoryId == IdCounter.UndefinedId) continue;
+
+				if (!itemEventsByInventoryId.TryGetValue(itemEvent.InventoryId, out var itemUpdate))
+				{
+					itemUpdate.PropertyUpdates = Item.Event.Types.Property;
+					itemUpdate.ItemUpdates = Item.Event.Types.Item;
+					itemUpdate.ItemEvents = new List<Item.Event>();
+				}
+
+				itemUpdate.PropertyUpdates |= currentEventTypeProperty;
+				itemUpdate.ItemUpdates |= currentEventTypeItem;
+				itemUpdate.ItemEvents.Add(itemEvent);
+
+				itemEventsByInventoryId[itemEvent.InventoryId] = itemUpdate;
 			}
 			
 			var eventTypeList = new List<Item.Event.Types>();
@@ -540,16 +549,24 @@ namespace Lunra.Satchel
 			
 			Updated?.Invoke(eventResult);
 
-			// If we don't get the item that means it was destroyed, which is okay... I think?
-			if (TryGet(itemId, out var item))
+			foreach (var itemUpdate in itemEventsByInventoryId)
 			{
-				// if (item.TryGet(Constants.InventoryId, out var inventoryId) && inventoryId != IdCounter.UndefinedId)
-				// {
-				// 	if (inventoryCallbacks.TryGetValue(inventoryId, out var inventoryCallback)) inventoryCallback?.Invoke(eventResult);
-				// 	else Debug.LogError($"No inventory registered for Id {inventoryId}");
-				// }
-			}
+				if (!inventoryCallbacks.TryGetValue(itemUpdate.Key, out var callback)) continue;
 
+				var updates = new List<Item.Event.Types>();
+				
+				if (itemUpdate.Value.ItemUpdates != Item.Event.Types.Item) updates.Add(itemUpdate.Value.ItemUpdates);
+				if (itemUpdate.Value.PropertyUpdates != Item.Event.Types.Property) updates.Add(itemUpdate.Value.PropertyUpdates);
+				
+				callback(
+					new Event(
+						updateTime,
+						updates.ToArray(),
+						itemUpdate.Value.ItemEvents.ToArray()
+					)	
+				);
+			}
+			
 			return true;
 		}
 		#endregion

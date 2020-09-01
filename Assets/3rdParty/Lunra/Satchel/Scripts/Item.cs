@@ -32,18 +32,21 @@ namespace Lunra.Satchel
 			}
 			
 			[JsonProperty] public long Id { get; private set; }
+			[JsonProperty] public long InventoryId { get; private set; }
 			[JsonProperty] public DateTime UpdateTime { get; private set; }
 			[JsonProperty] public Types[] Updates { get; private set; }
 			[JsonProperty] public ReadOnlyDictionary<string, (Property Property, Types Update)> PropertyEvents { get; private set; }
 
 			public Event(
 				long id,
+				long inventoryId,
 				DateTime updateTime,
 				Types[] updates,
 				ReadOnlyDictionary<string, (Property Property, Types Update)> propertyEvents
 			)
 			{
 				Id = id;
+				InventoryId = inventoryId;
 				UpdateTime = updateTime;
 				Updates = updates;
 				PropertyEvents = propertyEvents;
@@ -126,6 +129,7 @@ namespace Lunra.Satchel
 				itemStoreUpdated(
 					new Event(
 						Id,
+						InventoryId,
 						LastUpdated,
 						eventPropertyUpdates.Any() ? new[] {Event.Types.Item | Event.Types.New, Event.Types.Property | Event.Types.New} : new[] {Event.Types.Item | Event.Types.New},
 						eventPropertyUpdates
@@ -234,6 +238,7 @@ namespace Lunra.Satchel
 			itemStoreUpdated(
 				new Event(
 					Id,
+					InventoryId,
 					LastUpdated,
 					update.WrapInArray(),
 					new ReadOnlyDictionary<string, (Property Property, Event.Types Update)>(
@@ -272,6 +277,7 @@ namespace Lunra.Satchel
 			itemStoreUpdated(
 				new Event(
 					Id,
+					InventoryId,
 					LastUpdated,
 					eventUpdates.WrapInArray(),
 					eventPropertyUpdates.ToReadonlyDictionary()
