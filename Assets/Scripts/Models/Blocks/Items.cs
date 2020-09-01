@@ -21,12 +21,12 @@ namespace Lunra.Hothouse.Models
 				
 					var result = new []
 					{
-						Keys.Resource.Id.Pair(id.ToSnakeCase()),
-						Keys.Resource.InventoryId.Pair(),
+						Keys.Shared.Type.Pair(Values.Shared.Types.Resource),
+						Keys.Shared.InventoryId.Pair(),
+						
+						Keys.Resource.Id.Pair(id),
 					
 						Keys.Resource.Logistics.State.Pair(Values.Resource.Logistics.States.None),
-						// Keys.Resource.Logistics.ResourceId.Pair(),
-						// Keys.Resource.Logistics.Fulfillment.Pair(-1),
 					
 						Keys.Resource.Decay.Enabled.Pair(true),
 						Keys.Resource.Decay.Maximum.Pair(DefaultDecayMaximum),
@@ -43,31 +43,65 @@ namespace Lunra.Hothouse.Models
 					return consolidated.Values.ToArray();
 				}
 
-				public static readonly PropertyKeyValue[] Stalk = Create(nameof(Stalk));
+				public static readonly PropertyKeyValue[] Stalk = Create(Values.Resource.Ids.Stalk);
+			}
+			
+			public static class Capacity
+			{
+				public static PropertyKeyValue[] For(
+					string resourceId,
+					int count,
+					params PropertyKeyValue[] keyValues
+				)
+				{
+					var result = new []
+					{
+						Keys.Shared.Type.Pair(Values.Shared.Types.Capacity),
+						Keys.Shared.InventoryId.Pair(),
+						
+						Keys.Capacity.ResourceId.Pair(resourceId),
+						Keys.Capacity.Maximum.Pair(count),
+						Keys.Capacity.Desired.Pair(count),
+						Keys.Capacity.Fulfilled.Pair()
+					};
+
+					var consolidated = new Dictionary<string, PropertyKeyValue>();
+
+					foreach (var entry in result.Concat(keyValues)) consolidated[entry.Key] = entry;
+
+					return consolidated.Values.ToArray();
+				}
 			}
 		}
 
 		public static class Keys
 		{
 			static PropertyKey<T> CreateKey<T>(params string[] elements) => new PropertyKey<T>(elements.ToPunctualSnakeCase());
-		
+
+			public static class Shared
+			{
+				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Shared), suffix);
+				
+				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
+				public static readonly PropertyKey<string> InventoryId = Create<string>(nameof(InventoryId));
+			}
+			
 			public static class Resource
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Resource), suffix);
 
 				public static readonly PropertyKey<string> Id = Create<string>(nameof(Id));
-				public static readonly PropertyKey<string> InventoryId = Create<string>(nameof(InventoryId));
 
 				public static class Logistics
 				{
-					static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Keys), nameof(Logistics), suffix);
+					static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Resource), nameof(Logistics), suffix);
 				
 					public static readonly PropertyKey<string> State = Create<string>(nameof(State));
 				}
 			
 				public static class Decay
 				{
-					static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Keys), nameof(Decay), suffix);
+					static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Resource), nameof(Decay), suffix);
 				
 					public static readonly PropertyKey<bool> Enabled = Create<bool>(nameof(Enabled));
 					public static readonly PropertyKey<float> Maximum = Create<float>(nameof(Maximum));
@@ -83,14 +117,34 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Capacity), suffix);
 				
 				public static readonly PropertyKey<string> ResourceId = Create<string>(nameof(ResourceId));
-				public static readonly PropertyKey<int> Fulfillment = Create<int>(nameof(Fulfillment));
+				public static readonly PropertyKey<int> Maximum = Create<int>(nameof(Maximum));
+				public static readonly PropertyKey<int> Desired = Create<int>(nameof(Desired));
+				public static readonly PropertyKey<int> Fulfilled = Create<int>(nameof(Fulfilled));
 			}
 		}
 
 		public static class Values
 		{
+			public static class Shared
+			{
+				public static class Types
+				{
+					static string Create(string type) => type.ToSnakeCase();
+					
+					public static readonly string Resource = Create(nameof(Resource));
+					public static readonly string Capacity = Create(nameof(Capacity));
+				}
+			}
+			
 			public static class Resource
 			{
+				public static class Ids
+				{
+					static string Create(string id) => id.ToSnakeCase();
+
+					public static readonly string Stalk = Create(nameof(Stalk));
+				}
+				
 				public static class Logistics
 				{
 					public static class States

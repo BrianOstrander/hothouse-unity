@@ -4,14 +4,11 @@ namespace Lunra.Hothouse.Models
 	{
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 
-		// public override StackRecipe[] Inventory => new[]
-		// {
-		// 	new StackRecipe(
-		// 		10,
-		// 		
-		// 	), 
-		// };
-
+		public override StackRecipe[] Inventory => new[]
+		{
+			Items.Instantiate.Capacity.For(Items.Values.Resource.Ids.Stalk, 10).ToSingleStackRecipe()
+		};
+		
 		public override string[] Tags => new[] {BuildingTags.Stockpile};
 	}
 }

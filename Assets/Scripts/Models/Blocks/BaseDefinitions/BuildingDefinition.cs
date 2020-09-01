@@ -106,12 +106,12 @@ namespace Lunra.Hothouse.Models
 			
 			model.Inventory.Reset(Game.Items);
 
-			foreach (var recipe in Inventory)
+			foreach (var stackRecipe in Inventory)
 			{
 				model.Inventory.Container.New(
-					recipe.Count,
+					stackRecipe.Count,
 					out _,
-					recipe.Properties
+					stackRecipe.Properties
 				);
 			}
 			

@@ -225,6 +225,17 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
+			if (GUILayout.Button("item cap"))
+			{
+				var cap = Items.Instantiate.Capacity
+					.For(
+						Items.Values.Resource.Ids.Stalk,
+						10
+					);
+				
+				Debug.Log(cap.Aggregate("uh: ", (r, c) => $"{r}\n{c.Property.ToString(c.Key)}"));
+			}
+			
 			if (GUILayout.Button("item proc"))
 			{
 				var itemStore = new ItemStore().Initialize(new IdCounter());

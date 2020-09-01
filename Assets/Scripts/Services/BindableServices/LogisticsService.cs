@@ -1,4 +1,5 @@
 using Lunra.Hothouse.Models;
+using Lunra.Satchel;
 using Lunra.StyxMvp.Services;
 
 namespace Lunra.Hothouse.Services
@@ -20,7 +21,12 @@ namespace Lunra.Hothouse.Services
 		#region GameModel Events
 		void OnGameSimulationUpdate()
 		{
-			
+			Model.Items.IterateAll(OnItemUpdate);	
+		}
+
+		void OnItemUpdate(Item item)
+		{
+			// if ()
 		}
 		#endregion
 	}

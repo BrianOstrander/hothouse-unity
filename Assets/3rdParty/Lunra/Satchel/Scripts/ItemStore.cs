@@ -442,6 +442,14 @@ namespace Lunra.Satchel
 			}
 		}
 		
+		/// <summary>
+		/// Iterates over the items in the provided stacks.
+		/// </summary>
+		/// <remarks>
+		/// Will not iterate over stacks with identical items more than once.
+		/// </remarks>
+		/// <param name="iterator"></param>
+		/// <param name="stacks"></param>
 		public void Iterate(
 			Action<Item> iterator,
 			params Stack[] stacks

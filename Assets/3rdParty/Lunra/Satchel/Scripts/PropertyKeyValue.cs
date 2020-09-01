@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using UnityEngine;
 
 namespace Lunra.Satchel
@@ -96,6 +98,22 @@ namespace Lunra.Satchel
 					result = default;
 					break;
 			}
+		}
+	}
+
+	public static class PropertyKeyValueExtensions
+	{
+		public static T FirstValueForKey<T>(
+			this PropertyKeyValue[] elements,
+			PropertyKey<T> key
+		)
+		{
+			if (!elements.First(e => e.Key == key.Key).Property.TryGet<T>(out var result))
+			{
+				throw new Exception($"Unable to find matching key for {key.Key} among specified elements");
+			}
+
+			return result;
 		}
 	}
 }

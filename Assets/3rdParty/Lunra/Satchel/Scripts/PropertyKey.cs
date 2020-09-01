@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace Lunra.Satchel
 {
@@ -28,6 +29,17 @@ namespace Lunra.Satchel
 			return new PropertyKeyValue(
 				Key,
 				property
+			);
+		}
+		
+		public PropertyKeyValue Pair(
+			PropertyKeyValue[] elements
+		)
+		{
+			var key = Key;
+			return new PropertyKeyValue(
+				Key,
+				elements.First(e => e.Key == key).Property
 			);
 		}
 	}
