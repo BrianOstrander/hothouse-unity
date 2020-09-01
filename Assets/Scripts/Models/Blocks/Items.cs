@@ -9,37 +9,49 @@ namespace Lunra.Hothouse.Models
 	{
 		public static class Instantiate
 		{
+			static PropertyKeyValue[] Combine(
+				string type,
+				PropertyKeyValue[] required,
+				params PropertyKeyValue[] overrides
+			)
+			{
+				var consolidated = new Dictionary<string, PropertyKeyValue>();
+
+				consolidated.Add(Keys.Shared.Type.Key, Keys.Shared.Type.Pair(type));
+				
+				foreach (var e in required.Concat(overrides)) consolidated[e.Key] = e;
+
+				return consolidated.Values.ToArray();
+			}
+			
 			public static class Resource
 			{
 				static PropertyKeyValue[] Create(
 					string id,
-					params PropertyKeyValue[] keyValues
+					params PropertyKeyValue[] overrides
 				)
 				{
 					const float DefaultDecayRate = 1f; // Per real second at 1x speed
 					const float DefaultDecayMaximum = DayTime.RealTimeToSimulationTime * DefaultDecayRate * (60f * 10f); // Real seconds to decay
-				
-					var result = new []
-					{
-						Keys.Shared.Type.Pair(Values.Shared.Types.Resource),
-						
-						Keys.Resource.Id.Pair(id),
-					
-						Keys.Resource.Logistics.State.Pair(Values.Resource.Logistics.States.None),
-					
-						Keys.Resource.Decay.Enabled.Pair(true),
-						Keys.Resource.Decay.Maximum.Pair(DefaultDecayMaximum),
-						Keys.Resource.Decay.Current.Pair(DefaultDecayMaximum),
-						Keys.Resource.Decay.Previous.Pair(DefaultDecayMaximum),
-						Keys.Resource.Decay.Rate.Pair(DefaultDecayRate),
-						Keys.Resource.Decay.RatePredicted.Pair(DefaultDecayRate)
-					};
 
-					var consolidated = new Dictionary<string, PropertyKeyValue>();
+					return Combine(
+						Values.Shared.Types.Resource,
+						new[]
+						{
+							Keys.Resource.Id.Pair(id),
 
-					foreach (var entry in result.Concat(keyValues)) consolidated[entry.Key] = entry;
+							Keys.Resource.Logistics.State.Pair(Values.Resource.Logistics.States.None),
+							Keys.Resource.Logistics.Promised.Pair(),
 
-					return consolidated.Values.ToArray();
+							Keys.Resource.Decay.IsEnabled.Pair(true),
+							Keys.Resource.Decay.Maximum.Pair(DefaultDecayMaximum),
+							Keys.Resource.Decay.Current.Pair(DefaultDecayMaximum),
+							Keys.Resource.Decay.Previous.Pair(DefaultDecayMaximum),
+							Keys.Resource.Decay.Rate.Pair(DefaultDecayRate),
+							Keys.Resource.Decay.RatePredicted.Pair(DefaultDecayRate)
+						},
+						overrides
+					);
 				}
 
 				public static readonly PropertyKeyValue[] Stalk = Create(Values.Resource.Ids.Stalk);
@@ -57,24 +69,44 @@ namespace Lunra.Hothouse.Models
 				public static PropertyKeyValue[] Of(
 					string resourceId,
 					int count,
-					params PropertyKeyValue[] keyValues
+					params PropertyKeyValue[] overrides
 				)
 				{
-					var result = new []
-					{
-						Keys.Shared.Type.Pair(Values.Shared.Types.Capacity),
-						
-						Keys.Capacity.ResourceId.Pair(resourceId),
-						Keys.Capacity.Maximum.Pair(count),
-						Keys.Capacity.Desired.Pair(count),
-						Keys.Capacity.Fulfilled.Pair()
-					};
-
-					var consolidated = new Dictionary<string, PropertyKeyValue>();
-
-					foreach (var entry in result.Concat(keyValues)) consolidated[entry.Key] = entry;
-
-					return consolidated.Values.ToArray();
+					return Combine(
+						Values.Shared.Types.Capacity,
+						new[]
+						{
+							Keys.Capacity.ResourceId.Pair(resourceId),
+							Keys.Capacity.Desire.Pair(Values.Capacity.Desires.NotCalculated),
+							Keys.Capacity.TimeoutExpired.Pair(),
+							Keys.Capacity.CurrentCount.Pair(),
+							Keys.Capacity.MaximumCount.Pair(count),
+							Keys.Capacity.TargetCount.Pair(count)
+						},
+						overrides
+					);
+				}
+			}
+			
+			public static class Reservation
+			{
+				static PropertyKeyValue[] Of(
+					string resourceId,
+					string state,
+					bool promised,
+					params PropertyKeyValue[] overrides
+				)
+				{
+					return Combine(
+						Values.Shared.Types.Reservation,
+						new []
+						{
+							Keys.Reservation.ResourceId.Pair(resourceId),
+							Keys.Reservation.State.Pair(state),
+							Keys.Reservation.IsPromised.Pair(promised)
+						},
+						overrides
+					);
 				}
 			}
 		}
@@ -101,13 +133,14 @@ namespace Lunra.Hothouse.Models
 					static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Resource), nameof(Logistics), suffix);
 				
 					public static readonly PropertyKey<string> State = Create<string>(nameof(State));
+					public static readonly PropertyKey<bool> Promised = Create<bool>(nameof(Promised));
 				}
 			
 				public static class Decay
 				{
 					static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Resource), nameof(Decay), suffix);
 				
-					public static readonly PropertyKey<bool> Enabled = Create<bool>(nameof(Enabled));
+					public static readonly PropertyKey<bool> IsEnabled = Create<bool>(nameof(IsEnabled));
 					public static readonly PropertyKey<float> Maximum = Create<float>(nameof(Maximum));
 					public static readonly PropertyKey<float> Current = Create<float>(nameof(Current));
 					public static readonly PropertyKey<float> Previous = Create<float>(nameof(Previous));
@@ -121,9 +154,20 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Capacity), suffix);
 				
 				public static readonly PropertyKey<string> ResourceId = Create<string>(nameof(ResourceId));
-				public static readonly PropertyKey<int> Maximum = Create<int>(nameof(Maximum));
-				public static readonly PropertyKey<int> Desired = Create<int>(nameof(Desired));
-				public static readonly PropertyKey<int> Fulfilled = Create<int>(nameof(Fulfilled));
+				public static readonly PropertyKey<string> Desire = Create<string>(nameof(Desire));
+				public static readonly PropertyKey<long> TimeoutExpired = Create<long>(nameof(TimeoutExpired));
+				public static readonly PropertyKey<int> CurrentCount = Create<int>(nameof(CurrentCount));
+				public static readonly PropertyKey<int> MaximumCount = Create<int>(nameof(MaximumCount));
+				public static readonly PropertyKey<int> TargetCount = Create<int>(nameof(TargetCount));
+			}
+			
+			public static class Reservation
+			{
+				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Reservation), suffix);
+				
+				public static readonly PropertyKey<string> ResourceId = Create<string>(nameof(ResourceId));
+				public static readonly PropertyKey<string> State = Create<string>(nameof(State));
+				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 			}
 		}
 
@@ -137,6 +181,7 @@ namespace Lunra.Hothouse.Models
 					
 					public static readonly string Resource = Create(nameof(Resource));
 					public static readonly string Capacity = Create(nameof(Capacity));
+					public static readonly string Reservation = Create(nameof(Reservation));
 				}
 			}
 			
@@ -154,12 +199,34 @@ namespace Lunra.Hothouse.Models
 					public static class States
 					{
 						public static readonly string None = nameof(None).ToSnakeCase();
-						public static readonly string Distribute = nameof(Distribute).ToSnakeCase();
 						public static readonly string Input = nameof(Input).ToSnakeCase();
 						public static readonly string Output = nameof(Output).ToSnakeCase();
-						public static readonly string Transit = nameof(Transit).ToSnakeCase();
-						public static readonly string Forbidden = nameof(Forbidden).ToSnakeCase();
+						
+						// I don't think I need these below
+						// public static readonly string Distribute = nameof(Distribute).ToSnakeCase();
+						// public static readonly string Transit = nameof(Transit).ToSnakeCase();
+						// public static readonly string Forbidden = nameof(Forbidden).ToSnakeCase();
 					}
+				}
+			}
+			
+			public static class Capacity
+			{
+				public static class Desires
+				{
+					public static readonly string None = nameof(None).ToSnakeCase();
+					public static readonly string NotCalculated = nameof(NotCalculated).ToSnakeCase();
+					public static readonly string Distribute = nameof(Distribute).ToSnakeCase();
+					public static readonly string Fulfill = nameof(Fulfill).ToSnakeCase();
+				}
+			}
+			
+			public static class Reservation
+			{
+				public static class States
+				{
+					public static readonly string Input = nameof(Input).ToSnakeCase();
+					public static readonly string Output = nameof(Output).ToSnakeCase();
 				}
 			}
 		}

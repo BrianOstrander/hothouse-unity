@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Services
 
 		protected override PropertyFilter GetFilter() => ItemStore.Builder
 			.BeginPropertyFilter()
-			.RequireAll(PropertyValidation.Default.Bool.EqualTo(Items.Keys.Resource.Decay.Enabled, true));
+			.RequireAll(PropertyValidation.Default.Bool.EqualTo(Items.Keys.Resource.Decay.IsEnabled, true));
 
 		public override void Process(Item item, float deltaTime)
 		{
@@ -62,15 +62,11 @@ namespace Lunra.Hothouse.Services
 		{ 
 			if (Mathf.Approximately(0f, current))
 			{
-				var logisticsState = item.Get(Items.Keys.Resource.Logistics.State);
-
-				if (logisticsState == Items.Values.Resource.Logistics.States.Distribute || logisticsState == Items.Values.Resource.Logistics.States.None)
-				{
-					OnDestruction(item);
-					return true;				
-				}
-
-				return false;
+				if (item.Get(Items.Keys.Resource.Logistics.Promised)) return false;
+				if (item.Get(Items.Keys.Resource.Logistics.State) != Items.Values.Resource.Logistics.States.None) return false;
+				
+				OnDestruction(item);
+				return true;
 			}
 
 			return false;

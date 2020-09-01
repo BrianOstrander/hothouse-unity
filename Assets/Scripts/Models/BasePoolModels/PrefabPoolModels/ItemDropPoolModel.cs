@@ -59,6 +59,8 @@ namespace Lunra.Hothouse.Models
 			model.Enterable.Reset();
 			model.Inventory.Reset(game.Items);
 
+			var existingResourceIds = new HashSet<string>();
+
 			game.Items.Iterate(
 				(item, stack) =>
 				{
@@ -66,16 +68,22 @@ namespace Lunra.Hothouse.Models
 					{
 						if (type == Items.Values.Shared.Types.Resource)
 						{
-							item.Set(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.Distribute);
+							item.Set(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.None);
 
-							model.Inventory.Container.Add(
-								stack,
-								model.Inventory.Container
-									.Build()
-									.WithProperties(
-										Items.Instantiate.Capacity.OfZero(item.Get(Items.Keys.Resource.Id))
-									)
-							);
+							var resourceId = item.Get(Items.Keys.Resource.Id);
+
+							if (existingResourceIds.Add(resourceId))
+							{
+								model.Inventory.Container.Add(
+									stack,
+									model.Inventory.Container
+										.Build()
+										.WithProperties(
+											Items.Instantiate.Capacity.OfZero(resourceId)
+										)
+								);
+							}
+							else model.Inventory.Container.Add(stack);
 						}
 						else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");
 					}

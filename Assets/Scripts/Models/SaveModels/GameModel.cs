@@ -60,6 +60,10 @@ namespace Lunra.Hothouse.Models
 		readonly ListenerProperty<DayTime> simulationTimeListener;
 		[JsonIgnore] public ReadonlyProperty<DayTime> SimulationTime { get; }
 		
+		[JsonProperty] long simulationTick;
+		readonly ListenerProperty<long> simulationTickListener;
+		[JsonIgnore] public ReadonlyProperty<long> SimulationTick { get; }
+		
 		[JsonProperty] TimeSpan simulationPlaytimeElapsed;
 		[JsonIgnore] public ListenerProperty<TimeSpan> SimulationPlaytimeElapsed { get; }
 		
@@ -121,6 +125,13 @@ namespace Lunra.Hothouse.Models
 				() => simulationTime,
 				out simulationTimeListener
 			);
+			
+			SimulationTick = new ReadonlyProperty<long>(
+				value => simulationTick = value,
+				() => simulationTick,
+				out simulationTickListener
+			);
+
 			SimulationPlaytimeElapsed = new ListenerProperty<TimeSpan>(value => simulationPlaytimeElapsed = value, () => simulationPlaytimeElapsed);
 			PlaytimeElapsed = new ListenerProperty<TimeSpan>(value => playtimeElapsed = value, () => playtimeElapsed);
 			LastLightUpdate = new ListenerProperty<LightDelta>(value => lastLightUpdate = value, () => lastLightUpdate);
@@ -166,6 +177,7 @@ namespace Lunra.Hothouse.Models
 		{
 			SimulationTimeDelta = deltaTime * DayTime.RealTimeToSimulationTime;
 			simulationTimeListener.Value += new DayTime(SimulationTimeDelta);
+			simulationTickListener.Value++;
 			
 			SimulationPlaytimeElapsed.Value += TimeSpan.FromSeconds(deltaTime);
 			PlaytimeElapsed.Value += TimeSpan.FromSeconds(deltaTime);
