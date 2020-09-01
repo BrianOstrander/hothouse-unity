@@ -445,24 +445,21 @@ namespace Lunra.Satchel
 		/// <summary>
 		/// Iterates over the items in the provided stacks.
 		/// </summary>
-		/// <remarks>
-		/// Will not iterate over stacks with identical items more than once.
-		/// </remarks>
 		/// <param name="iterator"></param>
 		/// <param name="stacks"></param>
 		public void Iterate(
-			Action<Item> iterator,
+			Action<Item, Stack> iterator,
 			params Stack[] stacks
 		)
 		{
-			foreach (var id in stacks.Select(s => s.Id).Distinct())
+			foreach (var stack in stacks)
 			{
-				if (TryGet(id, out var item))
+				if (TryGet(stack.Id, out var item))
 				{
-					try { iterator(item); }
+					try { iterator(item, stack); }
 					catch (Exception e) { Debug.LogException(e); }
 				}
-				else Debug.LogError($"Unable to find item with Id {id}");
+				else Debug.LogError($"Unable to find item with Id {stack.Id}");
 			}
 		}
 

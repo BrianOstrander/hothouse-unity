@@ -228,7 +228,7 @@ namespace Lunra.Hothouse.Editor
 			if (GUILayout.Button("item cap"))
 			{
 				var cap = Items.Instantiate.Capacity
-					.For(
+					.Of(
 						Items.Values.Resource.Ids.Stalk,
 						10
 					);

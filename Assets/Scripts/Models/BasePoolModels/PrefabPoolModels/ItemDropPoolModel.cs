@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
 using Lunra.Satchel;
@@ -54,16 +56,34 @@ namespace Lunra.Hothouse.Models
 			params Stack[] inventory
 		)
 		{
-			game.Items.Iterate(
-				item => item.Set(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.Distribute),
-				inventory
-			);
-			
 			model.Enterable.Reset();
 			model.Inventory.Reset(game.Items);
 
-			model.Inventory.Container
-				.Add(inventory);
+			game.Items.Iterate(
+				(item, stack) =>
+				{
+					if (item.TryGet(Items.Keys.Shared.Type, out var type))
+					{
+						if (type == Items.Values.Shared.Types.Resource)
+						{
+							item.Set(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.Distribute);
+
+							model.Inventory.Container.Add(
+								stack,
+								model.Inventory.Container
+									.Build()
+									.WithProperties(
+										Items.Instantiate.Capacity.OfZero(item.Get(Items.Keys.Resource.Id))
+									)
+							);
+						}
+						else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");
+					}
+					else Debug.LogError($"Unable to get the {Items.Keys.Shared.Type} for {item}");
+				},
+				inventory
+			);
+			
 			// model.Inventory.Reset(
 			// 	InventoryPermission.WithdrawalForJobs(EnumExtensions.GetValues(Jobs.Unknown)),
 			// 	InventoryCapacity.ByIndividualWeight(inventory)

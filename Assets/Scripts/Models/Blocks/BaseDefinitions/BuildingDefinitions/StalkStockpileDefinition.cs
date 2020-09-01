@@ -6,7 +6,9 @@ namespace Lunra.Hothouse.Models
 
 		public override StackRecipe[] Inventory => new[]
 		{
-			Items.Instantiate.Capacity.For(Items.Values.Resource.Ids.Stalk, 10).ToSingleStackRecipe()
+			Items.Instantiate.Capacity
+				.Of(Items.Values.Resource.Ids.Stalk, 10)
+				.ToSingleStackRecipe()
 		};
 		
 		public override string[] Tags => new[] {BuildingTags.Stockpile};

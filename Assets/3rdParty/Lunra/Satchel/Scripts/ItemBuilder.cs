@@ -69,5 +69,7 @@ namespace Lunra.Satchel
 				propertyKeyValues
 			);
 		}
+		
+		public static implicit operator Stack(ItemBuilder builder) => builder.Done(1);
 	}
 }

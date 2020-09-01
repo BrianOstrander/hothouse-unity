@@ -22,7 +22,6 @@ namespace Lunra.Hothouse.Models
 					var result = new []
 					{
 						Keys.Shared.Type.Pair(Values.Shared.Types.Resource),
-						Keys.Shared.InventoryId.Pair(),
 						
 						Keys.Resource.Id.Pair(id),
 					
@@ -48,7 +47,14 @@ namespace Lunra.Hothouse.Models
 			
 			public static class Capacity
 			{
-				public static PropertyKeyValue[] For(
+				public static PropertyKeyValue[] OfZero(
+					string resourceId,
+					params PropertyKeyValue[] keyValues
+				)
+				{
+					return Of(resourceId, 0, keyValues);
+				}
+				public static PropertyKeyValue[] Of(
 					string resourceId,
 					int count,
 					params PropertyKeyValue[] keyValues
@@ -57,7 +63,6 @@ namespace Lunra.Hothouse.Models
 					var result = new []
 					{
 						Keys.Shared.Type.Pair(Values.Shared.Types.Capacity),
-						Keys.Shared.InventoryId.Pair(),
 						
 						Keys.Capacity.ResourceId.Pair(resourceId),
 						Keys.Capacity.Maximum.Pair(count),
@@ -83,7 +88,6 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Shared), suffix);
 				
 				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
-				public static readonly PropertyKey<string> InventoryId = Create<string>(nameof(InventoryId));
 			}
 			
 			public static class Resource
@@ -150,7 +154,7 @@ namespace Lunra.Hothouse.Models
 					public static class States
 					{
 						public static readonly string None = nameof(None).ToSnakeCase();
-						public static readonly string Distribute = nameof(Distribute).ToSnakeCase(); // TODO I THINK THIS SHOULDN'T EXIST AND SHOULD BE HANDLED BY CAPACITY
+						public static readonly string Distribute = nameof(Distribute).ToSnakeCase();
 						public static readonly string Input = nameof(Input).ToSnakeCase();
 						public static readonly string Output = nameof(Output).ToSnakeCase();
 						public static readonly string Transit = nameof(Transit).ToSnakeCase();
