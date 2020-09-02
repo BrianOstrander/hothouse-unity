@@ -233,7 +233,7 @@ namespace Lunra.Satchel
 							Debug.LogError($"Incrementing item [ {modification.Id} ] in inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
 						}
 						
-						modificationItem.Set(Constants.InstanceCount, modification.Count);
+						modificationItem.ForceUpdateInstanceCount(modification.Count);
 					}
 					else
 					{
@@ -383,7 +383,7 @@ namespace Lunra.Satchel
 				i =>
 				{
 					i.Set(propertyKeyValues);
-					i.Set(Constants.InstanceCount, count);
+					i.ForceUpdateInstanceCount(count);
 				}
 			);
 
@@ -409,7 +409,7 @@ namespace Lunra.Satchel
 				i =>
 				{
 					i.Set(propertyKeyValues);
-					i.Set(Constants.InstanceCount, count);
+					i.ForceUpdateInstanceCount(count);
 				}
 			);
 			

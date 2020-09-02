@@ -88,9 +88,9 @@ namespace Lunra.Satchel
 		{
 			IdCounter = idCounter ?? throw new ArgumentNullException(nameof(idCounter));
 			
-			this.ignoredKeysForStacking = new[]
+			this.ignoredKeysForStacking = new string[]
 				{
-					Constants.InstanceCount.Key
+					// Constant keys here
 				}
 				.Concat(ignoredKeysForStacking ?? new string[0])
 				.Distinct()
@@ -98,7 +98,6 @@ namespace Lunra.Satchel
 			
 			this.ignoredKeysCloning = new[]
 				{
-					Constants.InstanceCount.Key,
 					Constants.Destroyed.Key
 				}
 				.Concat(ignoredKeysCloning ?? new string[0])
@@ -107,10 +106,6 @@ namespace Lunra.Satchel
 			
 			this.modifiers = new []
 				{
-					new CallbackItemModifier(
-						i => i.Set(Constants.InstanceCount, 0),
-						i => !i.IsDefined(Constants.InstanceCount)
-					),
 					new CallbackItemModifier(
 						i => i.Set(Constants.Destroyed, false)
 					)
@@ -252,7 +247,7 @@ namespace Lunra.Satchel
 				{
 					if (items.TryGetValue(stack.Id, out var item))
 					{
-						var instanceCount = item.Get(Constants.InstanceCount);
+						var instanceCount = item.InstanceCount;
 
 						if (instanceCount < 0)
 						{
@@ -328,18 +323,8 @@ namespace Lunra.Satchel
 				
 				const Item.Event.Types ExpectedPropertyUpdate = Item.Event.Types.Property | Item.Event.Types.Updated;
 				
-				entry.Value.Item.Set(
-					Constants.InstanceCount.Key,
-					Mathf.Max(0, entry.Value.InstanceCount),
-					out var instanceCountPropertyUpdate,
-					true
-				);
+				entry.Value.Item.ForceUpdateInstanceCount(Mathf.Max(0, entry.Value.InstanceCount));
 				
-				if (instanceCountPropertyUpdate.Update != ExpectedPropertyUpdate)
-				{
-					Debug.LogError($"Expected {ExpectedPropertyUpdate:F} for {Constants.InstanceCount} but got {instanceCountPropertyUpdate.Update:F} instead");
-				}
-
 				if (instanceCount == 0)
 				{
 					updates = new [] {Item.Event.Types.Item | Item.Event.Types.Destroyed, Item.Event.Types.Property | Item.Event.Types.Updated}; 
@@ -370,11 +355,6 @@ namespace Lunra.Satchel
 					updates = new [] {Item.Event.Types.Property | Item.Event.Types.Updated};
 				}
 				
-				propertyEvents.Add(
-					Constants.InstanceCount.Key,
-					instanceCountPropertyUpdate
-				);
-
 				entry.Value.Item.ForceUpdateTime(updateTime);
 				entry.Value.Item.ForceUpdateInventoryId(IdCounter.UndefinedId);
 				

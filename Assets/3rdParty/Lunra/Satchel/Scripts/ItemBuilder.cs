@@ -57,7 +57,7 @@ namespace Lunra.Satchel
 					i =>
 					{
 						i.Set(propertyKeyValues);
-						i.Set(Constants.InstanceCount, count);
+						i.ForceUpdateInstanceCount(count);
 					}
 				);
 				return item.StackOf(count);

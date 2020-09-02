@@ -92,6 +92,7 @@ namespace Lunra.Satchel
 		#region Serialized
 		[JsonProperty] public long Id { get; private set; }
 		[JsonProperty] public long InventoryId { get; private set; }
+		[JsonProperty] public int InstanceCount { get; private set; }
 		[JsonProperty] public DateTime LastUpdated { get; private set; }
 		
 		[JsonProperty] bool isInitialized;
@@ -315,6 +316,7 @@ namespace Lunra.Satchel
 		public void ForceUpdateTime(DateTime lastUpdated) => LastUpdated = lastUpdated;
 
 		public void ForceUpdateInventoryId(long inventoryId) => InventoryId = inventoryId;
+		public void ForceUpdateInstanceCount(int instanceCount) => InstanceCount = instanceCount;
 
 		public bool Is(long id) => id == Id;
 
