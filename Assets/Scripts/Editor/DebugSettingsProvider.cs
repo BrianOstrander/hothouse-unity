@@ -322,6 +322,26 @@ namespace Lunra.Hothouse.Editor
 				
 					Debug.Log(res);
 				};
+				
+				var inventory1 = itemStore.Builder.Inventory();
+				
+				inventory1.Updated += updateInventoryEvent =>
+				{
+					var res = "\n-------- inventory1.Updated --------\n";
+					res += updateInventoryEvent.ToString(Inventory.Event.Formats.IncludeStacks);
+				
+					Debug.Log(res);
+				};
+
+				inventory1.UpdatedItem += updateItemEvent =>
+				{
+					var res = "\n-------- inventory1.UpdatedItem --------\n";
+					res += updateItemEvent.ToString(ItemStore.Event.Formats.IncludeProperties);
+					res += "\n-------- All Items --------\n";
+					res += itemStore.ToString(true, true);
+				
+					Debug.Log(res);
+				};
 
 				var filterIntKey = new PropertyKey<int>("some_int_key0");
 				
@@ -332,14 +352,22 @@ namespace Lunra.Hothouse.Editor
 				);
 
 				inventory0.Increment(stack0);
-				// inventory0.New(stack0);
 
-				item0.Set(filterIntKey, 69);
+				var forTransfer = stack0.NewCount(20);
+				inventory0.Remove(forTransfer);
 
-				inventory0.Destroy(stack0);
+				// inventory1.Add(forTransfer);
 				
+				// // inventory0.New(stack0);
+				//
+				// item0.Set(filterIntKey, 69);
+				//
+				// inventory0.Destroy(stack0);
+				//
+				Debug.Log("---------");
 				Debug.Log(itemStore);
 				Debug.Log(inventory0);
+				Debug.Log(inventory1);
 			}
 		}
 		

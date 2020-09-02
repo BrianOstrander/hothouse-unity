@@ -224,28 +224,28 @@ namespace Lunra.Satchel
 					
 				if (modification.Count == oldCount) continue;
 
-				if (oldCount == 0)
+				if (itemStore.TryGet(modification.Id, out var modificationItem))
 				{
-					if (itemStore.TryGet(modification.Id, out var modificationItem))
+					if (incrementOnly)
 					{
-						if (incrementOnly)
+						if (modificationItem.InventoryId != Id)
 						{
-							if (modificationItem.InventoryId != Id)
-							{
-								Debug.LogError($"Incrementing item [ {modification.Id} ] in inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
-							}
-							
-							Debug.LogError("TODO INCREAMENT INSTANCE COUNT OR WHATNOT LOL");
+							Debug.LogError($"Incrementing item [ {modification.Id} ] in inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
 						}
-						else if (modificationItem.InventoryId != IdCounter.UndefinedId && modificationItem.InventoryId != Id)
+						
+						modificationItem.Set(Constants.InstanceCount, modification.Count);
+					}
+					else
+					{
+						if (modificationItem.InventoryId != IdCounter.UndefinedId && modificationItem.InventoryId != Id)
 						{
 							Debug.LogError($"Adding item [ {modification.Id} ] to inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
 						}
-							
+						
 						modificationItem.ForceUpdateInventoryId(Id);
 					}
-					else Debug.LogError($"Could not find item with Id {modification.Id}");
 				}
+				else Debug.LogError($"Could not find item with Id {modification.Id}");
 					
 				stackEvents.Add(
 					modification.Id,
