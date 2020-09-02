@@ -176,13 +176,6 @@ namespace Lunra.Satchel
 			Updated = null;
 			UpdatedItem = null;
 		}
-		
-		/// <summary>
-		/// Increases the count of specified items, and is not expected to add any new ones to this inventory.
-		/// </summary>
-		/// <param name="increments"></param>
-		/// <returns></returns>
-		public ModificationResults Increment(params Stack[] increments) => OnAdd(true, increments);
 
 		/// <summary>
 		/// Deposits the specified items into the inventory, it is expected that no instances of them exist in any other
@@ -190,15 +183,25 @@ namespace Lunra.Satchel
 		/// </summary>
 		/// <param name="deposits"></param>
 		/// <returns></returns>
-		public ModificationResults Deposit(params Stack[] deposits) => OnAdd(false, deposits);
-		
-		ModificationResults OnAdd(
-			bool incrementOnly,
-			params Stack[] additions
-		)
+		public ModificationResults Deposit(params Stack[] deposits)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(OnAdd));
-			if (additions.None()) return ModificationResults.None;
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Deposit));
+			if (deposits.None()) return ModificationResults.None;
+			
+			foreach (var deposit in deposits)
+			{
+				if (deposit.Count <= 0) continue;
+				if (stacks.Any(s => s.Is(deposit.Id))) continue;
+				stacks.Add(deposit.NewEmpty());
+			}
+
+			return Increment(deposits);
+		}
+
+		public ModificationResults Increment(params Stack[] increments)
+		{
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Increment));
+			if (increments.None()) return ModificationResults.None;
 
 			var modifications = Stacks.ToDictionary(
 				s => s.Id,
@@ -207,19 +210,19 @@ namespace Lunra.Satchel
 
 			var anyAddition = false;
 			
-			foreach (var addition in additions)
+			foreach (var increment in increments)
 			{
-				if (addition.Count == 0) continue;
+				if (increment.Count == 0) continue;
 
-				if (!modifications.TryGetValue(addition.Id, out var count) && incrementOnly)
+				if (!modifications.TryGetValue(increment.Id, out var count))
 				{
-					Debug.LogError($"Attempted to increment item [ {addition.Id} ], but it was not present in this inventory");
+					Debug.LogError($"Attempted to increment item [ {increment.Id} ], but it was not present in this inventory");
 					continue;
 				}
 				
 				anyAddition = true;
 
-				modifications[addition.Id] = count + addition.Count;
+				modifications[increment.Id] = count + increment.Count;
 			}
 
 			if (!anyAddition) return ModificationResults.None;
@@ -238,24 +241,10 @@ namespace Lunra.Satchel
 
 				if (itemStore.TryGet(modification.Id, out var modificationItem))
 				{
-					if (incrementOnly)
-					{
-						if (modificationItem.InventoryId != Id)
-						{
-							Debug.LogError($"Incrementing item [ {modification.Id} ] in inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
-						}
-						
-						modificationItem.ForceUpdateInstanceCount(modification.Count);
-					}
-					else
-					{
-						if (modificationItem.InventoryId != IdCounter.UndefinedId && modificationItem.InventoryId != Id)
-						{
-							Debug.LogError($"Adding item [ {modification.Id} ] to inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
-						}
-						
-						modificationItem.ForceUpdateInventoryId(Id);
-					}
+					if (modificationItem.InventoryId == IdCounter.UndefinedId) modificationItem.ForceUpdateInventoryId(Id);
+					else if (modificationItem.InventoryId != Id) Debug.LogError($"Adding item [ {modification.Id} ] to inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
+					
+					modificationItem.ForceUpdateInstanceCount(modification.Count);
 				}
 				else Debug.LogError($"Could not find item with Id {modification.Id}");
 					
