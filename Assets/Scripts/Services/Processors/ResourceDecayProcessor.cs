@@ -83,6 +83,6 @@ namespace Lunra.Hothouse.Services
 			inventory.Destroy(item);
 		}
 
-		public override bool BreakProcessing(Item item) => item.Get(Constants.Destroyed);
+		public override bool BreakProcessing(Item item) => item.IsDestroyed;
 	}
 }

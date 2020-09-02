@@ -137,6 +137,7 @@ namespace Lunra.Satchel
 		{
 			if (id == IdCounter.UndefinedId) throw new Exception($"Id {id} is an invalid and undefined value");
 			Id = id;
+			lastUpdated = DateTime.Now;
 		}
 
 		public Inventory Initialize(ItemStore itemStore)
@@ -345,7 +346,19 @@ namespace Lunra.Satchel
 				foreach (var kv in consolidated)
 				{
 					if (0 < kv.Value.Count) stacks.Add(new Stack(kv.Key, kv.Value.Count));
-					if (0 < kv.Value.RemovedCount) stackEvents.Add(kv.Key, (kv.Value.Count + kv.Value.RemovedCount, kv.Value.Count, -kv.Value.RemovedCount, Event.Types.Subtraction));
+					if (0 < kv.Value.RemovedCount)
+					{
+						stackEvents.Add(kv.Key, (kv.Value.Count + kv.Value.RemovedCount, kv.Value.Count, -kv.Value.RemovedCount, Event.Types.Subtraction));
+						if (kv.Value.Count <= 0)
+						{
+							if (itemStore.TryGet(kv.Key, out var stackEventItem))
+							{
+								stackEventItem.ForceUpdateInstanceCount(0);
+								stackEventItem.ForceUpdateIsDestroyed(true);
+								stackEventItem.ForceUpdateInventoryId(IdCounter.UndefinedId);
+							}
+						}
+					}
 					updateUnderflow(kv.Key, kv.Value.Underflow);
 				}
 				
@@ -717,7 +730,7 @@ namespace Lunra.Satchel
 
 		public string ToString(Formats format)
 		{
-			var result = $"Item Inventory Contains {Stacks.Count} Stacks | {(IsInitialized ? "Initialized" : "Not Initialized")} | {lastUpdated}";
+			var result = $"Item Inventory [ {Id} ] Contains {Stacks.Count} Stacks | {(IsInitialized ? "Initialized" : "Not Initialized")} | {lastUpdated}";
 
 			if (format == Formats.Default) return result;
 

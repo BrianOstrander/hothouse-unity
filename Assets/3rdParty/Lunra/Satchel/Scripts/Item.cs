@@ -93,6 +93,7 @@ namespace Lunra.Satchel
 		[JsonProperty] public long Id { get; private set; }
 		[JsonProperty] public long InventoryId { get; private set; }
 		[JsonProperty] public int InstanceCount { get; private set; }
+		[JsonProperty] public bool IsDestroyed { get; private set; }
 		[JsonProperty] public DateTime LastUpdated { get; private set; }
 		
 		[JsonProperty] bool isInitialized;
@@ -317,6 +318,7 @@ namespace Lunra.Satchel
 
 		public void ForceUpdateInventoryId(long inventoryId) => InventoryId = inventoryId;
 		public void ForceUpdateInstanceCount(int instanceCount) => InstanceCount = instanceCount;
+		public void ForceUpdateIsDestroyed(bool isDestroyed) => IsDestroyed = isDestroyed;
 
 		public bool Is(long id) => id == Id;
 
@@ -361,6 +363,13 @@ namespace Lunra.Satchel
 
 			result += $" | {(isInitialized ? "Initialized" : "Not Initialized")} | {LastUpdated}";
 
+			if (IsDestroyed)
+			{
+				if (InstanceCount != 0) result += $" | Instance Count : {InstanceCount}";
+				result += " | Destroyed";
+			}
+			else result += $" | Instance Count : {InstanceCount}";
+			
 			if (format.HasFlag(Formats.IncludeProperties))
 			{
 				foreach (var kv in properties.OrderBy(kv => kv.Key))

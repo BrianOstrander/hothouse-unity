@@ -88,30 +88,15 @@ namespace Lunra.Satchel
 		{
 			IdCounter = idCounter ?? throw new ArgumentNullException(nameof(idCounter));
 			
-			this.ignoredKeysForStacking = new string[]
-				{
-					// Constant keys here
-				}
-				.Concat(ignoredKeysForStacking ?? new string[0])
+			this.ignoredKeysForStacking = (ignoredKeysForStacking ?? new string[0])
 				.Distinct()
 				.ToArray();
 			
-			this.ignoredKeysCloning = new[]
-				{
-					Constants.Destroyed.Key
-				}
-				.Concat(ignoredKeysCloning ?? new string[0])
+			this.ignoredKeysCloning = (ignoredKeysCloning ?? new string[0])
 				.Distinct()
 				.ToArray();
-			
-			this.modifiers = new []
-				{
-					new CallbackItemModifier(
-						i => i.Set(Constants.Destroyed, false)
-					)
-				}
-				.Concat(modifiers ?? new IItemModifier[0])
-				.ToArray();
+
+			this.modifiers = modifiers ?? new IItemModifier[0];
 
 			Items = new ReadOnlyDictionary<long, Item>(items);
 			Inventories = new ReadOnlyDictionary<long, Inventory>(inventories = new Dictionary<long, Inventory>());
@@ -321,34 +306,16 @@ namespace Lunra.Satchel
 				var propertyEvents = new Dictionary<string, (Property Property, Item.Event.Types Update)>();
 				Item.Event.Types[] updates;
 				
-				const Item.Event.Types ExpectedPropertyUpdate = Item.Event.Types.Property | Item.Event.Types.Updated;
-				
-				entry.Value.Item.ForceUpdateInstanceCount(Mathf.Max(0, entry.Value.InstanceCount));
+				entry.Value.Item.ForceUpdateInstanceCount(instanceCount);
 				
 				if (instanceCount == 0)
 				{
 					updates = new [] {Item.Event.Types.Item | Item.Event.Types.Destroyed, Item.Event.Types.Property | Item.Event.Types.Updated}; 
 					
-					entry.Value.Item.Set(
-						Constants.Destroyed.Key,
-						true,
-						out var destroyedPropertyUpdate,
-						true
-					);
-					
-					if (destroyedPropertyUpdate.Update != ExpectedPropertyUpdate)
-					{
-						Debug.LogError($"Expected {ExpectedPropertyUpdate:F} for {Constants.Destroyed} but got {destroyedPropertyUpdate.Update:F} instead");
-					}
+					entry.Value.Item.ForceUpdateIsDestroyed(true);
+					entry.Value.Item.ForceUpdateInventoryId(IdCounter.UndefinedId);
 
 					itemDestructionQueued.Add(entry.Value.Item.Id);
-					
-					propertyEvents.Add(
-						Constants.Destroyed.Key,
-						destroyedPropertyUpdate
-					);
-					
-					entry.Value.Item.ForceUpdateInventoryId(IdCounter.UndefinedId);
 				}
 				else
 				{
