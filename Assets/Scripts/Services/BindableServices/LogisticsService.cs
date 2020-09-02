@@ -194,8 +194,8 @@ namespace Lunra.Hothouse.Services
 					);
 
 					inventory.Deposit(
-						inventory
-							.Build()
+						Model.Items.Builder
+							.BeginItem()
 							.WithProperties(
 								Items.Instantiate.Reservation.OfInput(
 									capacityResourceId,
@@ -215,8 +215,8 @@ namespace Lunra.Hothouse.Services
 					);
 					
 					inventory.Deposit(
-						inventory
-							.Build()
+						Model.Items.Builder
+							.BeginItem()
 							.WithProperties(
 								Items.Instantiate.Reservation.OfOutput(
 									capacityResourceId,

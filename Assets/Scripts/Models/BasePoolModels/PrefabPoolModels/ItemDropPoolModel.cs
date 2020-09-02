@@ -74,16 +74,17 @@ namespace Lunra.Hothouse.Models
 
 							if (existingResourceIds.Add(resourceId))
 							{
-								// model.Inventory.Container.Add(
-								// 	stack,
-								// 	model.Inventory.Container
-								// 		.Build()
-								// 		.WithProperties(
-								// 			Items.Instantiate.Capacity.OfZero(resourceId)
-								// 		)
-								// );
+								model.Inventory.Container.Deposit(
+									game.Items.Builder
+										.BeginItem()
+										.WithProperties(
+											Items.Instantiate.Capacity.OfZero(resourceId)
+										)
+										.Done()
+								);
 							}
-							else model.Inventory.Container.Deposit(stack);
+							
+							model.Inventory.Container.Deposit(stack);
 						}
 						else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");
 					}

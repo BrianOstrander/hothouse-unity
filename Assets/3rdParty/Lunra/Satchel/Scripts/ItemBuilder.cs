@@ -7,16 +7,13 @@ namespace Lunra.Satchel
 	public class ItemBuilder
 	{
 		ItemStore itemStore;
-		Inventory inventory;
 		Dictionary<string, PropertyKeyValue> properties = new Dictionary<string, PropertyKeyValue>();
 
 		public ItemBuilder(
-			ItemStore itemStore,
-			Inventory inventory = null
+			ItemStore itemStore
 		)
 		{
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
-			this.inventory = inventory;
 		}
 
 		public ItemBuilder WithProperties(
@@ -40,6 +37,8 @@ namespace Lunra.Satchel
 			return this;
 		}
 
+		public Stack Done() => Done(1);
+		
 		public Stack Done(int count) => Done(count, out _);
 
 		public Stack Done(
@@ -51,25 +50,16 @@ namespace Lunra.Satchel
 
 			var propertyKeyValues = properties.Values.ToArray();
 			
-			if (inventory == null)
-			{
-				item = itemStore.Define(
-					i =>
-					{
-						i.Set(propertyKeyValues);
-						i.ForceUpdateInstanceCount(count);
-					}
-				);
-				return item.StackOf(count);
-			}
-			
-			return inventory.New(
-				count,
-				out item,
-				propertyKeyValues
+			item = itemStore.Define(
+				i =>
+				{
+					i.Set(propertyKeyValues);
+					i.ForceUpdateInstanceCount(count);
+				}
 			);
+			return item.StackOf(count);
 		}
 		
-		public static implicit operator Stack(ItemBuilder builder) => builder.Done(1);
+		public static implicit operator Stack(ItemBuilder builder) => builder.Done();
 	}
 }

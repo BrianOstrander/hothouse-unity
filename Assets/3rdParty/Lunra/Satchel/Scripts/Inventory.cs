@@ -589,12 +589,6 @@ namespace Lunra.Satchel
 			);
 		}
 
-		public ItemBuilder Build()
-		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Build));
-			return new ItemBuilder(itemStore, this);
-		}
-
 		public bool TryOperation<T>(
 			string key,
 			Func<OperationRequest<T>, OperationResult<T>> operation,
