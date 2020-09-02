@@ -43,7 +43,7 @@ namespace Lunra.Satchel
 
 		void OnProcess(Item item, float deltaTime)
 		{
-			if (item.IsDestroyed) return;
+			if (item.NoInstances) return;
 
 			foreach (var processor in processors)
 			{

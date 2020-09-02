@@ -58,8 +58,7 @@ namespace Lunra.Satchel
 		#region Serialized
 		[JsonProperty] Dictionary<long, Item> items = new Dictionary<long, Item>();
 		[JsonProperty] DateTime lastUpdated;
-		[JsonProperty] List<long> itemDestructionQueued = new List<long>();
-		
+
 		#endregion
 		
 		#region Non Serialized
@@ -208,138 +207,6 @@ namespace Lunra.Satchel
 		}
 
 		public bool CanStack(Stack stack0, Stack stack1) => CanStack(First(stack0.Id), First(stack1.Id));
-
-		/// <summary>
-		/// Destroys specified stacks from the item store, cleaning up any with an instance count of zero, unless the
-		/// <c>IgnoreCleanup</c> flag is set to <c>true</c>.
-		/// </summary>
-		/// <param name="stacks"></param>
-		/// <returns><c>true</c> if changes occured, <c>false</c> otherwise.</returns>
-		public bool Destroy(params Stack[] stacks)
-		{
-			if (stacks.None()) return false;
-
-			var consolidated = new Dictionary<long, (Item Item, int InstanceCount, int OldInstanceCount, Item.Event.Types ItemUpdates, Item.Event.Types PropertyUpdates, bool IgnoreCleanup)>();
-			
-			var totalItemUpdates = Item.Event.Types.Item;
-			var totalPropertyUpdates = Item.Event.Types.Property;
-
-			foreach (var stack in stacks)
-			{
-				if (stack.IsEmpty) continue;
-				
-				if (!consolidated.TryGetValue(stack.Id, out var entry))
-				{
-					if (items.TryGetValue(stack.Id, out var item))
-					{
-						var instanceCount = item.InstanceCount;
-
-						if (instanceCount < 0)
-						{
-							Debug.LogError($"Unexpected negative instance count of {instanceCount} for {item}");
-							instanceCount = 0;
-						}
-						
-						entry = (
-							item,
-							instanceCount,
-							instanceCount,
-							Item.Event.Types.Item,
-							Item.Event.Types.Property,
-							item.IgnoreCleanup
-						);
-					}
-					else
-					{
-						Debug.LogError($"Unrecognized item id: {stack.Id}");
-						entry = (
-							null,
-							0,
-							0,
-							Item.Event.Types.Item,
-							Item.Event.Types.Property,
-							false
-						);
-					}
-				}
-
-				entry.InstanceCount -= stack.Count;
-
-				if (entry.Item != null && entry.InstanceCount != entry.OldInstanceCount)
-				{
-					entry.PropertyUpdates |= Item.Event.Types.Updated;
-					totalPropertyUpdates |= Item.Event.Types.Updated;
-					
-					if (entry.InstanceCount <= 0 && !entry.IgnoreCleanup)
-					{
-						entry.ItemUpdates |= Item.Event.Types.Destroyed;
-						totalItemUpdates |= Item.Event.Types.Destroyed;
-					}
-				}
-				
-				consolidated[stack.Id] = entry;
-			}
-
-			var totalUpdates = new List<Item.Event.Types>();
-			
-			if (totalItemUpdates != Item.Event.Types.Item) totalUpdates.Add(totalItemUpdates);
-			if (totalPropertyUpdates != Item.Event.Types.Property) totalUpdates.Add(totalPropertyUpdates);
-
-			// No stacks were destroyed or instance counts modified...
-			if (totalUpdates.None()) return false;
-
-			var updateTime = DateTime.Now;
-			var itemEventsList = new List<Item.Event>();
-
-			foreach (var entry in consolidated)
-			{
-				if (entry.Value.Item == null) continue;
-
-				var instanceCount = Mathf.Max(0, entry.Value.InstanceCount);
-
-				if (instanceCount == entry.Value.OldInstanceCount)
-				{
-					Debug.LogError($"Cannot destroy any instances of {entry.Value.Item}, there are none left to destroy.");
-					continue;
-				}
-
-				var propertyEvents = new Dictionary<string, (Property Property, Item.Event.Types Update)>();
-				Item.Event.Types[] updates;
-				
-				entry.Value.Item.ForceUpdateInstanceCount(instanceCount);
-				
-				if (instanceCount == 0)
-				{
-					updates = new [] {Item.Event.Types.Item | Item.Event.Types.Destroyed, Item.Event.Types.Property | Item.Event.Types.Updated}; 
-					
-					entry.Value.Item.ForceUpdateIsDestroyed(true);
-					entry.Value.Item.ForceUpdateInventoryId(IdCounter.UndefinedId);
-
-					itemDestructionQueued.Add(entry.Value.Item.Id);
-				}
-				else
-				{
-					updates = new [] {Item.Event.Types.Property | Item.Event.Types.Updated};
-				}
-				
-				entry.Value.Item.ForceUpdateTime(updateTime);
-				entry.Value.Item.ForceUpdateInventoryId(IdCounter.UndefinedId);
-				
-				itemEventsList.Add(
-					new Item.Event(
-						entry.Value.Item.Id,
-						entry.Value.Item.InventoryId,
-						updateTime,
-						updates,
-						propertyEvents.ToReadonlyDictionary()
-					)
-				);
-			}
-
-			return TryUpdate(
-				itemEventsList.ToArray()
-			);
-		}
 		
 		public bool TryGet(long id, out Item item) => items.TryGetValue(id, out item);
 
@@ -418,11 +285,33 @@ namespace Lunra.Satchel
 
 		public void Cleanup()
 		{
-			while (itemDestructionQueued.Any())
+			var destructionEvents = new List<Item.Event>();
+			var updateTime = DateTime.Now;
+			
+			foreach (var item in items.Values)
 			{
-				items.Remove(itemDestructionQueued[0]);
-				itemDestructionQueued.RemoveAt(0);
+				if (item.NoInstances)
+				{
+					if (item.InventoryId != IdCounter.UndefinedId) Debug.LogError($"Item with id [ {item.Id} ] has zero instances but still belongs to inventory [ {item.InventoryId} ], unexpected behaviour may occur");
+				}
+				else if (item.InventoryId != IdCounter.UndefinedId) continue;
+				
+				item.ForceUpdateTime(updateTime);
+				
+				destructionEvents.Add(
+					new Item.Event(
+						item.Id,
+						item.InventoryId,
+						updateTime,
+						new [] { Item.Event.Types.Item | Item.Event.Types.Destroyed },
+						new Dictionary<string, (Property Property, Item.Event.Types Update)>().ToReadonlyDictionary()
+					)	
+				);
 			}
+
+			foreach (var destructionEvent in destructionEvents) items.Remove(destructionEvent.Id);
+			
+			TryUpdate(destructionEvents.ToArray());
 		}
 
 		#region Events

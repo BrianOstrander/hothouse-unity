@@ -93,7 +93,6 @@ namespace Lunra.Satchel
 		[JsonProperty] public long Id { get; private set; }
 		[JsonProperty] public long InventoryId { get; private set; }
 		[JsonProperty] public int InstanceCount { get; private set; }
-		[JsonProperty] public bool IsDestroyed { get; private set; }
 		[JsonProperty] public bool IgnoreCleanup { get; private set; }
 		[JsonProperty] public DateTime LastUpdated { get; private set; }
 		
@@ -102,6 +101,8 @@ namespace Lunra.Satchel
 		#endregion
 
 		#region Non Serialized
+		[JsonIgnore] public bool NoInstances => !AnyInstances;
+		[JsonIgnore] public bool AnyInstances => 0 < InstanceCount;
 		[JsonIgnore] public string[] PropertyKeys => properties.Keys.ToArray();
 
 		ItemStore itemStore;
@@ -319,7 +320,6 @@ namespace Lunra.Satchel
 
 		public void ForceUpdateInventoryId(long inventoryId) => InventoryId = inventoryId;
 		public void ForceUpdateInstanceCount(int instanceCount) => InstanceCount = instanceCount;
-		public void ForceUpdateIsDestroyed(bool isDestroyed) => IsDestroyed = isDestroyed;
 
 		public bool Is(long id) => id == Id;
 
@@ -362,14 +362,7 @@ namespace Lunra.Satchel
 			if (InventoryId == IdCounter.UndefinedId) result += " | No Inventory";
 			else result += $" | Inventory [ {InventoryId} ]";
 
-			result += $" | {(isInitialized ? "Initialized" : "Not Initialized")} | {LastUpdated}";
-
-			if (IsDestroyed)
-			{
-				if (InstanceCount != 0) result += $" | Instance Count : {InstanceCount}";
-				result += " | Destroyed";
-			}
-			else result += $" | Instance Count : {InstanceCount}";
+			result += $" | {(isInitialized ? "Initialized" : "Not Initialized")} | {LastUpdated} |  Instance Count : {InstanceCount}";
 			
 			if (format.HasFlag(Formats.IncludeProperties))
 			{

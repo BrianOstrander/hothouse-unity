@@ -353,21 +353,20 @@ namespace Lunra.Hothouse.Editor
 
 				inventory0.Increment(stack0);
 
-				var forTransfer = stack0.NewCount(20);
-				inventory0.Remove(forTransfer);
+				inventory1.Deposit(
+					inventory0.Withdrawal(stack0.NewCount(20))
+				);
 
-				// inventory1.Add(forTransfer);
-				
-				// // inventory0.New(stack0);
-				//
-				// item0.Set(filterIntKey, 69);
-				//
-				// inventory0.Destroy(stack0);
-				//
+				inventory1.Destroy(stack0.NewCount(20));
+
+				inventory0.Deposit(stack0.NewCount(20));
+
 				Debug.Log("---------");
 				Debug.Log(itemStore);
 				Debug.Log(inventory0);
 				Debug.Log(inventory1);
+				Debug.Log("---------");
+				itemStore.Cleanup();
 			}
 		}
 		
