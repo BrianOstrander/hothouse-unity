@@ -246,7 +246,7 @@ namespace Lunra.Satchel
 							instanceCount,
 							Item.Event.Types.Item,
 							Item.Event.Types.Property,
-							item.Get(Constants.IgnoreCleanup)
+							item.IgnoreCleanup
 						);
 					}
 					else

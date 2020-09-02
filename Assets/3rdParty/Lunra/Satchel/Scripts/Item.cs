@@ -94,6 +94,7 @@ namespace Lunra.Satchel
 		[JsonProperty] public long InventoryId { get; private set; }
 		[JsonProperty] public int InstanceCount { get; private set; }
 		[JsonProperty] public bool IsDestroyed { get; private set; }
+		[JsonProperty] public bool IgnoreCleanup { get; private set; }
 		[JsonProperty] public DateTime LastUpdated { get; private set; }
 		
 		[JsonProperty] bool isInitialized;
