@@ -177,9 +177,20 @@ namespace Lunra.Satchel
 			UpdatedItem = null;
 		}
 		
+		/// <summary>
+		/// Increases the count of specified items, and is not expected to add any new ones to this inventory.
+		/// </summary>
+		/// <param name="increments"></param>
+		/// <returns></returns>
 		public ModificationResults Increment(params Stack[] increments) => OnAdd(true, increments);
 
-		public ModificationResults Add(params Stack[] additions) => OnAdd(false, additions);
+		/// <summary>
+		/// Deposits the specified items into the inventory, it is expected that no instances of them exist in any other
+		/// inventories.
+		/// </summary>
+		/// <param name="deposits"></param>
+		/// <returns></returns>
+		public ModificationResults Deposit(params Stack[] deposits) => OnAdd(false, deposits);
 		
 		ModificationResults OnAdd(
 			bool incrementOnly,
@@ -383,6 +394,182 @@ namespace Lunra.Satchel
 			return result;
 		}
 
+		Stack[] Withdrawal(
+			Stack[] withdrawals
+		)
+		{
+			var result = Withdrawal(
+				withdrawals,
+				out var results,
+				out _
+			);
+			
+			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow may cause unexpected problems");
+
+			return results;
+		}
+		
+		ModificationResults Withdrawal(
+			Stack[] withdrawals,
+			out Stack[] results,
+			out Stack[] underflow
+		)
+		{
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Withdrawal));
+
+			var result = Decrement(
+				withdrawals,
+				out underflow
+			);
+
+			if (result == ModificationResults.None)
+			{
+				results = new Stack[0];
+				return result;
+			}
+
+			var consolidated = withdrawals.ToDictionary(
+				s => s.Id,
+				s => s.Count
+			);
+
+			foreach (var stack in underflow) consolidated[stack.Id] -= stack.Count;
+
+			var resultsList = new List<Stack>();
+			
+			foreach (var kv in consolidated)
+			{
+				if (kv.Value <= 0) continue;
+
+				if (itemStore.TryGet(kv.Key, out var item))
+				{
+					resultsList.Add(
+						itemStore.Define(
+							item,
+							i => i.ForceUpdateInstanceCount(kv.Value)
+						).StackOf(kv.Value)
+					);
+				}
+				else Debug.LogError($"Unable to clone item with id [ {kv.Key} ]");
+			}
+
+			results = resultsList.ToArray();
+
+			return result;
+		}
+		
+		public ModificationResults Decrement(params Stack[] decrements)
+		{
+			var result = Decrement(decrements, out _);
+			
+			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow may cause unexpected problems");
+
+			return result;
+		}
+		
+		ModificationResults Decrement(
+			Stack[] decrements,
+			out Stack[] underflow
+		)
+		{
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Decrement));
+			
+			var result = ModificationResults.None;
+			
+			Dictionary<long, (int Count, int RemovedCount, int Underflow)> consolidated = Stacks
+				.ToDictionary(
+					stack => stack.Id,
+					stack => (stack.Count, 0, 0)
+				);
+
+			var anyRemovals = false;
+			
+			foreach (var stack in decrements)
+			{
+				if (stack.Count == 0) continue;
+				
+				if (consolidated.TryGetValue(stack.Id, out var entry))
+				{
+					if (stack.Count <= entry.Count)
+					{
+						entry.Count -= stack.Count;
+						entry.RemovedCount += stack.Count;
+					}
+					else
+					{
+						var countUnderflow = Mathf.Abs(entry.Count - stack.Count);
+						var countRemoved = stack.Count - countUnderflow;
+						entry.Count -= countRemoved;
+						entry.RemovedCount += countRemoved;
+						entry.Underflow += countUnderflow;
+					}
+
+					anyRemovals = true;
+				}
+				else
+				{
+					entry = (0, 0, stack.Count);
+				}
+
+				consolidated[stack.Id] = entry;
+			}
+
+			var underflowList = new List<Stack>();
+
+			void updateUnderflow(
+				long key,
+				int underflowCount
+			)
+			{
+				if (0 < underflowCount) underflowList.Add(new Stack(key, underflowCount));
+			}
+			
+			if (anyRemovals)
+			{
+				result |= ModificationResults.Modified;
+				
+				stacks.Clear();
+				var stackEvents = new Dictionary<long, (int OldCount, int NewCount, int DeltaCount, Event.Types Type)>();
+				foreach (var kv in consolidated)
+				{
+					if (0 < kv.Value.Count) stacks.Add(new Stack(kv.Key, kv.Value.Count));
+					if (0 < kv.Value.RemovedCount)
+					{
+						stackEvents.Add(kv.Key, (kv.Value.Count + kv.Value.RemovedCount, kv.Value.Count, -kv.Value.RemovedCount, Event.Types.Subtraction));
+						if (kv.Value.Count <= 0)
+						{
+							if (itemStore.TryGet(kv.Key, out var stackEventItem))
+							{
+								stackEventItem.ForceUpdateInstanceCount(0);
+								stackEventItem.ForceUpdateIsDestroyed(true);
+								stackEventItem.ForceUpdateInventoryId(IdCounter.UndefinedId);
+							}
+						}
+					}
+					updateUnderflow(kv.Key, kv.Value.Underflow);
+				}
+				
+				TriggerUpdate(
+					new Event(
+						DateTime.Now,
+						Event.Types.Subtraction,
+						Stacks.None(),
+						stackEvents.ToReadonlyDictionary()
+					)
+				);
+			}
+			else
+			{
+				foreach (var kv in consolidated) updateUnderflow(kv.Key, kv.Value.Underflow);
+			}
+
+			underflow = underflowList.ToArray();
+		
+			if (underflow.Any()) result |= ModificationResults.Underflow;
+
+			return result;
+		}
+
 		public Stack New(
 			int count,
 			out Item item,
@@ -441,7 +628,7 @@ namespace Lunra.Satchel
 
 			var result = item.StackOf(count);
 			
-			Add(result);
+			Deposit(result);
 
 			return result;
 		}

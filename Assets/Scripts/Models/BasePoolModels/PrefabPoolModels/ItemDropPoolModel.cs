@@ -83,7 +83,7 @@ namespace Lunra.Hothouse.Models
 								// 		)
 								// );
 							}
-							else model.Inventory.Container.Add(stack);
+							else model.Inventory.Container.Deposit(stack);
 						}
 						else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");
 					}

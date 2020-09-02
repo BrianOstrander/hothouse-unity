@@ -193,7 +193,7 @@ namespace Lunra.Hothouse.Services
 						Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
 					);
 
-					inventory.Add(
+					inventory.Deposit(
 						inventory
 							.Build()
 							.WithProperties(
@@ -214,7 +214,7 @@ namespace Lunra.Hothouse.Services
 						Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
 					);
 					
-					inventory.Add(
+					inventory.Deposit(
 						inventory
 							.Build()
 							.WithProperties(
