@@ -181,27 +181,27 @@ namespace Lunra.Satchel
 		/// Deposits the specified items into the inventory, it is expected that no instances of them exist in any other
 		/// inventories.
 		/// </summary>
-		/// <param name="deposits"></param>
+		/// <param name="requests"></param>
 		/// <returns></returns>
-		public ModificationResults Deposit(params Stack[] deposits)
+		public ModificationResults Deposit(params Stack[] requests)
 		{
 			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Deposit));
-			if (deposits.None()) return ModificationResults.None;
+			if (requests.None()) return ModificationResults.None;
 			
-			foreach (var deposit in deposits)
+			foreach (var request in requests)
 			{
-				if (deposit.Count <= 0) continue;
-				if (stacks.Any(s => s.Is(deposit.Id))) continue;
-				stacks.Add(deposit.NewEmpty());
+				if (request.Count <= 0) continue;
+				if (stacks.Any(s => s.Is(request.Id))) continue;
+				stacks.Add(request.NewEmpty());
 			}
 
-			return Increment(deposits);
+			return Increment(requests);
 		}
 
-		public ModificationResults Increment(params Stack[] increments)
+		public ModificationResults Increment(params Stack[] requests)
 		{
 			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Increment));
-			if (increments.None()) return ModificationResults.None;
+			if (requests.None()) return ModificationResults.None;
 
 			var modifications = Stacks.ToDictionary(
 				s => s.Id,
@@ -210,19 +210,19 @@ namespace Lunra.Satchel
 
 			var anyAddition = false;
 			
-			foreach (var increment in increments)
+			foreach (var request in requests)
 			{
-				if (increment.Count == 0) continue;
+				if (request.Count == 0) continue;
 
-				if (!modifications.TryGetValue(increment.Id, out var count))
+				if (!modifications.TryGetValue(request.Id, out var count))
 				{
-					Debug.LogError($"Attempted to increment item [ {increment.Id} ], but it was not present in this inventory");
+					Debug.LogError($"Attempted to increment item [ {request.Id} ], but it was not present in this inventory");
 					continue;
 				}
 				
 				anyAddition = true;
 
-				modifications[increment.Id] = count + increment.Count;
+				modifications[request.Id] = count + request.Count;
 			}
 
 			if (!anyAddition) return ModificationResults.None;
@@ -273,11 +273,11 @@ namespace Lunra.Satchel
 		
 		
 		public Stack[] Withdrawal(
-			params Stack[] withdrawals
+			params Stack[] requests
 		)
 		{
 			var result = Withdrawal(
-				withdrawals,
+				requests,
 				out var results,
 				out _
 			);
@@ -288,7 +288,7 @@ namespace Lunra.Satchel
 		}
 		
 		public ModificationResults Withdrawal(
-			Stack[] withdrawals,
+			Stack[] requests,
 			out Stack[] results,
 			out Stack[] underflow
 		)
@@ -296,7 +296,7 @@ namespace Lunra.Satchel
 			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Withdrawal));
 
 			var result = OnDecrement(
-				withdrawals,
+				requests,
 				out var modified,
 				out var destroyed,
 				out underflow
@@ -343,11 +343,11 @@ namespace Lunra.Satchel
 		}
 		
 		public ModificationResults Decrement(
-			params Stack[] decrements
+			params Stack[] requests
 		)
 		{
 			var result = OnDecrement(
-				decrements,
+				requests,
 				out _,
 				out _,
 				out _
@@ -359,7 +359,7 @@ namespace Lunra.Satchel
 		}
 		
 		ModificationResults OnDecrement(
-			Stack[] decrements,
+			Stack[] requests,
 			out (long Id, int OldCount, int NewCount, int Delta)[] modified,
 			out Stack[] destroyed,
 			out Stack[] underflow
@@ -377,21 +377,21 @@ namespace Lunra.Satchel
 
 			var anyModifications = false;
 			
-			foreach (var stack in decrements)
+			foreach (var request in requests)
 			{
-				if (stack.Count == 0) continue;
+				if (request.Count == 0) continue;
 				
-				if (consolidated.TryGetValue(stack.Id, out var entry))
+				if (consolidated.TryGetValue(request.Id, out var entry))
 				{
-					if (stack.Count <= entry.Count)
+					if (request.Count <= entry.Count)
 					{
-						entry.Count -= stack.Count;
-						entry.RemovedCount += stack.Count;
+						entry.Count -= request.Count;
+						entry.RemovedCount += request.Count;
 					}
 					else
 					{
-						var countUnderflow = Mathf.Abs(entry.Count - stack.Count);
-						var countRemoved = stack.Count - countUnderflow;
+						var countUnderflow = Mathf.Abs(entry.Count - request.Count);
+						var countRemoved = request.Count - countUnderflow;
 						entry.Count -= countRemoved;
 						entry.RemovedCount += countRemoved;
 						entry.Underflow += countUnderflow;
@@ -401,10 +401,10 @@ namespace Lunra.Satchel
 				}
 				else
 				{
-					entry = (0, 0, stack.Count);
+					entry = (0, 0, request.Count);
 				}
 
-				consolidated[stack.Id] = entry;
+				consolidated[request.Id] = entry;
 			}
 
 			var underflowList = new List<Stack>();
@@ -540,10 +540,10 @@ namespace Lunra.Satchel
 		public ModificationResults DestroyAll() => Destroy(Stacks.ToArray(), out _);
 
 		public ModificationResults Destroy(
-			params Item[] destroyed
+			params Item[] requests
 		)
 		{
-			var destroyedIds = destroyed
+			var destroyedIds = requests
 				.Select(i => i.Id)
 				.Distinct()
 				.ToArray();
@@ -558,10 +558,10 @@ namespace Lunra.Satchel
 		}
 		
 		public ModificationResults Destroy(
-			params Stack[] destroyed
+			params Stack[] requests
 		)
 		{
-			var result = Destroy(destroyed, out _);
+			var result = Destroy(requests, out _);
 			
 			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow on destruction may cause unexpected problems");
 			
@@ -569,20 +569,20 @@ namespace Lunra.Satchel
 		}
 		
 		public ModificationResults Destroy(
-			Stack[] destroyed,
+			Stack[] requests,
 			out Stack[] underflow
 		)
 		{
 			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(DestroyAll));
 
-			if (destroyed.None())
+			if (requests.None())
 			{
 				underflow = new Stack[0];
 				return ModificationResults.None;
 			}
 
 			return OnDecrement(
-				destroyed,
+				requests,
 				out _,
 				out _,
 				out underflow
@@ -778,6 +778,42 @@ namespace Lunra.Satchel
 		{
 			lastUpdated = itemEvent.UpdateTime;
 			UpdatedItem?.Invoke(itemEvent);
+		}
+
+		public static ModificationResults Transfer(
+			Stack[] requests,
+			Inventory source,
+			Inventory destination
+		)
+		{
+			var result = Transfer(
+				requests,
+				source,
+				destination,
+				out _
+			);
+			
+			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow may cause unexpected problems");
+
+			return result;
+		}
+		
+		public static ModificationResults Transfer(
+			Stack[] requests,
+			Inventory source,
+			Inventory destination,
+			out Stack[] underflow
+		)
+		{
+			var withdrawalResult = source.Withdrawal(
+				requests,
+				out var withdrawalResults,
+				out underflow
+			);
+		
+			if (!withdrawalResult.HasFlag(ModificationResults.Modified)) return withdrawalResult;
+
+			return destination.Deposit(withdrawalResults);
 		}
 
 		public override string ToString() => ToString(Formats.IncludeItems | Formats.IncludeItemProperties);

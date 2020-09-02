@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -50,7 +52,7 @@ namespace Lunra.Satchel
 				// ReSharper restore NonReadonlyMemberInGetHashCode
 			}
 		}
-
+		
 		public static bool operator ==(Stack left, Stack right) => left.Equals(right);
 
 		public static bool operator !=(Stack left, Stack right) => !left.Equals(right);
@@ -74,5 +76,92 @@ namespace Lunra.Satchel
 			return item.ToString(format, Count);
 		}
 		public string ToString(ItemStore itemStore, Item.Formats format = Item.Formats.Default) => ToString(itemStore?.FirstOrDefault(Id), format);
+	}
+
+	public static class StackExtensions
+	{
+		public static Inventory.ModificationResults Transfer(
+			this Stack request,
+			Inventory source,
+			Inventory destination
+		)
+		{
+			return Inventory.Transfer(
+				request.WrapInArray(),
+				source,
+				destination
+			);
+		}
+		
+		public static Inventory.ModificationResults Transfer(
+			this Stack request,
+			Inventory source,
+			Inventory destination,
+			out Stack[] underflow
+		)
+		{
+			return Inventory.Transfer(
+				request.WrapInArray(),
+				source,
+				destination,
+				out underflow
+			);
+		}
+		
+		public static Inventory.ModificationResults Transfer(
+			this IEnumerable<Stack> requests,
+			Inventory source,
+			Inventory destination
+		)
+		{
+			return Transfer(
+				requests.ToArray(),
+				source,
+				destination
+			);
+		}
+		
+		public static Inventory.ModificationResults Transfer(
+			this IEnumerable<Stack> requests,
+			Inventory source,
+			Inventory destination,
+			out Stack[] underflow
+		)
+		{
+			return Transfer(
+				requests.ToArray(),
+				source,
+				destination,
+				out underflow
+			);
+		}
+		
+		public static Inventory.ModificationResults Transfer(
+			this Stack[] requests,
+			Inventory source,
+			Inventory destination
+		)
+		{
+			return Inventory.Transfer(
+				requests,
+				source,
+				destination
+			);
+		}
+		
+		public static Inventory.ModificationResults Transfer(
+			this Stack[] requests,
+			Inventory source,
+			Inventory destination,
+			out Stack[] underflow
+		)
+		{
+			return Inventory.Transfer(
+				requests,
+				source,
+				destination,
+				out underflow
+			);
+		}
 	}
 }

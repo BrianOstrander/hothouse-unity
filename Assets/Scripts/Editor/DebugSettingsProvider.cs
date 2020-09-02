@@ -351,15 +351,18 @@ namespace Lunra.Hothouse.Editor
 					filterIntKey.Pair()
 				);
 
-				inventory0.Increment(stack0);
+				(stack0 / 2).Transfer(inventory0, inventory1);
+				// inventory0.TransferTo()
+				
+				// inventory0.Increment(stack0);
 
-				inventory1.Deposit(
-					inventory0.Withdrawal(stack0.NewCount(20))
-				);
-
-				inventory1.Destroy(stack0.NewCount(20));
-
-				inventory0.Deposit(stack0.NewCount(20));
+				// inventory1.Deposit(
+				// 	inventory0.Withdrawal(stack0.NewCount(20))
+				// );
+				//
+				// inventory1.Destroy(stack0.NewCount(20));
+				//
+				// inventory0.Deposit(stack0.NewCount(20));
 
 				Debug.Log("---------");
 				Debug.Log(itemStore);
