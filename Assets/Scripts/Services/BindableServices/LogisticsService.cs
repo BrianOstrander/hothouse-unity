@@ -114,6 +114,7 @@ namespace Lunra.Hothouse.Services
 
 				bool? inventoryFound;
 				bool? parentFound;
+				string resourceId;
 				
 				public ItemInfo(
 					Context context,
@@ -164,6 +165,10 @@ namespace Lunra.Hothouse.Services
 					
 					return parent;
 				}
+
+				public string GetResourceId() => resourceId ?? (resourceId = OnGetResourceId());
+				
+				protected abstract string OnGetResourceId();
 			}
 			
 			public class ResourceInfo : ItemInfo
@@ -171,10 +176,9 @@ namespace Lunra.Hothouse.Services
 				public ResourceInfo(
 					Context context,
 					Item item
-				) : base(context, item)
-				{
-					
-				}
+				) : base(context, item) { }
+
+				protected override string OnGetResourceId() => Item.Get(Items.Keys.Resource.Id);
 			}
 
 			public class CapacityInfo : ItemInfo
@@ -194,6 +198,8 @@ namespace Lunra.Hothouse.Services
 					Item item
 				) : base(context, item) { }
 
+				protected override string OnGetResourceId() => Item.Get(Items.Keys.Capacity.ResourceId);
+				
 				public Goals Calculate()
 				{
 					var desire = Item.Get(Items.Keys.Capacity.Desire);
@@ -205,7 +211,7 @@ namespace Lunra.Hothouse.Services
 						Debug.LogError($"Unrecognized desire: {desire}");
 					}
 
-					var resourceId = Item.Get(Items.Keys.Capacity.ResourceId);
+					var resourceId = GetResourceId();
 					// var capacityCurrentCount = capacity.Item.Get(Items.Keys.Capacity.CurrentCount);
 					// var capacityMaximumCount = capacity.Item.Get(Items.Keys.Capacity.MaximumCount);
 					var capacityTargetCount = Item.Get(Items.Keys.Capacity.TargetCount);
@@ -214,18 +220,16 @@ namespace Lunra.Hothouse.Services
 
 					var resourceTotalCount = 0;
 
-					if (Context.Resources.TryGetValue(resourceId, out var resourceDictionary))
+					foreach (var stack in inventory.Stacks)
 					{
-						foreach (var stack in inventory.Stacks)
-						{
-							if (!resourceDictionary.TryGetValue(stack.Id, out var resource)) continue;
-							// TODO: I probably just shouldn't add ones note equal to None?
-							if (resource.Item.Get(Items.Keys.Resource.Logistics.State) != Items.Values.Resource.Logistics.States.None) continue;
+						if (!Context.Resources.TryGetValue(stack.Id, out var resource)) continue;
+						if (resource.Item.Get(Items.Keys.Resource.Id) != resourceId) continue;
+						// TODO: I probably just shouldn't add ones note equal to None?
+						if (resource.Item.Get(Items.Keys.Resource.Logistics.State) != Items.Values.Resource.Logistics.States.None) continue;
 						
-							resourceTotalCount += stack.Count;
-						}
+						resourceTotalCount += stack.Count;
 					}
-					
+
 					var delta = capacityTargetCount - resourceTotalCount;
 				
 					if (delta == 0)
@@ -288,26 +292,12 @@ namespace Lunra.Hothouse.Services
 
 			public List<NavigationCache> NavigationCaches = new List<NavigationCache>();
 			public List<DwellerInfo> Dwellers = new List<DwellerInfo>();
-			public Dictionary<string, Dictionary<long, ResourceInfo>> Resources = new Dictionary<string, Dictionary<long, ResourceInfo>>();
-			public Dictionary<string, Dictionary<long, CapacityInfo>> Capacities = new Dictionary<string, Dictionary<long, CapacityInfo>>();
+			public Dictionary<long, ResourceInfo> Resources = new Dictionary<long, ResourceInfo>();
+			public Dictionary<long, CapacityInfo> Capacities = new Dictionary<long, CapacityInfo>();
 			public Dictionary<long, Inventory> Inventories = new Dictionary<long, Inventory>();
 			public Dictionary<long, IInventoryModel> Parents = new Dictionary<long, IInventoryModel>();
 
 			public Context(LogisticsService service) => this.service = service;
-
-			public void Cache<T>(
-				PropertyKey<string> resourceIdKey,
-				Dictionary<string, Dictionary<long, T>> dictionary,
-				T entry
-			)
-				where T : ItemInfo
-			{
-				var resourceId = entry.Item.Get(resourceIdKey);
-
-				if (!dictionary.TryGetValue(resourceId, out var itemDictionary)) dictionary.Add(resourceId, (itemDictionary = new Dictionary<long, T>()));
-				
-				itemDictionary.Add(entry.Item.Id, entry);
-			}
 			
 			public void Clear()
 			{
@@ -355,24 +345,21 @@ namespace Lunra.Hothouse.Services
 			var capacitiesReceive = new List<Context.CapacityInfo>();
 			var capacitiesDistribute = new List<Context.CapacityInfo>();
 			
-			foreach (var capacities in context.Capacities.Values)
+			foreach (var capacity in context.Capacities.Values)
 			{
-				foreach (var capacity in capacities.Values)
+				switch (capacity.Calculate())
 				{
-					switch (capacity.Calculate())
-					{
-						case Context.CapacityInfo.Goals.None:
-							break;
-						case Context.CapacityInfo.Goals.Receive:
-							capacitiesReceive.Add(capacity);
-							break;
-						case Context.CapacityInfo.Goals.Distribute:
-							capacitiesDistribute.Add(capacity);
-							break;
-						default:
-							Debug.LogError($"Unrecognized goal: {capacity.Goal}");
-							break;
-					}
+					case Context.CapacityInfo.Goals.None:
+						break;
+					case Context.CapacityInfo.Goals.Receive:
+						capacitiesReceive.Add(capacity);
+						break;
+					case Context.CapacityInfo.Goals.Distribute:
+						capacitiesDistribute.Add(capacity);
+						break;
+					default:
+						Debug.LogError($"Unrecognized goal: {capacity.Goal}");
+						break;
 				}
 			}
 
@@ -413,32 +400,10 @@ namespace Lunra.Hothouse.Services
 						noValidDwellerNavigations = false;
 						
 						if (!dweller.ValidNavigationTo(availableDistribution)) continue;
-
-						if (!context.Resources.TryGetValue(resourceId, out var resourceDictionary))
-						{
-							Debug.LogError($"No resource dictionary for {resourceId}");
-							break;
-						}
-
-						var distributionInventory = availableDistribution.GetInventory();
-						foreach (var stack in distributionInventory.Stacks)
-						{
-							// if (!resourceDictionary.TryGetValue(stack.Id, out var resource))
-							// {
-							// 	Debug.LogError($"Unable to find resource with id {stack.Id} in {distributionInventory}");
-							// 	countinue
-							// }
-						}
 						
-						foreach (var stack in distributionInventory.Stacks)
-						{
-							
-						}
-						
+						// var distributionInventory = availableDistribution.GetInventory();
 						// var receiveInventory = nextRecieve.GetInventory();
 						// var dwellerInventory = dweller.GetInventory();
-
-						// context.Resources.v
 					}
 
 					if (noValidDwellerNavigations) break;
@@ -461,9 +426,8 @@ namespace Lunra.Hothouse.Services
 
 		void OnResourceUpdate(Item item)
 		{
-			context.Cache(
-				Items.Keys.Resource.Id,
-				context.Resources,
+			context.Resources.Add(
+				item.Id,
 				new Context.ResourceInfo(
 					context,
 					item
@@ -473,9 +437,8 @@ namespace Lunra.Hothouse.Services
 
 		void OnCapacityUpdate(Item item)
 		{
-			context.Cache(
-				Items.Keys.Capacity.ResourceId,
-				context.Capacities,
+			context.Capacities.Add(
+				item.Id,
 				new Context.CapacityInfo(
 					context,
 					item
