@@ -224,9 +224,11 @@ namespace Lunra.Satchel
 			}
 		}
 		
+		public Item First(Stack stack) => items[stack.Id];
 		public Item First(long id) => items[id];
 		public Item First(Func<Item, bool> predicate) => items.First(kv => predicate(kv.Value)).Value;
 		
+		public Item FirstOrFallback(Stack stack, Item fallback = null) => items.TryGetValue(stack.Id, out var value) ? value : fallback;
 		public Item FirstOrFallback(long id, Item fallback = null) => items.TryGetValue(id, out var value) ? value : fallback;
 
 		public Item FirstOrFallback(Func<Item, bool> predicate, Item fallback = null)
@@ -241,6 +243,7 @@ namespace Lunra.Satchel
 			}
 		}
 
+		public Item FirstOrDefault(Stack stack) => FirstOrFallback(stack.Id);
 		public Item FirstOrDefault(long id) => FirstOrFallback(id);
 		public Item FirstOrDefault(Func<Item, bool> predicate) => FirstOrFallback(predicate);
 		public Item[] Where(Func<Item, bool> predicate) => items.Select(kv => kv.Value).Where(predicate).ToArray();

@@ -375,32 +375,77 @@ namespace Lunra.Hothouse.Services
 				.ThenBy(c => c.GetPriority())
 				.ToList();
 
-			var availableDwellers = context.Dwellers
+			var dwellersAvailable = context.Dwellers
 				.Where(m => m.Dweller.InventoryPromises.All.None())
 				.ToList();
 			
-			while (capacitiesReceive.Any() && capacitiesDistribute.Any() && availableDwellers.Any())
+			while (capacitiesReceive.Any() && capacitiesDistribute.Any() && dwellersAvailable.Any())
 			{
-				var nextRecieve = capacitiesReceive[0];
+				var capacityReceive = capacitiesReceive[0];
 				capacitiesReceive.RemoveAt(0);
 
-				var resourceId = nextRecieve.Item.Get(Items.Keys.Capacity.ResourceId);
+				var resourceId = capacityReceive.Item.Get(Items.Keys.Capacity.ResourceId);
 
-				var availableDistributions = capacitiesDistribute
+				var capacitiesDistributeAvailable = capacitiesDistribute
 					.Where(c => c.Item.Get(Items.Keys.Capacity.ResourceId) == resourceId)
 					.ToList();
 
-				foreach (var availableDistribution in availableDistributions)
+				foreach (var capacityDistributeAvailable in capacitiesDistributeAvailable)
 				{
 					var noValidDwellerNavigations = true;
 					
-					foreach (var dweller in availableDwellers.OrderBy(m => m.Dweller.DistanceTo(availableDistribution.GetParent())))
+					foreach (var dweller in dwellersAvailable.OrderBy(m => m.Dweller.DistanceTo(capacityDistributeAvailable.GetParent())))
 					{
-						if (!dweller.ValidNavigationTo(nextRecieve)) continue;
+						if (!dweller.ValidNavigationTo(capacityReceive)) continue;
 						noValidDwellerNavigations = false;
 						
-						if (!dweller.ValidNavigationTo(availableDistribution)) continue;
+						if (!dweller.ValidNavigationTo(capacityDistributeAvailable)) continue;
+
+						var inventoryDistribute = capacityDistributeAvailable.GetInventory();
+
+						var found = inventoryDistribute
+							.TryFindFirst(
+								out var item,
+								Items.Keys.Resource.Id.Pair(resourceId),
+								Items.Keys.Resource.Logistics.State.Pair(Items.Values.Resource.Logistics.States.None)
+							);
+
+						if (!found)
+						{
+							Debug.LogError($"Unable to find valid instance of a {resourceId} in {inventoryDistribute.Id}");
+							break;
+						}
 						
+						found = inventoryDistribute
+							.TryFindFirst(
+								out var itemReservation,
+								Items.Keys.Reservation.CapacityId.Pair(capacityReceive.Item.Id)
+							);
+
+						if (!found)
+						{
+							Debug.LogError($"Unable to find valid reservation for {capacityReceive.Item.Id} in {inventoryDistribute.Id}");
+							break;
+						}
+
+						item = Model.Items.First(inventoryDistribute.Withdrawal(item.StackOf(1)).First()); 
+						itemReservation = Model.Items.First(inventoryDistribute.Withdrawal(itemReservation.StackOf(1)).First());
+						
+						item.Set(
+							Items.Keys.Resource.Logistics.State
+								.Pair(Items.Values.Resource.Logistics.States.Output)
+						);
+						
+						itemReservation.Set(
+							Items.Keys.Reservation.IsPromised
+								.Pair(true)
+						);
+						
+						// itemStack
+
+						// if (distributionInventory.TryFindFirst())
+
+
 						// var distributionInventory = availableDistribution.GetInventory();
 						// var receiveInventory = nextRecieve.GetInventory();
 						// var dwellerInventory = dweller.GetInventory();

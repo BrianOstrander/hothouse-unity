@@ -17,7 +17,7 @@ namespace Lunra.Hothouse.Models
 			{
 				var consolidated = new Dictionary<string, PropertyKeyValue>();
 
-				consolidated.Add(Keys.Shared.Type.Key, Keys.Shared.Type.Pair(type));
+				consolidated.Add(Keys.Shared.Type.Key, (Keys.Shared.Type, type));
 				
 				foreach (var e in required.Concat(overrides)) consolidated[e.Key] = e;
 
@@ -36,19 +36,19 @@ namespace Lunra.Hothouse.Models
 
 					return Combine(
 						Values.Shared.Types.Resource,
-						new[]
+						new PropertyKeyValue[]
 						{
-							Keys.Resource.Id.Pair(id),
+							(Keys.Resource.Id, id),
 
-							Keys.Resource.Logistics.State.Pair(Values.Resource.Logistics.States.None),
-							Keys.Resource.Logistics.Promised.Pair(),
+							(Keys.Resource.Logistics.State, Values.Resource.Logistics.States.None),
+							(Keys.Resource.Logistics.Promised, false),
 
-							Keys.Resource.Decay.IsEnabled.Pair(true),
-							Keys.Resource.Decay.Maximum.Pair(DefaultDecayMaximum),
-							Keys.Resource.Decay.Current.Pair(DefaultDecayMaximum),
-							Keys.Resource.Decay.Previous.Pair(DefaultDecayMaximum),
-							Keys.Resource.Decay.Rate.Pair(DefaultDecayRate),
-							Keys.Resource.Decay.RatePredicted.Pair(DefaultDecayRate)
+							(Keys.Resource.Decay.IsEnabled, true),
+							(Keys.Resource.Decay.Maximum, DefaultDecayMaximum),
+							(Keys.Resource.Decay.Current, DefaultDecayMaximum),
+							(Keys.Resource.Decay.Previous, DefaultDecayMaximum),
+							(Keys.Resource.Decay.Rate, DefaultDecayRate),
+							(Keys.Resource.Decay.RatePredicted, DefaultDecayRate)
 						},
 						overrides
 					);
@@ -122,15 +122,15 @@ namespace Lunra.Hothouse.Models
 				{
 					return Combine(
 						Values.Shared.Types.Capacity,
-						new[]
+						new PropertyKeyValue[]
 						{
-							Keys.Capacity.ResourceId.Pair(resourceId),
-							Keys.Capacity.IsCache.Pair(isCache),
-							Keys.Capacity.Desire.Pair(Values.Capacity.Desires.NotCalculated),
-							Keys.Capacity.TimeoutExpired.Pair(),
-							Keys.Capacity.CurrentCount.Pair(),
-							Keys.Capacity.MaximumCount.Pair(count),
-							Keys.Capacity.TargetCount.Pair(count)
+							(Keys.Capacity.ResourceId, resourceId),
+							(Keys.Capacity.IsCache, isCache),
+							(Keys.Capacity.Desire, Values.Capacity.Desires.NotCalculated), 
+							(Keys.Capacity.TimeoutExpired, 0L),
+							(Keys.Capacity.CurrentCount, 0),
+							(Keys.Capacity.MaximumCount, count),
+							(Keys.Capacity.TargetCount, count)
 						},
 						overrides
 					);
@@ -176,12 +176,12 @@ namespace Lunra.Hothouse.Models
 				{
 					return Combine(
 						Values.Shared.Types.Reservation,
-						new []
+						new PropertyKeyValue[]
 						{
-							Keys.Reservation.ResourceId.Pair(resourceId),
-							Keys.Reservation.CapacityId.Pair(capacityId),
-							Keys.Reservation.State.Pair(state),
-							Keys.Reservation.IsPromised.Pair()
+							(Keys.Reservation.ResourceId, resourceId),
+							(Keys.Reservation.CapacityId, capacityId),
+							(Keys.Reservation.State, state),
+							(Keys.Reservation.IsPromised, false)
 						},
 						overrides
 					);

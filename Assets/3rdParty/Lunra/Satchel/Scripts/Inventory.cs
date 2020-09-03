@@ -621,6 +621,48 @@ namespace Lunra.Satchel
 			stack = default;
 			return false;
 		}
+		
+		public bool TryFindFirst(
+			out Item item,
+			params PropertyKeyValue[] keyValues
+		)
+		{
+			return TryFindFirst(out item, out _, keyValues);
+		}
+		
+		public bool TryFindFirst(
+			out Item item,
+			out Stack stack,
+			params PropertyKeyValue[] keyValues
+		)
+		{
+			foreach (var s in Stacks)
+			{
+				if (itemStore.TryGet(s.Id, out item))
+				{
+					var isMatch = true;
+					foreach (var kv in keyValues)
+					{
+						if (!kv.IsEqualToValueIn(item))
+						{
+							isMatch = false;
+							break;
+						}
+					}
+
+					if (isMatch)
+					{
+						stack = s;
+						return true;
+					}
+				}
+				else Debug.LogError($"Unrecognized item id {s.Id}");
+			}
+
+			item = null;
+			stack = default;
+			return false;
+		}
 
 		public bool TryOperation<T>(
 			string key,
