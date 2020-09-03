@@ -200,7 +200,7 @@ namespace Lunra.Satchel
 				
 				if (ignoredKeysForStacking.Contains(targetKey)) continue;
 				
-				if (!Item.IsPropertyEqual(item0, item1, targetKey)) return false;
+				if (!Item.IsPropertyEqual(targetKey, item0, item1)) return false;
 			}
 
 			return true;

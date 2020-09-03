@@ -325,7 +325,11 @@ namespace Lunra.Satchel
 
 		public bool Is(Item item) => Is(item.Id);
 		
-		public static bool IsPropertyEqual(Item item0, Item item1, string key)
+		public static bool IsPropertyEqual(
+			string key,
+			Item item0,
+			Item item1
+		)
 		{
 			if (item0 == null) throw new ArgumentNullException(nameof(item0));
 			if (item1 == null) throw new ArgumentNullException(nameof(item1));

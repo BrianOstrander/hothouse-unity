@@ -589,6 +589,39 @@ namespace Lunra.Satchel
 			);
 		}
 
+		public bool TryFindFirst(
+			Func<Item, bool> predicate,
+			out Item item
+		)
+		{
+			return TryFindFirst(predicate, out item, out _);
+		}
+		
+		public bool TryFindFirst(
+			Func<Item, bool> predicate,
+			out Item item,
+			out Stack stack
+		)
+		{
+			foreach (var s in Stacks)
+			{
+				if (itemStore.TryGet(s.Id, out item))
+				{
+					if (predicate(item))
+					{
+						stack = s;
+						return true;
+					}
+					item = null;
+				}
+				else Debug.LogError($"Unrecognized item id {s.Id}");
+			}
+
+			item = null;
+			stack = default;
+			return false;
+		}
+
 		public bool TryOperation<T>(
 			string key,
 			Func<OperationRequest<T>, OperationResult<T>> operation,

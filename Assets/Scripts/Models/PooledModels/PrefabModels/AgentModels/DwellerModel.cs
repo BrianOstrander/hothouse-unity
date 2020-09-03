@@ -25,6 +25,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] InstanceId workplace = InstanceId.Null();
 		[JsonIgnore] public ListenerProperty<InstanceId> Workplace { get; }
 		
+		[JsonProperty] public InventoryPromiseComponent InventoryPromises { get; private set; } = new InventoryPromiseComponent();
 		[JsonProperty] public GoalComponent Goals { get; private set; } = new GoalComponent();
 		[JsonProperty] public GoalPromiseComponent GoalPromises { get; private set; } = new GoalPromiseComponent();
 		[JsonProperty] public AttackComponent Attacks { get; private set; } = new AttackComponent();
@@ -42,6 +43,7 @@ namespace Lunra.Hothouse.Models
 			Workplace = new ListenerProperty<InstanceId>(value => workplace = value, () => workplace);
 			
 			AppendComponents(
+				InventoryPromises,
 				Goals,
 				GoalPromises,
 				Attacks

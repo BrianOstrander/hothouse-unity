@@ -7,7 +7,7 @@ namespace Lunra.Hothouse.Models
 		public override StackRecipe[] Inventory => new[]
 		{
 			Items.Instantiate.Capacity
-				.Of(Items.Values.Resource.Ids.Stalk, 10)
+				.CacheOf(Items.Values.Resource.Ids.Stalk, 10)
 				.ToSingleStackRecipe()
 		};
 		

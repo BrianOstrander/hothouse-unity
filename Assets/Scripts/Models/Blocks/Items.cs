@@ -59,16 +59,64 @@ namespace Lunra.Hothouse.Models
 			
 			public static class Capacity
 			{
-				public static PropertyKeyValue[] OfZero(
+				public static PropertyKeyValue[] CacheOfZero(
 					string resourceId,
-					params PropertyKeyValue[] keyValues
+					params PropertyKeyValue[] overrides
 				)
 				{
-					return Of(resourceId, 0, keyValues);
+					return Get(
+						resourceId,
+						0,
+						true,
+						overrides
+					);
 				}
+
+				public static PropertyKeyValue[] CacheOf(
+					string resourceId,
+					int count,
+					params PropertyKeyValue[] overrides
+				)
+				{
+					return Get(
+						resourceId,
+						count,
+						true,
+						overrides
+					);
+				}
+				
+				public static PropertyKeyValue[] OfZero(
+					string resourceId,
+					params PropertyKeyValue[] overrides
+				)
+				{
+					return Get(
+						resourceId,
+						0,
+						false,
+						overrides
+					);
+				}
+
 				public static PropertyKeyValue[] Of(
 					string resourceId,
 					int count,
+					params PropertyKeyValue[] overrides
+				)
+				{
+					return Get(
+						resourceId,
+						count,
+						false,
+						overrides
+					);
+				}
+				
+				static PropertyKeyValue[] Get(
+					string resourceId,
+					int count,
+					bool isCache,
 					params PropertyKeyValue[] overrides
 				)
 				{
@@ -77,6 +125,7 @@ namespace Lunra.Hothouse.Models
 						new[]
 						{
 							Keys.Capacity.ResourceId.Pair(resourceId),
+							Keys.Capacity.IsCache.Pair(isCache),
 							Keys.Capacity.Desire.Pair(Values.Capacity.Desires.NotCalculated),
 							Keys.Capacity.TimeoutExpired.Pair(),
 							Keys.Capacity.CurrentCount.Pair(),
@@ -87,7 +136,7 @@ namespace Lunra.Hothouse.Models
 					);
 				}
 			}
-			
+
 			public static class Reservation
 			{
 				public static PropertyKeyValue[] OfInput(
@@ -183,13 +232,14 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Capacity), suffix);
 				
 				public static readonly PropertyKey<string> ResourceId = Create<string>(nameof(ResourceId));
+				public static readonly PropertyKey<bool> IsCache = Create<bool>(nameof(IsCache));
 				public static readonly PropertyKey<string> Desire = Create<string>(nameof(Desire));
 				public static readonly PropertyKey<long> TimeoutExpired = Create<long>(nameof(TimeoutExpired));
 				public static readonly PropertyKey<int> CurrentCount = Create<int>(nameof(CurrentCount));
 				public static readonly PropertyKey<int> MaximumCount = Create<int>(nameof(MaximumCount));
 				public static readonly PropertyKey<int> TargetCount = Create<int>(nameof(TargetCount));
 			}
-			
+
 			public static class Reservation
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Reservation), suffix);
@@ -240,10 +290,10 @@ namespace Lunra.Hothouse.Models
 			{
 				public static class Desires
 				{
-					public static readonly string None = nameof(None).ToSnakeCase();
 					public static readonly string NotCalculated = nameof(NotCalculated).ToSnakeCase();
+					public static readonly string None = nameof(None).ToSnakeCase();
+					public static readonly string Receive = nameof(Receive).ToSnakeCase();
 					public static readonly string Distribute = nameof(Distribute).ToSnakeCase();
-					public static readonly string Fulfill = nameof(Fulfill).ToSnakeCase();
 				}
 			}
 			

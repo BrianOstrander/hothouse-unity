@@ -150,6 +150,8 @@ namespace Lunra.Hothouse.Models
 			Debug.LogWarning("TODO: Inventory reset");
 			// model.InventoryPromises.Reset();
 
+			model.InventoryPromises.Reset();
+			
 			model.Goals.Reset(this);
 			
 			model.GoalPromises.Reset();
