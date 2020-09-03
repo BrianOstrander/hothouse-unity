@@ -296,7 +296,7 @@ namespace Lunra.Hothouse.Editor
 				var stack0 = inventory0.New(
 					10,
 					out var item0,
-					filterIntKey.Pair()
+					(filterIntKey, 0)
 				);
 
 				(stack0 / 2).Transfer(inventory0, inventory1);

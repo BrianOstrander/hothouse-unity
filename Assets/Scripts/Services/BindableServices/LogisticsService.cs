@@ -236,8 +236,8 @@ namespace Lunra.Hothouse.Services
 					{
 						// We're at a satisfactory amount
 						Item.Set(
-							Items.Keys.Capacity.Desire.Pair(Items.Values.Capacity.Desires.None),
-							Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
+							(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.None),
+							(Items.Keys.Capacity.CurrentCount, resourceTotalCount)
 						);
 
 						return Goal = Goals.None;
@@ -247,8 +247,8 @@ namespace Lunra.Hothouse.Services
 					{
 						// We want more
 						Item.Set(
-							Items.Keys.Capacity.Desire.Pair(Items.Values.Capacity.Desires.Receive),
-							Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
+							(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Receive),
+							(Items.Keys.Capacity.CurrentCount, resourceTotalCount)
 						);
 
 						inventory.Deposit(
@@ -268,8 +268,8 @@ namespace Lunra.Hothouse.Services
 					
 					// We want less
 					Item.Set(
-						Items.Keys.Capacity.Desire.Pair(Items.Values.Capacity.Desires.Distribute),
-						Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
+						(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Distribute),
+						(Items.Keys.Capacity.CurrentCount, resourceTotalCount)
 					);
 				
 					inventory.Deposit(
@@ -401,13 +401,15 @@ namespace Lunra.Hothouse.Services
 						
 						if (!dweller.ValidNavigationTo(capacityDistributeAvailable)) continue;
 
+						break;
+						
 						var inventoryDistribute = capacityDistributeAvailable.GetInventory();
 
 						var found = inventoryDistribute
 							.TryFindFirst(
 								out var item,
-								Items.Keys.Resource.Id.Pair(resourceId),
-								Items.Keys.Resource.Logistics.State.Pair(Items.Values.Resource.Logistics.States.None)
+								(Items.Keys.Resource.Id, resourceId),
+								(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.None)
 							);
 
 						if (!found)
@@ -419,7 +421,7 @@ namespace Lunra.Hothouse.Services
 						found = inventoryDistribute
 							.TryFindFirst(
 								out var itemReservation,
-								Items.Keys.Reservation.CapacityId.Pair(capacityReceive.Item.Id)
+								(Items.Keys.Reservation.CapacityId, capacityReceive.Item.Id)
 							);
 
 						if (!found)
@@ -432,13 +434,11 @@ namespace Lunra.Hothouse.Services
 						itemReservation = Model.Items.First(inventoryDistribute.Withdrawal(itemReservation.StackOf(1)).First());
 						
 						item.Set(
-							Items.Keys.Resource.Logistics.State
-								.Pair(Items.Values.Resource.Logistics.States.Output)
+							(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.Output)
 						);
 						
 						itemReservation.Set(
-							Items.Keys.Reservation.IsPromised
-								.Pair(true)
+							(Items.Keys.Reservation.IsPromised, true)
 						);
 						
 						// itemStack

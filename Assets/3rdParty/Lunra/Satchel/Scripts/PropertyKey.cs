@@ -23,27 +23,5 @@ namespace Lunra.Satchel
 		
 		[Pure]
 		public bool IsPropertyEqual(Item item0, Item item1) => Item.IsPropertyEqual(Key, item0, item1);
-		
-		[Pure]
-		public PropertyKeyValue Pair(T value = default)
-		{
-			Property.TryNew(value, out var property);
-			
-			return new PropertyKeyValue(
-				Key,
-				property
-			);
-		}
-		
-		public PropertyKeyValue Pair(
-			PropertyKeyValue[] elements
-		)
-		{
-			var key = Key;
-			return new PropertyKeyValue(
-				Key,
-				elements.First(e => e.Key == key).Property
-			);
-		}
 	}
 }
