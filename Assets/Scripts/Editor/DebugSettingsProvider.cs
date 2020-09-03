@@ -229,7 +229,7 @@ namespace Lunra.Hothouse.Editor
 			{
 				var cap = Items.Instantiate.Capacity
 					.Of(
-						Items.Values.Resource.Ids.Stalk,
+						Items.Values.Resource.Types.Stalk,
 						10
 					);
 				

@@ -59,7 +59,7 @@ namespace Lunra.Hothouse.Models
 			model.Enterable.Reset();
 			model.Inventory.Reset(game.Items);
 
-			var existingResourceIds = new HashSet<string>();
+			var existingResourceTypes = new HashSet<string>();
 
 			game.Items.Iterate(
 				(item, stack) =>
@@ -70,15 +70,15 @@ namespace Lunra.Hothouse.Models
 						{
 							item[Items.Keys.Resource.Logistics.State] = Items.Values.Resource.Logistics.States.None;
 
-							var resourceId = item[Items.Keys.Resource.Id];
+							var resourceType = item[Items.Keys.Resource.Type];
 
-							if (existingResourceIds.Add(resourceId))
+							if (existingResourceTypes.Add(resourceType))
 							{
 								model.Inventory.Container.Deposit(
 									game.Items.Builder
 										.BeginItem()
 										.WithProperties(
-											Items.Instantiate.Capacity.OfZero(resourceId)
+											Items.Instantiate.Capacity.OfZero(resourceType)
 										)
 										.Done()
 								);

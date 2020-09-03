@@ -114,7 +114,7 @@ namespace Lunra.Hothouse.Services
 
 				bool? inventoryFound;
 				bool? parentFound;
-				string resourceId;
+				string resourceType;
 				
 				public ItemInfo(
 					Context context,
@@ -166,9 +166,9 @@ namespace Lunra.Hothouse.Services
 					return parent;
 				}
 
-				public string GetResourceId() => resourceId ?? (resourceId = OnGetResourceId());
+				public string GetResourceType() => resourceType ?? (resourceType = OnGetResourceType());
 				
-				protected abstract string OnGetResourceId();
+				protected abstract string OnGetResourceType();
 			}
 			
 			public class ResourceInfo : ItemInfo
@@ -178,7 +178,7 @@ namespace Lunra.Hothouse.Services
 					Item item
 				) : base(context, item) { }
 
-				protected override string OnGetResourceId() => Item[Items.Keys.Resource.Id];
+				protected override string OnGetResourceType() => Item[Items.Keys.Resource.Type];
 			}
 
 			public class CapacityInfo : ItemInfo
@@ -198,7 +198,7 @@ namespace Lunra.Hothouse.Services
 					Item item
 				) : base(context, item) { }
 
-				protected override string OnGetResourceId() => Item[Items.Keys.Capacity.ResourceId];
+				protected override string OnGetResourceType() => Item[Items.Keys.Capacity.ResourceType];
 				
 				public Goals Calculate()
 				{
@@ -211,7 +211,7 @@ namespace Lunra.Hothouse.Services
 						Debug.LogError($"Unrecognized desire: {desire}");
 					}
 
-					var resourceId = GetResourceId();
+					var resourceType = GetResourceType();
 					// var capacityCurrentCount = capacity.Item.Get(Items.Keys.Capacity.CurrentCount);
 					// var capacityMaximumCount = capacity.Item.Get(Items.Keys.Capacity.MaximumCount);
 					var capacityTargetCount = Item[Items.Keys.Capacity.TargetCount];
@@ -223,7 +223,7 @@ namespace Lunra.Hothouse.Services
 					foreach (var stack in inventory.Stacks)
 					{
 						if (!Context.Resources.TryGetValue(stack.Id, out var resource)) continue;
-						if (resource.Item[Items.Keys.Resource.Id] != resourceId) continue;
+						if (resource.Item[Items.Keys.Resource.Type] != resourceType) continue;
 						// TODO: I probably just shouldn't add ones note equal to None?
 						if (resource.Item[Items.Keys.Resource.Logistics.State] != Items.Values.Resource.Logistics.States.None) continue;
 						
@@ -256,7 +256,7 @@ namespace Lunra.Hothouse.Services
 								.BeginItem()
 								.WithProperties(
 									Items.Instantiate.Reservation.OfInput(
-										resourceId,
+										resourceType,
 										Item.Id
 									)
 								)
@@ -277,7 +277,7 @@ namespace Lunra.Hothouse.Services
 							.BeginItem()
 							.WithProperties(
 								Items.Instantiate.Reservation.OfOutput(
-									resourceId,
+									resourceType,
 									Item.Id
 								)
 							)
@@ -384,38 +384,38 @@ namespace Lunra.Hothouse.Services
 				var capacityReceive = capacitiesReceive[0];
 				capacitiesReceive.RemoveAt(0);
 
-				var resourceId = capacityReceive.Item[Items.Keys.Capacity.ResourceId];
+				var resourceType = capacityReceive.Item[Items.Keys.Capacity.ResourceType];
 
 				var capacitiesDistributeAvailable = capacitiesDistribute
-					.Where(c => c.Item[Items.Keys.Capacity.ResourceId] == resourceId)
+					.Where(c => c.Item[Items.Keys.Capacity.ResourceType] == resourceType)
 					.ToList();
 
-				foreach (var capacityDistributeAvailable in capacitiesDistributeAvailable)
+				foreach (var capacityDistribute in capacitiesDistributeAvailable)
 				{
 					var noValidDwellerNavigations = true;
 					int? capacityDistributeCurrentCount = null;
+					int? capacityDistributeTargetCount = null;
 					
-					foreach (var dweller in dwellersAvailable.OrderBy(m => m.Dweller.DistanceTo(capacityDistributeAvailable.GetParent())))
+					
+					foreach (var dweller in dwellersAvailable.OrderBy(m => m.Dweller.DistanceTo(capacityDistribute.GetParent())))
 					{
 						if (!dweller.ValidNavigationTo(capacityReceive)) continue;
 						noValidDwellerNavigations = false;
 						
-						if (!dweller.ValidNavigationTo(capacityDistributeAvailable)) continue;
+						if (!dweller.ValidNavigationTo(capacityDistribute)) continue;
 
-						break;
-						
-						var inventoryDistribute = capacityDistributeAvailable.GetInventory();
+						var inventoryDistribute = capacityDistribute.GetInventory();
 
 						var found = inventoryDistribute
 							.TryFindFirst(
 								out var item,
-								(Items.Keys.Resource.Id, resourceId),
+								(Items.Keys.Resource.Type, resourceType),
 								(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.None)
 							);
 
 						if (!found)
 						{
-							Debug.LogError($"Unable to find valid instance of a {resourceId} in {inventoryDistribute.Id}");
+							Debug.LogError($"Unable to find valid instance of a {resourceType} in {inventoryDistribute.Id}");
 							break;
 						}
 						
@@ -439,21 +439,42 @@ namespace Lunra.Hothouse.Services
 						);
 						
 						itemReservation.Set(
-							(Items.Keys.Reservation.IsPromised, true)
+							(Items.Keys.Reservation.IsPromised, true),
+							(Items.Keys.Reservation.ItemId, item.Id)
 						);
 
+						inventoryDistribute.Deposit(item.StackOf(1));
+						inventoryDistribute.Deposit(itemReservation.StackOf(1));
+
 						// Don't miss the -1 at the end of this!
-						capacityDistributeCurrentCount = (capacityDistributeCurrentCount ?? capacityDistributeAvailable.Item[Items.Keys.Capacity.CurrentCount]) - 1;
+						capacityDistributeCurrentCount = (capacityDistributeCurrentCount ?? capacityDistribute.Item[Items.Keys.Capacity.CurrentCount]) - 1;
 
+						capacityDistribute.Item[Items.Keys.Capacity.CurrentCount] = capacityDistributeCurrentCount.Value;
 
-						// itemStack
+						if (capacityDistributeCurrentCount == (capacityDistributeTargetCount ?? (capacityDistributeTargetCount = capacityDistribute.Item[Items.Keys.Capacity.TargetCount])))
+						{
+							capacityDistribute.Item[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
+						}
+						
+						var dwellerInventory = dweller.GetInventory();
 
-						// if (distributionInventory.TryFindFirst())
-
+						// dwellerInventory.New(
+						// 	1,
+						// 	itemReservation,
+						// 	out var itemPickup,
+						// 	(Items.Keys.Reservation.State, Items.Values.Reservation.States.Pickup)
+						// );
+						//
+						// dwellerInventory.New(
+						// 	1,
+						// 	itemReservation,
+						// 	out var itemDropoff,
+						// 	(Items.Keys.Reservation.State, Items.Values.Reservation.States.Dropoff),
+						// 	(Items.Keys.Reservation.State, Items.Values.Reservation.States.Dropoff)
+						// );
 
 						// var distributionInventory = availableDistribution.GetInventory();
 						// var receiveInventory = nextRecieve.GetInventory();
-						// var dwellerInventory = dweller.GetInventory();
 					}
 
 					if (noValidDwellerNavigations) break;
