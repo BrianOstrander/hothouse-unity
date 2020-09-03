@@ -82,30 +82,14 @@ namespace Lunra.Hothouse.Services
 
 			public class CapacityInfo : ItemInfo
 			{
-				public enum Desires
-				{
-					None = 0,
-					NotCalculated = 10,
-					Distribute = 20,
-					Fulfill = 30
-				}
-				
-				public Desires Desire { get; }
-				
 				public CapacityInfo(
 					Context context,
-					Item item,
-					Desires desire
-				) : base(context, item)
-				{
-					Desire = desire;
-				}
+					Item item
+				) : base(context, item) { }
 			}
 
 			LogisticsService service;
 
-			public List<(Item Item, Stack Stack)> ItemStackWorkspace = new List<(Item Item, Stack Stack)>();
-			
 			public Dictionary<long, ResourceInfo> Resources = new Dictionary<long, ResourceInfo>();
 			public Dictionary<long, CapacityInfo> Capacities = new Dictionary<long, CapacityInfo>();
 			public Dictionary<long, Inventory> Inventories = new Dictionary<long, Inventory>();
@@ -115,7 +99,6 @@ namespace Lunra.Hothouse.Services
 			
 			public void Clear()
 			{
-				ItemStackWorkspace.Clear();
 				Resources.Clear();
 				Capacities.Clear();
 				Inventories.Clear();
@@ -147,13 +130,11 @@ namespace Lunra.Hothouse.Services
 
 			foreach (var capacity in context.Capacities.Values)
 			{
-				if (capacity.Desire != Context.CapacityInfo.Desires.NotCalculated) continue;
+				if (capacity.Item.Get(Items.Keys.Capacity.Desire) != Items.Values.Capacity.Desires.NotCalculated) continue;
 
-				context.ItemStackWorkspace.Clear();
-				
 				var capacityResourceId = capacity.Item.Get(Items.Keys.Capacity.ResourceId);
-				var capacityCurrentCount = capacity.Item.Get(Items.Keys.Capacity.CurrentCount);
-				var capacityMaximumCount = capacity.Item.Get(Items.Keys.Capacity.MaximumCount);
+				// var capacityCurrentCount = capacity.Item.Get(Items.Keys.Capacity.CurrentCount);
+				// var capacityMaximumCount = capacity.Item.Get(Items.Keys.Capacity.MaximumCount);
 				var capacityTargetCount = capacity.Item.Get(Items.Keys.Capacity.TargetCount);
 				
 				var inventory = capacity.GetInventory();
@@ -170,7 +151,6 @@ namespace Lunra.Hothouse.Services
 						if (possibleResourceId != capacityResourceId) continue;
 						if (possibleResource.Get(Items.Keys.Resource.Logistics.State) != Items.Values.Resource.Logistics.States.None) continue;
 						
-						context.ItemStackWorkspace.Add((possibleResource, stack));
 						resourceTotalCount += stack.Count;
 					}
 				}
@@ -187,7 +167,6 @@ namespace Lunra.Hothouse.Services
 				else if (0 < delta)
 				{
 					// We want more
-					
 					capacity.Item.Set(
 						Items.Keys.Capacity.Desire.Pair(Items.Values.Capacity.Desires.Fulfill),
 						Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
@@ -208,7 +187,6 @@ namespace Lunra.Hothouse.Services
 				else
 				{
 					// We want less
-					
 					capacity.Item.Set(
 						Items.Keys.Capacity.Desire.Pair(Items.Values.Capacity.Desires.Distribute),
 						Items.Keys.Capacity.CurrentCount.Pair(resourceTotalCount)
@@ -227,7 +205,20 @@ namespace Lunra.Hothouse.Services
 					);
 				}
 			}
+
+			// TODO: Sort these by some priority
+			var sortedResources = context.Resources;
+			var sortedCapacities = context.Capacities;
+
+			var dwellerPool = new Dictionary<string, DwellerModel>();
+
+			foreach (var dweller in Model.Dwellers.AllActive)
+			{
+				// if (dwe)
+			}
 			
+			
+
 			context.Clear();
 		}
 
@@ -246,27 +237,20 @@ namespace Lunra.Hothouse.Services
 		{
 			context.Resources.Add(
 				item.Id,
-				new Context.ResourceInfo(context, item)	
+				new Context.ResourceInfo(
+					context,
+					item
+				)	
 			);
 		}
 
 		void OnCapacityUpdate(Item item)
 		{
-			var desireRaw = item.Get(Items.Keys.Capacity.Desire);
-			var desire = Context.CapacityInfo.Desires.None;
-
-			if (desireRaw == Items.Values.Capacity.Desires.None) desire = Context.CapacityInfo.Desires.None;
-			else if (desireRaw == Items.Values.Capacity.Desires.NotCalculated) desire = Context.CapacityInfo.Desires.NotCalculated;
-			else if (desireRaw == Items.Values.Capacity.Desires.Distribute) desire = Context.CapacityInfo.Desires.Distribute;
-			else if (desireRaw == Items.Values.Capacity.Desires.Fulfill) desire = Context.CapacityInfo.Desires.Fulfill;
-			else Debug.LogError($"Unrecognized desire: {desireRaw}");
-			
 			context.Capacities.Add(
 				item.Id,
 				new Context.CapacityInfo(
 					context,
-					item,
-					desire
+					item
 				)	
 			);
 		}

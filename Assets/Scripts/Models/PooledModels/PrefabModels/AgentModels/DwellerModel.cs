@@ -19,23 +19,6 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] DayTimeFrame jobShift = DayTimeFrame.Zero;
 		[JsonIgnore] public ListenerProperty<DayTimeFrame> JobShift { get; }
 
-		[JsonProperty] float withdrawalCooldown;
-		[JsonIgnore] public ListenerProperty<float> WithdrawalCooldown { get; }
-		
-		[JsonProperty] float depositCooldown;
-		[JsonIgnore] public ListenerProperty<float> DepositCooldown { get; }
-		
-		[JsonProperty] float obligationDistance;
-		[JsonIgnore] public ListenerProperty<float> ObligationDistance { get; }
-		[JsonProperty] float obligationMinimumConcentrationDuration;
-		[JsonIgnore] public ListenerProperty<float> ObligationMinimumConcentrationDuration { get; }
-		
-		[JsonProperty] float transferDistance;
-		[JsonIgnore] public ListenerProperty<float> TransferDistance { get; }
-		
-		[JsonProperty] int lowRationThreshold;
-		[JsonIgnore] public ListenerProperty<int> LowRationThreshold { get; }
-
 		[JsonProperty] InstanceId bed = InstanceId.Null();
 		[JsonIgnore] public  ListenerProperty<InstanceId> Bed { get; }
 		
@@ -55,12 +38,6 @@ namespace Lunra.Hothouse.Models
 			Name = new ListenerProperty<string>(value => name = value, () => name);
 			Job = new ListenerProperty<Jobs>(value => job = value, () => job);
 			JobShift = new ListenerProperty<DayTimeFrame>(value => jobShift = value, () => jobShift);
-			WithdrawalCooldown = new ListenerProperty<float>(value => withdrawalCooldown = value, () => withdrawalCooldown); 
-			DepositCooldown = new ListenerProperty<float>(value => depositCooldown = value, () => depositCooldown);
-			ObligationDistance = new ListenerProperty<float>(value => obligationDistance = value, () => obligationDistance);
-			ObligationMinimumConcentrationDuration = new ListenerProperty<float>(value => obligationMinimumConcentrationDuration = value, () => obligationMinimumConcentrationDuration);
-			TransferDistance = new ListenerProperty<float>(value => transferDistance = value, () => transferDistance);
-			LowRationThreshold = new ListenerProperty<int>(value => lowRationThreshold = value, () => lowRationThreshold);
 			Bed = new ListenerProperty<InstanceId>(value => bed = value, () => bed);
 			Workplace = new ListenerProperty<InstanceId>(value => workplace = value, () => workplace);
 			

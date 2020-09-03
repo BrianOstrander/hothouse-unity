@@ -207,11 +207,9 @@ namespace Lunra.Hothouse.Models
 			{
 				public static class Types
 				{
-					static string Create(string type) => type.ToSnakeCase();
-					
-					public static readonly string Resource = Create(nameof(Resource));
-					public static readonly string Capacity = Create(nameof(Capacity));
-					public static readonly string Reservation = Create(nameof(Reservation));
+					public static readonly string Resource = nameof(Resource).ToSnakeCase();
+					public static readonly string Capacity = nameof(Capacity).ToSnakeCase();
+					public static readonly string Reservation = nameof(Reservation).ToSnakeCase();
 				}
 			}
 			
@@ -219,9 +217,7 @@ namespace Lunra.Hothouse.Models
 			{
 				public static class Ids
 				{
-					static string Create(string id) => id.ToSnakeCase();
-
-					public static readonly string Stalk = Create(nameof(Stalk));
+					public static readonly string Stalk = nameof(Stalk).ToSnakeCase();
 				}
 				
 				public static class Logistics

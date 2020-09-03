@@ -146,15 +146,6 @@ namespace Lunra.Hothouse.Models
 			model.JobShift.Value = new DayTimeFrame(0f, 0.75f);
 			// model.JobShift.Value = DayTimeFrame.Maximum;
 			// model.JobShift.Value = DayTimeFrame.Zero;
-			
-
-			model.WithdrawalCooldown.Value = 0.5f;
-			model.DepositCooldown.Value = model.WithdrawalCooldown.Value;
-			model.TransferDistance.Value = 0.75f;
-			
-			model.LowRationThreshold.Value = 1;
-			model.ObligationDistance.Value = 0.75f;
-			model.ObligationMinimumConcentrationDuration.Value = 0.5f;
 
 			Debug.LogWarning("TODO: Inventory reset");
 			// model.InventoryPromises.Reset();
