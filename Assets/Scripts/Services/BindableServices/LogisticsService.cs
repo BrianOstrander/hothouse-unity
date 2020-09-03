@@ -178,7 +178,7 @@ namespace Lunra.Hothouse.Services
 					Item item
 				) : base(context, item) { }
 
-				protected override string OnGetResourceId() => Item.Get(Items.Keys.Resource.Id);
+				protected override string OnGetResourceId() => Item[Items.Keys.Resource.Id];
 			}
 
 			public class CapacityInfo : ItemInfo
@@ -198,11 +198,11 @@ namespace Lunra.Hothouse.Services
 					Item item
 				) : base(context, item) { }
 
-				protected override string OnGetResourceId() => Item.Get(Items.Keys.Capacity.ResourceId);
+				protected override string OnGetResourceId() => Item[Items.Keys.Capacity.ResourceId];
 				
 				public Goals Calculate()
 				{
-					var desire = Item.Get(Items.Keys.Capacity.Desire);
+					var desire = Item[Items.Keys.Capacity.Desire];
 					if (desire != Items.Values.Capacity.Desires.NotCalculated)
 					{
 						if (desire == Items.Values.Capacity.Desires.None) return Goal = Goals.None;
@@ -214,7 +214,7 @@ namespace Lunra.Hothouse.Services
 					var resourceId = GetResourceId();
 					// var capacityCurrentCount = capacity.Item.Get(Items.Keys.Capacity.CurrentCount);
 					// var capacityMaximumCount = capacity.Item.Get(Items.Keys.Capacity.MaximumCount);
-					var capacityTargetCount = Item.Get(Items.Keys.Capacity.TargetCount);
+					var capacityTargetCount = Item[Items.Keys.Capacity.TargetCount];
 				
 					var inventory = GetInventory();
 
@@ -223,9 +223,9 @@ namespace Lunra.Hothouse.Services
 					foreach (var stack in inventory.Stacks)
 					{
 						if (!Context.Resources.TryGetValue(stack.Id, out var resource)) continue;
-						if (resource.Item.Get(Items.Keys.Resource.Id) != resourceId) continue;
+						if (resource.Item[Items.Keys.Resource.Id] != resourceId) continue;
 						// TODO: I probably just shouldn't add ones note equal to None?
-						if (resource.Item.Get(Items.Keys.Resource.Logistics.State) != Items.Values.Resource.Logistics.States.None) continue;
+						if (resource.Item[Items.Keys.Resource.Logistics.State] != Items.Values.Resource.Logistics.States.None) continue;
 						
 						resourceTotalCount += stack.Count;
 					}
@@ -366,12 +366,12 @@ namespace Lunra.Hothouse.Services
 			// Order in a way that cachecs will get filled up or taken from last
 			
 			capacitiesReceive = capacitiesReceive
-				.OrderBy(c => c.Item.Get(Items.Keys.Capacity.IsCache))
+				.OrderBy(c => c.Item[Items.Keys.Capacity.IsCache])
 				.ThenBy(c => c.GetPriority())
 				.ToList();
 
 			capacitiesDistribute = capacitiesDistribute
-				.OrderBy(c => c.Item.Get(Items.Keys.Capacity.IsCache))
+				.OrderBy(c => c.Item[Items.Keys.Capacity.IsCache])
 				.ThenBy(c => c.GetPriority())
 				.ToList();
 
@@ -384,15 +384,16 @@ namespace Lunra.Hothouse.Services
 				var capacityReceive = capacitiesReceive[0];
 				capacitiesReceive.RemoveAt(0);
 
-				var resourceId = capacityReceive.Item.Get(Items.Keys.Capacity.ResourceId);
+				var resourceId = capacityReceive.Item[Items.Keys.Capacity.ResourceId];
 
 				var capacitiesDistributeAvailable = capacitiesDistribute
-					.Where(c => c.Item.Get(Items.Keys.Capacity.ResourceId) == resourceId)
+					.Where(c => c.Item[Items.Keys.Capacity.ResourceId] == resourceId)
 					.ToList();
 
 				foreach (var capacityDistributeAvailable in capacitiesDistributeAvailable)
 				{
 					var noValidDwellerNavigations = true;
+					int? capacityDistributeCurrentCount = null;
 					
 					foreach (var dweller in dwellersAvailable.OrderBy(m => m.Dweller.DistanceTo(capacityDistributeAvailable.GetParent())))
 					{
@@ -440,7 +441,11 @@ namespace Lunra.Hothouse.Services
 						itemReservation.Set(
 							(Items.Keys.Reservation.IsPromised, true)
 						);
-						
+
+						// Don't miss the -1 at the end of this!
+						capacityDistributeCurrentCount = (capacityDistributeCurrentCount ?? capacityDistributeAvailable.Item[Items.Keys.Capacity.CurrentCount]) - 1;
+
+
 						// itemStack
 
 						// if (distributionInventory.TryFindFirst())
@@ -460,7 +465,7 @@ namespace Lunra.Hothouse.Services
 
 		void OnItemUpdate(Item item)
 		{
-			var type = item.Get(Items.Keys.Shared.Type);
+			var type = item[Items.Keys.Shared.Type];
 			
 			if (type == Items.Values.Shared.Types.Resource) OnResourceUpdate(item);
 			else if (type == Items.Values.Shared.Types.Capacity) OnCapacityUpdate(item);

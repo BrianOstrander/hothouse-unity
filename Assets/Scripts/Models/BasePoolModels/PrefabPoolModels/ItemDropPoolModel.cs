@@ -68,9 +68,9 @@ namespace Lunra.Hothouse.Models
 					{
 						if (type == Items.Values.Shared.Types.Resource)
 						{
-							item.Set(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.None);
+							item[Items.Keys.Resource.Logistics.State] = Items.Values.Resource.Logistics.States.None;
 
-							var resourceId = item.Get(Items.Keys.Resource.Id);
+							var resourceId = item[Items.Keys.Resource.Id];
 
 							if (existingResourceIds.Add(resourceId))
 							{

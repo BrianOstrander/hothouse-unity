@@ -17,7 +17,7 @@ namespace Lunra.Hothouse.Services
 
 		public override void Process(Item item, float deltaTime)
 		{
-			var current = item.Get(Items.Keys.Resource.Decay.Current);
+			var current = item[Items.Keys.Resource.Decay.Current];
 
 			if (CheckForDestruction(item, current)) return;
 
@@ -26,11 +26,11 @@ namespace Lunra.Hothouse.Services
 			
 			var rateSinceLastTime = 0f;
 
-			var isAlreadyAtZero = Mathf.Approximately(0f, current) && Mathf.Approximately(0f, item.Get(Items.Keys.Resource.Decay.Previous));
+			var isAlreadyAtZero = Mathf.Approximately(0f, current) && Mathf.Approximately(0f, item[Items.Keys.Resource.Decay.Previous]);
 			
 			if (!isAlreadyAtZero)
 			{
-				var rate = item.Get(Items.Keys.Resource.Decay.Rate);
+				var rate = item[Items.Keys.Resource.Decay.Rate];
 			
 				// TODO: Additional rate modifiers calculated here, probably obtained from inventory...
 
@@ -41,18 +41,15 @@ namespace Lunra.Hothouse.Services
 
 				rateSinceLastTime = Mathf.Abs(current - previous) / deltaTime;
 
-				item.Set(Items.Keys.Resource.Decay.Previous, previous);
-				item.Set(Items.Keys.Resource.Decay.Current, current);
+				item[Items.Keys.Resource.Decay.Previous] = previous;
+				item[Items.Keys.Resource.Decay.Current] = current;
 
 				// We can skip the final rate prediction set if we get destroyed...
 				if (CheckForDestruction(item, current)) return;
 			}
-			
-			item.Set(
-				Items.Keys.Resource.Decay.RatePredicted,
-				(PredictedRatePastWeight * item.Get(Items.Keys.Resource.Decay.RatePredicted))
-				+ (PredictedRateRecentWeight * rateSinceLastTime)
-			);
+
+			item[Items.Keys.Resource.Decay.RatePredicted] = (PredictedRatePastWeight * item[Items.Keys.Resource.Decay.RatePredicted])
+			                                                + (PredictedRateRecentWeight * rateSinceLastTime);
 		}
 
 		bool CheckForDestruction(
@@ -62,8 +59,8 @@ namespace Lunra.Hothouse.Services
 		{ 
 			if (Mathf.Approximately(0f, current))
 			{
-				if (item.Get(Items.Keys.Resource.Logistics.Promised)) return false;
-				if (item.Get(Items.Keys.Resource.Logistics.State) != Items.Values.Resource.Logistics.States.None) return false;
+				if (item[Items.Keys.Resource.Logistics.Promised]) return false;
+				if (item[Items.Keys.Resource.Logistics.State] != Items.Values.Resource.Logistics.States.None) return false;
 				
 				OnDestruction(item);
 				return true;

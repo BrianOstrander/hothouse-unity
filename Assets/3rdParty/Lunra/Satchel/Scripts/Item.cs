@@ -228,6 +228,41 @@ namespace Lunra.Satchel
 
 			return this;
 		}
+
+		[JsonIgnore]
+		public bool this[PropertyKey<bool> key]
+		{
+			get => Get(key);
+			set => Set(key, value);
+		}
+		
+		[JsonIgnore]
+		public int this[PropertyKey<int> key]
+		{
+			get => Get(key);
+			set => Set(key, value);
+		}
+		
+		[JsonIgnore]
+		public long this[PropertyKey<long> key]
+		{
+			get => Get(key);
+			set => Set(key, value);
+		}
+		
+		[JsonIgnore]
+		public float this[PropertyKey<float> key]
+		{
+			get => Get(key);
+			set => Set(key, value);
+		}
+		
+		[JsonIgnore]
+		public string this[PropertyKey<string> key]
+		{
+			get => Get(key);
+			set => Set(key, value);
+		}
 		
 		bool TryUpdate(
 			string key,
