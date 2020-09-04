@@ -151,6 +151,7 @@ namespace Lunra.Hothouse.Models
 				if (foundReservation)
 				{
 					reservationContainer.Withdrawal(unPromisedReservationStack);
+					unPromisedReservationStack = unPromisedReservationStack.NewCount(Mathf.Abs(delta));
 				}
 				else
 				{
