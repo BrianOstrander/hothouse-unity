@@ -253,19 +253,32 @@ namespace Lunra.Satchel
 		/// <remarks>
 		/// Adding or removing items while iterating here will cause an exception.
 		/// </remarks>
-		/// <param name="iterator"></param>
 		public IEnumerable<Item> All()
 		{
-			foreach (var kv in items)
+			foreach (var kv in items) yield return kv.Value;
+		}
+		
+		/// <summary>
+		/// For iterating over all items when you don't need to access the actual list.
+		/// </summary>
+		/// <remarks>
+		/// Adding or removing items while iterating here will cause an exception.
+		/// </remarks>
+		/// <param name="predicate"></param>
+		public IEnumerable<Item> All(Func<Item, bool> predicate)
+		{
+			foreach (var item in All())
 			{
-				yield return kv.Value;
+				if (predicate(item)) yield return item;
 			}
 		}
 		
 		/// <summary>
 		/// Iterates over the items in the provided stacks.
 		/// </summary>
-		/// <param name="iterator"></param>
+		/// <remarks>
+		/// Adding or removing items while iterating here will cause an exception.
+		/// </remarks>
 		/// <param name="stacks"></param>
 		public IEnumerable<(Item Item, Stack Stack)> InStack(
 			params Stack[] stacks
@@ -273,11 +286,27 @@ namespace Lunra.Satchel
 		{
 			foreach (var stack in stacks)
 			{
-				if (TryGet(stack.Id, out var item))
-				{
-					yield return (item, stack);
-				}
+				if (TryGet(stack.Id, out var item)) yield return (item, stack);
 				else Debug.LogError($"Unable to find item with Id {stack.Id}");
+			}
+		}
+
+		/// <summary>
+		/// Iterates over the items in the provided stacks.
+		/// </summary>
+		/// <remarks>
+		/// Adding or removing items while iterating here will cause an exception.
+		/// </remarks>
+		/// <param name="predicate"></param>
+		/// <param name="stacks"></param>
+		public IEnumerable<(Item Item, Stack Stack)> InStack(
+			Func<Item, bool> predicate,
+			params Stack[] stacks
+		)
+		{
+			foreach (var element in InStack(stacks))
+			{
+				if (predicate(element.Item)) yield return element;	
 			}
 		}
 

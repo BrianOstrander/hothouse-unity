@@ -479,6 +479,16 @@ namespace Lunra.Satchel
 
 		public Stack New(
 			int count,
+			params PropertyKeyValue[] propertyKeyValues
+		)
+		{
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
+
+			return New(count, out _, propertyKeyValues);
+		}
+
+		public Stack New(
+			int count,
 			out Item item,
 			params PropertyKeyValue[] propertyKeyValues
 		)
@@ -590,6 +600,40 @@ namespace Lunra.Satchel
 				out _,
 				out underflow
 			);
+		}
+		
+		/// <summary>
+		/// For iterating over all items when you don't need to access the actual list.
+		/// </summary>
+		/// <remarks>
+		/// Adding or removing items while iterating here will cause an exception.
+		/// </remarks>
+		public IEnumerable<(Item Item, Stack Stack)> All()
+		{
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(All));
+			
+			foreach (var stack in stacks)
+			{
+				if (itemStore.TryGet(stack.Id, out var item)) yield return (item, stack);
+				else Debug.LogError($"Unable to find item with Id {stack.Id}");
+			}
+		}
+		
+		/// <summary>
+		/// For iterating over all items when you don't need to access the actual list.
+		/// </summary>
+		/// <remarks>
+		/// Adding or removing items while iterating here will cause an exception.
+		/// </remarks>
+		/// <param name="predicate"></param>
+		public IEnumerable<(Item Item, Stack Stack)> All(Func<Item, bool> predicate)
+		{
+			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(All));
+
+			foreach (var element in All())
+			{
+				if (predicate(element.Item)) yield return element;
+			}
 		}
 
 		public bool TryFindFirst(

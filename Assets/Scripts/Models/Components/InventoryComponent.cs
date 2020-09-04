@@ -1,3 +1,4 @@
+using System.Linq;
 using Lunra.Satchel;
 using UnityEngine;
 
@@ -35,8 +36,19 @@ namespace Lunra.Hothouse.Models
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)
 		{
-			
-			Debug.LogError("TODO: Check if inventory is empty for dropping");
+			var droppedItems = Container
+				.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Resource)
+				.Select(e => e.Stack)
+				.ToArray();
+
+			if (droppedItems.Any())
+			{
+				Game.ItemDrops.Activate(
+					Model,
+					Quaternion.identity,
+					Container.Withdrawal(droppedItems)
+				);
+			}
 		}
 		#endregion
 
