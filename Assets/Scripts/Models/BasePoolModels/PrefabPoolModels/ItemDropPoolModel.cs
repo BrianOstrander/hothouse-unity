@@ -68,7 +68,7 @@ namespace Lunra.Hothouse.Models
 					{
 						if (type == Items.Values.Shared.Types.Resource)
 						{
-							item[Items.Keys.Resource.Logistics.State] = Items.Values.Resource.Logistics.States.None;
+							item[Items.Keys.Shared.LogisticsState] = Items.Values.Shared.LogisticStates.None;
 
 							var resourceType = item[Items.Keys.Resource.Type];
 

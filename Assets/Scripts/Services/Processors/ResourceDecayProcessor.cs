@@ -59,8 +59,8 @@ namespace Lunra.Hothouse.Services
 		{ 
 			if (Mathf.Approximately(0f, current))
 			{
-				if (item[Items.Keys.Resource.Logistics.Promised]) return false;
-				if (item[Items.Keys.Resource.Logistics.State] != Items.Values.Resource.Logistics.States.None) return false;
+				if (item[Items.Keys.Shared.IsPromised]) return false;
+				if (item[Items.Keys.Shared.LogisticsState] != Items.Values.Shared.LogisticStates.None) return false;
 				
 				OnDestruction(item);
 				return true;

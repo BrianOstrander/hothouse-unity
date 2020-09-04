@@ -225,7 +225,7 @@ namespace Lunra.Hothouse.Services
 						if (!Context.Resources.TryGetValue(stack.Id, out var resource)) continue;
 						if (resource.Item[Items.Keys.Resource.Type] != resourceType) continue;
 						// TODO: I probably just shouldn't add ones note equal to None?
-						if (resource.Item[Items.Keys.Resource.Logistics.State] != Items.Values.Resource.Logistics.States.None) continue;
+						if (resource.Item[Items.Keys.Shared.LogisticsState] != Items.Values.Shared.LogisticStates.None) continue;
 						
 						resourceTotalCount += stack.Count;
 					}
@@ -411,9 +411,9 @@ namespace Lunra.Hothouse.Services
 							.TryFindFirst(
 								out var itemReservationDistribute,
 								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
+								(Items.Keys.Shared.IsPromised, false),
 								(Items.Keys.Reservation.CapacityId, capacityDistribute.Item.Id),
-								(Items.Keys.Reservation.State, Items.Values.Reservation.States.Output),
-								(Items.Keys.Reservation.IsPromised, false)
+								(Items.Keys.Reservation.State, Items.Values.Reservation.States.Output)
 							);
 
 						if (!found)
@@ -426,8 +426,8 @@ namespace Lunra.Hothouse.Services
 							.TryFindFirst(
 								out var item,
 								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Resource),
-								(Items.Keys.Resource.Type, resourceType),
-								(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.None)
+								(Items.Keys.Shared.LogisticsState, Items.Values.Shared.LogisticStates.None),
+								(Items.Keys.Resource.Type, resourceType)
 							);
 
 						if (!found)
@@ -452,11 +452,11 @@ namespace Lunra.Hothouse.Services
 									).First()
 							);
 						
-						item[Items.Keys.Resource.Logistics.State] = Items.Values.Resource.Logistics.States.Output;
+						item[Items.Keys.Shared.LogisticsState] = Items.Values.Shared.LogisticStates.Output;
 						
 						itemReservationDistribute.Set(
-							(Items.Keys.Reservation.ItemId, item.Id),
-							(Items.Keys.Reservation.IsPromised, true)
+							(Items.Keys.Shared.IsPromised, true),
+							(Items.Keys.Reservation.ItemId, item.Id)
 						);
 
 						inventoryDistribute.Deposit(item.StackOf(1));
@@ -482,9 +482,9 @@ namespace Lunra.Hothouse.Services
 							.TryFindFirst(
 								out var itemReservationReceive,
 								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
+								(Items.Keys.Shared.IsPromised, false),
 								(Items.Keys.Reservation.CapacityId, capacityReceive.Item.Id),
-								(Items.Keys.Reservation.State, Items.Values.Reservation.States.Input),
-								(Items.Keys.Reservation.IsPromised, false)
+								(Items.Keys.Reservation.State, Items.Values.Reservation.States.Input)
 							);
 
 						if (!found)
@@ -502,8 +502,8 @@ namespace Lunra.Hothouse.Services
 							);
 						
 						itemReservationReceive.Set(
-							(Items.Keys.Reservation.ItemId, item.Id),
-							(Items.Keys.Reservation.IsPromised, true)
+							(Items.Keys.Shared.IsPromised, true),
+							(Items.Keys.Reservation.ItemId, item.Id)
 						);
 
 						inventoryReceive.Deposit(itemReservationReceive.StackOf(1));
