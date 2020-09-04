@@ -145,7 +145,7 @@ namespace Lunra.Hothouse.Models
 					return Of(
 						resourceType,
 						capacityId,
-						Values.Reservation.States.Input,
+						Values.Reservation.LogisticStates.Input,
 						overrides
 					);
 				}
@@ -159,7 +159,7 @@ namespace Lunra.Hothouse.Models
 					return Of(
 						resourceType,
 						capacityId,
-						Values.Reservation.States.Output,
+						Values.Reservation.LogisticStates.Output,
 						overrides
 					);
 				}
@@ -175,8 +175,7 @@ namespace Lunra.Hothouse.Models
 						Values.Shared.Types.Reservation,
 						new PropertyKeyValue[]
 						{
-							(Keys.Shared.IsPromised, false),
-							
+							(Keys.Reservation.IsPromised, false),
 							(Keys.Reservation.ResourceType, resourceType),
 							(Keys.Reservation.CapacityId, capacityId),
 							(Keys.Reservation.ItemId, IdCounter.UndefinedId),
@@ -202,7 +201,7 @@ namespace Lunra.Hothouse.Models
 						inventoryId,
 						reservationId,
 						itemId,
-						Values.Shared.LogisticStates.Pickup,
+						Values.Transfer.LogisticStates.Pickup,
 						overrides
 					);
 				}
@@ -220,7 +219,7 @@ namespace Lunra.Hothouse.Models
 						inventoryId,
 						reservationId,
 						itemId,
-						Values.Shared.LogisticStates.Dropoff,
+						Values.Transfer.LogisticStates.Dropoff,
 						overrides
 					);
 				}
@@ -230,7 +229,7 @@ namespace Lunra.Hothouse.Models
 					long inventoryId,
 					long reservationId,
 					long itemId,
-					string logisticsState,
+					string logisticState,
 					params PropertyKeyValue[] overrides
 				)
 				{
@@ -238,8 +237,7 @@ namespace Lunra.Hothouse.Models
 						Values.Shared.Types.Transfer,
 						new PropertyKeyValue[]
 						{
-							(Keys.Shared.LogisticsState, logisticsState),
-							
+							(Keys.Transfer.LogisticState, logisticState),
 							(Keys.Transfer.ResourceType, resourceType),
 							(Keys.Transfer.InventoryId, inventoryId),
 							(Keys.Transfer.ReservationId, reservationId),
@@ -260,8 +258,6 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Shared), suffix);
 				
 				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
-				public static readonly PropertyKey<string> LogisticsState = Create<string>(nameof(LogisticsState));
-				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 			}
 			
 			public static class Resource
@@ -269,6 +265,8 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Resource), suffix);
 
 				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
+				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
+				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
 
 				public static class Decay
 				{
@@ -300,6 +298,7 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Reservation), suffix);
 				
+				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 				public static readonly PropertyKey<string> ResourceType = Create<string>(nameof(ResourceType));
 				public static readonly PropertyKey<long> CapacityId = Create<long>(nameof(CapacityId));
 				public static readonly PropertyKey<long> ItemId = Create<long>(nameof(ItemId));
@@ -310,6 +309,7 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Transfer), suffix);
 				
+				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
 				public static readonly PropertyKey<long> ItemId = Create<long>(nameof(ItemId));
 				public static readonly PropertyKey<long> InventoryId = Create<long>(nameof(InventoryId));
 				public static readonly PropertyKey<long> ReservationId = Create<long>(nameof(ReservationId));
@@ -328,15 +328,6 @@ namespace Lunra.Hothouse.Models
 					public static readonly string Reservation = nameof(Reservation).ToSnakeCase();
 					public static readonly string Transfer = nameof(Transfer).ToSnakeCase();
 				}
-				
-				public static class LogisticStates
-				{
-					public static readonly string None = nameof(None).ToSnakeCase();
-					public static readonly string Input = nameof(Input).ToSnakeCase();
-					public static readonly string Output = nameof(Output).ToSnakeCase();
-					public static readonly string Pickup = nameof(Pickup).ToSnakeCase();
-					public static readonly string Dropoff = nameof(Dropoff).ToSnakeCase();
-				}
 			}
 			
 			public static class Resource
@@ -344,6 +335,13 @@ namespace Lunra.Hothouse.Models
 				public static class Types
 				{
 					public static readonly string Stalk = nameof(Stalk).ToSnakeCase();
+				}
+				
+				public static class LogisticStates
+				{
+					public static readonly string None = nameof(None).ToSnakeCase();
+					public static readonly string Input = nameof(Input).ToSnakeCase();
+					public static readonly string Output = nameof(Output).ToSnakeCase();
 				}
 			}
 			
@@ -360,10 +358,19 @@ namespace Lunra.Hothouse.Models
 			
 			public static class Reservation
 			{
-				public static class States
+				public static class LogisticStates
 				{
 					public static readonly string Input = nameof(Input).ToSnakeCase();
 					public static readonly string Output = nameof(Output).ToSnakeCase();
+				}
+			}
+			
+			public static class Transfer
+			{
+				public static class LogisticStates
+				{
+					public static readonly string Pickup = nameof(Pickup).ToSnakeCase();
+					public static readonly string Dropoff = nameof(Dropoff).ToSnakeCase();
 				}
 			}
 		}
