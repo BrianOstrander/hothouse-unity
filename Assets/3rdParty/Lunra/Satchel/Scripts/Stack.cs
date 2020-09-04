@@ -80,27 +80,27 @@ namespace Lunra.Satchel
 
 	public static class StackExtensions
 	{
-		public static Inventory.ModificationResults Transfer(
+		public static Container.ModificationResults Transfer(
 			this Stack request,
-			Inventory source,
-			Inventory destination
+			Container source,
+			Container destination
 		)
 		{
-			return Inventory.Transfer(
+			return Container.Transfer(
 				request.WrapInArray(),
 				source,
 				destination
 			);
 		}
 		
-		public static Inventory.ModificationResults Transfer(
+		public static Container.ModificationResults Transfer(
 			this Stack request,
-			Inventory source,
-			Inventory destination,
+			Container source,
+			Container destination,
 			out Stack[] underflow
 		)
 		{
-			return Inventory.Transfer(
+			return Container.Transfer(
 				request.WrapInArray(),
 				source,
 				destination,
@@ -108,10 +108,10 @@ namespace Lunra.Satchel
 			);
 		}
 		
-		public static Inventory.ModificationResults Transfer(
+		public static Container.ModificationResults Transfer(
 			this IEnumerable<Stack> requests,
-			Inventory source,
-			Inventory destination
+			Container source,
+			Container destination
 		)
 		{
 			return Transfer(
@@ -121,10 +121,10 @@ namespace Lunra.Satchel
 			);
 		}
 		
-		public static Inventory.ModificationResults Transfer(
+		public static Container.ModificationResults Transfer(
 			this IEnumerable<Stack> requests,
-			Inventory source,
-			Inventory destination,
+			Container source,
+			Container destination,
 			out Stack[] underflow
 		)
 		{
@@ -136,27 +136,27 @@ namespace Lunra.Satchel
 			);
 		}
 		
-		public static Inventory.ModificationResults Transfer(
+		public static Container.ModificationResults Transfer(
 			this Stack[] requests,
-			Inventory source,
-			Inventory destination
+			Container source,
+			Container destination
 		)
 		{
-			return Inventory.Transfer(
+			return Container.Transfer(
 				requests,
 				source,
 				destination
 			);
 		}
 		
-		public static Inventory.ModificationResults Transfer(
+		public static Container.ModificationResults Transfer(
 			this Stack[] requests,
-			Inventory source,
-			Inventory destination,
+			Container source,
+			Container destination,
 			out Stack[] underflow
 		)
 		{
-			return Inventory.Transfer(
+			return Container.Transfer(
 				requests,
 				source,
 				destination,

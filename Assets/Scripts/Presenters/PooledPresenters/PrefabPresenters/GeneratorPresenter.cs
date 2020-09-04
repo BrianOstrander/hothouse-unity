@@ -50,7 +50,7 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 
 		#region GeneratorModel Events
-		void OnGeneratorInventoryAll(Inventory.Event delta) => Model.Generator.CalculateRate();
+		void OnGeneratorInventoryAll(Container.Event delta) => Model.Generator.CalculateRate();
 
 		void OnGeneratorGeneratorRate(float rate)
 		{

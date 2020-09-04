@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Lunra.Satchel
 {
-	public class InventoryFilterBuilder
+	public class ContainerFilterBuilder
 	{
 		ItemStore itemStore;
 		int limit = int.MaxValue;
@@ -16,16 +16,16 @@ namespace Lunra.Satchel
 		/// Use the builder in an initialized <c>ItemStore<c> as a shortcut.
 		/// </remarks>
 		/// <param name="itemStore"></param>
-		public InventoryFilterBuilder(ItemStore itemStore)
+		public ContainerFilterBuilder(ItemStore itemStore)
 		{
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
 			
 			propertyFilterBuilder = new PropertyFilterBuilder(itemStore);
 		}
 		
-		public InventoryFilterBuilder WithLimitOfZero() => WithLimitOf(0);
+		public ContainerFilterBuilder WithLimitOfZero() => WithLimitOf(0);
 		
-		public InventoryFilterBuilder WithLimitOf(int limit)
+		public ContainerFilterBuilder WithLimitOf(int limit)
 		{
 			if (limit < 0) throw new ArgumentOutOfRangeException(nameof(limit), "Must be greater than or equal to zero.");
 
@@ -34,34 +34,34 @@ namespace Lunra.Satchel
 			return this;
 		}
 		
-		public InventoryFilterBuilder RequireAll(params PropertyValidation[] validations)
+		public ContainerFilterBuilder RequireAll(params PropertyValidation[] validations)
 		{
 			propertyFilterBuilder.RequireAll(validations);
 			return this;
 		}
 		
-		public InventoryFilterBuilder RequireNone(params PropertyValidation[] validations)
+		public ContainerFilterBuilder RequireNone(params PropertyValidation[] validations)
 		{
 			propertyFilterBuilder.RequireNone(validations);
 			return this;
 		}
 		
-		public InventoryFilterBuilder RequireAny(params PropertyValidation[] validations)
+		public ContainerFilterBuilder RequireAny(params PropertyValidation[] validations)
 		{
 			propertyFilterBuilder.RequireAny(validations);
 			return this;
 		}
 
-		public InventoryFilter Done()
+		public ContainerFilter Done()
 		{
 			if (itemStore == null) throw new ArgumentNullException(nameof(itemStore));
 
-			return new InventoryFilter(
+			return new ContainerFilter(
 				propertyFilterBuilder.Done(),
 				limit
 			);
 		}
 
-		public static implicit operator InventoryFilter(InventoryFilterBuilder builder) => builder.Done();
+		public static implicit operator ContainerFilter(ContainerFilterBuilder builder) => builder.Done();
 	}
 }

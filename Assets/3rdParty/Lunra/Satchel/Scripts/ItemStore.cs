@@ -65,14 +65,14 @@ namespace Lunra.Satchel
 		string[] ignoredKeysForStacking;
 		string[] ignoredKeysCloning;
 		IItemModifier[] modifiers;
-		Dictionary<long, Inventory> inventories;
-		Dictionary<long, Action<Event>> inventoryCallbacks;
+		Dictionary<long, Container> containers;
+		Dictionary<long, Action<Event>> containerCallbacks;
 		
 		[JsonIgnore] public IdCounter IdCounter { get; private set; }
 		[JsonIgnore] public BuilderUtility Builder { get; private set; }
 		[JsonIgnore] public ValidationStore Validation { get; private set; }
 		[JsonIgnore] public ProcessorStore Processor { get; private set; }
-		[JsonIgnore] public ReadOnlyDictionary<long, Inventory> Inventories { get; private set; }
+		[JsonIgnore] public ReadOnlyDictionary<long, Container> Containers { get; private set; }
 		#endregion
 		
 		public event Action<Event> Updated;
@@ -96,8 +96,8 @@ namespace Lunra.Satchel
 
 			this.modifiers = modifiers ?? new IItemModifier[0];
 
-			Inventories = new ReadOnlyDictionary<long, Inventory>(inventories = new Dictionary<long, Inventory>());
-			inventoryCallbacks = new Dictionary<long, Action<Event>>();
+			Containers = new ReadOnlyDictionary<long, Container>(containers = new Dictionary<long, Container>());
+			containerCallbacks = new Dictionary<long, Action<Event>>();
 			
 			Builder = new BuilderUtility(this);
 			Validation = new ValidationStore().Initialize(this);
@@ -109,28 +109,28 @@ namespace Lunra.Satchel
 		}
 
 		public void Register(
-			Inventory inventory,
+			Container container,
 			Action<Event> update
 		)
 		{
-			if (inventory.Id == IdCounter.UndefinedId) throw new Exception("Cannot register an inventory with an undefined Id");
+			if (container.Id == IdCounter.UndefinedId) throw new Exception("Cannot register an container with an undefined Id");
 			
-			inventories.Add(inventory.Id, inventory);
-			inventoryCallbacks.Add(inventory.Id, update);
+			containers.Add(container.Id, container);
+			containerCallbacks.Add(container.Id, update);
 		}
 		
-		public void UnRegister(Inventory inventory)
+		public void UnRegister(Container container)
 		{
-			if (inventory.Id == IdCounter.UndefinedId) throw new Exception("Cannot unregister an inventory with an undefined Id");
-			inventories.Remove(inventory.Id);
-			inventoryCallbacks.Remove(inventory.Id);
+			if (container.Id == IdCounter.UndefinedId) throw new Exception("Cannot unregister an container with an undefined Id");
+			containers.Remove(container.Id);
+			containerCallbacks.Remove(container.Id);
 		}
 
 		/// <summary>
 		/// Defines a new item with a unique id and initializes it.
 		/// </summary>
 		/// <remarks>
-		/// Ideally this should only be called by instances of the <c>Inventory</c> class when creating new stacks. 
+		/// Ideally this should only be called by instances of the <c>Container</c> class when creating new stacks. 
 		/// </remarks>
 		/// <param name="initialize"></param>
 		/// <returns></returns>
@@ -159,7 +159,7 @@ namespace Lunra.Satchel
 		/// Defines a new item cloned from a reference with a unique id and initializes it.
 		/// </summary>
 		/// <remarks>
-		/// Ideally this should only be called by instances of the <c>Inventory</c> class when creating new stacks. 
+		/// Ideally this should only be called by instances of the <c>Container</c> class when creating new stacks. 
 		/// </remarks>
 		/// <param name="reference">The item to clone.</param>
 		/// <param name="initialize"></param>
@@ -319,16 +319,16 @@ namespace Lunra.Satchel
 			{
 				if (item.NoInstances)
 				{
-					if (item.InventoryId != IdCounter.UndefinedId) Debug.LogError($"Item with id [ {item.Id} ] has zero instances but still belongs to inventory [ {item.InventoryId} ], unexpected behaviour may occur");
+					if (item.ContainerId != IdCounter.UndefinedId) Debug.LogError($"Item with id [ {item.Id} ] has zero instances but still belongs to container [ {item.ContainerId} ], unexpected behaviour may occur");
 				}
-				else if (item.InventoryId != IdCounter.UndefinedId) continue;
+				else if (item.ContainerId != IdCounter.UndefinedId) continue;
 				
 				item.ForceUpdateTime(updateTime);
 				
 				destructionEvents.Add(
 					new Item.Event(
 						item.Id,
-						item.InventoryId,
+						item.ContainerId,
 						updateTime,
 						new [] { Item.Event.Types.Item | Item.Event.Types.Destroyed },
 						new Dictionary<string, (Property Property, Item.Event.Types Update)>().ToReadonlyDictionary()
@@ -357,7 +357,7 @@ namespace Lunra.Satchel
 			var eventTypeProperty = Item.Event.Types.Property;
 			var eventTypeItem = Item.Event.Types.Item;
 
-			var itemEventsByInventoryId = new Dictionary<long, (Item.Event.Types PropertyUpdates, Item.Event.Types ItemUpdates, List<Item.Event> ItemEvents)>();
+			var itemEventsByContainerId = new Dictionary<long, (Item.Event.Types PropertyUpdates, Item.Event.Types ItemUpdates, List<Item.Event> ItemEvents)>();
 			var itemEventsList = new List<Item.Event>();
 
 			foreach (var itemEvent in itemEvents)
@@ -379,9 +379,9 @@ namespace Lunra.Satchel
 				
 				itemEventsList.Add(itemEvent);
 
-				if (itemEvent.InventoryId == IdCounter.UndefinedId) continue;
+				if (itemEvent.ContainerId == IdCounter.UndefinedId) continue;
 
-				if (!itemEventsByInventoryId.TryGetValue(itemEvent.InventoryId, out var itemUpdate))
+				if (!itemEventsByContainerId.TryGetValue(itemEvent.ContainerId, out var itemUpdate))
 				{
 					itemUpdate.PropertyUpdates = Item.Event.Types.Property;
 					itemUpdate.ItemUpdates = Item.Event.Types.Item;
@@ -392,7 +392,7 @@ namespace Lunra.Satchel
 				itemUpdate.ItemUpdates |= currentEventTypeItem;
 				itemUpdate.ItemEvents.Add(itemEvent);
 
-				itemEventsByInventoryId[itemEvent.InventoryId] = itemUpdate;
+				itemEventsByContainerId[itemEvent.ContainerId] = itemUpdate;
 			}
 			
 			var eventTypeList = new List<Item.Event.Types>();
@@ -412,9 +412,9 @@ namespace Lunra.Satchel
 			
 			Updated?.Invoke(eventResult);
 
-			foreach (var itemUpdate in itemEventsByInventoryId)
+			foreach (var itemUpdate in itemEventsByContainerId)
 			{
-				if (!inventoryCallbacks.TryGetValue(itemUpdate.Key, out var callback)) continue;
+				if (!containerCallbacks.TryGetValue(itemUpdate.Key, out var callback)) continue;
 
 				var updates = new List<Item.Event.Types>();
 				

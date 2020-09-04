@@ -14,7 +14,6 @@ using Lunra.StyxMvp.Services;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
-using Inventory = Lunra.Satchel.Inventory;
 
 namespace Lunra.Hothouse.Editor
 {
@@ -251,12 +250,12 @@ namespace Lunra.Hothouse.Editor
 					Debug.Log(res);
 				};
 				
-				var inventory0 = itemStore.Builder.Inventory();
+				var inventory0 = itemStore.Builder.Container();
 				
 				inventory0.Updated += updateInventoryEvent =>
 				{
 					var res = "\n-------- inventory0.Updated --------\n";
-					res += updateInventoryEvent.ToString(Inventory.Event.Formats.IncludeStacks);
+					res += updateInventoryEvent.ToString(Container.Event.Formats.IncludeStacks);
 				
 					Debug.Log(res);
 				};
@@ -271,12 +270,12 @@ namespace Lunra.Hothouse.Editor
 					Debug.Log(res);
 				};
 				
-				var inventory1 = itemStore.Builder.Inventory();
+				var inventory1 = itemStore.Builder.Container();
 				
 				inventory1.Updated += updateInventoryEvent =>
 				{
 					var res = "\n-------- inventory1.Updated --------\n";
-					res += updateInventoryEvent.ToString(Inventory.Event.Formats.IncludeStacks);
+					res += updateInventoryEvent.ToString(Container.Event.Formats.IncludeStacks);
 				
 					Debug.Log(res);
 				};

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Lunra.Satchel
 {
-	public class Inventory
+	public class Container
 	{
 		[Flags]
 		public enum Formats
@@ -65,7 +65,7 @@ namespace Lunra.Satchel
 
 			public string ToString(Formats format)
 			{
-				var result = $"Updated {StackEvents.Count} Inventory Item(s) |";
+				var result = $"Updated {StackEvents.Count} Container Item(s) |";
 
 				foreach (var referenceType in EnumExtensions.GetValues(Types.None))
 				{
@@ -133,14 +133,14 @@ namespace Lunra.Satchel
 		public event Action<ItemStore.Event> UpdatedItem;
 		#endregion
 
-		public Inventory(long id)
+		public Container(long id)
 		{
 			if (id == IdCounter.UndefinedId) throw new Exception($"Id {id} is an invalid and undefined value");
 			Id = id;
 			lastUpdated = DateTime.Now;
 		}
 
-		public Inventory Initialize(ItemStore itemStore)
+		public Container Initialize(ItemStore itemStore)
 		{
 			if (IsInitialized) return this;
 			
@@ -158,12 +158,12 @@ namespace Lunra.Satchel
 		}
 
 		/// <summary>
-		/// This is similar to creating a whole new inventory, by destroying any remaining items, changing its id, and
+		/// This is similar to creating a whole new container, by destroying any remaining items, changing its id, and
 		/// unregistering itself from the item store. It will need to be reinitialized after calling this.
 		/// </summary>
 		public void Reset()
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Reset));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(Reset));
 			
 			DestroyAll();
 			itemStore.UnRegister(this);
@@ -178,14 +178,14 @@ namespace Lunra.Satchel
 		}
 
 		/// <summary>
-		/// Deposits the specified items into the inventory, it is expected that no instances of them exist in any other
-		/// inventories.
+		/// Deposits the specified items into the container, it is expected that no instances of them exist in any other
+		/// containers.
 		/// </summary>
 		/// <param name="requests"></param>
 		/// <returns></returns>
 		public ModificationResults Deposit(params Stack[] requests)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Deposit));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(Deposit));
 			if (requests.None()) return ModificationResults.None;
 			
 			foreach (var request in requests)
@@ -200,7 +200,7 @@ namespace Lunra.Satchel
 
 		public ModificationResults Increment(params Stack[] requests)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Increment));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(Increment));
 			if (requests.None()) return ModificationResults.None;
 
 			var modifications = Stacks.ToDictionary(
@@ -216,7 +216,7 @@ namespace Lunra.Satchel
 
 				if (!modifications.TryGetValue(request.Id, out var count))
 				{
-					Debug.LogError($"Attempted to increment item [ {request.Id} ], but it was not present in this inventory");
+					Debug.LogError($"Attempted to increment item [ {request.Id} ], but it was not present in this container");
 					continue;
 				}
 				
@@ -241,8 +241,8 @@ namespace Lunra.Satchel
 
 				if (itemStore.TryGet(modification.Id, out var modificationItem))
 				{
-					if (modificationItem.InventoryId == IdCounter.UndefinedId) modificationItem.ForceUpdateInventoryId(Id);
-					else if (modificationItem.InventoryId != Id) Debug.LogError($"Adding item [ {modification.Id} ] to inventory [ {Id} ], but item already assigned to inventory [ {modificationItem.InventoryId} ], unexpected behaviour may occur");
+					if (modificationItem.ContainerId == IdCounter.UndefinedId) modificationItem.ForceUpdateContainerId(Id);
+					else if (modificationItem.ContainerId != Id) Debug.LogError($"Adding item [ {modification.Id} ] to container [ {Id} ], but item already assigned to container [ {modificationItem.ContainerId} ], unexpected behaviour may occur");
 					
 					modificationItem.ForceUpdateInstanceCount(modification.Count);
 				}
@@ -293,7 +293,7 @@ namespace Lunra.Satchel
 			out Stack[] underflow
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Withdrawal));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(Withdrawal));
 
 			var result = OnDecrement(
 				requests,
@@ -365,7 +365,7 @@ namespace Lunra.Satchel
 			out Stack[] underflow
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(Decrement));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(Decrement));
 			
 			var result = ModificationResults.None;
 			
@@ -435,7 +435,7 @@ namespace Lunra.Satchel
 						if (stackEventItem.InstanceCount == 0)
 						{
 							destroyedList.Add(stackEventItem.StackOf(kv.Value.RemovedCount));
-							stackEventItem.ForceUpdateInventoryId(IdCounter.UndefinedId);
+							stackEventItem.ForceUpdateContainerId(IdCounter.UndefinedId);
 						}
 						else
 						{
@@ -482,7 +482,7 @@ namespace Lunra.Satchel
 			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(New));
 
 			return New(count, out _, propertyKeyValues);
 		}
@@ -493,7 +493,7 @@ namespace Lunra.Satchel
 			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(New));
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
 			
 			item = itemStore.Define(
@@ -517,7 +517,7 @@ namespace Lunra.Satchel
 			params PropertyKeyValue[] propertyKeyValues
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(New));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(New));
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Cannot be less than 1");
 			if (reference == null) throw new ArgumentNullException(nameof(reference));
 			
@@ -541,7 +541,7 @@ namespace Lunra.Satchel
 			Item item
 		)
 		{
-			item.ForceUpdateInventoryId(Id);
+			item.ForceUpdateContainerId(Id);
 
 			var result = item.StackOf(count);
 			
@@ -586,7 +586,7 @@ namespace Lunra.Satchel
 			out Stack[] underflow
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(DestroyAll));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(DestroyAll));
 
 			if (requests.None())
 			{
@@ -610,7 +610,7 @@ namespace Lunra.Satchel
 		/// </remarks>
 		public IEnumerable<(Item Item, Stack Stack)> All()
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(All));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(All));
 			
 			foreach (var stack in stacks)
 			{
@@ -628,7 +628,7 @@ namespace Lunra.Satchel
 		/// <param name="predicate"></param>
 		public IEnumerable<(Item Item, Stack Stack)> All(Func<Item, bool> predicate)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(All));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(All));
 
 			foreach (var element in All())
 			{
@@ -718,7 +718,7 @@ namespace Lunra.Satchel
 			out int count
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(TryOperation));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(TryOperation));
 			
 			result = default;
 			count = 0;
@@ -769,7 +769,7 @@ namespace Lunra.Satchel
 			out bool result
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(TryAllEqual));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(TryAllEqual));
 			
 			result = false;
 			var anyOperations = false;
@@ -829,7 +829,7 @@ namespace Lunra.Satchel
 			out bool result
 		)
 		{
-			if (!IsInitialized) throw new NonInitializedInventoryOperationException(nameof(TryAnyEqual));
+			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(TryAnyEqual));
 			
 			result = false;
 			var anyOperations = false;
@@ -883,11 +883,11 @@ namespace Lunra.Satchel
 			return anyOperations;
 		}
 		
-		void TriggerUpdate(Event inventoryEvent)
+		void TriggerUpdate(Event containerEvent)
 		{
-			lastUpdated = inventoryEvent.UpdateTime;
+			lastUpdated = containerEvent.UpdateTime;
 			
-			Updated?.Invoke(inventoryEvent);
+			Updated?.Invoke(containerEvent);
 		}
 
 		void TriggerItemUpdate(ItemStore.Event itemEvent)
@@ -898,8 +898,8 @@ namespace Lunra.Satchel
 
 		public static ModificationResults Transfer(
 			Stack[] requests,
-			Inventory source,
-			Inventory destination
+			Container source,
+			Container destination
 		)
 		{
 			var result = Transfer(
@@ -916,8 +916,8 @@ namespace Lunra.Satchel
 		
 		public static ModificationResults Transfer(
 			Stack[] requests,
-			Inventory source,
-			Inventory destination,
+			Container source,
+			Container destination,
 			out Stack[] underflow
 		)
 		{
@@ -936,7 +936,7 @@ namespace Lunra.Satchel
 
 		public string ToString(Formats format)
 		{
-			var result = $"Item Inventory [ {Id} ] Contains {Stacks.Count} Stacks | {(IsInitialized ? "Initialized" : "Not Initialized")} | {lastUpdated}";
+			var result = $"Item Container [ {Id} ] Contains {Stacks.Count} Stacks | {(IsInitialized ? "Initialized" : "Not Initialized")} | {lastUpdated}";
 
 			if (format == Formats.Default) return result;
 

@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Services
 					Context = context;
 				}
 
-				public abstract Inventory GetInventory();
+				public abstract Container GetInventory();
 
 				public abstract IInventoryModel GetParent();
 
@@ -104,7 +104,7 @@ namespace Lunra.Hothouse.Services
 					Dweller = dweller;
 				}
 
-				public override Inventory GetInventory() => Dweller.Inventory.Container;
+				public override Container GetInventory() => Dweller.Inventory.Container;
 				public override IInventoryModel GetParent() => Dweller;
 			}
 			
@@ -128,11 +128,11 @@ namespace Lunra.Hothouse.Services
 
 				public int GetPriority() => 0;
 				
-				public override Inventory GetInventory()
+				public override Container GetInventory()
 				{
 					if (inventoryFound.HasValue)
 					{
-						if (inventoryFound.Value) return Context.Inventories[Item.InventoryId];
+						if (inventoryFound.Value) return Context.Inventories[Item.ContainerId];
 						return null;
 					}
 
@@ -145,7 +145,7 @@ namespace Lunra.Hothouse.Services
 					}
 
 					inventoryFound = true;
-					Context.Inventories.Add(Item.InventoryId, parent.Inventory.Container);
+					Context.Inventories.Add(Item.ContainerId, parent.Inventory.Container);
 					return parent.Inventory.Container;
 				}
 
@@ -153,15 +153,15 @@ namespace Lunra.Hothouse.Services
 				{
 					if (parentFound.HasValue)
 					{
-						if (parentFound.Value) return Context.Parents[Item.InventoryId];
+						if (parentFound.Value) return Context.Parents[Item.ContainerId];
 						return null;
 					}
 
 					var parent = Context.service.Model.Query
-						.FirstOrDefault<IInventoryModel>(i => i.Inventory.Container.Id == Item.InventoryId);
+						.FirstOrDefault<IInventoryModel>(i => i.Inventory.Container.Id == Item.ContainerId);
 
 					parentFound = parent != null;
-					if (parentFound.Value) Context.Parents.Add(Item.InventoryId, parent);
+					if (parentFound.Value) Context.Parents.Add(Item.ContainerId, parent);
 					
 					return parent;
 				}
@@ -294,7 +294,7 @@ namespace Lunra.Hothouse.Services
 			public List<DwellerInfo> Dwellers = new List<DwellerInfo>();
 			public Dictionary<long, ResourceInfo> Resources = new Dictionary<long, ResourceInfo>();
 			public Dictionary<long, CapacityInfo> Capacities = new Dictionary<long, CapacityInfo>();
-			public Dictionary<long, Inventory> Inventories = new Dictionary<long, Inventory>();
+			public Dictionary<long, Container> Inventories = new Dictionary<long, Container>();
 			public Dictionary<long, IInventoryModel> Parents = new Dictionary<long, IInventoryModel>();
 
 			public Context(LogisticsService service) => this.service = service;

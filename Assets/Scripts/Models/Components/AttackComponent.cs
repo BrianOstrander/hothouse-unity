@@ -88,7 +88,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Parent Events
-		void OnParentInventory(Inventory.Event delta)
+		void OnParentInventory(Container.Event delta)
 		{
 			if (!anyParentInventoryRequired) return;
 

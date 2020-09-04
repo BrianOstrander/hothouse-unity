@@ -32,21 +32,21 @@ namespace Lunra.Satchel
 			}
 			
 			[JsonProperty] public long Id { get; private set; }
-			[JsonProperty] public long InventoryId { get; private set; }
+			[JsonProperty] public long ContainerId { get; private set; }
 			[JsonProperty] public DateTime UpdateTime { get; private set; }
 			[JsonProperty] public Types[] Updates { get; private set; }
 			[JsonProperty] public ReadOnlyDictionary<string, (Property Property, Types Update)> PropertyEvents { get; private set; }
 
 			public Event(
 				long id,
-				long inventoryId,
+				long containerId,
 				DateTime updateTime,
 				Types[] updates,
 				ReadOnlyDictionary<string, (Property Property, Types Update)> propertyEvents
 			)
 			{
 				Id = id;
-				InventoryId = inventoryId;
+				ContainerId = containerId;
 				UpdateTime = updateTime;
 				Updates = updates;
 				PropertyEvents = propertyEvents;
@@ -91,7 +91,7 @@ namespace Lunra.Satchel
 		
 		#region Serialized
 		[JsonProperty] public long Id { get; private set; }
-		[JsonProperty] public long InventoryId { get; private set; }
+		[JsonProperty] public long ContainerId { get; private set; }
 		[JsonProperty] public int InstanceCount { get; private set; }
 		[JsonProperty] public bool IgnoreCleanup { get; private set; }
 		[JsonProperty] public DateTime LastUpdated { get; private set; }
@@ -133,7 +133,7 @@ namespace Lunra.Satchel
 				itemStoreUpdated(
 					new Event(
 						Id,
-						InventoryId,
+						ContainerId,
 						LastUpdated,
 						eventPropertyUpdates.Any() ? new[] {Event.Types.Item | Event.Types.New, Event.Types.Property | Event.Types.New} : new[] {Event.Types.Item | Event.Types.New},
 						eventPropertyUpdates
@@ -277,7 +277,7 @@ namespace Lunra.Satchel
 			itemStoreUpdated(
 				new Event(
 					Id,
-					InventoryId,
+					ContainerId,
 					LastUpdated,
 					update.WrapInArray(),
 					new ReadOnlyDictionary<string, (Property Property, Event.Types Update)>(
@@ -316,7 +316,7 @@ namespace Lunra.Satchel
 			itemStoreUpdated(
 				new Event(
 					Id,
-					InventoryId,
+					ContainerId,
 					LastUpdated,
 					eventUpdates.WrapInArray(),
 					eventPropertyUpdates.ToReadonlyDictionary()
@@ -353,7 +353,7 @@ namespace Lunra.Satchel
 		/// <param name="lastUpdated"></param>
 		public void ForceUpdateTime(DateTime lastUpdated) => LastUpdated = lastUpdated;
 
-		public void ForceUpdateInventoryId(long inventoryId) => InventoryId = inventoryId;
+		public void ForceUpdateContainerId(long containerId) => ContainerId = containerId;
 		public void ForceUpdateInstanceCount(int instanceCount) => InstanceCount = instanceCount;
 
 		public bool Is(long id) => id == Id;
@@ -383,7 +383,7 @@ namespace Lunra.Satchel
 
 		public bool CanStack(Item other)
 		{
-			if (!isInitialized) throw new NonInitializedInventoryOperationException(nameof(CanStack));
+			if (!isInitialized) throw new NonInitializedContainerOperationException(nameof(CanStack));
 
 			return itemStore.CanStack(this, other);
 		}
@@ -398,8 +398,8 @@ namespace Lunra.Satchel
 
 			if (count.HasValue) result += $" | Count: {count.Value}";
 
-			if (InventoryId == IdCounter.UndefinedId) result += " | No Inventory";
-			else result += $" | Inventory [ {InventoryId} ]";
+			if (ContainerId == IdCounter.UndefinedId) result += " | No Container";
+			else result += $" | Container [ {ContainerId} ]";
 
 			result += $" | {(isInitialized ? "Initialized" : "Not Initialized")} | {LastUpdated} |  Instance Count : {InstanceCount}";
 			

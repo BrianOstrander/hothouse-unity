@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region ItemDropModel Events
-		void OnItemDropInventory(Inventory.Event delta)
+		void OnItemDropInventory(Container.Event delta)
 		{
 			if (delta.IsEmpty) Game.ItemDrops.InActivate(Model);
 		}

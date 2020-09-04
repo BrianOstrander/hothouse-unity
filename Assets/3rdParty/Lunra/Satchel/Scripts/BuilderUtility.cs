@@ -8,11 +8,11 @@ namespace Lunra.Satchel
 
 		public BuilderUtility(ItemStore itemStore) => this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
 		
-		public InventoryConstraintBuilder BeginConstraint() => new InventoryConstraintBuilder(itemStore);
-		public InventoryFilterBuilder BeginInventoryFilter() => new InventoryFilterBuilder(itemStore);
+		public ContainerConstraintBuilder BeginConstraint() => new ContainerConstraintBuilder(itemStore);
+		public ContainerFilterBuilder BeginInventoryFilter() => new ContainerFilterBuilder(itemStore);
 		public PropertyFilterBuilder BeginPropertyFilter() => new PropertyFilterBuilder(itemStore);
 		public ItemBuilder BeginItem() => new ItemBuilder(itemStore);
 		
-		public Inventory Inventory() => new Inventory(itemStore.IdCounter.Next()).Initialize(itemStore);
+		public Container Container() => new Container(itemStore.IdCounter.Next()).Initialize(itemStore);
 	}
 }

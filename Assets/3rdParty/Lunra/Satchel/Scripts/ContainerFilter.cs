@@ -3,12 +3,12 @@ using Newtonsoft.Json;
 
 namespace Lunra.Satchel
 {
-	public struct InventoryFilter
+	public struct ContainerFilter
 	{
 		[JsonProperty] public PropertyFilter Filter { get; private set; }
 		[JsonProperty] public int CountLimit { get; private set; }
 
-		public InventoryFilter(
+		public ContainerFilter(
 			PropertyFilter filter,
 			int countLimit = int.MaxValue
 		)

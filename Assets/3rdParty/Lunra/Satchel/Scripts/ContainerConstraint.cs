@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Lunra.Satchel
 {
-	public class InventoryConstraint
+	public class ContainerConstraint
 	{
 		[Flags]
 		public enum Events
@@ -17,9 +17,9 @@ namespace Lunra.Satchel
 			Overflow = 1 << 1 
 		}
 		
-		public static InventoryConstraint Ignored() => new InventoryConstraint(int.MaxValue, int.MaxValue);
+		public static ContainerConstraint Ignored() => new ContainerConstraint(int.MaxValue, int.MaxValue);
 
-		public static InventoryConstraint ByFilter(
+		public static ContainerConstraint ByFilter(
 			params PropertyFilter[] filters
 		)
 		{
@@ -29,25 +29,25 @@ namespace Lunra.Satchel
 			);
 		}
 		
-		public static InventoryConstraint ByFilter(
+		public static ContainerConstraint ByFilter(
 			int countLimit,
 			params PropertyFilter[] filters
 		)
 		{
-			return new InventoryConstraint(
+			return new ContainerConstraint(
 				countLimit,
 				0,
 				filters
-					.Select(f => new InventoryFilter(f))
+					.Select(f => new ContainerFilter(f))
 					.ToArray()
 			);
 		}
 		
-		public static InventoryConstraint ByCount(
+		public static ContainerConstraint ByCount(
 			int countLimit
 		)
 		{
-			return new InventoryConstraint(
+			return new ContainerConstraint(
 				countLimit,
 				countLimit
 			);
@@ -55,16 +55,16 @@ namespace Lunra.Satchel
 
 		[JsonProperty] public int Limit { get; private set; }
 		[JsonProperty] public int LimitDefault { get; private set; }
-		[JsonProperty] public InventoryFilter[] Restrictions { get; private set; }
+		[JsonProperty] public ContainerFilter[] Restrictions { get; private set; }
 		[JsonProperty]  public bool IsIgnored { get; private set; }
 
 		bool isInitialized;
 		ItemStore itemStore;
 		
-		public InventoryConstraint(
+		public ContainerConstraint(
 			int limit,
 			int limitDefault,
-			params InventoryFilter[] restrictions
+			params ContainerFilter[] restrictions
 		)
 		{
 			if (limit < 0) throw new ArgumentOutOfRangeException(nameof(limit), "Must be greater than or equal to zero");
@@ -77,7 +77,7 @@ namespace Lunra.Satchel
 			IsIgnored = Limit == int.MaxValue && LimitDefault == int.MaxValue && Restrictions.None();
 		}
 		
-		public InventoryConstraint Initialize(ItemStore itemStore)
+		public ContainerConstraint Initialize(ItemStore itemStore)
 		{
 			this.itemStore = itemStore ?? throw new ArgumentNullException(nameof(itemStore));
 

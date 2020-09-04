@@ -71,9 +71,9 @@ namespace Lunra.Hothouse.Services
 
 		void OnDestruction(Item item)
 		{
-			if (!ItemStore.Inventories.TryGetValue(item.InventoryId, out var inventory))
+			if (!ItemStore.Containers.TryGetValue(item.ContainerId, out var inventory))
 			{
-				Debug.LogError($"Unable to get find an inventory with an Id of {item.InventoryId}");
+				Debug.LogError($"Unable to get find an inventory with an Id of {item.ContainerId}");
 				return;
 			}
 			

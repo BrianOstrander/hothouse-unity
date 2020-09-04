@@ -12,7 +12,7 @@ namespace Lunra.Hothouse.Models
 	public class InventoryComponent : ComponentModel<IInventoryModel>
 	{
 		#region Serialized
-		public Inventory Container { get; private set; }
+		public Container Container { get; private set; }
 		#endregion
 		
 		#region Non Serialized
@@ -31,7 +31,7 @@ namespace Lunra.Hothouse.Models
 			Container.Reset();
 		}
 
-		protected override void OnInitialize() => Container = Container?.Initialize(Game.Items) ?? Game.Items.Builder.Inventory();
+		protected override void OnInitialize() => Container = Container?.Initialize(Game.Items) ?? Game.Items.Builder.Container();
 		
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)
@@ -60,7 +60,7 @@ namespace Lunra.Hothouse.Models
 		public override string ToString()
 		{
 			var result = "Inventory Component [ " + ShortId + " ]:\n";
-			result += Container.ToString(Inventory.Formats.IncludeItems | Inventory.Formats.IncludeItemProperties);
+			result += Container.ToString(Container.Formats.IncludeItems | Container.Formats.IncludeItemProperties);
 			return result;
 		}
 	}
