@@ -7,7 +7,9 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public class FloraModel : PrefabModel, IClearableModel
+	public class FloraModel : PrefabModel,
+		IClearableModel,
+		ILightSensitiveModel
 	{
 		#region Serialized
 		[JsonProperty] string type;

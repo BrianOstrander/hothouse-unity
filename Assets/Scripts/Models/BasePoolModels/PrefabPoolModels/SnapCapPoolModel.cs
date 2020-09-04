@@ -13,13 +13,12 @@ namespace Lunra.Hothouse.Models
 			"snapcap_0"
 		};
 		
-		GameModel game;
 		Demon generator = new Demon();
 		
 		public override void Initialize(GameModel game)
 		{
-			this.game = game;
 			Initialize(
+				game,
 				model => new SnapCapPresenter(game, model)	
 			);
 		}

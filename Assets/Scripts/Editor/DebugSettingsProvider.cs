@@ -481,7 +481,7 @@ namespace Lunra.Hothouse.Editor
 				}
 				
 				
-				Debug.LogError("re impliment here");
+				Debug.LogWarning("re impliment here");
 				// if (DebugSettings.AutoNewGame.Value)
 				// {
 				// 	game.GameResult.Value = game.GameResult.Value.New(GameResult.States.Failure);

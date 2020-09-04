@@ -15,13 +15,11 @@ namespace Lunra.Hothouse.Models
 			"debris_small",
 			"debris_large"
 		};
-		
-		GameModel game;
-		
+
 		public override void Initialize(GameModel game)
 		{
-			this.game = game;
 			Initialize(
+				game,
 				model => new ClearablePresenter<DebrisModel, ClearableView>(game, model)	
 			);
 		}
@@ -40,7 +38,8 @@ namespace Lunra.Hothouse.Models
 				rotation,
 				model => Reset(model)
 			);
-			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
+			// TODO: Probably need to move this to component initialize... 
+			if (IsInitialized) Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 		

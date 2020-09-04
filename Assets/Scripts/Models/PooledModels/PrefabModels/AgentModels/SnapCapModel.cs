@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Lunra.Hothouse.Models
 {
-	public class SnapCapModel : AgentModel, IClearableModel, IAttackModel
+	public class SnapCapModel : AgentModel, IClearableModel, IAttackModel, ILightSensitiveModel
 	{
 		#region Serialized
 		[JsonProperty] DayTime huntForbiddenExpiration;

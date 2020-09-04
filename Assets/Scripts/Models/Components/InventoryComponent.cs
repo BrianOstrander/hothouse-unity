@@ -17,18 +17,27 @@ namespace Lunra.Hothouse.Models
 		#region Non Serialized
 		#endregion
 
+		public override void Bind()
+		{
+			if (Model is IHealthModel health) health.Health.Destroyed += OnHealthDestroyed;
+		}
+		
 		public override void UnBind()
 		{
+			if (Model is IHealthModel health) health.Health.Destroyed -= OnHealthDestroyed;
+			
 			// I think this is the correct place to destroy any items, should ensure they are properly cleaned up...
 			Container.Reset();
 		}
 
-		public override void Initialize(GameModel game, IParentComponentModel model)
+		protected override void OnInitialize() => Container = Container?.Initialize(Game.Items) ?? Game.Items.Builder.Inventory();
+		
+		#region HealthComponent Events
+		void OnHealthDestroyed(Damage.Result result)
 		{
-			base.Initialize(game, model);
-
-			Container = Container?.Initialize(game.Items) ?? game.Items.Builder.Inventory();
+			Debug.LogError("TODO: Check if inventory is empty for dropping");
 		}
+		#endregion
 
 		public void Reset(ItemStore itemStore)
 		{

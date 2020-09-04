@@ -42,14 +42,13 @@ namespace Lunra.Hothouse.Models
 			"default"
 		};
 
-		GameModel game;
 		Dictionary<Motives, GoalCalculationCache> goalCalculationCache = new Dictionary<Motives, GoalCalculationCache>();
 		Demon generator = new Demon();
 		
 		public override void Initialize(GameModel game)
 		{
-			this.game = game;
 			Initialize(
+				game,
 				model => new DwellerPresenter(game, model)	
 			);
 
@@ -156,7 +155,7 @@ namespace Lunra.Hothouse.Models
 			
 			model.GoalPromises.Reset();
 			
-			model.Name.Value = game.DwellerNames.GetName(generator);
+			model.Name.Value = Game.DwellerNames.GetName(generator);
 			
 			model.ObligationPromises.Reset();
 			model.Tags.Reset();

@@ -490,7 +490,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				// Jobs.Laborer,
 				// Jobs.Laborer,
 				// Jobs.Laborer,
-				Jobs.Laborer,
+				// Jobs.Laborer,
 				Jobs.Laborer
 			};
 

@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 namespace Lunra.Hothouse.Models
 {
-	public class DebrisModel : PrefabModel, IClearableModel
+	public class DebrisModel : PrefabModel, IClearableModel, ILightSensitiveModel
 	{
 		#region Serialized
 		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();

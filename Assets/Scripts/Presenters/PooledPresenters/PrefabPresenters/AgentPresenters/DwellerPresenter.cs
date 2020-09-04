@@ -17,6 +17,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Model.Job.Changed += OnDwellerJob;
 			Model.Health.Damaged += OnDwellerHealthDamage;
+			Model.Health.Destroyed += OnDwellerHealthDestroyed;
 			
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
@@ -27,6 +28,7 @@ namespace Lunra.Hothouse.Presenters
 		{	
 			Model.Job.Changed -= OnDwellerJob;
 			Model.Health.Damaged -= OnDwellerHealthDamage;
+			Model.Health.Destroyed -= OnDwellerHealthDestroyed;
 			
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
@@ -40,11 +42,53 @@ namespace Lunra.Hothouse.Presenters
 		{
 			View.Job = job;
 		}
-		
+
 		void OnDwellerHealthDamage(Damage.Result result)
 		{
-			var affliction = string.Empty;
+			Game.EventLog.Dwellers.Push(
+				new EventLogModel.Entry(
+					(Model.Name.Value + " is suffering from " + GetHealthAffliction(result)).Wrap(
+						"<color=yellow>",
+						"</color>"
+					),
+					Game.SimulationTime.Value,
+					Model.GetInstanceId()
+				)
+			);
 			
+			if (result.Type != Damage.Types.GoalHurt)
+			{
+				Model.Goals.Apply(
+					(Motives.Heal, result.AmountApplied / Model.Health.Maximum.Value)
+				);	
+			}
+		}
+
+		void OnDwellerHealthDestroyed(Damage.Result result)
+		{
+			Game.Effects.Queued.Enqueue(
+				new EffectsModel.Request(
+					Model.Transform.Position.Value,
+					View.DeathEffectId
+				)
+			);
+			
+			Game.EventLog.Dwellers.Push(
+				new EventLogModel.Entry(
+					(Model.Name.Value + " died from " + GetHealthAffliction(result)).Wrap(
+						"<color=red>",
+						"</color>"
+					),
+					Game.SimulationTime.Value,
+					Model.GetInstanceId()
+				)
+			);
+		}
+
+		string GetHealthAffliction(Damage.Result result)
+		{
+			var affliction = string.Empty;
+
 			switch (result.Type)
 			{
 				case Damage.Types.Generic:
@@ -67,52 +111,15 @@ namespace Lunra.Hothouse.Presenters
 							if (i < (goalsAtMaximum.Length - 1)) affliction += ", ";
 						}
 					}
+
 					break;
 				default:
-					Debug.LogError("Unrecognized Damage Type: "+result.Type);
+					Debug.LogError("Unrecognized Damage Type: " + result.Type);
 					affliction += "UNKNOWN - " + result.Type;
 					break;
 			}
-		
-			if (result.IsTargetDestroyed)
-			{
-				Game.Effects.Queued.Enqueue(
-					new EffectsModel.Request(
-						Model.Transform.Position.Value,
-						View.DeathEffectId
-					)
-				);
-				
-				Game.EventLog.Dwellers.Push(
-					new EventLogModel.Entry(
-						(Model.Name.Value + " died from " + affliction).Wrap(
-							"<color=red>",
-							"</color>"
-						),
-						Game.SimulationTime.Value,
-						Model.GetInstanceId()
-					)
-				);
-			}
-			else
-			{
-				Game.EventLog.Dwellers.Push(
-					new EventLogModel.Entry(
-						(Model.Name.Value + " is suffering from " + affliction).Wrap(
-							"<color=yellow>",
-							"</color>"
-						),
-						Game.SimulationTime.Value,
-						Model.GetInstanceId()
-					)
-				);
-				if (result.Type != Damage.Types.GoalHurt)
-				{
-					Model.Goals.Apply(
-						(Motives.Heal, result.AmountApplied / Model.Health.Maximum.Value)
-					);	
-				}
-			}
+
+			return affliction;
 		}
 		#endregion
 

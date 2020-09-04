@@ -4,7 +4,8 @@ namespace Lunra.Hothouse.Models
 {
 	public class ItemDropModel : PrefabModel,
 		IInventoryModel,
-		IEnterableModel
+		IEnterableModel,
+		ILightSensitiveModel
 	{
 		#region Serialized
 		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();

@@ -12,7 +12,6 @@ namespace Lunra.Hothouse.Models
 {
 	public class BuildingPoolModel : BasePrefabPoolModel<BuildingModel>
 	{
-		GameModel game;
 		Dictionary<Type, BuildingDefinition> definitions = new Dictionary<Type, BuildingDefinition>();
 		
 		[JsonIgnore] public BuildingDefinition[] Definitions { get; private set; }
@@ -20,8 +19,6 @@ namespace Lunra.Hothouse.Models
 		
 		public override void Initialize(GameModel game)
 		{
-			this.game = game;
-			
 			var prefabIdsFromViews = App.V.GetPrefabs<BuildingView>()
 				.Select(v => v.View.PrefabId)
 				.ToArray();
@@ -63,6 +60,7 @@ namespace Lunra.Hothouse.Models
 			Workplaces = new ReadOnlyDictionary<Jobs, string[]>(workplaces);
 			
 			Initialize(
+				game,
 				m => Definitions.First(d => d.Type == m.Type.Value).Instantiate(m)
 			);
 		}
@@ -99,8 +97,8 @@ namespace Lunra.Hothouse.Models
 				rotation,
 				model => definition.Reset(model, buildingState)
 			);
-
-			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
+			// TODO: Probably need to move this to component initialize...
+			if (IsInitialized) Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 

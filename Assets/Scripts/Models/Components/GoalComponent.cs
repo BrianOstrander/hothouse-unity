@@ -59,12 +59,7 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 
-		public override void Initialize(GameModel game, IParentComponentModel model)
-		{
-			base.Initialize(game, model);
-
-			definition = Game.Dwellers;
-		}
+		protected override void OnInitialize() => definition = Game.Dwellers;
 
 		public void Reset(
 			DwellerPoolModel definition

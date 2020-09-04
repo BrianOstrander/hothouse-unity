@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace Lunra.Hothouse.Models
 {
-	public class BubblerModel : AgentModel, IClearableModel
+	public class BubblerModel : AgentModel, IClearableModel, ILightSensitiveModel
 	{
 		#region Serialized
 		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();

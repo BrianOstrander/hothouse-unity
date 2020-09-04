@@ -12,7 +12,6 @@ namespace Lunra.Hothouse.Models
 {
 	public class FloraPoolModel : BasePrefabPoolModel<FloraModel>
 	{
-		GameModel game;
 		Dictionary<Type, FloraDefinition> definitions = new Dictionary<Type, FloraDefinition>();
 		Demon generator = new Demon();
 		
@@ -20,8 +19,6 @@ namespace Lunra.Hothouse.Models
 		
 		public override void Initialize(GameModel game)
 		{
-			this.game = game;
-
 			var prefabIdsFromViews = App.V.GetPrefabs<FloraView>()
 				.Select(v => v.View.PrefabId)
 				.ToArray();
@@ -49,7 +46,8 @@ namespace Lunra.Hothouse.Models
 			Definitions = definitions.Values.ToArray();
 
 			Initialize(
-					m => Definitions.First(d => d.Type == m.Type.Value).Instantiate(m)	
+				game,
+				m => Definitions.First(d => d.Type == m.Type.Value).Instantiate(m)	
 			);
 		}
 
@@ -111,7 +109,8 @@ namespace Lunra.Hothouse.Models
 					if (isAdult) model.Age.Value = model.Age.Value.Done();
 				}
 			);
-			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
+			// TODO: Probably need to move this to component initialize...
+			if (IsInitialized) Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 		

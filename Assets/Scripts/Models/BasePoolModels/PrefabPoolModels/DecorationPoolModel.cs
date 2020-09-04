@@ -10,13 +10,10 @@ namespace Lunra.Hothouse.Models
 {
 	public class DecorationPoolModel : BasePrefabPoolModel<DecorationModel>
 	{
-		GameModel game;
 		List<DecorationRule> rules = new List<DecorationRule>();
 	
 		public override void Initialize(GameModel game)
 		{
-			this.game = game;
-			
 			foreach (var ruleType in ReflectionUtility.GetTypesWithAttribute<DecorationRuleAttribute, DecorationRule>())
 			{
 				if (ReflectionUtility.TryGetInstanceOfType<DecorationRule>(ruleType, out var ruleInstance))
@@ -34,6 +31,7 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			Initialize(
+				game,
 				m => new DecorationPresenter(game, m)
 			);
 		}

@@ -9,12 +9,10 @@ namespace Lunra.Hothouse.Models
 {
 	public class ItemDropPoolModel : BasePrefabPoolModel<ItemDropModel>
 	{
-		GameModel game;
-		
 		public override void Initialize(GameModel game)
 		{
-			this.game = game;
 			Initialize(
+				game,
 				model => new ItemDropPresenter(game, model)	
 			);
 		}
@@ -47,7 +45,8 @@ namespace Lunra.Hothouse.Models
 				rotation,
 				model => Reset(model, inventory)
 			);
-			if (IsInitialized) game.LastLightUpdate.Value = game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
+			// TODO: Probably need to move this to component initialize...
+			if (IsInitialized) Game.LastLightUpdate.Value = Game.LastLightUpdate.Value.SetSensitiveStale(result.Id.Value);
 			return result;
 		}
 		
@@ -57,11 +56,11 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			model.Enterable.Reset();
-			model.Inventory.Reset(game.Items);
+			model.Inventory.Reset(Game.Items);
 
 			var existingResourceTypes = new HashSet<string>();
 
-			game.Items.Iterate(
+			Game.Items.Iterate(
 				(item, stack) =>
 				{
 					if (item.TryGet(Items.Keys.Shared.Type, out var type))
@@ -75,7 +74,7 @@ namespace Lunra.Hothouse.Models
 							if (existingResourceTypes.Add(resourceType))
 							{
 								model.Inventory.Container.Deposit(
-									game.Items.Builder
+									Game.Items.Builder
 										.BeginItem()
 										.WithProperties(
 											Items.Instantiate.Capacity.OfZero(resourceType)

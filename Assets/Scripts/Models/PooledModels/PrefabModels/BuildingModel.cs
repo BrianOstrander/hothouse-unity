@@ -13,7 +13,8 @@ namespace Lunra.Hothouse.Models
 		IHealthModel,
 		IRecipeModel,
 		IFarmModel,
-		IGoalActivityModel
+		IGoalActivityModel,
+		ILightSensitiveModel
 	{
 		#region Serialized
 		[JsonProperty] string type;

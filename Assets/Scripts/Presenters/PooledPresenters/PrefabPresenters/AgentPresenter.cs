@@ -1,4 +1,5 @@
-﻿using Lunra.Hothouse.Ai;
+﻿using System.Collections.Generic;
+using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using UnityEngine;
@@ -26,7 +27,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationUpdate += OnGameSimulationUpdate;
 
 			Model.NavigationPlan.Changed += OnAgentNavigationPlan;
-			Model.Health.Damaged += OnAgentHealthDamaged;
+			Model.Health.Destroyed += OnAgentHealthDestroyed;
 			Model.ObligationPromises.Complete += OnAgentObligationComplete;
 			
 			base.Bind();
@@ -37,7 +38,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.SimulationUpdate -= OnGameSimulationUpdate;
 			
 			Model.NavigationPlan.Changed -= OnAgentNavigationPlan;
-			Model.Health.Damaged -= OnAgentHealthDamaged;
+			Model.Health.Destroyed -= OnAgentHealthDestroyed;
 			Model.ObligationPromises.Complete -= OnAgentObligationComplete;
 			
 			base.UnBind();
@@ -90,10 +91,8 @@ namespace Lunra.Hothouse.Presenters
 			base.OnPooledState(pooledState);
 		}
 
-		public virtual void OnAgentHealthDamaged(Damage.Result result)
+		public virtual void OnAgentHealthDestroyed(Damage.Result result)
 		{
-			if (!result.IsTargetDestroyed) return;
-			
 			if (!string.IsNullOrEmpty(View.DeathEffectId))
 			{
 				Game.Effects.Queued.Enqueue(
@@ -103,22 +102,8 @@ namespace Lunra.Hothouse.Presenters
 					)
 				);
 			}
-			
-			Debug.LogError("TODO: Check if inventory is empty for dropping");
-			// if (!Model.Inventory.All.Value.IsEmpty)
-			// {
-			// 	Game.ItemDrops.Activate(
-			// 		Model.RoomTransform.Id.Value,
-			// 		Model.Transform.Position.Value,
-			// 		Quaternion.identity,
-			// 		Model.Inventory.All.Value
-			// 	);
-			// }
 
-			// Model.InventoryPromises.BreakAllPromises();
-			
-			Debug.LogError("TODO: Inventory promise breaking here");
-			
+			// TODO: Perhaps the component itself should check to see if it needs to break promises upon death...
 			Model.ObligationPromises.BreakAllPromises();
 		}
 

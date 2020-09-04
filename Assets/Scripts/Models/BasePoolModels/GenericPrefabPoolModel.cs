@@ -6,10 +6,7 @@ namespace Lunra.Hothouse.Models
 	public sealed class GenericPrefabPoolModel<M> : BasePoolModel<M>
 		where M : PrefabModel, new()
 	{
-		public new void Initialize(Action<M> instantiatePresenter)
-		{
-			base.Initialize(instantiatePresenter);
-		}
+		public new void Initialize(GameModel game, Action<M> instantiatePresenter) => base.Initialize(game, instantiatePresenter);
 		
 		public M Activate(
 			string prefabId,

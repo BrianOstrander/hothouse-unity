@@ -8,7 +8,11 @@ using UnityEngine.UIElements;
 
 namespace Lunra.Hothouse.Models
 {
-	public class DwellerModel : AgentModel, IGoalModel, IAttackModel
+	public class DwellerModel : AgentModel,
+		IGoalModel,
+		IAttackModel,
+		ILightSensitiveModel,
+		IInventoryPromiseModel
 	{
 		#region Serialized
 		[JsonProperty] string name;
@@ -25,6 +29,7 @@ namespace Lunra.Hothouse.Models
 		[JsonProperty] InstanceId workplace = InstanceId.Null();
 		[JsonIgnore] public ListenerProperty<InstanceId> Workplace { get; }
 		
+		[JsonProperty] public LightSensitiveComponent LightSensitive { get; private set; } = new LightSensitiveComponent();
 		[JsonProperty] public InventoryPromiseComponent InventoryPromises { get; private set; } = new InventoryPromiseComponent();
 		[JsonProperty] public GoalComponent Goals { get; private set; } = new GoalComponent();
 		[JsonProperty] public GoalPromiseComponent GoalPromises { get; private set; } = new GoalPromiseComponent();
@@ -43,6 +48,7 @@ namespace Lunra.Hothouse.Models
 			Workplace = new ListenerProperty<InstanceId>(value => workplace = value, () => workplace);
 			
 			AppendComponents(
+				LightSensitive,
 				InventoryPromises,
 				Goals,
 				GoalPromises,

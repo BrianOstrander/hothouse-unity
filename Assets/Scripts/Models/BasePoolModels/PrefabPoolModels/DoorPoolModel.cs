@@ -15,12 +15,10 @@ namespace Lunra.Hothouse.Models
 			Quaternion rotation
 		);
 
-		GameModel game;
-		
 		public override void Initialize(GameModel game)
 		{
-			this.game = game;
 			Initialize(
+				game,
 				model => new DoorPresenter(game, model)	
 			);
 		}

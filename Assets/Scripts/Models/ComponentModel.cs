@@ -1,6 +1,8 @@
+using System;
 using Lunra.StyxMvp;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
@@ -14,7 +16,6 @@ namespace Lunra.Hothouse.Models
 		void Bind();
 		void UnBind();
 
-		// TODO: This should be renamed possible and called upon the activation of a model too
 		void Initialize(
 			GameModel game,
 			IParentComponentModel model
@@ -28,6 +29,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 
 		#region NonSerialized
+		[JsonIgnore] protected bool IsInitialized { get; private set; }
 		[JsonIgnore] protected GameModel Game { get; private set; }
 		[JsonIgnore] protected M Model { get; private set; }
 		#endregion
@@ -35,28 +37,33 @@ namespace Lunra.Hothouse.Models
 		public virtual void Bind() { }
 		public virtual void UnBind() { }
 
-		// TODO: This should be renamed possible and called upon the activation of a model too
-		public virtual void Initialize(
+		public void Initialize(
 			GameModel game,
 			IParentComponentModel model
 		)
 		{
-			// TODO: POSSIBLE CHECK IF INITIALIZED ALREADY
+			if (IsInitialized) return;
+			
+			IsInitialized = true;
 			Game = game;
-			Model = model as M;
+			Model = (model as M) ?? throw new NullReferenceException($"Unable to cast {model.GetType().Name} to {typeof(M).Name}");
+
+			OnInitialize();
 		}
+		
+		protected virtual void OnInitialize() { }
 		
 		protected void ResetId() => Id.Value = App.M.CreateUniqueId();
 	}
 	
 	public static class ParentComponentModelExtensions
 	{
-		// TODO: This should be renamed possible and called upon the activation of a model too
 		public static void InitializeComponents(
 			this IParentComponentModel model,
 			GameModel game
 		)
 		{
+			if (game == null) throw new ArgumentNullException(nameof(game));
 			foreach (var component in model.Components) component.Initialize(game, model);
 		}
 		

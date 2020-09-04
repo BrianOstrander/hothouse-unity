@@ -27,7 +27,14 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] public float Normalized => Mathf.Approximately(0f, Maximum.Value) ? 1f : (Current.Value / Maximum.Value);
 
 		[JsonIgnore] public Func<Damage.Request, float> GetDamageAbsorbed;
+		/// <summary>
+		/// Called when non-fatal damage is inflicted.
+		/// </summary>
 		[JsonIgnore] public Action<Damage.Result> Damaged = ActionExtensions.GetEmpty<Damage.Result>();
+		/// <summary>
+		/// Called only when fatal damage is inflicted.
+		/// </summary>
+		[JsonIgnore] public Action<Damage.Result> Destroyed = ActionExtensions.GetEmpty<Damage.Result>();
 		#endregion
 
 		public HealthComponent()
@@ -39,16 +46,6 @@ namespace Lunra.Hothouse.Models
 			);
 			
 			Maximum = new ListenerProperty<float>(value => maximum = value, () => maximum);
-		}
-
-		public override void Bind()
-		{
-			Damaged += OnDamaged;
-		}
-
-		public override void UnBind()
-		{
-			Damaged -= OnDamaged;
 		}
 
 		public void ResetToMaximum(float? newMaximum = null)
@@ -81,7 +78,14 @@ namespace Lunra.Hothouse.Models
 			if (!request.Type.HasFlag(Models.Damage.Types.Simulated))
 			{
 				currentListener.Value = currentNew;
-				Damaged(result);
+				if (result.IsTargetDestroyed)
+				{
+					Destroyed(result);
+					// Setting the model inactive is not bound to the destroyed event so every event gets a fair chance
+					// at handling any clean up it needs to do before unbinding.
+					Model.PooledState.Value = PooledStates.InActive;
+				}
+				else Damaged(result);
 			}
 
 			return result;
@@ -89,13 +93,6 @@ namespace Lunra.Hothouse.Models
 
 		public void Heal(float amount) => currentListener.Value = Mathf.Min(Current.Value + amount, Maximum.Value);
 
-		#region Events
-		void OnDamaged(Damage.Result result)
-		{
-			if (result.IsTargetDestroyed) Model.PooledState.Value = PooledStates.InActive;
-		}
-		#endregion
-		
 		public override string ToString()
 		{
 			var result = "Health: " + Current.Value + " / " + Maximum.Value;

@@ -58,7 +58,7 @@ namespace Lunra.Hothouse.Models
 		{
 			Game.Toolbar.CancelTask.Changed += OnToolbarCancelTask;
 			Game.Toolbar.ClearanceTask.Changed += OnToolbarClearanceTask;
-			Model.Health.Damaged += OnHealthDamaged;
+			Model.Health.Destroyed += OnHealthDestroyed;
 			State.Changed += OnState;
 		}
 
@@ -66,7 +66,7 @@ namespace Lunra.Hothouse.Models
 		{
 			Game.Toolbar.CancelTask.Changed -= OnToolbarCancelTask;
 			Game.Toolbar.ClearanceTask.Changed -= OnToolbarClearanceTask;
-			Model.Health.Damaged -= OnHealthDamaged;
+			Model.Health.Destroyed -= OnHealthDestroyed;
 			State.Changed -= OnState;
 		}
 
@@ -156,10 +156,8 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 
-		void OnHealthDamaged(Damage.Result result)
+		void OnHealthDestroyed(Damage.Result result)
 		{
-			if (!result.IsTargetDestroyed) return;
-			
 			if (Model.Clearable.ItemDrops.Value.Any())
 			{
 				Game.ItemDrops.Activate(

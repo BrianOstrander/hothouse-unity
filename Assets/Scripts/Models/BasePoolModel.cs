@@ -36,6 +36,7 @@ namespace Lunra.Hothouse.Models
 		#endregion
 		
 		#region Non Serialized
+		[JsonIgnore] protected GameModel Game;
 		[JsonIgnore] public M[] AllActive => All.Value.Active;
 		[JsonIgnore] public M[] AllInActive => All.Value.InActive;
 		[JsonIgnore] public bool IsInitialized { get; private set; }
@@ -47,9 +48,14 @@ namespace Lunra.Hothouse.Models
 			All = new ListenerProperty<Reservoir>(value => all = value, () => all);
 		}
 
-		protected void Initialize(Action<M> instantiatePresenter)
+		protected void Initialize(
+			GameModel game,
+			Action<M> instantiatePresenter
+		)
 		{
 			if (IsInitialized) throw new Exception("Already initialized");
+			
+			Game = game;
 
 			InstantiatePresenter = instantiatePresenter;
 			
@@ -70,12 +76,15 @@ namespace Lunra.Hothouse.Models
 			Func<M, bool> predicate = null
 		)
 		{
+			if (!IsInitialized) throw new Exception("Not initialized");
+			
 			M result = predicate == null ? All.Value.InActive.FirstOrDefault() : All.Value.InActive.FirstOrDefault(predicate);
 			
 			if (result == null)
 			{
 				result = new M();
 				result.PooledState.ChangedSource += (value, source) => OnPooledState(result, value, source);
+				result.InitializeComponents(Game);
 				initialize?.Invoke(result);
 				
 				All.Value = new Reservoir(
@@ -86,6 +95,7 @@ namespace Lunra.Hothouse.Models
 			else
 			{
 				result.Id.Value = null;
+				result.InitializeComponents(Game);
 				initialize?.Invoke(result);
 				All.Value = new Reservoir(
 					All.Value.Active.Append(result).ToArray(),
@@ -104,6 +114,8 @@ namespace Lunra.Hothouse.Models
 		
 		protected void InActivate(params M[] models)
 		{
+			if (!IsInitialized) throw new Exception("Not initialized");
+			
 			if (models == null || models.None()) return;
 
 			foreach (var model in models) model.Id.Value = null;
