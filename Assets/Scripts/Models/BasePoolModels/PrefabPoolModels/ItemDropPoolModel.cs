@@ -60,37 +60,34 @@ namespace Lunra.Hothouse.Models
 
 			var existingResourceTypes = new HashSet<string>();
 
-			Game.Items.Iterate(
-				(item, stack) =>
+			foreach (var (item, stack) in Game.Items.InStack(inventory))
+			{
+				if (item.TryGet(Items.Keys.Shared.Type, out var type))
 				{
-					if (item.TryGet(Items.Keys.Shared.Type, out var type))
+					if (type == Items.Values.Shared.Types.Resource)
 					{
-						if (type == Items.Values.Shared.Types.Resource)
+						item[Items.Keys.Shared.LogisticsState] = Items.Values.Shared.LogisticStates.None;
+
+						var resourceType = item[Items.Keys.Resource.Type];
+
+						if (existingResourceTypes.Add(resourceType))
 						{
-							item[Items.Keys.Shared.LogisticsState] = Items.Values.Shared.LogisticStates.None;
-
-							var resourceType = item[Items.Keys.Resource.Type];
-
-							if (existingResourceTypes.Add(resourceType))
-							{
-								model.Inventory.Container.Deposit(
-									Game.Items.Builder
-										.BeginItem()
-										.WithProperties(
-											Items.Instantiate.Capacity.OfZero(resourceType)
-										)
-										.Done()
-								);
-							}
-							
-							model.Inventory.Container.Deposit(stack);
+							model.Inventory.Container.Deposit(
+								Game.Items.Builder
+									.BeginItem()
+									.WithProperties(
+										Items.Instantiate.Capacity.OfZero(resourceType)
+									)
+									.Done()
+							);
 						}
-						else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");
+							
+						model.Inventory.Container.Deposit(stack);
 					}
-					else Debug.LogError($"Unable to get the {Items.Keys.Shared.Type} for {item}");
-				},
-				inventory
-			);
+					else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");
+				}
+				else Debug.LogError($"Unable to get the {Items.Keys.Shared.Type} for {item}");
+			}
 			
 			// model.Inventory.Reset(
 			// 	InventoryPermission.WithdrawalForJobs(EnumExtensions.GetValues(Jobs.Unknown)),

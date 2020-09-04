@@ -35,6 +35,7 @@ namespace Lunra.Hothouse.Models
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)
 		{
+			
 			Debug.LogError("TODO: Check if inventory is empty for dropping");
 		}
 		#endregion
@@ -42,11 +43,6 @@ namespace Lunra.Hothouse.Models
 		public void Reset(ItemStore itemStore)
 		{
 			ResetId();
-
-			// TODO: This should eventually only be handled by initialize
-			// Should I destroy this inventory and create a new one so we are sure the Id is wiped out?
-			// Probably not since unbind destroys it... but that seems non-intuitive...
-			Container = Container?.Initialize(itemStore) ?? itemStore.Builder.Inventory();
 		}
 
 		public override string ToString()

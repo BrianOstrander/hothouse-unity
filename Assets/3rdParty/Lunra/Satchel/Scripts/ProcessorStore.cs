@@ -37,7 +37,7 @@ namespace Lunra.Satchel
 
 		public void Process(float deltaTime)
 		{
-			itemStore.IterateAll(i => OnProcess(i, deltaTime));
+			foreach (var item in itemStore.All()) OnProcess(item, deltaTime);
 			itemStore.Cleanup();
 		}
 

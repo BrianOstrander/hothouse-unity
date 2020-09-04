@@ -72,7 +72,6 @@ namespace Lunra.Satchel
 		[JsonIgnore] public BuilderUtility Builder { get; private set; }
 		[JsonIgnore] public ValidationStore Validation { get; private set; }
 		[JsonIgnore] public ProcessorStore Processor { get; private set; }
-		[JsonIgnore] public ReadOnlyDictionary<long, Item> Items { get; private set; }
 		[JsonIgnore] public ReadOnlyDictionary<long, Inventory> Inventories { get; private set; }
 		#endregion
 		
@@ -97,7 +96,6 @@ namespace Lunra.Satchel
 
 			this.modifiers = modifiers ?? new IItemModifier[0];
 
-			Items = new ReadOnlyDictionary<long, Item>(items);
 			Inventories = new ReadOnlyDictionary<long, Inventory>(inventories = new Dictionary<long, Inventory>());
 			inventoryCallbacks = new Dictionary<long, Action<Event>>();
 			
@@ -256,12 +254,11 @@ namespace Lunra.Satchel
 		/// Adding or removing items while iterating here will cause an exception.
 		/// </remarks>
 		/// <param name="iterator"></param>
-		public void IterateAll(Action<Item> iterator)
+		public IEnumerable<Item> All()
 		{
 			foreach (var kv in items)
 			{
-				try { iterator(kv.Value); }
-				catch (Exception e) { Debug.LogException(e); }
+				yield return kv.Value;
 			}
 		}
 		
@@ -270,8 +267,7 @@ namespace Lunra.Satchel
 		/// </summary>
 		/// <param name="iterator"></param>
 		/// <param name="stacks"></param>
-		public void Iterate(
-			Action<Item, Stack> iterator,
+		public IEnumerable<(Item Item, Stack Stack)> InStack(
 			params Stack[] stacks
 		)
 		{
@@ -279,8 +275,7 @@ namespace Lunra.Satchel
 			{
 				if (TryGet(stack.Id, out var item))
 				{
-					try { iterator(item, stack); }
-					catch (Exception e) { Debug.LogException(e); }
+					yield return (item, stack);
 				}
 				else Debug.LogError($"Unable to find item with Id {stack.Id}");
 			}

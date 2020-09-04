@@ -340,7 +340,7 @@ namespace Lunra.Hothouse.Services
 				);
 			}
 			
-			Model.Items.IterateAll(OnItemUpdate);
+			foreach (var item in Model.Items.All()) OnItemUpdate(item);
 
 			var capacitiesReceive = new List<Context.CapacityInfo>();
 			var capacitiesDistribute = new List<Context.CapacityInfo>();
