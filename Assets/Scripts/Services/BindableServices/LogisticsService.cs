@@ -234,7 +234,7 @@ namespace Lunra.Hothouse.Services
 				
 					if (delta == 0)
 					{
-						// We're at a satisfactory amount
+						// We are satisfied
 						Item.Set(
 							(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.None),
 							(Items.Keys.Capacity.CurrentCount, resourceTotalCount)
@@ -256,7 +256,6 @@ namespace Lunra.Hothouse.Services
 								.BeginItem()
 								.WithProperties(
 									Items.Instantiate.Reservation.OfInput(
-										resourceType,
 										Item.Id
 									)
 								)
@@ -277,7 +276,6 @@ namespace Lunra.Hothouse.Services
 							.BeginItem()
 							.WithProperties(
 								Items.Instantiate.Reservation.OfOutput(
-									resourceType,
 									Item.Id
 								)
 							)
@@ -413,7 +411,7 @@ namespace Lunra.Hothouse.Services
 								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
 								(Items.Keys.Reservation.IsPromised, false),
 								(Items.Keys.Reservation.CapacityId, capacityDistribute.Item.Id),
-								(Items.Keys.Reservation.State, Items.Values.Reservation.LogisticStates.Output)
+								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Output)
 							);
 
 						if (!found)
@@ -453,11 +451,8 @@ namespace Lunra.Hothouse.Services
 							);
 						
 						item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.Output;
-						
-						itemReservationDistribute.Set(
-							(Items.Keys.Reservation.IsPromised, true),
-							(Items.Keys.Reservation.ItemId, item.Id)
-						);
+
+						itemReservationDistribute[Items.Keys.Reservation.IsPromised] = true;
 
 						inventoryDistribute.Deposit(item.StackOf(1));
 						inventoryDistribute.Deposit(itemReservationDistribute.StackOf(1));
@@ -484,7 +479,7 @@ namespace Lunra.Hothouse.Services
 								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
 								(Items.Keys.Reservation.IsPromised, false),
 								(Items.Keys.Reservation.CapacityId, capacityReceive.Item.Id),
-								(Items.Keys.Reservation.State, Items.Values.Reservation.LogisticStates.Input)
+								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Input)
 							);
 
 						if (!found)
@@ -501,10 +496,7 @@ namespace Lunra.Hothouse.Services
 								).First()
 							);
 						
-						itemReservationReceive.Set(
-							(Items.Keys.Reservation.IsPromised, true),
-							(Items.Keys.Reservation.ItemId, item.Id)
-						);
+						itemReservationReceive[Items.Keys.Reservation.IsPromised] = true;
 
 						inventoryReceive.Deposit(itemReservationReceive.StackOf(1));
 						
@@ -515,31 +507,18 @@ namespace Lunra.Hothouse.Services
 								.BeginItem()
 								.WithProperties(
 									Items.Instantiate.Transfer.Pickup(
-										resourceType,
-										inventoryDistribute.Id,
+										item.Id,
 										itemReservationDistribute.Id,
-										item.Id
+										itemReservationReceive.Id
 									)	
 								)
-								.Done(1, out var pickup)
+								.Done(1, out var transfer)
 						);
-						
-						dwellerInventory.Deposit(
-							Model.Items.Builder
-								.BeginItem()
-								.WithProperties(
-									Items.Instantiate.Transfer.Dropoff(
-										resourceType,
-										inventoryReceive.Id,
-										itemReservationReceive.Id,
-										item.Id
-									)	
-								)
-								.Done(1, out var dropoff)
-						);
-						
-						dweller.Dweller.InventoryPromises.All.Push(dropoff.Id);
-						dweller.Dweller.InventoryPromises.All.Push(pickup.Id);
+
+						itemReservationDistribute[Items.Keys.Reservation.TransferId] = transfer.Id;
+						itemReservationReceive[Items.Keys.Reservation.TransferId] = transfer.Id;
+							
+						dweller.Dweller.InventoryPromises.All.Push(transfer.Id);
 
 						dwellerAssigned = dweller;
 						break;

@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Lunra.Core;
 using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
@@ -13,6 +16,11 @@ namespace Lunra.Hothouse.Models
 	
 	public class InventoryPromiseComponent : ComponentModel<IInventoryPromiseModel>
 	{
+		class OperationException : Exception
+		{
+			public OperationException(string message) : base(message) {}
+		}
+		
 		#region Serialized
 		[JsonProperty] List<long> all = new List<long>();
 		[JsonIgnore] public StackProperty<long> All { get; } 
@@ -47,7 +55,7 @@ namespace Lunra.Hothouse.Models
 		{
 			var destroyed = new List<Stack>();
 			
-			foreach (var (item, stack) in Model.Inventory.Container.All())
+			foreach (var (item, stack) in Model.Inventory.Container.All().ToArray())
 			{
 				var type = item[Items.Keys.Shared.Type];
 
@@ -63,16 +71,121 @@ namespace Lunra.Hothouse.Models
 				{
 					destroyed.Add(stack);
 
-					var state = item[Items.Keys.Transfer.LogisticState];
-					
-					// if (state == Items.Values.Shared.LogisticStates.Dropoff)
-
+					try
+					{
+						OnBreakPromiseForTransfer(item, stack);
+					}
+					catch (OperationException e)
+					{
+						Debug.LogException(e);
+					}
 				}
 			}
 
 			Model.Inventory.Container.Destroy(destroyed.ToArray());
 		}
 		#endregion
+
+		void OnBreakPromiseForTransfer(
+			Item transferItem,
+			Stack transferStack
+		)
+		{
+			foreach (var reservationIdKey in new [] { Items.Keys.Transfer.ReservationDropoffId, Items.Keys.Transfer.ReservationPickupId })
+			{
+				var reservationId = transferItem[reservationIdKey];
+				if (reservationId == IdCounter.UndefinedId) continue;
+				
+				if (!Game.Items.TryGet(reservationId, out var reservationItem)) throw new OperationException($"Unable to find reservation [ {reservationId} ] referenced by {transferItem}");
+				
+				if (!reservationItem[Items.Keys.Reservation.IsPromised]) throw new OperationException($"Expected reservation {reservationItem} for transfer {transferItem} to be promised, but it was not");
+
+				var reservationState = reservationItem[Items.Keys.Reservation.LogisticState];
+
+				if (!Game.Items.Containers.TryGetValue(reservationItem.ContainerId, out var reservationContainer)) throw new OperationException($"Unable to find container {reservationItem.ContainerId} for reservation {reservationItem} referenced by {transferItem}");
+
+				var reservationItemStacks = reservationContainer.Withdrawal((reservationId, transferStack.Count));
+				
+				if (reservationItemStacks.Length != 1) throw new OperationException($"Expected 1 reservation item, but withdrew {reservationItemStacks.Length} instead, referenced by {transferItem}");
+
+				var reservationItemStack = reservationItemStacks.First();
+				
+				if (reservationItemStack.Id != reservationItem.Id) throw new OperationException($"Expected reservation stack to have id {reservationItem.Id}, but found {reservationItemStack.Id} instead, referenced by {transferItem}");
+				
+				if (reservationState == Items.Values.Reservation.LogisticStates.Input)
+				{
+					
+				}
+				else if (reservationState == Items.Values.Reservation.LogisticStates.Output)
+				{
+					var capacityId = reservationItem[Items.Keys.Reservation.CapacityId];
+					if (!Game.Items.TryGet(capacityId, out var capacityItem)) throw new OperationException($"Unable to find capacity [ {capacityId} ] for reservation {reservationItem}, referenced by {transferItem}");
+
+					var capacityCurrent = capacityItem[Items.Keys.Capacity.CurrentCount] + reservationItemStack.Count;
+					var capacityTarget = capacityItem[Items.Keys.Capacity.TargetCount];
+
+					var delta = capacityTarget - capacityCurrent;
+					
+					var foundReservation = reservationContainer.TryFindFirst(
+						out var unPromisedReservationItem,
+						out var unPromisedReservationStack,
+						(Items.Keys.Reservation.CapacityId, capacityId),
+						(Items.Keys.Reservation.IsPromised, false),
+						(Items.Keys.Reservation.TransferId, IdCounter.UndefinedId)
+					);
+
+					if (delta == 0)
+					{
+						// We are satisfied	
+						capacityItem.Set(
+							(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.None),
+							(Items.Keys.Capacity.CurrentCount, capacityCurrent)
+						);
+
+						if (foundReservation) reservationContainer.Destroy(unPromisedReservationStack);
+						return;
+					}
+					
+					if (foundReservation)
+					{
+						reservationContainer.Withdrawal(unPromisedReservationStack);
+					}
+					else
+					{
+						unPromisedReservationStack = Game.Items.Builder
+							.BeginItem()
+							.WithProperties(
+								Items.Instantiate.Reservation.OfUnknown(capacityId)
+							)
+							.Done(Mathf.Abs(delta), out unPromisedReservationItem);
+					}
+					
+					if (0 < delta)
+					{
+						// We want more
+						capacityItem.Set(
+							(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Receive),
+							(Items.Keys.Capacity.CurrentCount, capacityCurrent)
+						);
+
+						unPromisedReservationItem[Items.Keys.Reservation.LogisticState] = Items.Values.Reservation.LogisticStates.Input;
+					}
+					else
+					{
+						// We want less
+						capacityItem.Set(
+							(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Distribute),
+							(Items.Keys.Capacity.CurrentCount, capacityCurrent)
+						);
+						
+						unPromisedReservationItem[Items.Keys.Reservation.LogisticState] = Items.Values.Reservation.LogisticStates.Output;
+					}
+
+					reservationContainer.Deposit(unPromisedReservationStack);
+				}
+				else throw new OperationException($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {reservationItem} for transfer {transferItem}");
+			}
+		}
 		
 		public void Reset()
 		{

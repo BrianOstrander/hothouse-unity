@@ -66,6 +66,7 @@ namespace Lunra.Satchel
 		public static Stack operator --(Stack stack) => stack.NewCount(stack.Count - 1);
 
 		public static implicit operator Stack((Item Item, int Count) source) => new Stack(source.Item?.Id ?? IdCounter.UndefinedId, source.Count);
+		public static implicit operator Stack((long Id, int Count) source) => new Stack(source.Id, source.Count);
 
 		public override string ToString() => $"[ {Id} ] : {Count}";
 

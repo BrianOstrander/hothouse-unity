@@ -571,10 +571,10 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			foreach (var dweller in payload.Game.Dwellers.AllActive) dweller.Transform.Position.Value = bonfire.Transform.Position.Value + (Vector3.back * 2.5f);
 
-			payload.Game.Dwellers.AllActive.First().Inventory.Container.New(
-				1,
-				Items.Instantiate.Resource.Stalk
-			);
+			// payload.Game.Dwellers.AllActive.First().Inventory.Container.New(
+			// 	1,
+			// 	Items.Instantiate.Resource.Stalk
+			// );
 			
 			payload.Game.Buildings.Activate<StalkStockpileDefinition>(
 				spawn.RoomTransform.Id.Value,

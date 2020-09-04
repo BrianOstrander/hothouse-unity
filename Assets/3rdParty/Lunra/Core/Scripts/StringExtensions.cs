@@ -20,6 +20,12 @@ namespace Lunra.Core
 
 		// TODO: Convert to use "this string"
 		public static string GetNonNullOrEmpty(string value, string defaultValue) => string.IsNullOrEmpty(value) ? defaultValue : value;
+		public static string GetNonNullOrEmpty(string value, string defaultNullValue, string defaultEmptyValue)
+		{
+			if (value == null) return defaultNullValue;
+			if (value == string.Empty) return defaultEmptyValue;
+			return value;
+		}
 
 		public static string Wrap(
 			this string value,
