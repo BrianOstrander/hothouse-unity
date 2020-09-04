@@ -190,7 +190,7 @@ namespace Lunra.Hothouse.Models
 			{
 				public static PropertyKeyValue[] Pickup(
 					string resourceType,
-					long inventoryId,
+					long containerId,
 					long reservationId,
 					long itemId,
 					params PropertyKeyValue[] overrides
@@ -198,7 +198,7 @@ namespace Lunra.Hothouse.Models
 				{
 					return Of(
 						resourceType,
-						inventoryId,
+						containerId,
 						reservationId,
 						itemId,
 						Values.Transfer.LogisticStates.Pickup,
@@ -208,7 +208,7 @@ namespace Lunra.Hothouse.Models
 				
 				public static PropertyKeyValue[] Dropoff(
 					string resourceType,
-					long inventoryId,
+					long containerId,
 					long reservationId,
 					long itemId,
 					params PropertyKeyValue[] overrides
@@ -216,7 +216,7 @@ namespace Lunra.Hothouse.Models
 				{
 					return Of(
 						resourceType,
-						inventoryId,
+						containerId,
 						reservationId,
 						itemId,
 						Values.Transfer.LogisticStates.Dropoff,
@@ -226,7 +226,7 @@ namespace Lunra.Hothouse.Models
 				
 				static PropertyKeyValue[] Of(
 					string resourceType,
-					long inventoryId,
+					long containerId,
 					long reservationId,
 					long itemId,
 					string logisticState,
@@ -239,7 +239,7 @@ namespace Lunra.Hothouse.Models
 						{
 							(Keys.Transfer.LogisticState, logisticState),
 							(Keys.Transfer.ResourceType, resourceType),
-							(Keys.Transfer.InventoryId, inventoryId),
+							(Keys.Transfer.ContainerId, containerId),
 							(Keys.Transfer.ReservationId, reservationId),
 							(Keys.Transfer.ItemId, itemId)
 						},
@@ -311,7 +311,7 @@ namespace Lunra.Hothouse.Models
 				
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
 				public static readonly PropertyKey<long> ItemId = Create<long>(nameof(ItemId));
-				public static readonly PropertyKey<long> InventoryId = Create<long>(nameof(InventoryId));
+				public static readonly PropertyKey<long> ContainerId = Create<long>(nameof(ContainerId));
 				public static readonly PropertyKey<long> ReservationId = Create<long>(nameof(ReservationId));
 				public static readonly PropertyKey<string> ResourceType = Create<string>(nameof(ResourceType));
 			}
@@ -340,7 +340,6 @@ namespace Lunra.Hothouse.Models
 				public static class LogisticStates
 				{
 					public static readonly string None = nameof(None).ToSnakeCase();
-					public static readonly string Input = nameof(Input).ToSnakeCase();
 					public static readonly string Output = nameof(Output).ToSnakeCase();
 				}
 			}
