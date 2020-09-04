@@ -390,12 +390,13 @@ namespace Lunra.Hothouse.Services
 					.Where(c => c.Item[Items.Keys.Capacity.ResourceType] == resourceType)
 					.ToList();
 
+				var capacityReceiveFulfilled = false;
+				var capacitiesDistributeConsumed = new List<Context.CapacityInfo>();
+				
 				foreach (var capacityDistribute in capacitiesDistributeAvailable)
 				{
 					var noValidDwellerNavigations = true;
-					int? capacityDistributeCurrentCount = null;
-					int? capacityDistributeTargetCount = null;
-					
+					Context.DwellerInfo dwellerAssigned = null;
 					
 					foreach (var dweller in dwellersAvailable.OrderBy(m => m.Dweller.DistanceTo(capacityDistribute.GetParent())))
 					{
@@ -408,7 +409,23 @@ namespace Lunra.Hothouse.Services
 
 						var found = inventoryDistribute
 							.TryFindFirst(
+								out var itemReservationDistribute,
+								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
+								(Items.Keys.Reservation.CapacityId, capacityDistribute.Item.Id),
+								(Items.Keys.Reservation.State, Items.Values.Reservation.States.Output),
+								(Items.Keys.Reservation.IsPromised, false)
+							);
+
+						if (!found)
+						{
+							// This will occur if there is some other incoming reservation or whatnot, may not happen...
+							continue;
+						}
+						
+						found = inventoryDistribute
+							.TryFindFirst(
 								out var item,
+								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Resource),
 								(Items.Keys.Resource.Type, resourceType),
 								(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.None)
 							);
@@ -418,66 +435,122 @@ namespace Lunra.Hothouse.Services
 							Debug.LogError($"Unable to find valid instance of a {resourceType} in {inventoryDistribute.Id}");
 							break;
 						}
+
+						item = Model.Items
+							.First(
+								inventoryDistribute
+									.Withdrawal(
+										item.StackOf(1)
+									).First()
+							);
 						
-						found = inventoryDistribute
+						itemReservationDistribute = Model.Items
+							.First(
+								inventoryDistribute
+									.Withdrawal(
+										itemReservationDistribute.StackOf(1)
+									).First()
+							);
+						
+						item[Items.Keys.Resource.Logistics.State] = Items.Values.Resource.Logistics.States.Output;
+						
+						itemReservationDistribute.Set(
+							(Items.Keys.Reservation.ItemId, item.Id),
+							(Items.Keys.Reservation.IsPromised, true)
+						);
+
+						inventoryDistribute.Deposit(item.StackOf(1));
+						inventoryDistribute.Deposit(itemReservationDistribute.StackOf(1));
+						
+						capacityDistribute.Item[Items.Keys.Capacity.CurrentCount]--;
+						
+						if (capacityDistribute.Item[Items.Keys.Capacity.CurrentCount] == capacityDistribute.Item[Items.Keys.Capacity.TargetCount])
+						{
+							capacityDistribute.Item[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
+							capacitiesDistributeConsumed.Add(capacityDistribute);
+						}
+						
+						capacityReceive.Item[Items.Keys.Capacity.CurrentCount]++;
+
+						capacityReceiveFulfilled = capacityReceive.Item[Items.Keys.Capacity.CurrentCount] == capacityReceive.Item[Items.Keys.Capacity.TargetCount];
+
+						if (capacityReceiveFulfilled) capacityReceive.Item[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
+						
+						var inventoryReceive = capacityReceive.GetInventory();
+
+						found = inventoryReceive
 							.TryFindFirst(
-								out var itemReservation,
-								(Items.Keys.Reservation.CapacityId, capacityReceive.Item.Id)
+								out var itemReservationReceive,
+								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
+								(Items.Keys.Reservation.CapacityId, capacityReceive.Item.Id),
+								(Items.Keys.Reservation.State, Items.Values.Reservation.States.Input),
+								(Items.Keys.Reservation.IsPromised, false)
 							);
 
 						if (!found)
 						{
-							Debug.LogError($"Unable to find valid reservation for {capacityReceive.Item.Id} in {inventoryDistribute.Id}");
+							Debug.LogError($"Unable to find valid input reservation for {capacityReceive.Item.Id} in {inventoryDistribute.Id}");
 							break;
 						}
-
-						item = Model.Items.First(inventoryDistribute.Withdrawal(item.StackOf(1)).First()); 
-						itemReservation = Model.Items.First(inventoryDistribute.Withdrawal(itemReservation.StackOf(1)).First());
 						
-						item.Set(
-							(Items.Keys.Resource.Logistics.State, Items.Values.Resource.Logistics.States.Output)
-						);
+						itemReservationReceive = Model.Items
+							.First(
+								inventoryReceive
+								.Withdrawal(
+									itemReservationReceive.StackOf(1)
+								).First()
+							);
 						
-						itemReservation.Set(
-							(Items.Keys.Reservation.IsPromised, true),
-							(Items.Keys.Reservation.ItemId, item.Id)
+						itemReservationReceive.Set(
+							(Items.Keys.Reservation.ItemId, item.Id),
+							(Items.Keys.Reservation.IsPromised, true)
 						);
 
-						inventoryDistribute.Deposit(item.StackOf(1));
-						inventoryDistribute.Deposit(itemReservation.StackOf(1));
-
-						// Don't miss the -1 at the end of this!
-						capacityDistributeCurrentCount = (capacityDistributeCurrentCount ?? capacityDistribute.Item[Items.Keys.Capacity.CurrentCount]) - 1;
-
-						capacityDistribute.Item[Items.Keys.Capacity.CurrentCount] = capacityDistributeCurrentCount.Value;
-
-						if (capacityDistributeCurrentCount == (capacityDistributeTargetCount ?? (capacityDistributeTargetCount = capacityDistribute.Item[Items.Keys.Capacity.TargetCount])))
-						{
-							capacityDistribute.Item[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
-						}
+						inventoryReceive.Deposit(itemReservationReceive.StackOf(1));
 						
 						var dwellerInventory = dweller.GetInventory();
+						
+						dwellerInventory.Deposit(
+							Model.Items.Builder
+								.BeginItem()
+								.WithProperties(
+									Items.Instantiate.Transfer.Pickup(
+										resourceType,
+										inventoryDistribute.Id,
+										itemReservationDistribute.Id,
+										item.Id
+									)	
+								)
+								.Done(1, out var pickup)
+						);
+						
+						dwellerInventory.Deposit(
+							Model.Items.Builder
+								.BeginItem()
+								.WithProperties(
+									Items.Instantiate.Transfer.Dropoff(
+										resourceType,
+										inventoryReceive.Id,
+										itemReservationReceive.Id,
+										item.Id
+									)	
+								)
+								.Done(1, out var dropoff)
+						);
+						
+						dweller.Dweller.InventoryPromises.All.Push(dropoff.Id);
+						dweller.Dweller.InventoryPromises.All.Push(pickup.Id);
 
-						// dwellerInventory.New(
-						// 	1,
-						// 	itemReservation,
-						// 	out var itemPickup,
-						// 	(Items.Keys.Reservation.State, Items.Values.Reservation.States.Pickup)
-						// );
-						//
-						// dwellerInventory.New(
-						// 	1,
-						// 	itemReservation,
-						// 	out var itemDropoff,
-						// 	(Items.Keys.Reservation.State, Items.Values.Reservation.States.Dropoff),
-						// 	(Items.Keys.Reservation.State, Items.Values.Reservation.States.Dropoff)
-						// );
-
-						// var distributionInventory = availableDistribution.GetInventory();
-						// var receiveInventory = nextRecieve.GetInventory();
+						dwellerAssigned = dweller;
+						break;
 					}
 
+					if (capacityReceiveFulfilled) break;
 					if (noValidDwellerNavigations) break;
+
+					if (dwellerAssigned != null) dwellersAvailable.Remove(dwellerAssigned);
+
+					foreach (var consumed in capacitiesDistributeConsumed) capacitiesDistribute.Remove(consumed);
 				}
 			}
 

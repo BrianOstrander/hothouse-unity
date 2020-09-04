@@ -439,8 +439,11 @@ namespace Lunra.Satchel
 						}
 						else
 						{
-							modifiedList.Add((kv.Key, kv.Value.RemovedCount + kv.Value.Count, kv.Value.Count, kv.Value.RemovedCount));
 							stacks.Add(stackEventItem.StackOf(kv.Value.Count));
+							if (kv.Value.RemovedCount != 0 || kv.Value.Underflow != 0)
+							{
+								modifiedList.Add((kv.Key, kv.Value.RemovedCount + kv.Value.Count, kv.Value.Count, kv.Value.RemovedCount));
+							}
 						}
 						
 						if (0 < kv.Value.RemovedCount) stackEvents.Add(kv.Key, (kv.Value.Count + kv.Value.RemovedCount, kv.Value.Count, -kv.Value.RemovedCount, Event.Types.Subtraction));
