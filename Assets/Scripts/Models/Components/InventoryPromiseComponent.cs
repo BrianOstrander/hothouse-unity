@@ -117,6 +117,36 @@ namespace Lunra.Hothouse.Models
 				if (reservationState == Items.Values.Reservation.LogisticStates.Input) isOutput = false;
 				else if (reservationState == Items.Values.Reservation.LogisticStates.Output) isOutput = true;
 				else throw new OperationException($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {reservationItem} for transfer {transferItem}");
+
+				if (isOutput)
+				{
+					var outputStacks = reservationContainer.Withdrawal((transferItem[Items.Keys.Transfer.ItemId], transferStack.Count));
+					
+					if (outputStacks.Length != 1) throw new OperationException($"Expected 1 output item, but withdrew {outputStacks.Length} instead, referenced by {transferItem}");
+					
+					var outputStack = outputStacks.First();
+
+					if (outputStack.Count != transferStack.Count) throw new OperationException($"Expected output stack to have count of {transferStack.Count}, but instead it was {outputStack.Count}, referenced by {transferItem}");
+					
+					if (!Game.Items.TryGet(outputStack.Id, out var outputItem)) throw new OperationException($"Unable to find item for stack {outputStack}, referenced by {transferItem}");
+
+					var outputItemType = outputItem[Items.Keys.Shared.Type];
+
+					if (outputItemType == Items.Values.Shared.Types.Resource)
+					{
+						outputItem[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
+					}
+					else throw new OperationException($"Unrecognized {Items.Keys.Shared.Type} for output item: {outputItem}");
+
+					if (reservationContainer.TryFindFirst(i => i.CanStack(outputItem), out var existingOutputItem))
+					{
+						reservationContainer.Increment(existingOutputItem.StackOf(outputStack.Count));
+					}
+					else
+					{
+						reservationContainer.Deposit(outputStack);
+					}
+				}
 				
 				var capacityId = reservationItem[Items.Keys.Reservation.CapacityId];
 				if (!Game.Items.TryGet(capacityId, out var capacityItem)) throw new OperationException($"Unable to find capacity [ {capacityId} ] for reservation {reservationItem}, referenced by {transferItem}");
