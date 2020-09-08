@@ -578,7 +578,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			payload.Game.Buildings.Activate<StalkStockpileDefinition>(
 				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * 2f) + (Vector3.back * -3f),
+				position + (Vector3.right * 6f) + (Vector3.back * -3f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);

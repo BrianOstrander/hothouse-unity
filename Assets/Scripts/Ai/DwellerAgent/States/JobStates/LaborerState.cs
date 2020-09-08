@@ -18,13 +18,16 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new DestroyGenericHandlerState(),
 				new ConstructAssembleHandlerState(),
 				new DoorOpenHandlerState(),
-				new NavigateState()
+				new NavigateState(),
+				new InventoryPromiseHandlerState()
 				// new BalanceItemState()
 			);
 
 			AddTransitions(
 				new ToReturnOnJobChanged(),
 				new ToReturnOnShiftEnd(),
+				
+				new InventoryPromiseHandlerState.ToInventoryPromiseHandlerOnAvailable(),
 
 				new DestroyGenericHandlerState.ToObligationOnExistingObligation(),
 				new ConstructAssembleHandlerState.ToObligationOnExistingObligation(),
@@ -40,5 +43,9 @@ namespace Lunra.Hothouse.Ai.Dweller
 				new NavigateToNearestLight()
 			);
 		}
+		
+		#region Child Classes
+		class InventoryPromiseHandlerState : InventoryPromiseHandlerState<LaborerState<S>> { } 
+		#endregion
 	}
 }

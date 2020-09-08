@@ -118,6 +118,12 @@ namespace Lunra.Hothouse.Editor
 						}
 						GUILayout.EndHorizontal();
 
+						GUILayout.BeginHorizontal();
+						{
+							if (GUILayout.Button("Break Inventory Promises")) dweller.InventoryPromises.BreakAll();
+						}
+						GUILayout.EndHorizontal();
+						
 						var addRemoveButtonWidth = GUILayout.Width(48f);
 						
 						GUILayout.BeginHorizontal();

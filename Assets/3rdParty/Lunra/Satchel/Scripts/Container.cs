@@ -637,6 +637,38 @@ namespace Lunra.Satchel
 		}
 
 		public bool TryFindFirst(
+			long id,
+			out Item item
+		)
+		{
+			return TryFindFirst(id, out item, out _);
+		}
+		
+		public bool TryFindFirst(
+			long id,
+			out Item item,
+			out Stack stack
+		)
+		{
+			try
+			{
+				stack = Stacks.First(s => s.Id == id);
+
+				if (itemStore.TryGet(id, out item)) return true;
+				
+				Debug.LogError($"Unrecognized item id {id}");
+				return false;
+
+			}
+			catch (InvalidOperationException)
+			{
+				stack = default;
+				item = null;
+				return false;
+			}
+		}
+
+		public bool TryFindFirst(
 			Func<Item, bool> predicate,
 			out Item item
 		)

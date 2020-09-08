@@ -51,40 +51,43 @@ namespace Lunra.Hothouse.Models
 		}
 		
 		#region HealthComponent Events
-		void OnHealthDestroyed(Damage.Result result)
+		void OnHealthDestroyed(Damage.Result result) => BreakAll();
+		#endregion
+
+		public void Break()
 		{
-			var destroyed = new List<Stack>();
-			
-			foreach (var (item, stack) in Model.Inventory.Container.All().ToArray())
+			if (!All.TryPop(out var promise)) return;
+
+			if (!Model.Inventory.Container.TryFindFirst(promise, out var promiseItem, out var promiseStack))
 			{
-				var type = item[Items.Keys.Shared.Type];
-
-				if (type == Items.Values.Shared.Types.Reservation)
+				Debug.LogError($"Unable to find promise with item id {promise} in container {Model.Inventory.Container.Id}");
+				return;
+			}
+			
+			var type = promiseItem[Items.Keys.Shared.Type];
+			
+			if (type == Items.Values.Shared.Types.Transfer)
+			{
+				try
 				{
-					destroyed.Add(stack);
-					
-					// if (item[Items.Keys.Reservation.])
-					//
-					
+					OnBreakPromiseForTransfer(promiseItem, promiseStack);
 				}
-				else if (type == Items.Values.Shared.Types.Transfer)
+				catch (OperationException e)
 				{
-					destroyed.Add(stack);
-
-					try
-					{
-						OnBreakPromiseForTransfer(item, stack);
-					}
-					catch (OperationException e)
-					{
-						Debug.LogException(e);
-					}
+					Debug.LogException(e);
 				}
 			}
-
-			Model.Inventory.Container.Destroy(destroyed.ToArray());
+			else Debug.LogError($"Unrecognized {Items.Keys.Shared.Type}: {type}");
+			
+			Model.Inventory.Container.Destroy(promiseStack);
 		}
-		#endregion
+		
+		public void BreakAll()
+		{
+			// TODO: This simply breaks promises, doesn't drop the items or anything... some way to handle what to do
+			// with formerly promised items might be nice...
+			while (All.Any()) Break();
+		}
 
 		void OnBreakPromiseForTransfer(
 			Item transferItem,
