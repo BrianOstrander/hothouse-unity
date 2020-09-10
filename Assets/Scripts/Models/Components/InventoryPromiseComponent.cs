@@ -379,8 +379,7 @@ namespace Lunra.Hothouse.Models
 
 				var capacityCurrent = capacityItem[Items.Keys.Capacity.CurrentCount];
 
-				if (isOutput) capacityCurrent += reservationItemStack.Count;
-				else capacityCurrent -= reservationItemStack.Count;
+				if (!isOutput) capacityCurrent -= reservationItemStack.Count;
 				
 				var delta = capacityItem[Items.Keys.Capacity.TargetCount] - capacityCurrent;
 				
