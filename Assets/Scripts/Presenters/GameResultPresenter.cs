@@ -23,7 +23,7 @@ namespace Lunra.Hothouse.Presenters
 			game.GameResult.Changed += OnGameResult;
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			game.Dwellers.All.Changed -= OnDwellersAll;
 			game.LastLightUpdate.Changed -= OnLastLightUpdate;

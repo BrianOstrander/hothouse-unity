@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Presenters
 			roomResolver.Generate += OnRoomResolverGenerate;
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			roomResolver.Initialize -= OnRoomResolverInitialize;
 			roomResolver.Generate -= OnRoomResolverGenerate;

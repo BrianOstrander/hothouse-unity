@@ -119,7 +119,7 @@ namespace Lunra.Hothouse.Presenters
 			);
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			

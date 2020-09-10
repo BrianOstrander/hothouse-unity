@@ -16,9 +16,9 @@ namespace Lunra.Hothouse.Presenters
 			// Model.RadialFloorSelection.Changed += v => Debug.Log(v);
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
-			base.UnBind();
+			base.Deconstruct();
 			
 			Model.Display.Changed -= OnDisplay;
 		}

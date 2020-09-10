@@ -25,7 +25,7 @@ namespace Lunra.Hothouse.Presenters
 			effects.IsEnabled.Changed += OnFloraEffectsIsEnabled;
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			game.SimulationInitialize -= OnGameSimulationInitialize;
 			game.SimulationUpdate -= OnGameSimulationUpdate;

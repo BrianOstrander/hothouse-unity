@@ -43,6 +43,13 @@ namespace Lunra.Hothouse.Presenters
 			OnPooledState(Model.PooledState.Value);
 		}
 
+		protected override void Deconstruct()
+		{
+			Model.PooledState.Changed -= OnPooledState;
+			
+			if (Model.PooledState.Value != PooledStates.InActive) UnBind();
+		}
+
 		protected virtual void Bind()
 		{
 			Model.Transform.Position.Changed += OnPosition;
@@ -54,7 +61,7 @@ namespace Lunra.Hothouse.Presenters
 			else Game.SimulationInitialize += SimulationInitialize;
 		}
 
-		protected override void UnBind()
+		protected virtual void UnBind()
 		{
 			Model.Transform.Position.Changed -= OnPosition;
 			Model.Transform.Rotation.Changed -= OnRotation;

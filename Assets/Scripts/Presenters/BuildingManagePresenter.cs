@@ -31,7 +31,7 @@ namespace Lunra.Hothouse.Presenters
 			Show();
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			game.SimulationUpdate -= OnGameSimulationUpdate;
 			

@@ -23,7 +23,7 @@ namespace Lunra.Hothouse.Presenters
 			ShowView(instant: true);
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			App.Heartbeat.Update -= OnHeartbeatUpdate;
 		}

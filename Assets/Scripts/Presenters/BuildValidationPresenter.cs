@@ -32,7 +32,7 @@ namespace Lunra.Hothouse.Presenters
 			buildValidation.Current.Changed += OnBuildValidationCurrent;
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			game.Toolbar.Task.Changed -= OnToolbarTask;
 			game.Toolbar.IsEnabled.Changed -= OnToolbarIsEnabled;

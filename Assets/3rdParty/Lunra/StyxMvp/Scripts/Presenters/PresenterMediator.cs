@@ -58,7 +58,7 @@ namespace Lunra.StyxMvp.Presenters
 
 		public void UnRegister(IPresenter presenter, Action done = null)
 		{
-			if (presenter.UnBinded)
+			if (presenter.IsDeconstructed)
 			{
 				OnUnRegister(done);
 				return;

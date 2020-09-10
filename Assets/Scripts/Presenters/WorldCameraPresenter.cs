@@ -45,7 +45,7 @@ namespace Lunra.Hothouse.Presenters
 			};
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			App.Heartbeat.LateUpdate -= OnHeartbeatLateUpdate;
 			game.SimulationInitialize -= OnGameSimulationInitialize;

@@ -7,7 +7,7 @@ namespace Lunra.StyxMvp.Presenters
 	public interface IPresenter
 	{
 		Type ViewInterface { get; }
-		bool UnBinded { get; }
+		bool IsDeconstructed { get; }
 	}
 	
 	/// <summary>
@@ -27,7 +27,7 @@ namespace Lunra.StyxMvp.Presenters
 		/// <value>The view interface type.</value>
 		public Type ViewInterface => typeof(V);
 
-		public bool UnBinded { private set; get; }
+		public bool IsDeconstructed { private set; get; }
 
 		public Presenter() : this(App.V.Get<V>()) {}
 
@@ -39,7 +39,12 @@ namespace Lunra.StyxMvp.Presenters
 
 		protected void Register()
 		{
-			App.P.Register(this, () => View.TransitionState, CloseView, BaseUnBind);
+			App.P.Register(
+				this,
+				() => View.TransitionState,
+				CloseView,
+				TriggerDeconstruct
+			);
 		}
 
 		protected void SetView(V view)
@@ -56,15 +61,15 @@ namespace Lunra.StyxMvp.Presenters
 
 		protected virtual Transform DefaultAnchor => null;
 
-		void BaseUnBind()
+		void TriggerDeconstruct()
 		{
-			if (UnBinded) return;
-			UnBinded = true;
+			if (IsDeconstructed) return;
+			IsDeconstructed = true;
 			App.V.Pool(View);
-			UnBind();
+			Deconstruct();
 		}
 
-		protected virtual void UnBind() {}
+		protected virtual void Deconstruct() {}
 
 		protected virtual void ShowView(Transform parent = null, bool instant = false)
 		{

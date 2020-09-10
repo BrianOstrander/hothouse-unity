@@ -22,7 +22,7 @@ namespace Lunra.Hothouse.Presenters
 			interaction.Changed += OnInteraction;
 		}
 
-		protected override void UnBind()
+		protected override void Deconstruct()
 		{
 			interaction.Changed -= OnInteraction;
 		}
