@@ -454,15 +454,7 @@ namespace Lunra.Hothouse.Services
 
 						inventoryDistribute.Deposit(item.StackOf(1));
 						inventoryDistribute.Deposit(itemReservationDistribute.StackOf(1));
-						
-						capacityDistribute.Item[Items.Keys.Capacity.CurrentCount]--;
-						
-						if (capacityDistribute.Item[Items.Keys.Capacity.CurrentCount] == capacityDistribute.Item[Items.Keys.Capacity.TargetCount])
-						{
-							capacityDistribute.Item[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
-							capacitiesDistributeConsumed.Add(capacityDistribute);
-						}
-						
+
 						capacityReceive.Item[Items.Keys.Capacity.CurrentCount]++;
 
 						capacityReceiveFulfilled = capacityReceive.Item[Items.Keys.Capacity.CurrentCount] == capacityReceive.Item[Items.Keys.Capacity.TargetCount];

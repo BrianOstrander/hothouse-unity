@@ -4,11 +4,16 @@ using Lunra.StyxMvp.Models;
 
 namespace Lunra.Hothouse.Models
 {
-	public abstract class AgentModel : PrefabModel,
+	public interface IAgentModel : 
 		IHealthModel,
 		IInventoryModel,
-		IObligationPromiseModel,
-		ITagModel
+		IObligationPromiseModel
+	{
+		// TODO: Maybe this should be in a component? Not sure...
+		ListenerProperty<float> InteractionRadius { get; }
+	}
+	
+	public abstract class AgentModel : PrefabModel, IAgentModel
 	{
 		#region Serialized
 		[JsonProperty] float navigationVelocity;

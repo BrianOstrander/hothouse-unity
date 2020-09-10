@@ -34,7 +34,7 @@ namespace Lunra.Hothouse.Models
 		}
 
 		protected override void OnInitialize() => Container = Container?.Initialize(Game.Items) ?? Game.Items.Builder.Container();
-		
+
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)
 		{

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
+using Lunra.Hothouse.Ai;
 using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using Newtonsoft.Json;
@@ -9,13 +10,38 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Models
 {
-	public interface IInventoryPromiseModel : IInventoryModel, IHealthModel
+	public interface IInventoryPromiseModel : IAgentModel
 	{
 		InventoryPromiseComponent InventoryPromises { get; }
 	}
 	
 	public class InventoryPromiseComponent : ComponentModel<IInventoryPromiseModel>
 	{
+		public class ProcessResult
+		{
+			public enum Actions
+			{
+				Unknown = 0,
+				None = 10,
+				Navigate = 20,
+				Timeout = 30
+			}
+		
+			public static ProcessResult None() => new ProcessResult(Actions.None);
+
+			public Actions Action { get; }
+			public NavigationPlan Navigation { get; }
+
+			public ProcessResult(
+				Actions action,
+				NavigationPlan navigation = default
+			)
+			{
+				Action = action;
+				Navigation = navigation;
+			}
+		}
+		
 		class OperationException : Exception
 		{
 			public OperationException(string message) : base(message) {}
@@ -53,6 +79,203 @@ namespace Lunra.Hothouse.Models
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result) => BreakAll();
 		#endregion
+
+		public ProcessResult Process()
+		{
+			while (All.TryPeek(out var promiseId))
+			{
+				try
+				{
+					if (Model.Inventory.Container.TryFindFirst(promiseId, out var promiseItem))
+					{
+						var type = promiseItem[Items.Keys.Shared.Type];
+				
+						if (type == Items.Values.Shared.Types.Transfer)
+						{
+							var state = promiseItem[Items.Keys.Transfer.LogisticState];
+
+							var isValid = false;
+							ProcessResult result;
+							
+							if (state == Items.Values.Transfer.LogisticStates.Pickup)
+							{
+								isValid = OnProcessTransfer(
+									promiseItem,
+									true,
+									out result
+								);
+							}
+							else if (state == Items.Values.Transfer.LogisticStates.Dropoff)
+							{
+								isValid = OnProcessTransfer(
+									promiseItem,
+									false,
+									out result
+								);
+							}
+							else throw new OperationException($"Unrecognized {Items.Keys.Transfer.LogisticState}: {state}");
+
+							if (isValid) return result;
+						}
+						else throw new OperationException($"Unrecognized {Items.Keys.Shared.Type}: {type}");
+					}
+					else throw new OperationException($"Cannot find item for promise with id {promiseId}");
+
+					// If we get here the promise was not invalid, just impossible to complete for some reason - usually
+					// because we couldn't navigate there - so we simply break the promise. Ideally no errors occur.
+					Break();
+				}
+				catch (OperationException e)
+				{
+					// The promise was invalid in some way, missing pickup or dropoff location, and as such we just pop
+					// it, since breaking the promise would cause more errors.
+					All.Pop();
+					Debug.LogException(e);
+				}
+			}
+			
+			return ProcessResult.None();
+		}
+
+		bool OnProcessTransfer(
+			Item transferItem,
+			bool isPickup,
+			out ProcessResult result
+		)
+		{
+			var reservationIdKey = isPickup ? Items.Keys.Transfer.ReservationPickupId : Items.Keys.Transfer.ReservationDropoffId;
+			var itemId = transferItem[Items.Keys.Transfer.ItemId];
+
+			if (!Game.Items.TryGet(itemId, out var item))
+			{
+				throw new OperationException($"Unable to find item {itemId} of transfer {transferItem}");
+			}
+
+			var reservationItemId = transferItem[reservationIdKey];
+			if (!Game.Items.TryGet(reservationItemId, out var reservationItem))
+			{
+				throw new OperationException($"Unable to find {reservationIdKey} for reservation {reservationItemId} of transfer {transferItem}");
+			}
+
+			var reservationContainerId = reservationItem.ContainerId;
+
+			if (!Game.Query.TryFindFirst<IInventoryModel>(m => m.Inventory.Container.Id == reservationContainerId, out var reservationInventory))
+			{
+				throw new OperationException($"Unable to find an inventory with container id {reservationContainerId} for reservation {reservationItem} of transfer {transferItem}");
+			}
+
+			if (!Navigation.TryQuery(reservationInventory, out var navigationQuery))
+			{
+				throw new OperationException($"Unable to create a navigation query for {reservationInventory}");
+			}
+			
+			var isNavigable = NavigationUtility.CalculateNearest(
+				Model.Transform.Position.Value,
+				out var navigationResult,
+				navigationQuery
+			);
+
+			if (!isNavigable)
+			{
+				result = default;
+				return false;
+			}
+
+			if (Model.InteractionRadius.Value < Vector3.Distance(Model.Transform.Position.Value, navigationResult.Target))
+			{
+				result = new ProcessResult(
+					ProcessResult.Actions.Navigate,
+					NavigationPlan.Navigating(
+						navigationResult.Path,
+						NavigationPlan.Interrupts.RadiusThreshold,
+						Model.InteractionRadius.Value
+					)
+				);
+				return true;
+			}
+
+			if (isPickup)
+			{
+				OnProcessPickup(
+					transferItem,
+					reservationItem,
+					item,
+					reservationInventory
+				);
+			}
+			else
+			{
+				OnProcessDropoff(
+					transferItem,
+					reservationItem,
+					item,
+					reservationInventory
+				);
+			}
+			
+			result = new ProcessResult(ProcessResult.Actions.Timeout);
+
+			return true;
+		}
+
+		void OnProcessPickup(
+			Item transferItem,
+			Item reservationItem,
+			Item item,
+			IInventoryModel reservationInventory
+		)
+		{
+			reservationInventory.Inventory.Container
+				.Destroy(reservationItem);
+
+			Container.Transfer(
+				item.StackOfAll(),
+				reservationInventory.Inventory.Container,
+				Model.Inventory.Container
+			);
+			
+			var capacityId = reservationItem[Items.Keys.Reservation.CapacityId];
+			
+			if (reservationInventory.Inventory.Container.TryFindFirst(capacityId, out var capacityDistribute))
+			{
+				capacityDistribute[Items.Keys.Capacity.CurrentCount]--;
+						
+				if (capacityDistribute[Items.Keys.Capacity.CurrentCount] == capacityDistribute[Items.Keys.Capacity.TargetCount])
+				{
+					capacityDistribute[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
+				}
+			}
+			else throw new OperationException($"Unable to find capacity item [ {capacityId} ] referenced by reservation {reservationItem}");
+				
+			item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
+				
+			transferItem.Set(
+				(Items.Keys.Transfer.ReservationPickupId, IdCounter.UndefinedId),
+				(Items.Keys.Transfer.LogisticState, Items.Values.Transfer.LogisticStates.Dropoff)
+			);
+		}
+		
+		void OnProcessDropoff(
+			Item transferItem,
+			Item reservationItem,
+			Item item,
+			IInventoryModel reservationInventory
+		)
+		{
+			reservationInventory.Inventory.Container
+				.Destroy(reservationItem);
+
+			Container.Transfer(
+				item.StackOfAll(),
+				Model.Inventory.Container,
+				reservationInventory.Inventory.Container
+			);
+				
+			Model.Inventory.Container
+				.Destroy(transferItem);
+
+			All.Pop();
+		}
 
 		public void Break()
 		{
