@@ -270,7 +270,35 @@ namespace Lunra.Satchel
 
 			return ModificationResults.Modified;
 		}
-		
+
+		public ModificationResults Combine(params Stack[] requests)
+		{
+			var isModified = false;
+			
+			// TODO: Make this only trigger a single event...
+			// In order to do that properly, should probably check if items within itself can stack already...
+			// or something...
+			
+			foreach (var stack in requests)
+			{
+				if (itemStore.TryGet(stack.Id, out var stackItem))
+				{
+					if (TryFindFirst(i => i.Is(stack.Id) || i.CanStack(stackItem), out var existingItem))
+					{
+						Increment(existingItem.StackOf(stack.Count));
+						isModified = true;
+					}
+					else
+					{
+						Deposit(stack);
+						isModified = true;
+					}
+				}
+				else Debug.LogError($"Cannot resolve {stack}");
+			}
+
+			return isModified ? ModificationResults.Modified : ModificationResults.None;
+		}
 		
 		public Stack[] Withdrawal(
 			params Stack[] requests
@@ -929,6 +957,37 @@ namespace Lunra.Satchel
 		}
 
 		public static ModificationResults Transfer(
+			Stack request,
+			Container source,
+			Container destination
+		)
+		{
+			return Transfer(
+				request,
+				source,
+				destination,
+				out _
+			);
+		}
+		
+		public static ModificationResults Transfer(
+			Stack request,
+			Container source,
+			Container destination,
+			out Stack underflow
+		)
+		{
+			var result = Transfer(
+				request.WrapInArray(),
+				source,
+				destination,
+				out var underflows
+			);
+			underflow = underflows.FirstOrDefault();
+			return result;
+		}
+		
+		public static ModificationResults Transfer(
 			Stack[] requests,
 			Container source,
 			Container destination
@@ -961,7 +1020,7 @@ namespace Lunra.Satchel
 		
 			if (!withdrawalResult.HasFlag(ModificationResults.Modified)) return withdrawalResult;
 
-			return destination.Deposit(withdrawalResults);
+			return destination.Combine(withdrawalResults);
 		}
 
 		public override string ToString() => ToString(Formats.IncludeItems | Formats.IncludeItemProperties);

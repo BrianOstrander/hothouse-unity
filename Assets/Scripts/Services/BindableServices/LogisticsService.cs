@@ -212,8 +212,6 @@ namespace Lunra.Hothouse.Services
 					}
 
 					var resourceType = GetResourceType();
-					// var capacityCurrentCount = capacity.Item.Get(Items.Keys.Capacity.CurrentCount);
-					// var capacityMaximumCount = capacity.Item.Get(Items.Keys.Capacity.MaximumCount);
 					var capacityTargetCount = Item[Items.Keys.Capacity.TargetCount];
 				
 					var inventory = GetInventory();

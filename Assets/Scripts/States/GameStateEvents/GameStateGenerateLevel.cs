@@ -6,6 +6,7 @@ using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
+using Lunra.Satchel;
 using Lunra.StyxMvp;
 using UnityEngine;
 using UnityEngine.AI;
@@ -568,7 +569,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			);
 			
 			// Debugging Begin
-			
+
 			foreach (var dweller in payload.Game.Dwellers.AllActive) dweller.Transform.Position.Value = bonfire.Transform.Position.Value + (Vector3.back * 2.5f);
 
 			// payload.Game.Dwellers.AllActive.First().Inventory.Container.New(

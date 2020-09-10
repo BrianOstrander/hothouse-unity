@@ -14,9 +14,8 @@ namespace Lunra.Hothouse.Presenters
 		protected override void Bind()
 		{
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
-			
-			// Model.Inventory.All.Changed += OnItemDropInventory;
-			Debug.LogWarning("TODO: Bind Inventory");
+
+			Model.Inventory.Container.UpdatedItem += OnItemDropInventoryUpdateItem;
 			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
 			
 			base.Bind();
@@ -26,8 +25,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			// Model.Inventory.All.Changed -= OnItemDropInventory;
-			Debug.LogWarning("TODO: UnBind Inventory");
+			Model.Inventory.Container.UpdatedItem -= OnItemDropInventoryUpdateItem;
 			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
 			
 			base.UnBind();
@@ -45,9 +43,21 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region ItemDropModel Events
-		void OnItemDropInventory(Container.Event delta)
+		void OnItemDropInventoryUpdateItem(ItemStore.Event delta)
 		{
-			if (delta.IsEmpty) Game.ItemDrops.InActivate(Model);
+			foreach (var itemDelta in delta.ItemEvents)
+			{
+				// I think we can safely ignore items not found as having been destroyed...
+				if (Game.Items.TryGet(itemDelta.Id, out var item))
+				{
+					if (!item.TryGet(Items.Keys.Capacity.CurrentCount, out var currentCount) || currentCount != 0) return;
+				}
+			}
+			
+			// Making it this far means every capacity is zero...
+
+			Model.Inventory.Container.DestroyAll();
+			Model.PooledState.Value = PooledStates.InActive;
 		}
 		#endregion
 

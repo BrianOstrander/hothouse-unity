@@ -345,6 +345,7 @@ namespace Lunra.Satchel
 		}
 
 		public Stack StackOfZero() => StackOf(0);
+		public Stack StackOfAll() => new Stack(Id, InstanceCount);
 		public Stack StackOf(int count) => new Stack(Id, count);
 
 		/// <summary>

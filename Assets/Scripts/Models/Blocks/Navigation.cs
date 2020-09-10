@@ -203,6 +203,9 @@ namespace Lunra.Hothouse.Models
 		
 		public struct Result
 		{
+			/// <summary>
+			/// Origin of the target model, not origin of the navigation.
+			/// </summary>
 			[JsonProperty] public Vector3 Origin { get; private set; }
 			[JsonProperty] public IModel TargetModel { get; private set; }
 			[JsonProperty] public Vector3 Target { get; private set; }
@@ -239,6 +242,24 @@ namespace Lunra.Hothouse.Models
 				
 				if (distance < requiredDistance) return DayTime.Zero;
 				return new DayTime((distance - requiredDistance) / velocity);
+			}
+
+			public void DebugDraw(float duration = 0f)
+			{
+				if (!IsValid)
+				{
+					Debug.DrawLine(Origin, Origin + Vector3.up, Color.red, duration);
+					return;
+				}
+
+				var color = Path.status == NavMeshPathStatus.PathComplete ? Color.green : Color.yellow;
+				
+				Debug.DrawLine(Origin, Origin + Vector3.up, color.NewA(0.5f), duration);
+
+				for (var i = 1; i < Path.corners.Length; i++)
+				{
+					Debug.DrawLine(Path.corners[i - 1], Path.corners[i], color, duration);
+				}
 			}
 		}
 	}
