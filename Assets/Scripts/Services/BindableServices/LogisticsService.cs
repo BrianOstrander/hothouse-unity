@@ -377,7 +377,7 @@ namespace Lunra.Hothouse.Services
 				}
 			}
 
-			// Order in a way that cachecs will get filled up or taken from last
+			// Order in a way that caches will get filled up or taken from last
 			
 			capacitiesReceive = capacitiesReceive
 				.OrderBy(c => c.Item[Items.Keys.Capacity.IsCache])
@@ -484,124 +484,6 @@ namespace Lunra.Hothouse.Services
 						
 						dwellerAssigned = dweller;
 						break;
-						/*
-						if (!dweller.ValidNavigationTo(capacityReceive)) continue;
-						noValidDwellerNavigations = false;
-						
-						if (!dweller.ValidNavigationTo(capacityDistribute)) continue;
-
-						var inventoryDistribute = capacityDistribute.GetInventory();
-
-						var found = inventoryDistribute
-							.TryFindFirst(
-								out var itemReservationDistribute,
-								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
-								(Items.Keys.Reservation.IsPromised, false),
-								(Items.Keys.Reservation.CapacityId, capacityDistribute.Item.Id),
-								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Output)
-							);
-
-						if (!found)
-						{
-							// This will occur if there is some other incoming reservation or whatnot, may not happen...
-							continue;
-						}
-						
-						found = inventoryDistribute
-							.TryFindFirst(
-								out var item,
-								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Resource),
-								(Items.Keys.Resource.LogisticState, Items.Values.Resource.LogisticStates.None),
-								(Items.Keys.Resource.Type, resourceType)
-							);
-
-						if (!found)
-						{
-							Debug.LogError($"Unable to find valid instance of a {resourceType} in {inventoryDistribute.Id}");
-							break;
-						}
-
-						item = Model.Items
-							.First(
-								inventoryDistribute
-									.Withdrawal(
-										item.StackOf(1)
-									).First()
-							);
-						
-						itemReservationDistribute = Model.Items
-							.First(
-								inventoryDistribute
-									.Withdrawal(
-										itemReservationDistribute.StackOf(1)
-									).First()
-							);
-						
-						item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.Output;
-
-						itemReservationDistribute[Items.Keys.Reservation.IsPromised] = true;
-
-						inventoryDistribute.Deposit(item.StackOf(1));
-						inventoryDistribute.Deposit(itemReservationDistribute.StackOf(1));
-
-						capacityReceive.Item[Items.Keys.Capacity.CountCurrent]++;
-
-						capacityReceiveFulfilled = capacityReceive.Item[Items.Keys.Capacity.CountCurrent] == capacityReceive.Item[Items.Keys.Capacity.CountTarget];
-
-						if (capacityReceiveFulfilled) capacityReceive.Item[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
-						
-						var inventoryReceive = capacityReceive.GetInventory();
-
-						found = inventoryReceive
-							.TryFindFirst(
-								out var itemReservationReceive,
-								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
-								(Items.Keys.Reservation.IsPromised, false),
-								(Items.Keys.Reservation.CapacityId, capacityReceive.Item.Id),
-								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Input)
-							);
-
-						if (!found)
-						{
-							Debug.LogError($"Unable to find valid input reservation for {capacityReceive.Item.Id} in {inventoryDistribute.Id}");
-							break;
-						}
-						
-						itemReservationReceive = Model.Items
-							.First(
-								inventoryReceive
-								.Withdrawal(
-									itemReservationReceive.StackOf(1)
-								).First()
-							);
-						
-						itemReservationReceive[Items.Keys.Reservation.IsPromised] = true;
-
-						inventoryReceive.Deposit(itemReservationReceive.StackOf(1));
-						
-						var dwellerInventory = dweller.GetInventory();
-						
-						dwellerInventory.Deposit(
-							Model.Items.Builder
-								.BeginItem()
-								.WithProperties(
-									Items.Instantiate.Transfer.Pickup(
-										item.Id,
-										itemReservationDistribute.Id,
-										itemReservationReceive.Id
-									)	
-								)
-								.Done(1, out var transfer)
-						);
-
-						itemReservationDistribute[Items.Keys.Reservation.TransferId] = transfer.Id;
-						itemReservationReceive[Items.Keys.Reservation.TransferId] = transfer.Id;
-							
-						dweller.Dweller.InventoryPromises.All.Push(transfer.Id);
-
-						dwellerAssigned = dweller;
-						break;
-						*/
 					}
 
 					if (capacityReceiveFulfilled) break;
@@ -616,16 +498,13 @@ namespace Lunra.Hothouse.Services
 
 			context.Clear();
 		}
-
+		
 		void OnItemUpdate(Item item)
 		{
 			var type = item[Items.Keys.Shared.Type];
 			
 			if (type == Items.Values.Shared.Types.Resource) OnResourceUpdate(item);
 			else if (type == Items.Values.Shared.Types.Capacity) OnCapacityUpdate(item);
-			
-			// if (Model.SimulationTick.Value < item.Get(Items.Keys.Capacity.TimeoutExpired)) return;
-			// item.Set(Items.Keys.Capacity.TimeoutExpired, Model.SimulationTick.Value + 120L);
 		}
 
 		void OnResourceUpdate(Item item)
