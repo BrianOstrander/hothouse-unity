@@ -491,7 +491,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				// Jobs.Laborer,
 				// Jobs.Laborer,
 				// Jobs.Laborer,
-				// Jobs.Laborer,
+				Jobs.Laborer,
 				Jobs.Laborer
 			};
 
@@ -588,13 +588,13 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				spawn.Id.Value,
 				Vector3.zero,
 				Quaternion.identity,
+				// payload.Game.Items.Builder
+				// 	.BeginItem()
+				// 	.WithProperties(Items.Instantiate.Resource.Scrap)
+				// 	.Done(2),
 				payload.Game.Items.Builder
 					.BeginItem()
 					.WithProperties(Items.Instantiate.Resource.Stalk)
-					.Done(2),
-				payload.Game.Items.Builder
-					.BeginItem()
-					.WithProperties(Items.Instantiate.Resource.Scrap)
 					.Done(2)
 			);
 			

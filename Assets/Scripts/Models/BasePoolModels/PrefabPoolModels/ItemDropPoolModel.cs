@@ -56,7 +56,6 @@ namespace Lunra.Hothouse.Models
 		)
 		{
 			model.Enterable.Reset();
-			model.Inventory.Reset(Game.Items);
 
 			var existingResourceTypes = new HashSet<string>();
 

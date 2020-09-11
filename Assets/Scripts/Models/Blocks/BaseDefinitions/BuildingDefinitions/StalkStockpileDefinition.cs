@@ -9,7 +9,7 @@ namespace Lunra.Hothouse.Models
 		public override int Inventory(List<string> resourceTypes)
 		{
 			resourceTypes.Add(Items.Values.Resource.Types.Stalk);
-			resourceTypes.Add(Items.Values.Resource.Types.Scrap);
+			// resourceTypes.Add(Items.Values.Resource.Types.Scrap);
 
 			return 2;
 		}

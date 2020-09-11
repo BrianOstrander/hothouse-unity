@@ -104,8 +104,6 @@ namespace Lunra.Hothouse.Models
 			model.SalvageInventory.Add(SalvageInventory);
 			*/
 			//Debug.LogWarning("TODO: Inventory, all of it lol");
-			
-			model.Inventory.Reset(Game.Items);
 
 			var resourceTypes = new List<string>();
 			var resourceCapacity = Inventory(resourceTypes);

@@ -381,7 +381,16 @@ namespace Lunra.Hothouse.Models
 
 				var capacityCurrent = capacityItem[Items.Keys.Capacity.CountCurrent];
 
-				if (!isOutput) capacityCurrent -= reservationItemStack.Count;
+				if (!isOutput)
+				{
+					capacityCurrent -= reservationItemStack.Count;
+
+					var capacityPoolId = capacityItem[Items.Keys.Capacity.Pool];
+					
+					if (!Game.Items.TryGet(capacityPoolId, out var capacityPoolItem)) throw new OperationException($"Unable to find capacity pool [ {capacityPoolId} ] for reservation {reservationItem}, referenced by {transferItem}");
+					
+					capacityPoolItem[Items.Keys.CapacityPool.CountCurrent] -= reservationItemStack.Count;
+				}
 				
 				var delta = capacityItem[Items.Keys.Capacity.CountTarget] - capacityCurrent;
 				

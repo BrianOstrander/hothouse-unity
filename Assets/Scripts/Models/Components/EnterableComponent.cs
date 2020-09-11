@@ -43,6 +43,7 @@ namespace Lunra.Hothouse.Models
 		}
 		#endregion
 		
+		// TODO: Should this be in unbind?
 		public void Reset() => Entrances.Value = new Entrance[0];
 		
 		public bool AnyAvailable() => Entrances.Value.Any(e => e.State == Entrance.States.Available);

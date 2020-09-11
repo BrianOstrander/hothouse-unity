@@ -31,6 +31,7 @@ namespace Lunra.Hothouse.Models
 			
 			// I think this is the correct place to destroy any items, should ensure they are properly cleaned up...
 			Container.Reset();
+			ResetId();
 		}
 
 		protected override void OnInitialize() => Container = Container?.Initialize(Game.Items) ?? Game.Items.Builder.Container();
@@ -69,11 +70,6 @@ namespace Lunra.Hothouse.Models
 			}
 		}
 		#endregion
-
-		public void Reset(ItemStore itemStore)
-		{
-			ResetId();
-		}
 
 		public override string ToString()
 		{
