@@ -17,7 +17,15 @@ namespace Lunra.Hothouse.Models
 	
 	public class InventoryPromiseComponent : ComponentModel<IInventoryPromiseModel>
 	{
-		public class ProcessResult
+		public struct TransferInfo
+		{
+			public Container Container;
+			public Item CapacityPool;
+			public Item Capacity;
+			public Item Reservation;
+		}
+		
+		public struct ProcessResult
 		{
 			public enum Actions
 			{
@@ -439,8 +447,8 @@ namespace Lunra.Hothouse.Models
 		
 		public bool Transfer(
 			Item item,
-			(Container Container, Item Capacity, Item Reservation) source,
-			(Container Container, Item Capacity, Item Reservation) destination
+			TransferInfo source,
+			TransferInfo destination
 		)
 		{
 			item = Game.Items

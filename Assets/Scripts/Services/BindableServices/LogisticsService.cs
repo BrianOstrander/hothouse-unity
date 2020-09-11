@@ -40,7 +40,7 @@ namespace Lunra.Hothouse.Services
 					Context = context;
 				}
 
-				public abstract Container GetInventory();
+				public abstract Container GetContainer();
 
 				public abstract IInventoryModel GetParent();
 
@@ -104,7 +104,7 @@ namespace Lunra.Hothouse.Services
 					Dweller = dweller;
 				}
 
-				public override Container GetInventory() => Dweller.Inventory.Container;
+				public override Container GetContainer() => Dweller.Inventory.Container;
 				public override IInventoryModel GetParent() => Dweller;
 			}
 			
@@ -114,6 +114,7 @@ namespace Lunra.Hothouse.Services
 
 				bool? inventoryFound;
 				bool? parentFound;
+				bool resourceTypeChecked;
 				string resourceType;
 				
 				public ItemInfo(
@@ -128,7 +129,7 @@ namespace Lunra.Hothouse.Services
 
 				public int GetPriority() => 0;
 				
-				public override Container GetInventory()
+				public override Container GetContainer()
 				{
 					if (inventoryFound.HasValue)
 					{
@@ -170,9 +171,14 @@ namespace Lunra.Hothouse.Services
 					return parent;
 				}
 
-				public string GetResourceType() => resourceType ?? (resourceType = OnGetResourceType());
-				
-				protected abstract string OnGetResourceType();
+				protected string GetResourceType()
+				{
+					if (resourceTypeChecked) return resourceType;
+					resourceTypeChecked = true;
+					return (resourceType = OnGetResourceType());
+				}
+
+				protected virtual string OnGetResourceType() => null;
 			}
 			
 			public class ResourceInfo : ItemInfo
@@ -206,19 +212,6 @@ namespace Lunra.Hothouse.Services
 				
 				public Goals Calculate()
 				{
-					var poolId = Item[Items.Keys.Capacity.Pool];
-
-					int? poolCapacity = null;
-					
-					if (poolId != IdCounter.UndefinedId)
-					{
-						if (Context.service.Model.Items.TryGet(poolId, out var poolItem))
-						{
-							poolCapacity = Mathf.Max(0, poolItem[Items.Keys.CapacityPool.CountMaximum] - poolItem[Items.Keys.CapacityPool.CountCurrent]);
-						}
-						else Debug.LogError($"Cannot find capacity pool with id [ {poolId} ]");
-					}
-					
 					var desire = Item[Items.Keys.Capacity.Desire];
 					if (desire != Items.Values.Capacity.Desires.NotCalculated)
 					{
@@ -231,7 +224,7 @@ namespace Lunra.Hothouse.Services
 					var resourceType = GetResourceType();
 					var capacityTargetCount = Item[Items.Keys.Capacity.CountTarget];
 				
-					var inventory = GetInventory();
+					var inventory = GetContainer();
 
 					var resourceTotalCount = 0;
 
@@ -246,7 +239,6 @@ namespace Lunra.Hothouse.Services
 					}
 
 					var delta = capacityTargetCount - resourceTotalCount;
-					if (poolCapacity.HasValue) delta = Mathf.Min(delta, poolCapacity.Value);
 				
 					if (delta == 0)
 					{
@@ -301,12 +293,27 @@ namespace Lunra.Hothouse.Services
 					return Goal = Goals.Distribute;
 				}
 			}
+			
+			public class CapacityPoolInfo : ItemInfo
+			{
+				public CapacityPoolInfo(
+					Context context,
+					Item item
+				) : base(context, item) { }
+
+				public void Calculate()
+				{
+					var poolId = Item[Items.Keys.Capacity.Pool];
+
+				}
+			}
 
 			LogisticsService service;
 
 			public List<NavigationCache> NavigationCaches = new List<NavigationCache>();
 			public List<DwellerInfo> Dwellers = new List<DwellerInfo>();
 			public Dictionary<long, ResourceInfo> Resources = new Dictionary<long, ResourceInfo>();
+			public Dictionary<long, CapacityInfo> CapacityPools = new Dictionary<long, CapacityInfo>();
 			public Dictionary<long, CapacityInfo> Capacities = new Dictionary<long, CapacityInfo>();
 			public Dictionary<long, Container> Inventories = new Dictionary<long, Container>();
 			public Dictionary<long, IInventoryModel> Parents = new Dictionary<long, IInventoryModel>();
@@ -439,11 +446,11 @@ namespace Lunra.Hothouse.Services
 							continue;
 						}
 
-						(Container Container, Item Capacity, Item Reservation) source = (
-							capacitySource.GetInventory(),
-							capacitySource.Item,
-							null
-						);
+						var source = new InventoryPromiseComponent.TransferInfo
+						{
+							Container = capacitySource.GetContainer(),
+							Capacity = capacitySource.Item
+						};
 						
 						var found = source.Container
 							.TryFindFirst(
@@ -475,11 +482,11 @@ namespace Lunra.Hothouse.Services
 							break;
 						}
 						
-						(Container Container, Item Capacity, Item Reservation) destination = (
-							capacityDestinationCurrent.GetInventory(),
-							capacityDestinationCurrent.Item,
-							null
-						);
+						var destination = new InventoryPromiseComponent.TransferInfo
+						{
+							Container = capacityDestinationCurrent.GetContainer(),
+							Capacity = capacityDestinationCurrent.Item,
+						};
 						
 						found = destination.Container
 							.TryFindFirst(
@@ -524,31 +531,37 @@ namespace Lunra.Hothouse.Services
 		void OnItemUpdate(Item item)
 		{
 			var type = item[Items.Keys.Shared.Type];
-			
-			if (type == Items.Values.Shared.Types.Resource) OnResourceUpdate(item);
-			else if (type == Items.Values.Shared.Types.Capacity) OnCapacityUpdate(item);
-		}
 
-		void OnResourceUpdate(Item item)
-		{
-			context.Resources.Add(
-				item.Id,
-				new Context.ResourceInfo(
-					context,
-					item
-				)
-			);
-		}
-
-		void OnCapacityUpdate(Item item)
-		{
-			context.Capacities.Add(
-				item.Id,
-				new Context.CapacityInfo(
-					context,
-					item
-				)
-			);
+			if (type == Items.Values.Shared.Types.Resource)
+			{
+				context.Resources.Add(
+					item.Id,
+					new Context.ResourceInfo(
+						context,
+						item
+					)
+				);
+			}
+			else if (type == Items.Values.Shared.Types.CapacityPool)
+			{
+				// context.CapacityPools.Add(
+				// 	item.Id,
+				// 	new Context.CapacityInfo(
+				// 		context,
+				// 		item
+				// 	)
+				// );
+			}
+			else if (type == Items.Values.Shared.Types.Capacity)
+			{
+				context.Capacities.Add(
+					item.Id,
+					new Context.CapacityInfo(
+						context,
+						item
+					)
+				);
+			}
 		}
 		#endregion
 	}
