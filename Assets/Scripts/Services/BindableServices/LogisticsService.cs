@@ -356,8 +356,8 @@ namespace Lunra.Hothouse.Services
 			
 			foreach (var item in Model.Items.All()) OnItemUpdate(item);
 
-			var capacitiesReceive = new List<Context.CapacityInfo>();
-			var capacitiesDistribute = new List<Context.CapacityInfo>();
+			var capacityDestinations = new List<Context.CapacityInfo>();
+			var capacitySources = new List<Context.CapacityInfo>();
 			
 			foreach (var capacity in context.Capacities.Values)
 			{
@@ -366,10 +366,10 @@ namespace Lunra.Hothouse.Services
 					case Context.CapacityInfo.Goals.None:
 						break;
 					case Context.CapacityInfo.Goals.Receive:
-						capacitiesReceive.Add(capacity);
+						capacityDestinations.Add(capacity);
 						break;
 					case Context.CapacityInfo.Goals.Distribute:
-						capacitiesDistribute.Add(capacity);
+						capacitySources.Add(capacity);
 						break;
 					default:
 						Debug.LogError($"Unrecognized goal: {capacity.Goal}");
@@ -379,12 +379,12 @@ namespace Lunra.Hothouse.Services
 
 			// Order in a way that caches will get filled up or taken from last
 			
-			capacitiesReceive = capacitiesReceive
+			capacitySources = capacitySources
 				.OrderBy(c => c.Item[Items.Keys.Capacity.IsCache])
 				.ThenBy(c => c.GetPriority())
 				.ToList();
-
-			capacitiesDistribute = capacitiesDistribute
+			
+			capacityDestinations = capacityDestinations
 				.OrderBy(c => c.Item[Items.Keys.Capacity.IsCache])
 				.ThenBy(c => c.GetPriority())
 				.ToList();
@@ -394,35 +394,34 @@ namespace Lunra.Hothouse.Services
 				.ToList();
 			
 			// While loop below is entirely for handling assignment of transfers to dwellers.
-			while (capacitiesReceive.Any() && capacitiesDistribute.Any() && dwellersAvailable.Any())
+			while (capacitySources.Any() && capacityDestinations.Any() && dwellersAvailable.Any())
 			{
-				var capacityReceive = capacitiesReceive[0];
-				capacitiesReceive.RemoveAt(0);
+				var capacityDestinationCurrent = capacityDestinations[0];
+				capacityDestinations.RemoveAt(0);
 
-				var resourceType = capacityReceive.Item[Items.Keys.Capacity.ResourceType];
+				var resourceType = capacityDestinationCurrent.Item[Items.Keys.Capacity.ResourceType];
 
-				var capacitiesDistributeAvailable = capacitiesDistribute
+				var capacitySourcesAvailable = capacitySources
 					.Where(c => c.Item[Items.Keys.Capacity.ResourceType] == resourceType)
 					.ToList();
 
-				var capacityReceiveFulfilled = false;
-				var capacitiesDistributeConsumed = new List<Context.CapacityInfo>();
+				var capacitySourceSatisfied = false;
 				
-				foreach (var capacityDistribute in capacitiesDistributeAvailable)
+				foreach (var capacitySource in capacitySourcesAvailable)
 				{
 					var noValidDwellerNavigations = true;
 					Context.DwellerInfo dwellerAssigned = null;
 					
-					foreach (var dweller in dwellersAvailable.OrderBy(m => m.Dweller.DistanceTo(capacityDistribute.GetParent())))
+					foreach (var dweller in dwellersAvailable.OrderBy(m => m.Dweller.DistanceTo(capacitySource.GetParent())))
 					{
-						if (!dweller.ValidNavigationTo(capacityReceive)) continue;
+						if (!dweller.ValidNavigationTo(capacityDestinationCurrent)) continue;
 						noValidDwellerNavigations = false;
 						
-						if (!dweller.ValidNavigationTo(capacityDistribute)) continue;
+						if (!dweller.ValidNavigationTo(capacitySource)) continue;
 
 						(Container Container, Item Capacity, Item Reservation) source = (
-							capacityDistribute.GetInventory(),
-							capacityDistribute.Item,
+							capacitySource.GetInventory(),
+							capacitySource.Item,
 							null
 						);
 						
@@ -456,8 +455,8 @@ namespace Lunra.Hothouse.Services
 						}
 						
 						(Container Container, Item Capacity, Item Reservation) destination = (
-							capacityReceive.GetInventory(),
-							capacityReceive.Item,
+							capacityDestinationCurrent.GetInventory(),
+							capacityDestinationCurrent.Item,
 							null
 						);
 						
@@ -476,7 +475,7 @@ namespace Lunra.Hothouse.Services
 							break;
 						}
 
-						capacityReceiveFulfilled = dweller.Dweller.InventoryPromises.Transfer(
+						capacitySourceSatisfied = dweller.Dweller.InventoryPromises.Transfer(
 							item,
 							source,
 							destination
@@ -486,13 +485,10 @@ namespace Lunra.Hothouse.Services
 						break;
 					}
 
-					if (capacityReceiveFulfilled) break;
+					if (capacitySourceSatisfied) break;
 					if (noValidDwellerNavigations) break;
 
-					// Debug.Log("count: "+dwellersAvailable.Count);
 					if (dwellerAssigned != null) dwellersAvailable.Remove(dwellerAssigned);
-
-					foreach (var consumed in capacitiesDistributeConsumed) capacitiesDistribute.Remove(consumed);
 				}
 			}
 
