@@ -389,12 +389,12 @@ namespace Lunra.Hothouse.Services
 				.ThenBy(c => c.GetPriority())
 				.ToList();
 
-			var dwellersAvailable = context.Dwellers
+			var dwellers = context.Dwellers
 				.Where(m => m.Dweller.InventoryPromises.All.None())
 				.ToList();
 			
 			// While loop below is entirely for handling assignment of transfers to dwellers.
-			while (capacitySources.Any() && capacityDestinations.Any() && dwellersAvailable.Any())
+			while (capacitySources.Any() && capacityDestinations.Any() && dwellers.Any())
 			{
 				var capacityDestinationCurrent = capacityDestinations[0];
 				capacityDestinations.RemoveAt(0);
@@ -406,18 +406,38 @@ namespace Lunra.Hothouse.Services
 					.ToList();
 
 				var capacitySourceSatisfied = false;
+				var noRemainingDwellers = false;
 				
 				foreach (var capacitySource in capacitySourcesAvailable)
 				{
 					var noValidDwellerNavigations = true;
-					Context.DwellerInfo dwellerAssigned = null;
+
+					dwellers = dwellers
+						.OrderBy(m => m.Dweller.DistanceTo(capacitySource.GetParent()))
+						.ToList();
+
+					var dwellerIndex = 0;
+
+					void incrementDweller() => dwellerIndex++;
+					void popDweller() => dwellers.RemoveAt(dwellerIndex);
 					
-					foreach (var dweller in dwellersAvailable.OrderBy(m => m.Dweller.DistanceTo(capacitySource.GetParent())))
+					while (dwellerIndex < dwellers.Count)
 					{
-						if (!dweller.ValidNavigationTo(capacityDestinationCurrent)) continue;
-						noValidDwellerNavigations = false;
+						var dweller = dwellers[dwellerIndex];
+
+						if (!dweller.ValidNavigationTo(capacityDestinationCurrent))
+						{
+							incrementDweller();
+							continue;
+						}
 						
-						if (!dweller.ValidNavigationTo(capacitySource)) continue;
+						noValidDwellerNavigations = false;
+
+						if (!dweller.ValidNavigationTo(capacitySource))
+						{
+							incrementDweller();
+							continue;
+						}
 
 						(Container Container, Item Capacity, Item Reservation) source = (
 							capacitySource.GetInventory(),
@@ -437,6 +457,7 @@ namespace Lunra.Hothouse.Services
 						if (!found)
 						{
 							// This will occur if there is some other incoming reservation or whatnot, may not happen...
+							incrementDweller();
 							continue;
 						}
 						
@@ -481,15 +502,20 @@ namespace Lunra.Hothouse.Services
 							destination
 						); 
 						
-						dwellerAssigned = dweller;
-						break;
+						popDweller();
+
+						if (capacitySourceSatisfied) break;
 					}
 
 					if (capacitySourceSatisfied) break;
 					if (noValidDwellerNavigations) break;
 
-					if (dwellerAssigned != null) dwellersAvailable.Remove(dwellerAssigned);
+					noRemainingDwellers = dwellers.None();
+					
+					if (noRemainingDwellers) break;
 				}
+				
+				if (noRemainingDwellers) break;
 			}
 
 			context.Clear();

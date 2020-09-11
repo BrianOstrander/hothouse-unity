@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using Lunra.Core;
-using Lunra.Hothouse.Models;
+﻿using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.Satchel;
 using UnityEngine;
@@ -45,16 +43,13 @@ namespace Lunra.Hothouse.Presenters
 		#region ItemDropModel Events
 		void OnItemDropInventoryUpdateItem(ItemStore.Event delta)
 		{
-			foreach (var itemDelta in delta.ItemEvents)
+			foreach (var entry in Model.Inventory.Container.All())
 			{
-				// I think we can safely ignore items not found as having been destroyed...
-				if (Game.Items.TryGet(itemDelta.Id, out var item))
-				{
-					if (!item.TryGet(Items.Keys.Capacity.CountCurrent, out var currentCount) || currentCount != 0) return;
-				}
+				if (entry.Item.TryGet(Items.Keys.Capacity.Desire, out var desire) && desire == Items.Values.Capacity.Desires.NotCalculated) return;
+				if (entry.Item.TryGet(Items.Keys.Capacity.CountCurrent, out var currentCount) && 0 < currentCount) return;
 			}
 			
-			// Making it this far means every capacity is zero...
+			// If we make it here, that means there was no capacity with a current count greater than zero.
 
 			Model.Inventory.Container.DestroyAll();
 			Model.PooledState.Value = PooledStates.InActive;

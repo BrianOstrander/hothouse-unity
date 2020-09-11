@@ -591,11 +591,11 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				payload.Game.Items.Builder
 					.BeginItem()
 					.WithProperties(Items.Instantiate.Resource.Stalk)
+					.Done(2),
+				payload.Game.Items.Builder
+					.BeginItem()
+					.WithProperties(Items.Instantiate.Resource.Scrap)
 					.Done(2)
-				// payload.Game.Items.Builder
-				// 	.BeginItem()
-				// 	.WithProperties(Items.Instantiate.Resource.Scrap)
-				// 	.Done(1)
 			);
 			
 			// payload.Game.DesireDamageMultiplier.Value = 0f;

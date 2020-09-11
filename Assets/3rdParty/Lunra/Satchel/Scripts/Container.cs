@@ -817,14 +817,12 @@ namespace Lunra.Satchel
 			out count
 		);
 
-		public bool TrySum(string key, out float result) => TryOperation(key, o => o.Continues(o.Result + o.Value), out result, out _);
-		public bool TrySum(PropertyKey<float> key, out float result) => TrySum(key.Key, out result);
+		public bool TrySum(PropertyKey<float> key, out float result) => TryOperation(key, o => o.Continues(o.Result + o.Value), out result, out _);
 
-		public bool TrySum(string key, out int result) => TryOperation(key, o => o.Continues(o.Result + o.Value), out result, out _);
-		public bool TrySum(PropertyKey<float> key, out int result) => TrySum(key.Key, out result);
+		public bool TrySum(PropertyKey<int> key, out int result) => TryOperation(key, o => o.Continues(o.Result + o.Value), out result, out _);
 
 		public bool TryAllEqual<T>(
-			string key,
+			PropertyKey<T> key,
 			T targetValue,
 			out bool result
 		)
@@ -837,7 +835,7 @@ namespace Lunra.Satchel
 			if (targetValue is bool boolTargetValue)
 			{
 				anyOperations = TryOperation<bool>(
-					key,
+					key.Key,
 					o => o.Value == boolTargetValue ? o.Continues(o.Value) : o.Skips(o.Value),
 					out var boolResult,
 					out _
@@ -848,7 +846,7 @@ namespace Lunra.Satchel
 			else if (targetValue is int intTargetValue)
 			{
 				anyOperations = TryOperation<int>(
-					key,
+					key.Key,
 					o => o.Value == intTargetValue ? o.Continues(o.Value) : o.Skips(o.Value),
 					out var intResult,
 					out _
@@ -859,7 +857,7 @@ namespace Lunra.Satchel
 			else if (targetValue is float floatTargetValue)
 			{
 				anyOperations = TryOperation<float>(
-					key,
+					key.Key,
 					o => Mathf.Approximately(o.Value, floatTargetValue) ? o.Continues(o.Value) : o.Skips(o.Value),
 					out var floatResult,
 					out _
@@ -870,7 +868,7 @@ namespace Lunra.Satchel
 			else if (targetValue is string stringTargetValue)
 			{
 				anyOperations = TryOperation<string>(
-					key,
+					key.Key,
 					o => o.Value == stringTargetValue ? o.Continues(o.Value) : o.Skips(o.Value),
 					out var stringResult,
 					out _
@@ -884,7 +882,7 @@ namespace Lunra.Satchel
 		}
 
 		public bool TryAnyEqual<T>(
-			string key,
+			PropertyKey<T> key,
 			T targetValue,
 			out bool result
 		)
@@ -897,7 +895,7 @@ namespace Lunra.Satchel
 			if (targetValue is bool boolTargetValue)
 			{
 				anyOperations = TryOperation<bool>(
-					key,
+					key.Key,
 					o => o.Value == boolTargetValue ? o.Skips(o.Value) : o.Continues(o.Value),
 					out var boolResult,
 					out _
@@ -908,7 +906,7 @@ namespace Lunra.Satchel
 			else if (targetValue is int intTargetValue)
 			{
 				anyOperations = TryOperation<int>(
-					key,
+					key.Key,
 					o => o.Value == intTargetValue ? o.Skips(o.Value) : o.Continues(o.Value),
 					out var intResult,
 					out _
@@ -919,7 +917,7 @@ namespace Lunra.Satchel
 			else if (targetValue is float floatTargetValue)
 			{
 				anyOperations = TryOperation<float>(
-					key,
+					key.Key,
 					o => Mathf.Approximately(o.Value, floatTargetValue) ? o.Skips(o.Value) : o.Continues(o.Value),
 					out var floatResult,
 					out _
@@ -930,7 +928,7 @@ namespace Lunra.Satchel
 			else if (targetValue is string stringTargetValue)
 			{
 				anyOperations = TryOperation<string>(
-					key,
+					key.Key,
 					o => o.Value == stringTargetValue ? o.Skips(o.Value) : o.Continues(o.Value),
 					out var stringResult,
 					out _
