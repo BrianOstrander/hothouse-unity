@@ -136,13 +136,13 @@ namespace Lunra.Hothouse.Services
 						return null;
 					}
 
+					inventoryFound = Context.Inventories.TryGetValue(Item.ContainerId, out var inventory);
+
+					if (inventoryFound.Value) return inventory;
+
 					var parent = GetParent(); 
 					
-					if (parent == null)
-					{
-						inventoryFound = false;
-						return null;
-					}
+					if (parent == null) return null;
 
 					inventoryFound = true;
 					Context.Inventories.Add(Item.ContainerId, parent.Inventory.Container);
@@ -157,7 +157,11 @@ namespace Lunra.Hothouse.Services
 						return null;
 					}
 
-					var parent = Context.service.Model.Query
+					parentFound = Context.Parents.TryGetValue(Item.ContainerId, out var parent);
+
+					if (parentFound.Value) return parent;
+
+					parent = Context.service.Model.Query
 						.FirstOrDefault<IInventoryModel>(i => i.Inventory.Container.Id == Item.ContainerId);
 
 					parentFound = parent != null;
@@ -202,6 +206,19 @@ namespace Lunra.Hothouse.Services
 				
 				public Goals Calculate()
 				{
+					var poolId = Item[Items.Keys.Capacity.Pool];
+
+					int? poolCapacity = null;
+					
+					if (poolId != IdCounter.UndefinedId)
+					{
+						if (Context.service.Model.Items.TryGet(poolId, out var poolItem))
+						{
+							poolCapacity = Mathf.Max(0, poolItem[Items.Keys.CapacityPool.CountMaximum] - poolItem[Items.Keys.CapacityPool.CountCurrent]);
+						}
+						else Debug.LogError($"Cannot find capacity pool with id [ {poolId} ]");
+					}
+					
 					var desire = Item[Items.Keys.Capacity.Desire];
 					if (desire != Items.Values.Capacity.Desires.NotCalculated)
 					{
@@ -212,7 +229,7 @@ namespace Lunra.Hothouse.Services
 					}
 
 					var resourceType = GetResourceType();
-					var capacityTargetCount = Item[Items.Keys.Capacity.TargetCount];
+					var capacityTargetCount = Item[Items.Keys.Capacity.CountTarget];
 				
 					var inventory = GetInventory();
 
@@ -229,13 +246,14 @@ namespace Lunra.Hothouse.Services
 					}
 
 					var delta = capacityTargetCount - resourceTotalCount;
+					if (poolCapacity.HasValue) delta = Mathf.Min(delta, poolCapacity.Value);
 				
 					if (delta == 0)
 					{
 						// We are satisfied
 						Item.Set(
 							(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.None),
-							(Items.Keys.Capacity.CurrentCount, resourceTotalCount)
+							(Items.Keys.Capacity.CountCurrent, resourceTotalCount)
 						);
 
 						return Goal = Goals.None;
@@ -246,7 +264,7 @@ namespace Lunra.Hothouse.Services
 						// We want more
 						Item.Set(
 							(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Receive),
-							(Items.Keys.Capacity.CurrentCount, resourceTotalCount)
+							(Items.Keys.Capacity.CountCurrent, resourceTotalCount)
 						);
 
 						inventory.Deposit(
@@ -266,7 +284,7 @@ namespace Lunra.Hothouse.Services
 					// We want less
 					Item.Set(
 						(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Distribute),
-						(Items.Keys.Capacity.CurrentCount, resourceTotalCount)
+						(Items.Keys.Capacity.CountCurrent, resourceTotalCount)
 					);
 				
 					inventory.Deposit(
@@ -455,9 +473,9 @@ namespace Lunra.Hothouse.Services
 						inventoryDistribute.Deposit(item.StackOf(1));
 						inventoryDistribute.Deposit(itemReservationDistribute.StackOf(1));
 
-						capacityReceive.Item[Items.Keys.Capacity.CurrentCount]++;
+						capacityReceive.Item[Items.Keys.Capacity.CountCurrent]++;
 
-						capacityReceiveFulfilled = capacityReceive.Item[Items.Keys.Capacity.CurrentCount] == capacityReceive.Item[Items.Keys.Capacity.TargetCount];
+						capacityReceiveFulfilled = capacityReceive.Item[Items.Keys.Capacity.CountCurrent] == capacityReceive.Item[Items.Keys.Capacity.CountTarget];
 
 						if (capacityReceiveFulfilled) capacityReceive.Item[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
 						
@@ -517,6 +535,7 @@ namespace Lunra.Hothouse.Services
 					if (capacityReceiveFulfilled) break;
 					if (noValidDwellerNavigations) break;
 
+					Debug.Log("count: "+dwellersAvailable.Count);
 					if (dwellerAssigned != null) dwellersAvailable.Remove(dwellerAssigned);
 
 					foreach (var consumed in capacitiesDistributeConsumed) capacitiesDistribute.Remove(consumed);

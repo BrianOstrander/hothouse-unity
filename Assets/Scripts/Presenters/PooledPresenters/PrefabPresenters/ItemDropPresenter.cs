@@ -50,7 +50,7 @@ namespace Lunra.Hothouse.Presenters
 				// I think we can safely ignore items not found as having been destroyed...
 				if (Game.Items.TryGet(itemDelta.Id, out var item))
 				{
-					if (!item.TryGet(Items.Keys.Capacity.CurrentCount, out var currentCount) || currentCount != 0) return;
+					if (!item.TryGet(Items.Keys.Capacity.CountCurrent, out var currentCount) || currentCount != 0) return;
 				}
 			}
 			

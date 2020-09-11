@@ -19,7 +19,8 @@ namespace Lunra.Hothouse.Models
 		public virtual LightStates LightState => LightStates.Unknown;
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
-		public virtual StackRecipe[] Inventory => new StackRecipe[0];
+
+		public virtual int Inventory(List<string> resourceTypes) => 0;
 		// public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
 		// public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
 		// public virtual Inventory DefaultInventory => Inventory.Empty;
@@ -106,15 +107,32 @@ namespace Lunra.Hothouse.Models
 			
 			model.Inventory.Reset(Game.Items);
 
-			foreach (var stackRecipe in Inventory)
+			var resourceTypes = new List<string>();
+			var resourceCapacity = Inventory(resourceTypes);
+			
+			if (resourceTypes.Any())
 			{
 				model.Inventory.Container.New(
-					stackRecipe.Count,
-					out _,
-					stackRecipe.Properties
+					1,
+					out var capacityPoolItem,
+					Items.Instantiate.CapacityPool
+						.Of(resourceCapacity)
 				);
+					
+				foreach (var resourceType in resourceTypes)
+				{
+					model.Inventory.Container.New(
+						1,
+						out _,
+						Items.Instantiate.Capacity.CacheOf(
+							resourceType,
+							capacityPoolItem.Id,
+							resourceCapacity
+						)
+					);
+				}
 			}
-			
+			else if (0 < resourceCapacity) Debug.LogError($"Specified resource capacity of {resourceCapacity} but no resource types provided");
 			
 			model.Obligations.Reset();
 			

@@ -1,15 +1,18 @@
+using System.Collections.Generic;
+
 namespace Lunra.Hothouse.Models
 {
 	public class StalkStockpileDefinition : BuildingDefinition
 	{
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 
-		public override StackRecipe[] Inventory => new[]
+		public override int Inventory(List<string> resourceTypes)
 		{
-			Items.Instantiate.Capacity
-				.CacheOf(Items.Values.Resource.Types.Stalk, 10)
-				.ToSingleStackRecipe()
-		};
+			resourceTypes.Add(Items.Values.Resource.Types.Stalk);
+			resourceTypes.Add(Items.Values.Resource.Types.Scrap);
+
+			return 1;
+		}
 		
 		public override string[] Tags => new[] {BuildingTags.Stockpile};
 	}

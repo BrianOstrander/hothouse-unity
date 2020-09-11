@@ -238,9 +238,9 @@ namespace Lunra.Hothouse.Models
 			
 			if (reservationInventory.Inventory.Container.TryFindFirst(capacityId, out var capacityDistribute))
 			{
-				capacityDistribute[Items.Keys.Capacity.CurrentCount]--;
+				capacityDistribute[Items.Keys.Capacity.CountCurrent]--;
 						
-				if (capacityDistribute[Items.Keys.Capacity.CurrentCount] == capacityDistribute[Items.Keys.Capacity.TargetCount])
+				if (capacityDistribute[Items.Keys.Capacity.CountCurrent] == capacityDistribute[Items.Keys.Capacity.CountTarget])
 				{
 					capacityDistribute[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
 				}
@@ -377,11 +377,11 @@ namespace Lunra.Hothouse.Models
 				var capacityId = reservationItem[Items.Keys.Reservation.CapacityId];
 				if (!Game.Items.TryGet(capacityId, out var capacityItem)) throw new OperationException($"Unable to find capacity [ {capacityId} ] for reservation {reservationItem}, referenced by {transferItem}");
 
-				var capacityCurrent = capacityItem[Items.Keys.Capacity.CurrentCount];
+				var capacityCurrent = capacityItem[Items.Keys.Capacity.CountCurrent];
 
 				if (!isOutput) capacityCurrent -= reservationItemStack.Count;
 				
-				var delta = capacityItem[Items.Keys.Capacity.TargetCount] - capacityCurrent;
+				var delta = capacityItem[Items.Keys.Capacity.CountTarget] - capacityCurrent;
 				
 				var foundReservation = reservationContainer.TryFindFirst(
 					out var unPromisedReservationItem,
@@ -396,7 +396,7 @@ namespace Lunra.Hothouse.Models
 					// We are satisfied	
 					capacityItem.Set(
 						(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.None),
-						(Items.Keys.Capacity.CurrentCount, capacityCurrent)
+						(Items.Keys.Capacity.CountCurrent, capacityCurrent)
 					);
 
 					if (foundReservation) reservationContainer.Destroy(unPromisedReservationStack);
@@ -423,7 +423,7 @@ namespace Lunra.Hothouse.Models
 					// We want more
 					capacityItem.Set(
 						(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Receive),
-						(Items.Keys.Capacity.CurrentCount, capacityCurrent)
+						(Items.Keys.Capacity.CountCurrent, capacityCurrent)
 					);
 
 					unPromisedReservationItem[Items.Keys.Reservation.LogisticState] = Items.Values.Reservation.LogisticStates.Input;
@@ -433,7 +433,7 @@ namespace Lunra.Hothouse.Models
 					// We want less
 					capacityItem.Set(
 						(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Distribute),
-						(Items.Keys.Capacity.CurrentCount, capacityCurrent)
+						(Items.Keys.Capacity.CountCurrent, capacityCurrent)
 					);
 					
 					unPromisedReservationItem[Items.Keys.Reservation.LogisticState] = Items.Values.Reservation.LogisticStates.Output;
