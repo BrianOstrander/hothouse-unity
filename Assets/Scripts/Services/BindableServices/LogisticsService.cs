@@ -393,6 +393,7 @@ namespace Lunra.Hothouse.Services
 				.Where(m => m.Dweller.InventoryPromises.All.None())
 				.ToList();
 			
+			// While loop below is entirely for handling assignment of transfers to dwellers.
 			while (capacitiesReceive.Any() && capacitiesDistribute.Any() && dwellersAvailable.Any())
 			{
 				var capacityReceive = capacitiesReceive[0];
