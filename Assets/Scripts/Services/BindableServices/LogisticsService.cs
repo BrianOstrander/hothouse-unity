@@ -301,10 +301,21 @@ namespace Lunra.Hothouse.Services
 					Item item
 				) : base(context, item) { }
 
-				public void Calculate()
+				public bool Calculate()
 				{
-					var poolId = Item[Items.Keys.Capacity.Pool];
+					var maximum = Item[Items.Keys.CapacityPool.CountMaximum];
+					var previous = Item[Items.Keys.CapacityPool.CountCurrent];
 
+					var current = 0;
+					
+					foreach (var element in GetContainer().All(i => i.TryGet(Items.Keys.Capacity.Pool, out var poolId) && poolId == Item.Id))
+					{
+						current += element.Item[Items.Keys.Capacity.CountCurrent];
+					}
+
+					if (previous != current) Item[Items.Keys.CapacityPool.CountCurrent] = current;
+
+					return current < maximum;
 				}
 			}
 
@@ -313,7 +324,7 @@ namespace Lunra.Hothouse.Services
 			public List<NavigationCache> NavigationCaches = new List<NavigationCache>();
 			public List<DwellerInfo> Dwellers = new List<DwellerInfo>();
 			public Dictionary<long, ResourceInfo> Resources = new Dictionary<long, ResourceInfo>();
-			public Dictionary<long, CapacityInfo> CapacityPools = new Dictionary<long, CapacityInfo>();
+			public Dictionary<long, CapacityPoolInfo> CapacityPools = new Dictionary<long, CapacityPoolInfo>();
 			public Dictionary<long, CapacityInfo> Capacities = new Dictionary<long, CapacityInfo>();
 			public Dictionary<long, Container> Inventories = new Dictionary<long, Container>();
 			public Dictionary<long, IInventoryModel> Parents = new Dictionary<long, IInventoryModel>();
@@ -325,6 +336,7 @@ namespace Lunra.Hothouse.Services
 				NavigationCaches.Clear();
 				Dwellers.Clear();
 				Resources.Clear();
+				CapacityPools.Clear();
 				Capacities.Clear();
 				Inventories.Clear();
 				Parents.Clear();
@@ -383,6 +395,13 @@ namespace Lunra.Hothouse.Services
 						break;
 				}
 			}
+			
+			var capacityPoolForbiddenDestinations = new HashSet<long>();
+
+			foreach (var capacityPool in context.CapacityPools.Values)
+			{
+				if (!capacityPool.Calculate()) capacityPoolForbiddenDestinations.Add(capacityPool.Item.Id);
+			}
 
 			// Order in a way that caches will get filled up or taken from last
 			
@@ -406,6 +425,8 @@ namespace Lunra.Hothouse.Services
 				var capacityDestinationCurrent = capacityDestinations[0];
 				capacityDestinations.RemoveAt(0);
 
+				if (capacityPoolForbiddenDestinations.Contains(capacityDestinationCurrent.Item[Items.Keys.Capacity.Pool])) continue;
+				
 				var resourceType = capacityDestinationCurrent.Item[Items.Keys.Capacity.ResourceType];
 
 				var capacitySourcesAvailable = capacitySources
@@ -467,7 +488,14 @@ namespace Lunra.Hothouse.Services
 							incrementDweller();
 							continue;
 						}
-						
+
+						// It's okay if the source doesn't have a capacity pool.
+						source.Container
+							.TryFindFirst(
+								source.Capacity[Items.Keys.Capacity.Pool],
+								out source.CapacityPool
+							);
+
 						found = source.Container
 							.TryFindFirst(
 								out var item,
@@ -478,7 +506,7 @@ namespace Lunra.Hothouse.Services
 
 						if (!found)
 						{
-							Debug.LogError($"Unable to find valid instance of a {resourceType} in {source.Container.Id}");
+							Debug.LogError($"Unable to find valid instance of a {resourceType} in container {source.Container.Id}");
 							break;
 						}
 						
@@ -499,7 +527,21 @@ namespace Lunra.Hothouse.Services
 
 						if (!found)
 						{
-							Debug.LogError($"Unable to find valid input reservation for {destination.Reservation} in {source.Container.Id}");
+							Debug.LogError($"Unable to find valid input reservation for {destination.Reservation} in container {source.Container.Id}");
+							break;
+						}
+
+						var destinationCapacityPoolId = destination.Capacity[Items.Keys.Capacity.Pool];
+						
+						found = destination.Container
+							.TryFindFirst(
+								destinationCapacityPoolId,
+								out destination.CapacityPool
+							);
+
+						if (!found)
+						{
+							Debug.LogError($"Unable to find destination capacity pool [ {destinationCapacityPoolId} ] for reservation {destination.Reservation} in container {source.Container.Id}");
 							break;
 						}
 
@@ -544,13 +586,13 @@ namespace Lunra.Hothouse.Services
 			}
 			else if (type == Items.Values.Shared.Types.CapacityPool)
 			{
-				// context.CapacityPools.Add(
-				// 	item.Id,
-				// 	new Context.CapacityInfo(
-				// 		context,
-				// 		item
-				// 	)
-				// );
+				context.CapacityPools.Add(
+					item.Id,
+					new Context.CapacityPoolInfo(
+						context,
+						item
+					)
+				);
 			}
 			else if (type == Items.Values.Shared.Types.Capacity)
 			{

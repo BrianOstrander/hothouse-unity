@@ -510,7 +510,11 @@ namespace Lunra.Hothouse.Models
 				
 			All.Push(transfer.Id);
 
-			return isDestinationCapacityAtTarget;
+			if (source.CapacityPool != null) source.CapacityPool[Items.Keys.CapacityPool.CountCurrent]--;
+
+			var destinationCapacityPoolCountCurrent = ++destination.CapacityPool[Items.Keys.CapacityPool.CountCurrent];
+			
+			return isDestinationCapacityAtTarget || destination.CapacityPool[Items.Keys.CapacityPool.CountMaximum] <= destinationCapacityPoolCountCurrent;
 		}
 		
 		public void Reset()
