@@ -420,6 +420,76 @@ namespace Lunra.Hothouse.Services
 						
 						if (!dweller.ValidNavigationTo(capacityDistribute)) continue;
 
+						(Container Container, Item Capacity, Item Reservation) source = (
+							capacityDistribute.GetInventory(),
+							capacityDistribute.Item,
+							null
+						);
+						
+						var found = source.Container
+							.TryFindFirst(
+								out source.Reservation,
+								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
+								(Items.Keys.Reservation.IsPromised, false),
+								(Items.Keys.Reservation.CapacityId, source.Capacity.Id),
+								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Output)
+							);
+
+						if (!found)
+						{
+							// This will occur if there is some other incoming reservation or whatnot, may not happen...
+							continue;
+						}
+						
+						found = source.Container
+							.TryFindFirst(
+								out var item,
+								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Resource),
+								(Items.Keys.Resource.LogisticState, Items.Values.Resource.LogisticStates.None),
+								(Items.Keys.Resource.Type, resourceType)
+							);
+
+						if (!found)
+						{
+							Debug.LogError($"Unable to find valid instance of a {resourceType} in {source.Container.Id}");
+							break;
+						}
+						
+						(Container Container, Item Capacity, Item Reservation) destination = (
+							capacityReceive.GetInventory(),
+							capacityReceive.Item,
+							null
+						);
+						
+						found = destination.Container
+							.TryFindFirst(
+								out destination.Reservation,
+								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
+								(Items.Keys.Reservation.IsPromised, false),
+								(Items.Keys.Reservation.CapacityId, destination.Capacity.Id),
+								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Input)
+							);
+
+						if (!found)
+						{
+							Debug.LogError($"Unable to find valid input reservation for {destination.Reservation} in {source.Container.Id}");
+							break;
+						}
+
+						capacityReceiveFulfilled = dweller.Dweller.InventoryPromises.Transfer(
+							item,
+							source,
+							destination
+						); 
+						
+						dwellerAssigned = dweller;
+						break;
+						/*
+						if (!dweller.ValidNavigationTo(capacityReceive)) continue;
+						noValidDwellerNavigations = false;
+						
+						if (!dweller.ValidNavigationTo(capacityDistribute)) continue;
+
 						var inventoryDistribute = capacityDistribute.GetInventory();
 
 						var found = inventoryDistribute
@@ -531,12 +601,13 @@ namespace Lunra.Hothouse.Services
 
 						dwellerAssigned = dweller;
 						break;
+						*/
 					}
 
 					if (capacityReceiveFulfilled) break;
 					if (noValidDwellerNavigations) break;
 
-					Debug.Log("count: "+dwellersAvailable.Count);
+					// Debug.Log("count: "+dwellersAvailable.Count);
 					if (dwellerAssigned != null) dwellersAvailable.Remove(dwellerAssigned);
 
 					foreach (var consumed in capacitiesDistributeConsumed) capacitiesDistribute.Remove(consumed);

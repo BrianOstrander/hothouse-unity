@@ -112,13 +112,26 @@ namespace Lunra.Hothouse.Models
 			
 			if (resourceTypes.Any())
 			{
-				model.Inventory.Container.New(
-					1,
-					out var capacityPoolItem,
-					Items.Instantiate.CapacityPool
-						.Of(resourceCapacity)
-				);
-					
+				// model.Inventory.Container.New(
+				// 	1,
+				// 	out var capacityPoolItem,
+				// 	Items.Instantiate.CapacityPool
+				// 		.Of(resourceCapacity)
+				// );
+				// 	
+				// foreach (var resourceType in resourceTypes)
+				// {
+				// 	model.Inventory.Container.New(
+				// 		1,
+				// 		out _,
+				// 		Items.Instantiate.Capacity.CacheOf(
+				// 			resourceType,
+				// 			capacityPoolItem.Id,
+				// 			resourceCapacity
+				// 		)
+				// 	);
+				// }
+				
 				foreach (var resourceType in resourceTypes)
 				{
 					model.Inventory.Container.New(
@@ -126,7 +139,7 @@ namespace Lunra.Hothouse.Models
 						out _,
 						Items.Instantiate.Capacity.CacheOf(
 							resourceType,
-							capacityPoolItem.Id,
+							IdCounter.UndefinedId, // TODO: SHOULD USE CAPACITY POOLS AS ABOVE!
 							resourceCapacity
 						)
 					);

@@ -591,7 +591,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				payload.Game.Items.Builder
 					.BeginItem()
 					.WithProperties(Items.Instantiate.Resource.Stalk)
-					.Done(1)
+					.Done(2)
 				// payload.Game.Items.Builder
 				// 	.BeginItem()
 				// 	.WithProperties(Items.Instantiate.Resource.Scrap)

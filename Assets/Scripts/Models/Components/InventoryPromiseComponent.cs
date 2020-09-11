@@ -60,14 +60,8 @@ namespace Lunra.Hothouse.Models
 			All = new StackProperty<long>(all);
 		}
 
-		protected override void OnInitialize()
-		{
-			Debug.Log("Initializing...");
-		}
-
 		public override void Bind()
 		{
-			Debug.Log("Binding...");
 			Model.Health.Destroyed += OnHealthDestroyed;
 		}
 		
@@ -441,6 +435,74 @@ namespace Lunra.Hothouse.Models
 
 				reservationContainer.Deposit(unPromisedReservationStack);
 			}
+		}
+		
+		public bool Transfer(
+			Item item,
+			(Container Container, Item Capacity, Item Reservation) source,
+			(Container Container, Item Capacity, Item Reservation) destination
+		)
+		{
+			item = Game.Items
+				.First(
+					source.Container
+						.Withdrawal(
+							item.StackOf(1)
+						).First()
+				);
+			
+			source.Reservation = Game.Items
+				.First(
+					source.Container
+						.Withdrawal(
+							source.Reservation.StackOf(1)
+						).First()
+				);
+			
+			item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.Output;
+
+			source.Reservation[Items.Keys.Reservation.IsPromised] = true;
+
+			source.Container.Deposit(item.StackOf(1));
+			source.Container.Deposit(source.Reservation.StackOf(1));
+
+			destination.Capacity[Items.Keys.Capacity.CountCurrent]++;
+
+			var isDestinationCapacityAtTarget = destination.Capacity[Items.Keys.Capacity.CountCurrent] == destination.Capacity[Items.Keys.Capacity.CountTarget];
+
+			if (isDestinationCapacityAtTarget) destination.Capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
+
+			destination.Reservation = Game.Items
+				.First(
+					destination.Container
+					.Withdrawal(
+						destination.Reservation.StackOf(1)
+					).First()
+				);
+			
+			destination.Reservation[Items.Keys.Reservation.IsPromised] = true;
+
+			destination.Container.Deposit(destination.Reservation.StackOf(1));
+			
+			Model.Inventory.Container.Deposit(
+				Game.Items.Builder
+					.BeginItem()
+					.WithProperties(
+						Items.Instantiate.Transfer.Pickup(
+							item.Id,
+							source.Reservation.Id,
+							destination.Reservation.Id
+						)	
+					)
+					.Done(1, out var transfer)
+			);
+
+			source.Reservation[Items.Keys.Reservation.TransferId] = transfer.Id;
+			destination.Reservation[Items.Keys.Reservation.TransferId] = transfer.Id;
+				
+			All.Push(transfer.Id);
+
+			return isDestinationCapacityAtTarget;
 		}
 		
 		public void Reset()
