@@ -125,7 +125,11 @@ namespace Lunra.Hothouse.Models
 				All.Value.InActive.Union(models).ToArray()
 			);
 
-			foreach (var model in models) model.PooledState.SetValue(PooledStates.InActive, this);
+			foreach (var model in models)
+			{
+				model.PooledState.SetValue(PooledStates.InActive, this);
+				model.CleanupComponents();
+			}
 		}
 
 		protected void InActivateAll() => InActivate(AllActive);

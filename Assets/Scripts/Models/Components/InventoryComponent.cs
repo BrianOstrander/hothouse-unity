@@ -28,13 +28,17 @@ namespace Lunra.Hothouse.Models
 		public override void UnBind()
 		{
 			if (Model is IHealthModel health) health.Health.Destroyed -= OnHealthDestroyed;
-			
-			// I think this is the correct place to destroy any items, should ensure they are properly cleaned up...
-			Container.Reset();
-			ResetId();
 		}
 
 		protected override void OnInitialize() => Container = Container?.Initialize(Game.Items) ?? Game.Items.Builder.Container();
+
+		protected override void OnReset() => Container.Initialize(Game.Items);
+
+		protected override void OnCleanup()
+        {
+	        Container.Reset();
+	        ResetId();
+        }
 
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)

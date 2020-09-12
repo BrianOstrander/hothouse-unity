@@ -13,13 +13,15 @@ namespace Lunra.Hothouse.Models
 	
 	public interface IComponentModel : IModel
 	{
-		void Bind();
-		void UnBind();
-
 		void Initialize(
 			GameModel game,
 			IParentComponentModel model
 		);
+		
+		void Cleanup();
+	
+		void Bind();
+		void UnBind();
 	}
 	
 	public abstract class ComponentModel<M> : Model, IComponentModel
@@ -34,15 +36,16 @@ namespace Lunra.Hothouse.Models
 		[JsonIgnore] protected M Model { get; private set; }
 		#endregion
 
-		public virtual void Bind() { }
-		public virtual void UnBind() { }
-
 		public void Initialize(
 			GameModel game,
 			IParentComponentModel model
 		)
 		{
-			if (IsInitialized) return;
+			if (IsInitialized)
+			{
+				OnReset();
+				return;
+			}
 			
 			IsInitialized = true;
 			Game = game;
@@ -51,7 +54,25 @@ namespace Lunra.Hothouse.Models
 			OnInitialize();
 		}
 		
+		/// <summary>
+		/// Called once when the component is first initialized.
+		/// </summary>
 		protected virtual void OnInitialize() { }
+
+		/// <summary>
+		/// Called when the component is already initialized.
+		/// </summary>
+		protected virtual void OnReset() { }
+		
+		public void Cleanup() => OnCleanup();
+		
+		/// <summary>
+		/// Called when the component is pooled.
+		/// </summary>
+		protected virtual void OnCleanup() { }
+
+		public virtual void Bind() { }
+		public virtual void UnBind() { }
 		
 		protected void ResetId() => Id.Value = App.M.CreateUniqueId();
 	}
@@ -65,6 +86,11 @@ namespace Lunra.Hothouse.Models
 		{
 			if (game == null) throw new ArgumentNullException(nameof(game));
 			foreach (var component in model.Components) component.Initialize(game, model);
+		}
+
+		public static void CleanupComponents(this IParentComponentModel model)
+		{
+			foreach (var component in model.Components) component.Cleanup();
 		}
 		
 		public static void BindComponents(this IParentComponentModel model)
