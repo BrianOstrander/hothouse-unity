@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Services
 
 		protected override PropertyFilter GetFilter() => ItemStore.Builder
 			.BeginPropertyFilter()
-			.RequireAll(PropertyValidation.Default.Bool.EqualTo(Items.Keys.Resource.Decay.IsEnabled, true));
+			.RequireAll(PropertyValidations.Bool.EqualTo(Items.Keys.Resource.Decay.IsEnabled, true));
 
 		public override void Process(Item item, float deltaTime)
 		{

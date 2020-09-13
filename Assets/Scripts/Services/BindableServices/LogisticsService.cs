@@ -114,9 +114,7 @@ namespace Lunra.Hothouse.Services
 
 				bool? inventoryFound;
 				bool? parentFound;
-				bool resourceTypeChecked;
-				string resourceType;
-				
+
 				public ItemInfo(
 					Context context,
 					Item item
@@ -170,27 +168,44 @@ namespace Lunra.Hothouse.Services
 					
 					return parent;
 				}
-
-				protected string GetResourceType()
-				{
-					if (resourceTypeChecked) return resourceType;
-					resourceTypeChecked = true;
-					return (resourceType = OnGetResourceType());
-				}
-
-				protected virtual string OnGetResourceType() => null;
 			}
 			
 			public class ResourceInfo : ItemInfo
 			{
+				bool resourceTypeChecked;
+				string resourceType;
+				
 				public ResourceInfo(
 					Context context,
 					Item item
 				) : base(context, item) { }
 
-				protected override string OnGetResourceType() => Item[Items.Keys.Resource.Type];
+				protected string GetResourceType()
+				{
+					if (resourceTypeChecked) return resourceType;
+					resourceTypeChecked = true;
+					return (resourceType = Item[Items.Keys.Resource.Type]);
+				}
 			}
+			
+			public class ReservationInfo : ItemInfo
+			{
+				bool targetTypeChecked;
+				string targetType;
+				
+				public ReservationInfo(
+					Context context,
+					Item item
+				) : base(context, item) { }
 
+				protected string GetTargetType()
+				{
+					if (targetTypeChecked) return targetType;
+					targetTypeChecked = true;
+					return (targetType = Item[Items.Keys.Reservation.TargetType]);
+				}
+			}
+			
 			public class CapacityInfo : ItemInfo
 			{
 				public enum Goals
@@ -208,8 +223,6 @@ namespace Lunra.Hothouse.Services
 					Item item
 				) : base(context, item) { }
 
-				protected override string OnGetResourceType() => Item[Items.Keys.Capacity.ResourceType];
-				
 				public Goals Calculate()
 				{
 					var desire = Item[Items.Keys.Capacity.Desire];
@@ -219,10 +232,20 @@ namespace Lunra.Hothouse.Services
 						if (desire == Items.Values.Capacity.Desires.Receive) return Goal = Goals.Receive;
 						if (desire == Items.Values.Capacity.Desires.Distribute) return Goal = Goals.Distribute;
 						Debug.LogError($"Unrecognized desire: {desire}");
+						return Goal = Goals.Unknown;
 					}
 
-					var resourceType = GetResourceType();
-					var capacityTargetCount = Item[Items.Keys.Capacity.CountTarget];
+					var filterId = Item[Items.Keys.Capacity.Filter];
+
+					var parent = GetParent();
+
+					if (!parent.Inventory.Capacities.TryGetValue(filterId, out var filter))
+					{
+						Debug.LogError($"Cannot find filter [ {filterId} ] for capacity {Item} in {parent.ShortId}");
+						return Goal = Goals.Unknown;
+					}
+
+					var capacityCountTarget = Item[Items.Keys.Capacity.CountTarget];
 				
 					var inventory = GetContainer();
 
@@ -230,15 +253,16 @@ namespace Lunra.Hothouse.Services
 
 					foreach (var stack in inventory.Stacks)
 					{
+						// If this doesn't pass, it means it's not a resource, so we can ignore it...
 						if (!Context.Resources.TryGetValue(stack.Id, out var resource)) continue;
-						if (resource.Item[Items.Keys.Resource.Type] != resourceType) continue;
-						// TODO: I probably just shouldn't add ones note equal to None?
+						// TODO: Is this actually what I want???
 						if (resource.Item[Items.Keys.Resource.LogisticState] != Items.Values.Resource.LogisticStates.None) continue;
+						if (!filter.Validate(resource.Item)) continue;
 						
 						resourceTotalCount += stack.Count;
 					}
 
-					var delta = capacityTargetCount - resourceTotalCount;
+					var delta = capacityCountTarget - resourceTotalCount;
 				
 					if (delta == 0)
 					{
@@ -263,7 +287,7 @@ namespace Lunra.Hothouse.Services
 							Context.service.Model.Items.Builder
 								.BeginItem()
 								.WithProperties(
-									Items.Instantiate.Reservation.OfInput(
+									Items.Instantiate.Reservation.ForCapacity.OfInput(
 										Item.Id
 									)
 								)
@@ -283,7 +307,7 @@ namespace Lunra.Hothouse.Services
 						Context.service.Model.Items.Builder
 							.BeginItem()
 							.WithProperties(
-								Items.Instantiate.Reservation.OfOutput(
+								Items.Instantiate.Reservation.ForCapacity.OfOutput(
 									Item.Id
 								)
 							)
@@ -324,6 +348,7 @@ namespace Lunra.Hothouse.Services
 			public List<NavigationCache> NavigationCaches = new List<NavigationCache>();
 			public List<DwellerInfo> Dwellers = new List<DwellerInfo>();
 			public Dictionary<long, ResourceInfo> Resources = new Dictionary<long, ResourceInfo>();
+			public Dictionary<long, ReservationInfo> Reservations = new Dictionary<long, ReservationInfo>();
 			public Dictionary<long, CapacityPoolInfo> CapacityPools = new Dictionary<long, CapacityPoolInfo>();
 			public Dictionary<long, CapacityInfo> Capacities = new Dictionary<long, CapacityInfo>();
 			public Dictionary<long, Container> Inventories = new Dictionary<long, Container>();
@@ -336,6 +361,7 @@ namespace Lunra.Hothouse.Services
 				NavigationCaches.Clear();
 				Dwellers.Clear();
 				Resources.Clear();
+				Reservations.Clear();
 				CapacityPools.Clear();
 				Capacities.Clear();
 				Inventories.Clear();
@@ -375,6 +401,38 @@ namespace Lunra.Hothouse.Services
 			
 			foreach (var item in Model.Items.All()) OnItemUpdate(item);
 
+			foreach (var capacity in context.Capacities.Values) capacity.Calculate();
+			
+			var capacityPoolForbiddenDestinations = new HashSet<long>();
+
+			foreach (var capacityPool in context.CapacityPools.Values)
+			{
+				if (!capacityPool.Calculate()) capacityPoolForbiddenDestinations.Add(capacityPool.Item.Id);
+			}
+
+			var reservationSources = new List<Context.ReservationInfo>();
+			var reservationDestinations = new List<Context.ReservationInfo>();
+
+			foreach (var reservation in context.Reservations.Values)
+			{
+				if (!reservation.Item.TryGet(Items.Keys.Reservation.TargetType, out var targetType))
+				{
+					Debug.LogError($"Unable to get {Items.Keys.Reservation.TargetType} for reservation {reservation}");
+					continue;
+				}
+
+				if (targetType == Items.Values.Reservation.TargetTypes.Resource)
+				{
+					
+				}
+				else if (targetType == Items.Values.Reservation.TargetTypes.Capacity)
+				{
+					
+				}
+				else Debug.LogError($"Unrecognized {Items.Keys.Reservation.TargetType}: {targetType}");
+			}
+			
+			/*
 			var capacityDestinations = new List<Context.CapacityInfo>();
 			var capacitySources = new List<Context.CapacityInfo>();
 			
@@ -566,6 +624,7 @@ namespace Lunra.Hothouse.Services
 				
 				if (noRemainingDwellers) break;
 			}
+			*/
 
 			context.Clear();
 		}
@@ -579,6 +638,16 @@ namespace Lunra.Hothouse.Services
 				context.Resources.Add(
 					item.Id,
 					new Context.ResourceInfo(
+						context,
+						item
+					)
+				);
+			}
+			else if (type == Items.Values.Shared.Types.Reservation)
+			{
+				context.Reservations.Add(
+					item.Id,
+					new Context.ReservationInfo(
 						context,
 						item
 					)

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Satchel;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -14,7 +16,8 @@ namespace Lunra.Hothouse.Models
 	public class InventoryComponent : ComponentModel<IInventoryModel>
 	{
 		#region Serialized
-		public Container Container { get; private set; }
+		[JsonProperty] public Dictionary<long, PropertyFilter> Capacities { get; private set; } = new Dictionary<long, PropertyFilter>();
+		[JsonProperty] public Container Container { get; private set; }
 		#endregion
 		
 		#region Non Serialized
@@ -37,6 +40,7 @@ namespace Lunra.Hothouse.Models
 		protected override void OnCleanup()
         {
 	        Container.Reset();
+	        Capacities.Clear();
 	        ResetId();
         }
 

@@ -224,17 +224,6 @@ namespace Lunra.Hothouse.Editor
 				Debug.Log(res);
 			}
 
-			if (GUILayout.Button("item cap"))
-			{
-				var cap = Items.Instantiate.Capacity
-					.Of(
-						Items.Values.Resource.Types.Stalk,
-						10
-					);
-				
-				Debug.Log(cap.Aggregate("uh: ", (r, c) => $"{r}\n{c.Property.ToString(c.Key)}"));
-			}
-
 			if (GUILayout.Button("Test Satchel 0f"))
 			{
 				var itemStore = new ItemStore();

@@ -57,7 +57,7 @@ namespace Lunra.Hothouse.Models
 		{
 			model.Enterable.Reset();
 
-			var existingResourceTypes = new HashSet<string>();
+			// var existingResourceTypes = new HashSet<string>();
 
 			foreach (var (item, stack) in Game.Items.InStack(inventory))
 			{
@@ -67,20 +67,15 @@ namespace Lunra.Hothouse.Models
 					{
 						item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
 
-						var resourceType = item[Items.Keys.Resource.Type];
+						model.Inventory.Container.Deposit(
+							Game.Items.Builder
+								.BeginItem()
+								.WithProperties(
+									Items.Instantiate.Reservation.ForDrop.OfOutput(item.Id)
+								)
+								.Done(stack.Count)
+						);
 
-						if (existingResourceTypes.Add(resourceType))
-						{
-							model.Inventory.Container.Deposit(
-								Game.Items.Builder
-									.BeginItem()
-									.WithProperties(
-										Items.Instantiate.Capacity.OfZero(resourceType)
-									)
-									.Done()
-							);
-						}
-							
 						model.Inventory.Container.Deposit(stack);
 					}
 					else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");

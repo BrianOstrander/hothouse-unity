@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Presenters;
+using Lunra.Satchel;
 using UnityEngine;
 
 namespace Lunra.Hothouse.Models
@@ -20,7 +21,7 @@ namespace Lunra.Hothouse.Models
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
 
-		public virtual int Inventory(HashSet<string> resourceTypes) => 0;
+		public virtual int GetCapacities(List<(int Count, PropertyFilter Filter)> capacities) => 0;
 		// public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
 		// public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
 		// public virtual Inventory DefaultInventory => Inventory.Empty;
@@ -105,32 +106,38 @@ namespace Lunra.Hothouse.Models
 			*/
 			//Debug.LogWarning("TODO: Inventory, all of it lol");
 
-			var resourceTypes = new HashSet<string>();
-			var resourceCapacity = Inventory(resourceTypes);
+			var capacities = new List<(int Count, PropertyFilter Filter)>();
+			var capacityPool = GetCapacities(capacities);
 			
-			if (resourceTypes.Any())
+			if (capacities.Any())
 			{
 				model.Inventory.Container.New(
 					1,
 					out var capacityPoolItem,
 					Items.Instantiate.CapacityPool
-						.Of(resourceCapacity)
+						.Of(capacityPool)
 				);
-					
-				foreach (var resourceType in resourceTypes)
+				
+				foreach (var capacity in capacities)
 				{
+					var filterId = Game.Items.IdCounter.Next();
+					model.Inventory.Capacities.Add(
+						filterId,
+						capacity.Filter
+					);
+
 					model.Inventory.Container.New(
 						1,
-						out _,
-						Items.Instantiate.Capacity.CacheOf(
-							resourceType,
-							capacityPoolItem.Id,
-							resourceCapacity
-						)
+						Items.Instantiate.Capacity
+							.Of(
+								filterId,
+								capacityPoolItem.Id,
+								capacity.Count
+							)
 					);
 				}
 			}
-			else if (0 < resourceCapacity) Debug.LogError($"Specified resource capacity of {resourceCapacity} but no resource types provided");
+			else if (0 < capacityPool) Debug.LogError($"Specified resource capacity of {capacityPool} but no filters provided");
 			
 			model.Obligations.Reset();
 			

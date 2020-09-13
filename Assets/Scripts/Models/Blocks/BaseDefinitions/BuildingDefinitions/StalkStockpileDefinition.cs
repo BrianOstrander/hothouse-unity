@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Lunra.Satchel;
 
 namespace Lunra.Hothouse.Models
 {
@@ -6,11 +7,19 @@ namespace Lunra.Hothouse.Models
 	{
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 
-		public override int Inventory(HashSet<string> resourceTypes)
+		public override int GetCapacities(List<(int Count, PropertyFilter Filter)> capacities)
 		{
-			// resourceTypes.Add(Items.Values.Resource.Types.Scrap);
-			resourceTypes.Add(Items.Values.Resource.Types.Stalk);
-
+			capacities.Add(
+				(
+					2,
+					Game.Items.Builder
+						.BeginPropertyFilter()
+						.RequireAll(
+							// PropertyValidation.Default	
+						)
+				)	
+			);
+			
 			return 2;
 		}
 		

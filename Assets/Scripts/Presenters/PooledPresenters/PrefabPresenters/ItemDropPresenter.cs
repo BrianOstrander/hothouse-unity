@@ -43,6 +43,10 @@ namespace Lunra.Hothouse.Presenters
 		#region ItemDropModel Events
 		void OnItemDropInventoryUpdateItem(ItemStore.Event delta)
 		{
+			return;
+			
+			// TODO: Figure out how to destroy this when all reasources have been taken...
+			
 			foreach (var entry in Model.Inventory.Container.All())
 			{
 				if (entry.Item.TryGet(Items.Keys.Capacity.Desire, out var desire) && desire == Items.Values.Capacity.Desires.NotCalculated) return;
