@@ -6,12 +6,12 @@ namespace Lunra.Hothouse.Models
 	{
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 
-		public override int Inventory(List<string> resourceTypes)
+		public override int Inventory(HashSet<string> resourceTypes)
 		{
+			// resourceTypes.Add(Items.Values.Resource.Types.Scrap);
 			resourceTypes.Add(Items.Values.Resource.Types.Stalk);
-			resourceTypes.Add(Items.Values.Resource.Types.Scrap);
 
-			return 3;
+			return 2;
 		}
 		
 		public override string[] Tags => new[] {BuildingTags.Stockpile};

@@ -491,7 +491,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				// Jobs.Laborer,
 				// Jobs.Laborer,
 				// Jobs.Laborer,
-				Jobs.Laborer,
+				// Jobs.Laborer,
 				Jobs.Laborer
 			};
 
@@ -579,19 +579,19 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			payload.Game.Buildings.Activate<StalkStockpileDefinition>(
 				spawn.RoomTransform.Id.Value,
-				position + (Vector3.right * 6f) + (Vector3.back * -3f),
+				position + new Vector3(6f ,0f, 6f),
 				Quaternion.identity,
-				BuildingStates.Operating
+				BuildingStates.Constructing
 			);
 			
 			payload.Game.ItemDrops.Activate(
 				spawn.Id.Value,
 				Vector3.zero,
 				Quaternion.identity,
-				payload.Game.Items.Builder
-					.BeginItem()
-					.WithProperties(Items.Instantiate.Resource.Scrap)
-					.Done(2),
+				// payload.Game.Items.Builder
+				// 	.BeginItem()
+				// 	.WithProperties(Items.Instantiate.Resource.Scrap)
+				// 	.Done(2),
 				payload.Game.Items.Builder
 					.BeginItem()
 					.WithProperties(Items.Instantiate.Resource.Stalk)

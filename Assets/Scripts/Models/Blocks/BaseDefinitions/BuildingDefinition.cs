@@ -20,7 +20,7 @@ namespace Lunra.Hothouse.Models
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
 
-		public virtual int Inventory(List<string> resourceTypes) => 0;
+		public virtual int Inventory(HashSet<string> resourceTypes) => 0;
 		// public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
 		// public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
 		// public virtual Inventory DefaultInventory => Inventory.Empty;
@@ -105,7 +105,7 @@ namespace Lunra.Hothouse.Models
 			*/
 			//Debug.LogWarning("TODO: Inventory, all of it lol");
 
-			var resourceTypes = new List<string>();
+			var resourceTypes = new HashSet<string>();
 			var resourceCapacity = Inventory(resourceTypes);
 			
 			if (resourceTypes.Any())
