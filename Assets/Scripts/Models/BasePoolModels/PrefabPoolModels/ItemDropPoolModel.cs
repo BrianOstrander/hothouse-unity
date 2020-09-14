@@ -57,8 +57,30 @@ namespace Lunra.Hothouse.Models
 		{
 			model.Enterable.Reset();
 
-			// var existingResourceTypes = new HashSet<string>();
+			model.Inventory.Container.New(
+				1,
+				out var capacityPoolItem,
+				Items.Instantiate.CapacityPool.OfZero()
+			);
 
+			var capacityFilterId = Game.Items.IdCounter.Next();
+			
+			model.Inventory.Capacities.Add(
+				capacityFilterId,
+				PropertyFilter.Default()
+			);
+			
+			model.Inventory.Container.Deposit(
+				Game.Items.Builder
+					.BeginItem()
+					.WithProperties(
+						Items.Instantiate.Capacity.OfZero(
+							capacityFilterId,
+							capacityPoolItem.Id
+						)
+					)
+			);
+			
 			foreach (var (item, stack) in Game.Items.InStack(inventory))
 			{
 				if (item.TryGet(Items.Keys.Shared.Type, out var type))
@@ -66,23 +88,13 @@ namespace Lunra.Hothouse.Models
 					if (type == Items.Values.Shared.Types.Resource)
 					{
 						item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
-
-						model.Inventory.Container.Deposit(
-							Game.Items.Builder
-								.BeginItem()
-								.WithProperties(
-									Items.Instantiate.Reservation.ForDrop.OfOutput(item.Id)
-								)
-								.Done(stack.Count)
-						);
-
 						model.Inventory.Container.Deposit(stack);
 					}
 					else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");
 				}
 				else Debug.LogError($"Unable to get the {Items.Keys.Shared.Type} for {item}");
 			}
-			
+
 			// model.Inventory.Reset(
 			// 	InventoryPermission.WithdrawalForJobs(EnumExtensions.GetValues(Jobs.Unknown)),
 			// 	InventoryCapacity.ByIndividualWeight(inventory)

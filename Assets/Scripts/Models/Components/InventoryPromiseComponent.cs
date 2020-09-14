@@ -227,8 +227,6 @@ namespace Lunra.Hothouse.Models
 			IInventoryModel reservationInventory
 		)
 		{
-			Debug.LogError("Todo!");
-			/*
 			reservationInventory.Inventory.Container
 				.Destroy(reservationItem);
 
@@ -257,7 +255,6 @@ namespace Lunra.Hothouse.Models
 				(Items.Keys.Transfer.ReservationPickupId, IdCounter.UndefinedId),
 				(Items.Keys.Transfer.LogisticState, Items.Values.Transfer.LogisticStates.Dropoff)
 			);
-			*/
 		}
 		
 		void OnProcessDropoff(
@@ -322,7 +319,6 @@ namespace Lunra.Hothouse.Models
 			Stack transferStack
 		)
 		{
-			/*
 			foreach (var reservationIdKey in new [] { Items.Keys.Transfer.ReservationDropoffId, Items.Keys.Transfer.ReservationPickupId })
 			{
 				var reservationId = transferItem[reservationIdKey];
@@ -425,13 +421,12 @@ namespace Lunra.Hothouse.Models
 				}
 				else
 				{
-					Debug.LogError("Should this happen??? TODO: Figure it out!");
-					// unPromisedReservationStack = Game.Items.Builder
-					// 	.BeginItem()
-					// 	.WithProperties(
-					// 		Items.Instantiate.Reservation.OfUnknown(capacityId)
-					// 	)
-					// 	.Done(Mathf.Abs(delta), out unPromisedReservationItem);
+					unPromisedReservationStack = Game.Items.Builder
+						.BeginItem()
+						.WithProperties(
+							Items.Instantiate.Reservation.OfUnknown(capacityId)
+						)
+						.Done(Mathf.Abs(delta), out unPromisedReservationItem);
 				}
 				
 				if (0 < delta)
@@ -457,8 +452,6 @@ namespace Lunra.Hothouse.Models
 
 				reservationContainer.Deposit(unPromisedReservationStack);
 			}
-			*/
-			Debug.LogError("Todo!");
 		}
 		
 		public bool Transfer(

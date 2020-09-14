@@ -6,6 +6,12 @@ namespace Lunra.Satchel
 {
 	public class PropertyFilter
 	{
+		public static PropertyFilter Default() => new PropertyFilter(
+			new PropertyValidation[0],
+			new PropertyValidation[0],
+			new PropertyValidation[0]
+		);
+		
 		[JsonProperty] public PropertyValidation[] All { get; private set; }
 		[JsonProperty] public PropertyValidation[] None { get; private set; }
 		[JsonProperty] public PropertyValidation[] Any { get; private set; }

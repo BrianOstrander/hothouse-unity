@@ -163,8 +163,7 @@ namespace Lunra.Hothouse.Models
 			public static class Reservation
 			{
 				static PropertyKeyValue[] Of(
-					string type,
-					long targetId,
+					long capacityId,
 					string state,
 					params PropertyKeyValue[] overrides
 				)
@@ -173,8 +172,7 @@ namespace Lunra.Hothouse.Models
 						Values.Shared.Types.Reservation,
 						new PropertyKeyValue[]
 						{
-							(Keys.Reservation.TargetType, type),
-							(Keys.Reservation.TargetId, targetId),
+							(Keys.Reservation.CapacityId, capacityId),
 							(Keys.Reservation.TransferId, IdCounter.UndefinedId),
 							(Keys.Reservation.IsPromised, false),
 							(Keys.Reservation.LogisticState, state)
@@ -183,62 +181,41 @@ namespace Lunra.Hothouse.Models
 					);
 				}
 
-				public static class ForCapacity
+				public static PropertyKeyValue[] OfInput(
+					long capacityId,
+					params PropertyKeyValue[] overrides
+				)
 				{
-					public static PropertyKeyValue[] OfInput(
-						long capacityId,
-						params PropertyKeyValue[] overrides
-					)
-					{
-						return Of(
-							Values.Reservation.TargetTypes.Capacity,
-							capacityId,
-							Values.Reservation.LogisticStates.Input,
-							overrides
-						);
-					}
+					return Of(
+						capacityId,
+						Values.Reservation.LogisticStates.Input,
+						overrides
+					);
+				}
 				
-					public static PropertyKeyValue[] OfOutput(
-						long capacityId,
-						params PropertyKeyValue[] overrides
-					)
-					{
-						return Of(
-							Values.Reservation.TargetTypes.Capacity,
-							capacityId,
-							Values.Reservation.LogisticStates.Output,
-							overrides
-						);
-					}
-				}
-
-				public static class ForDrop
+				public static PropertyKeyValue[] OfOutput(
+					long capacityId,
+					params PropertyKeyValue[] overrides
+				)
 				{
-					public static PropertyKeyValue[] OfOutput(
-						long resourceId,
-						params PropertyKeyValue[] overrides
-					)
-					{
-						return Of(
-							Values.Reservation.TargetTypes.Resource,
-							resourceId,
-							Values.Reservation.LogisticStates.Output,
-							overrides
-						);
-					}
+					return Of(
+						capacityId,
+						Values.Reservation.LogisticStates.Output,
+						overrides
+					);
 				}
 
-				// public static PropertyKeyValue[] OfUnknown(
-				// 	long capacityId,
-				// 	params PropertyKeyValue[] overrides
-				// )
-				// {
-				// 	return Of(
-				// 		capacityId,
-				// 		Values.Reservation.LogisticStates.Unknown,
-				// 		overrides
-				// 	);
-				// }
+				public static PropertyKeyValue[] OfUnknown(
+					long capacityId,
+					params PropertyKeyValue[] overrides
+				)
+				{
+					return Of(
+						capacityId,
+						Values.Reservation.LogisticStates.Unknown,
+						overrides
+					);
+				}
 			}
 			
 			public static class Transfer
@@ -354,8 +331,7 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Reservation), suffix);
 				
-				public static readonly PropertyKey<string> TargetType = Create<string>(nameof(TargetType));
-				public static readonly PropertyKey<long> TargetId = Create<long>(nameof(TargetId));
+				public static readonly PropertyKey<long> CapacityId = Create<long>(nameof(CapacityId));
 				public static readonly PropertyKey<long> TransferId = Create<long>(nameof(TransferId));
 				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
@@ -414,13 +390,6 @@ namespace Lunra.Hothouse.Models
 			
 			public static class Reservation
 			{
-				public static class TargetTypes
-				{
-					public static readonly string Unknown = nameof(Unknown).ToSnakeCase();
-					public static readonly string Resource = nameof(Resource).ToSnakeCase();
-					public static readonly string Capacity = nameof(Capacity).ToSnakeCase();
-				}
-				
 				public static class LogisticStates
 				{
 					public static readonly string Unknown = nameof(Unknown).ToSnakeCase();

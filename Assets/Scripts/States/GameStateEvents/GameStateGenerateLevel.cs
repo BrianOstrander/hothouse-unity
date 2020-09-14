@@ -6,7 +6,6 @@ using Lunra.Hothouse.Ai;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
 using Lunra.NumberDemon;
-using Lunra.Satchel;
 using Lunra.StyxMvp;
 using UnityEngine;
 using UnityEngine.AI;
