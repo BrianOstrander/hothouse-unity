@@ -19,7 +19,18 @@ namespace Lunra.Hothouse.Models
 						.RequireAll(
 							PropertyValidations.String.EqualTo(Items.Keys.Resource.Type, Items.Values.Resource.Types.Stalk)
 						)
-				)	
+				)
+			);
+			
+			capacities.Add(
+				(
+					2,
+					Game.Items.Builder
+						.BeginPropertyFilter()
+						.RequireAll(
+							PropertyValidations.String.EqualTo(Items.Keys.Resource.Type, Items.Values.Resource.Types.Scrap)
+						)
+				)
 			);
 			
 			return 2;
