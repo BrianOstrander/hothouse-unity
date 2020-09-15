@@ -583,12 +583,19 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
+			stockpile0.Inventory.Container
+				.New(
+					2,
+					out _,
+					Items.Instantiate.Resource.Stalk
+				);
+
 			// stockpile0.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
 			// cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Unlimited;
 			
 			payload.Game.Buildings.Activate<StalkStockpileDefinition>(
 				spawn.RoomTransform.Id.Value,
-				position + new Vector3(10f ,0f, 6f),
+				position + new Vector3(10f ,0f, 12f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);

@@ -489,6 +489,8 @@ namespace Lunra.Hothouse.Services
 					
 					foreach (var modification in modifications)
 					{
+						Debug.Log($"Moving [ {modification.Capacity.Item.Id} ] from {modification.Begin} to {modification.End}");
+						
 						switch (modification.Begin)
 						{
 							case Context.CapacityInfo.Goals.None:
@@ -549,7 +551,9 @@ namespace Lunra.Hothouse.Services
 			var dwellers = context.Dwellers
 				.Where(m => m.Dweller.InventoryPromises.All.None())
 				.ToList();
-			
+
+			// dwellers.Clear();
+
 			// While loop below is entirely for handling assignment of transfers to dwellers.
 			while (capacitySources.Any() && capacityDestinations.Any() && dwellers.Any())
 			{
