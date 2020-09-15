@@ -576,27 +576,37 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// 	Items.Instantiate.Resource.Stalk
 			// );
 			
-			payload.Game.Buildings.Activate<StalkStockpileDefinition>(
+			var stockpile0 = payload.Game.Buildings.Activate<StalkStockpileDefinition>(
 				spawn.RoomTransform.Id.Value,
 				position + new Vector3(6f ,0f, 6f),
 				Quaternion.identity,
-				BuildingStates.Constructing
+				BuildingStates.Operating
+			);
+
+			// stockpile0.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
+			// cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Unlimited;
+			
+			payload.Game.Buildings.Activate<StalkStockpileDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + new Vector3(10f ,0f, 6f),
+				Quaternion.identity,
+				BuildingStates.Operating
 			);
 			
 			payload.Game.ItemDrops.Activate(
 				spawn.Id.Value,
 				Vector3.zero,
 				Quaternion.identity,
-				payload.Game.Items.Builder
-					.BeginItem()
-					.WithProperties(Items.Instantiate.Resource.Scrap)
-					.Done(2),
+				// payload.Game.Items.Builder
+				// 	.BeginItem()
+				// 	.WithProperties(Items.Instantiate.Resource.Scrap)
+				// 	.Done(2),
 				payload.Game.Items.Builder
 					.BeginItem()
 					.WithProperties(Items.Instantiate.Resource.Stalk)
 					.Done(2)
 			);
-			
+
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
 			// payload.Game.SimulationMultiplier.Value = 60f;
 			//

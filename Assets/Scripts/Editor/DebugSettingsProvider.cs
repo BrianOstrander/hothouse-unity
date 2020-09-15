@@ -205,6 +205,40 @@ namespace Lunra.Hothouse.Editor
 			
 			GUILayout.Label("Scratch Area", EditorStyles.boldLabel);
 
+			GUILayout.BeginHorizontal();
+			{
+				GUILayout.Label("CapacityPool Override", GUILayout.ExpandWidth(false));
+				
+				if (GUILayout.Button("None"))
+				{
+					var building = gameModel.Query.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value);
+					building.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
+					cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.None;
+				}
+				
+				if (GUILayout.Button("Zero"))
+				{
+					var building = gameModel.Query.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value);
+					building.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
+					cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Zero;
+				}
+				
+				if (GUILayout.Button("Unlimited"))
+				{
+					var building = gameModel.Query.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value);
+					building.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
+					cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Unlimited;
+				}
+				
+				if (GUILayout.Button("Forbidden"))
+				{
+					var building = gameModel.Query.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value);
+					building.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
+					cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Forbidden;
+				}
+			}
+			GUILayout.EndHorizontal();
+
 			if (GUILayout.Button("Validate Promise Components"))
 			{
 				var dweller = gameModel.Dwellers.FirstActive(d => d.IsDebugging);
