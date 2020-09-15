@@ -39,7 +39,8 @@ namespace Lunra.Hothouse.Models
 						new PropertyKeyValue[]
 						{
 							(Keys.Resource.Type, id),
-
+							(Keys.Resource.LogisticState, Values.Resource.LogisticStates.None),
+							
 							(Keys.Resource.Decay.IsEnabled, true),
 							(Keys.Resource.Decay.Maximum, DefaultDecayMaximum),
 							(Keys.Resource.Decay.Current, DefaultDecayMaximum),
@@ -291,7 +292,6 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Resource), suffix);
 
 				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
-				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
 
 				public static class Decay
