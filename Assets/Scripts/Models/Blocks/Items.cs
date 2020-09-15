@@ -308,7 +308,7 @@ namespace Lunra.Hothouse.Models
 
 			public static class CapacityPool
 			{
-				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Capacity), suffix);
+				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(CapacityPool), suffix);
 				
 				public static readonly PropertyKey<int> CountCurrent = Create<int>(nameof(CountCurrent));
 				public static readonly PropertyKey<int> CountMaximum = Create<int>(nameof(CountMaximum));
