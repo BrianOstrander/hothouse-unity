@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Satchel;
@@ -44,6 +44,48 @@ namespace Lunra.Hothouse.Models
 	        ResetId();
         }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="id">The Item Id of either a specific Capacity or a CapacityPool.</param>
+		/// <param name="count"></param>
+		public void SetCapacity(
+			long id,
+			int count
+		)
+		{
+			if (id == IdCounter.UndefinedId) throw new ArgumentException("Cannot set the capacity for an undefined Id", nameof(id));
+			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Cannot have a count less than zero");
+
+			if (!Container.TryFindFirst(id, out var item))
+			{
+				Debug.LogError($"Cannot find item [ {id} ] in [ {Container.Id} ] of {ShortId}");
+				return;
+			}
+
+			var type = item[Items.Keys.Shared.Type];
+			
+			if (type == Items.Values.Shared.Types.Capacity) OnSetCapacity(item, count);
+			else if (type == Items.Values.Shared.Types.CapacityPool) OnSetCapacityPool(item, count);
+			else Debug.LogError($"Unrecognized {Items.Keys.Shared.Type}: {type} on [ {id} ] in [ {Container.Id} ] of {ShortId}");
+		}
+
+		void OnSetCapacity(
+			Item item,
+			int count
+		)
+		{
+			
+		}
+		
+		void OnSetCapacityPool(
+			Item item,
+			int count
+		)
+		{
+			
+		}
+		
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)
 		{
