@@ -219,7 +219,7 @@ namespace Lunra.Hothouse.Services
 					Item item
 				) : base(context, item) { }
 
-				public Goals Calculate()
+				public Goals Calculate(int? capacityCountTargetOverride = null)
 				{
 					var desire = Item[Items.Keys.Capacity.Desire];
 					if (desire != Items.Values.Capacity.Desires.NotCalculated)
@@ -241,7 +241,7 @@ namespace Lunra.Hothouse.Services
 						return Goal = Goals.Unknown;
 					}
 
-					var capacityCountTarget = Item[Items.Keys.Capacity.CountTarget];
+					var capacityCountTarget = capacityCountTargetOverride ?? Item[Items.Keys.Capacity.CountTarget];
 				
 					var inventory = GetContainer();
 
@@ -333,19 +333,20 @@ namespace Lunra.Hothouse.Services
 
 				public Operations Calculate(
 					out CapacityInfo.Goals modificationGoal,
-					out CapacityInfo[] modifications
+					out CapacityInfo[] modifications,
+					out int countTarget
 				)
 				{
 					var isForbidden = Item[Items.Keys.CapacityPool.IsForbidden];
-					var maximum = Item[Items.Keys.CapacityPool.CountMaximum];
+					var countMaximum = Item[Items.Keys.CapacityPool.CountMaximum];
 					var countPrevious = Item[Items.Keys.CapacityPool.CountCurrent];
-					var target = Item[Items.Keys.CapacityPool.CountTarget];
+					countTarget = Item[Items.Keys.CapacityPool.CountTarget];
 
 					CapacityInfo.Goals? possibleGoalUpdate = null;
 
 					if (isForbidden) possibleGoalUpdate = CapacityInfo.Goals.None;
-					else if (target < maximum) possibleGoalUpdate = CapacityInfo.Goals.Distribute;
-					else if (maximum < target) possibleGoalUpdate = CapacityInfo.Goals.Receive;
+					else if (countTarget < countMaximum) possibleGoalUpdate = CapacityInfo.Goals.Distribute;
+					else if (countMaximum < countTarget) possibleGoalUpdate = CapacityInfo.Goals.Receive;
 					
 					var modificationsList = new List<CapacityInfo>();
 					
@@ -382,10 +383,10 @@ namespace Lunra.Hothouse.Services
 								modificationGoal = CapacityInfo.Goals.None;
 								break;
 							case CapacityInfo.Goals.Receive:
-								if (countCurrent < target) modificationGoal = CapacityInfo.Goals.Receive;
+								if (countCurrent < countTarget) modificationGoal = CapacityInfo.Goals.Receive;
 								break;
 							case CapacityInfo.Goals.Distribute:
-								if (target < countCurrent) modificationGoal = CapacityInfo.Goals.Distribute;
+								if (countTarget < countCurrent) modificationGoal = CapacityInfo.Goals.Distribute;
 								break;
 							default:
 								Debug.LogError($"Unrecognized goal {possibleGoalUpdate.Value}");
@@ -398,7 +399,7 @@ namespace Lunra.Hothouse.Services
 
 					var result = Operations.None;
 
-					if (target <= countCurrent) result |= Operations.ForbidPoolReceiving;
+					if (countTarget <= countCurrent) result |= Operations.ForbidPoolReceiving;
 					if (modifications.Any()) result |= Operations.ApplyModifications;
 
 					return result;
@@ -488,7 +489,11 @@ namespace Lunra.Hothouse.Services
 
 			foreach (var capacityPool in context.CapacityPools.Values)
 			{
-				var capacityPoolResult = capacityPool.Calculate(out var modificationGoal, out var modifications);
+				var capacityPoolResult = capacityPool.Calculate(
+					out var modificationGoal,
+					out var modifications,
+					out var countTarget
+				);
 
 				if (capacityPoolResult.HasFlag(Context.CapacityPoolInfo.Operations.ForbidPoolReceiving)) capacityPoolForbiddenDestinations.Add(capacityPool.Item.Id);
 
@@ -499,7 +504,7 @@ namespace Lunra.Hothouse.Services
 					
 					foreach (var modification in modifications)
 					{
-						// Debug.Log($"Moving [ {modification.Capacity.Item.Id} ] from {modification.Begin} to {modification.End}");
+						Debug.Log($"Moving [ {modification.Item.Id} ] from {modification.Goal} to {modificationGoal}");
 						
 						switch (modification.Goal)
 						{
@@ -536,6 +541,20 @@ namespace Lunra.Hothouse.Services
 								Debug.LogError($"Unrecognized goal origin {modificationGoal}");
 								break;
 						}
+
+						var reservationsRemoved = new List<Stack>();
+						
+						foreach (var reservation in modification.GetContainer().All(i => i[Items.Keys.Reservation.CapacityId] == modification.Item.Id))
+						{
+							if (reservation.Item[Items.Keys.Reservation.IsPromised]) continue;
+							
+							reservationsRemoved.Add(reservation.Stack);
+						}
+
+						if (reservationsRemoved.Any()) modification.GetContainer().Destroy(reservationsRemoved.ToArray());
+
+						modification.Item[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.NotCalculated;
+						modification.Calculate(countTarget);
 					}	
 				}
 			}
@@ -560,7 +579,7 @@ namespace Lunra.Hothouse.Services
 				.Where(m => m.Dweller.InventoryPromises.All.None())
 				.ToList();
 
-			// dwellers.Clear();
+			dwellers.Clear();
 
 			// While loop below is entirely for handling assignment of transfers to dwellers.
 			while (capacitySources.Any() && capacityDestinations.Any() && dwellers.Any())

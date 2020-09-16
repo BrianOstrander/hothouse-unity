@@ -12,16 +12,16 @@ namespace Lunra.Hothouse.Models
 			// TODO: Add a convenience function to this to make it easier to quickly define this tuple with a given
 			// list of KV's
 			
-			capacities.Add(
-				(
-					2,
-					Game.Items.Builder
-						.BeginPropertyFilter()
-						.RequireAll(
-							PropertyValidations.String.EqualTo(Items.Keys.Resource.Type, Items.Values.Resource.Types.Scrap)
-						)
-				)
-			);
+			// capacities.Add(
+			// 	(
+			// 		2,
+			// 		Game.Items.Builder
+			// 			.BeginPropertyFilter()
+			// 			.RequireAll(
+			// 				PropertyValidations.String.EqualTo(Items.Keys.Resource.Type, Items.Values.Resource.Types.Scrap)
+			// 			)
+			// 	)
+			// );
 			
 			capacities.Add(
 				(

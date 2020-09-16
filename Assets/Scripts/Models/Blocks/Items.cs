@@ -314,6 +314,14 @@ namespace Lunra.Hothouse.Models
 				
 				public static readonly PropertyKey<int> CountCurrent = Create<int>(nameof(CountCurrent));
 				public static readonly PropertyKey<int> CountMaximum = Create<int>(nameof(CountMaximum));
+				/// <summary>
+				/// The working maximum for this CapacityPool.
+				/// </summary>
+				/// <remarks>
+				///	Unless you also increase the CountTarget for member Capacities, errors will occur. Ideally this
+				/// number should always be less than the CapacityPool.CountMaximum, unless you really know what you're
+				/// doing... 
+				/// </remarks>
 				public static readonly PropertyKey<int> CountTarget = Create<int>(nameof(CountTarget));
 				public static readonly PropertyKey<bool> IsForbidden = Create<bool>(nameof(IsForbidden));
 			}

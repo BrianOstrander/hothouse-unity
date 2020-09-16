@@ -583,36 +583,36 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
-			// stockpile0.Inventory.Container
-			// 	.New(
-			// 		2,
-			// 		out _,
-			// 		Items.Instantiate.Resource.Stalk
-			// 	);
+			stockpile0.Inventory.Container
+				.New(
+					2,
+					out _,
+					Items.Instantiate.Resource.Stalk
+				);
 
-			// stockpile0.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
-			// cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Unlimited;
+			stockpile0.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
+			cap[Items.Keys.CapacityPool.CountCurrent] = 0;
 			
-			// payload.Game.Buildings.Activate<StalkStockpileDefinition>(
-			// 	spawn.RoomTransform.Id.Value,
-			// 	position + new Vector3(10f ,0f, 12f),
-			// 	Quaternion.identity,
-			// 	BuildingStates.Operating
-			// );
-			
-			payload.Game.ItemDrops.Activate(
-				spawn.Id.Value,
-				Vector3.zero,
+			payload.Game.Buildings.Activate<StalkStockpileDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + new Vector3(10f ,0f, 12f),
 				Quaternion.identity,
-				// payload.Game.Items.Builder
-				// 	.BeginItem()
-				// 	.WithProperties(Items.Instantiate.Resource.Scrap)
-				// 	.Done(2),
-				payload.Game.Items.Builder
-					.BeginItem()
-					.WithProperties(Items.Instantiate.Resource.Stalk)
-					.Done(2)
+				BuildingStates.Operating
 			);
+			
+			// payload.Game.ItemDrops.Activate(
+			// 	spawn.Id.Value,
+			// 	Vector3.zero,
+			// 	Quaternion.identity,
+			// 	// payload.Game.Items.Builder
+			// 	// 	.BeginItem()
+			// 	// 	.WithProperties(Items.Instantiate.Resource.Scrap)
+			// 	// 	.Done(2),
+			// 	payload.Game.Items.Builder
+			// 		.BeginItem()
+			// 		.WithProperties(Items.Instantiate.Resource.Stalk)
+			// 		.Done(2)
+			// );
 
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
 			// payload.Game.SimulationMultiplier.Value = 60f;
