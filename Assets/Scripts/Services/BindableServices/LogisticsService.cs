@@ -337,15 +337,15 @@ namespace Lunra.Hothouse.Services
 				)
 				{
 					var isForbidden = Item[Items.Keys.CapacityPool.IsForbidden];
-					var maximum = Item[Items.Keys.CapacityPool.CountMaximum];
+					var countMaximum = Item[Items.Keys.CapacityPool.CountMaximum];
 					var countPrevious = Item[Items.Keys.CapacityPool.CountCurrent];
-					var target = Item[Items.Keys.CapacityPool.CountTarget];
+					var countTarget = Item[Items.Keys.CapacityPool.CountTarget];
 
 					CapacityInfo.Goals? possibleGoalUpdate = null;
 
 					if (isForbidden) possibleGoalUpdate = CapacityInfo.Goals.None;
-					else if (target < maximum) possibleGoalUpdate = CapacityInfo.Goals.Distribute;
-					else if (maximum < target) possibleGoalUpdate = CapacityInfo.Goals.Receive;
+					else if (countTarget < countMaximum) possibleGoalUpdate = CapacityInfo.Goals.Distribute;
+					else if (countMaximum < countTarget) possibleGoalUpdate = CapacityInfo.Goals.Receive;
 					
 					var modificationsList = new List<CapacityInfo>();
 					
@@ -382,10 +382,10 @@ namespace Lunra.Hothouse.Services
 								modificationGoal = CapacityInfo.Goals.None;
 								break;
 							case CapacityInfo.Goals.Receive:
-								if (countCurrent < target) modificationGoal = CapacityInfo.Goals.Receive;
+								if (countCurrent < countTarget) modificationGoal = CapacityInfo.Goals.Receive;
 								break;
 							case CapacityInfo.Goals.Distribute:
-								if (target < countCurrent) modificationGoal = CapacityInfo.Goals.Distribute;
+								if (countTarget < countCurrent) modificationGoal = CapacityInfo.Goals.Distribute;
 								break;
 							default:
 								Debug.LogError($"Unrecognized goal {possibleGoalUpdate.Value}");
@@ -398,7 +398,7 @@ namespace Lunra.Hothouse.Services
 
 					var result = Operations.None;
 
-					if (target <= countCurrent) result |= Operations.ForbidPoolReceiving;
+					if (countTarget <= countCurrent) result |= Operations.ForbidPoolReceiving;
 					if (modifications.Any()) result |= Operations.ApplyModifications;
 
 					return result;
