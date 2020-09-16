@@ -208,34 +208,30 @@ namespace Lunra.Hothouse.Editor
 			GUILayout.BeginHorizontal();
 			{
 				GUILayout.Label("CapacityPool Override", GUILayout.ExpandWidth(false));
-				
-				if (GUILayout.Button("None"))
+
+				void onCapacityOverride(
+					bool? isForbidden = null,
+					int? countTarget = null
+				)
 				{
-					var building = gameModel.Query.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value);
-					building.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
-					cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.None;
+					var container = gameModel.Query
+						.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value)
+						.Inventory
+						.Container
+						.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var capacity);
+
+					if (isForbidden.HasValue) capacity[Items.Keys.CapacityPool.IsForbidden] = isForbidden.Value;
+					if (countTarget.HasValue)
+					{
+						if (countTarget.Value == -1) capacity[Items.Keys.CapacityPool.CountTarget] = capacity[Items.Keys.CapacityPool.CountMaximum];
+						else capacity[Items.Keys.CapacityPool.CountTarget] = countTarget.Value;
+					}
 				}
-				
-				if (GUILayout.Button("Zero"))
-				{
-					var building = gameModel.Query.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value);
-					building.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
-					cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Zero;
-				}
-				
-				if (GUILayout.Button("Unlimited"))
-				{
-					var building = gameModel.Query.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value);
-					building.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
-					cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Unlimited;
-				}
-				
-				if (GUILayout.Button("Forbidden"))
-				{
-					var building = gameModel.Query.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value);
-					building.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
-					cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Forbidden;
-				}
+
+				if (GUILayout.Button("None")) onCapacityOverride(false, -1);
+				if (GUILayout.Button("Zero")) onCapacityOverride(false, 0);
+				if (GUILayout.Button("Unlimited")) onCapacityOverride(false, int.MaxValue);
+				if (GUILayout.Button("Forbidden")) onCapacityOverride(true);
 			}
 			GUILayout.EndHorizontal();
 

@@ -523,7 +523,7 @@ namespace Lunra.Hothouse.Models
 
 			var destinationCapacityPoolCountCurrent = ++destination.CapacityPool[Items.Keys.CapacityPool.CountCurrent];
 			
-			return isDestinationCapacityAtTarget || destination.CapacityPool[Items.Keys.CapacityPool.CountMaximum] <= destinationCapacityPoolCountCurrent;
+			return isDestinationCapacityAtTarget || destination.CapacityPool[Items.Keys.CapacityPool.CountTarget] <= destinationCapacityPoolCountCurrent;
 		}
 		
 		public void Reset()

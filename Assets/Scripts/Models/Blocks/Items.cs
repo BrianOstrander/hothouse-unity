@@ -100,7 +100,8 @@ namespace Lunra.Hothouse.Models
 						{
 							(Keys.CapacityPool.CountCurrent, 0),
 							(Keys.CapacityPool.CountMaximum, countMaximum),
-							(Keys.CapacityPool.CountOverride, Values.CapacityPool.CountOverrides.None)
+							(Keys.CapacityPool.CountTarget, countMaximum),
+							(Keys.CapacityPool.IsForbidden, false)
 						},
 						overrides
 					);
@@ -313,7 +314,8 @@ namespace Lunra.Hothouse.Models
 				
 				public static readonly PropertyKey<int> CountCurrent = Create<int>(nameof(CountCurrent));
 				public static readonly PropertyKey<int> CountMaximum = Create<int>(nameof(CountMaximum));
-				public static readonly PropertyKey<string> CountOverride = Create<string>(nameof(CountOverride));
+				public static readonly PropertyKey<int> CountTarget = Create<int>(nameof(CountTarget));
+				public static readonly PropertyKey<bool> IsForbidden = Create<bool>(nameof(IsForbidden));
 			}
 			
 			public static class Capacity
@@ -378,18 +380,7 @@ namespace Lunra.Hothouse.Models
 					public static readonly string Output = nameof(Output).ToSnakeCase();
 				}
 			}
-			
-			public static class CapacityPool
-			{
-				public static class CountOverrides
-				{
-					public static readonly string None = nameof(None).ToSnakeCase();
-					public static readonly string Zero = nameof(Zero).ToSnakeCase();
-					public static readonly string Unlimited = nameof(Unlimited).ToSnakeCase();
-					public static readonly string Forbidden = nameof(Forbidden).ToSnakeCase();
-				}
-			}
-			
+
 			public static class Capacity
 			{
 				public static class Desires

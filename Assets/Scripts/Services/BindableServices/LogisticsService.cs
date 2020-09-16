@@ -318,82 +318,90 @@ namespace Lunra.Hothouse.Services
 			
 			public class CapacityPoolInfo : ItemInfo
 			{
+				[Flags]
+				public enum Operations
+				{
+					None = 0,
+					ForbidPoolReceiving = 1 << 0,
+					ApplyModifications = 1 << 1
+				}
+				
 				public CapacityPoolInfo(
 					Context context,
 					Item item
 				) : base(context, item) { }
 
-				public bool Calculate(
-					out bool isForbidden,
-					out bool isReceiveForbidden,
-					out (CapacityInfo.Goals Begin, CapacityInfo.Goals End, CapacityInfo Capacity)[] modifications
+				public Operations Calculate(
+					out CapacityInfo.Goals modificationGoal,
+					out CapacityInfo[] modifications
 				)
 				{
-					CapacityInfo.Goals? capacityPoolCountOverride = null;
-					var countOverride = Item[Items.Keys.CapacityPool.CountOverride];
-
-					if (countOverride != Items.Values.CapacityPool.CountOverrides.None)
-					{
-						if (countOverride == Items.Values.CapacityPool.CountOverrides.Zero) capacityPoolCountOverride = CapacityInfo.Goals.Distribute;
-						else if (countOverride == Items.Values.CapacityPool.CountOverrides.Unlimited) capacityPoolCountOverride = CapacityInfo.Goals.Receive;
-						else if (countOverride == Items.Values.CapacityPool.CountOverrides.Forbidden) capacityPoolCountOverride = CapacityInfo.Goals.None;
-						else Debug.LogError($"Unrecognized {Items.Keys.CapacityPool.CountOverride} of {countOverride} for {Item}");
-					}
-					
-					var modificationsList = new List<(CapacityInfo.Goals Begin, CapacityInfo.Goals End, CapacityInfo Capacity)>();
-					
+					var isForbidden = Item[Items.Keys.CapacityPool.IsForbidden];
 					var maximum = Item[Items.Keys.CapacityPool.CountMaximum];
-					var previous = Item[Items.Keys.CapacityPool.CountCurrent];
-					var current = 0;
+					var countPrevious = Item[Items.Keys.CapacityPool.CountCurrent];
+					var target = Item[Items.Keys.CapacityPool.CountTarget];
+
+					CapacityInfo.Goals? possibleGoalUpdate = null;
+
+					if (isForbidden) possibleGoalUpdate = CapacityInfo.Goals.None;
+					else if (target < maximum) possibleGoalUpdate = CapacityInfo.Goals.Distribute;
+					else if (maximum < target) possibleGoalUpdate = CapacityInfo.Goals.Receive;
+					
+					var modificationsList = new List<CapacityInfo>();
+					
+					var countCurrent = 0;
 
 					foreach (var element in GetContainer().All(i => i.TryGet(Items.Keys.Capacity.Pool, out var poolId) && poolId == Item.Id))
 					{
 						if (element.Item.NoInstances) continue;
-
-						current += element.Item[Items.Keys.Capacity.CountCurrent];
-
-						if (!capacityPoolCountOverride.HasValue) continue;
 						
-						if (!Context.Capacities.TryGetValue(element.Item.Id, out var capacity))
+						var capacityCountCurrent = element.Item[Items.Keys.Capacity.CountCurrent];
+						
+						countCurrent += capacityCountCurrent;
+
+						if (!possibleGoalUpdate.HasValue) continue;
+						
+						if (!Context.Capacities.TryGetValue(element.Item.Id, out var capacityInfo))
 						{
 							Debug.LogError($"Unable to find cached capacity [ {element.Item.Id} ], are you sure capacities have been calculated already?");
 							continue;
 						}
 
-						if (capacity.Goal != capacityPoolCountOverride.Value)
-						{
-							modificationsList.Add((capacity.Goal, capacityPoolCountOverride.Value, capacity));
-						}
+						if (possibleGoalUpdate.Value != capacityInfo.Goal) modificationsList.Add(capacityInfo);
 					}
 
-					if (previous != current) Item[Items.Keys.CapacityPool.CountCurrent] = current;
+					if (countPrevious != countCurrent) Item[Items.Keys.CapacityPool.CountCurrent] = countCurrent;
+
+					modificationGoal = CapacityInfo.Goals.Unknown;
+
+					if (possibleGoalUpdate.HasValue)
+					{
+						switch (possibleGoalUpdate.Value)
+						{
+							case CapacityInfo.Goals.None:
+								modificationGoal = CapacityInfo.Goals.None;
+								break;
+							case CapacityInfo.Goals.Receive:
+								if (countCurrent < target) modificationGoal = CapacityInfo.Goals.Receive;
+								break;
+							case CapacityInfo.Goals.Distribute:
+								if (target < countCurrent) modificationGoal = CapacityInfo.Goals.Distribute;
+								break;
+							default:
+								Debug.LogError($"Unrecognized goal {possibleGoalUpdate.Value}");
+								modificationsList.Clear();
+								break;
+						}
+					}
 
 					modifications = modificationsList.ToArray();
 
-					isForbidden = false;
-					isReceiveForbidden = false;
+					var result = Operations.None;
 
-					var isCapacityAvailable = current < maximum;
+					if (target <= countCurrent) result |= Operations.ForbidPoolReceiving;
+					if (modifications.Any()) result |= Operations.ApplyModifications;
 
-					if (capacityPoolCountOverride.HasValue)
-					{
-						switch (capacityPoolCountOverride.Value)
-						{
-							case CapacityInfo.Goals.None:
-								isForbidden = true;
-								isReceiveForbidden = true;
-								break;
-							case CapacityInfo.Goals.Receive:
-								break;
-							case CapacityInfo.Goals.Distribute:
-								isReceiveForbidden = true;
-								break;
-							default: throw new ArgumentOutOfRangeException();
-						}
-					}
-					else isReceiveForbidden = !isCapacityAvailable;
-					
-					return isForbidden || isReceiveForbidden || modifications.Any();
+					return result;
 				}
 			}
 
@@ -480,54 +488,55 @@ namespace Lunra.Hothouse.Services
 
 			foreach (var capacityPool in context.CapacityPools.Values)
 			{
-				if (capacityPool.Calculate(out var isForbidden, out var isReceiveForbidden, out var modifications ))
+				var capacityPoolResult = capacityPool.Calculate(out var modificationGoal, out var modifications);
+
+				if (capacityPoolResult.HasFlag(Context.CapacityPoolInfo.Operations.ForbidPoolReceiving)) capacityPoolForbiddenDestinations.Add(capacityPool.Item.Id);
+
+				if (capacityPoolResult.HasFlag(Context.CapacityPoolInfo.Operations.ApplyModifications))
 				{
-					if (isForbidden || isReceiveForbidden) capacityPoolForbiddenDestinations.Add(capacityPool.Item.Id);
-					
 					// I don't love the way this works, but basically if the pool defines behaviour that conflicts with
 					// the capacities below it, we fix those issues here...
 					
 					foreach (var modification in modifications)
 					{
-						Debug.Log($"Moving [ {modification.Capacity.Item.Id} ] from {modification.Begin} to {modification.End}");
+						// Debug.Log($"Moving [ {modification.Capacity.Item.Id} ] from {modification.Begin} to {modification.End}");
 						
-						switch (modification.Begin)
+						switch (modification.Goal)
 						{
 							case Context.CapacityInfo.Goals.None:
-								// Adding a capacity that wasn't previously a source or destination.
-								// Nothing needs to be done...
+								// No change required if previously had no goal... 
 								break;
 							case Context.CapacityInfo.Goals.Receive:
 								// Changing a destination to something else...
-								capacityDestinations.Remove(modification.Capacity.Item.Id);
+								capacityDestinations.Remove(modification.Item.Id);
 								break;
 							case Context.CapacityInfo.Goals.Distribute:
 								// Changing a source to something else...
-								capacitySources.Remove(modification.Capacity.Item.Id);
+								capacitySources.Remove(modification.Item.Id);
 								break;
 							default:
-								Debug.LogError($"Unrecognized begin goal {modification.Begin}");
+								Debug.LogError($"Unrecognized goal origin {modification.Goal}");
 								break;
 						}
 						
-						switch (modification.End)
+						switch (modificationGoal)
 						{
 							case Context.CapacityInfo.Goals.None:
-								// Nothing to do here, this must have been forbidden...
+								// We're forbidding stuff, so we don't add it as a source or destination...
 								break;
 							case Context.CapacityInfo.Goals.Receive:
-								// Changing something to a destination...
-								capacityDestinations.Add(modification.Capacity.Item.Id, modification.Capacity);
+								// This is now a destination
+								capacityDestinations.Add(modification.Item.Id, modification);
 								break;
 							case Context.CapacityInfo.Goals.Distribute:
-								// Changing something to a source...
-								capacitySources.Add(modification.Capacity.Item.Id, modification.Capacity);
+								// This is now a source
+								capacitySources.Add(modification.Item.Id, modification);
 								break;
 							default:
-								Debug.LogError($"Unrecognized end goal {modification.Begin}");
+								Debug.LogError($"Unrecognized goal origin {modificationGoal}");
 								break;
 						}
-					}
+					}	
 				}
 			}
 
@@ -541,7 +550,6 @@ namespace Lunra.Hothouse.Services
 				}
 			}
 			
-
 			// Order in a way that caches will get filled up or taken from last
 			var capacityDestinationsSorted = capacityDestinations
 				.Values
