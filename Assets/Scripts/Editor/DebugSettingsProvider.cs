@@ -214,13 +214,14 @@ namespace Lunra.Hothouse.Editor
 					int? countTarget = null
 				)
 				{
-					var container = gameModel.Query
+					var inventory = gameModel.Query
 						.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value)
-						.Inventory
-						.Container
+						.Inventory;
+
+					inventory.Container
 						.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var capacity);
 
-					if (isForbidden.HasValue) capacity[Items.Keys.CapacityPool.IsForbidden] = isForbidden.Value;
+					if (isForbidden.HasValue) inventory.SetForbidden(capacity.Id, isForbidden.Value);
 					if (countTarget.HasValue)
 					{
 						if (countTarget.Value == -1) capacity[Items.Keys.CapacityPool.CountTarget] = capacity[Items.Keys.CapacityPool.CountMaximum];

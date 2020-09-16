@@ -279,14 +279,16 @@ namespace Lunra.Hothouse.Models
 			All.Pop();
 		}
 
-		public void Break()
+		public bool Break() => Break(out _);
+		
+		public bool Break(out long promiseId)
 		{
-			if (!All.TryPop(out var promise)) return;
+			if (!All.TryPop(out promiseId)) return false;
 
-			if (!Model.Inventory.Container.TryFindFirst(promise, out var promiseItem, out var promiseStack))
+			if (!Model.Inventory.Container.TryFindFirst(promiseId, out var promiseItem, out var promiseStack))
 			{
-				Debug.LogError($"Unable to find promise with item id {promise} in container {Model.Inventory.Container.Id}");
-				return;
+				Debug.LogError($"Unable to find promise with item id {promiseId} in container {Model.Inventory.Container.Id}");
+				return false;
 			}
 			
 			var type = promiseItem[Items.Keys.Shared.Type];
@@ -305,13 +307,22 @@ namespace Lunra.Hothouse.Models
 			else Debug.LogError($"Unrecognized {Items.Keys.Shared.Type}: {type}");
 			
 			Model.Inventory.Container.Destroy(promiseStack);
+
+			return true;
 		}
 		
-		public void BreakAll()
+		public bool BreakAll()
 		{
+			var anyBroken = false;
+			
 			// TODO: This simply breaks promises, doesn't drop the items or anything... some way to handle what to do
 			// with formerly promised items might be nice...
-			while (All.Any()) Break();
+			while (All.Any())
+			{
+				anyBroken |= Break();
+			}
+
+			return anyBroken;
 		}
 
 		void OnBreakPromiseForTransfer(

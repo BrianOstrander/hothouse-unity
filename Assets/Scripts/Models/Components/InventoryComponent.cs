@@ -44,6 +44,83 @@ namespace Lunra.Hothouse.Models
 	        ResetId();
         }
 
+		public void SetForbidden(
+			long id,
+			bool isForbidden
+		)
+		{
+			if (id == IdCounter.UndefinedId) throw new ArgumentException("Cannot set the capacity for an undefined Id", nameof(id));
+
+			if (!Container.TryFindFirst(id, out var item))
+			{
+				Debug.LogError($"Cannot find item [ {id} ] in [ {Container.Id} ] of {ShortId}");
+				return;
+			}
+
+			var type = item[Items.Keys.Shared.Type];
+
+			if (type != Items.Values.Shared.Types.CapacityPool)
+			{
+				Debug.LogError($"Unrecognized {Items.Keys.Shared.Type}: {type} on [ {id} ] in [ {Container.Id} ] of {ShortId}");
+				return;
+			}
+
+			var existingIsForbidden = item[Items.Keys.CapacityPool.IsForbidden];
+
+			if (existingIsForbidden == isForbidden) return;
+			
+			item[Items.Keys.CapacityPool.IsForbidden] = isForbidden;
+
+			var reservations = Container
+				.All(
+					reservation =>
+					{
+						// If this isn't a reservation, it should return false anyways...
+						if (!reservation[Items.Keys.Reservation.IsPromised]) return false;
+
+						var capacityId = reservation[Items.Keys.Reservation.CapacityId];
+
+						// I believe all capacities currently require a capacity pool...
+						if (!Container.TryFindFirst(capacityId, out var capacity))
+						{
+							Debug.LogError($"Cannot find capacity [ {capacityId} ] in [ {Container.Id} ] of {ShortId}");
+							return false;
+						}
+
+						return capacity[Items.Keys.Capacity.Pool] == id;
+					}
+				)
+				.ToArray();
+
+			var transferParentsHandled = new HashSet<long>();
+			
+			foreach (var reservation in reservations)
+			{
+				var transferId = reservation.Item[Items.Keys.Reservation.TransferId];
+				if (!Game.Items.TryGet(transferId, out var transfer))
+				{
+					Debug.LogError($"Cannot find transfer [ {transferId} ] for reservation {reservation.Item}");
+					continue;
+				}
+
+				if (transfer[Items.Keys.Transfer.LogisticState] == Items.Values.Transfer.LogisticStates.Dropoff)
+				{
+					Debug.LogError("TODO: Handle what happens to these leaked resources here!");
+				}
+				
+				if (!transferParentsHandled.Add(transfer.ContainerId)) continue;
+
+				var transferParent = Game.Query.FirstOrDefault<IInventoryPromiseModel>(m => m.Inventory.Container.Id == transfer.ContainerId);
+				if (transferParent == null)
+				{
+					Debug.LogError($"Cannot find parent model containing transfer {transfer} for reservation {reservation.Item}");
+					continue;
+				}
+				
+				transferParent.InventoryPromises.BreakAll();
+			}
+		}
+		
 		/// <summary>
 		/// 
 		/// </summary>
@@ -75,7 +152,7 @@ namespace Lunra.Hothouse.Models
 			int count
 		)
 		{
-			
+			Debug.LogError("uhh not done yet");
 		}
 		
 		void OnSetCapacityPool(
@@ -83,7 +160,7 @@ namespace Lunra.Hothouse.Models
 			int count
 		)
 		{
-			
+			Debug.LogError("uhh not done yet");
 		}
 		
 		#region HealthComponent Events

@@ -583,6 +583,16 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				BuildingStates.Operating
 			);
 
+			// stockpile0.Inventory.Container.TryFindFirst(
+			// 	i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool,
+			// 	out var capacityItem
+			// );
+			//
+			// stockpile0.Inventory.SetForbidden(
+			// 	capacityItem.Id,
+			// 	true
+			// );
+			
 			// stockpile0.Inventory.Container
 			// 	.New(
 			// 		2,
