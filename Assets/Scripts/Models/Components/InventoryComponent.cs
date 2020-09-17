@@ -61,6 +61,59 @@ namespace Lunra.Hothouse.Models
 	        ResetId();
         }
 
+		public void Calculate()
+		{
+			// var resources = new Dictionary<long, Item>();
+			// var capacitiyPools = new Dictionary<long, Item>();
+			// var capacities = new Dictionary<long, Item>();
+			// var reservations = new Dictionary<long, Item>();
+			//
+			// foreach (var element in Container.All())
+			// {
+			// 	var type = element.Item[Items.Keys.Shared.Type];
+			//
+			// 	if (type == Items.Values.Shared.Types.Resource)
+			// 	{
+			// 		context.Resources.Add(
+			// 			item.Id,
+			// 			new Context.ResourceInfo(
+			// 				context,
+			// 				item
+			// 			)
+			// 		);
+			// 	}
+			// 	else if (type == Items.Values.Shared.Types.Reservation)
+			// 	{
+			// 		context.Reservations.Add(
+			// 			item.Id,
+			// 			new Context.ReservationInfo(
+			// 				context,
+			// 				item
+			// 			)
+			// 		);
+			// 	}
+			// 	else if (type == Items.Values.Shared.Types.CapacityPool)
+			// 	{
+			// 		context.CapacityPools.Add(
+			// 			item.Id,
+			// 			new Context.CapacityPoolInfo(
+			// 				context,
+			// 				item
+			// 			)
+			// 		);
+			// 	}
+			// 	else if (type == Items.Values.Shared.Types.Capacity)
+			// 	{
+			// 		context.Capacities.Add(
+			// 			item.Id,
+			// 			new Context.CapacityInfo(
+			// 				context,
+			// 				item
+			// 			)
+			// 		);
+			// }
+		}
+
 		public void SetForbidden(
 			long id,
 			bool isForbidden
@@ -407,13 +460,13 @@ namespace Lunra.Hothouse.Models
 		{
 			var droppedItems = new List<Stack>();
 
-			foreach (var (item, stack) in Container.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Resource))
+			foreach (var element in Container.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Resource))
 			{
-				var logisticState = item[Items.Keys.Resource.LogisticState];
+				var logisticState = element.Item[Items.Keys.Resource.LogisticState];
 
 				if (logisticState == Items.Values.Resource.LogisticStates.None)
 				{
-					droppedItems.Add(stack);
+					droppedItems.Add(element.Stack);
 					continue;
 				}
 
@@ -423,7 +476,7 @@ namespace Lunra.Hothouse.Models
 					continue;
 				}
 				
-				Debug.LogError($"Unrecognized {Items.Keys.Resource.LogisticState}: {StringExtensions.GetNonNullOrEmpty(logisticState, "< null >", "< empty >")} on {item}");
+				Debug.LogError($"Unrecognized {Items.Keys.Resource.LogisticState}: {StringExtensions.GetNonNullOrEmpty(logisticState, "< null >", "< empty >")} on {element.Item}");
 			}
 
 			if (droppedItems.Any())

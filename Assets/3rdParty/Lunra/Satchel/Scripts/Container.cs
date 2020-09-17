@@ -636,13 +636,13 @@ namespace Lunra.Satchel
 		/// <remarks>
 		/// Adding or removing items while iterating here will cause an exception.
 		/// </remarks>
-		public IEnumerable<(Item Item, Stack Stack)> All()
+		public IEnumerable<ItemStack> All()
 		{
 			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(All));
 			
 			foreach (var stack in stacks)
 			{
-				if (itemStore.TryGet(stack.Id, out var item)) yield return (item, stack);
+				if (itemStore.TryGet(stack.Id, out var item)) yield return ItemStack.Of(item, stack);
 				else Debug.LogError($"Unable to find item with Id {stack.Id}");
 			}
 		}
@@ -654,7 +654,7 @@ namespace Lunra.Satchel
 		/// Adding or removing items while iterating here will cause an exception.
 		/// </remarks>
 		/// <param name="predicate"></param>
-		public IEnumerable<(Item Item, Stack Stack)> All(Func<Item, bool> predicate)
+		public IEnumerable<ItemStack> All(Func<Item, bool> predicate)
 		{
 			if (!IsInitialized) throw new NonInitializedContainerOperationException(nameof(All));
 
