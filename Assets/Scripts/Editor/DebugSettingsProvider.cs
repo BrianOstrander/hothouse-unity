@@ -209,7 +209,7 @@ namespace Lunra.Hothouse.Editor
 			{
 				GUILayout.Label("CapacityPool Override", GUILayout.ExpandWidth(false));
 
-				void onCapacityOverride(
+				void onCapacityPoolOverride(
 					bool? isForbidden = null,
 					int? countTarget = null
 				)
@@ -219,22 +219,66 @@ namespace Lunra.Hothouse.Editor
 						.Inventory;
 
 					inventory.Container
-						.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var capacity);
+						.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var capacityPool);
 
-					if (isForbidden.HasValue) inventory.SetForbidden(capacity.Id, isForbidden.Value);
+					if (isForbidden.HasValue) inventory.SetForbidden(capacityPool.Id, isForbidden.Value);
 					if (countTarget.HasValue)
 					{
-						if (countTarget.Value == -1) capacity[Items.Keys.CapacityPool.CountTarget] = capacity[Items.Keys.CapacityPool.CountMaximum];
-						else capacity[Items.Keys.CapacityPool.CountTarget] = countTarget.Value;
+						if (countTarget.Value == -1) capacityPool[Items.Keys.CapacityPool.CountTarget] = capacityPool[Items.Keys.CapacityPool.CountMaximum];
+						else capacityPool[Items.Keys.CapacityPool.CountTarget] = countTarget.Value;
 					}
 				}
 
-				if (GUILayout.Button("None")) onCapacityOverride(false, -1);
-				if (GUILayout.Button("Zero")) onCapacityOverride(false, 0);
-				if (GUILayout.Button("Unlimited")) onCapacityOverride(false, int.MaxValue);
-				if (GUILayout.Button("Forbidden")) onCapacityOverride(true);
+				if (GUILayout.Button("None")) onCapacityPoolOverride(false, -1);
+				if (GUILayout.Button("Zero")) onCapacityPoolOverride(false, 0);
+				if (GUILayout.Button("Unlimited")) onCapacityPoolOverride(false, int.MaxValue);
+				if (GUILayout.Button("Forbidden")) onCapacityPoolOverride(true);
 			}
 			GUILayout.EndHorizontal();
+			
+			GUILayout.BeginHorizontal();
+			{
+				GUILayout.Label("Capacity Override", GUILayout.ExpandWidth(false));
+
+				void onCapacityOverride(int countTarget)
+				{
+					var inventory = gameModel.Query
+						.FirstOrDefault<BuildingModel>(m => !m.Light.IsLight.Value)
+						.Inventory;
+
+					inventory.Container
+						.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Capacity, out var capacity);
+
+					inventory.SetCapacity(capacity.Id, countTarget == -1 ? capacity[Items.Keys.Capacity.CountMaximum] : countTarget);
+				}
+
+				if (GUILayout.Button("None")) onCapacityOverride(-1);
+				if (GUILayout.Button("One")) onCapacityOverride(1);
+				if (GUILayout.Button("Zero")) onCapacityOverride(0);
+				if (GUILayout.Button("Unlimited")) onCapacityOverride(int.MaxValue);
+			}
+			GUILayout.EndHorizontal();
+
+			// if (GUILayout.Button("Mess up transfer"))
+			// {
+			// 	var transfer = gameModel.Items.First(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Transfer);
+			// 	var transferPickupId = transfer[Items.Keys.Transfer.ReservationPickupId];
+			// 	var transferDropoffId = transfer[Items.Keys.Transfer.ReservationDropoffId];
+			//
+			// 	if (transferPickupId != IdCounter.UndefinedId)
+			// 	{
+			// 		var reservation = gameModel.Items.First(transferPickupId);
+			// 		gameModel.Items.Containers[reservation.ContainerId].Destroy(reservation);
+			// 	}
+			// 	
+			// 	if (transferDropoffId != IdCounter.UndefinedId)
+			// 	{
+			// 		var reservation = gameModel.Items.First(transferDropoffId);
+			// 		gameModel.Items.Containers[reservation.ContainerId].Destroy(reservation);
+			// 	}
+			// 	
+			// 	
+			// }
 
 			if (GUILayout.Button("Validate Promise Components"))
 			{

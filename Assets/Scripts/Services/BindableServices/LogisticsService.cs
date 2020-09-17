@@ -683,7 +683,7 @@ namespace Lunra.Hothouse.Services
 
 						if (!found)
 						{
-							Debug.LogError($"Unable to find valid input reservation for {destination.Reservation} in container {source.Container.Id}");
+							Debug.LogError($"Unable to find valid input reservation for capacity {destination.Capacity.Id} in container {destination.Container.Id}");
 							break;
 						}
 

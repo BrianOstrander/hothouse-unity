@@ -432,6 +432,7 @@ namespace Lunra.Hothouse.Models
 				}
 				else
 				{
+					// I don't really understand what happens here...
 					unPromisedReservationStack = Game.Items.Builder
 						.BeginItem()
 						.WithProperties(
