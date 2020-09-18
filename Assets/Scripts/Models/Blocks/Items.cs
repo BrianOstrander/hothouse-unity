@@ -166,6 +166,7 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKeyValue[] Of(
 					long capacityId,
+					long capacityPoolId,
 					string state,
 					params PropertyKeyValue[] overrides
 				)
@@ -175,6 +176,7 @@ namespace Lunra.Hothouse.Models
 						new PropertyKeyValue[]
 						{
 							(Keys.Reservation.CapacityId, capacityId),
+							(Keys.Reservation.CapacityPoolId, capacityPoolId),
 							(Keys.Reservation.TransferId, IdCounter.UndefinedId),
 							(Keys.Reservation.IsPromised, false),
 							(Keys.Reservation.LogisticState, state)
@@ -185,11 +187,13 @@ namespace Lunra.Hothouse.Models
 
 				public static PropertyKeyValue[] OfInput(
 					long capacityId,
+					long capacityPoolId,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Of(
 						capacityId,
+						capacityPoolId,
 						Values.Reservation.LogisticStates.Input,
 						overrides
 					);
@@ -197,11 +201,13 @@ namespace Lunra.Hothouse.Models
 				
 				public static PropertyKeyValue[] OfOutput(
 					long capacityId,
+					long capacityPoolId,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Of(
 						capacityId,
+						capacityPoolId,
 						Values.Reservation.LogisticStates.Output,
 						overrides
 					);
@@ -209,11 +215,13 @@ namespace Lunra.Hothouse.Models
 
 				public static PropertyKeyValue[] OfUnknown(
 					long capacityId,
+					long capacityPoolId,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Of(
 						capacityId,
+						capacityPoolId,
 						Values.Reservation.LogisticStates.Unknown,
 						overrides
 					);
@@ -334,7 +342,7 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Reservation), suffix);
 				
 				public static readonly PropertyKey<long> CapacityId = Create<long>(nameof(CapacityId));
-				// public static readonly PropertyKey<long> CapacityPoolId = Create<long>(nameof(CapacityPoolId));
+				public static readonly PropertyKey<long> CapacityPoolId = Create<long>(nameof(CapacityPoolId));
 				public static readonly PropertyKey<long> TransferId = Create<long>(nameof(TransferId));
 				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));

@@ -289,7 +289,8 @@ namespace Lunra.Hothouse.Models
 				Container.New(
 					countTargetDelta,
 					Items.Instantiate.Reservation.OfInput(
-						capacity.Id
+						capacity.Id,
+						capacity[Items.Keys.Capacity.Pool]
 					)
 				);
 			}
@@ -537,7 +538,13 @@ namespace Lunra.Hothouse.Models
 				resourceTotalCount += stack.Count;
 			}
 
-			var delta = capacityCountTarget - resourceTotalCount;
+			var capacityPoolCountTarget = int.MaxValue;
+			var capacityPoolId = capacity[Items.Keys.Capacity.Pool];
+
+			if (Container.TryFindFirst(capacityPoolId, out var capacityPool)) capacityPoolCountTarget = capacityPool[Items.Keys.CapacityPool.CountTarget];
+			else Debug.LogError($"Cannot find capacity pool with id {capacityPoolId} for {capacity}");
+
+			var delta = Mathf.Min(capacityCountTarget, capacityPoolCountTarget) - resourceTotalCount;
 		
 			if (delta == 0)
 			{
@@ -549,7 +556,7 @@ namespace Lunra.Hothouse.Models
 
 				return Items.Values.Capacity.Desires.None;
 			}
-			
+
 			if (0 < delta)
 			{
 				// We want more
@@ -563,7 +570,8 @@ namespace Lunra.Hothouse.Models
 						.BeginItem()
 						.WithProperties(
 							Items.Instantiate.Reservation.OfInput(
-								capacity.Id
+								capacity.Id,
+								capacityPoolId
 							)
 						)
 						.Done(delta)
@@ -583,7 +591,8 @@ namespace Lunra.Hothouse.Models
 					.BeginItem()
 					.WithProperties(
 						Items.Instantiate.Reservation.OfOutput(
-							capacity.Id
+							capacity.Id,
+							capacityPoolId
 						)
 					)
 					.Done(Mathf.Abs(delta))
