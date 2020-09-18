@@ -402,6 +402,267 @@ namespace Lunra.Hothouse.Models
 		// 	}
 		// }
 		
+		// public enum Goals
+		// {
+		// 	Unknown = 0,
+		// 	None = 10,
+		// 	Receive = 20,
+		// 	Distribute = 30
+		// }
+		
+		[Flags]
+		public enum Operations
+		{
+			None = 0,
+			ForbidPoolReceiving = 1 << 0,
+			ApplyModifications = 1 << 1
+		}
+
+		public void Calculate()
+		{
+			var capacityToItemDesire = new Dictionary<long, (Item Item, string Desire)>();
+			var capacityPools = new Dictionary<long, Item>();
+
+			foreach (var (item, stack) in Container.All().ToList())
+			{
+				var type = item[Items.Keys.Shared.Type];
+
+				if (type == Items.Values.Shared.Types.Capacity)
+				{
+					capacityToItemDesire.Add(item.Id, (item, OnCalculateCapacity(item)));
+				}
+				else if (type == Items.Values.Shared.Types.CapacityPool)
+				{
+					capacityPools.Add(item.Id, item);
+				}
+			}
+			
+			foreach (var capacityPool in capacityPools.Values)
+			{
+				var capacityPoolResult = OnCalculateCapacityPool(
+					capacityPool,
+					capacityToItemDesire,
+					out var modificationDesire,
+					out var capacityModifications
+				);
+				
+				// if (capacityPoolResult.HasFlag(Operations.ApplyModifications))
+				// {
+				// 	// I don't love the way this works, but basically if the pool defines behaviour that conflicts with
+				// 	// the capacities below it, we fix those issues here...
+				// 	
+				// 	foreach (var modification in capacityModifications)
+				// 	{
+				// 		// Debug.Log($"Moving [ {modification.Capacity.Item.Id} ] from {modification.Begin} to {modification.End}");
+				//
+				// 		var desire = modification[Items.Keys.Capacity.Desire];
+				//
+				// 		if (desire != Items.Values.Capacity.Desires.None)
+				// 		{
+				// 			if (desire == Items.Values.Capacity.Desires.Receive)
+				// 			{
+				// 			
+				// 			}
+				// 			else if (desire == Items.Values.Capacity.Desires.Distribute)
+				// 			{
+				// 			
+				// 			}
+				// 			else
+				// 			{
+				// 			
+				// 			}	
+				// 		}
+				//
+				// 		switch (modification.Goal)
+				// 		{
+				// 			case Context.CapacityInfo.Goals.None:
+				// 				// No change required if previously had no goal... 
+				// 				break;
+				// 			case Context.CapacityInfo.Goals.Receive:
+				// 				// Changing a destination to something else...
+				// 				capacityDestinations.Remove(modification.Item.Id);
+				// 				break;
+				// 			case Context.CapacityInfo.Goals.Distribute:
+				// 				// Changing a source to something else...
+				// 				capacitySources.Remove(modification.Item.Id);
+				// 				break;
+				// 			default:
+				// 				Debug.LogError($"Unrecognized goal origin {modification.Goal}");
+				// 				break;
+				// 		}
+				// 		
+				// 		switch (modificationGoal)
+				// 		{
+				// 			case Context.CapacityInfo.Goals.None:
+				// 				// We're forbidding stuff, so we don't add it as a source or destination...
+				// 				break;
+				// 			case Context.CapacityInfo.Goals.Receive:
+				// 				// This is now a destination
+				// 				capacityDestinations.Add(modification.Item.Id, modification);
+				// 				break;
+				// 			case Context.CapacityInfo.Goals.Distribute:
+				// 				// This is now a source
+				// 				capacitySources.Add(modification.Item.Id, modification);
+				// 				break;
+				// 			default:
+				// 				Debug.LogError($"Unrecognized goal origin {modificationGoal}");
+				// 				break;
+				// 		}
+				// 	}	
+				// }
+			}
+		}
+
+		string OnCalculateCapacity(Item capacity)
+		{
+			var desire = capacity[Items.Keys.Capacity.Desire];
+			if (desire != Items.Values.Capacity.Desires.NotCalculated) return desire;
+
+			var filterId = capacity[Items.Keys.Capacity.Filter];
+
+			if (!Capacities.TryGetValue(filterId, out var filter))
+			{
+				Debug.LogError($"Cannot find filter [ {filterId} ] for capacity {capacity}");
+				return null;
+			}
+
+			var capacityCountTarget = capacity[Items.Keys.Capacity.CountTarget];
+		
+			var resourceTotalCount = 0;
+
+			foreach (var (resource, stack) in Container.All(i => i.TryGet(Items.Keys.Resource.LogisticState, out var logisticState) && logisticState == Items.Values.Resource.LogisticStates.None))
+			{
+				if (!filter.Validate(resource)) continue;
+				
+				resourceTotalCount += stack.Count;
+			}
+
+			var delta = capacityCountTarget - resourceTotalCount;
+		
+			if (delta == 0)
+			{
+				// We are satisfied
+				capacity.Set(
+					(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.None),
+					(Items.Keys.Capacity.CountCurrent, resourceTotalCount)
+				);
+
+				return Items.Values.Capacity.Desires.None;
+			}
+			
+			if (0 < delta)
+			{
+				// We want more
+				capacity.Set(
+					(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Receive),
+					(Items.Keys.Capacity.CountCurrent, resourceTotalCount)
+				);
+
+				Container.Deposit(
+					Game.Items.Builder
+						.BeginItem()
+						.WithProperties(
+							Items.Instantiate.Reservation.OfInput(
+								capacity.Id
+							)
+						)
+						.Done(delta)
+				);
+
+				return Items.Values.Capacity.Desires.Receive;
+			}
+			
+			// We want less
+			capacity.Set(
+				(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Distribute),
+				(Items.Keys.Capacity.CountCurrent, resourceTotalCount)
+			);
+		
+			Container.Deposit(
+				Game.Items.Builder
+					.BeginItem()
+					.WithProperties(
+						Items.Instantiate.Reservation.OfOutput(
+							capacity.Id
+						)
+					)
+					.Done(Mathf.Abs(delta))
+			);
+
+			return Items.Values.Capacity.Desires.Distribute;
+		}
+		
+		Operations OnCalculateCapacityPool(
+			Item capacityPool,
+			Dictionary<long, (Item Item, string Desire)> capacityToItemDesire,
+			out string modificationDesire,
+			out Item[] capacityModifications
+		)
+		{
+			var isForbidden = capacityPool[Items.Keys.CapacityPool.IsForbidden];
+			var countMaximum = capacityPool[Items.Keys.CapacityPool.CountMaximum];
+			var countPrevious = capacityPool[Items.Keys.CapacityPool.CountCurrent];
+			var countTarget = capacityPool[Items.Keys.CapacityPool.CountTarget];
+
+			string possibleGoalUpdate = null;
+
+			if (isForbidden) possibleGoalUpdate = Items.Values.Capacity.Desires.None;
+			else if (countTarget < countMaximum) possibleGoalUpdate = Items.Values.Capacity.Desires.Distribute;
+			else if (countMaximum < countTarget) possibleGoalUpdate = Items.Values.Capacity.Desires.Receive;
+			
+			var modificationsList = new List<Item>(); // capacities
+			
+			var countCurrent = 0;
+
+			foreach (var element in Container.All(i => i.TryGet(Items.Keys.Capacity.Pool, out var poolId) && poolId == capacityPool.Id))
+			{
+				if (element.Item.NoInstances) continue;
+				
+				var capacityCountCurrent = element.Item[Items.Keys.Capacity.CountCurrent];
+				
+				countCurrent += capacityCountCurrent;
+
+				if (possibleGoalUpdate != null && possibleGoalUpdate != element.Item[Items.Keys.Capacity.Desire])
+				{
+					modificationsList.Add(element.Item);
+				}
+			}
+
+			if (countPrevious != countCurrent) capacityPool[Items.Keys.CapacityPool.CountCurrent] = countCurrent;
+
+			modificationDesire = null;
+
+			if (possibleGoalUpdate != null)
+			{
+				if (possibleGoalUpdate == Items.Values.Capacity.Desires.None)
+				{
+					modificationDesire = possibleGoalUpdate;
+				}
+				else if (possibleGoalUpdate == Items.Values.Capacity.Desires.Receive)
+				{
+					if (countCurrent < countTarget) modificationDesire = possibleGoalUpdate;
+				}
+				else if (possibleGoalUpdate == Items.Values.Capacity.Desires.Distribute)
+				{
+					if (countTarget < countCurrent) modificationDesire = possibleGoalUpdate;
+				}
+				else 
+				{
+					Debug.LogError($"Unrecognized goal {possibleGoalUpdate}");
+					modificationsList.Clear();
+				}
+			}
+
+			capacityModifications = modificationsList.ToArray();
+
+			var result = Operations.None;
+
+			if (countTarget <= countCurrent) result |= Operations.ForbidPoolReceiving;
+			if (capacityModifications.Any()) result |= Operations.ApplyModifications;
+
+			return result;
+		}
+
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)
 		{

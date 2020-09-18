@@ -447,10 +447,26 @@ namespace Lunra.Hothouse.Services
 		{
 			Model.SimulationUpdate -= OnGameSimulationUpdate;
 		}
+
+		bool hasBruk = false;
 		
 		#region GameModel Events
 		void OnGameSimulationUpdate()
 		{
+			if (!hasBruk)
+			{
+				Debug.Break();
+				hasBruk = true;
+				return;
+			}
+			
+			foreach (var inventory in Model.Query.All<IInventoryModel>())
+			{
+				inventory.Inventory.Calculate();
+			}
+			
+			return;
+			
 			foreach (var dweller in Model.Dwellers.AllActive)
 			{
 				context.Dwellers.Add(
