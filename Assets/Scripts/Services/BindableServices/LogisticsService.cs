@@ -411,7 +411,7 @@ namespace Lunra.Hothouse.Services
 			public List<DwellerInfo> Dwellers = new List<DwellerInfo>();
 			public Dictionary<long, ResourceInfo> Resources = new Dictionary<long, ResourceInfo>();
 			public Dictionary<long, ReservationInfo> Reservations = new Dictionary<long, ReservationInfo>();
-			public Dictionary<long, CapacityPoolInfo> CapacityPools = new Dictionary<long, CapacityPoolInfo>();
+			public Dictionary<long, CapacityInfo> CapacityPools = new Dictionary<long, CapacityInfo>();
 			public Dictionary<long, CapacityInfo> Capacities = new Dictionary<long, CapacityInfo>();
 			public Dictionary<long, Container> Inventories = new Dictionary<long, Container>();
 			public Dictionary<long, IInventoryModel> Parents = new Dictionary<long, IInventoryModel>();
@@ -451,15 +451,209 @@ namespace Lunra.Hothouse.Services
 		#region GameModel Events
 		void OnGameSimulationUpdate()
 		{
-			// foreach (var inventory in Model.Query.All<IInventoryModel>())
-			// {
-			// 	inventory.Inventory.Calculate();
-			// }
+			foreach (var dweller in Model.Dwellers.AllActive)
+			{
+				context.Dwellers.Add(
+					new Context.DwellerInfo(
+						context,
+						dweller
+					)	
+				);
+			}
 			
-			Debug.Break();
+			foreach (var item in Model.Items.All()) OnItemCache(item);
 			
-			return;
+			var reservationOutputs = new Dictionary<long, Context.ReservationInfo>();
+			var reservationInputs = new Dictionary<long, Context.ReservationInfo>();
 
+			foreach (var reservation in context.Reservations.Values)
+			{
+				var logisticState = reservation.Item[Items.Keys.Reservation.LogisticState];
+				if (logisticState == Items.Values.Reservation.LogisticStates.Input)
+				{
+					reservationInputs.Add(reservation.Item.Id, reservation);
+				}
+				else if (logisticState == Items.Values.Reservation.LogisticStates.Output)
+				{
+					reservationOutputs.Add(reservation.Item.Id, reservation);
+				}
+				else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState}: {logisticState} on {reservation.Item}");
+			}
+			
+			// Order in a way that caches will get filled up or taken from last
+			var reservationInputsSorted = reservationInputs
+				.Values
+				.OrderBy(c => c.GetPriority())
+				.ToList();
+
+			var dwellers = context.Dwellers
+				.Where(m => m.Dweller.InventoryPromises.All.None())
+				.ToList();
+			
+			var forbiddenCapacityPools = new HashSet<long>();
+
+			while (reservationOutputs.Any() && reservationInputs.Any() && dwellers.Any())
+			{
+				var reservationInputCurrent = reservationInputsSorted[0];
+				reservationInputsSorted.RemoveAt(0);
+				reservationInputs.Remove(reservationInputCurrent.Item.Id);
+
+				if (forbiddenCapacityPools.Contains(reservationInputCurrent.Item[Items.Keys.Reservation.CapacityPoolId])) continue;
+				
+				var reservationInputFilterId = reservationInputCurrent.Item[Items.Keys.Reservation.CapacityId];
+
+				if (!reservationInputCurrent.GetParent().Inventory.Capacities.TryGetValue(reservationInputFilterId, out var reservationInputFilter))
+				{
+					Debug.LogError($"Cannot find filter [ {reservationInputFilterId} ] for reservation {reservationInputCurrent}");
+					continue;
+				}
+				
+				var reservationOutputsAvailable = reservationOutputs.Values
+					.OrderBy(c => c.GetPriority())
+					.ToList();
+
+				var reservationInputSatisfied = false;
+				var noRemainingDwellers = false;
+				var resourceCapacityTestResults = new Dictionary<long, bool>();
+				
+				foreach (var reservationOutput in reservationOutputsAvailable)
+				{
+					var foundResource = reservationOutput.GetContainer().TryFindFirst(
+						nextResourceItem =>
+						{
+							
+							// if (!resourceCapacityTestResults.TryGetValue(nextResourceItem.Id, out var resourceCapacityTestResult))
+							// {
+							// 	resourceCapacityTestResult = nextResourceItem[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Resource 
+							// 	                             && nextResourceItem[Items.Keys.Resource.LogisticState] == Items.Values.Resource.LogisticStates.None
+							// 	                             && reservationInputFilter.Validate(nextResourceItem);
+							// 	
+							// 	resourceCapacityTestResults.Add(nextResourceItem.Id, resourceCapacityTestResult);
+							// }
+							//
+							// if (!resourceCapacityTestResult) return false;
+							//
+							// return capacitySource.GetContainer().TryFindFirst(
+							// 	nextReservationItem =>
+							// 	{
+							// 		if (!reservationSources.TryGetValue(nextReservationItem.Id, out reservationSource)) return false;
+							// 		if (reservationSource.GetCapacity() != capacitySource) return false;
+							// 		if (reservationSource.Item[Items.Keys.Reservation.IsPromised]) return false;
+							// 		
+							// 		return capacitySource.GetFilter().Validate(nextResourceItem);
+							// 	},
+							// 	out _
+							// );
+						},
+						out var item
+					);
+
+					if (!foundResource) continue;
+					
+					var noValidDwellerNavigations = true;
+
+					dwellers = dwellers
+						.OrderBy(m => m.Dweller.DistanceTo(capacitySource.GetParent()))
+						.ToList();
+
+					var dwellerIndex = 0;
+
+					void incrementDweller() => dwellerIndex++;
+					void popDweller() => dwellers.RemoveAt(dwellerIndex);
+					
+					while (dwellerIndex < dwellers.Count)
+					{
+						var dweller = dwellers[dwellerIndex];
+
+						if (!dweller.ValidNavigationTo(capacityDestinationCurrent))
+						{
+							incrementDweller();
+							continue;
+						}
+						
+						noValidDwellerNavigations = false;
+
+						if (!dweller.ValidNavigationTo(capacitySource))
+						{
+							incrementDweller();
+							continue;
+						}
+
+						var source = new InventoryPromiseComponent.TransferInfo
+						{
+							Container = capacitySource.GetContainer(),
+							Capacity = capacitySource.Item,
+							Reservation = reservationSource.Item
+						};
+						
+						// It's okay if the source doesn't have a capacity pool.
+						source.Container
+							.TryFindFirst(
+								source.Capacity[Items.Keys.Capacity.Pool],
+								out source.CapacityPool
+							);
+						
+						var destination = new InventoryPromiseComponent.TransferInfo
+						{
+							Container = capacityDestinationCurrent.GetContainer(),
+							Capacity = capacityDestinationCurrent.Item,
+						};
+						
+						var found = destination.Container
+							.TryFindFirst(
+								out destination.Reservation,
+								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
+								(Items.Keys.Reservation.IsPromised, false),
+								(Items.Keys.Reservation.CapacityId, destination.Capacity.Id),
+								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Input)
+							);
+
+						if (!found)
+						{
+							Debug.LogError($"Unable to find valid input reservation for capacity {destination.Capacity.Id} in container {destination.Container.Id}");
+							break;
+						}
+
+						var destinationCapacityPoolId = destination.Capacity[Items.Keys.Capacity.Pool];
+						
+						found = destination.Container
+							.TryFindFirst(
+								destinationCapacityPoolId,
+								out destination.CapacityPool
+							);
+
+						if (!found)
+						{
+							Debug.LogError($"Unable to find destination capacity pool [ {destinationCapacityPoolId} ] for reservation {destination.Reservation} in container {source.Container.Id}");
+							break;
+						}
+
+						capacitySourceSatisfied = dweller.Dweller.InventoryPromises.Transfer(
+							item,
+							source,
+							destination
+						); 
+						
+						popDweller();
+
+						if (capacitySourceSatisfied) break;
+					}
+
+					if (capacitySourceSatisfied) break;
+					if (noValidDwellerNavigations) break;
+
+					noRemainingDwellers = dwellers.None();
+					
+					if (noRemainingDwellers) break;
+				}
+				
+				if (noRemainingDwellers) break;
+			}
+			
+			context.Clear();
+			*/
+			
+			/*
 			foreach (var dweller in Model.Dwellers.AllActive)
 			{
 				context.Dwellers.Add(
@@ -731,229 +925,11 @@ namespace Lunra.Hothouse.Services
 				
 				if (noRemainingDwellers) break;
 			}
-
-			/*
-			var reservationSources = new List<Context.ReservationInfo>();
-			var reservationDestinations = new List<Context.ReservationInfo>();
-
-			foreach (var reservation in context.Reservations.Values)
-			{
-				if (!reservation.Item.TryGet(Items.Keys.Reservation.TargetType, out var targetType))
-				{
-					Debug.LogError($"Unable to get {Items.Keys.Reservation.TargetType} for reservation {reservation}");
-					continue;
-				}
-
-				if (targetType == Items.Values.Reservation.TargetTypes.Resource)
-				{
-					
-				}
-				else if (targetType == Items.Values.Reservation.TargetTypes.Capacity)
-				{
-					
-				}
-				else Debug.LogError($"Unrecognized {Items.Keys.Reservation.TargetType}: {targetType}");
-			}
-			*/
-			
-			/*
-			var capacityDestinations = new List<Context.CapacityInfo>();
-			var capacitySources = new List<Context.CapacityInfo>();
-			
-			foreach (var capacity in context.Capacities.Values)
-			{
-				switch (capacity.Calculate())
-				{
-					case Context.CapacityInfo.Goals.None:
-						break;
-					case Context.CapacityInfo.Goals.Receive:
-						capacityDestinations.Add(capacity);
-						break;
-					case Context.CapacityInfo.Goals.Distribute:
-						capacitySources.Add(capacity);
-						break;
-					default:
-						Debug.LogError($"Unrecognized goal: {capacity.Goal}");
-						break;
-				}
-			}
-			
-			var capacityPoolForbiddenDestinations = new HashSet<long>();
-
-			foreach (var capacityPool in context.CapacityPools.Values)
-			{
-				if (!capacityPool.Calculate()) capacityPoolForbiddenDestinations.Add(capacityPool.Item.Id);
-			}
-
-			// Order in a way that caches will get filled up or taken from last
-			
-			capacitySources = capacitySources
-				.OrderBy(c => c.Item[Items.Keys.Capacity.IsCache])
-				.ThenBy(c => c.GetPriority())
-				.ToList();
-			
-			capacityDestinations = capacityDestinations
-				.OrderBy(c => c.Item[Items.Keys.Capacity.IsCache])
-				.ThenBy(c => c.GetPriority())
-				.ToList();
-
-			var dwellers = context.Dwellers
-				.Where(m => m.Dweller.InventoryPromises.All.None())
-				.ToList();
-			
-			// While loop below is entirely for handling assignment of transfers to dwellers.
-			while (capacitySources.Any() && capacityDestinations.Any() && dwellers.Any())
-			{
-				var capacityDestinationCurrent = capacityDestinations[0];
-				capacityDestinations.RemoveAt(0);
-
-				if (capacityPoolForbiddenDestinations.Contains(capacityDestinationCurrent.Item[Items.Keys.Capacity.Pool])) continue;
-				
-				var resourceType = capacityDestinationCurrent.Item[Items.Keys.Capacity.ResourceType];
-
-				var capacitySourcesAvailable = capacitySources
-					.Where(c => c.Item[Items.Keys.Capacity.ResourceType] == resourceType)
-					.ToList();
-
-				var capacitySourceSatisfied = false;
-				var noRemainingDwellers = false;
-				
-				foreach (var capacitySource in capacitySourcesAvailable)
-				{
-					var noValidDwellerNavigations = true;
-
-					dwellers = dwellers
-						.OrderBy(m => m.Dweller.DistanceTo(capacitySource.GetParent()))
-						.ToList();
-
-					var dwellerIndex = 0;
-
-					void incrementDweller() => dwellerIndex++;
-					void popDweller() => dwellers.RemoveAt(dwellerIndex);
-					
-					while (dwellerIndex < dwellers.Count)
-					{
-						var dweller = dwellers[dwellerIndex];
-
-						if (!dweller.ValidNavigationTo(capacityDestinationCurrent))
-						{
-							incrementDweller();
-							continue;
-						}
-						
-						noValidDwellerNavigations = false;
-
-						if (!dweller.ValidNavigationTo(capacitySource))
-						{
-							incrementDweller();
-							continue;
-						}
-
-						var source = new InventoryPromiseComponent.TransferInfo
-						{
-							Container = capacitySource.GetContainer(),
-							Capacity = capacitySource.Item
-						};
-						
-						var found = source.Container
-							.TryFindFirst(
-								out source.Reservation,
-								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
-								(Items.Keys.Reservation.IsPromised, false),
-								(Items.Keys.Reservation.CapacityId, source.Capacity.Id),
-								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Output)
-							);
-
-						if (!found)
-						{
-							// This will occur if there is some other incoming reservation or whatnot, may not happen...
-							incrementDweller();
-							continue;
-						}
-
-						// It's okay if the source doesn't have a capacity pool.
-						source.Container
-							.TryFindFirst(
-								source.Capacity[Items.Keys.Capacity.Pool],
-								out source.CapacityPool
-							);
-
-						found = source.Container
-							.TryFindFirst(
-								out var item,
-								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Resource),
-								(Items.Keys.Resource.LogisticState, Items.Values.Resource.LogisticStates.None),
-								(Items.Keys.Resource.Type, resourceType)
-							);
-
-						if (!found)
-						{
-							Debug.LogError($"Unable to find valid instance of a {resourceType} in container {source.Container.Id}");
-							break;
-						}
-						
-						var destination = new InventoryPromiseComponent.TransferInfo
-						{
-							Container = capacityDestinationCurrent.GetContainer(),
-							Capacity = capacityDestinationCurrent.Item,
-						};
-						
-						found = destination.Container
-							.TryFindFirst(
-								out destination.Reservation,
-								(Items.Keys.Shared.Type, Items.Values.Shared.Types.Reservation),
-								(Items.Keys.Reservation.IsPromised, false),
-								(Items.Keys.Reservation.CapacityId, destination.Capacity.Id),
-								(Items.Keys.Reservation.LogisticState, Items.Values.Reservation.LogisticStates.Input)
-							);
-
-						if (!found)
-						{
-							Debug.LogError($"Unable to find valid input reservation for {destination.Reservation} in container {source.Container.Id}");
-							break;
-						}
-
-						var destinationCapacityPoolId = destination.Capacity[Items.Keys.Capacity.Pool];
-						
-						found = destination.Container
-							.TryFindFirst(
-								destinationCapacityPoolId,
-								out destination.CapacityPool
-							);
-
-						if (!found)
-						{
-							Debug.LogError($"Unable to find destination capacity pool [ {destinationCapacityPoolId} ] for reservation {destination.Reservation} in container {source.Container.Id}");
-							break;
-						}
-
-						capacitySourceSatisfied = dweller.Dweller.InventoryPromises.Transfer(
-							item,
-							source,
-							destination
-						); 
-						
-						popDweller();
-
-						if (capacitySourceSatisfied) break;
-					}
-
-					if (capacitySourceSatisfied) break;
-					if (noValidDwellerNavigations) break;
-
-					noRemainingDwellers = dwellers.None();
-					
-					if (noRemainingDwellers) break;
-				}
-				
-				if (noRemainingDwellers) break;
-			}
-			*/
-
 			context.Clear();
+			*/
 		}
 		
-		void OnItemUpdate(Item item)
+		void OnItemCache(Item item)
 		{
 			// Since cleanup is handled by the ProcessorStore, which may happen before or after this service is called,
 			// we ignore items with no instances...
@@ -981,25 +957,28 @@ namespace Lunra.Hothouse.Services
 					)
 				);
 			}
-			else if (type == Items.Values.Shared.Types.CapacityPool)
-			{
-				context.CapacityPools.Add(
-					item.Id,
-					new Context.CapacityPoolInfo(
-						context,
-						item
-					)
-				);
-			}
 			else if (type == Items.Values.Shared.Types.Capacity)
 			{
-				context.Capacities.Add(
-					item.Id,
-					new Context.CapacityInfo(
-						context,
-						item
-					)
-				);
+				if (item[Items.Keys.Capacity.Pool] == IdCounter.UndefinedId)
+				{
+					context.CapacityPools.Add(
+						item.Id,
+						new Context.CapacityInfo(
+							context,
+							item
+						)
+					);
+				}
+				else
+				{
+					context.Capacities.Add(
+						item.Id,
+						new Context.CapacityInfo(
+							context,
+							item
+						)
+					);	
+				}
 			}
 		}
 		#endregion
