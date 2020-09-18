@@ -26,5 +26,7 @@ namespace Lunra.Satchel
 			
 			Stack = stack;
 		}
+
+		public override string ToString() => $"( {nameof(ItemStack)} [ {Item.Id} ] : {Count} )";
 	}
 }

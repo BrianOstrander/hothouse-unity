@@ -231,13 +231,11 @@ namespace Lunra.Hothouse.Services
 						return Goal = Goals.Unknown;
 					}
 
-					var filterId = Item[Items.Keys.Capacity.Filter];
-
 					var parent = GetParent();
 
-					if (!parent.Inventory.Capacities.TryGetValue(filterId, out var filter))
+					if (!parent.Inventory.Capacities.TryGetValue(Item.Id, out var filter))
 					{
-						Debug.LogError($"Cannot find filter [ {filterId} ] for capacity {Item} in {parent.ShortId}");
+						Debug.LogError($"Cannot find filter [ {Item.Id} ] for capacity {Item} in {parent.ShortId}");
 						return Goal = Goals.Unknown;
 					}
 
@@ -284,7 +282,8 @@ namespace Lunra.Hothouse.Services
 								.BeginItem()
 								.WithProperties(
 									Items.Instantiate.Reservation.OfInput(
-										Item.Id
+										Item.Id,
+										Item[Items.Keys.Capacity.Pool]
 									)
 								)
 								.Done(delta)
@@ -304,7 +303,8 @@ namespace Lunra.Hothouse.Services
 							.BeginItem()
 							.WithProperties(
 								Items.Instantiate.Reservation.OfOutput(
-									Item.Id
+									Item.Id,
+									Item[Items.Keys.Capacity.Pool]
 								)
 							)
 							.Done(Mathf.Abs(delta))
@@ -313,7 +313,7 @@ namespace Lunra.Hothouse.Services
 					return Goal = Goals.Distribute;
 				}
 
-				public PropertyFilter GetFilter() => filter ?? (filter = GetParent().Inventory.Capacities[Item[Items.Keys.Capacity.Filter]]);
+				public PropertyFilter GetFilter() => filter ?? (filter = GetParent().Inventory.Capacities[Item.Id]);
 			}
 			
 			public class CapacityPoolInfo : ItemInfo
@@ -451,6 +451,15 @@ namespace Lunra.Hothouse.Services
 		#region GameModel Events
 		void OnGameSimulationUpdate()
 		{
+			// foreach (var inventory in Model.Query.All<IInventoryModel>())
+			// {
+			// 	inventory.Inventory.Calculate();
+			// }
+			
+			Debug.Break();
+			
+			return;
+
 			foreach (var dweller in Model.Dwellers.AllActive)
 			{
 				context.Dwellers.Add(
@@ -571,7 +580,7 @@ namespace Lunra.Hothouse.Services
 
 				if (capacityPoolForbiddenDestinations.Contains(capacityDestinationCurrent.Item[Items.Keys.Capacity.Pool])) continue;
 
-				var capacityDestinationFilterId = capacityDestinationCurrent.Item[Items.Keys.Capacity.Filter];
+				var capacityDestinationFilterId = capacityDestinationCurrent.Item.Id;
 
 				if (!capacityDestinationCurrent.GetParent().Inventory.Capacities.TryGetValue(capacityDestinationFilterId, out var capacityDestinationFilter))
 				{

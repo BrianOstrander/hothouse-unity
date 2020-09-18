@@ -392,12 +392,14 @@ namespace Lunra.Hothouse.Models
 
 				var capacityCurrent = capacityItem[Items.Keys.Capacity.CountCurrent];
 
+				var capacityPoolId = capacityItem[Items.Keys.Capacity.Pool];
+
+				if (capacityPoolId == IdCounter.UndefinedId) throw new OperationException($"Unexpected undefined value for {Items.Keys.Capacity.Pool}");
+				
 				if (!isOutput)
 				{
 					capacityCurrent -= reservationItemStack.Count;
 
-					var capacityPoolId = capacityItem[Items.Keys.Capacity.Pool];
-					
 					if (!Game.Items.TryGet(capacityPoolId, out var capacityPoolItem)) throw new OperationException($"Unable to find capacity pool [ {capacityPoolId} ] for reservation {reservationItem}, referenced by {transferItem}");
 					
 					capacityPoolItem[Items.Keys.CapacityPool.CountCurrent] -= reservationItemStack.Count;
@@ -436,7 +438,10 @@ namespace Lunra.Hothouse.Models
 					unPromisedReservationStack = Game.Items.Builder
 						.BeginItem()
 						.WithProperties(
-							Items.Instantiate.Reservation.OfUnknown(capacityId)
+							Items.Instantiate.Reservation.OfUnknown(
+								capacityId,
+								capacityPoolId
+							)
 						)
 						.Done(Mathf.Abs(delta), out unPromisedReservationItem);
 				}

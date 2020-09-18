@@ -15,6 +15,43 @@ namespace Lunra.Hothouse.Models
 	
 	public class InventoryComponent : ComponentModel<IInventoryModel>
 	{
+		class CalculateCache
+		{
+			public Dictionary<long, ItemStack> Resources = new Dictionary<long, ItemStack>();
+			public Dictionary<long, ItemStack> CapacityPools = new Dictionary<long, ItemStack>();
+			public Dictionary<long, ItemStack> Capacities = new Dictionary<long, ItemStack>();
+			public Dictionary<long, ItemStack> Reservations = new Dictionary<long, ItemStack>();
+			
+			public Dictionary<long, List<long>> CapacityPoolToResources = new Dictionary<long, List<long>>();
+			public Dictionary<long, List<long>> CapacityPoolToCapacities = new Dictionary<long, List<long>>();
+			public Dictionary<long, List<long>> CapacityToReservations = new Dictionary<long, List<long>>();
+
+			public void Link(
+				long key,
+				long value,
+				Dictionary<long, List<long>> dictionary
+			)
+			{
+				if (!dictionary.TryGetValue(key, out var list))
+				{
+					list = new List<long>();
+					dictionary[key] = list;
+				}
+				
+				list.Add(value);
+			}
+			
+			public void Link(
+				long key,
+				long value,
+				Dictionary<long, long> dictionary
+			)
+			{
+				try { dictionary.Add(key, value); }
+				catch (ArgumentException e) { Debug.LogException(e); }
+			}
+		}
+		
 		class ReservationCache
 		{
 			public enum LogisticStates
@@ -61,57 +98,189 @@ namespace Lunra.Hothouse.Models
 	        ResetId();
         }
 
-		public void Calculate()
+		public void Calculate(params long[] capacityPools)
 		{
-			// var resources = new Dictionary<long, Item>();
-			// var capacitiyPools = new Dictionary<long, Item>();
-			// var capacities = new Dictionary<long, Item>();
-			// var reservations = new Dictionary<long, Item>();
-			//
-			// foreach (var element in Container.All())
-			// {
-			// 	var type = element.Item[Items.Keys.Shared.Type];
-			//
-			// 	if (type == Items.Values.Shared.Types.Resource)
-			// 	{
-			// 		context.Resources.Add(
-			// 			item.Id,
-			// 			new Context.ResourceInfo(
-			// 				context,
-			// 				item
-			// 			)
-			// 		);
-			// 	}
-			// 	else if (type == Items.Values.Shared.Types.Reservation)
-			// 	{
-			// 		context.Reservations.Add(
-			// 			item.Id,
-			// 			new Context.ReservationInfo(
-			// 				context,
-			// 				item
-			// 			)
-			// 		);
-			// 	}
-			// 	else if (type == Items.Values.Shared.Types.CapacityPool)
-			// 	{
-			// 		context.CapacityPools.Add(
-			// 			item.Id,
-			// 			new Context.CapacityPoolInfo(
-			// 				context,
-			// 				item
-			// 			)
-			// 		);
-			// 	}
-			// 	else if (type == Items.Values.Shared.Types.Capacity)
-			// 	{
-			// 		context.Capacities.Add(
-			// 			item.Id,
-			// 			new Context.CapacityInfo(
-			// 				context,
-			// 				item
-			// 			)
-			// 		);
-			// }
+			var cache = new CalculateCache();
+			
+			foreach (var itemStack in Container.All())
+			{
+				var type = itemStack.Item[Items.Keys.Shared.Type];
+			
+				if (type == Items.Values.Shared.Types.Resource)
+				{
+					var parentPool = itemStack.Item[Items.Keys.Resource.ParentPool];
+					
+					if (parentPool == IdCounter.UndefinedId) Debug.LogError($"Undefined {Items.Keys.Resource.ParentPool} for {itemStack}");
+					else
+					{
+						cache.Resources.Add(
+							itemStack.Id,
+							itemStack
+						);
+						
+						cache.Link(
+							parentPool,
+							itemStack.Id,
+							cache.CapacityPoolToResources
+						);
+					}
+				}
+				else if (type == Items.Values.Shared.Types.Capacity)
+				{
+					var capacityPoolId = itemStack.Item[Items.Keys.Capacity.Pool];
+					var isPool = capacityPoolId == IdCounter.UndefinedId;
+					
+					if (capacityPools.Any() && !capacityPools.Contains(isPool ? itemStack.Id : capacityPoolId)) continue;
+					
+					if (isPool)
+					{
+						cache.CapacityPools.Add(
+							itemStack.Id,
+							itemStack
+						);
+					}
+					else
+					{
+						cache.Capacities.Add(
+							itemStack.Id,
+							itemStack
+						);
+						
+						cache.Link(
+							capacityPoolId,
+							itemStack.Id,
+							cache.CapacityPoolToCapacities
+						);
+					}
+				}
+				else if (type == Items.Values.Shared.Types.Reservation)
+				{
+					cache.Reservations.Add(
+						itemStack.Id,
+						itemStack
+					);
+
+					if (itemStack.Item.TryGet(Items.Keys.Reservation.CapacityId, out var capacityId))
+					{
+						cache.Link(
+							capacityId,
+							itemStack.Id,
+							cache.CapacityToReservations
+						);
+					}
+					else Debug.LogError($"Cannot find {Items.Keys.Reservation.CapacityId} for reservation {itemStack}");
+				}
+			}
+			
+			foreach (var capacityPool in cache.CapacityPools.Values)
+			{
+				var capacityPoolCountCurrent = 0;
+
+				var capacities = cache.CapacityPoolToCapacities[capacityPool.Id]
+					.Select(i => cache.Capacities[i])
+					.FilteredSelect(
+						(ItemStack i, out (ItemStack ItemStack, PropertyFilter Filter) result) =>
+						{
+							result = (i, default);
+							
+							if (!Capacities.TryGetValue(i.Id, out result.Filter))
+							{
+								Debug.LogError($"No capacity filter for {i}");
+								return false;
+							}
+
+							return true;
+						}
+					)
+					.ToArray();
+				
+				var capacityToResourceCount = new Dictionary<long, int>();
+
+				if (cache.CapacityPoolToResources.TryGetValue(capacityPool.Id, out var resources))
+				{
+					foreach (var resource in resources.Select(i => cache.Resources[i]))
+					{
+						capacityPoolCountCurrent += resource.Count;
+
+						foreach (var capacity in capacities)
+						{
+							if (capacity.Filter.Validate(resource.Item))
+							{
+								capacityToResourceCount.TryGetValue(capacity.ItemStack.Id, out var count);
+								capacityToResourceCount[capacity.ItemStack.Id] = count + resource.Count;
+							}
+						}
+					}
+				}
+
+				foreach (var capacity in capacities.Select(c => c.ItemStack.Item))
+				{
+					capacityToResourceCount.TryGetValue(capacity.Id, out var capacityCountCurrent);
+					capacity[Items.Keys.Capacity.CountCurrent] = capacityCountCurrent;
+					var capacityCountTarget = capacity[Items.Keys.Capacity.CountTarget];
+
+					var capacityCountDelta = capacityCountTarget - capacityCountCurrent;
+
+					var reservationCountInputCount = 0;
+					var reservationCountInputs = new Dictionary<long, int>();
+					
+					var reservationCountOutputCount = 0;
+					var reservationCountOutputs = new Dictionary<long, int>();
+
+					if (cache.CapacityToReservations.TryGetValue(capacity.Id, out var reservations))
+					{
+						foreach (var reservation in reservations.Select(r => cache.Reservations[r]))
+						{
+							Debug.LogError(reservation);
+							var reservationLogisticState = reservation.Item[Items.Keys.Reservation.LogisticState];
+
+							if (reservationLogisticState == Items.Values.Reservation.LogisticStates.Input)
+							{
+								reservationCountInputCount += reservation.Count;
+								reservationCountInputs.Add(reservation.Id, reservation.Count);
+							}
+							else if (reservationLogisticState == Items.Values.Reservation.LogisticStates.Output)
+							{
+								reservationCountOutputCount += reservation.Count;
+								reservationCountOutputs.Add(reservation.Id, reservation.Count);
+							}
+							else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} {reservationLogisticState} for {reservation}");
+						}	
+					}
+
+					var delta = capacityCountDelta + (reservationCountOutputCount - reservationCountInputCount);
+
+					if (0 < delta)
+					{
+						Container.New(
+							delta,
+							Items.Instantiate.Reservation
+								.OfInput(
+									capacity.Id,
+									capacityPool.Id
+								)
+						);
+					}
+					else if (delta < 0)
+					{
+						Container.New(
+							Mathf.Abs(delta),
+							Items.Instantiate.Reservation
+								.OfOutput(
+									capacity.Id,
+									capacityPool.Id
+								)
+						);
+					}
+					
+					Debug.Log($"{Container.Id}.{capacity.Id}: {delta}");
+				}
+
+				capacityPool.Item[Items.Keys.Capacity.CountCurrent] = capacityPoolCountCurrent;
+
+				// Debug.Log(Container);
+				// Debug.LogError($"{Container.Id} cappoolcurr: {capacityPoolCountCurrent}{capacityToResourceCount.Aggregate(string.Empty, (r, c) => $"{r}\n{c.Key} : {c.Value}")}");
+			}
 		}
 
 		public void SetForbidden(
@@ -201,260 +370,9 @@ namespace Lunra.Hothouse.Models
 			int countTarget
 		)
 		{
-			if (id == IdCounter.UndefinedId) throw new ArgumentException("Cannot set the capacity for an undefined Id", nameof(id));
-			if (countTarget < 0) throw new ArgumentOutOfRangeException(nameof(countTarget), "Cannot have a count less than zero");
-
-			if (!Container.TryFindFirst(id, out var item))
-			{
-				Debug.LogError($"Cannot find item [ {id} ] in [ {Container.Id} ] of {ShortId}");
-				return;
-			}
-
-			var type = item[Items.Keys.Shared.Type];
-
-			if (type == Items.Values.Shared.Types.Capacity)
-			{
-				if (OnSetCapacity(item, countTarget, out var countTargetDelta, out var reservationsActive))
-				{
-					if (0 < countTargetDelta)
-					{
-						OnSetCapacityBudgetIncrease(
-							item,
-							countTargetDelta,
-							reservationsActive
-						);
-					}
-					else
-					{
-						countTargetDelta = Mathf.Abs(countTargetDelta);
-						var remainingDecreasesRequired = OnSetCapacityBudgetDecrease(
-							item,
-							countTargetDelta,
-							reservationsActive,
-							out _
-						);
-						
-						if (remainingDecreasesRequired) Debug.LogError("Unexpected, there shouldn't be any remaining count targets to remove...");
-					}
-				}
-			}
-			else if (type == Items.Values.Shared.Types.CapacityPool) OnSetCapacityPool(item, countTarget);
-			else Debug.LogError($"Unrecognized {Items.Keys.Shared.Type}: {type} on [ {id} ] in [ {Container.Id} ] of {ShortId}");
+			Debug.LogError("todo");
 		}
 
-		bool OnSetCapacity(
-			Item capacity,
-			int countTarget,
-			out int countTargetDelta,
-			out ReservationCache[] reservationsActive
-		)
-		{
-			reservationsActive = new ReservationCache[0];
-			countTargetDelta = 0;
-			
-			if (capacity[Items.Keys.Capacity.Desire] == Items.Values.Capacity.Desires.NotCalculated) return false;
-		
-			var countTargetPrevious = capacity[Items.Keys.Capacity.CountTarget];
-
-			if (countTargetPrevious == countTarget) return false;
-
-			countTargetDelta = countTarget - countTargetPrevious;
-			
-			capacity[Items.Keys.Capacity.CountTarget] = countTarget;
-
-			var reservations = Container
-				.All(i => i[Items.Keys.Reservation.CapacityId] == capacity.Id)
-				.ToArray();
-
-			if (reservations.None()) return countTargetDelta != 0;
-			
-			var reservationsActiveList = new List<ReservationCache>();
-			
-			foreach (var reservation in reservations)
-			{
-				var cache = new ReservationCache
-				{
-					Reservation = reservation.Item,
-					ReservationCount = reservation.Stack.Count
-				};
-
-				var reservationState = cache.Reservation[Items.Keys.Reservation.LogisticState];
-
-				if (reservationState == Items.Values.Reservation.LogisticStates.Input)
-				{
-					cache.ReservationState = ReservationCache.LogisticStates.Input;
-				}
-				else if (reservationState == Items.Values.Reservation.LogisticStates.Output)
-				{
-					cache.ReservationState = ReservationCache.LogisticStates.Output;
-				}
-				else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} {reservationState} on {reservation}");
-				
-				var transferId = cache.Reservation[Items.Keys.Reservation.TransferId];
-
-				if (transferId != IdCounter.UndefinedId)
-				{
-					cache.ReservationIsPromised = true;
-					
-					if (Game.Items.TryGet(transferId, out cache.Transfer))
-					{
-						if (!Game.Query.TryFindFirst(m => m.Inventory.Container.Id == cache.Transfer.ContainerId, out cache.TransferParent))
-						{
-							Debug.LogError($"Cannot find transfer parent with inventory container [ {cache.Transfer.ContainerId} ] for transfer {cache.Transfer}");
-						}
-					}
-					else Debug.LogError($"Cannot find transfer [ {transferId} ] for reservation {cache.Reservation}");
-				}
-				
-				if (cache.ReservationState != ReservationCache.LogisticStates.Unknown) reservationsActiveList.Add(cache);
-			}
-
-			reservationsActive = reservationsActiveList.ToArray();
-
-			return countTargetDelta != 0;
-		}
-		
-		void OnSetCapacityPool(
-			Item capacityPool,
-			int count
-		)
-		{
-			Debug.LogError("uhh not done yet");
-		}
-
-		void OnSetCapacityBudgetIncrease(
-			Item capacity,
-			int countTargetDelta,
-			ReservationCache[] reservationsActive
-		)
-		{
-			if (countTargetDelta <= 0) throw new ArgumentOutOfRangeException(nameof(countTargetDelta), "Must be greater than zero");
-
-			var found = false;
-			foreach (var cache in reservationsActive.Where(r => !r.ReservationIsPromised && r.ReservationState == ReservationCache.LogisticStates.Input))
-			{
-				Container.Increment(cache.Reservation.StackOf(countTargetDelta));
-				found = true;
-			}
-
-			if (!found)
-			{
-				Container.New(
-					countTargetDelta,
-					Items.Instantiate.Reservation.OfInput(
-						capacity.Id
-					)
-				);
-			}
-
-			capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.Receive;
-		}
-		
-		bool OnSetCapacityBudgetDecrease(
-			Item capacity,
-			int countTargetDelta,
-			ReservationCache[] reservationsActive,
-			out int countTargetDeltaRemaining,
-			bool? isPromisedLimit = null,
-			ReservationCache.LogisticStates stateLimit = ReservationCache.LogisticStates.Unknown 
-		)
-		{
-			if (countTargetDelta <= 0) throw new ArgumentOutOfRangeException(nameof(countTargetDelta), "Must be greater than zero");
-
-			var reservationsSorted = reservationsActive
-				.OrderBy(r => !r.ReservationIsPromised)
-				.ThenBy(r => r.ReservationState == ReservationCache.LogisticStates.Output)
-				.ThenBy(r => r.ReservationState == ReservationCache.LogisticStates.Input);
-
-			var destroyed = new List<(ReservationCache Cache, int Count)>();
-			var broken = new Dictionary<long, IInventoryPromiseModel>();
-			var totalDecrease = 0;
-			
-			foreach (var cache in reservationsSorted)
-			{
-				if (isPromisedLimit.HasValue && isPromisedLimit.Value == cache.ReservationIsPromised) break;
-				if (cache.ReservationState == stateLimit) break;
-				
-				var availableForDecrease = Mathf.Min(cache.ReservationCount, countTargetDelta);
-				destroyed.Add((cache, availableForDecrease));
-
-				if (cache.ReservationIsPromised)
-				{
-					totalDecrease += availableForDecrease;
-					
-					switch (cache.ReservationState)
-					{
-						case ReservationCache.LogisticStates.Output:
-							broken[cache.Transfer.ContainerId] = cache.TransferParent;
-							cache.Transfer[Items.Keys.Transfer.ReservationPickupId] = IdCounter.UndefinedId;
-							break;
-						case ReservationCache.LogisticStates.Input:
-							broken[cache.Transfer.ContainerId] = cache.TransferParent;
-							cache.Transfer[Items.Keys.Transfer.ReservationDropoffId] = IdCounter.UndefinedId;
-							break;
-						default:
-							Debug.LogError($"Unrecognized LogisticState {cache.ReservationState} on reservation {cache.Reservation}");
-							break;
-					}
-				}
-
-				// When destroyed we mark them as unknown so we don't try to destroy them twice...
-				cache.ReservationState = ReservationCache.LogisticStates.Unknown;
-
-				countTargetDelta -= availableForDecrease;
-				
-				if (countTargetDelta == 0) break;
-			}
-
-			countTargetDeltaRemaining = countTargetDelta;
-
-			if (destroyed.None()) return false;
-
-			capacity[Items.Keys.Capacity.CountCurrent] -= totalDecrease;
-
-			var countCurrent = capacity[Items.Keys.Capacity.CountCurrent];
-			var countTarget = capacity[Items.Keys.Capacity.CountTarget];
-
-			if (countCurrent < countTarget) capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.Receive;
-			else if (countTarget < countCurrent) capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.Distribute;
-			else capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
-			
-			Container.Destroy(
-				destroyed
-					.Select(
-						d =>
-						{
-							d.Cache.ReservationState = ReservationCache.LogisticStates.Unknown;
-							return d.Cache.Reservation.StackOf(d.Count);
-						}
-					).ToArray()
-			);
-
-			foreach (var b in broken.Values) b.InventoryPromises.BreakAll();
-
-			return countTargetDeltaRemaining != 0;
-		}
-		
-		// void OnSetCapacityBudgetDecrease(
-		// 	int countTargetDelta,
-		// 	ReservationCache[] reservationsActive
-		// )
-		// {
-		// 	countTargetDelta = Mathf.Abs(countTargetDelta);
-		//
-		// 	var reservationsSorted = reservationsActive
-		// 		.OrderBy(r => r.TransferState == ReservationCache.LogisticStates.NotDefined)
-		// 		.ThenBy(r => r.TransferState == ReservationCache.LogisticStates.Pickup)
-		// 		.ThenBy(r => r.TransferState == ReservationCache.LogisticStates.Dropoff);
-		//
-		// 	foreach (var cache in reservationsSorted)
-		// 	{
-		// 		
-		//
-		// 		if (--countTargetDelta == 0) break;
-		// 	}
-		// }
-		
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)
 		{

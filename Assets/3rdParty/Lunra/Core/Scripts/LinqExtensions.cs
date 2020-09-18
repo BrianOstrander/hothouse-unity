@@ -265,5 +265,18 @@ namespace Lunra.Core
 			if (source.TryGetValue(key, out var value)) return value;
 			return fallback;
 		}
+
+		public delegate bool FilteredSelectOperation<TSource, TResult>(TSource source, out TResult result); 
+		
+		public static IEnumerable<TResult> FilteredSelect<TSource, TResult>(
+			this IEnumerable<TSource> source,
+			FilteredSelectOperation<TSource, TResult> selector
+		)
+		{
+			foreach (var element in source)
+			{
+				if (selector(element, out var result)) yield return result;
+			}
+		}
 	}
 }

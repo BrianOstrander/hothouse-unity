@@ -280,13 +280,13 @@ namespace Lunra.Satchel
 		/// Adding or removing items while iterating here will cause an exception.
 		/// </remarks>
 		/// <param name="stacks"></param>
-		public IEnumerable<(Item Item, Stack Stack)> InStack(
+		public IEnumerable<ItemStack> InStack(
 			params Stack[] stacks
 		)
 		{
 			foreach (var stack in stacks)
 			{
-				if (TryGet(stack.Id, out var item)) yield return (item, stack);
+				if (TryGet(stack.Id, out var item)) yield return ItemStack.Of(item, stack);
 				else Debug.LogError($"Unable to find item with Id {stack.Id}");
 			}
 		}
@@ -299,7 +299,7 @@ namespace Lunra.Satchel
 		/// </remarks>
 		/// <param name="predicate"></param>
 		/// <param name="stacks"></param>
-		public IEnumerable<(Item Item, Stack Stack)> InStack(
+		public IEnumerable<ItemStack> InStack(
 			Func<Item, bool> predicate,
 			params Stack[] stacks
 		)

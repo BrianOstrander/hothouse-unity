@@ -21,7 +21,7 @@ namespace Lunra.Hothouse.Models
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
 
-		public virtual int GetCapacities(List<(int Count, PropertyFilter Filter)> capacities) => 0;
+		public virtual int GetCapacities(List<(int Count, PropertyFilterBuilder FilterBuilder)> capacities) => 0;
 		// public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
 		// public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
 		// public virtual Inventory DefaultInventory => Inventory.Empty;
@@ -106,7 +106,7 @@ namespace Lunra.Hothouse.Models
 			*/
 			//Debug.LogWarning("TODO: Inventory, all of it lol");
 
-			var capacities = new List<(int Count, PropertyFilter Filter)>();
+			var capacities = new List<(int Count, PropertyFilterBuilder FilterBuilder)>();
 			var capacityPool = GetCapacities(capacities);
 			
 			if (capacities.Any())
@@ -120,19 +120,20 @@ namespace Lunra.Hothouse.Models
 				
 				foreach (var capacity in capacities)
 				{
-					var filterId = Game.Items.IdCounter.Next();
-					model.Inventory.Capacities.Add(
-						filterId,
-						capacity.Filter
-					);
-
-					model.Inventory.Container.New(
+					var capacityStack = model.Inventory.Container.New(
 						1,
 						Items.Instantiate.Capacity
 							.Of(
-								filterId,
 								capacityPoolItem.Id,
 								capacity.Count
+							)
+					);
+					
+					model.Inventory.Capacities.Add(
+						capacityStack.Id,
+						capacity.FilterBuilder
+							.RequireAll(
+								PropertyValidations.Long.EqualTo(Items.Keys.Resource.ParentPool, capacityPoolItem.Id)
 							)
 					);
 				}

@@ -57,43 +57,49 @@ namespace Lunra.Hothouse.Models
 		{
 			model.Enterable.Reset();
 
-			model.Inventory.Container.New(
-				1,
-				out var capacityPoolItem,
-				Items.Instantiate.CapacityPool.OfZero()
-			);
-
-			var capacityFilterId = Game.Items.IdCounter.Next();
-			
-			model.Inventory.Capacities.Add(
-				capacityFilterId,
-				PropertyFilter.Default()
-			);
-			
 			model.Inventory.Container.Deposit(
 				Game.Items.Builder
 					.BeginItem()
 					.WithProperties(
 						Items.Instantiate.Capacity.OfZero(
-							capacityFilterId,
-							capacityPoolItem.Id
+							IdCounter.UndefinedId
 						)
 					)
+					.Done(out var capacityPool)
+			);
+
+			model.Inventory.Container.Deposit(
+				Game.Items.Builder
+					.BeginItem()
+					.WithProperties(
+						Items.Instantiate.Capacity.OfZero(
+							capacityPool.Id
+						)
+					)
+					.Done(out var capacity)
 			);
 			
-			foreach (var (item, stack) in Game.Items.InStack(inventory))
+			model.Inventory.Capacities.Add(
+				capacity.Id,
+				PropertyFilter.Default()
+			);
+			
+			foreach (var element in Game.Items.InStack(inventory))
 			{
-				if (item.TryGet(Items.Keys.Shared.Type, out var type))
+				if (element.Item.TryGet(Items.Keys.Shared.Type, out var type))
 				{
 					if (type == Items.Values.Shared.Types.Resource)
 					{
-						item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
-						model.Inventory.Container.Deposit(stack);
+						element.Item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
+						element.Item[Items.Keys.Resource.ParentPool] = capacityPool.Id;
+						model.Inventory.Container.Deposit(element.Stack);
 					}
 					else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");
 				}
-				else Debug.LogError($"Unable to get the {Items.Keys.Shared.Type} for {item}");
+				else Debug.LogError($"Unable to get the {Items.Keys.Shared.Type} for {element.Item}");
 			}
+			
+			model.Inventory.Calculate();
 
 			// model.Inventory.Reset(
 			// 	InventoryPermission.WithdrawalForJobs(EnumExtensions.GetValues(Jobs.Unknown)),

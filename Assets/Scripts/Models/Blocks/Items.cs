@@ -40,6 +40,7 @@ namespace Lunra.Hothouse.Models
 						{
 							(Keys.Resource.Type, id),
 							(Keys.Resource.LogisticState, Values.Resource.LogisticStates.None),
+							(Keys.Resource.ParentPool, IdCounter.UndefinedId),
 							
 							(Keys.Resource.Decay.IsEnabled, true),
 							(Keys.Resource.Decay.Maximum, DefaultDecayMaximum),
@@ -101,7 +102,8 @@ namespace Lunra.Hothouse.Models
 							(Keys.CapacityPool.CountCurrent, 0),
 							(Keys.CapacityPool.CountMaximum, countMaximum),
 							(Keys.CapacityPool.CountTarget, countMaximum),
-							(Keys.CapacityPool.IsForbidden, false)
+							(Keys.CapacityPool.IsForbidden, false),
+							(Keys.CapacityPool.IsStale, true)
 						},
 						overrides
 					);
@@ -111,13 +113,11 @@ namespace Lunra.Hothouse.Models
 			public static class Capacity
 			{
 				public static PropertyKeyValue[] OfZero(
-					long filterId,
 					long poolId,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Get(
-						filterId,
 						poolId,
 						0,
 						overrides
@@ -125,14 +125,12 @@ namespace Lunra.Hothouse.Models
 				}
 
 				public static PropertyKeyValue[] Of(
-					long filterId,
 					long poolId,
 					int count,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Get(
-						filterId,
 						poolId,
 						count,
 						overrides
@@ -140,7 +138,6 @@ namespace Lunra.Hothouse.Models
 				}
 				
 				static PropertyKeyValue[] Get(
-					long filterId,
 					long poolId,
 					int count,
 					params PropertyKeyValue[] overrides
@@ -150,7 +147,6 @@ namespace Lunra.Hothouse.Models
 						Values.Shared.Types.Capacity,
 						new PropertyKeyValue[]
 						{
-							(Keys.Capacity.Filter, filterId),
 							(Keys.Capacity.Pool, poolId),
 							(Keys.Capacity.Desire, Values.Capacity.Desires.NotCalculated), 
 							(Keys.Capacity.TimeoutExpired, 0L),
@@ -167,6 +163,7 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKeyValue[] Of(
 					long capacityId,
+					long capacityPoolId,
 					string state,
 					params PropertyKeyValue[] overrides
 				)
@@ -176,6 +173,7 @@ namespace Lunra.Hothouse.Models
 						new PropertyKeyValue[]
 						{
 							(Keys.Reservation.CapacityId, capacityId),
+							(Keys.Reservation.CapacityPoolId, capacityPoolId),
 							(Keys.Reservation.TransferId, IdCounter.UndefinedId),
 							(Keys.Reservation.IsPromised, false),
 							(Keys.Reservation.LogisticState, state)
@@ -186,11 +184,13 @@ namespace Lunra.Hothouse.Models
 
 				public static PropertyKeyValue[] OfInput(
 					long capacityId,
+					long capacityPoolId,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Of(
 						capacityId,
+						capacityPoolId,
 						Values.Reservation.LogisticStates.Input,
 						overrides
 					);
@@ -198,11 +198,13 @@ namespace Lunra.Hothouse.Models
 				
 				public static PropertyKeyValue[] OfOutput(
 					long capacityId,
+					long capacityPoolId,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Of(
 						capacityId,
+						capacityPoolId,
 						Values.Reservation.LogisticStates.Output,
 						overrides
 					);
@@ -210,11 +212,13 @@ namespace Lunra.Hothouse.Models
 
 				public static PropertyKeyValue[] OfUnknown(
 					long capacityId,
+					long capacityPoolId,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Of(
 						capacityId,
+						capacityPoolId,
 						Values.Reservation.LogisticStates.Unknown,
 						overrides
 					);
@@ -294,6 +298,7 @@ namespace Lunra.Hothouse.Models
 
 				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
+				public static readonly PropertyKey<long> ParentPool = Create<long>(nameof(ParentPool));
 
 				public static class Decay
 				{
@@ -316,13 +321,13 @@ namespace Lunra.Hothouse.Models
 				public static readonly PropertyKey<int> CountMaximum = Create<int>(nameof(CountMaximum));
 				public static readonly PropertyKey<int> CountTarget = Create<int>(nameof(CountTarget));
 				public static readonly PropertyKey<bool> IsForbidden = Create<bool>(nameof(IsForbidden));
+				public static readonly PropertyKey<bool> IsStale = Create<bool>(nameof(IsStale));
 			}
 			
 			public static class Capacity
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Capacity), suffix);
 				
-				public static readonly PropertyKey<long> Filter = Create<long>(nameof(Filter));
 				public static readonly PropertyKey<long> Pool = Create<long>(nameof(Pool));
 				public static readonly PropertyKey<string> Desire = Create<string>(nameof(Desire));
 				public static readonly PropertyKey<long> TimeoutExpired = Create<long>(nameof(TimeoutExpired));
@@ -336,6 +341,7 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Reservation), suffix);
 				
 				public static readonly PropertyKey<long> CapacityId = Create<long>(nameof(CapacityId));
+				public static readonly PropertyKey<long> CapacityPoolId = Create<long>(nameof(CapacityPoolId));
 				public static readonly PropertyKey<long> TransferId = Create<long>(nameof(TransferId));
 				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
@@ -345,6 +351,7 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Transfer), suffix);
 				
+				// TODO: This should probably be renamed to ResourceId...
 				public static readonly PropertyKey<long> ItemId = Create<long>(nameof(ItemId));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
 				public static readonly PropertyKey<long> ReservationPickupId = Create<long>(nameof(ReservationPickupId));

@@ -7,7 +7,7 @@ namespace Lunra.Hothouse.Models
 	{
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 
-		public override int GetCapacities(List<(int Count, PropertyFilter Filter)> capacities)
+		public override int GetCapacities(List<(int Count, PropertyFilterBuilder FilterBuilder)> capacities)
 		{
 			// TODO: Add a convenience function to this to make it easier to quickly define this tuple with a given
 			// list of KV's
