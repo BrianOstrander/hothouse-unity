@@ -1,8 +1,10 @@
+using System;
 using System.Linq;
 using Lunra.Core;
 using Lunra.Editor.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Services.Editor;
+using Lunra.StyxMvp.Models;
 using UnityEditor;
 using UnityEngine;
 
@@ -70,7 +72,7 @@ namespace Lunra.Hothouse.Editor
 				}
 				GUILayout.EndHorizontal();
 				
-				OnDwellersGui();
+				OnInventoryGui();
 			}
 			GUIExtensions.PopEnabled();
 
@@ -78,84 +80,197 @@ namespace Lunra.Hothouse.Editor
 
 		void OnDwellersGui()
 		{
+			DrawModelGui<DwellerModel>(
+				null,
+				m => "Dweller",
+				m => $"{m.Name.Value} - {m.Job.Value}",
+				m =>
+				{
+					if (GUILayout.Button("Satisfy", GUILayout.ExpandWidth(false)))
+					{
+						m.Goals.Apply(
+							EnumExtensions.GetValues(Motives.Unknown, Motives.None)
+								.Select(motive => (motive, -1f))
+								.ToArray()
+						);
+					}
+							
+					if (GUILayout.Button("Hurt", GUILayout.ExpandWidth(false)))
+					{
+						Damage.ApplyGeneric(
+							m.Health.Current.Value * 0.25f,
+							m
+						);
+					}
+					if (GUILayout.Button("Kill", GUILayout.ExpandWidth(false)))
+					{
+						Damage.ApplyGeneric(
+							9999f,
+							m
+						);
+					}
+				},
+				m =>
+				{
+					GUILayout.BeginHorizontal();
+					{
+						if (GUILayout.Button("Break Inventory Promises")) m.InventoryPromises.BreakAll();
+					}
+					GUILayout.EndHorizontal();
+						
+					var addRemoveButtonWidth = GUILayout.Width(48f);
+						
+					GUILayout.BeginHorizontal();
+					{
+						GUILayout.Label("Add");
+							
+						foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
+						{
+							if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
+							{
+								m.Goals.Apply((motive, 0.5f));
+							}	
+						}
+					}
+					GUILayout.EndHorizontal();
+						
+					GUILayout.BeginHorizontal();
+					{
+						GUILayout.Label("Remove");
+							
+						foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
+						{
+							if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
+							{
+								m.Goals.Apply((motive, -0.5f));
+							}	
+						}
+					}
+					GUILayout.EndHorizontal();
+						
+					m.IsDebugging = EditorGUILayout.Toggle(nameof(m.IsDebugging), m.IsDebugging);
+				}
+			);
+		}
+		
+		void OnInventoryGui()
+		{
+			DrawModelGui<IInventoryModel>(
+				m =>
+				{
+					switch (m)
+					{
+						case FloraModel _:
+							return SceneInspectionSettings.IsInspectingFlora.Value;
+						case BuildingModel _:
+							return SceneInspectionSettings.IsInspectingBuildings.Value;
+						case ItemDropModel _:
+							return SceneInspectionSettings.IsInspectingItemDrops.Value;
+						case DwellerModel _:
+							return SceneInspectionSettings.IsInspectingDwellers.Value;
+						case DebrisModel _:
+							return SceneInspectionSettings.IsInspectingDebris.Value;
+						default:
+							return false;
+					}
+				},
+				m => $"Inventory.{m.GetType().Name}",
+				drawBody: m =>
+				{
+					foreach (var (capacityPool, _) in m.Inventory.Container.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool).ToArray())
+					{
+						GUILayout.BeginHorizontal();
+						{
+							GUILayout.Label($"Pool [ {capacityPool.Id} ]", GUILayout.Width(64f));
+
+							if (GUILayout.Button("None", EditorStyles.miniButtonLeft))
+							{
+								m.Inventory.SetForbidden(capacityPool.Id, false);
+								m.Inventory.SetCapacity(capacityPool.Id, capacityPool[Items.Keys.CapacityPool.CountMaximum]);
+							}
+							if (GUILayout.Button("Zero", EditorStyles.miniButtonMid))
+							{
+								m.Inventory.SetForbidden(capacityPool.Id, false);
+								m.Inventory.SetCapacity(capacityPool.Id, 0);
+							}
+							if (GUILayout.Button("One", EditorStyles.miniButtonMid))
+							{
+								m.Inventory.SetForbidden(capacityPool.Id, false);
+								m.Inventory.SetCapacity(capacityPool.Id, 1);
+							}
+							if (GUILayout.Button("Unlimited", EditorStyles.miniButtonRight))
+							{
+								m.Inventory.SetForbidden(capacityPool.Id, false);
+								m.Inventory.SetCapacity(capacityPool.Id, int.MaxValue);
+							}
+							if (GUILayout.Button("Forbidden", EditorStyles.miniButton))
+							{
+								m.Inventory.SetForbidden(capacityPool.Id, true);
+							}
+						}
+						GUILayout.EndHorizontal();
+						
+						foreach (var (capacity, _) in m.Inventory.Container.All(i => i[Items.Keys.Capacity.Pool] == capacityPool.Id).ToArray())
+						{
+							GUILayout.BeginHorizontal();
+							{
+								GUILayout.Space(16f);
+								GUILayout.Label($"\tCapacity [ {capacity.Id} ]");
+
+								if (GUILayout.Button("None", EditorStyles.miniButtonLeft))
+								{
+									m.Inventory.SetCapacity(capacity.Id, capacity[Items.Keys.Capacity.CountMaximum]);
+								}
+								if (GUILayout.Button("Zero", EditorStyles.miniButtonMid))
+								{
+									m.Inventory.SetCapacity(capacity.Id, 0);
+								}
+								if (GUILayout.Button("One", EditorStyles.miniButtonMid))
+								{
+									m.Inventory.SetCapacity(capacity.Id, 1);
+								}
+								if (GUILayout.Button("Unlimited", EditorStyles.miniButtonRight))
+								{
+									m.Inventory.SetCapacity(capacity.Id, int.MaxValue);
+								}
+							}
+							GUILayout.EndHorizontal();
+							
+						}
+					}
+				}
+			);
+		}
+		
+		void DrawModelGui<M>(
+			Func<M, bool> predicate,
+			Func<M, string> getHeaderPrefix,
+			Func<M, string> getHeaderSuffix = null,
+			Action<M> drawHeaderRight = null,
+			Action<M> drawBody = null
+		)
+			where M : IModel
+		{
 			if (!SceneInspectionSettings.IsInspecting.Value) return;
-			if (!SceneInspectionSettings.IsInspectingDwellers.Value) return;
 			if (!GameStateEditorUtility.GetGameState(out var gameState)) return;
 			
 			EditorGUIExtensions.PushIndent();
 			{
-				foreach (var dweller in gameState.Payload.Game.Dwellers.AllActive)
+				foreach (var model in gameState.Payload.Game.Query.All(predicate))
 				{
 					GUILayoutExtensions.BeginVertical(EditorStyles.helpBox, Color.white);
 					{
 						GUILayout.BeginHorizontal();
 						{
-							GUILayout.Label("Dweller [ " + dweller.ShortId + " ] : " + dweller.Name.Value + " - " + dweller.Job.Value, EditorStyles.boldLabel);
-							
-							if (GUILayout.Button("Satisfy", GUILayout.ExpandWidth(false)))
-							{
-								dweller.Goals.Apply(
-									EnumExtensions.GetValues(Motives.Unknown, Motives.None)
-										.Select(m => (m, -1f))
-										.ToArray()
-								);
-							}
-							
-							if (GUILayout.Button("Hurt", GUILayout.ExpandWidth(false)))
-							{
-								Damage.ApplyGeneric(
-									dweller.Health.Current.Value * 0.25f,
-									dweller
-								);
-							}
-							if (GUILayout.Button("Kill", GUILayout.ExpandWidth(false)))
-							{
-								Damage.ApplyGeneric(
-									9999f,
-									dweller
-								);
-							}
+							var header = $"{getHeaderPrefix(model)} [ {model.ShortId} ]";
+							if (getHeaderSuffix != null) header += $" : {getHeaderSuffix(model)}";
+							GUILayout.Label(header, EditorStyles.boldLabel);
+
+							drawHeaderRight?.Invoke(model);
 						}
 						GUILayout.EndHorizontal();
 
-						GUILayout.BeginHorizontal();
-						{
-							if (GUILayout.Button("Break Inventory Promises")) dweller.InventoryPromises.BreakAll();
-						}
-						GUILayout.EndHorizontal();
-						
-						var addRemoveButtonWidth = GUILayout.Width(48f);
-						
-						GUILayout.BeginHorizontal();
-						{
-							GUILayout.Label("Add");
-							
-							foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
-							{
-								if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
-								{
-									dweller.Goals.Apply((motive, 0.5f));
-								}	
-							}
-						}
-						GUILayout.EndHorizontal();
-						
-						GUILayout.BeginHorizontal();
-						{
-							GUILayout.Label("Remove");
-							
-							foreach (var motive in EnumExtensions.GetValues(Motives.Unknown, Motives.None))
-							{
-								if (GUILayout.Button(motive.ToString(), addRemoveButtonWidth))
-								{
-									dweller.Goals.Apply((motive, -0.5f));
-								}	
-							}
-						}
-						GUILayout.EndHorizontal();
-						
-						dweller.IsDebugging = EditorGUILayout.Toggle(nameof(dweller.IsDebugging), dweller.IsDebugging);
-
+						drawBody?.Invoke(model);
 					}
 					GUILayoutExtensions.EndVertical();
 				}
