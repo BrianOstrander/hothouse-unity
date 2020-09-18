@@ -383,42 +383,6 @@ namespace Lunra.Hothouse.Models
 			return countTargetDeltaRemaining != 0;
 		}
 		
-		// void OnSetCapacityBudgetDecrease(
-		// 	int countTargetDelta,
-		// 	ReservationCache[] reservationsActive
-		// )
-		// {
-		// 	countTargetDelta = Mathf.Abs(countTargetDelta);
-		//
-		// 	var reservationsSorted = reservationsActive
-		// 		.OrderBy(r => r.TransferState == ReservationCache.LogisticStates.NotDefined)
-		// 		.ThenBy(r => r.TransferState == ReservationCache.LogisticStates.Pickup)
-		// 		.ThenBy(r => r.TransferState == ReservationCache.LogisticStates.Dropoff);
-		//
-		// 	foreach (var cache in reservationsSorted)
-		// 	{
-		// 		
-		//
-		// 		if (--countTargetDelta == 0) break;
-		// 	}
-		// }
-		
-		// public enum Goals
-		// {
-		// 	Unknown = 0,
-		// 	None = 10,
-		// 	Receive = 20,
-		// 	Distribute = 30
-		// }
-		
-		[Flags]
-		public enum Operations
-		{
-			None = 0,
-			ForbidPoolReceiving = 1 << 0,
-			ApplyModifications = 1 << 1
-		}
-
 		public void Calculate()
 		{
 			var capacityPools = new Dictionary<long, Item>();
