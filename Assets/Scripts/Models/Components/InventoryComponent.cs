@@ -93,7 +93,7 @@ namespace Lunra.Hothouse.Models
 					reservation =>
 					{
 						// If this isn't a reservation, it should return false anyways...
-						if (!reservation[Items.Keys.Reservation.IsPromised]) return false;
+						if (reservation[Items.Keys.Reservation.TransferId] == IdCounter.UndefinedId) return false;
 
 						var capacityId = reservation[Items.Keys.Reservation.CapacityId];
 

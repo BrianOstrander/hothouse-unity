@@ -178,7 +178,6 @@ namespace Lunra.Hothouse.Models
 							(Keys.Reservation.CapacityId, capacityId),
 							(Keys.Reservation.CapacityPoolId, capacityPoolId),
 							(Keys.Reservation.TransferId, IdCounter.UndefinedId),
-							(Keys.Reservation.IsPromised, false),
 							(Keys.Reservation.LogisticState, state)
 						},
 						overrides
@@ -344,7 +343,6 @@ namespace Lunra.Hothouse.Models
 				public static readonly PropertyKey<long> CapacityId = Create<long>(nameof(CapacityId));
 				public static readonly PropertyKey<long> CapacityPoolId = Create<long>(nameof(CapacityPoolId));
 				public static readonly PropertyKey<long> TransferId = Create<long>(nameof(TransferId));
-				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
 			}
 			

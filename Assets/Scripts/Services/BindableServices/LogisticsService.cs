@@ -28,7 +28,7 @@ namespace Lunra.Hothouse.Services
 		{
 			if (!hasBruk)
 			{
-				Debug.Break();
+				// Debug.Break();
 				hasBruk = true;
 				return;
 			}
@@ -37,6 +37,8 @@ namespace Lunra.Hothouse.Services
 			{
 				inventory.Inventory.Calculate();
 			}
+			
+			
 		}
 		#endregion
 	}

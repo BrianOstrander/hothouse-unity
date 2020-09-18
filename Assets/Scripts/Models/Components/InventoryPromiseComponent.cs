@@ -337,7 +337,7 @@ namespace Lunra.Hothouse.Models
 				
 				if (!Game.Items.TryGet(reservationId, out var reservationItem)) throw new OperationException($"Unable to find reservation [ {reservationId} ] referenced by {transferItem}");
 				
-				if (!reservationItem[Items.Keys.Reservation.IsPromised]) throw new OperationException($"Expected reservation {reservationItem} for transfer {transferItem} to be promised, but it was not");
+				if (reservationItem[Items.Keys.Reservation.TransferId] == IdCounter.UndefinedId) throw new OperationException($"Expected reservation {reservationItem} for transfer {transferItem} to have a defined {Items.Keys.Reservation.TransferId}, but it was not"); 
 
 				var reservationState = reservationItem[Items.Keys.Reservation.LogisticState];
 
@@ -409,7 +409,6 @@ namespace Lunra.Hothouse.Models
 					out var unPromisedReservationItem,
 					out var unPromisedReservationStack,
 					(Items.Keys.Reservation.CapacityId, capacityId),
-					(Items.Keys.Reservation.IsPromised, false),
 					(Items.Keys.Reservation.TransferId, IdCounter.UndefinedId)
 				);
 
@@ -490,8 +489,6 @@ namespace Lunra.Hothouse.Models
 			
 			item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.Output;
 
-			source.Reservation[Items.Keys.Reservation.IsPromised] = true;
-
 			source.Container.Deposit(item.StackOf(1));
 			source.Container.Deposit(source.Reservation.StackOf(1));
 
@@ -508,8 +505,6 @@ namespace Lunra.Hothouse.Models
 						destination.Reservation.StackOf(1)
 					).First()
 				);
-			
-			destination.Reservation[Items.Keys.Reservation.IsPromised] = true;
 
 			destination.Container.Deposit(destination.Reservation.StackOf(1));
 			
