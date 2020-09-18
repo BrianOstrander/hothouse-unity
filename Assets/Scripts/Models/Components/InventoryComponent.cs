@@ -143,6 +143,7 @@ namespace Lunra.Hothouse.Models
 		/// </summary>
 		/// <param name="id">The Item Id of either a specific Capacity or a CapacityPool.</param>
 		/// <param name="countTarget"></param>
+		// TODO: Might want to make a separate function for capacity pools...
 		public void SetCapacity(
 			long id,
 			int countTarget
@@ -266,7 +267,7 @@ namespace Lunra.Hothouse.Models
 			int count
 		)
 		{
-			Debug.LogError("uhh not done yet");
+			throw new NotImplementedException();
 		}
 
 		void OnSetCapacityBudgetIncrease(
@@ -387,7 +388,7 @@ namespace Lunra.Hothouse.Models
 		{
 			var capacityPools = new Dictionary<long, Item>();
 
-			foreach (var (item, stack) in Container.All().ToList())
+			foreach (var (item, _) in Container.All().ToList())
 			{
 				var type = item[Items.Keys.Shared.Type];
 
@@ -491,19 +492,8 @@ namespace Lunra.Hothouse.Models
 		
 		void OnCalculateCapacityPool(Item capacityPool)
 		{
-			var isForbidden = capacityPool[Items.Keys.CapacityPool.IsForbidden];
-			var countMaximum = capacityPool[Items.Keys.CapacityPool.CountMaximum];
 			var countPrevious = capacityPool[Items.Keys.CapacityPool.CountCurrent];
-			var countTarget = capacityPool[Items.Keys.CapacityPool.CountTarget];
 
-			string possibleGoalUpdate = null;
-
-			if (isForbidden) possibleGoalUpdate = Items.Values.Capacity.Desires.None;
-			else if (countTarget < countMaximum) possibleGoalUpdate = Items.Values.Capacity.Desires.Distribute;
-			else if (countMaximum < countTarget) possibleGoalUpdate = Items.Values.Capacity.Desires.Receive;
-			
-			var modificationsList = new List<Item>(); // capacities
-			
 			var countCurrent = 0;
 
 			foreach (var element in Container.All(i => i.TryGet(Items.Keys.Capacity.Pool, out var poolId) && poolId == capacityPool.Id))
@@ -513,11 +503,6 @@ namespace Lunra.Hothouse.Models
 				var capacityCountCurrent = element.Item[Items.Keys.Capacity.CountCurrent];
 				
 				countCurrent += capacityCountCurrent;
-
-				if (possibleGoalUpdate != null && possibleGoalUpdate != element.Item[Items.Keys.Capacity.Desire])
-				{
-					modificationsList.Add(element.Item);
-				}
 			}
 
 			if (countPrevious != countCurrent) capacityPool[Items.Keys.CapacityPool.CountCurrent] = countCurrent;

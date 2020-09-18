@@ -224,8 +224,7 @@ namespace Lunra.Hothouse.Editor
 					if (isForbidden.HasValue) inventory.SetForbidden(capacityPool.Id, isForbidden.Value);
 					if (countTarget.HasValue)
 					{
-						if (countTarget.Value == -1) capacityPool[Items.Keys.CapacityPool.CountTarget] = capacityPool[Items.Keys.CapacityPool.CountMaximum];
-						else capacityPool[Items.Keys.CapacityPool.CountTarget] = countTarget.Value;
+						inventory.SetCapacity(capacityPool.Id, countTarget.Value == -1 ? capacityPool[Items.Keys.CapacityPool.CountMaximum] : countTarget.Value);
 					}
 				}
 
