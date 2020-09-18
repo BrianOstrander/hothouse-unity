@@ -230,6 +230,7 @@ namespace Lunra.Hothouse.Editor
 
 				if (GUILayout.Button("None")) onCapacityPoolOverride(false, -1);
 				if (GUILayout.Button("Zero")) onCapacityPoolOverride(false, 0);
+				if (GUILayout.Button("One")) onCapacityPoolOverride(false, 1);
 				if (GUILayout.Button("Unlimited")) onCapacityPoolOverride(false, int.MaxValue);
 				if (GUILayout.Button("Forbidden")) onCapacityPoolOverride(true);
 			}
@@ -252,8 +253,8 @@ namespace Lunra.Hothouse.Editor
 				}
 
 				if (GUILayout.Button("None")) onCapacityOverride(-1);
-				if (GUILayout.Button("One")) onCapacityOverride(1);
 				if (GUILayout.Button("Zero")) onCapacityOverride(0);
+				if (GUILayout.Button("One")) onCapacityOverride(1);
 				if (GUILayout.Button("Unlimited")) onCapacityOverride(int.MaxValue);
 			}
 			GUILayout.EndHorizontal();

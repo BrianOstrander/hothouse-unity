@@ -186,7 +186,10 @@ namespace Lunra.Hothouse.Models
 					}
 				}
 			}
-			else if (type == Items.Values.Shared.Types.CapacityPool) OnSetCapacityPool(item, countTarget);
+			else if (type == Items.Values.Shared.Types.CapacityPool)
+			{
+				OnSetCapacityPool(item, countTarget);
+			}
 			else Debug.LogError($"Unrecognized {Items.Keys.Shared.Type}: {type} on [ {id} ] in [ {Container.Id} ] of {ShortId}");
 		}
 
@@ -262,14 +265,6 @@ namespace Lunra.Hothouse.Models
 			return countTargetDelta != 0;
 		}
 		
-		void OnSetCapacityPool(
-			Item capacityPool,
-			int count
-		)
-		{
-			throw new NotImplementedException();
-		}
-
 		void OnSetCapacityBudgetIncrease(
 			Item capacity,
 			int countTargetDelta,
@@ -382,6 +377,30 @@ namespace Lunra.Hothouse.Models
 			foreach (var b in broken.Values) b.InventoryPromises.BreakAll();
 
 			return countTargetDeltaRemaining != 0;
+		}
+		
+		bool OnSetCapacityPool(
+			Item capacityPool,
+			int count
+		)
+		{
+			var previousCapacityPoolCountTarget = capacityPool[Items.Keys.CapacityPool.CountTarget];
+
+			if (count == previousCapacityPoolCountTarget) return false;
+
+			capacityPool[Items.Keys.CapacityPool.CountTarget] = count;
+			
+			foreach (var (capacity, _) in Container.All(i => i[Items.Keys.Capacity.Pool] == capacityPool.Id).ToArray())
+			{
+				var capacityCountTarget = capacity[Items.Keys.Capacity.CountTarget];
+
+				if (count != capacityCountTarget)
+				{
+					SetCapacity(capacity.Id, Mathf.Min(count, capacity[Items.Keys.Capacity.CountMaximum]));
+				}
+			}
+
+			return true;
 		}
 		
 		public void Calculate()
