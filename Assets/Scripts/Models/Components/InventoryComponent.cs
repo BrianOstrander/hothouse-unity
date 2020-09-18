@@ -421,99 +421,23 @@ namespace Lunra.Hothouse.Models
 
 		public void Calculate()
 		{
-			var capacityToItemDesire = new Dictionary<long, (Item Item, string Desire)>();
 			var capacityPools = new Dictionary<long, Item>();
 
 			foreach (var (item, stack) in Container.All().ToList())
 			{
 				var type = item[Items.Keys.Shared.Type];
 
-				if (type == Items.Values.Shared.Types.Capacity)
-				{
-					capacityToItemDesire.Add(item.Id, (item, OnCalculateCapacity(item)));
-				}
-				else if (type == Items.Values.Shared.Types.CapacityPool)
-				{
-					capacityPools.Add(item.Id, item);
-				}
+				if (type == Items.Values.Shared.Types.Capacity) OnCalculateCapacity(item);
+				else if (type == Items.Values.Shared.Types.CapacityPool) capacityPools.Add(item.Id, item);
 			}
 			
 			foreach (var capacityPool in capacityPools.Values)
 			{
-				var capacityPoolResult = OnCalculateCapacityPool(
-					capacityPool,
-					capacityToItemDesire,
-					out var modificationDesire,
-					out var capacityModifications
-				);
-				
-				// if (capacityPoolResult.HasFlag(Operations.ApplyModifications))
-				// {
-				// 	// I don't love the way this works, but basically if the pool defines behaviour that conflicts with
-				// 	// the capacities below it, we fix those issues here...
-				// 	
-				// 	foreach (var modification in capacityModifications)
-				// 	{
-				// 		// Debug.Log($"Moving [ {modification.Capacity.Item.Id} ] from {modification.Begin} to {modification.End}");
-				//
-				// 		var desire = modification[Items.Keys.Capacity.Desire];
-				//
-				// 		if (desire != Items.Values.Capacity.Desires.None)
-				// 		{
-				// 			if (desire == Items.Values.Capacity.Desires.Receive)
-				// 			{
-				// 			
-				// 			}
-				// 			else if (desire == Items.Values.Capacity.Desires.Distribute)
-				// 			{
-				// 			
-				// 			}
-				// 			else
-				// 			{
-				// 			
-				// 			}	
-				// 		}
-				//
-				// 		switch (modification.Goal)
-				// 		{
-				// 			case Context.CapacityInfo.Goals.None:
-				// 				// No change required if previously had no goal... 
-				// 				break;
-				// 			case Context.CapacityInfo.Goals.Receive:
-				// 				// Changing a destination to something else...
-				// 				capacityDestinations.Remove(modification.Item.Id);
-				// 				break;
-				// 			case Context.CapacityInfo.Goals.Distribute:
-				// 				// Changing a source to something else...
-				// 				capacitySources.Remove(modification.Item.Id);
-				// 				break;
-				// 			default:
-				// 				Debug.LogError($"Unrecognized goal origin {modification.Goal}");
-				// 				break;
-				// 		}
-				// 		
-				// 		switch (modificationGoal)
-				// 		{
-				// 			case Context.CapacityInfo.Goals.None:
-				// 				// We're forbidding stuff, so we don't add it as a source or destination...
-				// 				break;
-				// 			case Context.CapacityInfo.Goals.Receive:
-				// 				// This is now a destination
-				// 				capacityDestinations.Add(modification.Item.Id, modification);
-				// 				break;
-				// 			case Context.CapacityInfo.Goals.Distribute:
-				// 				// This is now a source
-				// 				capacitySources.Add(modification.Item.Id, modification);
-				// 				break;
-				// 			default:
-				// 				Debug.LogError($"Unrecognized goal origin {modificationGoal}");
-				// 				break;
-				// 		}
-				// 	}	
-				// }
+				OnCalculateCapacityPool(capacityPool);
 			}
 		}
 
+		// TODO: I think I can remove the return on this...
 		string OnCalculateCapacity(Item capacity)
 		{
 			var desire = capacity[Items.Keys.Capacity.Desire];
@@ -601,12 +525,7 @@ namespace Lunra.Hothouse.Models
 			return Items.Values.Capacity.Desires.Distribute;
 		}
 		
-		Operations OnCalculateCapacityPool(
-			Item capacityPool,
-			Dictionary<long, (Item Item, string Desire)> capacityToItemDesire,
-			out string modificationDesire,
-			out Item[] capacityModifications
-		)
+		void OnCalculateCapacityPool(Item capacityPool)
 		{
 			var isForbidden = capacityPool[Items.Keys.CapacityPool.IsForbidden];
 			var countMaximum = capacityPool[Items.Keys.CapacityPool.CountMaximum];
@@ -638,38 +557,6 @@ namespace Lunra.Hothouse.Models
 			}
 
 			if (countPrevious != countCurrent) capacityPool[Items.Keys.CapacityPool.CountCurrent] = countCurrent;
-
-			modificationDesire = null;
-
-			if (possibleGoalUpdate != null)
-			{
-				if (possibleGoalUpdate == Items.Values.Capacity.Desires.None)
-				{
-					modificationDesire = possibleGoalUpdate;
-				}
-				else if (possibleGoalUpdate == Items.Values.Capacity.Desires.Receive)
-				{
-					if (countCurrent < countTarget) modificationDesire = possibleGoalUpdate;
-				}
-				else if (possibleGoalUpdate == Items.Values.Capacity.Desires.Distribute)
-				{
-					if (countTarget < countCurrent) modificationDesire = possibleGoalUpdate;
-				}
-				else 
-				{
-					Debug.LogError($"Unrecognized goal {possibleGoalUpdate}");
-					modificationsList.Clear();
-				}
-			}
-
-			capacityModifications = modificationsList.ToArray();
-
-			var result = Operations.None;
-
-			if (countTarget <= countCurrent) result |= Operations.ForbidPoolReceiving;
-			if (capacityModifications.Any()) result |= Operations.ApplyModifications;
-
-			return result;
 		}
 
 		#region HealthComponent Events
