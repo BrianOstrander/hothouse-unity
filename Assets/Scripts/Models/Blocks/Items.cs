@@ -152,8 +152,7 @@ namespace Lunra.Hothouse.Models
 						{
 							(Keys.Capacity.Filter, filterId),
 							(Keys.Capacity.Pool, poolId),
-							(Keys.Capacity.Desire, Values.Capacity.Desires.NotCalculated), 
-							(Keys.Capacity.TimeoutExpired, 0L),
+							(Keys.Capacity.Desire, Values.Capacity.Desires.NotCalculated),
 							(Keys.Capacity.CountCurrent, 0),
 							(Keys.Capacity.CountMaximum, count),
 							(Keys.Capacity.CountTarget, count)
@@ -325,7 +324,6 @@ namespace Lunra.Hothouse.Models
 				public static readonly PropertyKey<long> Filter = Create<long>(nameof(Filter));
 				public static readonly PropertyKey<long> Pool = Create<long>(nameof(Pool));
 				public static readonly PropertyKey<string> Desire = Create<string>(nameof(Desire));
-				public static readonly PropertyKey<long> TimeoutExpired = Create<long>(nameof(TimeoutExpired));
 				public static readonly PropertyKey<int> CountCurrent = Create<int>(nameof(CountCurrent));
 				public static readonly PropertyKey<int> CountMaximum = Create<int>(nameof(CountMaximum));
 				public static readonly PropertyKey<int> CountTarget = Create<int>(nameof(CountTarget));
@@ -336,6 +334,7 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Reservation), suffix);
 				
 				public static readonly PropertyKey<long> CapacityId = Create<long>(nameof(CapacityId));
+				// public static readonly PropertyKey<long> CapacityPoolId = Create<long>(nameof(CapacityPoolId));
 				public static readonly PropertyKey<long> TransferId = Create<long>(nameof(TransferId));
 				public static readonly PropertyKey<bool> IsPromised = Create<bool>(nameof(IsPromised));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
