@@ -389,19 +389,22 @@ namespace Lunra.Hothouse.Models
 				
 				var capacityId = reservationItem[Items.Keys.Reservation.CapacityId];
 				if (!Game.Items.TryGet(capacityId, out var capacityItem)) throw new OperationException($"Unable to find capacity [ {capacityId} ] for reservation {reservationItem}, referenced by {transferItem}");
+				
+				var capacityPoolId = capacityItem[Items.Keys.Capacity.Pool];
+				
+				if (!Game.Items.TryGet(capacityPoolId, out var capacityPoolItem)) throw new OperationException($"Unable to find capacity pool [ {capacityPoolId} ] for reservation {reservationItem}, referenced by {transferItem}");
 
 				var capacityCurrent = capacityItem[Items.Keys.Capacity.CountCurrent];
-
-				var capacityPoolId = capacityItem[Items.Keys.Capacity.Pool];
 				
 				if (!isOutput)
 				{
 					capacityCurrent -= reservationItemStack.Count;
 
-					if (!Game.Items.TryGet(capacityPoolId, out var capacityPoolItem)) throw new OperationException($"Unable to find capacity pool [ {capacityPoolId} ] for reservation {reservationItem}, referenced by {transferItem}");
-					
 					capacityPoolItem[Items.Keys.CapacityPool.CountCurrent] -= reservationItemStack.Count;
 				}
+
+				// Withdrawn items get cleaned up eventually, so no need to explicitly destroy them...
+				if (capacityPoolItem[Items.Keys.CapacityPool.IsForbidden]) return;
 				
 				var delta = capacityItem[Items.Keys.Capacity.CountTarget] - capacityCurrent;
 				

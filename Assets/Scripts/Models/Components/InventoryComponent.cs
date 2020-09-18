@@ -88,53 +88,50 @@ namespace Lunra.Hothouse.Models
 			
 			item[Items.Keys.CapacityPool.IsForbidden] = isForbidden;
 
-			var reservations = Container
-				.All(
-					reservation =>
-					{
-						// If this isn't a reservation, it should return false anyways...
-						if (reservation[Items.Keys.Reservation.TransferId] == IdCounter.UndefinedId) return false;
-
-						var capacityId = reservation[Items.Keys.Reservation.CapacityId];
-
-						// I believe all capacities currently require a capacity pool...
-						if (!Container.TryFindFirst(capacityId, out var capacity))
-						{
-							Debug.LogError($"Cannot find capacity [ {capacityId} ] in [ {Container.Id} ] of {ShortId}");
-							return false;
-						}
-
-						return capacity[Items.Keys.Capacity.Pool] == id;
-					}
-				)
-				.ToArray();
-
-			var transferParentsHandled = new HashSet<long>();
-			
-			foreach (var reservation in reservations)
+			if (isForbidden)
 			{
-				var transferId = reservation.Item[Items.Keys.Reservation.TransferId];
-				if (!Game.Items.TryGet(transferId, out var transfer))
+				var combineForbiddenOutputs = false;
+
+				foreach (var (reservation, reservationStack) in Container.All(i => i[Items.Keys.Reservation.CapacityPoolId] == id).ToArray())
 				{
-					Debug.LogError($"Cannot find transfer [ {transferId} ] for reservation {reservation.Item}");
-					continue;
+					var transferId = reservation[Items.Keys.Reservation.TransferId];
+
+					if (transferId != IdCounter.UndefinedId)
+					{
+						if (Game.Items.TryGet(transferId, out var transfer))
+						{
+							if (Game.Query.TryFindFirst<IInventoryPromiseModel>(m => m.Inventory.Container.Id == transfer.ContainerId, out var transferParent))
+							{
+								// TODO: Seems a bit heavy handed to break all promises...
+								transferParent.InventoryPromises.BreakAll();
+							}
+							else Debug.LogError($"Cannot find parent of transfer {transfer} for reservation {reservation}");
+						}
+						else Debug.LogError($"Cannot find transfer [ {transferId} ] for reservation {reservation}");
+
+						continue;
+					}
+
+					if (!combineForbiddenOutputs && reservation[Items.Keys.Reservation.LogisticState] == Items.Values.Reservation.LogisticStates.Output)
+					{
+						combineForbiddenOutputs = true;
+					}
+
+					Container.Destroy(reservationStack);
 				}
 
-				if (transfer[Items.Keys.Transfer.LogisticState] == Items.Values.Transfer.LogisticStates.Dropoff)
+				if (combineForbiddenOutputs)
 				{
-					Debug.LogError("TODO: Handle what happens to these leaked resources here!");
+					Debug.LogError("TODO: this!");
 				}
-				
-				if (!transferParentsHandled.Add(transfer.ContainerId)) continue;
-
-				var transferParent = Game.Query.FirstOrDefault<IInventoryPromiseModel>(m => m.Inventory.Container.Id == transfer.ContainerId);
-				if (transferParent == null)
+			}
+			else
+			{
+				foreach (var (capacity, _) in Container.All(i => i[Items.Keys.Capacity.Pool] == id).ToArray())
 				{
-					Debug.LogError($"Cannot find parent model containing transfer {transfer} for reservation {reservation.Item}");
-					continue;
+					capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.NotCalculated;
 				}
-				
-				transferParent.InventoryPromises.BreakAll();
+				Calculate();
 			}
 		}
 		
