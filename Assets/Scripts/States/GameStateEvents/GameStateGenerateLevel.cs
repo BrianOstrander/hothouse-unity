@@ -593,17 +593,17 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// 	true
 			// );
 
-			stockpile0.Inventory.Container
-				.TryFindFirst(i => i[Items.Keys.CapacityPool.Type] == Items.Values.CapacityPool.Types.Cache, out var stockpile0capacityPool);
-			
-			stockpile0.Inventory.Container
-				.New(
-					2,
-					out _,
-					Items.Instantiate.Resource.Stalk
-						.Append((Items.Keys.Resource.CapacityPoolId, stockpile0capacityPool.Id))
-						.ToArray()
-				);
+			// stockpile0.Inventory.Container
+			// 	.TryFindFirst(i => i[Items.Keys.CapacityPool.Type] == Items.Values.CapacityPool.Types.Cache, out var stockpile0capacityPool);
+			//
+			// stockpile0.Inventory.Container
+			// 	.New(
+			// 		2,
+			// 		out _,
+			// 		Items.Instantiate.Resource.Stalk
+			// 			.Append((Items.Keys.Resource.CapacityPoolId, stockpile0capacityPool.Id))
+			// 			.ToArray()
+			// 	);
 
 			// stockpile0.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
 			// cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Unlimited;

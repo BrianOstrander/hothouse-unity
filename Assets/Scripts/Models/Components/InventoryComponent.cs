@@ -373,21 +373,24 @@ namespace Lunra.Hothouse.Models
 				else Debug.LogError($"Cannot find capacity pool [ {capacityPoolId} ] for {capacity}");
 			}
 
-			if (existingUnpromisedOutputReservation == null)
+			if (0 < countTargetDelta)
 			{
-				Container.New(
-					countTargetDelta,
-					Items.Instantiate.Reservation.OfOutput(
-						capacity.Id,
-						capacityPoolId
-					)
-				);
-			}
-			else
-			{
-				Container.Increment(
-					existingUnpromisedOutputReservation.Reservation.StackOf(countTargetDelta)
-				);
+				if (existingUnpromisedOutputReservation == null)
+				{
+					Container.New(
+						countTargetDelta,
+						Items.Instantiate.Reservation.OfOutput(
+							capacity.Id,
+							capacityPoolId
+						)
+					);
+				}
+				else
+				{
+					Container.Increment(
+						existingUnpromisedOutputReservation.Reservation.StackOf(countTargetDelta)
+					);
+				}
 			}
 		}
 		
