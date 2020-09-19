@@ -63,22 +63,20 @@ namespace Lunra.Hothouse.Models
 				Items.Instantiate.CapacityPool.OfZero(Items.Values.CapacityPool.Types.Drop)
 			);
 
-			var capacityFilterId = Game.Items.IdCounter.Next();
-			
-			model.Inventory.Capacities.Add(
-				capacityFilterId,
-				PropertyFilter.Default()
-			);
-			
 			model.Inventory.Container.Deposit(
 				Game.Items.Builder
 					.BeginItem()
 					.WithProperties(
 						Items.Instantiate.Capacity.OfZero(
-							capacityFilterId,
 							capacityPoolItem.Id
 						)
 					)
+					.Done(out var capacity)
+			);
+			
+			model.Inventory.Capacities.Add(
+				capacity.Id,
+				PropertyFilter.Default()
 			);
 			
 			foreach (var (item, stack) in Game.Items.InStack(inventory))

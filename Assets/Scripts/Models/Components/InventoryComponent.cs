@@ -440,11 +440,9 @@ namespace Lunra.Hothouse.Models
 			var desire = capacity[Items.Keys.Capacity.Desire];
 			if (desire != Items.Values.Capacity.Desires.NotCalculated) return desire;
 
-			var filterId = capacity[Items.Keys.Capacity.Filter];
-
-			if (!Capacities.TryGetValue(filterId, out var filter))
+			if (!Capacities.TryGetValue(capacity.Id, out var filter))
 			{
-				Debug.LogError($"Cannot find filter [ {filterId} ] for capacity {capacity}");
+				Debug.LogError($"Cannot find filter [ {capacity.Id} ] for capacity {capacity}");
 				return null;
 			}
 

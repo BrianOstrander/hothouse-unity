@@ -120,13 +120,11 @@ namespace Lunra.Hothouse.Models
 			public static class Capacity
 			{
 				public static PropertyKeyValue[] OfZero(
-					long filterId,
 					long poolId,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Get(
-						filterId,
 						poolId,
 						0,
 						overrides
@@ -134,14 +132,12 @@ namespace Lunra.Hothouse.Models
 				}
 
 				public static PropertyKeyValue[] Of(
-					long filterId,
 					long poolId,
 					int count,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Get(
-						filterId,
 						poolId,
 						count,
 						overrides
@@ -149,7 +145,6 @@ namespace Lunra.Hothouse.Models
 				}
 				
 				static PropertyKeyValue[] Get(
-					long filterId,
 					long poolId,
 					int count,
 					params PropertyKeyValue[] overrides
@@ -159,7 +154,6 @@ namespace Lunra.Hothouse.Models
 						Values.Shared.Types.Capacity,
 						new PropertyKeyValue[]
 						{
-							(Keys.Capacity.Filter, filterId),
 							(Keys.Capacity.Pool, poolId),
 							(Keys.Capacity.Desire, Values.Capacity.Desires.NotCalculated),
 							(Keys.Capacity.CountCurrent, 0),
@@ -339,7 +333,6 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Capacity), suffix);
 				
-				public static readonly PropertyKey<long> Filter = Create<long>(nameof(Filter));
 				public static readonly PropertyKey<long> Pool = Create<long>(nameof(Pool));
 				public static readonly PropertyKey<string> Desire = Create<string>(nameof(Desire));
 				public static readonly PropertyKey<int> CountCurrent = Create<int>(nameof(CountCurrent));

@@ -41,6 +41,8 @@ namespace Lunra.Satchel
 		
 		public Stack Done(int count) => Done(count, out _);
 
+		public Stack Done(out Item item) => Done(1, out item);
+		
 		public Stack Done(
 			int count,
 			out Item item

@@ -42,7 +42,7 @@ namespace Lunra.Hothouse.Services
 		{
 			if (!hasBruk)
 			{
-				// Debug.Break();
+				Debug.Break();
 				hasBruk = true;
 				return;
 			}
@@ -68,6 +68,8 @@ namespace Lunra.Hothouse.Services
 
 			foreach (var item in Model.Items.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Reservation))
 			{
+				if (item.NoInstances) continue;
+				
 				var logisticState = item[Items.Keys.Reservation.LogisticState];
 
 				var cache = new ReservationCache

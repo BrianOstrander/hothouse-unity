@@ -123,20 +123,19 @@ namespace Lunra.Hothouse.Models
 				
 				foreach (var capacity in capacities)
 				{
-					var filterId = Game.Items.IdCounter.Next();
-					model.Inventory.Capacities.Add(
-						filterId,
-						capacity.Filter
-					);
-
 					model.Inventory.Container.New(
 						1,
+						out var capacityItem,
 						Items.Instantiate.Capacity
 							.Of(
-								filterId,
 								capacityPoolItem.Id,
 								capacity.Count
 							)
+					);
+					
+					model.Inventory.Capacities.Add(
+						capacityItem.Id,
+						capacity.Filter
 					);
 				}
 			}
