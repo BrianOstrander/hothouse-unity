@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Satchel;
@@ -33,7 +34,7 @@ namespace Lunra.Hothouse.Services
 		{
 			if (!hasBruk)
 			{
-				Debug.Break();
+				// Debug.Break();
 				hasBruk = true;
 				return;
 			}
@@ -45,19 +46,31 @@ namespace Lunra.Hothouse.Services
 				inventory.Inventory.Calculate();
 			}
 			
-			// var dwellers = new List<DwellerModel>();
-			//
-			// foreach (var dweller in Model.Dwellers.AllActive)
-			// {
-			// 	if (dweller.InventoryPromises.All.None()) dwellers.Add(dweller);
-			// }
-			//
-			// if (dwellers.None()) return;
+			var dwellers = new Dictionary<string, DwellerModel>();
+			
+			foreach (var dweller in Model.Dwellers.AllActive)
+			{
+				if (dweller.InventoryPromises.All.None()) dwellers.Add(dweller.Id.Value, dweller);
+			}
+			
+			if (dwellers.None()) return;
 
-			// var reservationInputs = new List<Item>();
-			// var reservationOutputs = new List<Item>();
-			//
-			// foreach (var ())
+			var reservationInputs = new List<Item>();
+			var reservationOutputs = new List<Item>();
+			
+			foreach (var item in Model.Items.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Reservation))
+			{
+				var logisticState = item[Items.Keys.Reservation.LogisticState];
+				
+				if (logisticState == Items.Values.Reservation.LogisticStates.Input) reservationInputs.Add(item);
+				else if (logisticState == Items.Values.Reservation.LogisticStates.Output) reservationOutputs.Add(item);
+				else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {item}");
+			}
+
+			// while (dwellers.Any() && reservationOutputs.Any())
+			// {
+			// 	
+			// }
 		}
 		#endregion
 	}

@@ -71,16 +71,20 @@ namespace Lunra.Hothouse.Editor
 					GUILayout.EndVertical();
 				}
 				GUILayout.EndHorizontal();
-				
-				OnInventoryGui();
+
+				if (SceneInspectionSettings.IsInspecting.Value && GameStateEditorUtility.GetGame(out var game, out _))
+				{
+					OnInventoryGui(game);
+				}
 			}
 			GUIExtensions.PopEnabled();
 
 		}
 
-		void OnDwellersGui()
+		void OnDwellersGui(GameModel game)
 		{
 			DrawModelGui<DwellerModel>(
+				game,
 				null,
 				m => "Dweller",
 				m => $"{m.Name.Value} - {m.Job.Value}",
@@ -153,9 +157,10 @@ namespace Lunra.Hothouse.Editor
 			);
 		}
 		
-		void OnInventoryGui()
+		void OnInventoryGui(GameModel game)
 		{
 			DrawModelGui<IInventoryModel>(
+				game,
 				m =>
 				{
 					switch (m)
@@ -243,6 +248,7 @@ namespace Lunra.Hothouse.Editor
 		}
 		
 		void DrawModelGui<M>(
+			GameModel game,
 			Func<M, bool> predicate,
 			Func<M, string> getHeaderPrefix,
 			Func<M, string> getHeaderSuffix = null,
@@ -251,12 +257,9 @@ namespace Lunra.Hothouse.Editor
 		)
 			where M : IModel
 		{
-			if (!SceneInspectionSettings.IsInspecting.Value) return;
-			if (!GameStateEditorUtility.GetGameState(out var gameState)) return;
-			
 			EditorGUIExtensions.PushIndent();
 			{
-				foreach (var model in gameState.Payload.Game.Query.All(predicate))
+				foreach (var model in game.Query.All(predicate))
 				{
 					GUILayoutExtensions.BeginVertical(EditorStyles.helpBox, Color.white);
 					{
