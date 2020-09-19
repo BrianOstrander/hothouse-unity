@@ -115,7 +115,10 @@ namespace Lunra.Hothouse.Models
 					1,
 					out var capacityPoolItem,
 					Items.Instantiate.CapacityPool
-						.Of(capacityPool)
+						.Of(
+							Items.Values.CapacityPool.Types.Cache,	
+							capacityPool
+						)
 				);
 				
 				foreach (var capacity in capacities)

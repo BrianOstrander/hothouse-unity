@@ -40,6 +40,7 @@ namespace Lunra.Hothouse.Models
 						{
 							(Keys.Resource.Type, id),
 							(Keys.Resource.LogisticState, Values.Resource.LogisticStates.None),
+							(Keys.Resource.CapacityPoolId, IdCounter.UndefinedId),
 							
 							(Keys.Resource.Decay.IsEnabled, true),
 							(Keys.Resource.Decay.Maximum, DefaultDecayMaximum),
@@ -59,37 +60,44 @@ namespace Lunra.Hothouse.Models
 			public static class CapacityPool
 			{
 				public static PropertyKeyValue[] OfUnlimited(
+					string type,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Get(
+						type,
 						int.MaxValue,
 						overrides
 					);
 				}
 				
 				public static PropertyKeyValue[] OfZero(
+					string type,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Get(
+						type,
 						0,
 						overrides
 					);
 				}
 
 				public static PropertyKeyValue[] Of(
+					string type,
 					int count,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Get(
+						type,
 						count,
 						overrides
 					);
 				}
 				
 				static PropertyKeyValue[] Get(
+					string type,
 					int countMaximum,
 					params PropertyKeyValue[] overrides
 				)
@@ -98,6 +106,7 @@ namespace Lunra.Hothouse.Models
 						Values.Shared.Types.CapacityPool,
 						new PropertyKeyValue[]
 						{
+							(Keys.CapacityPool.Type, type),
 							(Keys.CapacityPool.CountCurrent, 0),
 							(Keys.CapacityPool.CountMaximum, countMaximum),
 							(Keys.CapacityPool.CountTarget, countMaximum),
@@ -300,6 +309,7 @@ namespace Lunra.Hothouse.Models
 
 				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
 				public static readonly PropertyKey<string> LogisticState = Create<string>(nameof(LogisticState));
+				public static readonly PropertyKey<long> CapacityPoolId = Create<long>(nameof(CapacityPoolId));
 
 				public static class Decay
 				{
@@ -318,6 +328,7 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(CapacityPool), suffix);
 				
+				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
 				public static readonly PropertyKey<int> CountCurrent = Create<int>(nameof(CountCurrent));
 				public static readonly PropertyKey<int> CountMaximum = Create<int>(nameof(CountMaximum));
 				public static readonly PropertyKey<int> CountTarget = Create<int>(nameof(CountTarget));
@@ -394,6 +405,18 @@ namespace Lunra.Hothouse.Models
 					public static readonly string None = nameof(None).ToSnakeCase();
 					public static readonly string Receive = nameof(Receive).ToSnakeCase();
 					public static readonly string Distribute = nameof(Distribute).ToSnakeCase();
+				}
+			}
+			
+			public static class CapacityPool
+			{
+				public static class Types
+				{
+					public static readonly string Unknown = nameof(Unknown).ToSnakeCase();
+					public static readonly string Drop = nameof(Drop).ToSnakeCase();
+					public static readonly string Construction = nameof(Construction).ToSnakeCase();
+					public static readonly string Cache = nameof(Cache).ToSnakeCase();
+					public static readonly string Salvage = nameof(Salvage).ToSnakeCase();
 				}
 			}
 			

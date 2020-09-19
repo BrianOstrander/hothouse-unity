@@ -60,7 +60,7 @@ namespace Lunra.Hothouse.Models
 			model.Inventory.Container.New(
 				1,
 				out var capacityPoolItem,
-				Items.Instantiate.CapacityPool.OfZero()
+				Items.Instantiate.CapacityPool.OfZero(Items.Values.CapacityPool.Types.Drop)
 			);
 
 			var capacityFilterId = Game.Items.IdCounter.Next();
@@ -87,7 +87,10 @@ namespace Lunra.Hothouse.Models
 				{
 					if (type == Items.Values.Shared.Types.Resource)
 					{
-						item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
+						item.Set(
+							(Items.Keys.Resource.LogisticState, Items.Values.Resource.LogisticStates.None),
+							(Items.Keys.Resource.CapacityPoolId, capacityPoolItem.Id)
+						);
 						model.Inventory.Container.Deposit(stack);
 					}
 					else Debug.LogError($"Unrecognized type \"{type}\", was this inventory properly sanitized before dropping?");

@@ -333,6 +333,7 @@ namespace Lunra.Hothouse.Models
 			foreach (var reservationIdKey in new [] { Items.Keys.Transfer.ReservationDropoffId, Items.Keys.Transfer.ReservationPickupId })
 			{
 				var reservationId = transferItem[reservationIdKey];
+				// If the reservationId is null, that means someone else destroyed the associated reservation.
 				if (reservationId == IdCounter.UndefinedId) continue;
 				
 				if (!Game.Items.TryGet(reservationId, out var reservationItem)) throw new OperationException($"Unable to find reservation [ {reservationId} ] referenced by {transferItem}");
