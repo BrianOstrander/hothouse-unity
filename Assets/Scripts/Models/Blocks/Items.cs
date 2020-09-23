@@ -154,7 +154,7 @@ namespace Lunra.Hothouse.Models
 						Values.Shared.Types.Capacity,
 						new PropertyKeyValue[]
 						{
-							(Keys.Capacity.Pool, poolId),
+							(Keys.Capacity.CapacityPoolId, poolId),
 							(Keys.Capacity.Desire, Values.Capacity.Desires.NotCalculated),
 							(Keys.Capacity.CountCurrent, 0),
 							(Keys.Capacity.CountMaximum, count),
@@ -241,7 +241,7 @@ namespace Lunra.Hothouse.Models
 				{
 					return Of(
 						itemId,
-						Values.Transfer.ReservationTargets.Input,
+						Values.Transfer.ReservationTargets.Output,
 						reservationOutputId,
 						reservationInputId,
 						overrides
@@ -256,7 +256,7 @@ namespace Lunra.Hothouse.Models
 				{
 					return Of(
 						itemId,
-						Values.Transfer.ReservationTargets.Output,
+						Values.Transfer.ReservationTargets.Input,
 						IdCounter.UndefinedId,
 						reservationInputId,
 						overrides
@@ -333,7 +333,7 @@ namespace Lunra.Hothouse.Models
 			{
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(Capacity), suffix);
 				
-				public static readonly PropertyKey<long> Pool = Create<long>(nameof(Pool));
+				public static readonly PropertyKey<long> CapacityPoolId = Create<long>(nameof(CapacityPoolId));
 				public static readonly PropertyKey<string> Desire = Create<string>(nameof(Desire));
 				public static readonly PropertyKey<int> CountCurrent = Create<int>(nameof(CountCurrent));
 				public static readonly PropertyKey<int> CountMaximum = Create<int>(nameof(CountMaximum));
@@ -387,6 +387,7 @@ namespace Lunra.Hothouse.Models
 				{
 					public static readonly string None = nameof(None).ToSnakeCase();
 					public static readonly string Output = nameof(Output).ToSnakeCase();
+					public static readonly string Transfer = nameof(Transfer).ToSnakeCase();
 				}
 			}
 
@@ -427,8 +428,8 @@ namespace Lunra.Hothouse.Models
 			{
 				public static class ReservationTargets
 				{
-					public static readonly string Input = nameof(Input).ToSnakeCase();
 					public static readonly string Output = nameof(Output).ToSnakeCase();
+					public static readonly string Input = nameof(Input).ToSnakeCase();
 				}
 			}
 		}

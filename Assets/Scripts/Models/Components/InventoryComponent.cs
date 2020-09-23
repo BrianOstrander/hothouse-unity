@@ -119,7 +119,7 @@ namespace Lunra.Hothouse.Models
 			}
 			else
 			{
-				foreach (var (capacity, _) in Container.All(i => i[Items.Keys.Capacity.Pool] == id).ToArray())
+				foreach (var (capacity, _) in Container.All(i => i[Items.Keys.Capacity.CapacityPoolId] == id).ToArray())
 				{
 					capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.NotCalculated;
 				}
@@ -279,7 +279,7 @@ namespace Lunra.Hothouse.Models
 							countTargetDelta,
 							Items.Instantiate.Reservation.OfInput(
 								capacity.Id,
-								capacity[Items.Keys.Capacity.Pool]
+								capacity[Items.Keys.Capacity.CapacityPoolId]
 							)
 						);
 					}
@@ -360,7 +360,7 @@ namespace Lunra.Hothouse.Models
 			// TODO: Super weird to break all of this...
 			foreach (var b in broken.Values) b.InventoryPromises.BreakAll();
 
-			var capacityPoolId = capacity[Items.Keys.Capacity.Pool];
+			var capacityPoolId = capacity[Items.Keys.Capacity.CapacityPoolId];
 			
 			// When input promises are broken, we need to remember to modify the capacities...
 			if (0 < capacityCountModifications)
@@ -405,7 +405,7 @@ namespace Lunra.Hothouse.Models
 
 			capacityPool[Items.Keys.CapacityPool.CountTarget] = count;
 
-			foreach (var (capacity, _) in Container.All(i => i[Items.Keys.Capacity.Pool] == capacityPool.Id).ToArray())
+			foreach (var (capacity, _) in Container.All(i => i[Items.Keys.Capacity.CapacityPoolId] == capacityPool.Id).ToArray())
 			{
 				var capacityCountTarget = capacity[Items.Keys.Capacity.CountTarget];
 
@@ -458,7 +458,7 @@ namespace Lunra.Hothouse.Models
 			}
 
 			var capacityPoolCountTarget = int.MaxValue;
-			var capacityPoolId = capacity[Items.Keys.Capacity.Pool];
+			var capacityPoolId = capacity[Items.Keys.Capacity.CapacityPoolId];
 
 			if (Container.TryFindFirst(capacityPoolId, out var capacityPool)) capacityPoolCountTarget = capacityPool[Items.Keys.CapacityPool.CountTarget];
 			else Debug.LogError($"Cannot find capacity pool with id {capacityPoolId} for {capacity}");
@@ -526,7 +526,7 @@ namespace Lunra.Hothouse.Models
 
 			var countCurrent = 0;
 
-			foreach (var element in Container.All(i => i.TryGet(Items.Keys.Capacity.Pool, out var poolId) && poolId == capacityPool.Id))
+			foreach (var element in Container.All(i => i.TryGet(Items.Keys.Capacity.CapacityPoolId, out var poolId) && poolId == capacityPool.Id))
 			{
 				if (element.Item.NoInstances) continue;
 				

@@ -99,7 +99,7 @@ namespace Lunra.Hothouse.Models
 							var isValid = false;
 							ProcessResult result;
 							
-							if (state == Items.Values.Transfer.ReservationTargets.Input)
+							if (state == Items.Values.Transfer.ReservationTargets.Output)
 							{
 								isValid = OnProcessTransfer(
 									promiseItem,
@@ -107,7 +107,7 @@ namespace Lunra.Hothouse.Models
 									out result
 								);
 							}
-							else if (state == Items.Values.Transfer.ReservationTargets.Output)
+							else if (state == Items.Values.Transfer.ReservationTargets.Input)
 							{
 								isValid = OnProcessTransfer(
 									promiseItem,
@@ -141,11 +141,11 @@ namespace Lunra.Hothouse.Models
 
 		bool OnProcessTransfer(
 			Item transferItem,
-			bool isInput,
+			bool isOutput,
 			out ProcessResult result
 		)
 		{
-			var reservationIdKey = isInput ? Items.Keys.Transfer.ReservationOutputId : Items.Keys.Transfer.ReservationInputId;
+			var reservationIdKey = isOutput ? Items.Keys.Transfer.ReservationOutputId : Items.Keys.Transfer.ReservationInputId;
 			var itemId = transferItem[Items.Keys.Transfer.ItemId];
 
 			if (!Game.Items.TryGet(itemId, out var item))
@@ -196,9 +196,9 @@ namespace Lunra.Hothouse.Models
 				return true;
 			}
 
-			if (isInput)
+			if (isOutput)
 			{
-				OnProcessInput(
+				OnProcessOutput(
 					transferItem,
 					reservationItem,
 					item,
@@ -207,7 +207,7 @@ namespace Lunra.Hothouse.Models
 			}
 			else
 			{
-				OnProcessOutput(
+				OnProcessInput(
 					transferItem,
 					reservationItem,
 					item,
@@ -220,15 +220,23 @@ namespace Lunra.Hothouse.Models
 			return true;
 		}
 
-		void OnProcessInput(
+		/// <summary>
+		/// Called when we are taking an item from the output inventory and putting it into this agent's inventory.
+		/// </summary>
+		/// <param name="transferItem"></param>
+		/// <param name="reservationOutputItem"></param>
+		/// <param name="item"></param>
+		/// <param name="reservationInventory"></param>
+		/// <exception cref="OperationException"></exception>
+		void OnProcessOutput(
 			Item transferItem,
-			Item reservationItem,
+			Item reservationOutputItem,
 			Item item,
 			IInventoryModel reservationInventory
 		)
 		{
 			reservationInventory.Inventory.Container
-				.Destroy(reservationItem);
+				.Destroy(reservationOutputItem);
 
 			Container.Transfer(
 				item.StackOfAll(),
@@ -236,36 +244,49 @@ namespace Lunra.Hothouse.Models
 				Model.Inventory.Container
 			);
 			
-			var capacityId = reservationItem[Items.Keys.Reservation.CapacityId];
+			var capacityId = reservationOutputItem[Items.Keys.Reservation.CapacityId];
 			
-			if (reservationInventory.Inventory.Container.TryFindFirst(capacityId, out var capacityDistribute))
-			{
-				capacityDistribute[Items.Keys.Capacity.CountCurrent]--;
+			if (!reservationInventory.Inventory.Container.TryFindFirst(capacityId, out var capacityOutput)) throw new OperationException($"Unable to find capacity item [ {capacityId} ] referenced by reservation {reservationOutputItem}");
+			
+			capacityOutput[Items.Keys.Capacity.CountCurrent]--;
 						
-				if (capacityDistribute[Items.Keys.Capacity.CountCurrent] == capacityDistribute[Items.Keys.Capacity.CountTarget])
-				{
-					capacityDistribute[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
-				}
+			if (capacityOutput[Items.Keys.Capacity.CountCurrent] == capacityOutput[Items.Keys.Capacity.CountTarget])
+			{
+				capacityOutput[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
 			}
-			else throw new OperationException($"Unable to find capacity item [ {capacityId} ] referenced by reservation {reservationItem}");
-				
-			item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
+
+			item.Set(
+				(Items.Keys.Resource.LogisticState, Items.Values.Resource.LogisticStates.Transfer),
+				(Items.Keys.Resource.CapacityPoolId, IdCounter.UndefinedId)
+			);
 				
 			transferItem.Set(
 				(Items.Keys.Transfer.ReservationOutputId, IdCounter.UndefinedId),
-				(Items.Keys.Transfer.ReservationTarget, Items.Values.Transfer.ReservationTargets.Output)
+				(Items.Keys.Transfer.ReservationTarget, Items.Values.Transfer.ReservationTargets.Input)
 			);
 		}
 		
-		void OnProcessOutput(
+		/// <summary>
+		/// Called when we are taking an item from this dweller's inventory and putting it into the input inventory.
+		/// </summary>
+		/// <param name="transferItem"></param>
+		/// <param name="reservationInputItem"></param>
+		/// <param name="item"></param>
+		/// <param name="reservationInventory"></param>
+		void OnProcessInput(
 			Item transferItem,
-			Item reservationItem,
+			Item reservationInputItem,
 			Item item,
 			IInventoryModel reservationInventory
 		)
 		{
+			item.Set(
+				(Items.Keys.Resource.CapacityPoolId, reservationInputItem[Items.Keys.Reservation.CapacityPoolId]),
+				(Items.Keys.Resource.LogisticState, Items.Values.Resource.LogisticStates.None)
+			);
+			
 			reservationInventory.Inventory.Container
-				.Destroy(reservationItem);
+				.Destroy(reservationInputItem);
 
 			Container.Transfer(
 				item.StackOfAll(),
@@ -330,7 +351,9 @@ namespace Lunra.Hothouse.Models
 			Stack transferStack
 		)
 		{
-			foreach (var reservationIdKey in new [] { Items.Keys.Transfer.ReservationInputId, Items.Keys.Transfer.ReservationOutputId })
+			var isItemHandled = false;
+			
+			foreach (var reservationIdKey in new [] { Items.Keys.Transfer.ReservationOutputId, Items.Keys.Transfer.ReservationInputId })
 			{
 				var reservationId = transferItem[reservationIdKey];
 				// If the reservationId is null, that means someone else destroyed the associated reservation.
@@ -352,52 +375,58 @@ namespace Lunra.Hothouse.Models
 				
 				if (reservationItemStack.Id != reservationItem.Id) throw new OperationException($"Expected reservation stack to have id {reservationItem.Id}, but found {reservationItemStack.Id} instead, referenced by {transferItem}");
 
-				bool isOutput;
+				bool isReservationStateOutput;
 
-				if (reservationState == Items.Values.Reservation.LogisticStates.Input) isOutput = false;
-				else if (reservationState == Items.Values.Reservation.LogisticStates.Output) isOutput = true;
+				if (reservationState == Items.Values.Reservation.LogisticStates.Input) isReservationStateOutput = false;
+				else if (reservationState == Items.Values.Reservation.LogisticStates.Output) isReservationStateOutput = true;
 				else throw new OperationException($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {reservationItem} for transfer {transferItem}");
 
-				if (isOutput)
+				if (!isItemHandled)
 				{
-					var outputStacks = reservationContainer.Withdrawal((transferItem[Items.Keys.Transfer.ItemId], transferStack.Count));
+					isItemHandled = true;
 					
-					if (outputStacks.Length != 1) throw new OperationException($"Expected 1 output item, but withdrew {outputStacks.Length} instead, referenced by {transferItem}");
-					
-					var outputStack = outputStacks.First();
+					var itemStacks = (isReservationStateOutput ? reservationContainer : Model.Inventory.Container).Withdrawal((transferItem[Items.Keys.Transfer.ItemId], transferStack.Count));
 
-					if (outputStack.Count != transferStack.Count) throw new OperationException($"Expected output stack to have count of {transferStack.Count}, but instead it was {outputStack.Count}, referenced by {transferItem}");
-					
-					if (!Game.Items.TryGet(outputStack.Id, out var outputItem)) throw new OperationException($"Unable to find item for stack {outputStack}, referenced by {transferItem}");
+					if (itemStacks.Length != 1) throw new OperationException($"Expected 1 output item, but withdrew {itemStacks.Length} instead, referenced by {transferItem}");
 
-					var outputItemType = outputItem[Items.Keys.Shared.Type];
+					var itemStack = itemStacks.First();
 
-					if (outputItemType == Items.Values.Shared.Types.Resource)
+					if (itemStack.Count != transferStack.Count) throw new OperationException($"Expected output stack to have count of {transferStack.Count}, but instead it was {itemStack.Count}, referenced by {transferItem}");
+
+					if (!Game.Items.TryGet(itemStack.Id, out var item)) throw new OperationException($"Unable to find item for stack {itemStack}, referenced by {transferItem}");
+
+					var itemType = item[Items.Keys.Shared.Type];
+
+					if (itemType == Items.Values.Shared.Types.Resource)
 					{
-						outputItem[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
+						item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
 					}
-					else throw new OperationException($"Unrecognized {Items.Keys.Shared.Type} for output item: {outputItem}");
+					else throw new OperationException($"Unrecognized {Items.Keys.Shared.Type} for output item: {item}");
 
-					if (reservationContainer.TryFindFirst(i => i.CanStack(outputItem), out var existingOutputItem))
+					if (isReservationStateOutput)
 					{
-						reservationContainer.Increment(existingOutputItem.StackOf(outputStack.Count));
+						reservationContainer.Combine(itemStack);
 					}
 					else
 					{
-						reservationContainer.Deposit(outputStack);
+						Game.ItemDrops.Activate(
+							Model,
+							Quaternion.identity,
+							itemStack
+						);
 					}
 				}
-				
+
 				var capacityId = reservationItem[Items.Keys.Reservation.CapacityId];
 				if (!Game.Items.TryGet(capacityId, out var capacityItem)) throw new OperationException($"Unable to find capacity [ {capacityId} ] for reservation {reservationItem}, referenced by {transferItem}");
 				
-				var capacityPoolId = capacityItem[Items.Keys.Capacity.Pool];
+				var capacityPoolId = capacityItem[Items.Keys.Capacity.CapacityPoolId];
 				
 				if (!Game.Items.TryGet(capacityPoolId, out var capacityPoolItem)) throw new OperationException($"Unable to find capacity pool [ {capacityPoolId} ] for reservation {reservationItem}, referenced by {transferItem}");
 
 				var capacityCurrent = capacityItem[Items.Keys.Capacity.CountCurrent];
 				
-				if (!isOutput)
+				if (!isReservationStateOutput)
 				{
 					capacityCurrent -= reservationItemStack.Count;
 

@@ -240,7 +240,7 @@ namespace Lunra.Hothouse.Editor
 						}
 						GUILayout.EndHorizontal();
 						
-						foreach (var (capacity, _) in m.Inventory.Container.All(i => i[Items.Keys.Capacity.Pool] == capacityPool.Id).ToArray())
+						foreach (var (capacity, _) in m.Inventory.Container.All(i => i[Items.Keys.Capacity.CapacityPoolId] == capacityPool.Id).ToArray())
 						{
 							GUILayout.BeginHorizontal();
 							{
