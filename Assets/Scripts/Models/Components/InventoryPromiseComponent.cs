@@ -141,11 +141,11 @@ namespace Lunra.Hothouse.Models
 
 		bool OnProcessTransfer(
 			Item transferItem,
-			bool isPickup,
+			bool isInput,
 			out ProcessResult result
 		)
 		{
-			var reservationIdKey = isPickup ? Items.Keys.Transfer.ReservationOutputId : Items.Keys.Transfer.ReservationInputId;
+			var reservationIdKey = isInput ? Items.Keys.Transfer.ReservationOutputId : Items.Keys.Transfer.ReservationInputId;
 			var itemId = transferItem[Items.Keys.Transfer.ItemId];
 
 			if (!Game.Items.TryGet(itemId, out var item))
@@ -196,9 +196,9 @@ namespace Lunra.Hothouse.Models
 				return true;
 			}
 
-			if (isPickup)
+			if (isInput)
 			{
-				OnProcessPickup(
+				OnProcessInput(
 					transferItem,
 					reservationItem,
 					item,
@@ -207,7 +207,7 @@ namespace Lunra.Hothouse.Models
 			}
 			else
 			{
-				OnProcessDropoff(
+				OnProcessOutput(
 					transferItem,
 					reservationItem,
 					item,
@@ -220,7 +220,7 @@ namespace Lunra.Hothouse.Models
 			return true;
 		}
 
-		void OnProcessPickup(
+		void OnProcessInput(
 			Item transferItem,
 			Item reservationItem,
 			Item item,
@@ -257,7 +257,7 @@ namespace Lunra.Hothouse.Models
 			);
 		}
 		
-		void OnProcessDropoff(
+		void OnProcessOutput(
 			Item transferItem,
 			Item reservationItem,
 			Item item,
