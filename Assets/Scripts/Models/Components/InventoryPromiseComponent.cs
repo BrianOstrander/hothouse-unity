@@ -351,8 +351,38 @@ namespace Lunra.Hothouse.Models
 			Stack transferStack
 		)
 		{
-			var isItemHandled = false;
-			
+			void withdrawalItem(
+				Container container,
+				Action<Stack> done
+			)
+			{
+				var itemId = transferItem[Items.Keys.Transfer.ItemId];
+
+				if (itemId == IdCounter.UndefinedId) return;
+
+				transferItem[Items.Keys.Transfer.ItemId] = IdCounter.UndefinedId;
+				
+				var itemStacks = container.Withdrawal((itemId, transferStack.Count));
+
+				if (itemStacks.Length != 1) throw new OperationException($"Expected 1 output item, but withdrew {itemStacks.Length} instead, referenced by {transferItem}");
+
+				var itemStack = itemStacks.First();
+
+				if (itemStack.Count != transferStack.Count) throw new OperationException($"Expected output stack to have count of {transferStack.Count}, but instead it was {itemStack.Count}, referenced by {transferItem}");
+
+				if (!Game.Items.TryGet(itemStack.Id, out var item)) throw new OperationException($"Unable to find item for stack {itemStack}, referenced by {transferItem}");
+
+				var itemType = item[Items.Keys.Shared.Type];
+
+				if (itemType == Items.Values.Shared.Types.Resource)
+				{
+					item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
+				}
+				else throw new OperationException($"Unrecognized {Items.Keys.Shared.Type} for output item: {item}");
+
+				done(itemStack);
+			}
+		
 			foreach (var reservationIdKey in new [] { Items.Keys.Transfer.ReservationOutputId, Items.Keys.Transfer.ReservationInputId })
 			{
 				var reservationId = transferItem[reservationIdKey];
@@ -381,40 +411,12 @@ namespace Lunra.Hothouse.Models
 				else if (reservationState == Items.Values.Reservation.LogisticStates.Output) isReservationStateOutput = true;
 				else throw new OperationException($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {reservationItem} for transfer {transferItem}");
 
-				if (!isItemHandled)
+				if (isReservationStateOutput)
 				{
-					isItemHandled = true;
-					
-					var itemStacks = (isReservationStateOutput ? reservationContainer : Model.Inventory.Container).Withdrawal((transferItem[Items.Keys.Transfer.ItemId], transferStack.Count));
-
-					if (itemStacks.Length != 1) throw new OperationException($"Expected 1 output item, but withdrew {itemStacks.Length} instead, referenced by {transferItem}");
-
-					var itemStack = itemStacks.First();
-
-					if (itemStack.Count != transferStack.Count) throw new OperationException($"Expected output stack to have count of {transferStack.Count}, but instead it was {itemStack.Count}, referenced by {transferItem}");
-
-					if (!Game.Items.TryGet(itemStack.Id, out var item)) throw new OperationException($"Unable to find item for stack {itemStack}, referenced by {transferItem}");
-
-					var itemType = item[Items.Keys.Shared.Type];
-
-					if (itemType == Items.Values.Shared.Types.Resource)
-					{
-						item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
-					}
-					else throw new OperationException($"Unrecognized {Items.Keys.Shared.Type} for output item: {item}");
-
-					if (isReservationStateOutput)
-					{
-						reservationContainer.Combine(itemStack);
-					}
-					else
-					{
-						Game.ItemDrops.Activate(
-							Model,
-							Quaternion.identity,
-							itemStack
-						);
-					}
+					withdrawalItem(
+						reservationContainer,
+						itemStack => reservationContainer.Combine(itemStack)
+					);
 				}
 
 				var capacityId = reservationItem[Items.Keys.Reservation.CapacityId];
@@ -434,7 +436,7 @@ namespace Lunra.Hothouse.Models
 				}
 
 				// Withdrawn items get cleaned up eventually, so no need to explicitly destroy them...
-				if (capacityPoolItem[Items.Keys.CapacityPool.IsForbidden]) return;
+				if (capacityPoolItem[Items.Keys.CapacityPool.IsForbidden]) break;
 				
 				var delta = capacityItem[Items.Keys.Capacity.CountTarget] - capacityCurrent;
 				
@@ -454,7 +456,7 @@ namespace Lunra.Hothouse.Models
 					);
 
 					if (foundReservation) reservationContainer.Destroy(unPromisedReservationStack);
-					return;
+					break;
 				}
 				
 				if (foundReservation)
@@ -493,11 +495,18 @@ namespace Lunra.Hothouse.Models
 					
 					unPromisedReservationItem[Items.Keys.Reservation.LogisticState] = Items.Values.Reservation.LogisticStates.Output;
 				}
-
 				reservationContainer.Deposit(unPromisedReservationStack);
 			}
-			
-			
+
+			// This will only go off if items hasn't already been handled...
+			withdrawalItem(
+				Model.Inventory.Container,
+				itemStack => Game.ItemDrops.Activate(
+					Model,
+					Quaternion.identity,
+					itemStack
+				)
+			);
 		}
 		
 		public bool Transfer(

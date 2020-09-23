@@ -318,7 +318,6 @@ namespace Lunra.Hothouse.Models
 			{
 				var reservation = reservationsSorted[0];
 				reservationsSorted.RemoveAt(0);
-
 				
 				if (reservation.Reservation[Items.Keys.Reservation.LogisticState] == Items.Values.Reservation.LogisticStates.Output)
 				{
