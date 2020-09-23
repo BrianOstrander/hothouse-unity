@@ -119,5 +119,8 @@ namespace Lunra.Editor.Core
 
 		public override T Draw(params GUILayoutOption[] options) => Value = (T)EditorGUILayout.EnumPopup(Label, Value, options);
 		public override T DrawValue(params GUILayoutOption[] options) => Value = (T)EditorGUILayout.EnumPopup(Value, options);
+
+		public T DrawBar() => Value = EditorGUILayoutExtensions.EnumBar(Label, Value);
+		public T DrawValueBar() => Value = EditorGUILayoutExtensions.EnumValueBar(Value);
 	}
 }

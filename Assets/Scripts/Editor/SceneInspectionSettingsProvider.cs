@@ -12,6 +12,13 @@ namespace Lunra.Hothouse.Editor
 {
 	public static class SceneInspectionSettings
 	{
+		public enum Tabs
+		{
+			None = 0,
+			Dwellers = 10,
+			Inventories = 20
+		}
+	
 		const string KeyPrefix = SettingsProviderStrings.ProjectKeyPrefix + "SceneInspectionSettings.";
 
 		public static EditorPrefsBool IsInspecting = new EditorPrefsBool(KeyPrefix + "IsInspecting");
@@ -27,6 +34,8 @@ namespace Lunra.Hothouse.Editor
 		public static EditorPrefsBool IsInspectingObligations = new EditorPrefsBool(KeyPrefix + "IsInspectingObligations");
 		public static EditorPrefsBool IsInspectingRooms = new EditorPrefsBool(KeyPrefix + "IsInspectingRooms");
 		public static EditorPrefsBool IsInspectingDoors = new EditorPrefsBool(KeyPrefix + "IsInspectingDoors");
+		
+		public static EditorPrefsEnum<Tabs> Tab = new EditorPrefsEnum<Tabs>(KeyPrefix + "Tab", Tabs.None);
 	}
 	
 	public class SceneInspectionSettingsProvider : SettingsProvider
@@ -72,18 +81,33 @@ namespace Lunra.Hothouse.Editor
 				}
 				GUILayout.EndHorizontal();
 
+				SceneInspectionSettings.Tab.DrawValueBar();
+				
 				if (SceneInspectionSettings.IsInspecting.Value && GameStateEditorUtility.GetGame(out var game, out _))
 				{
-					OnInventoryGui(game);
+					switch (SceneInspectionSettings.Tab.Value)
+					{
+						case SceneInspectionSettings.Tabs.None:
+							break;
+						case SceneInspectionSettings.Tabs.Dwellers:
+							DrawDwellers(game);
+							break;
+						case SceneInspectionSettings.Tabs.Inventories:
+							DrawInventories(game);
+							break;
+						default:
+							EditorGUILayout.HelpBox($"Unrecognized tab: {SceneInspectionSettings.Tab.Value}", MessageType.Error);
+							break;
+					}
 				}
 			}
 			GUIExtensions.PopEnabled();
 
 		}
 
-		void OnDwellersGui(GameModel game)
+		void DrawDwellers(GameModel game)
 		{
-			DrawModelGui<DwellerModel>(
+			DrawModels<DwellerModel>(
 				game,
 				null,
 				m => "Dweller",
@@ -116,12 +140,6 @@ namespace Lunra.Hothouse.Editor
 				},
 				m =>
 				{
-					GUILayout.BeginHorizontal();
-					{
-						if (GUILayout.Button("Break Inventory Promises")) m.InventoryPromises.BreakAll();
-					}
-					GUILayout.EndHorizontal();
-						
 					var addRemoveButtonWidth = GUILayout.Width(48f);
 						
 					GUILayout.BeginHorizontal();
@@ -152,14 +170,21 @@ namespace Lunra.Hothouse.Editor
 					}
 					GUILayout.EndHorizontal();
 						
-					m.IsDebugging = EditorGUILayout.Toggle(nameof(m.IsDebugging), m.IsDebugging);
+					
+					GUILayout.BeginHorizontal();
+					{
+						m.IsDebugging = EditorGUILayout.Toggle(nameof(m.IsDebugging), m.IsDebugging);
+						if (GUILayout.Button("Break Inventory Promises")) m.InventoryPromises.BreakAll();
+					}
+					GUILayout.EndHorizontal();
+					
 				}
 			);
 		}
 		
-		void OnInventoryGui(GameModel game)
+		void DrawInventories(GameModel game)
 		{
-			DrawModelGui<IInventoryModel>(
+			DrawModels<IInventoryModel>(
 				game,
 				m =>
 				{
@@ -247,7 +272,7 @@ namespace Lunra.Hothouse.Editor
 			);
 		}
 		
-		void DrawModelGui<M>(
+		void DrawModels<M>(
 			GameModel game,
 			Func<M, bool> predicate,
 			Func<M, string> getHeaderPrefix,
@@ -257,28 +282,24 @@ namespace Lunra.Hothouse.Editor
 		)
 			where M : IModel
 		{
-			EditorGUIExtensions.PushIndent();
+			foreach (var model in (predicate == null ? game.Query.All<M>() : game.Query.All(predicate)))
 			{
-				foreach (var model in game.Query.All(predicate))
+				GUILayoutExtensions.BeginVertical(EditorStyles.helpBox, Color.white);
 				{
-					GUILayoutExtensions.BeginVertical(EditorStyles.helpBox, Color.white);
+					GUILayout.BeginHorizontal();
 					{
-						GUILayout.BeginHorizontal();
-						{
-							var header = $"{getHeaderPrefix(model)} [ {model.ShortId} ]";
-							if (getHeaderSuffix != null) header += $" : {getHeaderSuffix(model)}";
-							GUILayout.Label(header, EditorStyles.boldLabel);
+						var header = $"{getHeaderPrefix(model)} [ {model.ShortId} ]";
+						if (getHeaderSuffix != null) header += $" : {getHeaderSuffix(model)}";
+						GUILayout.Label(header, EditorStyles.boldLabel);
 
-							drawHeaderRight?.Invoke(model);
-						}
-						GUILayout.EndHorizontal();
-
-						drawBody?.Invoke(model);
+						drawHeaderRight?.Invoke(model);
 					}
-					GUILayoutExtensions.EndVertical();
+					GUILayout.EndHorizontal();
+
+					drawBody?.Invoke(model);
 				}
+				GUILayoutExtensions.EndVertical();
 			}
-			EditorGUIExtensions.PopIndent();
 		}
 
 		[SettingsProvider]
