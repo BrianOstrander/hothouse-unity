@@ -269,6 +269,16 @@ namespace Lunra.Hothouse.Models
 
 			if (destroyed.Any()) Container.Destroy(destroyed.ToArray());
 
+			var itemCapacityPoolId = capacity[Items.Keys.Capacity.CapacityPoolId];
+			
+			if (!Container.TryFindFirst(itemCapacityPoolId, out var capacityPool))
+			{
+				Debug.LogError($"$Cannot find capacity pool [ {itemCapacityPoolId} ] for capacity {capacity}");
+				return;
+			}
+			
+			if (capacityPool[Items.Keys.CapacityPool.IsForbidden]) return;
+			
 			if (countTargetDelta != 0)
 			{
 				if (0 < countTargetDelta)
@@ -361,18 +371,16 @@ namespace Lunra.Hothouse.Models
 
 			var capacityPoolId = capacity[Items.Keys.Capacity.CapacityPoolId];
 			
+			if (!Container.TryFindFirst(capacityPoolId, out var capacityPool)) Debug.LogError($"Cannot find capacity pool [ {capacityPoolId} ] for {capacity}");
+			
 			// When input promises are broken, we need to remember to modify the capacities...
 			if (0 < capacityCountModifications)
 			{
 				capacity[Items.Keys.Capacity.CountCurrent] -= capacityCountModifications;
-				if (Container.TryFindFirst(capacityPoolId, out var capacityPool))
-				{
-					capacityPool[Items.Keys.CapacityPool.CountCurrent] -= capacityCountModifications;
-				}
-				else Debug.LogError($"Cannot find capacity pool [ {capacityPoolId} ] for {capacity}");
+				capacityPool[Items.Keys.CapacityPool.CountCurrent] -= capacityCountModifications;
 			}
 
-			if (0 < countTargetDelta)
+			if (0 < countTargetDelta && !capacityPool[Items.Keys.CapacityPool.IsForbidden])
 			{
 				if (existingUnpromisedOutputReservation == null)
 				{
@@ -463,7 +471,9 @@ namespace Lunra.Hothouse.Models
 			else Debug.LogError($"Cannot find capacity pool with id {capacityPoolId} for {capacity}");
 
 			var delta = Mathf.Min(capacityCountTarget, capacityPoolCountTarget) - resourceTotalCount;
-		
+
+			var reservationsAllowed = !capacityPool[Items.Keys.CapacityPool.IsForbidden];
+			
 			if (delta == 0)
 			{
 				// We are satisfied
@@ -483,17 +493,20 @@ namespace Lunra.Hothouse.Models
 					(Items.Keys.Capacity.CountCurrent, resourceTotalCount)
 				);
 
-				Container.Deposit(
-					Game.Items.Builder
-						.BeginItem()
-						.WithProperties(
-							Items.Instantiate.Reservation.OfInput(
-								capacity.Id,
-								capacityPoolId
+				if (reservationsAllowed)
+				{
+					Container.Deposit(
+						Game.Items.Builder
+							.BeginItem()
+							.WithProperties(
+								Items.Instantiate.Reservation.OfInput(
+									capacity.Id,
+									capacityPoolId
+								)
 							)
-						)
-						.Done(delta)
-				);
+							.Done(delta)
+					);
+				}
 
 				return Items.Values.Capacity.Desires.Receive;
 			}
@@ -503,18 +516,21 @@ namespace Lunra.Hothouse.Models
 				(Items.Keys.Capacity.Desire, Items.Values.Capacity.Desires.Distribute),
 				(Items.Keys.Capacity.CountCurrent, resourceTotalCount)
 			);
-		
-			Container.Deposit(
-				Game.Items.Builder
-					.BeginItem()
-					.WithProperties(
-						Items.Instantiate.Reservation.OfOutput(
-							capacity.Id,
-							capacityPoolId
+
+			if (reservationsAllowed)
+			{
+				Container.Deposit(
+					Game.Items.Builder
+						.BeginItem()
+						.WithProperties(
+							Items.Instantiate.Reservation.OfOutput(
+								capacity.Id,
+								capacityPoolId
+							)
 						)
-					)
-					.Done(Mathf.Abs(delta))
-			);
+						.Done(Mathf.Abs(delta))
+				);
+			}
 
 			return Items.Values.Capacity.Desires.Distribute;
 		}
