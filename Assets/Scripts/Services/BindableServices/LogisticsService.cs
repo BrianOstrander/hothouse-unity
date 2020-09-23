@@ -168,7 +168,7 @@ namespace Lunra.Hothouse.Services
 									reservationInputRemaining--;
 									reservationOutputRemaining--;
 
-									var source = new InventoryPromiseComponent.TransferInfo
+									var output = new InventoryPromiseComponent.TransferInfo
 									{
 										Container = reservationOutput.Parent.Inventory.Container,
 										Capacity = Model.Items.First(reservationOutput.Item[Items.Keys.Reservation.CapacityId]),
@@ -179,7 +179,7 @@ namespace Lunra.Hothouse.Services
 										Reservation = reservationOutput.Item
 									};
 
-									var destination = new InventoryPromiseComponent.TransferInfo
+									var input = new InventoryPromiseComponent.TransferInfo
 									{
 										Container = reservationInput.Parent.Inventory.Container,
 										Capacity = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityId]),
@@ -192,8 +192,8 @@ namespace Lunra.Hothouse.Services
 
 									var isReservationInputSatisfied = dweller.InventoryPromises.Transfer(
 										item,
-										source,
-										destination
+										output,
+										input
 									);
 
 									dwellers.Remove(dweller.Id.Value);

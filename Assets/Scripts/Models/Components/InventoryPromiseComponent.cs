@@ -94,12 +94,12 @@ namespace Lunra.Hothouse.Models
 				
 						if (type == Items.Values.Shared.Types.Transfer)
 						{
-							var state = promiseItem[Items.Keys.Transfer.LogisticState];
+							var state = promiseItem[Items.Keys.Transfer.ReservationTarget];
 
 							var isValid = false;
 							ProcessResult result;
 							
-							if (state == Items.Values.Transfer.LogisticStates.Pickup)
+							if (state == Items.Values.Transfer.ReservationTargets.Input)
 							{
 								isValid = OnProcessTransfer(
 									promiseItem,
@@ -107,7 +107,7 @@ namespace Lunra.Hothouse.Models
 									out result
 								);
 							}
-							else if (state == Items.Values.Transfer.LogisticStates.Dropoff)
+							else if (state == Items.Values.Transfer.ReservationTargets.Output)
 							{
 								isValid = OnProcessTransfer(
 									promiseItem,
@@ -115,7 +115,7 @@ namespace Lunra.Hothouse.Models
 									out result
 								);
 							}
-							else throw new OperationException($"Unrecognized {Items.Keys.Transfer.LogisticState}: {state}");
+							else throw new OperationException($"Unrecognized {Items.Keys.Transfer.ReservationTarget}: {state}");
 
 							if (isValid) return result;
 						}
@@ -145,7 +145,7 @@ namespace Lunra.Hothouse.Models
 			out ProcessResult result
 		)
 		{
-			var reservationIdKey = isPickup ? Items.Keys.Transfer.ReservationPickupId : Items.Keys.Transfer.ReservationDropoffId;
+			var reservationIdKey = isPickup ? Items.Keys.Transfer.ReservationOutputId : Items.Keys.Transfer.ReservationInputId;
 			var itemId = transferItem[Items.Keys.Transfer.ItemId];
 
 			if (!Game.Items.TryGet(itemId, out var item))
@@ -252,8 +252,8 @@ namespace Lunra.Hothouse.Models
 			item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.None;
 				
 			transferItem.Set(
-				(Items.Keys.Transfer.ReservationPickupId, IdCounter.UndefinedId),
-				(Items.Keys.Transfer.LogisticState, Items.Values.Transfer.LogisticStates.Dropoff)
+				(Items.Keys.Transfer.ReservationOutputId, IdCounter.UndefinedId),
+				(Items.Keys.Transfer.ReservationTarget, Items.Values.Transfer.ReservationTargets.Output)
 			);
 		}
 		
@@ -330,7 +330,7 @@ namespace Lunra.Hothouse.Models
 			Stack transferStack
 		)
 		{
-			foreach (var reservationIdKey in new [] { Items.Keys.Transfer.ReservationDropoffId, Items.Keys.Transfer.ReservationPickupId })
+			foreach (var reservationIdKey in new [] { Items.Keys.Transfer.ReservationInputId, Items.Keys.Transfer.ReservationOutputId })
 			{
 				var reservationId = transferItem[reservationIdKey];
 				// If the reservationId is null, that means someone else destroyed the associated reservation.
@@ -467,50 +467,52 @@ namespace Lunra.Hothouse.Models
 
 				reservationContainer.Deposit(unPromisedReservationStack);
 			}
+			
+			
 		}
 		
 		public bool Transfer(
 			Item item,
-			TransferInfo source,
-			TransferInfo destination
+			TransferInfo output,
+			TransferInfo input
 		)
 		{
 			item = Game.Items
 				.First(
-					source.Container
+					output.Container
 						.Withdrawal(
 							item.StackOf(1)
 						).First()
 				);
 			
-			source.Reservation = Game.Items
+			output.Reservation = Game.Items
 				.First(
-					source.Container
+					output.Container
 						.Withdrawal(
-							source.Reservation.StackOf(1)
+							output.Reservation.StackOf(1)
 						).First()
 				);
 			
 			item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.Output;
 
-			source.Container.Deposit(item.StackOf(1));
-			source.Container.Deposit(source.Reservation.StackOf(1));
+			output.Container.Deposit(item.StackOf(1));
+			output.Container.Deposit(output.Reservation.StackOf(1));
 
-			destination.Capacity[Items.Keys.Capacity.CountCurrent]++;
+			input.Capacity[Items.Keys.Capacity.CountCurrent]++;
 
-			var isDestinationCapacityAtTarget = destination.Capacity[Items.Keys.Capacity.CountCurrent] == destination.Capacity[Items.Keys.Capacity.CountTarget];
+			var isInputCapacityAtTarget = input.Capacity[Items.Keys.Capacity.CountCurrent] == input.Capacity[Items.Keys.Capacity.CountTarget];
 
-			if (isDestinationCapacityAtTarget) destination.Capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
+			if (isInputCapacityAtTarget) input.Capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
 
-			destination.Reservation = Game.Items
+			input.Reservation = Game.Items
 				.First(
-					destination.Container
+					input.Container
 					.Withdrawal(
-						destination.Reservation.StackOf(1)
+						input.Reservation.StackOf(1)
 					).First()
 				);
 
-			destination.Container.Deposit(destination.Reservation.StackOf(1));
+			input.Container.Deposit(input.Reservation.StackOf(1));
 			
 			Model.Inventory.Container.Deposit(
 				Game.Items.Builder
@@ -518,23 +520,23 @@ namespace Lunra.Hothouse.Models
 					.WithProperties(
 						Items.Instantiate.Transfer.Pickup(
 							item.Id,
-							source.Reservation.Id,
-							destination.Reservation.Id
+							output.Reservation.Id,
+							input.Reservation.Id
 						)	
 					)
 					.Done(1, out var transfer)
 			);
 
-			source.Reservation[Items.Keys.Reservation.TransferId] = transfer.Id;
-			destination.Reservation[Items.Keys.Reservation.TransferId] = transfer.Id;
+			output.Reservation[Items.Keys.Reservation.TransferId] = transfer.Id;
+			input.Reservation[Items.Keys.Reservation.TransferId] = transfer.Id;
 				
 			All.Push(transfer.Id);
 
-			if (source.CapacityPool != null) source.CapacityPool[Items.Keys.CapacityPool.CountCurrent]--;
+			if (output.CapacityPool != null) output.CapacityPool[Items.Keys.CapacityPool.CountCurrent]--;
 
-			var destinationCapacityPoolCountCurrent = ++destination.CapacityPool[Items.Keys.CapacityPool.CountCurrent];
+			var inputCapacityPoolCountCurrent = ++input.CapacityPool[Items.Keys.CapacityPool.CountCurrent];
 			
-			return isDestinationCapacityAtTarget || destination.CapacityPool[Items.Keys.CapacityPool.CountTarget] <= destinationCapacityPoolCountCurrent;
+			return isInputCapacityAtTarget || input.CapacityPool[Items.Keys.CapacityPool.CountTarget] <= inputCapacityPoolCountCurrent;
 		}
 		
 		public void Reset()

@@ -341,7 +341,7 @@ namespace Lunra.Hothouse.Models
 				if (reservation.ReservationIsPromised)
 				{
 					broken[reservation.Transfer.ContainerId] = reservation.TransferParent;
-					reservation.Transfer[Items.Keys.Transfer.ReservationDropoffId] = IdCounter.UndefinedId;
+					reservation.Transfer[Items.Keys.Transfer.ReservationInputId] = IdCounter.UndefinedId;
 					destroyed.Add(reservation.Reservation.StackOf(reservation.ReservationCount));
 					capacityCountModifications += reservation.ReservationCount;
 				}
