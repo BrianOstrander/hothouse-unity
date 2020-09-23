@@ -436,7 +436,7 @@ namespace Lunra.Hothouse.Models
 				}
 
 				// Withdrawn items get cleaned up eventually, so no need to explicitly destroy them...
-				if (capacityPoolItem[Items.Keys.CapacityPool.IsForbidden]) break;
+				if (capacityPoolItem[Items.Keys.CapacityPool.IsForbidden]) continue;
 				
 				var delta = capacityItem[Items.Keys.Capacity.CountTarget] - capacityCurrent;
 				
@@ -456,7 +456,7 @@ namespace Lunra.Hothouse.Models
 					);
 
 					if (foundReservation) reservationContainer.Destroy(unPromisedReservationStack);
-					break;
+					continue;
 				}
 				
 				if (foundReservation)

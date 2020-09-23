@@ -82,8 +82,6 @@ namespace Lunra.Hothouse.Models
 
 			if (isForbidden)
 			{
-				var combineForbiddenOutputs = false;
-
 				foreach (var (reservation, reservationStack) in Container.All(i => i[Items.Keys.Reservation.CapacityPoolId] == id).ToArray())
 				{
 					var transferId = reservation[Items.Keys.Reservation.TransferId];
@@ -104,17 +102,7 @@ namespace Lunra.Hothouse.Models
 						continue;
 					}
 
-					if (!combineForbiddenOutputs && reservation[Items.Keys.Reservation.LogisticState] == Items.Values.Reservation.LogisticStates.Output)
-					{
-						combineForbiddenOutputs = true;
-					}
-
 					Container.Destroy(reservationStack);
-				}
-
-				if (combineForbiddenOutputs)
-				{
-					Debug.LogError("TODO: this!");
 				}
 			}
 			else
