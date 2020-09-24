@@ -211,7 +211,7 @@ namespace Lunra.Hothouse.Editor
 					{
 						GUILayout.BeginHorizontal();
 						{
-							GUILayout.Label($"Pool [ {capacityPool.Id} ]", GUILayout.Width(64f));
+							GUILayout.Label($"Pool [ {capacityPool.Id} ] {capacityPool[Items.Keys.CapacityPool.Type]}", GUILayout.Width(128f));
 
 							if (GUILayout.Button("None", EditorStyles.miniButtonLeft))
 							{

@@ -6,7 +6,6 @@ namespace Lunra.Hothouse.Models
 		Placing = 10,
 		Constructing = 20,
 		Operating = 30,
-		Salvaging = 40,
-		Decaying = 50
+		Salvaging = 40
 	}
 }

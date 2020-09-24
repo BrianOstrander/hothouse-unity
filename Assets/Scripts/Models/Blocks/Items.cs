@@ -64,7 +64,7 @@ namespace Lunra.Hothouse.Models
 					params PropertyKeyValue[] overrides
 				)
 				{
-					return Get(
+					return Create(
 						type,
 						int.MaxValue,
 						overrides
@@ -76,7 +76,7 @@ namespace Lunra.Hothouse.Models
 					params PropertyKeyValue[] overrides
 				)
 				{
-					return Get(
+					return Create(
 						type,
 						0,
 						overrides
@@ -89,14 +89,14 @@ namespace Lunra.Hothouse.Models
 					params PropertyKeyValue[] overrides
 				)
 				{
-					return Get(
+					return Create(
 						type,
 						count,
 						overrides
 					);
 				}
 				
-				static PropertyKeyValue[] Get(
+				static PropertyKeyValue[] Create(
 					string type,
 					int countMaximum,
 					params PropertyKeyValue[] overrides
@@ -124,7 +124,7 @@ namespace Lunra.Hothouse.Models
 					params PropertyKeyValue[] overrides
 				)
 				{
-					return Get(
+					return Create(
 						poolId,
 						0,
 						overrides
@@ -137,14 +137,14 @@ namespace Lunra.Hothouse.Models
 					params PropertyKeyValue[] overrides
 				)
 				{
-					return Get(
+					return Create(
 						poolId,
 						count,
 						overrides
 					);
 				}
 				
-				static PropertyKeyValue[] Get(
+				static PropertyKeyValue[] Create(
 					long poolId,
 					int count,
 					params PropertyKeyValue[] overrides
@@ -409,7 +409,7 @@ namespace Lunra.Hothouse.Models
 					public static readonly string Unknown = nameof(Unknown).ToSnakeCase();
 					public static readonly string Drop = nameof(Drop).ToSnakeCase();
 					public static readonly string Construction = nameof(Construction).ToSnakeCase();
-					public static readonly string Cache = nameof(Cache).ToSnakeCase();
+					public static readonly string Stockpile = nameof(Stockpile).ToSnakeCase();
 					public static readonly string Salvage = nameof(Salvage).ToSnakeCase();
 				}
 			}

@@ -265,5 +265,11 @@ namespace Lunra.Core
 			if (source.TryGetValue(key, out var value)) return value;
 			return fallback;
 		}
+
+		public static List<T> AddElements<T>(this List<T> source, params T[] elements)
+		{
+			source.AddRange(elements);
+			return source;
+		}
 	}
 }

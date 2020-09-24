@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Lunra.Core;
 using Lunra.Satchel;
 
 namespace Lunra.Hothouse.Models
@@ -7,34 +8,19 @@ namespace Lunra.Hothouse.Models
 	{
 		public override InventoryPermission DefaultInventoryPermission => InventoryPermission.AllForAnyJob();
 
-		public override int GetCapacities(List<(int Count, PropertyFilter Filter)> capacities)
+		public override void GetCapacities(CapacityPoolBuilder capacityPoolBuilder)
 		{
-			// TODO: Add a convenience function to this to make it easier to quickly define this tuple with a given
-			// list of KV's
-			
-			// capacities.Add(
-			// 	(
-			// 		2,
-			// 		Game.Items.Builder
-			// 			.BeginPropertyFilter()
-			// 			.RequireAll(
-			// 				PropertyValidations.String.EqualTo(Items.Keys.Resource.Type, Items.Values.Resource.Types.Scrap)
-			// 			)
-			// 	)
-			// );
-			
-			capacities.Add(
-				(
+			capacityPoolBuilder
+				.Pool(
+					Items.Values.CapacityPool.Types.Construction,
 					2,
-					Game.Items.Builder
-						.BeginPropertyFilter()
-						.RequireAll(
-							PropertyValidations.String.EqualTo(Items.Keys.Resource.Type, Items.Values.Resource.Types.Stalk)
-						)
+					(Items.Values.Resource.Types.Stalk, 2)
 				)
-			);
-
-			return 2;
+				.Pool(
+					Items.Values.CapacityPool.Types.Stockpile,
+					4,
+					Items.Values.Resource.Types.Stalk
+				);
 		}
 		
 		public override string[] Tags => new[] {BuildingTags.Stockpile};

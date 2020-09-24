@@ -3,6 +3,7 @@ using System.Linq;
 using Lunra.Core;
 using Lunra.Hothouse.Models;
 using Lunra.Hothouse.Views;
+using Lunra.Satchel;
 using Lunra.StyxMvp.Models;
 using UnityEngine;
 
@@ -52,10 +53,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed += OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
-			// Model.ConstructionInventory.All.Changed += OnBuildingConstructionInventory;
-			// Model.SalvageInventory.All.Changed += OnBuildingSalvageInventory;
-			// Model.Inventory.Available.Changed += OnBuildingAvailableInventory;
-			Debug.LogWarning("TODO: Bind Construct/Salvage/Inventory - should probably be handled by a component or something instead...");
+			Model.Inventory.Container.Updated += OnInventoryContainerUpdated;
 			Model.BuildingState.Changed += OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed += OnBuildingLightLevel;
 			Model.Health.Current.Changed += OnBuildingHealthCurrent;
@@ -89,10 +87,7 @@ namespace Lunra.Hothouse.Presenters
 			Game.Toolbar.Task.Changed -= OnToolbarTask;
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			// Model.ConstructionInventory.All.Changed -= OnBuildingConstructionInventory;
-			// Model.SalvageInventory.All.Changed -= OnBuildingSalvageInventory;
-			// Model.Inventory.Available.Changed -= OnBuildingAvailableInventory;
-			Debug.LogWarning("TODO: UnBind Construct/Salvage/Inventory - should probably be handled by a component or something instead...");
+			Model.Inventory.Container.Updated -= OnInventoryContainerUpdated;
 			Model.BuildingState.Changed -= OnBuildingState;
 			Model.LightSensitive.LightLevel.Changed -= OnBuildingLightLevel;
 			Model.Health.Current.Changed -= OnBuildingHealthCurrent;
@@ -274,6 +269,124 @@ namespace Lunra.Hothouse.Presenters
 		#endregion
 		
 		#region BuildingModel Events
+		void OnInventoryContainerUpdated(Container.Event containerEvent)
+		{
+			void trigger(
+				string capacityPoolType,
+				Action<Container.Event, Item> callback
+			)
+			{
+				if (!Model.Inventory.Container.TryFindFirst(i => i[Items.Keys.CapacityPool.Type] == capacityPoolType, out var capacityPool))
+				{
+					Debug.LogError($"Cannot find capacity pool of type {capacityPoolType} in {Model.Inventory}");
+					return;
+				}
+
+				if (capacityPool[Items.Keys.CapacityPool.IsForbidden]) return;
+				
+				callback(containerEvent, capacityPool);
+			}
+			
+			switch (Model.BuildingState.Value)
+			{
+				case BuildingStates.Placing:
+					break;
+				case BuildingStates.Constructing:
+					trigger(
+						Items.Values.CapacityPool.Types.Construction,
+						OnConstructionInventoryContainerUpdated
+					);
+					break;
+				case BuildingStates.Operating:
+					trigger(
+						Items.Values.CapacityPool.Types.Stockpile,
+						OnOperatingInventoryContainerUpdated
+					);
+					break;
+				case BuildingStates.Salvaging:
+					trigger(
+						Items.Values.CapacityPool.Types.Salvage,
+						OnSalvagingInventoryContainerUpdated
+					);
+					break;
+				default:
+					Debug.LogError($"Unrecognized building state: {Model.BuildingState.Value}");
+					break;
+			}
+		}
+		
+		void OnConstructionInventoryContainerUpdated(
+			Container.Event containerEvent,
+			Item capacityPool
+		)
+		{
+			var countTarget = capacityPool[Items.Keys.CapacityPool.CountTarget];
+			if (capacityPool[Items.Keys.CapacityPool.CountCurrent] < countTarget) return;
+		
+			var countCurrent = 0;
+			foreach (var resource in Model.Inventory.Container.All(i => i[Items.Keys.Resource.CapacityPoolId] == capacityPool.Id))
+			{
+				countCurrent += resource.Stack.Count;
+				if (countTarget == countCurrent) break;
+			}
+
+			// TODO: There should be a construction operation that happens here first...
+			if (countTarget <= countCurrent) OnInventoryContainerTransition(capacityPool, BuildingStates.Operating);
+		}
+		
+		void OnOperatingInventoryContainerUpdated(
+			Container.Event containerEvent,
+			Item capacityPool
+		)
+		{
+			
+		}
+		
+		void OnSalvagingInventoryContainerUpdated(
+			Container.Event containerEvent,
+			Item capacityPool
+		)
+		{
+			
+		}
+
+		void OnInventoryContainerTransition(
+			Item capacityPool,
+			BuildingStates buildStateNew
+		)
+		{
+			Model.BuildingState.Value = buildStateNew;
+			Model.Inventory.SetForbidden(capacityPool.Id, true);
+
+			string capacityPoolType;
+
+			switch (buildStateNew)
+			{
+				case BuildingStates.Placing:
+					return;
+				case BuildingStates.Constructing:
+					capacityPoolType = Items.Values.CapacityPool.Types.Construction;
+					break;
+				case BuildingStates.Operating:
+					capacityPoolType = Items.Values.CapacityPool.Types.Stockpile;
+					break;
+				case BuildingStates.Salvaging:
+					capacityPoolType = Items.Values.CapacityPool.Types.Salvage;
+					break;
+				default:
+					Debug.LogError($"Unrecognized build state: {buildStateNew}");
+					return;
+			}
+			
+			if (!Model.Inventory.Container.TryFindFirst(i => i[Items.Keys.CapacityPool.Type] == capacityPoolType, out capacityPool))
+			{
+				Debug.LogError($"Cannot find capacity pool of type {Items.Values.CapacityPool.Types.Stockpile}");
+				return;
+			}
+			
+			Model.Inventory.SetForbidden(capacityPool.Id, false);
+		}
+		
 		// void OnBuildingConstructionInventory(Inventory constructionInventory)
 		// {
 		// 	if (constructionInventory.IsEmpty || Model.ConstructionInventory.AllCapacity.Value.IsNotFull(constructionInventory)) return;
@@ -428,7 +541,6 @@ namespace Lunra.Hothouse.Presenters
 								break;
 						}
 						break;
-					case BuildingStates.Decaying:
 					case BuildingStates.Salvaging:
 						View.LightFuelNormal = 0f;
 						break;

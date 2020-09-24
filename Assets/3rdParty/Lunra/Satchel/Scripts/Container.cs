@@ -61,7 +61,7 @@ namespace Lunra.Satchel
 				StackEvents = stackEvents;
 			}
 
-			public override string ToString() => ToString(Formats.Default);
+			public override string ToString() => ToString(Formats.IncludeStacks);
 
 			public string ToString(Formats format)
 			{

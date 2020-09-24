@@ -21,12 +21,7 @@ namespace Lunra.Hothouse.Models
 		public virtual int MaximumOwners => 0;
 		public virtual InventoryPermission DefaultInventoryPermission => InventoryPermission.NoneForAnyJob();
 
-		public virtual int GetCapacities(List<(int Count, PropertyFilter Filter)> capacities) => 0;
-		// public virtual InventoryCapacity DefaultInventoryCapacity => InventoryCapacity.None();
-		// public virtual InventoryDesire DefaultInventoryDesire => InventoryDesire.UnCalculated(Inventory.Empty);
-		// public virtual Inventory DefaultInventory => Inventory.Empty;
-		// public virtual Inventory ConstructionInventory => Inventory.FromEntry(Inventory.Types.Stalk, 2);
-		// public virtual Inventory SalvageInventory => ConstructionInventory * 0.5f;
+		public virtual void GetCapacities(CapacityPoolBuilder capacityPoolBuilder) { }
 		public virtual Recipe[] Recipes => new Recipe[0];
 		public virtual bool IsFarm => false;
 		public virtual Vector2 FarmSize => Vector2.zero;
@@ -35,6 +30,15 @@ namespace Lunra.Hothouse.Models
 		public virtual Jobs[] WorkplaceForJobs => new Jobs[0];
 		public virtual string[] Tags => new string[0];
 		public virtual Type[] BuildingsRequired => new Type[0];
+
+		CapacityPoolBuilder capacityPoolBuilder;
+
+		public override void Initialize(GameModel game, string[] prefabIds)
+		{
+			base.Initialize(game, prefabIds);
+			
+			capacityPoolBuilder = new CapacityPoolBuilder(Game);
+		}
 
 		public virtual void Reset(
 			BuildingModel model,
@@ -60,87 +64,38 @@ namespace Lunra.Hothouse.Models
 				MaximumOwners,
 				WorkplaceForJobs
 			);
-			
-			/*
-			model.Inventory.Reset(
-				DefaultInventoryPermission,
-				DefaultInventoryCapacity,
-				DefaultInventoryDesire
-			);
 
-			model.Inventory.Add(DefaultInventory);
-
-			var constructionInventoryDesired = InventoryDesire.Ignored();
-			var salvageInventoryDesired = InventoryDesire.Ignored();
-
-			switch (state)
+			try
 			{
-				case BuildingStates.Placing:
-				case BuildingStates.Constructing:
-					constructionInventoryDesired = InventoryDesire.UnCalculated(ConstructionInventory);
-					break;
-				case BuildingStates.Salvaging:
-					salvageInventoryDesired = InventoryDesire.UnCalculated(SalvageInventory);
-					break;
-				case BuildingStates.Operating:
-				case BuildingStates.Decaying:
-					break;
-				default:
-					Debug.LogError("Unrecognized BuildingState: " + state);
-					break;
-			}
-			
-			model.ConstructionInventory.Reset(
-				InventoryPermission.DepositForJobs(Jobs.Stockpiler, Jobs.Laborer), 
-				InventoryCapacity.ByIndividualWeight(ConstructionInventory),
-				constructionInventoryDesired
-			);
-			
-			model.SalvageInventory.Reset(
-				InventoryPermission.WithdrawalForJobs(Jobs.Stockpiler),
-				InventoryCapacity.ByIndividualWeight(SalvageInventory),
-				salvageInventoryDesired
-			);
-
-			model.SalvageInventory.Add(SalvageInventory);
-			*/
-			//Debug.LogWarning("TODO: Inventory, all of it lol");
-
-			var capacities = new List<(int Count, PropertyFilter Filter)>();
-			var capacityPool = GetCapacities(capacities);
-			
-			if (capacities.Any())
-			{
-				model.Inventory.Container.New(
-					1,
-					out var capacityPoolItem,
-					Items.Instantiate.CapacityPool
-						.Of(
-							Items.Values.CapacityPool.Types.Cache,	
-							capacityPool
-						)
+				GetCapacities(capacityPoolBuilder);
+				capacityPoolBuilder.Apply(
+					model.Inventory,
+					capacityPoolType =>
+					{
+						// Confusing, but basically return true if this inventory should be forbidden.
+						switch (state)
+						{
+							case BuildingStates.Placing:
+								return true;
+							case BuildingStates.Constructing:
+								return capacityPoolType != Items.Values.CapacityPool.Types.Construction;
+							case BuildingStates.Operating:
+								return capacityPoolType != Items.Values.CapacityPool.Types.Stockpile;
+							case BuildingStates.Salvaging:
+								return capacityPoolType != Items.Values.CapacityPool.Types.Salvage;
+							default:
+								Debug.LogError($"Unrecognized state: {state}");
+								return true;
+						}
+					}
 				);
-				
-				foreach (var capacity in capacities)
-				{
-					model.Inventory.Container.New(
-						1,
-						out var capacityItem,
-						Items.Instantiate.Capacity
-							.Of(
-								capacityPoolItem.Id,
-								capacity.Count
-							)
-					);
-					
-					model.Inventory.Capacities.Add(
-						capacityItem.Id,
-						capacity.Filter
-					);
-				}
 			}
-			else if (0 < capacityPool) Debug.LogError($"Specified resource capacity of {capacityPool} but no filters provided");
-			
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+				capacityPoolBuilder.Reset();
+			}
+
 			model.Obligations.Reset();
 			
 			model.Recipes.Reset(Recipes);
