@@ -331,7 +331,14 @@ namespace Lunra.Hothouse.Presenters
 			}
 
 			// TODO: There should be a construction operation that happens here first...
-			if (countTarget <= countCurrent) OnInventoryContainerTransition(capacityPool, BuildingStates.Operating);
+			if (countTarget <= countCurrent)
+			{
+				foreach (var resource in Model.Inventory.Container.All(i => i[Items.Keys.Resource.CapacityPoolId] == capacityPool.Id))
+				{
+					resource.Item[Items.Keys.Resource.Decay.IsEnabled] = false;
+				}
+				OnInventoryContainerTransition(capacityPool, BuildingStates.Operating);
+			}
 		}
 		
 		void OnOperatingInventoryContainerUpdated(

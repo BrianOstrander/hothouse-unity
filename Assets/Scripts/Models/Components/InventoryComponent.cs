@@ -446,18 +446,19 @@ namespace Lunra.Hothouse.Models
 
 			var capacityCountTarget = capacity[Items.Keys.Capacity.CountTarget];
 		
+			var capacityPoolId = capacity[Items.Keys.Capacity.CapacityPoolId];
 			var resourceTotalCount = 0;
 
 			foreach (var (resource, stack) in Container.All(i => i.TryGet(Items.Keys.Resource.LogisticState, out var logisticState) && logisticState == Items.Values.Resource.LogisticStates.None))
 			{
+				if (resource[Items.Keys.Resource.CapacityPoolId] != capacityPoolId) continue;
 				if (!filter.Validate(resource)) continue;
 				
 				resourceTotalCount += stack.Count;
 			}
 
 			var capacityPoolCountTarget = int.MaxValue;
-			var capacityPoolId = capacity[Items.Keys.Capacity.CapacityPoolId];
-
+			
 			if (Container.TryFindFirst(capacityPoolId, out var capacityPool)) capacityPoolCountTarget = capacityPool[Items.Keys.CapacityPool.CountTarget];
 			else Debug.LogError($"Cannot find capacity pool with id {capacityPoolId} for {capacity}");
 
