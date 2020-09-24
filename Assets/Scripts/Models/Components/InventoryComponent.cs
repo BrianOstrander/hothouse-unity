@@ -574,8 +574,9 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			// How many are removed from each Capacities current...
-			var capacityDeltas = new Dictionary<long, int>();
-			var affectedCapacityIdsToReservations = new Dictionary<long, Item>();
+			var capacityIdToDelta = new Dictionary<long, int>();
+			var capacityIdToExistingReservationOutput = new Dictionary<long, Item>();
+			var capacityIdToExistingReservationInput = new Dictionary<long, Item>(); 
 
 			foreach (var (item, _) in Container.All())
 			{
@@ -610,9 +611,9 @@ namespace Lunra.Hothouse.Models
 								{
 									if (filter.Validate(resource))
 									{
-										capacityDeltas.TryGetValue(item.Id, out var capacityDelta);
+										capacityIdToDelta.TryGetValue(item.Id, out var capacityDelta);
 										capacityDelta += resourceCount;
-										capacityDeltas[item.Id] = capacityDelta;
+										capacityIdToDelta[item.Id] = capacityDelta;
 
 										item[Items.Keys.Capacity.CountCurrent] -= resourceCount;
 									}
@@ -627,8 +628,19 @@ namespace Lunra.Hothouse.Models
 						{
 							if (item[Items.Keys.Reservation.TransferId] == IdCounter.UndefinedId)
 							{
-								try { affectedCapacityIdsToReservations.Add(item[Items.Keys.Reservation.CapacityId], item); }
-								catch (ArgumentException e) { Debug.LogException(e); }
+								var logisticState = item[Items.Keys.Reservation.LogisticState];
+								
+								if (logisticState == Items.Values.Reservation.LogisticStates.Output)
+								{
+									try { capacityIdToExistingReservationOutput.Add(item[Items.Keys.Reservation.CapacityId], item); }
+									catch (ArgumentException e) { Debug.LogException(e); }
+								}
+								else if (logisticState == Items.Values.Reservation.LogisticStates.Input)
+								{
+									try { capacityIdToExistingReservationInput.Add(item[Items.Keys.Reservation.CapacityId], item); }
+									catch (ArgumentException e) { Debug.LogException(e); }
+								}
+								else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState.Key}: {logisticState}");
 							}
 						}
 					}
@@ -639,7 +651,7 @@ namespace Lunra.Hothouse.Models
 				.Select(e => e.Item.StackOf(e.Count))
 				.ToList();
 			
-			foreach (var capacityDelta in capacityDeltas)
+			foreach (var capacityDelta in capacityIdToDelta)
 			{
 				if (!Container.TryFindFirst(capacityDelta.Key, out var capacity))
 				{
@@ -647,7 +659,7 @@ namespace Lunra.Hothouse.Models
 					continue;
 				}
 				
-				if (affectedCapacityIdsToReservations.TryGetValue(capacityDelta.Key, out var reservation))
+				if (capacityIdToExistingReservationOutput.TryGetValue(capacityDelta.Key, out var reservation))
 				{
 					if (capacityDelta.Value == reservation.InstanceCount)
 					{
@@ -656,7 +668,7 @@ namespace Lunra.Hothouse.Models
 						
 						capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
 					}
-					if (capacityDelta.Value < reservation.InstanceCount)
+					else if (capacityDelta.Value < reservation.InstanceCount)
 					{
 						// We got rid of some we wanted to get rid of anyways, but there are still some we want to get rid of.
 						destroyed.Add(reservation.StackOf(capacityDelta.Value));
@@ -664,104 +676,53 @@ namespace Lunra.Hothouse.Models
 					else
 					{
 						// We only wanted to get rid of some of these, so we need to add a few new input reservations.
-						Container.New(
-							capacity[Items.Keys.Capacity.CountTarget] - capacity[Items.Keys.Capacity.CountCurrent],
-							Items.Instantiate.Reservation.OfInput(
-								capacityDelta.Key,
-								reservation[Items.Keys.Reservation.CapacityPoolId]
-							)
-						);
+						var inputCount = capacity[Items.Keys.Capacity.CountTarget] - capacity[Items.Keys.Capacity.CountCurrent];
+
+						if (0 < inputCount)
+						{
+							Container.New(
+								inputCount,
+								Items.Instantiate.Reservation.OfInput(
+									capacityDelta.Key,
+									reservation[Items.Keys.Reservation.CapacityPoolId]
+								)
+							);
+
+							capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.Receive;
+						}
+						else capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.None;
 						
 						destroyed.Add(reservation.StackOfAll());
-						
-						capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.Receive;
 					}
 				}
 				else
 				{
 					// If we get here, it means the inventory was already satisfied and no reservations existed
-					Container.New(
-						capacityDelta.Value,
-						Items.Instantiate.Reservation.OfInput(
-							capacityDelta.Key,
-							capacity[Items.Keys.Capacity.CapacityPoolId]
-						)
-					);
-				
-					capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.Receive;	
+					
+					if (capacityIdToExistingReservationInput.TryGetValue(capacityDelta.Key, out var existingReservationInput))
+					{
+						Container.Increment(
+							existingReservationInput.StackOf(
+								// (capacity[Items.Keys.Capacity.CountTarget] - capacity[Items.Keys.Capacity.CountCurrent]) - existingReservationInput.InstanceCount
+								capacityDelta.Value
+							)
+						);
+					}
+					else
+					{
+						Container.New(
+							capacityDelta.Value,
+							Items.Instantiate.Reservation.OfInput(
+								capacityDelta.Key,
+								capacity[Items.Keys.Capacity.CapacityPoolId]
+							)
+						);
+						
+						capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.Receive;	
+					}
 				}
-				
-				// if (affectedCapacityIdsToReservations.TryGetValue(capacityDelta.Key, out var reservation))
-				// {
-				// 	string desire = null;
-				// 	
-				// 	Debug.Log("Create this amoun of additional inputs?: "+(capacityDelta.Value - reservation.InstanceCount));
-				// 	
-				// 	if (reservation.InstanceCount == capacityDelta.Value)
-				// 	{
-				// 		Debug.Log($"equal? : {reservation.InstanceCount} | {capacityDelta.Value}");
-				// 		// We wanted to get rid of all these anyways, so no reservations are left.
-				// 		destroyed.Add(reservation.StackOfAll());
-				// 		desire = Items.Values.Capacity.Desires.None;
-				// 	}
-				// 	else if (reservation.InstanceCount < capacityDelta.Value)
-				// 	{
-				// 		Debug.Log($"lesssss? : {reservation.InstanceCount} | {capacityDelta.Value}");
-				// 		// We only wanted to get rid of some of these, so we need to add a few new input reservations.
-				// 		var reservationInputCount = capacityDelta.Value - reservation.InstanceCount;
-				//
-				// 		Container.New(
-				// 			reservationInputCount,
-				// 			Items.Instantiate.Reservation.OfInput(
-				// 				capacityDelta.Key,
-				// 				reservation[Items.Keys.Reservation.CapacityPoolId]
-				// 			)
-				// 		);
-				// 		
-				// 		destroyed.Add(reservation.StackOfAll());
-				// 		
-				// 		desire = Items.Values.Capacity.Desires.Receive;
-				// 	}
-				// 	else
-				// 	{
-				// 		Debug.Log($"else? : {reservation.InstanceCount} | {capacityDelta.Value}");
-				// 		// We got rid of some we wanted to get rid of anyways, but there are still some we want to get rid of.
-				// 		destroyed.Add(reservation.StackOf(capacityDelta.Value));
-				// 	}
-				//
-				// 	if (desire != null)
-				// 	{
-				// 		capacity[Items.Keys.Capacity.Desire] = desire;
-				// 	}
-				// }
-				// else
-				// {
-				// 	// If we get here, it means the inventory was already satisfied and no reservations existed
-				// 	
-				// 	Container.New(
-				// 		capacityDelta.Value,
-				// 		Items.Instantiate.Reservation.OfInput(
-				// 			capacityDelta.Key,
-				// 			capacity[Items.Keys.Capacity.CapacityPoolId]
-				// 		)
-				// 	);
-				//
-				// 	capacity[Items.Keys.Capacity.Desire] = Items.Values.Capacity.Desires.Receive;
-				// }
 			}
 			
-			Debug.Log(
-				destroyed.Aggregate("destroyed: ", (r, c) => $"{r}\n{c}")
-			);
-			
-			Debug.Log(
-				capacityDeltas.Aggregate("capacityDeltas: ", (r, c) => $"{r}\n{c.Key} : {c.Value}")
-			);
-			
-			Debug.Log(
-				affectedCapacityIdsToReservations.Aggregate("afto res: ", (r, c) => $"{r}\n{c.Key} : {c.Value}")
-			);
-
 			Container.Destroy(
 				destroyed.ToArray()
 			);

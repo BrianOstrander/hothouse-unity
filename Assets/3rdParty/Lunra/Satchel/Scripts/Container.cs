@@ -307,10 +307,13 @@ namespace Lunra.Satchel
 			var result = Withdrawal(
 				requests,
 				out var results,
-				out _
+				out var underflow
 			);
-			
-			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow may cause unexpected problems");
+
+			if (result.HasFlag(ModificationResults.Underflow))
+			{
+				Debug.LogError(underflow.Aggregate("Unhandled underflow on destruction may cause unexpected problems", (r, c) => $"{r}\n{c}"));
+			}
 
 			return results;
 		}
@@ -378,10 +381,13 @@ namespace Lunra.Satchel
 				requests,
 				out _,
 				out _,
-				out _
+				out var underflow
 			);
-			
-			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow may cause unexpected problems");
+
+			if (result.HasFlag(ModificationResults.Underflow))
+			{
+				Debug.LogError(underflow.Aggregate("Unhandled underflow on destruction may cause unexpected problems", (r, c) => $"{r}\n{c}"));
+			}
 
 			return result;
 		}
@@ -602,9 +608,12 @@ namespace Lunra.Satchel
 			params Stack[] requests
 		)
 		{
-			var result = Destroy(requests, out _);
-			
-			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow on destruction may cause unexpected problems");
+			var result = Destroy(requests, out var underflow);
+
+			if (result.HasFlag(ModificationResults.Underflow))
+			{
+				Debug.LogError(underflow.Aggregate("Unhandled underflow on destruction may cause unexpected problems", (r, c) => $"{r}\n{c}"));
+			}
 			
 			return result;
 		}
@@ -995,10 +1004,13 @@ namespace Lunra.Satchel
 				requests,
 				source,
 				destination,
-				out _
+				out var underflow
 			);
-			
-			if (result.HasFlag(ModificationResults.Underflow)) Debug.LogError("Unhandled underflow may cause unexpected problems");
+
+			if (result.HasFlag(ModificationResults.Underflow))
+			{
+				Debug.LogError(underflow.Aggregate("Unhandled underflow on destruction may cause unexpected problems", (r, c) => $"{r}\n{c}"));
+			}
 
 			return result;
 		}
