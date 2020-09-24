@@ -13,6 +13,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
+			Model.Inventory.Container.UpdatedItem += OnItemDropInventoryUpdateItem;
 			Model.Inventory.Container.Updated += OnItemDropInventoryUpdate;
 			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
 			
@@ -23,6 +24,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
+			Model.Inventory.Container.UpdatedItem -= OnItemDropInventoryUpdateItem;
 			Model.Inventory.Container.Updated -= OnItemDropInventoryUpdate;
 			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
 			
@@ -41,10 +43,10 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region ItemDropModel Events
+		void OnItemDropInventoryUpdateItem(ItemStore.Event itemEvent) => OnItemDropInventoryUpdate(default); 
+		
 		void OnItemDropInventoryUpdate(Container.Event containerEvent)
 		{
-			if (!containerEvent.Updates.HasFlag(Container.Event.Types.Subtraction)) return;
-			
 			foreach (var entry in Model.Inventory.Container.All())
 			{
 				var type = entry.Item[Items.Keys.Shared.Type];
