@@ -186,6 +186,9 @@ namespace Lunra.Hothouse.Models
 		
 			var countTargetPrevious = capacity[Items.Keys.Capacity.CountTarget];
 
+			if (Container.TryFindFirst(capacity[Items.Keys.Capacity.CapacityPoolId], out var capacityPool)) countTarget = Mathf.Min(capacityPool[Items.Keys.CapacityPool.CountTarget], countTarget);
+			else Debug.LogError($"Cannot find capacity pool for {capacity}");
+			
 			if (countTargetPrevious == countTarget) return false;
 
 			countTargetDelta = countTarget - countTargetPrevious;
@@ -266,7 +269,7 @@ namespace Lunra.Hothouse.Models
 			}
 			
 			if (capacityPool[Items.Keys.CapacityPool.IsForbidden]) return;
-			
+
 			if (countTargetDelta != 0)
 			{
 				if (0 < countTargetDelta)
@@ -406,7 +409,7 @@ namespace Lunra.Hothouse.Models
 
 				if (count != capacityCountTarget)
 				{
-					SetCapacity(capacity.Id, Mathf.Min(count, capacity[Items.Keys.Capacity.CountMaximum]));
+					SetCapacity(capacity.Id, Mathf.Min(count, capacity[Items.Keys.Capacity.CountTarget]));
 				}
 			}
 		}

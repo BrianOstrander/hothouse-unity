@@ -582,6 +582,14 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
+			
+			var stockpile1 = payload.Game.Buildings.Activate<StalkStockpileDefinition>(
+				spawn.RoomTransform.Id.Value,
+				position + new Vector3(12f ,0f, 6f),
+				Quaternion.identity,
+				BuildingStates.Operating
+			);
+			
 			//
 			// stockpile0.Inventory.Container.TryFindFirst(
 			// 	i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool,
@@ -593,17 +601,17 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// 	true
 			// );
 
-			// stockpile0.Inventory.Container
-			// 	.TryFindFirst(i => i[Items.Keys.CapacityPool.Type] == Items.Values.CapacityPool.Types.Cache, out var stockpile0capacityPool);
-			//
-			// stockpile0.Inventory.Container
-			// 	.New(
-			// 		2,
-			// 		out _,
-			// 		Items.Instantiate.Resource.Stalk
-			// 			.Append((Items.Keys.Resource.CapacityPoolId, stockpile0capacityPool.Id))
-			// 			.ToArray()
-			// 	);
+			stockpile0.Inventory.Container
+				.TryFindFirst(i => i[Items.Keys.CapacityPool.Type] == Items.Values.CapacityPool.Types.Cache, out var stockpile0capacityPool);
+			
+			stockpile0.Inventory.Container
+				.New(
+					2,
+					out _,
+					Items.Instantiate.Resource.Stalk
+						.Append((Items.Keys.Resource.CapacityPoolId, stockpile0capacityPool.Id))
+						.ToArray()
+				);
 
 			// stockpile0.Inventory.Container.TryFindFirst(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool, out var cap);
 			// cap[Items.Keys.CapacityPool.CountOverride] = Items.Values.CapacityPool.CountOverrides.Unlimited;
@@ -615,19 +623,19 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// 	BuildingStates.Operating
 			// );
 			
-			payload.Game.ItemDrops.Activate(
-				spawn.Id.Value,
-				Vector3.zero,
-				Quaternion.identity,
-				// payload.Game.Items.Builder
-				// 	.BeginItem()
-				// 	.WithProperties(Items.Instantiate.Resource.Scrap)
-				// 	.Done(2),
-				payload.Game.Items.Builder
-					.BeginItem()
-					.WithProperties(Items.Instantiate.Resource.Stalk)
-					.Done(2)
-			);
+			// payload.Game.ItemDrops.Activate(
+			// 	spawn.Id.Value,
+			// 	Vector3.zero,
+			// 	Quaternion.identity,
+			// 	// payload.Game.Items.Builder
+			// 	// 	.BeginItem()
+			// 	// 	.WithProperties(Items.Instantiate.Resource.Scrap)
+			// 	// 	.Done(2),
+			// 	payload.Game.Items.Builder
+			// 		.BeginItem()
+			// 		.WithProperties(Items.Instantiate.Resource.Stalk)
+			// 		.Done(2)
+			// );
 
 			// payload.Game.DesireDamageMultiplier.Value = 0f;
 			// payload.Game.SimulationMultiplier.Value = 60f;
