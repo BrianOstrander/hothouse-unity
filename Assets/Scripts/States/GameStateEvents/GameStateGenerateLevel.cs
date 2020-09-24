@@ -576,12 +576,12 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			// 	Items.Instantiate.Resource.Stalk
 			// );
 			
-			var stockpile0 = payload.Game.Buildings.Activate<StalkStockpileDefinition>(
-				spawn.RoomTransform.Id.Value,
-				position + new Vector3(6f ,0f, 6f),
-				Quaternion.identity,
-				BuildingStates.Constructing
-			);
+			// var stockpile0 = payload.Game.Buildings.Activate<StalkStockpileDefinition>(
+			// 	spawn.RoomTransform.Id.Value,
+			// 	position + new Vector3(6f ,0f, 6f),
+			// 	Quaternion.identity,
+			// 	BuildingStates.Constructing
+			// );
 			
 			//
 			// stockpile0.Inventory.Container.TryFindFirst(

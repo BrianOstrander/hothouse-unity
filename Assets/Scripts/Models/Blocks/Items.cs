@@ -32,7 +32,7 @@ namespace Lunra.Hothouse.Models
 				)
 				{
 					const float DefaultDecayRate = 1f; // Per real second at 1x speed
-					const float DefaultDecayMaximum = DayTime.RealTimeToSimulationTime * DefaultDecayRate * (60f * 10f); // Real seconds to decay
+					const float DefaultDecayMaximum = DayTime.RealTimeToSimulationTime * DefaultDecayRate * (60f * 0.1f); // Real seconds to decay
 
 					return Combine(
 						Values.Shared.Types.Resource,

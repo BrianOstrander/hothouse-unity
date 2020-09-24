@@ -13,7 +13,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed += OnNavigationMeshCalculationState;
 
-			Model.Inventory.Container.UpdatedItem += OnItemDropInventoryUpdateItem;
+			Model.Inventory.Container.Updated += OnItemDropInventoryUpdate;
 			Model.LightSensitive.LightLevel.Changed += OnLightSensitiveLightLevel;
 			
 			base.Bind();
@@ -23,7 +23,7 @@ namespace Lunra.Hothouse.Presenters
 		{
 			Game.NavigationMesh.CalculationState.Changed -= OnNavigationMeshCalculationState;
 			
-			Model.Inventory.Container.UpdatedItem -= OnItemDropInventoryUpdateItem;
+			Model.Inventory.Container.Updated -= OnItemDropInventoryUpdate;
 			Model.LightSensitive.LightLevel.Changed -= OnLightSensitiveLightLevel;
 			
 			base.UnBind();
@@ -41,15 +41,19 @@ namespace Lunra.Hothouse.Presenters
 		}
 		
 		#region ItemDropModel Events
-		void OnItemDropInventoryUpdateItem(ItemStore.Event delta)
+		void OnItemDropInventoryUpdate(Container.Event containerEvent)
 		{
+			if (!containerEvent.Updates.HasFlag(Container.Event.Types.Subtraction)) return;
+			
 			foreach (var entry in Model.Inventory.Container.All())
 			{
-				if (entry.Item.TryGet(Items.Keys.Capacity.Desire, out var desire) && desire == Items.Values.Capacity.Desires.NotCalculated) return;
-				if (entry.Item.TryGet(Items.Keys.Capacity.CountCurrent, out var currentCount) && 0 < currentCount) return;
+				var type = entry.Item[Items.Keys.Shared.Type];
+				if (type == Items.Values.Shared.Types.Reservation) return;
+				if (type == Items.Values.Shared.Types.Resource) return;
+				if (entry.Item.TryGet(Items.Keys.Capacity.Desire, out var desire) && desire != Items.Values.Capacity.Desires.None) return;
 			}
 			
-			// If we make it here, that means there was no capacity with a current count greater than zero.
+			// If we make it here, it means no resources are in the inventory or capacities that desire anything...
 
 			Model.Inventory.Container.DestroyAll();
 			Model.PooledState.Value = PooledStates.InActive;

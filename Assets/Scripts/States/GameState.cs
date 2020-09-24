@@ -68,6 +68,11 @@ namespace Lunra.Hothouse.Services
 		{
 			Payload.Game.Items.Initialize(Payload.Game.Ids);
 
+			foreach (var processor in Payload.Game.Items.Processor.Processors)
+			{
+				if (processor is GameProcessor gameProcessor) gameProcessor.InitializeGame(Payload.Game);
+			}
+
 			done();
 		}
 

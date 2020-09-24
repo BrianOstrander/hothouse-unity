@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Lunra.Hothouse.Services
 {
-	public class ResourceDecayProcessor : Processor
+	public class ResourceDecayProcessor : GameProcessor
 	{
 		const float PredictedRatePastWeight = 0.95f;
 		const float PredictedRateRecentWeight = 1f - PredictedRatePastWeight;
@@ -70,13 +70,13 @@ namespace Lunra.Hothouse.Services
 
 		void OnDestruction(Item item)
 		{
-			if (!ItemStore.Containers.TryGetValue(item.ContainerId, out var inventory))
+			if (!Game.Query.TryFindFirst<IInventoryModel>(m => m.Inventory.Container.Id == item.ContainerId, out var parent))
 			{
-				Debug.LogError($"Unable to get find an inventory with an Id of {item.ContainerId}");
+				Debug.LogError($"Cannot find an inventory with an Id of {item.ContainerId}");
 				return;
 			}
-			
-			inventory.Destroy(item);
+
+			parent.Inventory.Destroy(item.StackOfAll());
 		}
 
 		public override bool BreakProcessing(Item item) => item.NoInstances;

@@ -544,6 +544,151 @@ namespace Lunra.Hothouse.Models
 
 			if (countPrevious != countCurrent) capacityPool[Items.Keys.CapacityPool.CountCurrent] = countCurrent;
 		}
+		
+		public void Destroy(
+			params Stack[] resources
+		)
+		{
+			var affectedCapacityPoolIds = new HashSet<long>();
+			var resourcesList = new List<(Item Item, int Count)>();
+			
+			foreach (var resource in resources)
+			{
+				if (resource.Count == 0) continue;
+				if (!Container.TryFindFirst(resource.Id, out var resourceItem))
+				{
+					Debug.LogError($"Cannot find resource with id [ {resource.Id} ] in {Container}");
+					continue;
+				}
+				
+				var resourceLogisticState = resourceItem[Items.Keys.Resource.LogisticState];
+
+				if (resourceLogisticState != Items.Values.Resource.LogisticStates.None)
+				{
+					Debug.LogError($"Expected item {resourceItem} to have {Items.Keys.Resource.LogisticState.Key} of {Items.Values.Resource.LogisticStates.None}, but instead it was {resourceLogisticState}");
+					continue;
+				}
+
+				affectedCapacityPoolIds.Add(resourceItem[Items.Keys.Resource.CapacityPoolId]);
+				resourcesList.Add((resourceItem, resource.Count));
+			}
+			
+			// How many are removed from each Capacities current...
+			var capacityDeltas = new Dictionary<long, int>();
+			var affectedCapacityIdsToReservations = new Dictionary<long, Item>();
+
+			foreach (var (item, _) in Container.All())
+			{
+				if (affectedCapacityPoolIds.Contains(item.Id))
+				{
+					if (item[Items.Keys.CapacityPool.IsForbidden]) Debug.LogError($"Destroying items in forbidden capacity pool [ {item.Id} ], unexpected behaviour may occur");
+					
+					var capacityPoolCountCurrentDelta = 0;
+
+					foreach (var (resource, resourceCount) in resourcesList)
+					{
+						if (resource[Items.Keys.Resource.CapacityPoolId] == item.Id)
+						{
+							capacityPoolCountCurrentDelta += resourceCount;
+						}
+					}
+
+					if (capacityPoolCountCurrentDelta != 0) item[Items.Keys.CapacityPool.CountCurrent] -= capacityPoolCountCurrentDelta;
+				}
+				else
+				{
+					var type = item[Items.Keys.Shared.Type];
+					
+					if (type == Items.Values.Shared.Types.Capacity)
+					{
+						var capacityPoolId = item[Items.Keys.Capacity.CapacityPoolId];
+						foreach (var (resource, resourceCount) in resourcesList)
+						{
+							if (resource[Items.Keys.Resource.CapacityPoolId] == capacityPoolId)
+							{
+								if (Capacities.TryGetValue(item.Id, out var filter))
+								{
+									if (filter.Validate(resource))
+									{
+										capacityDeltas.TryGetValue(item.Id, out var capacityDelta);
+										capacityDelta += resourceCount;
+										capacityDeltas[item.Id] = capacityDelta;
+
+										item[Items.Keys.Capacity.CountCurrent] -= resourceCount;
+									}
+								}
+								else Debug.LogError($"Cannot find capacity filter {item.Id}");
+							}
+						}
+					}
+					else if (type == Items.Values.Shared.Types.Reservation)
+					{
+						if (affectedCapacityPoolIds.Contains(item[Items.Keys.Reservation.CapacityPoolId]))
+						{
+							if (item[Items.Keys.Reservation.TransferId] == IdCounter.UndefinedId)
+							{
+								try { affectedCapacityIdsToReservations.Add(item[Items.Keys.Reservation.CapacityId], item); }
+								catch (ArgumentException e) { Debug.LogException(e); }
+							}
+						}
+					}
+				}
+			}
+
+			var destroyed = resourcesList
+				.Select(e => e.Item.StackOf(e.Count))
+				.ToList();
+			
+			foreach (var capacityDelta in capacityDeltas)
+			{
+				if (affectedCapacityIdsToReservations.TryGetValue(capacityDelta.Key, out var reservation))
+				{
+					string desire = null;
+					
+					if (reservation.InstanceCount == capacityDelta.Value)
+					{
+						// We wanted to get rid of all these anyways, so no reservations are left.
+						destroyed.Add(reservation.StackOfAll());
+						desire = Items.Values.Capacity.Desires.None;
+					}
+					else if (reservation.InstanceCount < capacityDelta.Value)
+					{
+						// We only wanted to get rid of some of these, so we need to add a few new input reservations.
+						var reservationInputCount = capacityDelta.Value - reservation.InstanceCount;
+
+						Container.New(
+							reservationInputCount,
+							Items.Instantiate.Reservation.OfInput(
+								capacityDelta.Key,
+								reservation[Items.Keys.Reservation.CapacityPoolId]
+							)
+						);
+						
+						destroyed.Add(reservation.StackOfAll());
+						
+						desire = Items.Values.Capacity.Desires.Receive;
+					}
+					else
+					{
+						// We got rid of some we wanted to get rid of anyways, but there are still some we want to get rid of.
+						destroyed.Add(reservation.StackOf(capacityDelta.Value));
+					}
+
+					if (desire != null)
+					{
+						if (Container.TryFindFirst(capacityDelta.Key, out var capacityPool))
+						{
+							capacityPool[Items.Keys.Capacity.Desire] = desire;
+						}
+						else Debug.LogError($"Cannot find capacity pool [ {capacityDelta.Key} ] in {Container}");
+					}
+				}
+			}
+
+			Container.Destroy(
+				destroyed.ToArray()
+			);
+		}
 
 		#region HealthComponent Events
 		void OnHealthDestroyed(Damage.Result result)

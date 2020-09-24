@@ -9,7 +9,7 @@ namespace Lunra.Satchel
 	public class ProcessorStore
 	{
 		ItemStore itemStore;
-		List<Processor> processors = new List<Processor>();
+		public List<Processor> Processors { get; private set;} = new List<Processor>();
 		
 		public ProcessorStore Initialize(
 			ItemStore itemStore
@@ -21,13 +21,13 @@ namespace Lunra.Satchel
 			{
 				if (ReflectionUtility.TryGetInstanceOfType<Processor>(processorType, out var processorInstance))
 				{
-					try { processors.Add(processorInstance.Initialize(itemStore)); }
+					try { Processors.Add(processorInstance.Initialize(itemStore)); }
 					catch (Exception e) { Debug.LogException(e); }
 				}
 			}
 
 			// Order them by name as well so there is some consistency to how similar priority processors are ordered.
-			processors = processors
+			Processors = Processors
 				.OrderBy(p => p.Priority)
 				.ThenBy(p => p.GetType().Name)
 				.ToList();
@@ -45,7 +45,7 @@ namespace Lunra.Satchel
 		{
 			if (item.NoInstances) return;
 
-			foreach (var processor in processors)
+			foreach (var processor in Processors)
 			{
 				try
 				{
