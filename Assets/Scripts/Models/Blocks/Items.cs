@@ -107,6 +107,7 @@ namespace Lunra.Hothouse.Models
 						new PropertyKeyValue[]
 						{
 							(Keys.CapacityPool.Type, type),
+							(Keys.CapacityPool.Priority, 0),
 							(Keys.CapacityPool.CountCurrent, 0),
 							(Keys.CapacityPool.CountMaximum, countMaximum),
 							(Keys.CapacityPool.CountTarget, countMaximum),
@@ -323,6 +324,7 @@ namespace Lunra.Hothouse.Models
 				static PropertyKey<T> Create<T>(string suffix) => CreateKey<T>(nameof(CapacityPool), suffix);
 				
 				public static readonly PropertyKey<string> Type = Create<string>(nameof(Type));
+				public static readonly PropertyKey<int> Priority = Create<int>(nameof(Priority));
 				public static readonly PropertyKey<int> CountCurrent = Create<int>(nameof(CountCurrent));
 				public static readonly PropertyKey<int> CountMaximum = Create<int>(nameof(CountMaximum));
 				public static readonly PropertyKey<int> CountTarget = Create<int>(nameof(CountTarget));

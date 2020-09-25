@@ -69,6 +69,8 @@ namespace Lunra.Hothouse.Services
 				var reservationInputs = new Dictionary<long, ReservationCache>();
 				var reservationOutputs = new Dictionary<long, ReservationCache>();
 
+				var capacityPoolPriorities = new Dictionary<long, int>();
+				
 				foreach (var item in Model.Items.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Reservation))
 				{
 					if (item.NoInstances) continue;
@@ -80,6 +82,19 @@ namespace Lunra.Hothouse.Services
 						Item = item,
 						NavigationCache = new Dictionary<long, bool>()
 					};
+
+					var capacityPoolId = item[Items.Keys.Reservation.CapacityPoolId];
+
+					if (!capacityPoolPriorities.TryGetValue(capacityPoolId, out cache.Priority))
+					{
+						if (Model.Items.TryGet(capacityPoolId, out var capacityPool))
+						{
+							cache.Priority = capacityPool[Items.Keys.CapacityPool.Priority];
+						}
+						else Debug.LogError($"Cannot find capacity pool [ {capacityPoolId} ]");
+
+						capacityPoolPriorities[capacityPoolId] = cache.Priority;
+					}
 
 					if (Model.Query.TryFindFirst(m => m.Inventory.Container.Id == item.ContainerId, out cache.Parent))
 					{
