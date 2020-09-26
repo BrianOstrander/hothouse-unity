@@ -241,24 +241,24 @@ namespace Lunra.Hothouse.Services
 
 					var reservationInputRemaining = reservationInput.Item.InstanceCount;
 
-					var reservationOutputsSorted = itemOutputs.Values
+					var itemOutputsSorted = itemOutputs.Values
 						.Where(r => r.IsReservation) // TODO REMOVE THIS
 						.OrderBy(r => r.Priority)
 						.ThenBy(r => r.Parent.DistanceTo(reservationInput.Parent))
 						.ToList();
 
-					while (0 < reservationInputRemaining && reservationOutputsSorted.Any() && dwellers.Any())
+					while (0 < reservationInputRemaining && itemOutputsSorted.Any() && dwellers.Any())
 					{
-						var reservationOutput = reservationOutputsSorted[0];
-						reservationOutputsSorted.RemoveAt(0);
+						var itemOutput = itemOutputsSorted[0];
+						itemOutputsSorted.RemoveAt(0);
 
-						var reservationOutputRemaining = reservationOutput.Item.InstanceCount;
+						var itemOutputRemaining = itemOutput.Item.InstanceCount;
 
 						var dwellersSorted = dwellers.Values
-							.OrderBy(d => d.DistanceTo(reservationOutput.Parent))
+							.OrderBy(d => d.DistanceTo(itemOutput.Parent))
 							.ToList();
 
-						while (0 < reservationInputRemaining && 0 < reservationOutputRemaining && dwellersSorted.Any())
+						while (0 < reservationInputRemaining && 0 < itemOutputRemaining && dwellersSorted.Any())
 						{
 							var dweller = dwellersSorted[0];
 							dwellersSorted.RemoveAt(0);
@@ -281,10 +281,10 @@ namespace Lunra.Hothouse.Services
 
 							if (!isNavigableToInput) continue;
 
-							var dwellerToOutputConnection = ContainerConnection.Between(dweller.Inventory.Container.Id, reservationOutput.Parent.Inventory.Container.Id);
+							var dwellerToOutputConnection = ContainerConnection.Between(dweller.Inventory.Container.Id, itemOutput.Parent.Inventory.Container.Id);
 							if (!navigationCache.TryGetValue(dwellerToOutputConnection, out var isNavigableToOutput))
 							{
-								if (Navigation.TryQuery(reservationOutput.Parent, out var queryOutput))
+								if (Navigation.TryQuery(itemOutput.Parent, out var queryOutput))
 								{
 									isNavigableToOutput = NavigationUtility.CalculateNearest(
 										dweller.Transform.Position.Value,
@@ -292,33 +292,33 @@ namespace Lunra.Hothouse.Services
 										queryOutput
 									);
 								}
-								else Debug.LogError($"Unable to query {reservationOutput.Parent}");
+								else Debug.LogError($"Unable to query {itemOutput.Parent}");
 								
 								navigationCache.Add(dwellerToOutputConnection, isNavigableToOutput);
 							}
 							
 							if (!isNavigableToOutput) continue;
 
-							var items = reservationOutput.Parent.Inventory.Container
-								.All(i => i[Items.Keys.Resource.CapacityPoolId] == reservationOutput.Item[Items.Keys.Reservation.CapacityPoolId])
+							var items = itemOutput.Parent.Inventory.Container
+								.All(i => i[Items.Keys.Resource.CapacityPoolId] == itemOutput.Item[Items.Keys.Reservation.CapacityPoolId])
 								.ToList();
 
-							foreach (var (item, stack) in items)
+							foreach (var (item, _) in items)
 							{
 								if (filter.Validate(item))
 								{
 									reservationInputRemaining--;
-									reservationOutputRemaining--;
+									itemOutputRemaining--;
 
 									var output = new InventoryPromiseComponent.TransferInfo
 									{
-										Container = reservationOutput.Parent.Inventory.Container,
-										Capacity = Model.Items.First(reservationOutput.Item[Items.Keys.Reservation.CapacityId]),
+										Container = itemOutput.Parent.Inventory.Container,
+										Capacity = Model.Items.First(itemOutput.Item[Items.Keys.Reservation.CapacityId]),
 
 										// It's okay if the source doesn't have a capacity pool.
-										CapacityPool = Model.Items.FirstOrDefault(reservationOutput.Item[Items.Keys.Reservation.CapacityPoolId]),
+										CapacityPool = Model.Items.FirstOrDefault(itemOutput.Item[Items.Keys.Reservation.CapacityPoolId]),
 
-										Reservation = reservationOutput.Item
+										Reservation = itemOutput.Item
 									};
 
 									var input = new InventoryPromiseComponent.TransferInfo
