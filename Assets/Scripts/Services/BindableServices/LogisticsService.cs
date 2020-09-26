@@ -170,9 +170,10 @@ namespace Lunra.Hothouse.Services
 							else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {item}");
 							continue;	
 						}
-						
+						// Don't want to include already reserved items...
 						if (item[Items.Keys.Resource.LogisticState] != Items.Values.Resource.LogisticStates.None) continue;
-						if (capacityPool[Items.Keys.CapacityPool.CountCurrent] != capacityPool[Items.Keys.CapacityPool.CountTarget]) continue;
+						// Any items that are surplus will already have output reservations, so we don't need to add them again...
+						if (capacityPool[Items.Keys.CapacityPool.CountTarget] < capacityPool[Items.Keys.CapacityPool.CountCurrent]) continue;
 						
 						// If we get here we know it's a resource that is part of a filled or nearly filled capacity...
 						itemsToCapacityPoolReservationChecks.Add(item.Id, capacityPoolId);
@@ -180,6 +181,15 @@ namespace Lunra.Hothouse.Services
 					}
 					else Debug.LogError($"Cannot find parent of container {item.ContainerId} for item {item}");
 				}
+
+				// var deb = string.Empty;
+				//
+				// foreach (var item in itemOutputs.Values.OrderBy(i => i.IsReservation))
+				// {
+				// 	deb += $"\n{item.Item.ToString().WrapColor(item.IsReservation ? "red" : "green")}";
+				// }
+				//
+				// Debug.Log(deb);
 				
 				// foreach (var item in Model.Items.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Reservation))
 				// {
