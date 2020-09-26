@@ -15,8 +15,8 @@ namespace Lunra.Hothouse.Services
 		struct ItemCache
 		{
 			public Item Item;
-			public Vector3 Position;
 			public int Priority;
+			public bool IsReservation;
 			public IInventoryModel Parent;
 		}
 
@@ -126,44 +126,93 @@ namespace Lunra.Hothouse.Services
 				if (dwellers.None()) return;
 
 				var reservationInputs = new Dictionary<long, ItemCache>();
-				var reservationOutputs = new Dictionary<long, ItemCache>();
+				var itemOutputs = new Dictionary<long, ItemCache>();
 
-				var capacityPoolPriorities = new Dictionary<long, int>();
+				var capacityPoolsWithReservations = new HashSet<long>(); 
+				var itemsToCapacityPoolReservationChecks  = new Dictionary<long, long>();
 				
-				foreach (var item in Model.Items.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Reservation))
+				foreach (var item in Model.Items.All())
 				{
-					if (item.NoInstances) continue;
+					if (!item.IsValid) continue;
 
-					var logisticState = item[Items.Keys.Reservation.LogisticState];
+					var cache = new ItemCache { Item = item };
 
-					var cache = new ItemCache
+					long capacityPoolId;
+					
+					if (item.TryGet(Items.Keys.Reservation.LogisticState, out var logisticState))
 					{
-						Item = item
-					};
-
-					var capacityPoolId = item[Items.Keys.Reservation.CapacityPoolId];
-
-					if (!capacityPoolPriorities.TryGetValue(capacityPoolId, out cache.Priority))
+						cache.IsReservation = true;
+						capacityPoolId = item[Items.Keys.Reservation.CapacityPoolId];
+						capacityPoolsWithReservations.Add(capacityPoolId);
+					}
+					else if (item.TryGet(Items.Keys.Resource.LogisticState, out logisticState))
 					{
-						if (Model.Items.TryGet(capacityPoolId, out var capacityPool))
-						{
-							cache.Priority = capacityPool[Items.Keys.CapacityPool.Priority];
-						}
-						else Debug.LogError($"Cannot find capacity pool [ {capacityPoolId} ]");
+						capacityPoolId = item[Items.Keys.Resource.CapacityPoolId];
+					}
+					else continue;
 
-						capacityPoolPriorities[capacityPoolId] = cache.Priority;
+					if (Model.Items.TryGet(capacityPoolId, out var capacityPool))
+					{
+						cache.Priority = capacityPool[Items.Keys.CapacityPool.Priority];
+					}
+					else
+					{
+						Debug.LogError($"Cannot find capacity pool [ {capacityPoolId} ]");
+						continue;
 					}
 
 					if (Model.Query.TryFindFirst(m => m.Inventory.Container.Id == item.ContainerId, out cache.Parent))
 					{
-						cache.Position = cache.Parent.Transform.Position.Value;
-
-						if (logisticState == Items.Values.Reservation.LogisticStates.Input) reservationInputs.Add(item.Id, cache);
-						else if (logisticState == Items.Values.Reservation.LogisticStates.Output) reservationOutputs.Add(item.Id, cache);
-						else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {item}");
+						if (cache.IsReservation)
+						{
+							if (logisticState == Items.Values.Reservation.LogisticStates.Input) reservationInputs.Add(item.Id, cache);
+							else if (logisticState == Items.Values.Reservation.LogisticStates.Output) itemOutputs.Add(item.Id, cache);
+							else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {item}");
+							continue;	
+						}
+						
+						if (item[Items.Keys.Resource.LogisticState] != Items.Values.Resource.LogisticStates.None) continue;
+						if (capacityPool[Items.Keys.CapacityPool.CountCurrent] != capacityPool[Items.Keys.CapacityPool.CountTarget]) continue;
+						
+						// If we get here we know it's a resource that is part of a filled or nearly filled capacity...
+						itemsToCapacityPoolReservationChecks.Add(item.Id, capacityPoolId);
+						itemOutputs.Add(item.Id, cache);
 					}
 					else Debug.LogError($"Cannot find parent of container {item.ContainerId} for item {item}");
 				}
+				
+				// foreach (var item in Model.Items.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Reservation))
+				// {
+				// 	if (item.NoInstances) continue;
+				//
+				// 	var logisticState = item[Items.Keys.Reservation.LogisticState];
+				//
+				// 	var cache = new ItemCache
+				// 	{
+				// 		Item = item
+				// 	};
+				//
+				// 	var capacityPoolId = item[Items.Keys.Reservation.CapacityPoolId];
+				//
+				// 	if (!capacityPoolPriorities.TryGetValue(capacityPoolId, out cache.Priority))
+				// 	{
+				// 		if (Model.Items.TryGet(capacityPoolId, out var capacityPool))
+				// 		{
+				// 			cache.Priority = capacityPool[Items.Keys.CapacityPool.Priority];
+				// 		}
+				// 		else Debug.LogError($"Cannot find capacity pool [ {capacityPoolId} ]");
+				//
+				// 		capacityPoolPriorities[capacityPoolId] = cache.Priority;
+				// 	}
+				//
+				// 	if (Model.Query.TryFindFirst(m => m.Inventory.Container.Id == item.ContainerId, out cache.Parent))
+				// 	{
+				// 		if (logisticState == Items.Values.Reservation.LogisticStates.Input) reservationInputs.Add(item.Id, cache);
+				// 		else if (logisticState == Items.Values.Reservation.LogisticStates.Output) reservationOutputs.Add(item.Id, cache);
+				// 		else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {item}");
+				// 	}
+				// 	else Debug.LogError($"Cannot find parent of container {item.ContainerId} for item {item}");
+				// }
 
 				var reservationInputsSorted = reservationInputs.Values
 					.OrderBy(r => r.Priority)
@@ -182,7 +231,8 @@ namespace Lunra.Hothouse.Services
 
 					var reservationInputRemaining = reservationInput.Item.InstanceCount;
 
-					var reservationOutputsSorted = reservationOutputs.Values
+					var reservationOutputsSorted = itemOutputs.Values
+						.Where(r => r.IsReservation) // TODO REMOVE THIS
 						.OrderBy(r => r.Priority)
 						.ThenBy(r => r.Parent.DistanceTo(reservationInput.Parent))
 						.ToList();

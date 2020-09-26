@@ -104,6 +104,7 @@ namespace Lunra.Satchel
 		[JsonIgnore] public bool NoInstances => !AnyInstances;
 		[JsonIgnore] public bool AnyInstances => 0 < InstanceCount;
 		[JsonIgnore] public string[] PropertyKeys => properties.Keys.ToArray();
+		[JsonIgnore] public bool IsValid => AnyInstances && ContainerId != IdCounter.UndefinedId;
 
 		ItemStore itemStore;
 		Action<Event> itemStoreUpdated;

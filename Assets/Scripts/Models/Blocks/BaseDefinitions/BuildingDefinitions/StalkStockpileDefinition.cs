@@ -11,11 +11,11 @@ namespace Lunra.Hothouse.Models
 		public override void GetCapacities(CapacityPoolBuilder capacityPoolBuilder)
 		{
 			capacityPoolBuilder
-				.Pool(
-					Items.Values.CapacityPool.Types.Construction,
-					2,
-					(Items.Values.Resource.Types.Stalk, 2)
-				)
+				// .Pool(
+				// 	Items.Values.CapacityPool.Types.Construction,
+				// 	2,
+				// 	(Items.Values.Resource.Types.Stalk, 2)
+				// )
 				.Pool(
 					Items.Values.CapacityPool.Types.Stockpile,
 					4,
