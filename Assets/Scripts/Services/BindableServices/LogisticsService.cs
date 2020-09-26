@@ -182,14 +182,14 @@ namespace Lunra.Hothouse.Services
 					else Debug.LogError($"Cannot find parent of container {item.ContainerId} for item {item}");
 				}
 
-				// var deb = string.Empty;
-				//
-				// foreach (var item in itemOutputs.Values.OrderBy(i => i.IsReservation))
-				// {
-				// 	deb += $"\n{item.Item.ToString().WrapColor(item.IsReservation ? "red" : "green")}";
-				// }
-				//
-				// Debug.Log(deb);
+				var deb = string.Empty;
+				
+				foreach (var item in itemOutputs.Values.OrderBy(i => i.IsReservation))
+				{
+					deb += $"\n{item.Item.ToString().WrapColor(item.IsReservation ? "red" : "green")}";
+				}
+				
+				Debug.Log(deb);
 				
 				// foreach (var item in Model.Items.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Reservation))
 				// {
@@ -242,7 +242,7 @@ namespace Lunra.Hothouse.Services
 					var reservationInputRemaining = reservationInput.Item.InstanceCount;
 
 					var itemOutputsSorted = itemOutputs.Values
-						.Where(i => reservationInput.Priority < i.Priority)
+						.Where(i => reservationInput.IsReservation || reservationInput.Priority < i.Priority)
 						.OrderBy(i => i.Priority)
 						.ThenBy(i => i.Parent.DistanceTo(reservationInput.Parent))
 						.ToList();
@@ -263,91 +263,109 @@ namespace Lunra.Hothouse.Services
 							var dweller = dwellersSorted[0];
 							dwellersSorted.RemoveAt(0);
 
-							var dwellerToInputConnection = ContainerConnection.Between(dweller.Inventory.Container.Id, reservationInput.Parent.Inventory.Container.Id);
-							if (!navigationCache.TryGetValue(dwellerToInputConnection, out var isNavigableToInput))
+							if (!IsNavigable(dweller, reservationInput, itemOutput)) continue;
+
+							if (itemOutput.IsReservation)
 							{
-								if (Navigation.TryQuery(reservationInput.Parent, out var queryInput))
+								var items = itemOutput.Parent.Inventory.Container
+									.All(i => i[Items.Keys.Resource.CapacityPoolId] == itemOutput.Item[Items.Keys.Reservation.CapacityPoolId])
+									.ToList();
+
+								foreach (var (item, _) in items)
 								{
-									isNavigableToInput = NavigationUtility.CalculateNearest(
-										dweller.Transform.Position.Value,
-										out _,
-										queryInput
-									);
-								}
-								else Debug.LogError($"Unable to query {reservationInput.Parent}");
-								
-								navigationCache.Add(dwellerToInputConnection, isNavigableToInput);
-							}
-
-							if (!isNavigableToInput) continue;
-
-							var dwellerToOutputConnection = ContainerConnection.Between(dweller.Inventory.Container.Id, itemOutput.Parent.Inventory.Container.Id);
-							if (!navigationCache.TryGetValue(dwellerToOutputConnection, out var isNavigableToOutput))
-							{
-								if (Navigation.TryQuery(itemOutput.Parent, out var queryOutput))
-								{
-									isNavigableToOutput = NavigationUtility.CalculateNearest(
-										dweller.Transform.Position.Value,
-										out _,
-										queryOutput
-									);
-								}
-								else Debug.LogError($"Unable to query {itemOutput.Parent}");
-								
-								navigationCache.Add(dwellerToOutputConnection, isNavigableToOutput);
-							}
-							
-							if (!isNavigableToOutput) continue;
-
-							var items = itemOutput.Parent.Inventory.Container
-								.All(i => i[Items.Keys.Resource.CapacityPoolId] == itemOutput.Item[Items.Keys.Reservation.CapacityPoolId])
-								.ToList();
-
-							foreach (var (item, _) in items)
-							{
-								if (filter.Validate(item))
-								{
-									reservationInputRemaining--;
-									itemOutputRemaining--;
-
-									var output = new InventoryPromiseComponent.TransferInfo
+									if (filter.Validate(item))
 									{
-										Container = itemOutput.Parent.Inventory.Container,
-										Capacity = Model.Items.First(itemOutput.Item[Items.Keys.Reservation.CapacityId]),
+										reservationInputRemaining--;
+										itemOutputRemaining--;
 
-										// It's okay if the source doesn't have a capacity pool.
-										CapacityPool = Model.Items.FirstOrDefault(itemOutput.Item[Items.Keys.Reservation.CapacityPoolId]),
+										var output = new InventoryPromiseComponent.TransferInfo
+										{
+											Container = itemOutput.Parent.Inventory.Container,
+											Capacity = Model.Items.First(itemOutput.Item[Items.Keys.Reservation.CapacityId]),
 
-										Reservation = itemOutput.Item
-									};
+											// It's okay if the source doesn't have a capacity pool.
+											CapacityPool = Model.Items.FirstOrDefault(itemOutput.Item[Items.Keys.Reservation.CapacityPoolId]),
 
-									var input = new InventoryPromiseComponent.TransferInfo
-									{
-										Container = reservationInput.Parent.Inventory.Container,
-										Capacity = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityId]),
+											Reservation = itemOutput.Item
+										};
 
-										// This capacity pool is required.
-										CapacityPool = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityPoolId]),
+										var input = new InventoryPromiseComponent.TransferInfo
+										{
+											Container = reservationInput.Parent.Inventory.Container,
+											Capacity = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityId]),
 
-										Reservation = reservationInput.Item,
-									};
+											// This capacity pool is required.
+											CapacityPool = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityPoolId]),
 
-									var isReservationInputSatisfied = dweller.InventoryPromises.Transfer(
-										item,
-										output,
-										input
-									);
+											Reservation = reservationInput.Item,
+										};
 
-									dwellers.Remove(dweller.Id.Value);
+										var isReservationInputSatisfied = dweller.InventoryPromises.Transfer(
+											item,
+											output,
+											input
+										);
 
-									if (isReservationInputSatisfied) break;
+										dwellers.Remove(dweller.Id.Value);
+
+										if (isReservationInputSatisfied) break;
+									}
 								}
+							}
+							else
+							{
+								
 							}
 						}
 					}
 				}
 			}
 			catch (Exception e) { Debug.LogException(e); }
+		}
+
+		bool IsNavigable(
+			DwellerModel dweller,
+			ItemCache input,
+			ItemCache output
+		)
+		{
+			var dwellerToInputConnection = ContainerConnection.Between(dweller.Inventory.Container.Id, input.Parent.Inventory.Container.Id);
+			
+			if (!navigationCache.TryGetValue(dwellerToInputConnection, out var isNavigableToInput))
+			{
+				if (Navigation.TryQuery(input.Parent, out var queryInput))
+				{
+					isNavigableToInput = NavigationUtility.CalculateNearest(
+						dweller.Transform.Position.Value,
+						out _,
+						queryInput
+					);
+				}
+				else Debug.LogError($"Unable to query {input.Parent}");
+								
+				navigationCache.Add(dwellerToInputConnection, isNavigableToInput);
+			}
+
+			if (!isNavigableToInput) return false;
+
+			var dwellerToOutputConnection = ContainerConnection.Between(dweller.Inventory.Container.Id, output.Parent.Inventory.Container.Id);
+			
+			if (!navigationCache.TryGetValue(dwellerToOutputConnection, out var isNavigableToOutput))
+			{
+				if (Navigation.TryQuery(output.Parent, out var queryOutput))
+				{
+					isNavigableToOutput = NavigationUtility.CalculateNearest(
+						dweller.Transform.Position.Value,
+						out _,
+						queryOutput
+					);
+				}
+				else Debug.LogError($"Unable to query {output.Parent}");
+								
+				navigationCache.Add(dwellerToOutputConnection, isNavigableToOutput);
+			}
+
+			return isNavigableToOutput;
 		}
 		#endregion
 	}
