@@ -18,6 +18,7 @@ namespace Lunra.Hothouse.Models
 				// )
 				.Pool(
 					Items.Values.CapacityPool.Types.Stockpile,
+					InventoryPriorities.Default,
 					4,
 					Items.Values.Resource.Types.Stalk
 				);

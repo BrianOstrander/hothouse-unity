@@ -596,7 +596,7 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 				out var capacityItem
 			);
 
-			capacityItem[Items.Keys.CapacityPool.Priority] = -1;
+			// capacityItem[Items.Keys.CapacityPool.Priority] = 100;
 
 			// stockpile0.Inventory.Container
 			// 	.TryFindFirst(i => i[Items.Keys.CapacityPool.Type] == Items.Values.CapacityPool.Types.Stockpile, out var stockpile0capacityPool);

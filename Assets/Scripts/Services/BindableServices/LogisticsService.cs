@@ -242,9 +242,9 @@ namespace Lunra.Hothouse.Services
 					var reservationInputRemaining = reservationInput.Item.InstanceCount;
 
 					var itemOutputsSorted = itemOutputs.Values
-						.Where(r => r.IsReservation) // TODO REMOVE THIS
-						.OrderBy(r => r.Priority)
-						.ThenBy(r => r.Parent.DistanceTo(reservationInput.Parent))
+						.Where(i => reservationInput.Priority < i.Priority)
+						.OrderBy(i => i.Priority)
+						.ThenBy(i => i.Parent.DistanceTo(reservationInput.Parent))
 						.ToList();
 
 					while (0 < reservationInputRemaining && itemOutputsSorted.Any() && dwellers.Any())

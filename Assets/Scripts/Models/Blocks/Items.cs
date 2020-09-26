@@ -61,11 +61,13 @@ namespace Lunra.Hothouse.Models
 			{
 				public static PropertyKeyValue[] OfUnlimited(
 					string type,
+					int priority,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Create(
 						type,
+						priority,
 						int.MaxValue,
 						overrides
 					);
@@ -73,11 +75,13 @@ namespace Lunra.Hothouse.Models
 				
 				public static PropertyKeyValue[] OfZero(
 					string type,
+					int priority,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Create(
 						type,
+						priority,
 						0,
 						overrides
 					);
@@ -85,12 +89,14 @@ namespace Lunra.Hothouse.Models
 
 				public static PropertyKeyValue[] Of(
 					string type,
+					int priority,
 					int count,
 					params PropertyKeyValue[] overrides
 				)
 				{
 					return Create(
 						type,
+						priority,
 						count,
 						overrides
 					);
@@ -98,6 +104,7 @@ namespace Lunra.Hothouse.Models
 				
 				static PropertyKeyValue[] Create(
 					string type,
+					int priority,
 					int countMaximum,
 					params PropertyKeyValue[] overrides
 				)
@@ -107,7 +114,7 @@ namespace Lunra.Hothouse.Models
 						new PropertyKeyValue[]
 						{
 							(Keys.CapacityPool.Type, type),
-							(Keys.CapacityPool.Priority, 0),
+							(Keys.CapacityPool.Priority, priority),
 							(Keys.CapacityPool.CountCurrent, 0),
 							(Keys.CapacityPool.CountMaximum, countMaximum),
 							(Keys.CapacityPool.CountTarget, countMaximum),

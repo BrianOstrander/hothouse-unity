@@ -16,6 +16,7 @@ namespace Lunra.Hothouse.Models
 		struct CapacityPoolDefinition
 		{
 			public string Type;
+			public int Priority;
 			public int Count;
 			public CapacityDefinition[] Capacities;
 		}
@@ -27,6 +28,7 @@ namespace Lunra.Hothouse.Models
 
 		public CapacityPoolBuilder Pool(
 			string type,
+			int priority,
 			int count,
 			params (PropertyFilter Filter, int Count)[] capacities
 		)
@@ -53,12 +55,14 @@ namespace Lunra.Hothouse.Models
 		
 		public CapacityPoolBuilder Pool(
 			string type,
+			int priority,
 			int count,
 			params (string ResourceType, int Count)[] capacities
 		)
 		{
 			return Pool(
 				type,
+				priority,
 				count,
 				capacities
 					.Select(
@@ -76,12 +80,14 @@ namespace Lunra.Hothouse.Models
 
 		public CapacityPoolBuilder Pool(
 			string type,
+			int priority,
 			int count,
 			params string[] resourceTypes
 		)
 		{
 			return Pool(
 				type,
+				priority,
 				count,
 				resourceTypes
 					.Select(e => (e, count))
@@ -102,6 +108,7 @@ namespace Lunra.Hothouse.Models
 					Items.Instantiate.CapacityPool
 						.Of(
 							capacityPoolDefinition.Type,	
+							capacityPoolDefinition.Priority,
 							capacityPoolDefinition.Count,
 							(Items.Keys.CapacityPool.IsForbidden, forbiddenPredicate(capacityPoolDefinition.Type))
 						)

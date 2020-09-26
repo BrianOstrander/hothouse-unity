@@ -60,7 +60,10 @@ namespace Lunra.Hothouse.Models
 			model.Inventory.Container.New(
 				1,
 				out var capacityPoolItem,
-				Items.Instantiate.CapacityPool.OfZero(Items.Values.CapacityPool.Types.Drop)
+				Items.Instantiate.CapacityPool.OfZero(
+					Items.Values.CapacityPool.Types.Drop,
+					InventoryPriorities.ItemDrop
+				)
 			);
 
 			model.Inventory.Container.Deposit(
