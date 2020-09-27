@@ -128,8 +128,7 @@ namespace Lunra.Hothouse.Services
 				var reservationInputs = new Dictionary<long, ItemCache>();
 				var itemOutputs = new Dictionary<long, ItemCache>();
 
-				var capacityPoolsWithReservations = new HashSet<long>(); 
-				var itemsToCapacityPoolReservationChecks  = new Dictionary<long, long>();
+				var capacityPoolsWithUnPromisedReservations = new HashSet<long>(); 
 				
 				foreach (var item in Model.Items.All())
 				{
@@ -143,7 +142,7 @@ namespace Lunra.Hothouse.Services
 					{
 						cache.IsReservation = true;
 						capacityPoolId = item[Items.Keys.Reservation.CapacityPoolId];
-						capacityPoolsWithReservations.Add(capacityPoolId);
+						if (item[Items.Keys.Reservation.TransferId] == IdCounter.UndefinedId) capacityPoolsWithUnPromisedReservations.Add(capacityPoolId);
 					}
 					else if (item.TryGet(Items.Keys.Resource.LogisticState, out logisticState))
 					{
@@ -168,16 +167,17 @@ namespace Lunra.Hothouse.Services
 							if (logisticState == Items.Values.Reservation.LogisticStates.Input) reservationInputs.Add(item.Id, cache);
 							else if (logisticState == Items.Values.Reservation.LogisticStates.Output) itemOutputs.Add(item.Id, cache);
 							else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {item}");
-							continue;	
 						}
-						// Don't want to include already reserved items...
-						if (item[Items.Keys.Resource.LogisticState] != Items.Values.Resource.LogisticStates.None) continue;
-						// Any items that are surplus will already have output reservations, so we don't need to add them again...
-						if (capacityPool[Items.Keys.CapacityPool.CountTarget] < capacityPool[Items.Keys.CapacityPool.CountCurrent]) continue;
+						else
+						{
+							// Don't want to include already reserved items...
+							if (item[Items.Keys.Resource.LogisticState] != Items.Values.Resource.LogisticStates.None) continue;
+							// Any items that are surplus will already have output reservations, so we don't need to add them again...
+							if (capacityPool[Items.Keys.CapacityPool.CountTarget] < capacityPool[Items.Keys.CapacityPool.CountCurrent]) continue;
 						
-						// If we get here we know it's a resource that is part of a filled or nearly filled capacity...
-						itemsToCapacityPoolReservationChecks.Add(item.Id, capacityPoolId);
-						itemOutputs.Add(item.Id, cache);
+							// If we get here we know it's a resource that is part of a filled or nearly filled capacity...
+							itemOutputs.Add(item.Id, cache);
+						}
 					}
 					else Debug.LogError($"Cannot find parent of container {item.ContainerId} for item {item}");
 				}
@@ -242,7 +242,8 @@ namespace Lunra.Hothouse.Services
 					var reservationInputRemaining = reservationInput.Item.InstanceCount;
 
 					var itemOutputsSorted = itemOutputs.Values
-						.Where(i => reservationInput.IsReservation || reservationInput.Priority < i.Priority)
+						.Where(i => i.IsReservation)
+						// .Where(i => reservationInput.IsReservation || reservationInput.Priority < i.Priority)
 						.OrderBy(i => i.Priority)
 						.ThenBy(i => i.Parent.DistanceTo(reservationInput.Parent))
 						.ToList();
@@ -265,6 +266,54 @@ namespace Lunra.Hothouse.Services
 
 							if (!IsNavigable(dweller, reservationInput, itemOutput)) continue;
 
+							bool validateTransfer(Item item)
+							{
+								if (filter.Validate(item))
+								{
+									reservationInputRemaining--;
+									itemOutputRemaining--;
+
+									var output = new InventoryPromiseComponent.TransferInfo
+									{
+										Container = itemOutput.Parent.Inventory.Container,
+									};
+
+									if (itemOutput.IsReservation)
+									{
+										output.CapacityPool = Model.Items.First(itemOutput.Item[Items.Keys.Reservation.CapacityPoolId]);
+										output.Capacity = Model.Items.First(itemOutput.Item[Items.Keys.Reservation.CapacityId]);
+										output.Reservation = itemOutput.Item;
+									}
+									else
+									{
+										output.CapacityPool = Model.Items.First(itemOutput.Item[Items.Keys.Resource.CapacityPoolId]);
+									}
+									
+									var input = new InventoryPromiseComponent.TransferInfo
+									{
+										Container = reservationInput.Parent.Inventory.Container,
+										Capacity = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityId]),
+
+										// This capacity pool is required.
+										CapacityPool = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityPoolId]),
+
+										Reservation = reservationInput.Item,
+									};
+
+									var isReservationInputSatisfied = dweller.InventoryPromises.Transfer(
+										item,
+										output,
+										input
+									);
+
+									dwellers.Remove(dweller.Id.Value);
+
+									if (isReservationInputSatisfied) return true;
+								}
+
+								return false;
+							}
+
 							if (itemOutput.IsReservation)
 							{
 								var items = itemOutput.Parent.Inventory.Container
@@ -273,49 +322,10 @@ namespace Lunra.Hothouse.Services
 
 								foreach (var (item, _) in items)
 								{
-									if (filter.Validate(item))
-									{
-										reservationInputRemaining--;
-										itemOutputRemaining--;
-
-										var output = new InventoryPromiseComponent.TransferInfo
-										{
-											Container = itemOutput.Parent.Inventory.Container,
-											Capacity = Model.Items.First(itemOutput.Item[Items.Keys.Reservation.CapacityId]),
-
-											// It's okay if the source doesn't have a capacity pool.
-											CapacityPool = Model.Items.FirstOrDefault(itemOutput.Item[Items.Keys.Reservation.CapacityPoolId]),
-
-											Reservation = itemOutput.Item
-										};
-
-										var input = new InventoryPromiseComponent.TransferInfo
-										{
-											Container = reservationInput.Parent.Inventory.Container,
-											Capacity = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityId]),
-
-											// This capacity pool is required.
-											CapacityPool = Model.Items.First(reservationInput.Item[Items.Keys.Reservation.CapacityPoolId]),
-
-											Reservation = reservationInput.Item,
-										};
-
-										var isReservationInputSatisfied = dweller.InventoryPromises.Transfer(
-											item,
-											output,
-											input
-										);
-
-										dwellers.Remove(dweller.Id.Value);
-
-										if (isReservationInputSatisfied) break;
-									}
+									if (validateTransfer(item)) break;
 								}
 							}
-							else
-							{
-								
-							}
+							else validateTransfer(itemOutput.Item);
 						}
 					}
 				}
