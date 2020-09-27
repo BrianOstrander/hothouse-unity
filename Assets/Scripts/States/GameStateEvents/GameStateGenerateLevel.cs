@@ -585,18 +585,18 @@ namespace Lunra.Hothouse.Services.GameStateEvents
 			
 			var stockpile1 = payload.Game.Buildings.Activate<StalkStockpileDefinition>(
 				spawn.RoomTransform.Id.Value,
-				position + new Vector3(6f ,0f, 12f),
+				position + new Vector3(6f ,0f, 16f),
 				Quaternion.identity,
 				BuildingStates.Operating
 			);
 
 			//
-			// stockpile1.Inventory.Container.TryFindFirst(
-			// 	i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool,
-			// 	out var capacityItem
-			// );
+			stockpile1.Inventory.Container.TryFindFirst(
+				i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.CapacityPool,
+				out var capacityItem
+			);
 
-			// capacityItem[Items.Keys.CapacityPool.Priority] = 100;
+			capacityItem[Items.Keys.CapacityPool.Priority] = -100;
 
 			stockpile0.Inventory.Container
 				.TryFindFirst(i => i[Items.Keys.CapacityPool.Type] == Items.Values.CapacityPool.Types.Stockpile, out var stockpile0capacityPool);

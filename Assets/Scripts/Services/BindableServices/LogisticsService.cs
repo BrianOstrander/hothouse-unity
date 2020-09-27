@@ -127,8 +127,9 @@ namespace Lunra.Hothouse.Services
 
 				var reservationInputs = new Dictionary<long, ItemCache>();
 				var itemOutputs = new Dictionary<long, ItemCache>();
+				var capacityPoolIdsToCapacities = new Dictionary<long, List<long>>();
 
-				var capacityPoolsWithUnPromisedReservations = new HashSet<long>(); 
+				var capacitiesWithUnPromisedReservations = new HashSet<long>(); 
 				
 				foreach (var item in Model.Items.All())
 				{
@@ -142,11 +143,23 @@ namespace Lunra.Hothouse.Services
 					{
 						cache.IsReservation = true;
 						capacityPoolId = item[Items.Keys.Reservation.CapacityPoolId];
-						if (item[Items.Keys.Reservation.TransferId] == IdCounter.UndefinedId) capacityPoolsWithUnPromisedReservations.Add(capacityPoolId);
+						if (item[Items.Keys.Reservation.TransferId] == IdCounter.UndefinedId) capacitiesWithUnPromisedReservations.Add(item[Items.Keys.Reservation.CapacityId]);
 					}
 					else if (item.TryGet(Items.Keys.Resource.LogisticState, out logisticState))
 					{
 						capacityPoolId = item[Items.Keys.Resource.CapacityPoolId];
+					}
+					else if (item.TryGet(Items.Keys.Capacity.CapacityPoolId, out capacityPoolId))
+					{
+						if (!capacityPoolIdsToCapacities.TryGetValue(capacityPoolId, out var capacities))
+						{
+							capacities = new List<long>();
+							capacityPoolIdsToCapacities.Add(capacityPoolId, capacities);
+						}
+						
+						capacities.Add(item.Id);
+						
+						continue;
 					}
 					else continue;
 
@@ -182,48 +195,6 @@ namespace Lunra.Hothouse.Services
 					else Debug.LogError($"Cannot find parent of container {item.ContainerId} for item {item}");
 				}
 
-				var deb = string.Empty;
-				
-				foreach (var item in itemOutputs.Values.OrderBy(i => i.IsReservation))
-				{
-					deb += $"\n{item.Item.ToString().WrapColor(item.IsReservation ? "red" : "green")}";
-				}
-				
-				Debug.Log(deb);
-				
-				// foreach (var item in Model.Items.All(i => i[Items.Keys.Shared.Type] == Items.Values.Shared.Types.Reservation))
-				// {
-				// 	if (item.NoInstances) continue;
-				//
-				// 	var logisticState = item[Items.Keys.Reservation.LogisticState];
-				//
-				// 	var cache = new ItemCache
-				// 	{
-				// 		Item = item
-				// 	};
-				//
-				// 	var capacityPoolId = item[Items.Keys.Reservation.CapacityPoolId];
-				//
-				// 	if (!capacityPoolPriorities.TryGetValue(capacityPoolId, out cache.Priority))
-				// 	{
-				// 		if (Model.Items.TryGet(capacityPoolId, out var capacityPool))
-				// 		{
-				// 			cache.Priority = capacityPool[Items.Keys.CapacityPool.Priority];
-				// 		}
-				// 		else Debug.LogError($"Cannot find capacity pool [ {capacityPoolId} ]");
-				//
-				// 		capacityPoolPriorities[capacityPoolId] = cache.Priority;
-				// 	}
-				//
-				// 	if (Model.Query.TryFindFirst(m => m.Inventory.Container.Id == item.ContainerId, out cache.Parent))
-				// 	{
-				// 		if (logisticState == Items.Values.Reservation.LogisticStates.Input) reservationInputs.Add(item.Id, cache);
-				// 		else if (logisticState == Items.Values.Reservation.LogisticStates.Output) reservationOutputs.Add(item.Id, cache);
-				// 		else Debug.LogError($"Unrecognized {Items.Keys.Reservation.LogisticState} on reservation {item}");
-				// 	}
-				// 	else Debug.LogError($"Cannot find parent of container {item.ContainerId} for item {item}");
-				// }
-
 				var reservationInputsSorted = reservationInputs.Values
 					.OrderBy(r => r.Priority)
 					.ToList();
@@ -242,8 +213,7 @@ namespace Lunra.Hothouse.Services
 					var reservationInputRemaining = reservationInput.Item.InstanceCount;
 
 					var itemOutputsSorted = itemOutputs.Values
-						.Where(i => i.IsReservation)
-						// .Where(i => reservationInput.IsReservation || reservationInput.Priority < i.Priority)
+						.Where(i => reservationInput.Priority < i.Priority)
 						.OrderBy(i => i.Priority)
 						.ThenBy(i => i.Parent.DistanceTo(reservationInput.Parent))
 						.ToList();
@@ -253,6 +223,15 @@ namespace Lunra.Hothouse.Services
 						var itemOutput = itemOutputsSorted[0];
 						itemOutputsSorted.RemoveAt(0);
 
+						if (reservationInput.Item.ContainerId == itemOutput.Item.ContainerId)
+						{
+							if (!itemOutput.IsReservation && itemOutput.Item[Items.Keys.Resource.CapacityPoolId] == reservationInput.Item[Items.Keys.Reservation.CapacityPoolId])
+							{
+								// This item is already fulfilling some part of this input's pool...
+								continue;
+							}
+						}
+						
 						var itemOutputRemaining = itemOutput.Item.InstanceCount;
 
 						var dwellersSorted = dwellers.Values
@@ -270,9 +249,6 @@ namespace Lunra.Hothouse.Services
 							{
 								if (filter.Validate(item))
 								{
-									reservationInputRemaining--;
-									itemOutputRemaining--;
-
 									var output = new InventoryPromiseComponent.TransferInfo
 									{
 										Container = itemOutput.Parent.Inventory.Container,
@@ -287,6 +263,35 @@ namespace Lunra.Hothouse.Services
 									else
 									{
 										output.CapacityPool = Model.Items.First(itemOutput.Item[Items.Keys.Resource.CapacityPoolId]);
+										if (capacityPoolIdsToCapacities.TryGetValue(output.CapacityPool.Id, out var capacityFilterIds))
+										{
+											var capacityId = IdCounter.UndefinedId;
+											foreach (var capacityFilterId in capacityFilterIds)
+											{
+												if (itemOutput.Parent.Inventory.Capacities.TryGetValue(capacityFilterId, out var capacityFilter))
+												{
+													if (capacityFilter.Validate(item))
+													{
+														capacityId = capacityFilterId;
+														break;
+													}
+												}
+												else Debug.LogError($"Cannot find capacity filter {capacityFilterId} in {itemOutput.Parent.Inventory}");
+											}
+
+											if (capacityId == IdCounter.UndefinedId)
+											{
+												Debug.LogError($"Cannot find capacity for {item}");
+												return false;
+											}
+
+											output.Capacity = Model.Items.First(capacityId);
+										}
+										else
+										{
+											Debug.LogError($"Cannot find list of capacities for capacity pool {output.CapacityPool}");
+											return false;
+										}
 									}
 									
 									var input = new InventoryPromiseComponent.TransferInfo
@@ -299,6 +304,9 @@ namespace Lunra.Hothouse.Services
 
 										Reservation = reservationInput.Item,
 									};
+									
+									reservationInputRemaining--;
+									itemOutputRemaining--;
 
 									var isReservationInputSatisfied = dweller.InventoryPromises.Transfer(
 										item,

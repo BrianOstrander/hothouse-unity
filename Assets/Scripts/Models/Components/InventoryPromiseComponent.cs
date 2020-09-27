@@ -523,19 +523,52 @@ namespace Lunra.Hothouse.Models
 						).First()
 				);
 			
-			output.Reservation = Game.Items
-				.First(
-					output.Container
-						.Withdrawal(
-							output.Reservation.StackOf(1)
-						).First()
-				);
-			
 			item[Items.Keys.Resource.LogisticState] = Items.Values.Resource.LogisticStates.Output;
-
 			output.Container.Deposit(item.StackOf(1));
-			output.Container.Deposit(output.Reservation.StackOf(1));
 
+			if (output.Reservation == null)
+			{
+				// This means the output is at or below its target capacity, so we have to make our own reservation...
+				if (output.Container.TryFindFirst(i => i[Items.Keys.Reservation.CapacityId] == output.Capacity.Id, out var existingReservationInput))
+				{
+					output.Container.Increment(existingReservationInput.StackOf(1));
+				}
+				else
+				{
+					output.Container
+						.New(
+							1,
+							out output.Reservation,
+							Items.Instantiate.Reservation.OfInput(
+								output.Capacity.Id,
+								output.CapacityPool.Id
+							)
+						);
+				}
+				
+				output.Container
+					.New(
+						1,
+						out output.Reservation,
+						Items.Instantiate.Reservation.OfOutput(
+							output.Capacity.Id,
+							output.CapacityPool.Id
+						)
+					);
+			}
+			else
+			{
+				output.Reservation = Game.Items
+					.First(
+						output.Container
+							.Withdrawal(
+								output.Reservation.StackOf(1)
+							).First()
+					);
+				
+				output.Container.Deposit(output.Reservation.StackOf(1));
+			}
+			
 			input.Capacity[Items.Keys.Capacity.CountCurrent]++;
 
 			var isInputCapacityAtTarget = input.Capacity[Items.Keys.Capacity.CountCurrent] == input.Capacity[Items.Keys.Capacity.CountTarget];
